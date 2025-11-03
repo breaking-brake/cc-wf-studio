@@ -124,6 +124,7 @@ export const NodePalette: React.FC = () => {
       <button
         type="button"
         onClick={handleAddPromptNode}
+        data-tour="add-prompt-button"
         style={{
           width: '100%',
           padding: '12px',
@@ -162,6 +163,7 @@ export const NodePalette: React.FC = () => {
       <button
         type="button"
         onClick={handleAddSubAgent}
+        data-tour="add-subagent-button"
         style={{
           width: '100%',
           padding: '12px',
@@ -253,6 +255,7 @@ export const NodePalette: React.FC = () => {
       <button
         type="button"
         onClick={handleAddAskUserQuestion}
+        data-tour="add-askuserquestion-button"
         style={{
           width: '100%',
           padding: '12px',

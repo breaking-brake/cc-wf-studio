@@ -131,4 +131,31 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'default.branchFalseCondition': '条件为假时',
   'default.newBranch': '分支',
   'default.newCondition': '新条件',
+
+  // Tour
+  'tour.welcome': '欢迎使用Claude Code Workflow Studio！\n\n本导览将指导您创建第一个工作流。',
+  'tour.nodePalette':
+    '节点面板包含可在工作流中使用的各种节点。\n\n点击Prompt、Sub-Agent、AskUserQuestion、Branch等节点将其添加到画布。',
+  'tour.addPrompt': '点击"Prompt"按钮添加第一个节点。\n\nPrompt节点是支持变量的模板，是工作流的基本构建块。',
+  'tour.canvas':
+    '这是画布。拖动节点调整位置，拖动手柄连接节点。\n\n已经放置了开始和结束节点。',
+  'tour.propertyPanel':
+    '属性面板可以配置所选节点。\n\n您可以编辑节点名称、提示、模型选择等。',
+  'tour.addAskUserQuestion':
+    '现在添加"AskUserQuestion"节点。\n\n此节点允许根据用户选择分支工作流。',
+  'tour.connectNodes':
+    '连接节点以创建工作流。\n\n从节点右侧的输出手柄(⚪)拖动到另一个节点左侧的输入手柄。',
+  'tour.workflowName': '为工作流命名。\n\n可以使用字母、数字、连字符和下划线。',
+  'tour.saveWorkflow':
+    '点击"保存"按钮将工作流以JSON格式保存到`.vscode/workflows/`目录。\n\n稍后可以加载并继续编辑。',
+  'tour.exportWorkflow':
+    '点击"导出"按钮以Claude Code可执行的格式导出。\n\nSub-Agent导出到`.claude/agents/`，SlashCommand导出到`.claude/commands/`。',
+  'tour.helpButton': '要再次查看此导览，请点击帮助按钮(?)。\n\n享受创建工作流的乐趣！',
+
+  // Tour buttons
+  'tour.button.back': '返回',
+  'tour.button.close': '关闭',
+  'tour.button.finish': '完成',
+  'tour.button.next': '下一步',
+  'tour.button.skip': '跳过',
 };

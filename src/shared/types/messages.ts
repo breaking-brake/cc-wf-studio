@@ -52,6 +52,10 @@ export interface WorkflowListPayload {
   }>;
 }
 
+export interface InitialStatePayload {
+  isFirstLaunch: boolean;
+}
+
 // ============================================================================
 // Webview → Extension Payloads
 // ============================================================================
@@ -89,7 +93,8 @@ export type ExtensionMessage =
   | Message<SaveSuccessPayload, 'SAVE_SUCCESS'>
   | Message<ExportSuccessPayload, 'EXPORT_SUCCESS'>
   | Message<ErrorPayload, 'ERROR'>
-  | Message<WorkflowListPayload, 'WORKFLOW_LIST_LOADED'>;
+  | Message<WorkflowListPayload, 'WORKFLOW_LIST_LOADED'>
+  | Message<InitialStatePayload, 'INITIAL_STATE'>;
 
 // ============================================================================
 // Webview → Extension Messages

@@ -19,6 +19,7 @@ import { useWorkflowStore } from '../stores/workflow-store';
 
 interface ToolbarProps {
   onError: (error: { code: string; message: string; details?: unknown }) => void;
+  onStartTour: () => void;
 }
 
 interface WorkflowListItem {
@@ -28,7 +29,7 @@ interface WorkflowListItem {
   updatedAt: string;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
   const { t } = useTranslation();
   const { nodes, edges, setNodes, setEdges } = useWorkflowStore();
   const [workflowName, setWorkflowName] = useState('my-workflow');
@@ -195,6 +196,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
         onChange={(e) => setWorkflowName(e.target.value)}
         placeholder={t('toolbar.workflowNamePlaceholder')}
         className="nodrag"
+        data-tour="workflow-name-input"
         style={{
           flex: 1,
           padding: '4px 8px',
@@ -211,6 +213,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
         type="button"
         onClick={handleSave}
         disabled={isSaving}
+        data-tour="save-button"
         style={{
           padding: '4px 12px',
           backgroundColor: 'var(--vscode-button-background)',
@@ -231,6 +234,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
         type="button"
         onClick={handleExport}
         disabled={isExporting}
+        data-tour="export-button"
         style={{
           padding: '4px 12px',
           backgroundColor: 'var(--vscode-button-secondaryBackground)',
@@ -316,6 +320,34 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
         }}
       >
         ↻
+      </button>
+
+      {/* Divider */}
+      <div
+        style={{
+          width: '1px',
+          height: '20px',
+          backgroundColor: 'var(--vscode-panel-border)',
+        }}
+      />
+
+      {/* Help Button */}
+      <button
+        type="button"
+        onClick={onStartTour}
+        title="Start Tour"
+        data-tour="help-button"
+        style={{
+          padding: '4px 8px',
+          backgroundColor: 'var(--vscode-button-secondaryBackground)',
+          color: 'var(--vscode-button-secondaryForeground)',
+          border: 'none',
+          borderRadius: '2px',
+          cursor: 'pointer',
+          fontSize: '13px',
+        }}
+      >
+        ?
       </button>
     </div>
   );

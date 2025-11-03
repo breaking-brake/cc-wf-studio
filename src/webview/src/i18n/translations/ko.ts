@@ -134,4 +134,35 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'default.branchFalseCondition': '조건이 거짓일 때',
   'default.newBranch': '분기',
   'default.newCondition': '새 조건',
+
+  // Tour
+  'tour.welcome':
+    'Claude Code Workflow Studio에 오신 것을 환영합니다!\n\n이 투어는 첫 워크플로우 생성 방법을 안내합니다.',
+  'tour.nodePalette':
+    '노드 팔레트에는 워크플로우에서 사용할 수 있는 다양한 노드가 있습니다.\n\nPrompt, Sub-Agent, AskUserQuestion, Branch 등의 노드를 클릭하여 캔버스에 추가할 수 있습니다.',
+  'tour.addPrompt':
+    '"Prompt" 버튼을 클릭하여 첫 번째 노드를 추가하세요.\n\nPrompt 노드는 변수를 지원하는 템플릿으로 워크플로우의 기본 구성 요소입니다.',
+  'tour.canvas':
+    '여기가 캔버스입니다. 노드를 드래그하여 위치를 조정하고 핸들을 드래그하여 노드를 연결할 수 있습니다.\n\n시작 및 종료 노드가 이미 배치되어 있습니다.',
+  'tour.propertyPanel':
+    '속성 패널에서 선택한 노드를 구성할 수 있습니다.\n\n노드 이름, 프롬프트, 모델 선택 등을 편집할 수 있습니다.',
+  'tour.addAskUserQuestion':
+    '이제 "AskUserQuestion" 노드를 추가하세요.\n\n이 노드를 사용하면 사용자 선택에 따라 워크플로우를 분기할 수 있습니다.',
+  'tour.connectNodes':
+    '노드를 연결하여 워크플로우를 만드세요.\n\n노드 오른쪽의 출력 핸들(⚪)에서 다른 노드 왼쪽의 입력 핸들로 드래그하세요.',
+  'tour.workflowName':
+    '워크플로우에 이름을 지정하세요.\n\n문자, 숫자, 하이픈 및 밑줄을 사용할 수 있습니다.',
+  'tour.saveWorkflow':
+    '"저장" 버튼을 클릭하면 워크플로우가 `.vscode/workflows/` 디렉터리에 JSON으로 저장됩니다.\n\n나중에 로드하여 계속 편집할 수 있습니다.',
+  'tour.exportWorkflow':
+    '"내보내기" 버튼을 클릭하면 Claude Code에서 실행 가능한 형식으로 내보내집니다.\n\nSub-Agent는 `.claude/agents/`로, SlashCommand는 `.claude/commands/`로 이동합니다.',
+  'tour.helpButton':
+    '이 투어를 다시 보려면 도움말 버튼(?)을 클릭하세요.\n\n워크플로우 생성을 즐기세요!',
+
+  // Tour buttons
+  'tour.button.back': '뒤로',
+  'tour.button.close': '닫기',
+  'tour.button.finish': '완료',
+  'tour.button.next': '다음',
+  'tour.button.skip': '건너뛰기',
 };

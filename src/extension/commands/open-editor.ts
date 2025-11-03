@@ -63,6 +63,25 @@ export function registerOpenEditorCommand(
     // Set webview HTML content
     currentPanel.webview.html = getWebviewContent(currentPanel.webview, context.extensionUri);
 
+    // Check if this is the first launch and send initial state
+    const hasLaunchedBefore = context.globalState.get<boolean>('hasLaunchedBefore', false);
+    if (!hasLaunchedBefore) {
+      // Mark as launched
+      context.globalState.update('hasLaunchedBefore', true);
+    }
+
+    // Send initial state to webview after a short delay to ensure webview is ready
+    setTimeout(() => {
+      if (currentPanel) {
+        currentPanel.webview.postMessage({
+          type: 'INITIAL_STATE',
+          payload: {
+            isFirstLaunch: !hasLaunchedBefore,
+          },
+        });
+      }
+    }, 500);
+
     // Handle messages from webview
     currentPanel.webview.onDidReceiveMessage(
       async (message: WebviewMessage) => {

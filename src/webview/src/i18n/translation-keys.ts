@@ -129,4 +129,24 @@ export interface WebviewTranslationKeys {
   'default.branchFalseCondition': string;
   'default.newBranch': string;
   'default.newCondition': string;
+
+  // Tour
+  'tour.welcome': string;
+  'tour.nodePalette': string;
+  'tour.addPrompt': string;
+  'tour.canvas': string;
+  'tour.propertyPanel': string;
+  'tour.addAskUserQuestion': string;
+  'tour.connectNodes': string;
+  'tour.workflowName': string;
+  'tour.saveWorkflow': string;
+  'tour.exportWorkflow': string;
+  'tour.helpButton': string;
+
+  // Tour buttons
+  'tour.button.back': string;
+  'tour.button.close': string;
+  'tour.button.finish': string;
+  'tour.button.next': string;
+  'tour.button.skip': string;
 }

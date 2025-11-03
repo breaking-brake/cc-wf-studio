@@ -134,4 +134,35 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'default.branchFalseCondition': '条件が偽の場合',
   'default.newBranch': '分岐',
   'default.newCondition': '新しい条件',
+
+  // Tour
+  'tour.welcome':
+    'Claude Code Workflow Studioへようこそ！\n\nこのツアーでは、初めてのワークフロー作成を通じて、基本的な使い方をご案内します。',
+  'tour.nodePalette':
+    'ノードパレットには、ワークフローで使用できる様々なノードが用意されています。\n\nPrompt、Sub-Agent、AskUserQuestion、Branchなどのノードをクリックしてキャンバスに追加できます。',
+  'tour.addPrompt':
+    '「Prompt」ボタンをクリックして、最初のノードを追加してみましょう。\n\nPromptノードは変数を使用できるテンプレートで、ワークフローの基本的な構成要素です。',
+  'tour.canvas':
+    'ここがキャンバスです。ノードをドラッグして配置を調整し、ハンドルをドラッグしてノード間を接続できます。\n\n既にStartノードとEndノードが配置されています。',
+  'tour.propertyPanel':
+    'プロパティパネルでは、選択したノードの詳細設定を行います。\n\nノード名、プロンプト、モデル選択などを編集できます。',
+  'tour.addAskUserQuestion':
+    '次に「AskUserQuestion」ノードを追加してみましょう。\n\nこのノードを使うと、ユーザーの選択に応じてワークフローを分岐できます。',
+  'tour.connectNodes':
+    'ノードを接続してワークフローを作りましょう。\n\nノードの右側の出力ハンドル(⚪)を別のノードの左側の入力ハンドルにドラッグして接続します。',
+  'tour.workflowName':
+    'ワークフローに名前を付けます。\n\n英数字、ハイフン、アンダースコアが使用できます。',
+  'tour.saveWorkflow':
+    '「保存」ボタンをクリックすると、ワークフローが`.vscode/workflows/`ディレクトリにJSON形式で保存されます。\n\n後で読み込んで編集を続けることができます。',
+  'tour.exportWorkflow':
+    '「エクスポート」ボタンをクリックすると、Claude Codeで実行可能な形式にエクスポートされます。\n\nSub-Agentは`.claude/agents/`に、SlashCommandは`.claude/commands/`に出力されます。',
+  'tour.helpButton':
+    'このツアーをもう一度見たい場合は、ヘルプボタン(?)をクリックしてください。\n\nそれでは、ワークフロー作成を楽しんでください！',
+
+  // Tour buttons
+  'tour.button.back': '戻る',
+  'tour.button.close': '閉じる',
+  'tour.button.finish': '完了',
+  'tour.button.next': '次へ',
+  'tour.button.skip': 'スキップ',
 };
