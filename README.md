@@ -166,7 +166,7 @@ A: Both the Visual Editor UI and exported workflows automatically use your VSCod
 
 MIT License - see [LICENSE](./LICENSE) file for details
 
-Copyright (c) 2025 breaking-break
+Copyright (c) 2025 breaking-brake
 
 ## Acknowledgments
 

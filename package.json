@@ -2,8 +2,8 @@
   "name": "cc-wf-studio",
   "displayName": "Claude Code Workflow Studio",
   "description": "Visual workflow editor for Claude Code SlashCommands and Sub-Agents",
-  "version": "0.1.2",
-  "publisher": "breaking-break",
+  "version": "0.1.3",
+  "publisher": "breaking-brake",
   "icon": "resources/icon.png",
   "repository": {
     "type": "git",
