@@ -5,17 +5,19 @@
  * Based on: /specs/001-cc-wf-studio/plan.md
  */
 
-import type { ErrorPayload } from '@shared/types/messages';
+import type { ErrorPayload, InitialStatePayload } from '@shared/types/messages';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ErrorNotification } from './components/ErrorNotification';
 import { NodePalette } from './components/NodePalette';
 import { PropertyPanel } from './components/PropertyPanel';
 import { Toolbar } from './components/Toolbar';
+import { Tour } from './components/Tour';
 import { WorkflowEditor } from './components/WorkflowEditor';
 
 const App: React.FC = () => {
   const [error, setError] = useState<ErrorPayload | null>(null);
+  const [runTour, setRunTour] = useState(false);
 
   const handleError = (errorData: ErrorPayload) => {
     setError(errorData);
@@ -24,6 +26,35 @@ const App: React.FC = () => {
   const handleDismissError = () => {
     setError(null);
   };
+
+  const handleTourFinish = () => {
+    setRunTour(false);
+  };
+
+  const handleStartTour = () => {
+    setRunTour(true);
+  };
+
+  // Listen for messages from Extension
+  useEffect(() => {
+    const messageHandler = (event: MessageEvent) => {
+      const message = event.data;
+
+      if (message.type === 'INITIAL_STATE') {
+        const payload = message.payload as InitialStatePayload;
+        if (payload.isFirstLaunch) {
+          // Start tour automatically on first launch
+          setRunTour(true);
+        }
+      }
+    };
+
+    window.addEventListener('message', messageHandler);
+
+    return () => {
+      window.removeEventListener('message', messageHandler);
+    };
+  }, []);
 
   return (
     <div
@@ -37,7 +68,7 @@ const App: React.FC = () => {
       }}
     >
       {/* Top: Toolbar */}
-      <Toolbar onError={handleError} />
+      <Toolbar onError={handleError} onStartTour={handleStartTour} />
 
       {/* Main Content: 3-column layout */}
       <div
@@ -62,6 +93,9 @@ const App: React.FC = () => {
 
       {/* Error Notification Overlay */}
       <ErrorNotification error={error} onDismiss={handleDismissError} />
+
+      {/* Interactive Tour */}
+      <Tour run={runTour} onFinish={handleTourFinish} />
     </div>
   );
 };
