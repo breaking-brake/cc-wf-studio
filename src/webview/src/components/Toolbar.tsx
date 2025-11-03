@@ -7,6 +7,7 @@
 import type { Workflow } from '@shared/types/messages';
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from '../i18n/i18n-context';
 import { vscode } from '../main';
 import { loadWorkflowList, saveWorkflow } from '../services/vscode-bridge';
 import {
@@ -28,6 +29,7 @@ interface WorkflowListItem {
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
+  const { t } = useTranslation();
   const { nodes, edges, setNodes, setEdges } = useWorkflowStore();
   const [workflowName, setWorkflowName] = useState('my-workflow');
   const [isSaving, setIsSaving] = useState(false);
@@ -40,7 +42,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
     if (!workflowName.trim()) {
       onError({
         code: 'VALIDATION_ERROR',
-        message: 'Workflow name is required',
+        message: t('toolbar.error.workflowNameRequired'),
       });
       return;
     }
@@ -64,7 +66,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
     } catch (error) {
       onError({
         code: 'VALIDATION_ERROR',
-        message: error instanceof Error ? error.message : 'Workflow validation failed',
+        message: error instanceof Error ? error.message : t('toolbar.error.validationFailed'),
         details: error,
       });
     } finally {
@@ -126,7 +128,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
     if (!selectedWorkflowId) {
       onError({
         code: 'VALIDATION_ERROR',
-        message: 'Please select a workflow to load',
+        message: t('toolbar.error.selectWorkflowToLoad'),
       });
       return;
     }
@@ -142,7 +144,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
     if (!workflowName.trim()) {
       onError({
         code: 'VALIDATION_ERROR',
-        message: 'Workflow name is required for export',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
       });
       return;
     }
@@ -168,7 +170,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
     } catch (error) {
       onError({
         code: 'VALIDATION_ERROR',
-        message: error instanceof Error ? error.message : 'Workflow validation failed',
+        message: error instanceof Error ? error.message : t('toolbar.error.validationFailed'),
         details: error,
       });
       setIsExporting(false);
@@ -191,7 +193,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
         type="text"
         value={workflowName}
         onChange={(e) => setWorkflowName(e.target.value)}
-        placeholder="Workflow name"
+        placeholder={t('toolbar.workflowNamePlaceholder')}
         className="nodrag"
         style={{
           flex: 1,
@@ -221,7 +223,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
           whiteSpace: 'nowrap',
         }}
       >
-        {isSaving ? 'Saving...' : 'Save'}
+        {isSaving ? t('toolbar.saving') : t('toolbar.save')}
       </button>
 
       {/* Export Button */}
@@ -241,7 +243,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
           whiteSpace: 'nowrap',
         }}
       >
-        {isExporting ? 'Exporting...' : 'Export'}
+        {isExporting ? t('toolbar.exporting') : t('toolbar.export')}
       </button>
 
       {/* Divider */}
@@ -268,7 +270,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
           minWidth: '150px',
         }}
       >
-        <option value="">Select workflow...</option>
+        <option value="">{t('toolbar.selectWorkflow')}</option>
         {workflows.map((wf) => (
           <option key={wf.id} value={wf.id}>
             {wf.name}
@@ -293,7 +295,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
           whiteSpace: 'nowrap',
         }}
       >
-        Load
+        {t('toolbar.load')}
       </button>
 
       {/* Refresh List Button */}
@@ -301,7 +303,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError }) => {
         type="button"
         onClick={handleRefreshList}
         disabled={isLoading}
-        title="Refresh workflow list"
+        title={t('toolbar.refreshList')}
         style={{
           padding: '4px 8px',
           backgroundColor: 'var(--vscode-button-secondaryBackground)',

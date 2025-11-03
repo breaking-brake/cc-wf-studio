@@ -6,6 +6,7 @@
  */
 
 import * as vscode from 'vscode';
+import { getCurrentLocale } from './i18n/i18n-service';
 
 /**
  * Generate HTML content for the Webview
@@ -17,6 +18,9 @@ import * as vscode from 'vscode';
 export function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): string {
   // Generate a nonce for Content Security Policy
   const nonce = getNonce();
+
+  // Get current locale for i18n
+  const locale = getCurrentLocale();
 
   // Get URIs for webview resources
   const scriptUri = webview.asWebviewUri(
@@ -52,6 +56,9 @@ export function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.
 </head>
 <body>
     <div id="root"></div>
+    <script nonce="${nonce}">
+      window.initialLocale = "${locale}";
+    </script>
     <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`;

@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { I18nProvider } from './i18n/i18n-context';
 import 'reactflow/dist/style.css';
 import './styles/main.css';
 
@@ -28,6 +29,7 @@ interface VSCodeAPI {
 declare global {
   interface Window {
     acquireVsCodeApi?: () => VSCodeAPI;
+    initialLocale?: string;
   }
 }
 
@@ -57,8 +59,13 @@ if (!rootElement) {
 
 const root = ReactDOM.createRoot(rootElement);
 
+// Get locale from Extension (injected via HTML)
+const locale = window.initialLocale || 'en';
+
 root.render(
   <React.StrictMode>
-    <App />
+    <I18nProvider locale={locale}>
+      <App />
+    </I18nProvider>
   </React.StrictMode>
 );

@@ -13,6 +13,7 @@ import type {
   SubAgentNode,
   Workflow,
 } from '../../shared/types/workflow-definition';
+import { translate } from '../i18n/i18n-service';
 import type { FileService } from './file-service';
 
 /**
@@ -218,20 +219,22 @@ function generateMermaidFlowchart(workflow: Workflow): string {
     const nodeType = node.type as string;
 
     if (nodeType === 'start') {
-      lines.push(`    ${nodeId}([開始])`);
+      lines.push(`    ${nodeId}([${translate('mermaid.start')}])`);
     } else if (nodeType === 'end') {
-      lines.push(`    ${nodeId}([終了])`);
+      lines.push(`    ${nodeId}([${translate('mermaid.end')}])`);
     } else if (nodeType === 'subAgent') {
       const agentName = node.name || 'Sub-Agent';
       lines.push(`    ${nodeId}[${escapeLabel(agentName)}]`);
     } else if (nodeType === 'askUserQuestion') {
       const askNode = node as AskUserQuestionNode;
-      const questionText = askNode.data.questionText || '質問';
+      const questionText = askNode.data.questionText || translate('mermaid.question');
       lines.push(`    ${nodeId}{${escapeLabel(`AskUserQuestion:<br/>${questionText}`)}}`);
     } else if (nodeType === 'branch') {
       const branchNode = node as BranchNode;
       const branchType = branchNode.data.branchType === 'conditional' ? 'Branch' : 'Switch';
-      lines.push(`    ${nodeId}{${escapeLabel(`${branchType}:<br/>条件分岐`)}}`);
+      lines.push(
+        `    ${nodeId}{${escapeLabel(`${branchType}:<br/>${translate('mermaid.conditionalBranch')}`)}}`
+      );
     } else if (nodeType === 'prompt') {
       const promptNode = node as PromptNode;
       // Use first line of prompt or default label
@@ -349,26 +352,18 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
   const sections: string[] = [];
 
   // Introduction
-  sections.push('## ワークフロー実行ガイド');
+  sections.push(translate('guide.title'));
   sections.push('');
-  sections.push(
-    '上記のMermaidフローチャートに従ってワークフローを実行してください。各ノードタイプの実行方法は以下の通りです。'
-  );
+  sections.push(translate('guide.intro'));
   sections.push('');
 
   // Node type explanations
-  sections.push('### ノードタイプ別実行方法');
+  sections.push(translate('guide.nodeTypesTitle'));
   sections.push('');
-  sections.push('- **四角形のノード**: Taskツールを使用してSub-Agentを実行します');
-  sections.push(
-    '- **ひし形のノード（AskUserQuestion:...）**: AskUserQuestionツールを使用してユーザーに質問し、回答に応じて分岐します'
-  );
-  sections.push(
-    '- **ひし形のノード（Branch/Switch:...）**: 前処理の結果に応じて自動的に分岐します（詳細セクション参照）'
-  );
-  sections.push(
-    '- **四角形のノード（Promptノード）**: 以下の詳細セクションに記載されたプロンプトを実行します'
-  );
+  sections.push(translate('guide.nodeTypes.subAgent'));
+  sections.push(translate('guide.nodeTypes.askUserQuestion'));
+  sections.push(translate('guide.nodeTypes.branch'));
+  sections.push(translate('guide.nodeTypes.prompt'));
   sections.push('');
 
   // Collect node details by type
@@ -380,7 +375,7 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
 
   // Prompt node details
   if (promptNodes.length > 0) {
-    sections.push('### Promptノード詳細');
+    sections.push(translate('promptNode.title'));
     sections.push('');
     for (const node of promptNodes) {
       const nodeId = sanitizeNodeId(node.id);
@@ -395,9 +390,9 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
 
       // Show variables if any
       if (node.data.variables && Object.keys(node.data.variables).length > 0) {
-        sections.push('**使用可能な変数:**');
+        sections.push(translate('promptNode.availableVariables'));
         for (const [key, value] of Object.entries(node.data.variables)) {
-          sections.push(`- \`{{${key}}}\`: ${value || '(未設定)'}`);
+          sections.push(`- \`{{${key}}}\`: ${value || translate('promptNode.variableNotSet')}`);
         }
         sections.push('');
       }
@@ -406,7 +401,7 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
 
   // AskUserQuestion node details
   if (askUserQuestionNodes.length > 0) {
-    sections.push('### AskUserQuestionノード詳細');
+    sections.push(translate('askNode.title'));
     sections.push('');
     for (const node of askUserQuestionNodes) {
       const nodeId = sanitizeNodeId(node.id);
@@ -416,29 +411,33 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
       // Show selection mode
       if (node.data.useAiSuggestions) {
         sections.push(
-          '**選択モード:** AI提案（AIが文脈に基づいて選択肢を動的に生成し、ユーザーに提示します）'
+          `${translate('askNode.selectionMode')} ${translate('askNode.aiSuggestions')}`
         );
         sections.push('');
         if (node.data.multiSelect) {
-          sections.push('**複数選択:** 有効（ユーザーは複数の選択肢を選べます）');
+          sections.push(translate('askNode.multiSelect'));
           sections.push('');
         }
       } else if (node.data.multiSelect) {
         sections.push(
-          '**選択モード:** 複数選択可能（選択された選択肢のリストが次のノードに渡されます）'
+          `${translate('askNode.selectionMode')} ${translate('askNode.multiSelectExplanation')}`
         );
         sections.push('');
-        sections.push('**選択肢:**');
+        sections.push(translate('askNode.options'));
         for (const option of node.data.options) {
-          sections.push(`- **${option.label}**: ${option.description || '(説明なし)'}`);
+          sections.push(
+            `- **${option.label}**: ${option.description || translate('askNode.noDescription')}`
+          );
         }
         sections.push('');
       } else {
-        sections.push('**選択モード:** 単一選択（選択された選択肢に応じて分岐します）');
+        sections.push(`${translate('askNode.selectionMode')} ${translate('askNode.singleSelect')}`);
         sections.push('');
-        sections.push('**選択肢:**');
+        sections.push(translate('askNode.options'));
         for (const option of node.data.options) {
-          sections.push(`- **${option.label}**: ${option.description || '(説明なし)'}`);
+          sections.push(
+            `- **${option.label}**: ${option.description || translate('askNode.noDescription')}`
+          );
         }
         sections.push('');
       }
@@ -447,21 +446,22 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
 
   // Branch node details
   if (branchNodes.length > 0) {
-    sections.push('### Branchノード詳細');
+    sections.push(translate('branchNode.title'));
     sections.push('');
     for (const node of branchNodes) {
       const nodeId = sanitizeNodeId(node.id);
-      const branchTypeName = node.data.branchType === 'conditional' ? '2分岐' : '複数分岐';
+      const branchTypeName =
+        node.data.branchType === 'conditional'
+          ? translate('branchNode.binary')
+          : translate('branchNode.multiple');
       sections.push(`#### ${nodeId}(${branchTypeName})`);
       sections.push('');
-      sections.push('**分岐条件:**');
+      sections.push(translate('branchNode.conditions'));
       for (const branch of node.data.branches) {
         sections.push(`- **${branch.label}**: ${branch.condition}`);
       }
       sections.push('');
-      sections.push(
-        '**実行方法**: 前段の処理結果を評価し、上記の条件に基づいて自動的に適切な分岐を選択してください。'
-      );
+      sections.push(translate('branchNode.executionMethod'));
       sections.push('');
     }
   }

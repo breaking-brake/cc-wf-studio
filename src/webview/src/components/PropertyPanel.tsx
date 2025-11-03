@@ -12,6 +12,7 @@ import type {
 } from '@shared/types/workflow-definition';
 import type React from 'react';
 import type { Node } from 'reactflow';
+import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
 import type { PromptNodeData } from '../types/node-types';
 import { extractVariables } from '../utils/template-utils';
@@ -20,6 +21,7 @@ import { extractVariables } from '../utils/template-utils';
  * PropertyPanel Component
  */
 export const PropertyPanel: React.FC = () => {
+  const { t } = useTranslation();
   const { nodes, selectedNodeId, updateNodeData, setNodes } = useWorkflowStore();
 
   // Find the selected node
@@ -46,7 +48,7 @@ export const PropertyPanel: React.FC = () => {
             marginTop: '24px',
           }}
         >
-          Select a node to edit its properties
+          {t('property.noSelection')}
         </div>
       </div>
     );
@@ -75,7 +77,7 @@ export const PropertyPanel: React.FC = () => {
           letterSpacing: '0.5px',
         }}
       >
-        Properties
+        {t('property.title')}
       </div>
 
       {/* Node Type Badge */}
@@ -91,18 +93,18 @@ export const PropertyPanel: React.FC = () => {
         }}
       >
         {selectedNode.type === 'subAgent'
-          ? 'Sub-Agent'
+          ? t('property.nodeType.subAgent')
           : selectedNode.type === 'askUserQuestion'
-            ? 'Ask User Question'
+            ? t('property.nodeType.askUserQuestion')
             : selectedNode.type === 'branch'
-              ? 'Branch Node'
+              ? t('property.nodeType.branch')
               : selectedNode.type === 'prompt'
-                ? 'Prompt Node'
+                ? t('property.nodeType.prompt')
                 : selectedNode.type === 'start'
-                  ? 'Start Node'
+                  ? t('property.nodeType.start')
                   : selectedNode.type === 'end'
-                    ? 'End Node'
-                    : 'Unknown'}
+                    ? t('property.nodeType.end')
+                    : t('property.nodeType.unknown')}
       </div>
 
       {/* Node Name (only for subAgent, askUserQuestion, branch, and prompt types) */}
@@ -121,7 +123,7 @@ export const PropertyPanel: React.FC = () => {
               marginBottom: '6px',
             }}
           >
-            Node Name
+            {t('property.nodeName')}
           </label>
           <input
             id="node-name-input"
@@ -147,7 +149,7 @@ export const PropertyPanel: React.FC = () => {
               }
             }}
             className="nodrag"
-            placeholder="Enter node name"
+            placeholder={t('property.nodeName.placeholder')}
             style={{
               width: '100%',
               padding: '6px 8px',
@@ -165,7 +167,7 @@ export const PropertyPanel: React.FC = () => {
               marginTop: '4px',
             }}
           >
-            Used for exported file name (e.g., "data-analysis")
+            {t('property.nodeName.help')}
           </div>
         </div>
       )}
@@ -203,8 +205,8 @@ export const PropertyPanel: React.FC = () => {
           }}
         >
           {selectedNode.type === 'start'
-            ? 'Start node marks the beginning of the workflow. It cannot be deleted and has no editable properties.'
-            : 'End node marks the completion of the workflow. It cannot be deleted and has no editable properties.'}
+            ? t('property.startNodeDescription')
+            : t('property.endNodeDescription')}
         </div>
       ) : (
         <div
@@ -217,7 +219,7 @@ export const PropertyPanel: React.FC = () => {
             color: 'var(--vscode-errorForeground)',
           }}
         >
-          Unknown node type: {selectedNode.type}
+          {t('property.unknownNodeType')} {selectedNode.type}
         </div>
       )}
     </div>
@@ -231,6 +233,7 @@ const SubAgentProperties: React.FC<{
   node: Node<SubAgentData>;
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
 }> = ({ node, updateNodeData }) => {
+  const { t } = useTranslation();
   const data = node.data;
 
   return (
@@ -247,7 +250,7 @@ const SubAgentProperties: React.FC<{
             marginBottom: '6px',
           }}
         >
-          Description
+          {t('property.description')}
         </label>
         <input
           id="description-input"
@@ -279,7 +282,7 @@ const SubAgentProperties: React.FC<{
             marginBottom: '6px',
           }}
         >
-          Prompt
+          {t('property.prompt')}
         </label>
         <textarea
           id="prompt-textarea"
@@ -313,7 +316,7 @@ const SubAgentProperties: React.FC<{
             marginBottom: '6px',
           }}
         >
-          Model
+          {t('property.model')}
         </label>
         <select
           id="model-select"
@@ -350,14 +353,14 @@ const SubAgentProperties: React.FC<{
             marginBottom: '6px',
           }}
         >
-          Tools (comma-separated)
+          {t('property.tools')}
         </label>
         <input
           id="tools-input"
           type="text"
           value={data.tools || ''}
           onChange={(e) => updateNodeData(node.id, { tools: e.target.value })}
-          placeholder="e.g., Read,Write,Bash"
+          placeholder={t('property.tools.placeholder')}
           className="nodrag"
           style={{
             width: '100%',
@@ -376,7 +379,7 @@ const SubAgentProperties: React.FC<{
             marginTop: '4px',
           }}
         >
-          Leave empty for all tools
+          {t('property.tools.help')}
         </div>
       </div>
     </div>
@@ -397,6 +400,7 @@ const AskUserQuestionProperties: React.FC<{
   node: Node<AskUserQuestionData>;
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
 }> = ({ node, updateNodeData }) => {
+  const { t } = useTranslation();
   const data = node.data;
 
   // Ensure all options have IDs (for backward compatibility)
@@ -415,8 +419,8 @@ const AskUserQuestionProperties: React.FC<{
       ...normalizedOptions,
       {
         id: generateOptionId(),
-        label: `Option ${normalizedOptions.length + 1}`,
-        description: 'New option',
+        label: `${t('default.option')} ${normalizedOptions.length + 1}`,
+        description: t('default.newOption'),
       },
     ];
     updateNodeData(node.id, {
@@ -455,7 +459,7 @@ const AskUserQuestionProperties: React.FC<{
             marginBottom: '6px',
           }}
         >
-          Question
+          {t('property.questionText')}
         </label>
         <textarea
           id="question-text-input"
@@ -506,7 +510,7 @@ const AskUserQuestionProperties: React.FC<{
               cursor: 'pointer',
             }}
           />
-          <span>Multiple Selection</span>
+          <span>{t('property.multiSelect')}</span>
         </label>
         <div
           style={{
@@ -517,8 +521,8 @@ const AskUserQuestionProperties: React.FC<{
           }}
         >
           {data.multiSelect
-            ? 'User can select multiple options (outputs selected list)'
-            : 'User selects one option (branches to corresponding node)'}
+            ? t('property.multiSelect.enabled')
+            : t('property.multiSelect.disabled')}
         </div>
       </div>
 
@@ -553,7 +557,7 @@ const AskUserQuestionProperties: React.FC<{
               cursor: 'pointer',
             }}
           />
-          <span>AI Suggests Options</span>
+          <span>{t('property.aiSuggestions')}</span>
         </label>
         <div
           style={{
@@ -564,8 +568,8 @@ const AskUserQuestionProperties: React.FC<{
           }}
         >
           {data.useAiSuggestions
-            ? 'AI will dynamically generate options based on context'
-            : 'Manually define options below'}
+            ? t('property.aiSuggestions.enabled')
+            : t('property.aiSuggestions.disabled')}
         </div>
       </div>
 
@@ -581,7 +585,7 @@ const AskUserQuestionProperties: React.FC<{
               marginBottom: '6px',
             }}
           >
-            Options ({normalizedOptions.length}/4)
+            {t('property.optionsCount').replace('{count}', normalizedOptions.length.toString())}
           </div>
 
           {normalizedOptions.map((option, index) => (
@@ -598,7 +602,9 @@ const AskUserQuestionProperties: React.FC<{
               <div
                 style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}
               >
-                <span style={{ fontSize: '11px', fontWeight: 600 }}>Option {index + 1}</span>
+                <span style={{ fontSize: '11px', fontWeight: 600 }}>
+                  {t('property.optionNumber').replace('{number}', (index + 1).toString())}
+                </span>
                 {normalizedOptions.length > 2 && (
                   <button
                     type="button"
@@ -614,7 +620,7 @@ const AskUserQuestionProperties: React.FC<{
                       cursor: 'pointer',
                     }}
                   >
-                    Remove
+                    {t('property.remove')}
                   </button>
                 )}
               </div>
@@ -622,7 +628,7 @@ const AskUserQuestionProperties: React.FC<{
                 type="text"
                 value={option.label}
                 onChange={(e) => handleUpdateOption(index, 'label', e.target.value)}
-                placeholder="Label"
+                placeholder={t('property.optionLabel.placeholder')}
                 className="nodrag"
                 style={{
                   width: '100%',
@@ -639,7 +645,7 @@ const AskUserQuestionProperties: React.FC<{
                 type="text"
                 value={option.description}
                 onChange={(e) => handleUpdateOption(index, 'description', e.target.value)}
-                placeholder="Description"
+                placeholder={t('property.optionDescription.placeholder')}
                 className="nodrag"
                 style={{
                   width: '100%',
@@ -670,7 +676,7 @@ const AskUserQuestionProperties: React.FC<{
                 fontSize: '12px',
               }}
             >
-              + Add Option
+              {t('property.addOption')}
             </button>
           )}
         </div>
@@ -686,6 +692,7 @@ const PromptProperties: React.FC<{
   node: Node<PromptNodeData>;
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
 }> = ({ node, updateNodeData }) => {
+  const { t } = useTranslation();
   const data = node.data;
 
   // プロンプトから変数を抽出
@@ -705,7 +712,7 @@ const PromptProperties: React.FC<{
             marginBottom: '6px',
           }}
         >
-          Label
+          {t('property.label')}
         </label>
         <input
           id="label-input"
@@ -713,7 +720,7 @@ const PromptProperties: React.FC<{
           value={data.label || ''}
           onChange={(e) => updateNodeData(node.id, { label: e.target.value })}
           className="nodrag"
-          placeholder="Enter label"
+          placeholder={t('property.label.placeholder')}
           style={{
             width: '100%',
             padding: '6px 8px',
@@ -738,7 +745,7 @@ const PromptProperties: React.FC<{
             marginBottom: '6px',
           }}
         >
-          Prompt Template
+          {t('property.promptTemplate')}
         </label>
         <textarea
           id="prompt-textarea"
@@ -746,7 +753,7 @@ const PromptProperties: React.FC<{
           onChange={(e) => updateNodeData(node.id, { prompt: e.target.value })}
           className="nodrag"
           rows={8}
-          placeholder="Enter prompt template with {{variables}}"
+          placeholder={t('property.promptTemplate.placeholder')}
           style={{
             width: '100%',
             padding: '6px 8px',
@@ -766,7 +773,7 @@ const PromptProperties: React.FC<{
             marginTop: '4px',
           }}
         >
-          Use {'{{variableName}}'} syntax for dynamic values
+          {t('property.promptTemplate.help')}
         </div>
       </div>
 
@@ -781,7 +788,7 @@ const PromptProperties: React.FC<{
               marginBottom: '6px',
             }}
           >
-            Detected Variables ({variables.length})
+            {t('property.detectedVariables').replace('{count}', variables.length.toString())}
           </div>
           <div
             style={{
@@ -812,7 +819,7 @@ const PromptProperties: React.FC<{
               marginTop: '4px',
             }}
           >
-            Variables will be substituted at runtime
+            {t('property.variablesSubstituted')}
           </div>
         </div>
       )}
@@ -827,6 +834,7 @@ const BranchProperties: React.FC<{
   node: Node<BranchNodeData>;
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
 }> = ({ node, updateNodeData }) => {
+  const { t } = useTranslation();
   const data = node.data;
 
   // Ensure all branches have IDs (for backward compatibility)
@@ -845,8 +853,8 @@ const BranchProperties: React.FC<{
       ...normalizedBranches,
       {
         id: generateBranchId(),
-        label: `Branch ${normalizedBranches.length + 1}`,
-        condition: '新しい条件',
+        label: `${t('default.newBranch')} ${normalizedBranches.length + 1}`,
+        condition: t('default.newCondition'),
       },
     ];
     updateNodeData(node.id, {
@@ -898,7 +906,7 @@ const BranchProperties: React.FC<{
             marginBottom: '6px',
           }}
         >
-          Branch Type
+          {t('property.branchType')}
         </label>
         <select
           id="branch-type-select"
@@ -915,8 +923,8 @@ const BranchProperties: React.FC<{
             fontSize: '13px',
           }}
         >
-          <option value="conditional">Conditional (2-way)</option>
-          <option value="switch">Switch (Multi-way)</option>
+          <option value="conditional">{t('property.conditional')}</option>
+          <option value="switch">{t('property.switch')}</option>
         </select>
         <div
           style={{
@@ -925,7 +933,9 @@ const BranchProperties: React.FC<{
             marginTop: '4px',
           }}
         >
-          {data.branchType === 'conditional' ? '2つの分岐（True/False）' : '複数の分岐（2-N分岐）'}
+          {data.branchType === 'conditional'
+            ? t('property.branchType.conditional.help')
+            : t('property.branchType.switch.help')}
         </div>
       </div>
 
@@ -946,7 +956,7 @@ const BranchProperties: React.FC<{
               color: 'var(--vscode-foreground)',
             }}
           >
-            Branches ({normalizedBranches.length})
+            {t('property.branchesCount').replace('{count}', normalizedBranches.length.toString())}
           </div>
           {(data.branchType === 'switch' || normalizedBranches.length < 2) && (
             <button
@@ -962,7 +972,7 @@ const BranchProperties: React.FC<{
                 cursor: 'pointer',
               }}
             >
-              + Add Branch
+              {t('property.addBranch')}
             </button>
           )}
         </div>
@@ -993,7 +1003,7 @@ const BranchProperties: React.FC<{
                   color: 'var(--vscode-descriptionForeground)',
                 }}
               >
-                Branch {index + 1}
+                {t('property.branchNumber').replace('{number}', (index + 1).toString())}
               </span>
               {normalizedBranches.length > 2 && (
                 <button
@@ -1009,7 +1019,7 @@ const BranchProperties: React.FC<{
                     cursor: 'pointer',
                   }}
                 >
-                  Remove
+                  {t('property.remove')}
                 </button>
               )}
             </div>
@@ -1026,7 +1036,7 @@ const BranchProperties: React.FC<{
                   marginBottom: '4px',
                 }}
               >
-                Label
+                {t('property.branchLabel')}
               </label>
               <input
                 id={`branch-label-${index}`}
@@ -1034,7 +1044,7 @@ const BranchProperties: React.FC<{
                 value={branch.label}
                 onChange={(e) => handleUpdateBranch(index, 'label', e.target.value)}
                 className="nodrag"
-                placeholder="e.g., Success, Error"
+                placeholder={t('property.branchLabel.placeholder')}
                 style={{
                   width: '100%',
                   padding: '4px 6px',
@@ -1059,7 +1069,7 @@ const BranchProperties: React.FC<{
                   marginBottom: '4px',
                 }}
               >
-                Condition (自然言語)
+                {t('property.branchCondition')}
               </label>
               <textarea
                 id={`branch-condition-${index}`}
@@ -1067,7 +1077,7 @@ const BranchProperties: React.FC<{
                 onChange={(e) => handleUpdateBranch(index, 'condition', e.target.value)}
                 className="nodrag"
                 rows={2}
-                placeholder="e.g., 前の処理が成功した場合"
+                placeholder={t('property.branchCondition.placeholder')}
                 style={{
                   width: '100%',
                   padding: '4px 6px',
@@ -1090,7 +1100,7 @@ const BranchProperties: React.FC<{
             marginTop: '8px',
           }}
         >
-          Minimum 2 branches required
+          {t('property.minimumBranches')}
         </div>
       </div>
     </div>

@@ -6,12 +6,14 @@
  */
 
 import type React from 'react';
+import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
 
 /**
  * NodePalette Component
  */
 export const NodePalette: React.FC = () => {
+  const { t } = useTranslation();
   const { addNode } = useWorkflowStore();
 
   const handleAddSubAgent = () => {
@@ -20,8 +22,8 @@ export const NodePalette: React.FC = () => {
       type: 'subAgent' as const,
       position: { x: 250, y: 100 },
       data: {
-        description: 'New Sub-Agent',
-        prompt: 'Enter your prompt here',
+        description: t('default.newSubAgent'),
+        prompt: t('default.enterPrompt'),
         model: 'sonnet' as const,
         outputPorts: 1,
       },
@@ -35,10 +37,10 @@ export const NodePalette: React.FC = () => {
       type: 'askUserQuestion' as const,
       position: { x: 250, y: 300 },
       data: {
-        questionText: 'New Question',
+        questionText: t('default.newQuestion'),
         options: [
-          { label: 'Option 1', description: 'First option' },
-          { label: 'Option 2', description: 'Second option' },
+          { label: `${t('default.option')} 1`, description: t('default.firstOption') },
+          { label: `${t('default.option')} 2`, description: t('default.secondOption') },
         ],
         outputPorts: 2,
       },
@@ -52,8 +54,8 @@ export const NodePalette: React.FC = () => {
       type: 'prompt' as const,
       position: { x: 350, y: 200 },
       data: {
-        label: 'New Prompt',
-        prompt: 'Enter your prompt template here.\n\nYou can use variables like {{variableName}}.',
+        label: t('default.newPrompt'),
+        prompt: t('default.promptTemplate'),
         variables: {},
       },
     };
@@ -68,8 +70,8 @@ export const NodePalette: React.FC = () => {
       data: {
         branchType: 'conditional' as const,
         branches: [
-          { label: 'True', condition: '条件が真の場合' },
-          { label: 'False', condition: '条件が偽の場合' },
+          { label: t('default.branchTrue'), condition: t('default.branchTrueCondition') },
+          { label: t('default.branchFalse'), condition: t('default.branchFalseCondition') },
         ],
         outputPorts: 2,
       },
@@ -100,7 +102,7 @@ export const NodePalette: React.FC = () => {
           letterSpacing: '0.5px',
         }}
       >
-        Node Palette
+        {t('palette.title')}
       </div>
 
       {/* Section: Basic Nodes */}
@@ -115,7 +117,7 @@ export const NodePalette: React.FC = () => {
           letterSpacing: '0.5px',
         }}
       >
-        Basic Nodes
+        {t('palette.basicNodes')}
       </div>
 
       {/* Prompt Node Button */}
@@ -145,14 +147,14 @@ export const NodePalette: React.FC = () => {
           e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
         }}
       >
-        <div style={{ fontWeight: 600 }}>Prompt</div>
+        <div style={{ fontWeight: 600 }}>{t('node.prompt.title')}</div>
         <div
           style={{
             fontSize: '11px',
             color: 'var(--vscode-descriptionForeground)',
           }}
         >
-          Template with variables
+          {t('node.prompt.description')}
         </div>
       </button>
 
@@ -183,14 +185,14 @@ export const NodePalette: React.FC = () => {
           e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
         }}
       >
-        <div style={{ fontWeight: 600 }}>Sub-Agent</div>
+        <div style={{ fontWeight: 600 }}>{t('node.subAgent.title')}</div>
         <div
           style={{
             fontSize: '11px',
             color: 'var(--vscode-descriptionForeground)',
           }}
         >
-          Execute a specialized task
+          {t('node.subAgent.description')}
         </div>
       </button>
 
@@ -206,7 +208,7 @@ export const NodePalette: React.FC = () => {
           letterSpacing: '0.5px',
         }}
       >
-        Control Flow
+        {t('palette.controlFlow')}
       </div>
 
       {/* Branch Node Button */}
@@ -236,14 +238,14 @@ export const NodePalette: React.FC = () => {
           e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
         }}
       >
-        <div style={{ fontWeight: 600 }}>Branch</div>
+        <div style={{ fontWeight: 600 }}>{t('node.branch.title')}</div>
         <div
           style={{
             fontSize: '11px',
             color: 'var(--vscode-descriptionForeground)',
           }}
         >
-          Conditional branching logic
+          {t('node.branch.description')}
         </div>
       </button>
 
@@ -274,14 +276,14 @@ export const NodePalette: React.FC = () => {
           e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
         }}
       >
-        <div style={{ fontWeight: 600 }}>Ask User Question</div>
+        <div style={{ fontWeight: 600 }}>{t('node.askUserQuestion.title')}</div>
         <div
           style={{
             fontSize: '11px',
             color: 'var(--vscode-descriptionForeground)',
           }}
         >
-          Branch based on user choice
+          {t('node.askUserQuestion.description')}
         </div>
       </button>
 
@@ -298,12 +300,12 @@ export const NodePalette: React.FC = () => {
           lineHeight: '1.5',
         }}
       >
-        <div style={{ fontWeight: 600, marginBottom: '8px' }}>💡 Quick Start</div>
+        <div style={{ fontWeight: 600, marginBottom: '8px' }}>{t('palette.quickStart')}</div>
         <ul style={{ margin: 0, paddingLeft: '16px' }}>
-          <li>Click a node to add it to the canvas</li>
-          <li>Drag nodes to reposition them</li>
-          <li>Connect nodes by dragging from output to input handles</li>
-          <li>Select a node to edit its properties</li>
+          <li>{t('palette.instruction.addNode')}</li>
+          <li>{t('palette.instruction.dragNode')}</li>
+          <li>{t('palette.instruction.connectNodes')}</li>
+          <li>{t('palette.instruction.editProperties')}</li>
         </ul>
       </div>
     </div>

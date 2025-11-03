@@ -45,6 +45,8 @@ All operations run locally within VSCode. No network communication means zero ri
 
 ⚙️ **Intuitive Property Panel** - Configure all node settings in a dedicated right-side panel
 
+🌐 **Multilingual Support** - Both the Visual Editor UI and exported workflows automatically adapt to your VSCode language (English/Japanese/Korean/Simplified Chinese/Traditional Chinese supported)
+
 ## Getting Started
 
 ### Installation
@@ -107,6 +109,8 @@ Generates ready-to-use files:
 - `.claude/agents/*.md` - Sub-Agent definitions
 - `.claude/commands/*.md` - SlashCommand to execute the workflow
 
+**Internationalization**: The Visual Editor UI and all exported files automatically adapt to your VSCode display language setting (`vscode.env.language`). Supported languages: English (default), Japanese, Korean, Simplified Chinese (zh-CN), and Traditional Chinese (zh-TW/zh-HK). This ensures both the editing experience and generated workflows are accessible for international teams regardless of their location.
+
 ## Usage Examples
 
 ### Example 1: Data Analysis Pipeline
@@ -137,6 +141,9 @@ A: The extension will detect conflicts and ask for confirmation before overwriti
 
 **Q: How many nodes can I add?**
 A: Up to 50 nodes per workflow. Most workflows use 3-10 nodes.
+
+**Q: What languages are supported?**
+A: Both the Visual Editor UI and exported workflows automatically use your VSCode display language setting. Currently supported: English (default), Japanese, Korean, Simplified Chinese (zh-CN), and Traditional Chinese (zh-TW/zh-HK). The extension detects `vscode.env.language` and displays all UI elements and generates documentation in the appropriate language. This includes toolbar buttons, node palette, property panel labels, and all exported files.
 
 ## Troubleshooting
 

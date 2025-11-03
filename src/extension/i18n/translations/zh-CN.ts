@@ -1,0 +1,47 @@
+/**
+ * Claude Code Workflow Studio - Simplified Chinese Translations
+ */
+
+import type { TranslationKeys } from '../translation-keys';
+
+export const zhCNTranslations: TranslationKeys = {
+  // Mermaid flowchart labels
+  'mermaid.start': '开始',
+  'mermaid.end': '结束',
+  'mermaid.question': '问题',
+  'mermaid.conditionalBranch': '条件分支',
+
+  // Workflow execution guide
+  'guide.title': '## 工作流执行指南',
+  'guide.intro': '按照上方的Mermaid流程图执行工作流。每种节点类型的执行方法如下所述。',
+  'guide.nodeTypesTitle': '### 各节点类型的执行方法',
+  'guide.nodeTypes.subAgent': '- **矩形节点**：使用Task工具执行子代理',
+  'guide.nodeTypes.askUserQuestion':
+    '- **菱形节点（AskUserQuestion:...）**：使用AskUserQuestion工具提示用户并根据其响应进行分支',
+  'guide.nodeTypes.branch':
+    '- **菱形节点（Branch/Switch:...）**：根据先前处理的结果自动分支（参见详细信息部分）',
+  'guide.nodeTypes.prompt': '- **矩形节点（Prompt节点）**：执行下面详细信息部分中描述的提示',
+
+  // Prompt node details
+  'promptNode.title': '### Prompt节点详细信息',
+  'promptNode.availableVariables': '**可用变量：**',
+  'promptNode.variableNotSet': '（未设置）',
+
+  // AskUserQuestion node details
+  'askNode.title': '### AskUserQuestion节点详细信息',
+  'askNode.selectionMode': '**选择模式：**',
+  'askNode.aiSuggestions': 'AI建议（AI根据上下文动态生成选项并呈现给用户）',
+  'askNode.multiSelect': '**多选：** 已启用（用户可以选择多个选项）',
+  'askNode.singleSelect': '单选（根据所选选项进行分支）',
+  'askNode.options': '**选项：**',
+  'askNode.noDescription': '（无描述）',
+  'askNode.multiSelectExplanation': '多选已启用（所选选项列表将传递到下一个节点）',
+
+  // Branch node details
+  'branchNode.title': '### Branch节点详细信息',
+  'branchNode.binary': '二分支',
+  'branchNode.multiple': '多分支',
+  'branchNode.conditions': '**分支条件：**',
+  'branchNode.executionMethod':
+    '**执行方法**：评估先前处理的结果，并根据上述条件自动选择适当的分支。',
+};
