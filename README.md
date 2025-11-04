@@ -33,6 +33,8 @@ All operations run locally within VSCode. No network communication means zero ri
 
 ✨ **Visual Workflow Editor** - Intuitive drag-and-drop canvas inspired by Dify
 
+🎓 **Interactive Onboarding Tour** - Step-by-step guided tutorial for first-time users, automatically launched on first use with ? button for anytime replay
+
 🤖 **Sub-Agent Nodes** - Configure Claude Code Sub-Agents with custom prompts, tool permissions, and model selection (Sonnet/Opus/Haiku)
 
 ❓ **AskUserQuestion Nodes** - Create dynamic conditional branches with 2-4 user-selectable options
@@ -68,12 +70,18 @@ Currently not available (private repository).
    - Type "Claude Code Workflow Studio: Open Editor"
    - Press Enter
 
-**2. Create Your Workflow**
+**2. Take the Interactive Tour** (First-time users)
+   - An interactive onboarding tour will automatically start on your first launch
+   - Follow the step-by-step guided tutorial to learn workflow creation hands-on
+   - Click the **?** button in the toolbar anytime to restart the tour
+   - Available in English, Japanese, Korean, Simplified Chinese, and Traditional Chinese
+
+**3. Create Your Workflow**
    - **Add Nodes**: Click Sub-Agent, AskUserQuestion, Prompt, or Branch nodes in the left palette to add them to the canvas
    - **Configure**: Click a node to edit its properties in the right panel
    - **Connect**: Drag from output ports (right) to input ports (left) to create flow
 
-**3. Save & Export**
+**4. Save & Export**
    - Enter a workflow name in the toolbar
    - Click **Save** to store as JSON in `.vscode/workflows/`
    - Click **Export** to generate `.claude` files ready for Claude Code
