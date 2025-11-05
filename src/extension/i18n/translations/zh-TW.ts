@@ -37,11 +37,21 @@ export const zhTWTranslations: TranslationKeys = {
   'askNode.noDescription': '（無描述）',
   'askNode.multiSelectExplanation': '多選已啟用（所選選項列表將傳遞到下一個節點）',
 
-  // Branch node details
+  // Branch node details (Legacy)
   'branchNode.title': '### Branch節點詳細資訊',
   'branchNode.binary': '二分支',
   'branchNode.multiple': '多分支',
   'branchNode.conditions': '**分支條件：**',
   'branchNode.executionMethod':
     '**執行方法**：評估先前處理的結果，並根據上述條件自動選擇適當的分支。',
+
+  // IfElse node details
+  'ifElseNode.title': '### If/Else節點詳細資訊',
+  'ifElseNode.binary': '二分支 (True/False)',
+  'ifElseNode.evaluationTarget': '評估目標',
+
+  // Switch node details
+  'switchNode.title': '### Switch節點詳細資訊',
+  'switchNode.multiple': '多分支 (2-N)',
+  'switchNode.evaluationTarget': '評估目標',
 };

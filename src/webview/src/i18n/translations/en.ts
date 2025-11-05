@@ -34,6 +34,11 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'node.subAgent.description': 'Execute a specialized task',
   'node.branch.title': 'Branch',
   'node.branch.description': 'Conditional branching logic',
+  'node.branch.deprecationNotice': 'Deprecated. Please migrate to If/Else or Switch nodes',
+  'node.ifElse.title': 'If/Else',
+  'node.ifElse.description': 'Binary conditional branch (True/False)',
+  'node.switch.title': 'Switch',
+  'node.switch.description': 'Multi-way conditional branch (2-N cases)',
   'node.askUserQuestion.title': 'Ask User Question',
   'node.askUserQuestion.description': 'Branch based on user choice',
 
@@ -51,6 +56,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeType.subAgent': 'Sub-Agent',
   'property.nodeType.askUserQuestion': 'Ask User Question',
   'property.nodeType.branch': 'Branch Node',
+  'property.nodeType.ifElse': 'If/Else Node',
+  'property.nodeType.switch': 'Switch Node',
   'property.nodeType.prompt': 'Prompt Node',
   'property.nodeType.start': 'Start Node',
   'property.nodeType.end': 'End Node',
@@ -65,6 +72,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.model': 'Model',
   'property.label': 'Label',
   'property.label.placeholder': 'Enter label',
+  'property.evaluationTarget': 'Evaluation Target',
+  'property.evaluationTarget.placeholder': 'e.g., Result of the previous step',
+  'property.evaluationTarget.help': 'Describe what to evaluate in the branch condition',
 
   // Start/End node descriptions
   'property.startNodeDescription':
@@ -132,6 +142,12 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'default.branchTrueCondition': 'When condition is true',
   'default.branchFalse': 'False',
   'default.branchFalseCondition': 'When condition is false',
+  'default.case1': 'Case 1',
+  'default.case1Condition': 'When condition 1 is met',
+  'default.case2': 'Case 2',
+  'default.case2Condition': 'When condition 2 is met',
+  'default.case3': 'Case 3',
+  'default.case3Condition': 'When condition 3 is met',
   'default.newBranch': 'Branch',
   'default.newCondition': 'New condition',
 
@@ -139,7 +155,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'tour.welcome':
     'Welcome to Claude Code Workflow Studio!\n\nThis tour will guide you through creating your first workflow.',
   'tour.nodePalette':
-    'The Node Palette contains various nodes you can use in your workflow.\n\nClick on Prompt, Sub-Agent, AskUserQuestion, Branch, and other nodes to add them to the canvas.',
+    'The Node Palette contains various nodes you can use in your workflow.\n\nClick on Prompt, Sub-Agent, AskUserQuestion, If/Else, Switch, and other nodes to add them to the canvas.',
   'tour.addPrompt':
     'Click the "Prompt" button to add your first node.\n\nA Prompt node is a template that supports variables and is the basic building block of workflows.',
   'tour.canvas':

@@ -34,6 +34,11 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'node.subAgent.description': '専門タスクを実行',
   'node.branch.title': 'Branch',
   'node.branch.description': '条件分岐ロジック',
+  'node.branch.deprecationNotice': '廃止予定。If/ElseまたはSwitchノードへの移行を推奨します',
+  'node.ifElse.title': 'If/Else',
+  'node.ifElse.description': '2分岐条件分岐（真/偽）',
+  'node.switch.title': 'Switch',
+  'node.switch.description': '複数分岐条件分岐（2-N個）',
   'node.askUserQuestion.title': 'Ask User Question',
   'node.askUserQuestion.description': 'ユーザーの選択に基づいて分岐',
 
@@ -51,6 +56,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeType.subAgent': 'Sub-Agent',
   'property.nodeType.askUserQuestion': 'Ask User Question',
   'property.nodeType.branch': 'Branch Node',
+  'property.nodeType.ifElse': 'If/Else Node',
+  'property.nodeType.switch': 'Switch Node',
   'property.nodeType.prompt': 'Prompt Node',
   'property.nodeType.start': 'Start Node',
   'property.nodeType.end': 'End Node',
@@ -65,6 +72,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.model': 'モデル',
   'property.label': 'ラベル',
   'property.label.placeholder': 'ラベルを入力',
+  'property.evaluationTarget': '評価対象',
+  'property.evaluationTarget.placeholder': '例：前のステップの実行結果',
+  'property.evaluationTarget.help': '分岐条件で評価する対象を自然言語で記述',
 
   // Start/End node descriptions
   'property.startNodeDescription':
@@ -132,6 +142,12 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'default.branchTrueCondition': '条件が真の場合',
   'default.branchFalse': 'False',
   'default.branchFalseCondition': '条件が偽の場合',
+  'default.case1': 'Case 1',
+  'default.case1Condition': '条件1の場合',
+  'default.case2': 'Case 2',
+  'default.case2Condition': '条件2の場合',
+  'default.case3': 'Case 3',
+  'default.case3Condition': '条件3の場合',
   'default.newBranch': '分岐',
   'default.newCondition': '新しい条件',
 
@@ -139,7 +155,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'tour.welcome':
     'Claude Code Workflow Studioへようこそ！\n\nこのツアーでは、初めてのワークフロー作成を通じて、基本的な使い方をご案内します。',
   'tour.nodePalette':
-    'ノードパレットには、ワークフローで使用できる様々なノードが用意されています。\n\nPrompt、Sub-Agent、AskUserQuestion、Branchなどのノードをクリックしてキャンバスに追加できます。',
+    'ノードパレットには、ワークフローで使用できる様々なノードが用意されています。\n\nPrompt、Sub-Agent、AskUserQuestion、If/Else、Switchなどのノードをクリックしてキャンバスに追加できます。',
   'tour.addPrompt':
     '「Prompt」ボタンをクリックして、最初のノードを追加してみましょう。\n\nPromptノードは変数を使用できるテンプレートで、ワークフローの基本的な構成要素です。',
   'tour.canvas':

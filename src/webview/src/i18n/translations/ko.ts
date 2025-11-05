@@ -34,6 +34,12 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'node.subAgent.description': '전문 작업 실행',
   'node.branch.title': 'Branch',
   'node.branch.description': '조건 분기 로직',
+  'node.branch.deprecationNotice':
+    '더 이상 사용되지 않습니다. If/Else 또는 Switch 노드로 마이그레이션하세요',
+  'node.ifElse.title': 'If/Else',
+  'node.ifElse.description': '이진 조건 분기 (참/거짓)',
+  'node.switch.title': 'Switch',
+  'node.switch.description': '다중 조건 분기 (2-N 케이스)',
   'node.askUserQuestion.title': 'Ask User Question',
   'node.askUserQuestion.description': '사용자 선택에 따라 분기',
 
@@ -51,6 +57,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeType.subAgent': 'Sub-Agent',
   'property.nodeType.askUserQuestion': 'Ask User Question',
   'property.nodeType.branch': 'Branch Node',
+  'property.nodeType.ifElse': 'If/Else Node',
+  'property.nodeType.switch': 'Switch Node',
   'property.nodeType.prompt': 'Prompt Node',
   'property.nodeType.start': 'Start Node',
   'property.nodeType.end': 'End Node',
@@ -65,6 +73,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.model': '모델',
   'property.label': '레이블',
   'property.label.placeholder': '레이블 입력',
+  'property.evaluationTarget': '평가 대상',
+  'property.evaluationTarget.placeholder': '예: 이전 단계의 실행 결과',
+  'property.evaluationTarget.help': '분기 조건에서 평가할 대상을 자연어로 설명',
 
   // Start/End node descriptions
   'property.startNodeDescription':
@@ -132,6 +143,12 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'default.branchTrueCondition': '조건이 참일 때',
   'default.branchFalse': 'False',
   'default.branchFalseCondition': '조건이 거짓일 때',
+  'default.case1': 'Case 1',
+  'default.case1Condition': '조건 1이 충족될 때',
+  'default.case2': 'Case 2',
+  'default.case2Condition': '조건 2가 충족될 때',
+  'default.case3': 'Case 3',
+  'default.case3Condition': '조건 3이 충족될 때',
   'default.newBranch': '분기',
   'default.newCondition': '새 조건',
 
@@ -139,7 +156,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'tour.welcome':
     'Claude Code Workflow Studio에 오신 것을 환영합니다!\n\n이 투어는 첫 워크플로우 생성 방법을 안내합니다.',
   'tour.nodePalette':
-    '노드 팔레트에는 워크플로우에서 사용할 수 있는 다양한 노드가 있습니다.\n\nPrompt, Sub-Agent, AskUserQuestion, Branch 등의 노드를 클릭하여 캔버스에 추가할 수 있습니다.',
+    '노드 팔레트에는 워크플로우에서 사용할 수 있는 다양한 노드가 있습니다.\n\nPrompt, Sub-Agent, AskUserQuestion, If/Else, Switch 등의 노드를 클릭하여 캔버스에 추가할 수 있습니다.',
   'tour.addPrompt':
     '"Prompt" 버튼을 클릭하여 첫 번째 노드를 추가하세요.\n\nPrompt 노드는 변수를 지원하는 템플릿으로 워크플로우의 기본 구성 요소입니다.',
   'tour.canvas':

@@ -37,11 +37,21 @@ export const zhCNTranslations: TranslationKeys = {
   'askNode.noDescription': '（无描述）',
   'askNode.multiSelectExplanation': '多选已启用（所选选项列表将传递到下一个节点）',
 
-  // Branch node details
+  // Branch node details (Legacy)
   'branchNode.title': '### Branch节点详细信息',
   'branchNode.binary': '二分支',
   'branchNode.multiple': '多分支',
   'branchNode.conditions': '**分支条件：**',
   'branchNode.executionMethod':
     '**执行方法**：评估先前处理的结果，并根据上述条件自动选择适当的分支。',
+
+  // IfElse node details
+  'ifElseNode.title': '### If/Else节点详细信息',
+  'ifElseNode.binary': '二分支 (True/False)',
+  'ifElseNode.evaluationTarget': '评估目标',
+
+  // Switch node details
+  'switchNode.title': '### Switch节点详细信息',
+  'switchNode.multiple': '多分支 (2-N)',
+  'switchNode.evaluationTarget': '评估目标',
 };

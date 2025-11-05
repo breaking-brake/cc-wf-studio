@@ -40,11 +40,21 @@ export const jaTranslations: TranslationKeys = {
   'askNode.multiSelectExplanation':
     '複数選択可能(選択された選択肢のリストが次のノードに渡されます)',
 
-  // Branch node details
+  // Branch node details (Legacy)
   'branchNode.title': '### Branchノード詳細',
   'branchNode.binary': '2分岐',
   'branchNode.multiple': '複数分岐',
   'branchNode.conditions': '**分岐条件:**',
   'branchNode.executionMethod':
     '**実行方法**: 前段の処理結果を評価し、上記の条件に基づいて自動的に適切な分岐を選択してください。',
+
+  // IfElse node details
+  'ifElseNode.title': '### If/Elseノード詳細',
+  'ifElseNode.binary': '2分岐(True/False)',
+  'ifElseNode.evaluationTarget': '評価対象',
+
+  // Switch node details
+  'switchNode.title': '### Switchノード詳細',
+  'switchNode.multiple': '複数分岐(2-N)',
+  'switchNode.evaluationTarget': '評価対象',
 };

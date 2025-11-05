@@ -79,6 +79,41 @@ export const NodePalette: React.FC = () => {
     addNode(newNode);
   };
 
+  const handleAddIfElse = () => {
+    const newNode = {
+      id: `ifelse-${Date.now()}`,
+      type: 'ifElse' as const,
+      position: { x: 250, y: 250 },
+      data: {
+        evaluationTarget: '',
+        branches: [
+          { label: t('default.branchTrue'), condition: t('default.branchTrueCondition') },
+          { label: t('default.branchFalse'), condition: t('default.branchFalseCondition') },
+        ],
+        outputPorts: 2 as const,
+      },
+    };
+    addNode(newNode);
+  };
+
+  const handleAddSwitch = () => {
+    const newNode = {
+      id: `switch-${Date.now()}`,
+      type: 'switch' as const,
+      position: { x: 250, y: 280 },
+      data: {
+        evaluationTarget: '',
+        branches: [
+          { label: t('default.case1'), condition: t('default.case1Condition') },
+          { label: t('default.case2'), condition: t('default.case2Condition') },
+          { label: t('default.case3'), condition: t('default.case3Condition') },
+        ],
+        outputPorts: 3,
+      },
+    };
+    addNode(newNode);
+  };
+
   return (
     <div
       className="node-palette"
@@ -213,10 +248,10 @@ export const NodePalette: React.FC = () => {
         {t('palette.controlFlow')}
       </div>
 
-      {/* Branch Node Button */}
+      {/* IfElse Node Button */}
       <button
         type="button"
-        onClick={handleAddBranch}
+        onClick={handleAddIfElse}
         style={{
           width: '100%',
           padding: '12px',
@@ -240,14 +275,52 @@ export const NodePalette: React.FC = () => {
           e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
         }}
       >
-        <div style={{ fontWeight: 600 }}>{t('node.branch.title')}</div>
+        <div style={{ fontWeight: 600 }}>{t('node.ifElse.title')}</div>
         <div
           style={{
             fontSize: '11px',
             color: 'var(--vscode-descriptionForeground)',
           }}
         >
-          {t('node.branch.description')}
+          {t('node.ifElse.description')}
+        </div>
+      </button>
+
+      {/* Switch Node Button */}
+      <button
+        type="button"
+        onClick={handleAddSwitch}
+        style={{
+          width: '100%',
+          padding: '12px',
+          marginBottom: '12px',
+          backgroundColor: 'var(--vscode-button-background)',
+          color: 'var(--vscode-button-foreground)',
+          border: '1px solid var(--vscode-button-border)',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '13px',
+          fontWeight: 500,
+          textAlign: 'left',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+        }}
+      >
+        <div style={{ fontWeight: 600 }}>{t('node.switch.title')}</div>
+        <div
+          style={{
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+          }}
+        >
+          {t('node.switch.description')}
         </div>
       </button>
 
@@ -287,6 +360,57 @@ export const NodePalette: React.FC = () => {
           }}
         >
           {t('node.askUserQuestion.description')}
+        </div>
+      </button>
+
+      {/* Branch Node Button (Legacy) */}
+      <button
+        type="button"
+        onClick={handleAddBranch}
+        style={{
+          width: '100%',
+          padding: '12px',
+          marginBottom: '12px',
+          backgroundColor: 'var(--vscode-button-secondaryBackground)',
+          color: 'var(--vscode-button-secondaryForeground)',
+          border: '1px solid var(--vscode-button-border)',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '13px',
+          fontWeight: 500,
+          textAlign: 'left',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+          opacity: 0.7,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.opacity = '1';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.opacity = '0.7';
+        }}
+      >
+        <div style={{ fontWeight: 600 }}>
+          {t('node.branch.title')} <span style={{ fontSize: '10px' }}>(Legacy)</span>
+        </div>
+        <div
+          style={{
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+          }}
+        >
+          {t('node.branch.description')}
+        </div>
+        <div
+          style={{
+            fontSize: '10px',
+            color: 'var(--vscode-editorWarning-foreground)',
+            marginTop: '4px',
+            fontStyle: 'italic',
+          }}
+        >
+          ⚠️ {t('node.branch.deprecationNotice')}
         </div>
       </button>
 

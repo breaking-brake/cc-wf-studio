@@ -21,10 +21,12 @@ import { useWorkflowStore } from '../stores/workflow-store';
 import { AskUserQuestionNodeComponent } from './nodes/AskUserQuestionNode';
 import { BranchNodeComponent } from './nodes/BranchNode';
 import { EndNode } from './nodes/EndNode';
+import { IfElseNodeComponent } from './nodes/IfElseNode';
 import { PromptNode } from './nodes/PromptNode';
 // 新規ノードタイプのインポート
 import { StartNode } from './nodes/StartNode';
 import { SubAgentNodeComponent } from './nodes/SubAgentNode';
+import { SwitchNodeComponent } from './nodes/SwitchNode';
 
 /**
  * Node types registration (memoized outside component for performance)
@@ -35,7 +37,9 @@ import { SubAgentNodeComponent } from './nodes/SubAgentNode';
 const nodeTypes: NodeTypes = {
   subAgent: SubAgentNodeComponent,
   askUserQuestion: AskUserQuestionNodeComponent,
-  branch: BranchNodeComponent,
+  branch: BranchNodeComponent, // Legacy: 後方互換性のため維持
+  ifElse: IfElseNodeComponent,
+  switch: SwitchNodeComponent,
   // 新規ノードタイプ
   start: StartNode,
   end: EndNode,
@@ -148,6 +152,12 @@ export const WorkflowEditor: React.FC = () => {
                 return 'var(--vscode-charts-blue)';
               case 'askUserQuestion':
                 return 'var(--vscode-charts-orange)';
+              case 'branch': // Legacy
+                return 'var(--vscode-charts-yellow)';
+              case 'ifElse':
+                return 'var(--vscode-charts-yellow)';
+              case 'switch':
+                return 'var(--vscode-charts-yellow)';
               case 'start':
                 return 'var(--vscode-charts-green)';
               case 'end':

@@ -34,6 +34,11 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'node.subAgent.description': '执行专门任务',
   'node.branch.title': 'Branch',
   'node.branch.description': '条件分支逻辑',
+  'node.branch.deprecationNotice': '已弃用。请迁移到If/Else或Switch节点',
+  'node.ifElse.title': 'If/Else',
+  'node.ifElse.description': '二元条件分支（真/假）',
+  'node.switch.title': 'Switch',
+  'node.switch.description': '多路条件分支（2-N 种情况）',
   'node.askUserQuestion.title': 'Ask User Question',
   'node.askUserQuestion.description': '根据用户选择分支',
 
@@ -51,6 +56,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeType.subAgent': 'Sub-Agent',
   'property.nodeType.askUserQuestion': 'Ask User Question',
   'property.nodeType.branch': 'Branch Node',
+  'property.nodeType.ifElse': 'If/Else Node',
+  'property.nodeType.switch': 'Switch Node',
   'property.nodeType.prompt': 'Prompt Node',
   'property.nodeType.start': 'Start Node',
   'property.nodeType.end': 'End Node',
@@ -65,6 +72,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'property.model': '模型',
   'property.label': '标签',
   'property.label.placeholder': '输入标签',
+  'property.evaluationTarget': '评估目标',
+  'property.evaluationTarget.placeholder': '例如：前一步的执行结果',
+  'property.evaluationTarget.help': '用自然语言描述分支条件中要评估的内容',
 
   // Start/End node descriptions
   'property.startNodeDescription': 'Start节点标记工作流的开始。它不能被删除且没有可编辑的属性。',
@@ -129,18 +139,23 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'default.branchTrueCondition': '条件为真时',
   'default.branchFalse': 'False',
   'default.branchFalseCondition': '条件为假时',
+  'default.case1': 'Case 1',
+  'default.case1Condition': '满足条件 1 时',
+  'default.case2': 'Case 2',
+  'default.case2Condition': '满足条件 2 时',
+  'default.case3': 'Case 3',
+  'default.case3Condition': '满足条件 3 时',
   'default.newBranch': '分支',
   'default.newCondition': '新条件',
 
   // Tour
   'tour.welcome': '欢迎使用Claude Code Workflow Studio！\n\n本导览将指导您创建第一个工作流。',
   'tour.nodePalette':
-    '节点面板包含可在工作流中使用的各种节点。\n\n点击Prompt、Sub-Agent、AskUserQuestion、Branch等节点将其添加到画布。',
-  'tour.addPrompt': '点击"Prompt"按钮添加第一个节点。\n\nPrompt节点是支持变量的模板，是工作流的基本构建块。',
-  'tour.canvas':
-    '这是画布。拖动节点调整位置，拖动手柄连接节点。\n\n已经放置了开始和结束节点。',
-  'tour.propertyPanel':
-    '属性面板可以配置所选节点。\n\n您可以编辑节点名称、提示、模型选择等。',
+    '节点面板包含可在工作流中使用的各种节点。\n\n点击Prompt、Sub-Agent、AskUserQuestion、If/Else、Switch等节点将其添加到画布。',
+  'tour.addPrompt':
+    '点击"Prompt"按钮添加第一个节点。\n\nPrompt节点是支持变量的模板，是工作流的基本构建块。',
+  'tour.canvas': '这是画布。拖动节点调整位置，拖动手柄连接节点。\n\n已经放置了开始和结束节点。',
+  'tour.propertyPanel': '属性面板可以配置所选节点。\n\n您可以编辑节点名称、提示、模型选择等。',
   'tour.addAskUserQuestion':
     '现在添加"AskUserQuestion"节点。\n\n此节点允许根据用户选择分支工作流。',
   'tour.connectNodes':

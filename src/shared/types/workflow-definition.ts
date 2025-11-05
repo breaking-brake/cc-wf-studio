@@ -11,7 +11,9 @@
 export enum NodeType {
   SubAgent = 'subAgent',
   AskUserQuestion = 'askUserQuestion',
-  Branch = 'branch',
+  Branch = 'branch', // Legacy: 後方互換性のため維持
+  IfElse = 'ifElse', // New: 2分岐専用
+  Switch = 'switch', // New: 多分岐専用
   Start = 'start',
   End = 'end',
   Prompt = 'prompt',
@@ -84,6 +86,22 @@ export interface BranchNodeData {
   outputPorts: number; // Number of output ports (2 for conditional, 2-N for switch)
 }
 
+// Condition type aliases for IfElse and Switch (same structure as BranchCondition)
+export type IfElseCondition = BranchCondition;
+export type SwitchCondition = BranchCondition;
+
+export interface IfElseNodeData {
+  evaluationTarget?: string; // Natural language description of what to evaluate (e.g., "前のステップの実行結果")
+  branches: IfElseCondition[]; // Fixed: exactly 2 branches (True/False, Yes/No, etc.)
+  outputPorts: 2; // Fixed: 2 output ports
+}
+
+export interface SwitchNodeData {
+  evaluationTarget?: string; // Natural language description of what to evaluate (e.g., "HTTPステータスコード")
+  branches: SwitchCondition[]; // Variable: 2-N branches
+  outputPorts: number; // Variable: 2-N output ports
+}
+
 // ============================================================================
 // Node Types
 // ============================================================================
@@ -125,10 +143,22 @@ export interface BranchNode extends BaseNode {
   data: BranchNodeData;
 }
 
+export interface IfElseNode extends BaseNode {
+  type: NodeType.IfElse;
+  data: IfElseNodeData;
+}
+
+export interface SwitchNode extends BaseNode {
+  type: NodeType.Switch;
+  data: SwitchNodeData;
+}
+
 export type WorkflowNode =
   | SubAgentNode
   | AskUserQuestionNode
-  | BranchNode
+  | BranchNode // Legacy: kept for backward compatibility
+  | IfElseNode
+  | SwitchNode
   | StartNode
   | EndNode
   | PromptNode;
@@ -206,6 +236,22 @@ export const VALIDATION_RULES = {
     OPTION_DESCRIPTION_MAX_LENGTH: 200,
   },
   BRANCH: {
+    CONDITION_MIN_LENGTH: 1,
+    CONDITION_MAX_LENGTH: 500,
+    LABEL_MIN_LENGTH: 1,
+    LABEL_MAX_LENGTH: 50,
+    MIN_BRANCHES: 2,
+    MAX_BRANCHES: 10,
+  },
+  IF_ELSE: {
+    CONDITION_MIN_LENGTH: 1,
+    CONDITION_MAX_LENGTH: 500,
+    LABEL_MIN_LENGTH: 1,
+    LABEL_MAX_LENGTH: 50,
+    BRANCHES: 2, // Fixed: exactly 2 branches
+    OUTPUT_PORTS: 2, // Fixed: 2 output ports
+  },
+  SWITCH: {
     CONDITION_MIN_LENGTH: 1,
     CONDITION_MAX_LENGTH: 500,
     LABEL_MIN_LENGTH: 1,

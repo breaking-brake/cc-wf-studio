@@ -41,11 +41,21 @@ export const enTranslations: TranslationKeys = {
   'askNode.multiSelectExplanation':
     'Multi-select enabled (a list of selected options is passed to the next node)',
 
-  // Branch node details
+  // Branch node details (Legacy)
   'branchNode.title': '### Branch Node Details',
   'branchNode.binary': 'Binary Branch',
   'branchNode.multiple': 'Multiple Branch',
   'branchNode.conditions': '**Branch conditions:**',
   'branchNode.executionMethod':
     '**Execution method**: Evaluate the results of the previous processing and automatically select the appropriate branch based on the conditions above.',
+
+  // IfElse node details
+  'ifElseNode.title': '### If/Else Node Details',
+  'ifElseNode.binary': 'Binary Branch (True/False)',
+  'ifElseNode.evaluationTarget': 'Evaluation Target',
+
+  // Switch node details
+  'switchNode.title': '### Switch Node Details',
+  'switchNode.multiple': 'Multiple Branch (2-N)',
+  'switchNode.evaluationTarget': 'Evaluation Target',
 };

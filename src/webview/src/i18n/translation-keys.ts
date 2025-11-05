@@ -32,6 +32,11 @@ export interface WebviewTranslationKeys {
   'node.subAgent.description': string;
   'node.branch.title': string;
   'node.branch.description': string;
+  'node.branch.deprecationNotice': string;
+  'node.ifElse.title': string;
+  'node.ifElse.description': string;
+  'node.switch.title': string;
+  'node.switch.description': string;
   'node.askUserQuestion.title': string;
   'node.askUserQuestion.description': string;
 
@@ -49,6 +54,8 @@ export interface WebviewTranslationKeys {
   'property.nodeType.subAgent': string;
   'property.nodeType.askUserQuestion': string;
   'property.nodeType.branch': string;
+  'property.nodeType.ifElse': string;
+  'property.nodeType.switch': string;
   'property.nodeType.prompt': string;
   'property.nodeType.start': string;
   'property.nodeType.end': string;
@@ -63,6 +70,9 @@ export interface WebviewTranslationKeys {
   'property.model': string;
   'property.label': string;
   'property.label.placeholder': string;
+  'property.evaluationTarget': string;
+  'property.evaluationTarget.placeholder': string;
+  'property.evaluationTarget.help': string;
 
   // Start/End node descriptions
   'property.startNodeDescription': string;
@@ -127,6 +137,12 @@ export interface WebviewTranslationKeys {
   'default.branchTrueCondition': string;
   'default.branchFalse': string;
   'default.branchFalseCondition': string;
+  'default.case1': string;
+  'default.case1Condition': string;
+  'default.case2': string;
+  'default.case2Condition': string;
+  'default.case3': string;
+  'default.case3Condition': string;
   'default.newBranch': string;
   'default.newCondition': string;
 
