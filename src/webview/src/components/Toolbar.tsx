@@ -34,7 +34,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
   const { nodes, edges, setNodes, setEdges } = useWorkflowStore();
   const [workflowName, setWorkflowName] = useState('my-workflow');
   const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [workflows, setWorkflows] = useState<WorkflowListItem[]>([]);
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>('');
@@ -111,17 +110,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
   }, []);
 
   const handleRefreshList = async () => {
-    setIsLoading(true);
     try {
       await loadWorkflowList();
     } catch (error) {
-      onError({
-        code: 'LOAD_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to load workflows',
-        details: error,
-      });
-    } finally {
-      setIsLoading(false);
+      console.error('Failed to load workflow list:', error);
     }
   };
 
@@ -263,6 +255,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
       <select
         value={selectedWorkflowId}
         onChange={(e) => setSelectedWorkflowId(e.target.value)}
+        onFocus={handleRefreshList}
         className="nodrag"
         style={{
           padding: '4px 8px',
@@ -300,26 +293,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
         }}
       >
         {t('toolbar.load')}
-      </button>
-
-      {/* Refresh List Button */}
-      <button
-        type="button"
-        onClick={handleRefreshList}
-        disabled={isLoading}
-        title={t('toolbar.refreshList')}
-        style={{
-          padding: '4px 8px',
-          backgroundColor: 'var(--vscode-button-secondaryBackground)',
-          color: 'var(--vscode-button-secondaryForeground)',
-          border: 'none',
-          borderRadius: '2px',
-          cursor: isLoading ? 'not-allowed' : 'pointer',
-          fontSize: '13px',
-          opacity: isLoading ? 0.6 : 1,
-        }}
-      >
-        ↻
       </button>
 
       {/* Divider */}
