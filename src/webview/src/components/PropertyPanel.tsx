@@ -8,7 +8,9 @@
 import type {
   AskUserQuestionData,
   BranchNodeData,
+  IfElseNodeData,
   SubAgentData,
+  SwitchNodeData,
 } from '@shared/types/workflow-definition';
 import type React from 'react';
 import type { Node } from 'reactflow';
@@ -98,19 +100,25 @@ export const PropertyPanel: React.FC = () => {
             ? t('property.nodeType.askUserQuestion')
             : selectedNode.type === 'branch'
               ? t('property.nodeType.branch')
-              : selectedNode.type === 'prompt'
-                ? t('property.nodeType.prompt')
-                : selectedNode.type === 'start'
-                  ? t('property.nodeType.start')
-                  : selectedNode.type === 'end'
-                    ? t('property.nodeType.end')
-                    : t('property.nodeType.unknown')}
+              : selectedNode.type === 'ifElse'
+                ? t('property.nodeType.ifElse')
+                : selectedNode.type === 'switch'
+                  ? t('property.nodeType.switch')
+                  : selectedNode.type === 'prompt'
+                    ? t('property.nodeType.prompt')
+                    : selectedNode.type === 'start'
+                      ? t('property.nodeType.start')
+                      : selectedNode.type === 'end'
+                        ? t('property.nodeType.end')
+                        : t('property.nodeType.unknown')}
       </div>
 
-      {/* Node Name (only for subAgent, askUserQuestion, branch, and prompt types) */}
+      {/* Node Name (only for subAgent, askUserQuestion, branch, ifElse, switch, and prompt types) */}
       {(selectedNode.type === 'subAgent' ||
         selectedNode.type === 'askUserQuestion' ||
         selectedNode.type === 'branch' ||
+        selectedNode.type === 'ifElse' ||
+        selectedNode.type === 'switch' ||
         selectedNode.type === 'prompt') && (
         <div style={{ marginBottom: '16px' }}>
           <label
@@ -186,6 +194,16 @@ export const PropertyPanel: React.FC = () => {
       ) : selectedNode.type === 'branch' ? (
         <BranchProperties
           node={selectedNode as Node<BranchNodeData>}
+          updateNodeData={updateNodeData}
+        />
+      ) : selectedNode.type === 'ifElse' ? (
+        <IfElseProperties
+          node={selectedNode as Node<IfElseNodeData>}
+          updateNodeData={updateNodeData}
+        />
+      ) : selectedNode.type === 'switch' ? (
+        <SwitchProperties
+          node={selectedNode as Node<SwitchNodeData>}
           updateNodeData={updateNodeData}
         />
       ) : selectedNode.type === 'prompt' ? (
@@ -1113,3 +1131,489 @@ const BranchProperties: React.FC<{
 function generateBranchId(): string {
   return `branch_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
+
+/**
+ * IfElse Properties Editor (2-way branch, fixed)
+ */
+const IfElseProperties: React.FC<{
+  node: Node<IfElseNodeData>;
+  updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
+}> = ({ node, updateNodeData }) => {
+  const { t } = useTranslation();
+  const data = node.data;
+
+  // Ensure exactly 2 branches with IDs
+  const normalizedBranches = data.branches?.slice(0, 2).map((branch, index) => ({
+    ...branch,
+    id: branch.id || `ifelse_${index}_${Date.now()}`,
+  })) || [
+    {
+      id: `ifelse_0_${Date.now()}`,
+      label: t('default.branchTrue'),
+      condition: t('default.branchTrueCondition'),
+    },
+    {
+      id: `ifelse_1_${Date.now()}`,
+      label: t('default.branchFalse'),
+      condition: t('default.branchFalseCondition'),
+    },
+  ];
+
+  // Update data if branches changed
+  if (JSON.stringify(normalizedBranches) !== JSON.stringify(data.branches)) {
+    updateNodeData(node.id, { branches: normalizedBranches, outputPorts: 2 });
+  }
+
+  const handleUpdateBranch = (index: number, field: 'label' | 'condition', value: string) => {
+    const newBranches = normalizedBranches.map((branch, i) =>
+      i === index ? { ...branch, [field]: value } : branch
+    );
+    updateNodeData(node.id, { branches: newBranches, outputPorts: 2 });
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {/* Info: Fixed 2 branches */}
+      <div
+        style={{
+          padding: '8px',
+          backgroundColor: 'var(--vscode-textBlockQuote-background)',
+          border: '1px solid var(--vscode-textBlockQuote-border)',
+          borderRadius: '4px',
+          fontSize: '11px',
+          color: 'var(--vscode-descriptionForeground)',
+        }}
+      >
+        {t('property.branchType.conditional.help')}
+      </div>
+
+      {/* Evaluation Target */}
+      <div>
+        <label
+          htmlFor="ifelse-evaluation-target"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('property.evaluationTarget')}
+        </label>
+        <input
+          id="ifelse-evaluation-target"
+          type="text"
+          value={data.evaluationTarget || ''}
+          onChange={(e) => updateNodeData(node.id, { evaluationTarget: e.target.value })}
+          className="nodrag"
+          placeholder={t('property.evaluationTarget.placeholder')}
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+          }}
+        />
+        <div
+          style={{
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+            marginTop: '4px',
+          }}
+        >
+          {t('property.evaluationTarget.help')}
+        </div>
+      </div>
+
+      {/* Branches (Fixed at 2) */}
+      <div>
+        <div
+          style={{
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '8px',
+          }}
+        >
+          {t('property.branchesCount').replace('{count}', '2')}
+        </div>
+
+        {normalizedBranches.map((branch, index) => (
+          <div
+            key={branch.id}
+            style={{
+              padding: '12px',
+              marginBottom: '8px',
+              backgroundColor: 'var(--vscode-textBlockQuote-background)',
+              border: '1px solid var(--vscode-textBlockQuote-border)',
+              borderRadius: '4px',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                color: 'var(--vscode-descriptionForeground)',
+                marginBottom: '8px',
+              }}
+            >
+              {t('property.branchNumber').replace('{number}', (index + 1).toString())}
+            </div>
+
+            {/* Label */}
+            <div style={{ marginBottom: '8px' }}>
+              <label
+                htmlFor={`ifelse-label-${index}`}
+                style={{
+                  display: 'block',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                  marginBottom: '4px',
+                }}
+              >
+                {t('property.branchLabel')}
+              </label>
+              <input
+                id={`ifelse-label-${index}`}
+                type="text"
+                value={branch.label}
+                onChange={(e) => handleUpdateBranch(index, 'label', e.target.value)}
+                className="nodrag"
+                placeholder={t('property.branchLabel.placeholder')}
+                style={{
+                  width: '100%',
+                  padding: '4px 6px',
+                  backgroundColor: 'var(--vscode-input-background)',
+                  color: 'var(--vscode-input-foreground)',
+                  border: '1px solid var(--vscode-input-border)',
+                  borderRadius: '2px',
+                  fontSize: '12px',
+                }}
+              />
+            </div>
+
+            {/* Condition */}
+            <div>
+              <label
+                htmlFor={`ifelse-condition-${index}`}
+                style={{
+                  display: 'block',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                  marginBottom: '4px',
+                }}
+              >
+                {t('property.branchCondition')}
+              </label>
+              <textarea
+                id={`ifelse-condition-${index}`}
+                value={branch.condition}
+                onChange={(e) => handleUpdateBranch(index, 'condition', e.target.value)}
+                className="nodrag"
+                rows={2}
+                placeholder={t('property.branchCondition.placeholder')}
+                style={{
+                  width: '100%',
+                  padding: '4px 6px',
+                  backgroundColor: 'var(--vscode-input-background)',
+                  color: 'var(--vscode-input-foreground)',
+                  border: '1px solid var(--vscode-input-border)',
+                  borderRadius: '2px',
+                  fontSize: '12px',
+                  resize: 'vertical',
+                }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Switch Properties Editor (Multi-way branch, 2-N)
+ */
+const SwitchProperties: React.FC<{
+  node: Node<SwitchNodeData>;
+  updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
+}> = ({ node, updateNodeData }) => {
+  const { t } = useTranslation();
+  const data = node.data;
+
+  // Ensure all branches have IDs (for backward compatibility)
+  const normalizedBranches = data.branches.map((branch) => ({
+    ...branch,
+    id: branch.id || generateBranchId(),
+  }));
+
+  // Update data if any branch was missing an ID
+  if (normalizedBranches.some((branch, i) => branch.id !== data.branches[i].id)) {
+    updateNodeData(node.id, { branches: normalizedBranches });
+  }
+
+  const handleAddBranch = () => {
+    if (normalizedBranches.length >= 10) return; // Maximum 10 branches
+    const newBranches = [
+      ...normalizedBranches,
+      {
+        id: generateBranchId(),
+        label: `${t('default.newBranch')} ${normalizedBranches.length + 1}`,
+        condition: t('default.newCondition'),
+      },
+    ];
+    updateNodeData(node.id, {
+      branches: newBranches,
+      outputPorts: newBranches.length,
+    });
+  };
+
+  const handleRemoveBranch = (index: number) => {
+    if (normalizedBranches.length <= 2) return; // Minimum 2 branches
+    const newBranches = normalizedBranches.filter((_, i) => i !== index);
+    updateNodeData(node.id, {
+      branches: newBranches,
+      outputPorts: newBranches.length,
+    });
+  };
+
+  const handleUpdateBranch = (index: number, field: 'label' | 'condition', value: string) => {
+    const newBranches = normalizedBranches.map((branch, i) =>
+      i === index ? { ...branch, [field]: value } : branch
+    );
+    updateNodeData(node.id, { branches: newBranches });
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {/* Info: Multi-way branch */}
+      <div
+        style={{
+          padding: '8px',
+          backgroundColor: 'var(--vscode-textBlockQuote-background)',
+          border: '1px solid var(--vscode-textBlockQuote-border)',
+          borderRadius: '4px',
+          fontSize: '11px',
+          color: 'var(--vscode-descriptionForeground)',
+        }}
+      >
+        {t('property.branchType.switch.help')}
+      </div>
+
+      {/* Evaluation Target */}
+      <div>
+        <label
+          htmlFor="switch-evaluation-target"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('property.evaluationTarget')}
+        </label>
+        <input
+          id="switch-evaluation-target"
+          type="text"
+          value={data.evaluationTarget || ''}
+          onChange={(e) => updateNodeData(node.id, { evaluationTarget: e.target.value })}
+          className="nodrag"
+          placeholder={t('property.evaluationTarget.placeholder')}
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+          }}
+        />
+        <div
+          style={{
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+            marginTop: '4px',
+          }}
+        >
+          {t('property.evaluationTarget.help')}
+        </div>
+      </div>
+
+      {/* Branches */}
+      <div>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '8px',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--vscode-foreground)',
+            }}
+          >
+            {t('property.branchesCount').replace('{count}', normalizedBranches.length.toString())}
+          </div>
+          {normalizedBranches.length < 10 && (
+            <button
+              type="button"
+              onClick={handleAddBranch}
+              className="nodrag"
+              style={{
+                padding: '4px 8px',
+                fontSize: '11px',
+                backgroundColor: 'var(--vscode-button-background)',
+                color: 'var(--vscode-button-foreground)',
+                border: '1px solid var(--vscode-button-border)',
+                borderRadius: '2px',
+                cursor: 'pointer',
+              }}
+            >
+              {t('property.addBranch')}
+            </button>
+          )}
+        </div>
+
+        {normalizedBranches.map((branch, index) => (
+          <div
+            key={branch.id}
+            style={{
+              padding: '12px',
+              marginBottom: '8px',
+              backgroundColor: 'var(--vscode-textBlockQuote-background)',
+              border: '1px solid var(--vscode-textBlockQuote-border)',
+              borderRadius: '4px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '8px',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-descriptionForeground)',
+                }}
+              >
+                {t('property.branchNumber').replace('{number}', (index + 1).toString())}
+              </span>
+              {normalizedBranches.length > 2 && (
+                <button
+                  type="button"
+                  onClick={() => handleRemoveBranch(index)}
+                  className="nodrag"
+                  style={{
+                    padding: '2px 6px',
+                    fontSize: '11px',
+                    backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                    color: 'var(--vscode-button-secondaryForeground)',
+                    border: 'none',
+                    borderRadius: '2px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {t('property.remove')}
+                </button>
+              )}
+            </div>
+
+            {/* Label */}
+            <div style={{ marginBottom: '8px' }}>
+              <label
+                htmlFor={`switch-label-${index}`}
+                style={{
+                  display: 'block',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                  marginBottom: '4px',
+                }}
+              >
+                {t('property.branchLabel')}
+              </label>
+              <input
+                id={`switch-label-${index}`}
+                type="text"
+                value={branch.label}
+                onChange={(e) => handleUpdateBranch(index, 'label', e.target.value)}
+                className="nodrag"
+                placeholder={t('property.branchLabel.placeholder')}
+                style={{
+                  width: '100%',
+                  padding: '4px 6px',
+                  backgroundColor: 'var(--vscode-input-background)',
+                  color: 'var(--vscode-input-foreground)',
+                  border: '1px solid var(--vscode-input-border)',
+                  borderRadius: '2px',
+                  fontSize: '12px',
+                }}
+              />
+            </div>
+
+            {/* Condition */}
+            <div>
+              <label
+                htmlFor={`switch-condition-${index}`}
+                style={{
+                  display: 'block',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                  marginBottom: '4px',
+                }}
+              >
+                {t('property.branchCondition')}
+              </label>
+              <textarea
+                id={`switch-condition-${index}`}
+                value={branch.condition}
+                onChange={(e) => handleUpdateBranch(index, 'condition', e.target.value)}
+                className="nodrag"
+                rows={2}
+                placeholder={t('property.branchCondition.placeholder')}
+                style={{
+                  width: '100%',
+                  padding: '4px 6px',
+                  backgroundColor: 'var(--vscode-input-background)',
+                  color: 'var(--vscode-input-foreground)',
+                  border: '1px solid var(--vscode-input-border)',
+                  borderRadius: '2px',
+                  fontSize: '12px',
+                  resize: 'vertical',
+                }}
+              />
+            </div>
+          </div>
+        ))}
+
+        <div
+          style={{
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+            marginTop: '8px',
+          }}
+        >
+          {t('property.minimumBranches')}
+        </div>
+      </div>
+    </div>
+  );
+};

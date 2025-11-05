@@ -77,7 +77,9 @@ Currently not available (private repository).
    - Available in English, Japanese, Korean, Simplified Chinese, and Traditional Chinese
 
 **3. Create Your Workflow**
-   - **Add Nodes**: Click Sub-Agent, AskUserQuestion, Prompt, or Branch nodes in the left palette to add them to the canvas
+   - **Add Nodes**: The left palette is organized into sections:
+     - **Basic Nodes**: Prompt (templates), Sub-Agent (AI tasks)
+     - **Control Flow**: IfElse (binary branching), Switch (multi-way branching), AskUserQuestion (user decisions)
    - **Configure**: Click a node to edit its properties in the right panel
    - **Connect**: Drag from output ports (right) to input ports (left) to create flow
 
@@ -100,11 +102,26 @@ Configure autonomous AI agents with:
 - Tool permissions (Read, Write, Bash, etc.)
 - Model selection (Sonnet for balance, Opus for complex tasks, Haiku for speed)
 
-### Branch Nodes
-Implement conditional logic with:
-- **Conditional Mode**: 2-way branching (True/False)
-- **Switch Mode**: Multi-way branching (2-N branches)
-- Natural language condition descriptions
+### Conditional Branching Nodes
+Implement conditional logic with specialized nodes:
+
+#### IfElse Node
+Fixed 2-way branching for binary conditions:
+- True/False, Yes/No, Success/Error patterns
+- Simplified configuration for common conditional scenarios
+- Clear visual distinction between branches (green/red indicators)
+
+#### Switch Node
+Variable multi-way branching (2-N branches):
+- Multiple conditional paths from a single decision point
+- Dynamic branch management (add/remove cases)
+- Ideal for complex routing logic
+
+#### Branch Node (Legacy - Deprecated)
+The original Branch node with dual modes is deprecated:
+- Still available for backward compatibility
+- Marked with deprecation warning in the palette
+- **Recommended**: Use IfElse or Switch nodes for new workflows
 
 ### AskUserQuestion Nodes
 Create decision points where:

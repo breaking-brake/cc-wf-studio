@@ -35,10 +35,20 @@ export interface TranslationKeys {
   'askNode.noDescription': string;
   'askNode.multiSelectExplanation': string;
 
-  // Branch node details
+  // Branch node details (Legacy)
   'branchNode.title': string;
   'branchNode.binary': string;
   'branchNode.multiple': string;
   'branchNode.conditions': string;
   'branchNode.executionMethod': string;
+
+  // IfElse node details
+  'ifElseNode.title': string;
+  'ifElseNode.binary': string;
+  'ifElseNode.evaluationTarget': string;
+
+  // Switch node details
+  'switchNode.title': string;
+  'switchNode.multiple': string;
+  'switchNode.evaluationTarget': string;
 }

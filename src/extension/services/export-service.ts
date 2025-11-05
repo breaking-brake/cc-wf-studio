@@ -9,8 +9,10 @@ import * as path from 'node:path';
 import type {
   AskUserQuestionNode,
   BranchNode,
+  IfElseNode,
   PromptNode,
   SubAgentNode,
+  SwitchNode,
   Workflow,
 } from '../../shared/types/workflow-definition';
 import { translate } from '../i18n/i18n-service';
@@ -235,6 +237,14 @@ function generateMermaidFlowchart(workflow: Workflow): string {
       lines.push(
         `    ${nodeId}{${escapeLabel(`${branchType}:<br/>${translate('mermaid.conditionalBranch')}`)}}`
       );
+    } else if (nodeType === 'ifElse') {
+      lines.push(
+        `    ${nodeId}{${escapeLabel(`If/Else:<br/>${translate('mermaid.conditionalBranch')}`)}}`
+      );
+    } else if (nodeType === 'switch') {
+      lines.push(
+        `    ${nodeId}{${escapeLabel(`Switch:<br/>${translate('mermaid.conditionalBranch')}`)}}`
+      );
     } else if (nodeType === 'prompt') {
       const promptNode = node as PromptNode;
       // Use first line of prompt or default label
@@ -278,6 +288,30 @@ function generateMermaidFlowchart(workflow: Workflow): string {
       const branchIndex = Number.parseInt(conn.fromPort.replace('branch-', ''), 10);
       const branchNode = sourceNode as BranchNode;
       const branch = branchNode.data.branches[branchIndex];
+
+      if (branch) {
+        const label = escapeLabel(branch.label);
+        lines.push(`    ${fromId} -->|${label}| ${toId}`);
+      } else {
+        lines.push(`    ${fromId} --> ${toId}`);
+      }
+    } else if (sourceNode?.type === 'ifElse' && conn.fromPort) {
+      // Extract branch index from fromPort (e.g., "branch-0" -> 0)
+      const branchIndex = Number.parseInt(conn.fromPort.replace('branch-', ''), 10);
+      const ifElseNode = sourceNode as IfElseNode;
+      const branch = ifElseNode.data.branches[branchIndex];
+
+      if (branch) {
+        const label = escapeLabel(branch.label);
+        lines.push(`    ${fromId} -->|${label}| ${toId}`);
+      } else {
+        lines.push(`    ${fromId} --> ${toId}`);
+      }
+    } else if (sourceNode?.type === 'switch' && conn.fromPort) {
+      // Extract branch index from fromPort (e.g., "branch-0" -> 0)
+      const branchIndex = Number.parseInt(conn.fromPort.replace('branch-', ''), 10);
+      const switchNode = sourceNode as SwitchNode;
+      const branch = switchNode.data.branches[branchIndex];
 
       if (branch) {
         const label = escapeLabel(branch.label);
@@ -372,6 +406,8 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
     (n) => (n.type as string) === 'askUserQuestion'
   ) as AskUserQuestionNode[];
   const branchNodes = nodes.filter((n) => (n.type as string) === 'branch') as BranchNode[];
+  const ifElseNodes = nodes.filter((n) => (n.type as string) === 'ifElse') as IfElseNode[];
+  const switchNodes = nodes.filter((n) => (n.type as string) === 'switch') as SwitchNode[];
 
   // Prompt node details
   if (promptNodes.length > 0) {
@@ -444,7 +480,7 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
     }
   }
 
-  // Branch node details
+  // Branch node details (Legacy)
   if (branchNodes.length > 0) {
     sections.push(translate('branchNode.title'));
     sections.push('');
@@ -456,6 +492,50 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
           : translate('branchNode.multiple');
       sections.push(`#### ${nodeId}(${branchTypeName})`);
       sections.push('');
+      sections.push(translate('branchNode.conditions'));
+      for (const branch of node.data.branches) {
+        sections.push(`- **${branch.label}**: ${branch.condition}`);
+      }
+      sections.push('');
+      sections.push(translate('branchNode.executionMethod'));
+      sections.push('');
+    }
+  }
+
+  // IfElse node details
+  if (ifElseNodes.length > 0) {
+    sections.push(translate('ifElseNode.title'));
+    sections.push('');
+    for (const node of ifElseNodes) {
+      const nodeId = sanitizeNodeId(node.id);
+      sections.push(`#### ${nodeId}(${translate('ifElseNode.binary')})`);
+      sections.push('');
+      if (node.data.evaluationTarget) {
+        sections.push(`**${translate('ifElseNode.evaluationTarget')}**: ${node.data.evaluationTarget}`);
+        sections.push('');
+      }
+      sections.push(translate('branchNode.conditions'));
+      for (const branch of node.data.branches) {
+        sections.push(`- **${branch.label}**: ${branch.condition}`);
+      }
+      sections.push('');
+      sections.push(translate('branchNode.executionMethod'));
+      sections.push('');
+    }
+  }
+
+  // Switch node details
+  if (switchNodes.length > 0) {
+    sections.push(translate('switchNode.title'));
+    sections.push('');
+    for (const node of switchNodes) {
+      const nodeId = sanitizeNodeId(node.id);
+      sections.push(`#### ${nodeId}(${translate('switchNode.multiple')})`);
+      sections.push('');
+      if (node.data.evaluationTarget) {
+        sections.push(`**${translate('switchNode.evaluationTarget')}**: ${node.data.evaluationTarget}`);
+        sections.push('');
+      }
       sections.push(translate('branchNode.conditions'));
       for (const branch of node.data.branches) {
         sections.push(`- **${branch.label}**: ${branch.condition}`);

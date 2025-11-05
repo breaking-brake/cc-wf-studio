@@ -40,11 +40,21 @@ export const koTranslations: TranslationKeys = {
   'askNode.noDescription': '(설명 없음)',
   'askNode.multiSelectExplanation': '다중 선택 활성화됨(선택한 옵션 목록이 다음 노드로 전달됨)',
 
-  // Branch node details
+  // Branch node details (Legacy)
   'branchNode.title': '### Branch 노드 세부 정보',
   'branchNode.binary': '이진 분기',
   'branchNode.multiple': '다중 분기',
   'branchNode.conditions': '**분기 조건:**',
   'branchNode.executionMethod':
     '**실행 방법**: 이전 처리 결과를 평가하고 위의 조건에 따라 적절한 분기를 자동으로 선택합니다.',
+
+  // IfElse node details
+  'ifElseNode.title': '### If/Else 노드 세부 정보',
+  'ifElseNode.binary': '이진 분기 (True/False)',
+  'ifElseNode.evaluationTarget': '평가 대상',
+
+  // Switch node details
+  'switchNode.title': '### Switch 노드 세부 정보',
+  'switchNode.multiple': '다중 분기 (2-N)',
+  'switchNode.evaluationTarget': '평가 대상',
 };
