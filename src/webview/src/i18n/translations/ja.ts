@@ -148,8 +148,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'default.case2Condition': '条件2の場合',
   'default.case3': 'Case 3',
   'default.case3Condition': '条件3の場合',
-  'default.newBranch': '分岐',
-  'default.newCondition': '新しい条件',
+  'default.conditionPrefix': '条件',
+  'default.conditionSuffix': 'の場合',
 
   // Tour
   'tour.welcome':

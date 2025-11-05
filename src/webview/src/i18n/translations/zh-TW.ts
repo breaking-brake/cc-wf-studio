@@ -145,8 +145,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'default.case2Condition': '滿足條件 2 時',
   'default.case3': 'Case 3',
   'default.case3Condition': '滿足條件 3 時',
-  'default.newBranch': '分支',
-  'default.newCondition': '新條件',
+  'default.conditionPrefix': '滿足條件 ',
+  'default.conditionSuffix': ' 時',
 
   // Tour
   'tour.welcome': '歡迎使用Claude Code Workflow Studio！\n\n本導覽將指導您建立第一個工作流程。',

@@ -148,8 +148,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'default.case2Condition': 'When condition 2 is met',
   'default.case3': 'Case 3',
   'default.case3Condition': 'When condition 3 is met',
-  'default.newBranch': 'Branch',
-  'default.newCondition': 'New condition',
+  'default.conditionPrefix': 'When condition ',
+  'default.conditionSuffix': ' is met',
 
   // Tour
   'tour.welcome':

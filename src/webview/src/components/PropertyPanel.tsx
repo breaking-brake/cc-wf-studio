@@ -867,12 +867,13 @@ const BranchProperties: React.FC<{
   }
 
   const handleAddBranch = () => {
+    const branchNumber = normalizedBranches.length + 1;
     const newBranches = [
       ...normalizedBranches,
       {
         id: generateBranchId(),
-        label: `${t('default.newBranch')} ${normalizedBranches.length + 1}`,
-        condition: t('default.newCondition'),
+        label: `Case ${branchNumber}`,
+        condition: `${t('default.conditionPrefix')}${branchNumber}${t('default.conditionSuffix')}`,
       },
     ];
     updateNodeData(node.id, {
@@ -1360,12 +1361,13 @@ const SwitchProperties: React.FC<{
 
   const handleAddBranch = () => {
     if (normalizedBranches.length >= 10) return; // Maximum 10 branches
+    const branchNumber = normalizedBranches.length + 1;
     const newBranches = [
       ...normalizedBranches,
       {
         id: generateBranchId(),
-        label: `${t('default.newBranch')} ${normalizedBranches.length + 1}`,
-        condition: t('default.newCondition'),
+        label: `Case ${branchNumber}`,
+        condition: `${t('default.conditionPrefix')}${branchNumber}${t('default.conditionSuffix')}`,
       },
     ];
     updateNodeData(node.id, {

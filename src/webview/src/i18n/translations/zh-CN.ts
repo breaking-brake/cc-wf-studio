@@ -145,8 +145,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'default.case2Condition': '满足条件 2 时',
   'default.case3': 'Case 3',
   'default.case3Condition': '满足条件 3 时',
-  'default.newBranch': '分支',
-  'default.newCondition': '新条件',
+  'default.conditionPrefix': '满足条件 ',
+  'default.conditionSuffix': ' 时',
 
   // Tour
   'tour.welcome': '欢迎使用Claude Code Workflow Studio！\n\n本导览将指导您创建第一个工作流。',
