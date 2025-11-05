@@ -6,7 +6,7 @@
 
 import type React from 'react';
 import { useCallback } from 'react';
-import Joyride, { type CallBackProps, EVENTS, STATUS } from 'react-joyride';
+import Joyride, { ACTIONS, type CallBackProps, EVENTS, STATUS } from 'react-joyride';
 import { getTourLocale, getTourSteps, tourStyles } from '../constants/tour-steps';
 import { useTranslation } from '../i18n/i18n-context';
 
@@ -25,10 +25,15 @@ export const Tour: React.FC<TourProps> = ({ run, onFinish }) => {
 
   const handleJoyrideCallback = useCallback(
     (data: CallBackProps) => {
-      const { status, type } = data;
+      const { status, type, action } = data;
 
       // Tour finished or skipped
       if (([STATUS.FINISHED, STATUS.SKIPPED] as string[]).includes(status)) {
+        onFinish();
+      }
+
+      // Handle close button (X button) click - treat as skip
+      if (action === ACTIONS.CLOSE) {
         onFinish();
       }
 
