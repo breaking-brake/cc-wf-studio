@@ -170,6 +170,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     'ワークフローに名前を付けます。\n\n英数字、ハイフン、アンダースコアが使用できます。',
   'tour.saveWorkflow':
     '「保存」ボタンをクリックすると、ワークフローが`.vscode/workflows/`ディレクトリにJSON形式で保存されます。\n\n後で読み込んで編集を続けることができます。',
+  'tour.loadWorkflow':
+    '保存したワークフローを読み込むには、ドロップダウンメニューからワークフローを選択し、「読み込み」ボタンをクリックします。',
   'tour.exportWorkflow':
     '「エクスポート」ボタンをクリックすると、Claude Codeで実行可能な形式にエクスポートされます。\n\nSub-Agentは`.claude/agents/`に、SlashCommandは`.claude/commands/`に出力されます。',
   'tour.helpButton':

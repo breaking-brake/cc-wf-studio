@@ -163,6 +163,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'tour.workflowName': '为工作流命名。\n\n可以使用字母、数字、连字符和下划线。',
   'tour.saveWorkflow':
     '点击"保存"按钮将工作流以JSON格式保存到`.vscode/workflows/`目录。\n\n稍后可以加载并继续编辑。',
+  'tour.loadWorkflow': '要加载已保存的工作流，请从下拉菜单中选择工作流并点击"加载"按钮。',
   'tour.exportWorkflow':
     '点击"导出"按钮以Claude Code可执行的格式导出。\n\nSub-Agent导出到`.claude/agents/`，SlashCommand导出到`.claude/commands/`。',
   'tour.helpButton': '要再次查看此导览，请点击帮助按钮(?)。\n\n享受创建工作流的乐趣！',

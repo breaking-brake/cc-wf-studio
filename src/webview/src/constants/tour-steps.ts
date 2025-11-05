@@ -66,6 +66,12 @@ export const getTourSteps = (t: (key: string) => string): Step[] => [
     disableBeacon: true,
   },
   {
+    target: '[data-tour="workflow-selector"]',
+    content: t('tour.loadWorkflow'),
+    placement: 'bottom',
+    disableBeacon: true,
+  },
+  {
     target: '[data-tour="export-button"]',
     content: t('tour.exportWorkflow'),
     placement: 'bottom',

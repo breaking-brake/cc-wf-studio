@@ -257,6 +257,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
         onChange={(e) => setSelectedWorkflowId(e.target.value)}
         onFocus={handleRefreshList}
         className="nodrag"
+        data-tour="workflow-selector"
         style={{
           padding: '4px 8px',
           backgroundColor: 'var(--vscode-input-background)',
@@ -280,6 +281,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
         type="button"
         onClick={handleLoadWorkflow}
         disabled={!selectedWorkflowId}
+        data-tour="load-button"
         style={{
           padding: '4px 12px',
           backgroundColor: 'var(--vscode-button-secondaryBackground)',

@@ -171,6 +171,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     '워크플로우에 이름을 지정하세요.\n\n문자, 숫자, 하이픈 및 밑줄을 사용할 수 있습니다.',
   'tour.saveWorkflow':
     '"저장" 버튼을 클릭하면 워크플로우가 `.vscode/workflows/` 디렉터리에 JSON으로 저장됩니다.\n\n나중에 로드하여 계속 편집할 수 있습니다.',
+  'tour.loadWorkflow':
+    '저장된 워크플로우를 로드하려면 드롭다운 메뉴에서 워크플로우를 선택하고 "불러오기" 버튼을 클릭하세요.',
   'tour.exportWorkflow':
     '"내보내기" 버튼을 클릭하면 Claude Code에서 실행 가능한 형식으로 내보내집니다.\n\nSub-Agent는 `.claude/agents/`로, SlashCommand는 `.claude/commands/`로 이동합니다.',
   'tour.helpButton':
