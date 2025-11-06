@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { generateWorkflow, AIGenerationError } from '../../services/ai-generation-service';
 import { useWorkflowStore } from '../../stores/workflow-store';
+import { useTranslation } from '../../i18n/i18n-context';
 
 interface AiGenerationDialogProps {
   isOpen: boolean;
@@ -17,11 +18,35 @@ interface AiGenerationDialogProps {
 const MAX_DESCRIPTION_LENGTH = 2000;
 
 export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps) {
+  const { t } = useTranslation();
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const { addGeneratedWorkflow } = useWorkflowStore();
+
+  // Map error codes to translation keys
+  const getErrorMessage = (err: unknown): string => {
+    if (err instanceof AIGenerationError) {
+      switch (err.code) {
+        case 'COMMAND_NOT_FOUND':
+          return t('ai.error.commandNotFound');
+        case 'TIMEOUT':
+          return t('ai.error.timeout');
+        case 'PARSE_ERROR':
+          return t('ai.error.parseError');
+        case 'VALIDATION_ERROR':
+          return t('ai.error.validationError');
+        default:
+          return t('ai.error.unknown');
+      }
+    }
+    if (err instanceof Error) {
+      return err.message;
+    }
+    return t('ai.error.unknown');
+  };
 
   if (!isOpen) {
     return null;
@@ -30,12 +55,12 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
   const handleGenerate = async () => {
     // Validate description
     if (!description.trim()) {
-      setError('Please enter a workflow description');
+      setError(t('ai.error.emptyDescription'));
       return;
     }
 
     if (description.length > MAX_DESCRIPTION_LENGTH) {
-      setError(`Description is too long (max ${MAX_DESCRIPTION_LENGTH} characters)`);
+      setError(t('ai.error.descriptionTooLong', { max: MAX_DESCRIPTION_LENGTH }));
       return;
     }
 
@@ -49,16 +74,13 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
       // Add generated workflow to canvas (with auto-positioning to avoid overlap)
       addGeneratedWorkflow(workflow);
 
-      // Close dialog
-      handleClose();
+      // Show success message
+      setShowSuccess(true);
+      setTimeout(() => {
+        handleClose();
+      }, 1500); // Close after 1.5 seconds
     } catch (err) {
-      if (err instanceof AIGenerationError) {
-        setError(err.message);
-      } else if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An unexpected error occurred. Please try again.');
-      }
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -68,6 +90,7 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
     setDescription('');
     setError(null);
     setLoading(false);
+    setShowSuccess(false);
     onClose();
   };
 
@@ -79,7 +102,8 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
     }
   };
 
-  const isDescriptionValid = description.trim().length > 0 && description.length <= MAX_DESCRIPTION_LENGTH;
+  const isDescriptionValid =
+    description.trim().length > 0 && description.length <= MAX_DESCRIPTION_LENGTH;
 
   return (
     <div
@@ -112,12 +136,11 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
         onKeyDown={handleKeyDown}
       >
         <h2 style={{ marginTop: 0, marginBottom: '16px', color: 'var(--vscode-foreground)' }}>
-          Generate Workflow with AI
+          {t('ai.dialogTitle')}
         </h2>
 
         <p style={{ marginBottom: '16px', color: 'var(--vscode-descriptionForeground)' }}>
-          Describe the workflow you want to create in natural language. The AI will generate a complete
-          workflow with nodes and connections.
+          {t('ai.dialogDescription')}
         </p>
 
         <div style={{ marginBottom: '16px' }}>
@@ -130,14 +153,14 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
               fontWeight: 500,
             }}
           >
-            Workflow Description
+            {t('ai.descriptionLabel')}
           </label>
           <textarea
             id="workflow-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Example: Create a code review workflow that scans code, asks user for priority level, and generates fix suggestions"
-            disabled={loading}
+            placeholder={t('ai.descriptionPlaceholder')}
+            disabled={loading || showSuccess}
             style={{
               width: '100%',
               minHeight: '120px',
@@ -162,7 +185,7 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
                   : 'var(--vscode-descriptionForeground)',
             }}
           >
-            {description.length} / {MAX_DESCRIPTION_LENGTH} characters
+            {t('ai.characterCount', { count: description.length, max: MAX_DESCRIPTION_LENGTH })}
           </div>
         </div>
 
@@ -182,6 +205,22 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
           </div>
         )}
 
+        {showSuccess && (
+          <div
+            style={{
+              marginBottom: '16px',
+              padding: '12px',
+              backgroundColor: 'var(--vscode-inputValidation-infoBackground)',
+              border: '1px solid var(--vscode-inputValidation-infoBorder)',
+              borderRadius: '4px',
+              color: 'var(--vscode-foreground)',
+              fontSize: '14px',
+            }}
+          >
+            {t('ai.success')}
+          </div>
+        )}
+
         {loading && (
           <div
             style={{
@@ -198,7 +237,7 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
             }}
           >
             <div className="spinner" style={{ width: '16px', height: '16px' }} />
-            Generating workflow... This may take up to 30 seconds.
+            {t('ai.generating')}
           </div>
         )}
 
@@ -217,25 +256,26 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
               opacity: loading ? 0.5 : 1,
             }}
           >
-            Cancel
+            {t('ai.cancelButton')}
           </button>
           <button
             onClick={handleGenerate}
-            disabled={!isDescriptionValid || loading}
+            disabled={!isDescriptionValid || loading || showSuccess}
             style={{
               padding: '8px 16px',
               fontSize: '14px',
-              backgroundColor: isDescriptionValid && !loading
-                ? 'var(--vscode-button-background)'
-                : 'var(--vscode-button-secondaryBackground)',
+              backgroundColor:
+                isDescriptionValid && !loading && !showSuccess
+                  ? 'var(--vscode-button-background)'
+                  : 'var(--vscode-button-secondaryBackground)',
               color: 'var(--vscode-button-foreground)',
               border: 'none',
               borderRadius: '4px',
-              cursor: isDescriptionValid && !loading ? 'pointer' : 'not-allowed',
-              opacity: isDescriptionValid && !loading ? 1 : 0.5,
+              cursor: isDescriptionValid && !loading && !showSuccess ? 'pointer' : 'not-allowed',
+              opacity: isDescriptionValid && !loading && !showSuccess ? 1 : 0.5,
             }}
           >
-            Generate
+            {t('ai.generateButton')}
           </button>
         </div>
       </div>

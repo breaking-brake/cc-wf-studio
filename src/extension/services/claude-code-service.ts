@@ -6,6 +6,7 @@
  */
 
 import { spawn } from 'child_process';
+import { log } from '../extension';
 
 export interface ClaudeCodeExecutionResult {
   success: boolean;
@@ -31,6 +32,11 @@ export async function executeClaudeCodeCLI(
 ): Promise<ClaudeCodeExecutionResult> {
   const startTime = Date.now();
 
+  log('INFO', 'Starting Claude Code CLI execution', {
+    promptLength: prompt.length,
+    timeoutMs,
+  });
+
   return new Promise((resolve) => {
     let stdout = '';
     let stderr = '';
@@ -46,6 +52,12 @@ export async function executeClaudeCodeCLI(
       timedOut = true;
       process.kill();
 
+      const executionTimeMs = Date.now() - startTime;
+      log('WARN', 'Claude Code CLI execution timed out', {
+        timeoutMs,
+        executionTimeMs,
+      });
+
       resolve({
         success: false,
         error: {
@@ -53,7 +65,7 @@ export async function executeClaudeCodeCLI(
           message: 'AI generation timed out after 30 seconds. Try simplifying your description.',
           details: `Timeout after ${timeoutMs}ms`,
         },
-        executionTimeMs: Date.now() - startTime,
+        executionTimeMs,
       });
     }, timeoutMs);
 
@@ -73,7 +85,15 @@ export async function executeClaudeCodeCLI(
 
       if (timedOut) return; // Already handled by timeout
 
+      const executionTimeMs = Date.now() - startTime;
+
       if (err.code === 'ENOENT') {
+        log('ERROR', 'Claude Code CLI not found', {
+          errorCode: err.code,
+          errorMessage: err.message,
+          executionTimeMs,
+        });
+
         resolve({
           success: false,
           error: {
@@ -81,9 +101,15 @@ export async function executeClaudeCodeCLI(
             message: 'Cannot connect to Claude Code - please ensure it is installed and running',
             details: err.message,
           },
-          executionTimeMs: Date.now() - startTime,
+          executionTimeMs,
         });
       } else {
+        log('ERROR', 'Claude Code CLI execution error', {
+          errorCode: err.code,
+          errorMessage: err.message,
+          executionTimeMs,
+        });
+
         resolve({
           success: false,
           error: {
@@ -91,7 +117,7 @@ export async function executeClaudeCodeCLI(
             message: 'An unexpected error occurred. Please try again.',
             details: err.message,
           },
-          executionTimeMs: Date.now() - startTime,
+          executionTimeMs,
         });
       }
     });
@@ -106,6 +132,11 @@ export async function executeClaudeCodeCLI(
 
       if (code === 0) {
         // Success - return stdout
+        log('INFO', 'Claude Code CLI execution succeeded', {
+          executionTimeMs,
+          outputLength: stdout.length,
+        });
+
         resolve({
           success: true,
           output: stdout.trim(),
@@ -113,6 +144,12 @@ export async function executeClaudeCodeCLI(
         });
       } else {
         // Non-zero exit code
+        log('ERROR', 'Claude Code CLI execution failed', {
+          exitCode: code,
+          executionTimeMs,
+          stderr: stderr.substring(0, 200), // Log first 200 chars of stderr
+        });
+
         resolve({
           success: false,
           error: {

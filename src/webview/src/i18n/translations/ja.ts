@@ -184,4 +184,28 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': '完了',
   'tour.button.next': '次へ',
   'tour.button.skip': 'スキップ',
+
+  // AI Generation Dialog
+  'ai.dialogTitle': 'AIでワークフローを生成',
+  'ai.dialogDescription':
+    '作成したいワークフローを自然言語で説明してください。AIがノードと接続を含む完全なワークフローを生成します。',
+  'ai.descriptionLabel': 'ワークフローの説明',
+  'ai.descriptionPlaceholder':
+    '例: コードをスキャンし、ユーザーに優先度レベルを尋ね、修正案を生成するコードレビューワークフローを作成',
+  'ai.characterCount': '{count} / {max} 文字',
+  'ai.generating': 'ワークフローを生成中... 最大30秒かかることがあります。',
+  'ai.generateButton': '生成',
+  'ai.cancelButton': 'キャンセル',
+  'ai.success': 'ワークフローが正常に生成されました！',
+
+  // AI Generation Errors
+  'ai.error.emptyDescription': 'ワークフローの説明を入力してください',
+  'ai.error.descriptionTooLong': '説明が長すぎます（最大{max}文字）',
+  'ai.error.commandNotFound':
+    'Claude Code CLIが見つかりません。AI生成機能を使用するにはClaude Codeをインストールしてください。',
+  'ai.error.timeout':
+    'リクエストがタイムアウトしました。もう一度試すか、説明を簡潔にしてください。',
+  'ai.error.parseError': '生成に失敗しました - もう一度試すか、説明を言い換えてください',
+  'ai.error.validationError': '生成されたワークフローの検証に失敗しました',
+  'ai.error.unknown': '予期しないエラーが発生しました。もう一度お試しください。',
 };

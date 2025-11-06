@@ -167,4 +167,24 @@ export interface WebviewTranslationKeys {
   'tour.button.finish': string;
   'tour.button.next': string;
   'tour.button.skip': string;
+
+  // AI Generation Dialog
+  'ai.dialogTitle': string;
+  'ai.dialogDescription': string;
+  'ai.descriptionLabel': string;
+  'ai.descriptionPlaceholder': string;
+  'ai.characterCount': string;
+  'ai.generating': string;
+  'ai.generateButton': string;
+  'ai.cancelButton': string;
+  'ai.success': string;
+
+  // AI Generation Errors
+  'ai.error.emptyDescription': string;
+  'ai.error.descriptionTooLong': string;
+  'ai.error.commandNotFound': string;
+  'ai.error.timeout': string;
+  'ai.error.parseError': string;
+  'ai.error.validationError': string;
+  'ai.error.unknown': string;
 }

@@ -144,10 +144,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
     // Calculate offset to avoid overlap with existing nodes
     // Find the rightmost node position
-    const maxX = currentNodes.reduce(
-      (max, node) => Math.max(max, node.position.x),
-      0
-    );
+    const maxX = currentNodes.reduce((max, node) => Math.max(max, node.position.x), 0);
     const offsetX = maxX + 200; // Add 200px margin to the right
 
     // Convert workflow nodes to ReactFlow nodes with offset

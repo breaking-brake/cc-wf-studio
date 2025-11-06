@@ -175,4 +175,25 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': '完成',
   'tour.button.next': '下一步',
   'tour.button.skip': '略過',
+
+  // AI Generation Dialog
+  'ai.dialogTitle': '使用AI生成工作流',
+  'ai.dialogDescription': '用自然語言描述您要建立的工作流。AI將產生包含節點和連接的完整工作流。',
+  'ai.descriptionLabel': '工作流描述',
+  'ai.descriptionPlaceholder':
+    '範例：建立一個掃描程式碼、詢問使用者優先順序並產生修復建議的程式碼審查工作流',
+  'ai.characterCount': '{count} / {max} 字元',
+  'ai.generating': '正在產生工作流... 可能需要最多30秒。',
+  'ai.generateButton': '產生',
+  'ai.cancelButton': '取消',
+  'ai.success': '工作流產生成功！',
+
+  // AI Generation Errors
+  'ai.error.emptyDescription': '請輸入工作流描述',
+  'ai.error.descriptionTooLong': '描述過長（最多{max}字元）',
+  'ai.error.commandNotFound': '未找到Claude Code CLI。請安裝Claude Code以使用AI產生功能。',
+  'ai.error.timeout': '請求逾時。請重試或簡化您的描述。',
+  'ai.error.parseError': '產生失敗 - 請重試或重新表述您的描述',
+  'ai.error.validationError': '產生的工作流驗證失敗',
+  'ai.error.unknown': '發生意外錯誤。請重試。',
 };

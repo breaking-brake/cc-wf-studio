@@ -184,4 +184,27 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': 'Finish',
   'tour.button.next': 'Next',
   'tour.button.skip': 'Skip',
+
+  // AI Generation Dialog
+  'ai.dialogTitle': 'Generate Workflow with AI',
+  'ai.dialogDescription':
+    'Describe the workflow you want to create in natural language. The AI will generate a complete workflow with nodes and connections.',
+  'ai.descriptionLabel': 'Workflow Description',
+  'ai.descriptionPlaceholder':
+    'Example: Create a code review workflow that scans code, asks user for priority level, and generates fix suggestions',
+  'ai.characterCount': '{count} / {max} characters',
+  'ai.generating': 'Generating workflow... This may take up to 30 seconds.',
+  'ai.generateButton': 'Generate',
+  'ai.cancelButton': 'Cancel',
+  'ai.success': 'Workflow generated successfully!',
+
+  // AI Generation Errors
+  'ai.error.emptyDescription': 'Please enter a workflow description',
+  'ai.error.descriptionTooLong': 'Description is too long (max {max} characters)',
+  'ai.error.commandNotFound':
+    'Claude Code CLI not found. Please install Claude Code to use AI generation.',
+  'ai.error.timeout': 'Request timed out. Please try again or simplify your description.',
+  'ai.error.parseError': 'Generation failed - please try again or rephrase your description',
+  'ai.error.validationError': 'Generated workflow failed validation',
+  'ai.error.unknown': 'An unexpected error occurred. Please try again.',
 };

@@ -15,6 +15,7 @@ import {
 import { executeClaudeCodeCLI, parseClaudeCodeOutput } from '../services/claude-code-service';
 import { loadWorkflowSchema, getDefaultSchemaPath } from '../services/schema-loader-service';
 import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
+import { log } from '../extension';
 
 /**
  * Handle AI workflow generation request
@@ -32,6 +33,12 @@ export async function handleGenerateWorkflow(
 ): Promise<void> {
   const startTime = Date.now();
 
+  log('INFO', 'AI Workflow Generation started', {
+    requestId,
+    descriptionLength: payload.userDescription.length,
+    timeoutMs: payload.timeoutMs,
+  });
+
   try {
     // Step 1: Load workflow schema
     const schemaPath = getDefaultSchemaPath(extensionPath);
@@ -39,6 +46,11 @@ export async function handleGenerateWorkflow(
 
     if (!schemaResult.success || !schemaResult.schema) {
       // Schema loading failed
+      log('ERROR', 'Failed to load workflow schema', {
+        requestId,
+        errorMessage: schemaResult.error?.message,
+      });
+
       sendGenerationFailed(webview, requestId, {
         error: {
           code: 'UNKNOWN_ERROR',
@@ -51,6 +63,8 @@ export async function handleGenerateWorkflow(
       return;
     }
 
+    log('INFO', 'Workflow schema loaded successfully', { requestId });
+
     // Step 2: Construct prompt
     const prompt = constructPrompt(payload.userDescription, schemaResult.schema);
 
@@ -60,6 +74,13 @@ export async function handleGenerateWorkflow(
 
     if (!cliResult.success || !cliResult.output) {
       // CLI execution failed
+      log('ERROR', 'AI generation failed during CLI execution', {
+        requestId,
+        errorCode: cliResult.error?.code,
+        errorMessage: cliResult.error?.message,
+        executionTimeMs: cliResult.executionTimeMs,
+      });
+
       sendGenerationFailed(webview, requestId, {
         error: cliResult.error!,
         executionTimeMs: cliResult.executionTimeMs,
@@ -68,11 +89,22 @@ export async function handleGenerateWorkflow(
       return;
     }
 
+    log('INFO', 'CLI execution successful, parsing output', {
+      requestId,
+      executionTimeMs: cliResult.executionTimeMs,
+    });
+
     // Step 4: Parse CLI output
     const parsedOutput = parseClaudeCodeOutput(cliResult.output);
 
     if (!parsedOutput) {
       // Parsing failed
+      log('ERROR', 'Failed to parse CLI output', {
+        requestId,
+        outputPreview: cliResult.output.substring(0, 200),
+        executionTimeMs: cliResult.executionTimeMs,
+      });
+
       sendGenerationFailed(webview, requestId, {
         error: {
           code: 'PARSE_ERROR',
@@ -85,12 +117,21 @@ export async function handleGenerateWorkflow(
       return;
     }
 
+    log('INFO', 'Output parsed successfully, validating workflow', { requestId });
+
     // Step 5: Validate workflow
     const validationResult = validateAIGeneratedWorkflow(parsedOutput);
 
     if (!validationResult.valid) {
       // Validation failed
       const errorMessages = validationResult.errors.map((e) => e.message).join('; ');
+      log('ERROR', 'Generated workflow failed validation', {
+        requestId,
+        errorCount: validationResult.errors.length,
+        errors: validationResult.errors,
+        executionTimeMs: cliResult.executionTimeMs,
+      });
+
       sendGenerationFailed(webview, requestId, {
         error: {
           code: 'VALIDATION_ERROR',
@@ -103,7 +144,19 @@ export async function handleGenerateWorkflow(
       return;
     }
 
+    log('INFO', 'Workflow validated successfully', {
+      requestId,
+      nodeCount: (parsedOutput as Workflow).nodes?.length ?? 0,
+      connectionCount: (parsedOutput as Workflow).connections?.length ?? 0,
+    });
+
     // Step 6: Success - send generated workflow
+    log('INFO', 'AI Workflow Generation completed successfully', {
+      requestId,
+      executionTimeMs: cliResult.executionTimeMs,
+      workflowName: (parsedOutput as Workflow).name,
+    });
+
     sendGenerationSuccess(webview, requestId, {
       workflow: parsedOutput as Workflow,
       executionTimeMs: cliResult.executionTimeMs,
@@ -111,13 +164,21 @@ export async function handleGenerateWorkflow(
     });
   } catch (error) {
     // Unexpected error
+    const executionTimeMs = Date.now() - startTime;
+    log('ERROR', 'Unexpected error during AI Workflow Generation', {
+      requestId,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorStack: error instanceof Error ? error.stack : undefined,
+      executionTimeMs,
+    });
+
     sendGenerationFailed(webview, requestId, {
       error: {
         code: 'UNKNOWN_ERROR',
         message: 'An unexpected error occurred. Please try again.',
         details: error instanceof Error ? error.message : String(error),
       },
-      executionTimeMs: Date.now() - startTime,
+      executionTimeMs,
       timestamp: new Date().toISOString(),
     });
   }

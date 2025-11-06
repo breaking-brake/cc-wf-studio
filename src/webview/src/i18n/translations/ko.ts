@@ -185,4 +185,27 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': '완료',
   'tour.button.next': '다음',
   'tour.button.skip': '건너뛰기',
+
+  // AI Generation Dialog
+  'ai.dialogTitle': 'AI로 워크플로 생성',
+  'ai.dialogDescription':
+    '자연어로 생성하려는 워크플로를 설명하세요. AI가 노드와 연결이 포함된 완전한 워크플로를 생성합니다.',
+  'ai.descriptionLabel': '워크플로 설명',
+  'ai.descriptionPlaceholder':
+    '예: 코드를 스캔하고 사용자에게 우선순위 수준을 묻고 수정 제안을 생성하는 코드 검토 워크플로 만들기',
+  'ai.characterCount': '{count} / {max} 자',
+  'ai.generating': '워크플로 생성 중... 최대 30초 소요될 수 있습니다.',
+  'ai.generateButton': '생성',
+  'ai.cancelButton': '취소',
+  'ai.success': '워크플로가 성공적으로 생성되었습니다!',
+
+  // AI Generation Errors
+  'ai.error.emptyDescription': '워크플로 설명을 입력하세요',
+  'ai.error.descriptionTooLong': '설명이 너무 깁니다 (최대 {max}자)',
+  'ai.error.commandNotFound':
+    'Claude Code CLI를 찾을 수 없습니다. AI 생성 기능을 사용하려면 Claude Code를 설치하세요.',
+  'ai.error.timeout': '요청 시간이 초과되었습니다. 다시 시도하거나 설명을 간소화하세요.',
+  'ai.error.parseError': '생성에 실패했습니다 - 다시 시도하거나 설명을 다시 작성하세요',
+  'ai.error.validationError': '생성된 워크플로 검증에 실패했습니다',
+  'ai.error.unknown': '예기치 않은 오류가 발생했습니다. 다시 시도하세요.',
 };

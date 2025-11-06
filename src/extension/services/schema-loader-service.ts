@@ -27,9 +27,7 @@ export interface SchemaLoadResult {
  * @param schemaPath - Absolute path to workflow-schema.json file
  * @returns Load result with success status and schema/error
  */
-export async function loadWorkflowSchema(
-  schemaPath: string
-): Promise<SchemaLoadResult> {
+export async function loadWorkflowSchema(schemaPath: string): Promise<SchemaLoadResult> {
   // Return cached schema if available
   if (cachedSchema !== null) {
     return {

@@ -5,11 +5,7 @@
  * Based on: /specs/001-ai-workflow-generation/quickstart.md Phase 4
  */
 
-import type {
-  ExtensionMessage,
-  GenerateWorkflowPayload,
-  Workflow,
-} from '@shared/types/messages';
+import type { ExtensionMessage, GenerateWorkflowPayload, Workflow } from '@shared/types/messages';
 import { vscode } from '../main';
 
 /**
