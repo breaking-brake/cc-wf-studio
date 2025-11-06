@@ -1,0 +1,197 @@
+/**
+ * AI Generation Command Handler
+ *
+ * Handles GENERATE_WORKFLOW messages from Webview and orchestrates AI workflow generation.
+ * Based on: /specs/001-ai-workflow-generation/plan.md
+ */
+
+import * as vscode from 'vscode';
+import {
+  GenerateWorkflowPayload,
+  GenerationSuccessPayload,
+  GenerationFailedPayload,
+  Workflow,
+} from '../../shared/types/messages';
+import { executeClaudeCodeCLI, parseClaudeCodeOutput } from '../services/claude-code-service';
+import { loadWorkflowSchema, getDefaultSchemaPath } from '../services/schema-loader-service';
+import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
+
+/**
+ * Handle AI workflow generation request
+ *
+ * @param payload - The generation request from Webview
+ * @param webview - The webview to send response messages to
+ * @param extensionPath - The extension's root path
+ * @param requestId - The request ID for correlation
+ */
+export async function handleGenerateWorkflow(
+  payload: GenerateWorkflowPayload,
+  webview: vscode.Webview,
+  extensionPath: string,
+  requestId: string
+): Promise<void> {
+  const startTime = Date.now();
+
+  try {
+    // Step 1: Load workflow schema
+    const schemaPath = getDefaultSchemaPath(extensionPath);
+    const schemaResult = await loadWorkflowSchema(schemaPath);
+
+    if (!schemaResult.success || !schemaResult.schema) {
+      // Schema loading failed
+      sendGenerationFailed(webview, requestId, {
+        error: {
+          code: 'UNKNOWN_ERROR',
+          message: 'Failed to load workflow schema',
+          details: schemaResult.error?.message,
+        },
+        executionTimeMs: Date.now() - startTime,
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    // Step 2: Construct prompt
+    const prompt = constructPrompt(payload.userDescription, schemaResult.schema);
+
+    // Step 3: Execute Claude Code CLI
+    const timeout = payload.timeoutMs ?? 30000;
+    const cliResult = await executeClaudeCodeCLI(prompt, timeout);
+
+    if (!cliResult.success || !cliResult.output) {
+      // CLI execution failed
+      sendGenerationFailed(webview, requestId, {
+        error: cliResult.error!,
+        executionTimeMs: cliResult.executionTimeMs,
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    // Step 4: Parse CLI output
+    const parsedOutput = parseClaudeCodeOutput(cliResult.output);
+
+    if (!parsedOutput) {
+      // Parsing failed
+      sendGenerationFailed(webview, requestId, {
+        error: {
+          code: 'PARSE_ERROR',
+          message: 'Generation failed - please try again or rephrase your description',
+          details: 'Failed to parse JSON from Claude Code output',
+        },
+        executionTimeMs: cliResult.executionTimeMs,
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    // Step 5: Validate workflow
+    const validationResult = validateAIGeneratedWorkflow(parsedOutput);
+
+    if (!validationResult.valid) {
+      // Validation failed
+      const errorMessages = validationResult.errors.map((e) => e.message).join('; ');
+      sendGenerationFailed(webview, requestId, {
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Generated workflow failed validation',
+          details: errorMessages,
+        },
+        executionTimeMs: cliResult.executionTimeMs,
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    // Step 6: Success - send generated workflow
+    sendGenerationSuccess(webview, requestId, {
+      workflow: parsedOutput as Workflow,
+      executionTimeMs: cliResult.executionTimeMs,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    // Unexpected error
+    sendGenerationFailed(webview, requestId, {
+      error: {
+        code: 'UNKNOWN_ERROR',
+        message: 'An unexpected error occurred. Please try again.',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      executionTimeMs: Date.now() - startTime,
+      timestamp: new Date().toISOString(),
+    });
+  }
+}
+
+/**
+ * Construct prompt for Claude Code CLI
+ *
+ * Based on: /specs/001-ai-workflow-generation/research.md Q4
+ */
+function constructPrompt(userDescription: string, schema: unknown): string {
+  const schemaJSON = JSON.stringify(schema, null, 2);
+
+  return `You are an expert workflow designer for Claude Code Workflow Studio.
+
+**Task**: Generate a valid workflow JSON based on the user's natural language description.
+
+**User Description**:
+${userDescription}
+
+**Workflow Schema**:
+${schemaJSON}
+
+**Output Requirements**:
+- Output ONLY valid JSON matching the Workflow interface
+- Do NOT include explanations, markdown, or additional text
+- Ensure the workflow has exactly one Start node and at least one End node
+- Respect the maximum node limit of 50
+- All connections must be valid (no connections from End nodes, no connections to Start nodes)
+- Node IDs must be unique
+- All required fields for each node type must be present
+- Use semantic version for workflow version (e.g., "1.0.0")
+- Set createdAt and updatedAt to current ISO 8601 timestamp
+
+**Output Format**:
+\`\`\`json
+{
+  "id": "generated-workflow-${Date.now()}",
+  "name": "...",
+  "version": "1.0.0",
+  "nodes": [...],
+  "connections": [...],
+  "createdAt": "${new Date().toISOString()}",
+  "updatedAt": "${new Date().toISOString()}"
+}
+\`\`\``;
+}
+
+/**
+ * Send GENERATION_SUCCESS message to Webview
+ */
+function sendGenerationSuccess(
+  webview: vscode.Webview,
+  requestId: string,
+  payload: GenerationSuccessPayload
+): void {
+  webview.postMessage({
+    type: 'GENERATION_SUCCESS',
+    requestId,
+    payload,
+  });
+}
+
+/**
+ * Send GENERATION_FAILED message to Webview
+ */
+function sendGenerationFailed(
+  webview: vscode.Webview,
+  requestId: string,
+  payload: GenerationFailedPayload
+): void {
+  webview.postMessage({
+    type: 'GENERATION_FAILED',
+    requestId,
+    payload,
+  });
+}

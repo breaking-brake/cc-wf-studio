@@ -11,6 +11,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.saving': '儲存中...',
   'toolbar.export': '匯出',
   'toolbar.exporting': '匯出中...',
+  'toolbar.generateWithAI': 'AI生成',
   'toolbar.selectWorkflow': '選擇工作流...',
   'toolbar.load': '載入',
   'toolbar.refreshList': '重新整理工作流清單',

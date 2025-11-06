@@ -9,6 +9,7 @@ export interface WebviewTranslationKeys {
   'toolbar.saving': string;
   'toolbar.export': string;
   'toolbar.exporting': string;
+  'toolbar.generateWithAI': string;
   'toolbar.selectWorkflow': string;
   'toolbar.load': string;
   'toolbar.refreshList': string;

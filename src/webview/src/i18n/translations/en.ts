@@ -11,6 +11,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.saving': 'Saving...',
   'toolbar.export': 'Export',
   'toolbar.exporting': 'Exporting...',
+  'toolbar.generateWithAI': 'Generate with AI',
   'toolbar.selectWorkflow': 'Select workflow...',
   'toolbar.load': 'Load',
   'toolbar.refreshList': 'Refresh workflow list',

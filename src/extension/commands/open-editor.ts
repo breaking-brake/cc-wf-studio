@@ -13,6 +13,7 @@ import { handleExportWorkflow } from './export-workflow';
 import { loadWorkflow } from './load-workflow';
 import { loadWorkflowList } from './load-workflow-list';
 import { saveWorkflow } from './save-workflow';
+import { handleGenerateWorkflow } from './ai-generation';
 
 /**
  * Register the open editor command
@@ -153,6 +154,27 @@ export function registerOpenEditorCommand(
           case 'STATE_UPDATE':
             // State update from webview (for persistence)
             console.log('STATE_UPDATE:', message.payload);
+            break;
+
+          case 'GENERATE_WORKFLOW':
+            // AI-assisted workflow generation
+            if (message.payload) {
+              await handleGenerateWorkflow(
+                message.payload,
+                webview,
+                context.extensionPath,
+                message.requestId || ''
+              );
+            } else {
+              webview.postMessage({
+                type: 'ERROR',
+                requestId: message.requestId,
+                payload: {
+                  code: 'VALIDATION_ERROR',
+                  message: 'Generation payload is required',
+                },
+              });
+            }
             break;
 
           case 'CONFIRM_OVERWRITE':

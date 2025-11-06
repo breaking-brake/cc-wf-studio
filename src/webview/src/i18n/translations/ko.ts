@@ -11,6 +11,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.saving': '저장 중...',
   'toolbar.export': '내보내기',
   'toolbar.exporting': '내보내는 중...',
+  'toolbar.generateWithAI': 'AI로 생성',
   'toolbar.selectWorkflow': '워크플로 선택...',
   'toolbar.load': '불러오기',
   'toolbar.refreshList': '워크플로 목록 새로고침',

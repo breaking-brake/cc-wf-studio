@@ -11,6 +11,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.saving': '保存中...',
   'toolbar.export': 'エクスポート',
   'toolbar.exporting': 'エクスポート中...',
+  'toolbar.generateWithAI': 'AIで生成',
   'toolbar.selectWorkflow': 'ワークフローを選択...',
   'toolbar.load': '読み込み',
   'toolbar.refreshList': 'ワークフローリストを更新',
