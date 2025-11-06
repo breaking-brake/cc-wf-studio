@@ -74,9 +74,9 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ locale, children }) 
 
         // Replace parameters if provided
         if (params) {
-          Object.keys(params).forEach((paramKey) => {
+          for (const paramKey of Object.keys(params)) {
             text = text.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(params[paramKey]));
-          });
+          }
         }
 
         return text;

@@ -5,17 +5,17 @@
  * Based on: /specs/001-ai-workflow-generation/plan.md
  */
 
-import * as vscode from 'vscode';
-import {
+import type * as vscode from 'vscode';
+import type {
   GenerateWorkflowPayload,
-  GenerationSuccessPayload,
   GenerationFailedPayload,
+  GenerationSuccessPayload,
   Workflow,
 } from '../../shared/types/messages';
-import { executeClaudeCodeCLI, parseClaudeCodeOutput } from '../services/claude-code-service';
-import { loadWorkflowSchema, getDefaultSchemaPath } from '../services/schema-loader-service';
-import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
 import { log } from '../extension';
+import { executeClaudeCodeCLI, parseClaudeCodeOutput } from '../services/claude-code-service';
+import { getDefaultSchemaPath, loadWorkflowSchema } from '../services/schema-loader-service';
+import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
 
 /**
  * Handle AI workflow generation request
@@ -82,7 +82,10 @@ export async function handleGenerateWorkflow(
       });
 
       sendGenerationFailed(webview, requestId, {
-        error: cliResult.error!,
+        error: cliResult.error ?? {
+          code: 'UNKNOWN_ERROR',
+          message: 'Unknown error occurred during CLI execution',
+        },
         executionTimeMs: cliResult.executionTimeMs,
         timestamp: new Date().toISOString(),
       });

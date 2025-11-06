@@ -6,11 +6,11 @@
  */
 
 import {
-  Workflow,
-  WorkflowNode,
-  Connection,
+  type Connection,
   NodeType,
   VALIDATION_RULES,
+  type Workflow,
+  type WorkflowNode,
 } from '../../shared/types/workflow-definition';
 
 export interface ValidationError {

@@ -30,10 +30,7 @@ export class AIGenerationError extends Error {
  * @returns Promise that resolves to the generated workflow
  * @throws {AIGenerationError} If generation fails
  */
-export function generateWorkflow(
-  userDescription: string,
-  timeoutMs: number = 35000
-): Promise<Workflow> {
+export function generateWorkflow(userDescription: string, timeoutMs = 35000): Promise<Workflow> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
 

@@ -5,8 +5,8 @@
  * Based on: /specs/001-ai-workflow-generation/research.md Q2
  */
 
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
 
 // In-memory cache for loaded schema
 let cachedSchema: unknown | null = null;

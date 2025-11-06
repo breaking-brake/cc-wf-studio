@@ -5,10 +5,11 @@
  * Based on: /specs/001-ai-workflow-generation/quickstart.md Phase 5
  */
 
-import React, { useState } from 'react';
-import { generateWorkflow, AIGenerationError } from '../../services/ai-generation-service';
-import { useWorkflowStore } from '../../stores/workflow-store';
+import type React from 'react';
+import { useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
+import { AIGenerationError, generateWorkflow } from '../../services/ai-generation-service';
+import { useWorkflowStore } from '../../stores/workflow-store';
 
 interface AiGenerationDialogProps {
   isOpen: boolean;
@@ -120,6 +121,8 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
         zIndex: 1000,
       }}
       onClick={handleClose}
+      onKeyDown={handleClose}
+      role="presentation"
     >
       <div
         style={{
@@ -243,6 +246,7 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
 
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
           <button
+            type="button"
             onClick={handleClose}
             disabled={loading}
             style={{
@@ -259,6 +263,7 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
             {t('ai.cancelButton')}
           </button>
           <button
+            type="button"
             onClick={handleGenerate}
             disabled={!isDescriptionValid || loading || showSuccess}
             style={{

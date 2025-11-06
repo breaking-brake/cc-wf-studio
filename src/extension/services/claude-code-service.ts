@@ -5,7 +5,7 @@
  * Based on: /specs/001-ai-workflow-generation/research.md Q1
  */
 
-import { spawn } from 'child_process';
+import { spawn } from 'node:child_process';
 import { log } from '../extension';
 
 export interface ClaudeCodeExecutionResult {
@@ -28,7 +28,7 @@ export interface ClaudeCodeExecutionResult {
  */
 export async function executeClaudeCodeCLI(
   prompt: string,
-  timeoutMs: number = 30000
+  timeoutMs = 30000
 ): Promise<ClaudeCodeExecutionResult> {
   const startTime = Date.now();
 
@@ -177,7 +177,7 @@ export function parseClaudeCodeOutput(output: string): unknown {
     const jsonString = jsonMatch ? jsonMatch[1] : output;
 
     return JSON.parse(jsonString.trim());
-  } catch (error) {
+  } catch (_error) {
     // If parsing fails, return null
     return null;
   }

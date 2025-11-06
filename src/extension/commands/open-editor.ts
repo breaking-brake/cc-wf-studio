@@ -9,11 +9,11 @@ import * as vscode from 'vscode';
 import type { WebviewMessage } from '../../shared/types/messages';
 import { FileService } from '../services/file-service';
 import { getWebviewContent } from '../webview-content';
+import { handleGenerateWorkflow } from './ai-generation';
 import { handleExportWorkflow } from './export-workflow';
 import { loadWorkflow } from './load-workflow';
 import { loadWorkflowList } from './load-workflow-list';
 import { saveWorkflow } from './save-workflow';
-import { handleGenerateWorkflow } from './ai-generation';
 
 /**
  * Register the open editor command

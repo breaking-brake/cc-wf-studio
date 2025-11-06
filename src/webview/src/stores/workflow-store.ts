@@ -5,10 +5,10 @@
  * Based on: /specs/001-cc-wf-studio/research.md section 3.4
  */
 
+import type { Workflow } from '@shared/types/messages';
 import type { Edge, Node, OnConnect, OnEdgesChange, OnNodesChange } from 'reactflow';
 import { addEdge, applyEdgeChanges, applyNodeChanges } from 'reactflow';
 import { create } from 'zustand';
-import type { Workflow } from '@shared/types/messages';
 
 // ============================================================================
 // Store State Interface
