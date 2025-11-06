@@ -44,14 +44,10 @@ export async function handleExportWorkflow(
         );
 
         if (answer !== 'Overwrite') {
-          // User cancelled
+          // User cancelled - send cancellation message (not an error)
           webview.postMessage({
-            type: 'ERROR',
+            type: 'EXPORT_CANCELLED',
             requestId,
-            payload: {
-              code: 'EXPORT_CANCELLED',
-              message: 'Export cancelled by user',
-            },
           });
           return;
         }
