@@ -6,7 +6,7 @@
  */
 
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { AIGenerationError, generateWorkflow } from '../../services/ai-generation-service';
 import { useWorkflowStore } from '../../stores/workflow-store';
@@ -17,6 +17,7 @@ interface AiGenerationDialogProps {
 }
 
 const MAX_DESCRIPTION_LENGTH = 2000;
+const MAX_GENERATION_TIME_SECONDS = 60;
 
 export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps) {
   const { t } = useTranslation();
@@ -24,8 +25,29 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   const { addGeneratedWorkflow } = useWorkflowStore();
+
+  // Progress timer
+  useEffect(() => {
+    if (!loading) {
+      setElapsedSeconds(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setElapsedSeconds((prev) => {
+        // Cap at MAX_GENERATION_TIME_SECONDS to avoid going over 100%
+        if (prev >= MAX_GENERATION_TIME_SECONDS) {
+          return MAX_GENERATION_TIME_SECONDS;
+        }
+        return prev + 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [loading]);
 
   // Map error codes to translation keys
   const getErrorMessage = (err: unknown): string => {
@@ -252,19 +274,61 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
           <div
             style={{
               marginBottom: '16px',
-              padding: '12px',
+              padding: '16px',
               backgroundColor: 'var(--vscode-inputValidation-infoBackground)',
               border: '1px solid var(--vscode-inputValidation-infoBorder)',
               borderRadius: '4px',
-              color: 'var(--vscode-foreground)',
-              fontSize: '14px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
             }}
           >
-            <div className="spinner" style={{ width: '16px', height: '16px' }} />
-            {t('ai.generating')}
+            <div
+              style={{
+                marginBottom: '12px',
+                fontSize: '14px',
+                color: 'var(--vscode-foreground)',
+                fontWeight: 500,
+              }}
+            >
+              {t('ai.generating')}
+            </div>
+
+            {/* Progress bar */}
+            <div
+              style={{
+                width: '100%',
+                height: '8px',
+                backgroundColor: 'var(--vscode-editor-background)',
+                borderRadius: '4px',
+                overflow: 'hidden',
+                marginBottom: '8px',
+                border: '1px solid var(--vscode-panel-border)',
+              }}
+            >
+              <div
+                style={{
+                  width: `${Math.min((elapsedSeconds / MAX_GENERATION_TIME_SECONDS) * 100, 100)}%`,
+                  height: '100%',
+                  backgroundColor: 'var(--vscode-progressBar-background)',
+                  transition: 'width 0.5s linear',
+                }}
+              />
+            </div>
+
+            {/* Progress text */}
+            <div
+              style={{
+                fontSize: '12px',
+                color: 'var(--vscode-descriptionForeground)',
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
+              <span>
+                {Math.min(Math.round((elapsedSeconds / MAX_GENERATION_TIME_SECONDS) * 100), 100)}%
+              </span>
+              <span>
+                {elapsedSeconds}秒 / {MAX_GENERATION_TIME_SECONDS}秒
+              </span>
+            </div>
           </div>
         )}
 
