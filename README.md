@@ -61,7 +61,28 @@ All operations run locally within VSCode. No network communication means zero ri
 
 **From Source**
 
-Currently not available (private repository).
+1. Clone the repository
+   ```bash
+   git clone https://github.com/breaking-brake/cc-wf-studio.git
+   cd cc-wf-studio
+   ```
+2. Install dependencies
+   ```bash
+   npm install
+   cd src/webview && npm install && cd ../..
+   ```
+3. Build the extension
+   ```bash
+   npm run build
+   ```
+4. Package the extension
+   ```bash
+   npx vsce package
+   ```
+5. Install the generated `.vsix` file
+   - Open VSCode Extensions (`Ctrl+Shift+X` / `Cmd+Shift+X`)
+   - Click the `...` menu → "Install from VSIX..."
+   - Select the generated `cc-wf-studio-x.x.x.vsix` file
 
 ### Quick Start
 
