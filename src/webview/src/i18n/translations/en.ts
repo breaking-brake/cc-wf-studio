@@ -175,6 +175,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'To load a saved workflow, select it from the dropdown menu and click the "Load" button.',
   'tour.exportWorkflow':
     'Click the "Export" button to export in a format executable by Claude Code.\n\nSub-Agents go to `.claude/agents/` and SlashCommands to `.claude/commands/`.',
+  'tour.generateWithAI':
+    'Use the "Generate with AI" button to automatically create workflows from natural language descriptions.\n\nFor example: Simply input "Create a code review workflow that scans code, asks user for priority level, and generates fix suggestions" to generate a complete workflow.',
   'tour.helpButton':
     'To see this tour again, click the help button (?).\n\nEnjoy creating workflows!',
 

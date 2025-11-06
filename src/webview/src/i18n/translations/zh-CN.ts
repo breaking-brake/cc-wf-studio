@@ -167,6 +167,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'tour.loadWorkflow': '要加载已保存的工作流，请从下拉菜单中选择工作流并点击"加载"按钮。',
   'tour.exportWorkflow':
     '点击"导出"按钮以Claude Code可执行的格式导出。\n\nSub-Agent导出到`.claude/agents/`，SlashCommand导出到`.claude/commands/`。',
+  'tour.generateWithAI':
+    '使用"AI生成"按钮从自然语言描述自动创建工作流。\n\n例如：只需输入"创建一个扫描代码、询问用户优先级并生成修复建议的代码审查工作流"，就会生成完整的工作流。',
   'tour.helpButton': '要再次查看此导览，请点击帮助按钮(?)。\n\n享受创建工作流的乐趣！',
 
   // Tour buttons

@@ -176,6 +176,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     '저장된 워크플로우를 로드하려면 드롭다운 메뉴에서 워크플로우를 선택하고 "불러오기" 버튼을 클릭하세요.',
   'tour.exportWorkflow':
     '"내보내기" 버튼을 클릭하면 Claude Code에서 실행 가능한 형식으로 내보내집니다.\n\nSub-Agent는 `.claude/agents/`로, SlashCommand는 `.claude/commands/`로 이동합니다.',
+  'tour.generateWithAI':
+    '"AI로 생성" 버튼을 사용하여 자연어 설명으로부터 워크플로우를 자동 생성할 수 있습니다.\n\n예: "코드를 스캔하고 사용자에게 우선순위를 묻고 수정 제안을 생성하는 코드 검토 워크플로 만들기"라고 입력하면 완전한 워크플로우가 생성됩니다.',
   'tour.helpButton':
     '이 투어를 다시 보려면 도움말 버튼(?)을 클릭하세요.\n\n워크플로우 생성을 즐기세요!',
 

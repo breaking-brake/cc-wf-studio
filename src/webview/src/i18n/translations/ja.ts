@@ -175,6 +175,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     '保存したワークフローを読み込むには、ドロップダウンメニューからワークフローを選択し、「読み込み」ボタンをクリックします。',
   'tour.exportWorkflow':
     '「エクスポート」ボタンをクリックすると、Claude Codeで実行可能な形式にエクスポートされます。\n\nSub-Agentは`.claude/agents/`に、SlashCommandは`.claude/commands/`に出力されます。',
+  'tour.generateWithAI':
+    '「AI生成」ボタンで、自然言語の説明からワークフローを自動生成できます。\n\n例：「コードをスキャンし、ユーザーに優先度を尋ねて修正案を生成するワークフロー」と入力するだけで、完全なワークフローが作成されます。',
   'tour.helpButton':
     'このツアーをもう一度見たい場合は、ヘルプボタン(?)をクリックしてください。\n\nそれでは、ワークフロー作成を楽しんでください！',
 
