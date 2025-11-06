@@ -145,8 +145,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'default.case2Condition': '滿足條件 2 時',
   'default.case3': 'Case 3',
   'default.case3Condition': '滿足條件 3 時',
-  'default.newBranch': '分支',
-  'default.newCondition': '新條件',
+  'default.conditionPrefix': '滿足條件 ',
+  'default.conditionSuffix': ' 時',
 
   // Tour
   'tour.welcome': '歡迎使用Claude Code Workflow Studio！\n\n本導覽將指導您建立第一個工作流程。',
@@ -163,6 +163,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'tour.workflowName': '為工作流程命名。\n\n可以使用字母、數字、連字號和底線。',
   'tour.saveWorkflow':
     '點擊「儲存」按鈕將工作流程以JSON格式儲存到`.vscode/workflows/`目錄。\n\n稍後可以載入並繼續編輯。',
+  'tour.loadWorkflow': '要載入已儲存的工作流程，請從下拉選單中選擇工作流程並點擊「載入」按鈕。',
   'tour.exportWorkflow':
     '點擊「匯出」按鈕以Claude Code可執行的格式匯出。\n\nSub-Agent匯出到`.claude/agents/`，SlashCommand匯出到`.claude/commands/`。',
   'tour.helpButton': '要再次檢視此導覽，請點擊說明按鈕(?)。\n\n享受建立工作流程的樂趣！',

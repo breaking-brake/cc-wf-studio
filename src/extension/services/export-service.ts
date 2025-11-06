@@ -511,7 +511,9 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
       sections.push(`#### ${nodeId}(${translate('ifElseNode.binary')})`);
       sections.push('');
       if (node.data.evaluationTarget) {
-        sections.push(`**${translate('ifElseNode.evaluationTarget')}**: ${node.data.evaluationTarget}`);
+        sections.push(
+          `**${translate('ifElseNode.evaluationTarget')}**: ${node.data.evaluationTarget}`
+        );
         sections.push('');
       }
       sections.push(translate('branchNode.conditions'));
@@ -533,7 +535,9 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
       sections.push(`#### ${nodeId}(${translate('switchNode.multiple')})`);
       sections.push('');
       if (node.data.evaluationTarget) {
-        sections.push(`**${translate('switchNode.evaluationTarget')}**: ${node.data.evaluationTarget}`);
+        sections.push(
+          `**${translate('switchNode.evaluationTarget')}**: ${node.data.evaluationTarget}`
+        );
         sections.push('');
       }
       sections.push(translate('branchNode.conditions'));

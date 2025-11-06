@@ -35,6 +35,25 @@ export async function saveWorkflow(
     // Get file path
     const filePath = fileService.getWorkflowFilePath(workflow.name);
 
+    // Check if file already exists
+    if (await fileService.fileExists(filePath)) {
+      // Show warning dialog for overwrite confirmation
+      const answer = await vscode.window.showWarningMessage(
+        `Workflow "${workflow.name}" already exists.\n\nDo you want to overwrite it?`,
+        { modal: true },
+        'Overwrite'
+      );
+
+      if (answer !== 'Overwrite') {
+        // User cancelled - send cancellation message (not an error)
+        webview.postMessage({
+          type: 'SAVE_CANCELLED',
+          requestId,
+        });
+        return;
+      }
+    }
+
     // Serialize workflow to JSON with 2-space indentation
     const content = JSON.stringify(workflow, null, 2);
 

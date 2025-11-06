@@ -148,8 +148,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'default.case2Condition': 'When condition 2 is met',
   'default.case3': 'Case 3',
   'default.case3Condition': 'When condition 3 is met',
-  'default.newBranch': 'Branch',
-  'default.newCondition': 'New condition',
+  'default.conditionPrefix': 'When condition ',
+  'default.conditionSuffix': ' is met',
 
   // Tour
   'tour.welcome':
@@ -170,6 +170,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Name your workflow.\n\nYou can use letters, numbers, hyphens, and underscores.',
   'tour.saveWorkflow':
     'Click the "Save" button to save your workflow as JSON in the `.vscode/workflows/` directory.\n\nYou can load and continue editing later.',
+  'tour.loadWorkflow':
+    'To load a saved workflow, select it from the dropdown menu and click the "Load" button.',
   'tour.exportWorkflow':
     'Click the "Export" button to export in a format executable by Claude Code.\n\nSub-Agents go to `.claude/agents/` and SlashCommands to `.claude/commands/`.',
   'tour.helpButton':

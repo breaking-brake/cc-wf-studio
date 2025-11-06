@@ -94,7 +94,9 @@ export type ExtensionMessage =
   | Message<ExportSuccessPayload, 'EXPORT_SUCCESS'>
   | Message<ErrorPayload, 'ERROR'>
   | Message<WorkflowListPayload, 'WORKFLOW_LIST_LOADED'>
-  | Message<InitialStatePayload, 'INITIAL_STATE'>;
+  | Message<InitialStatePayload, 'INITIAL_STATE'>
+  | Message<void, 'SAVE_CANCELLED'>
+  | Message<void, 'EXPORT_CANCELLED'>;
 
 // ============================================================================
 // Webview → Extension Messages

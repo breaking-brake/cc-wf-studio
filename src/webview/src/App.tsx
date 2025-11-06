@@ -18,6 +18,7 @@ import { WorkflowEditor } from './components/WorkflowEditor';
 const App: React.FC = () => {
   const [error, setError] = useState<ErrorPayload | null>(null);
   const [runTour, setRunTour] = useState(false);
+  const [tourKey, setTourKey] = useState(0); // Used to force Tour component remount
 
   const handleError = (errorData: ErrorPayload) => {
     setError(errorData);
@@ -33,6 +34,7 @@ const App: React.FC = () => {
 
   const handleStartTour = () => {
     setRunTour(true);
+    setTourKey((prev) => prev + 1); // Increment key to force remount and reset tour state
   };
 
   // Listen for messages from Extension
@@ -95,7 +97,7 @@ const App: React.FC = () => {
       <ErrorNotification error={error} onDismiss={handleDismissError} />
 
       {/* Interactive Tour */}
-      <Tour run={runTour} onFinish={handleTourFinish} />
+      <Tour key={tourKey} run={runTour} onFinish={handleTourFinish} />
     </div>
   );
 };

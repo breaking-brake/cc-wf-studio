@@ -143,8 +143,8 @@ export interface WebviewTranslationKeys {
   'default.case2Condition': string;
   'default.case3': string;
   'default.case3Condition': string;
-  'default.newBranch': string;
-  'default.newCondition': string;
+  'default.conditionPrefix': string;
+  'default.conditionSuffix': string;
 
   // Tour
   'tour.welcome': string;
@@ -156,6 +156,7 @@ export interface WebviewTranslationKeys {
   'tour.connectNodes': string;
   'tour.workflowName': string;
   'tour.saveWorkflow': string;
+  'tour.loadWorkflow': string;
   'tour.exportWorkflow': string;
   'tour.helpButton': string;
 

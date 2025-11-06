@@ -32,6 +32,9 @@ export function saveWorkflow(workflow: Workflow): Promise<void> {
 
         if (message.type === 'SAVE_SUCCESS') {
           resolve();
+        } else if (message.type === 'SAVE_CANCELLED') {
+          // User cancelled save - resolve silently without showing error
+          resolve();
         } else if (message.type === 'ERROR') {
           reject(new Error(message.payload?.message || 'Failed to save workflow'));
         }
@@ -76,6 +79,9 @@ export function exportWorkflow(workflow: Workflow, overwriteExisting = false): P
 
         if (message.type === 'EXPORT_SUCCESS') {
           resolve(message.payload?.exportedFiles || []);
+        } else if (message.type === 'EXPORT_CANCELLED') {
+          // User cancelled export - resolve silently without showing error
+          resolve([]);
         } else if (message.type === 'ERROR') {
           reject(new Error(message.payload?.message || 'Failed to export workflow'));
         }
