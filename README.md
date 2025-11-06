@@ -82,7 +82,7 @@ claude --version
 
 4. **Generate**
    - Click "Generate" or press `Ctrl+Enter` / `Cmd+Enter`
-   - AI processes your description (may take up to 30 seconds)
+   - AI processes your description (may take up to 60 seconds)
    - Generated workflow appears on canvas automatically
 
 ### Features
@@ -133,14 +133,14 @@ Build a multi-stage data pipeline:
 | Error Code | Meaning | Solution |
 |------------|---------|----------|
 | `COMMAND_NOT_FOUND` | Claude Code CLI not installed | Install Claude Code CLI |
-| `TIMEOUT` | Request took > 30 seconds | Simplify description or try again |
+| `TIMEOUT` | Request took > 60 seconds | Simplify description or try again |
 | `PARSE_ERROR` | AI output couldn't be parsed | Rephrase description and retry |
 | `VALIDATION_ERROR` | Workflow exceeds limits (50 nodes max) | Reduce complexity |
 
 ### Limitations
 
 - Maximum 50 nodes per generated workflow
-- 30-second timeout for AI processing
+- 60-second timeout for AI processing
 - Description limited to 2000 characters
 - Requires active Claude Code CLI installation
 

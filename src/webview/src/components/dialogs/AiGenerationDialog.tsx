@@ -121,7 +121,11 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
         zIndex: 1000,
       }}
       onClick={handleClose}
-      onKeyDown={handleClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          handleClose();
+        }
+      }}
       role="presentation"
     >
       <div
@@ -190,6 +194,26 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
           >
             {t('ai.characterCount', { count: description.length, max: MAX_DESCRIPTION_LENGTH })}
           </div>
+        </div>
+
+        <div
+          style={{
+            marginBottom: '8px',
+            fontSize: '12px',
+            color: 'var(--vscode-descriptionForeground)',
+          }}
+        >
+          {t('ai.usageNote')}
+        </div>
+
+        <div
+          style={{
+            marginBottom: '16px',
+            fontSize: '12px',
+            color: 'var(--vscode-descriptionForeground)',
+          }}
+        >
+          {t('ai.overwriteWarning')}
         </div>
 
         {error && (

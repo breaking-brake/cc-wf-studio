@@ -178,6 +178,8 @@ export interface WebviewTranslationKeys {
   'ai.generateButton': string;
   'ai.cancelButton': string;
   'ai.success': string;
+  'ai.usageNote': string;
+  'ai.overwriteWarning': string;
 
   // AI Generation Errors
   'ai.error.emptyDescription': string;

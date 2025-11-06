@@ -193,10 +193,13 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'ai.descriptionPlaceholder':
     '例: コードをスキャンし、ユーザーに優先度レベルを尋ね、修正案を生成するコードレビューワークフローを作成',
   'ai.characterCount': '{count} / {max} 文字',
-  'ai.generating': 'ワークフローを生成中... 最大30秒かかることがあります。',
+  'ai.generating': 'ワークフローを生成中... 最大60秒かかることがあります。',
   'ai.generateButton': '生成',
   'ai.cancelButton': 'キャンセル',
   'ai.success': 'ワークフローが正常に生成されました！',
+  'ai.usageNote': '※1 この機能はお使いの環境にインストールされたClaude Codeを使用します。',
+  'ai.overwriteWarning':
+    '※2 ワークフローを生成すると、現在のワークフローが完全に上書きされます。続行する前に作業内容を保存してください。',
 
   // AI Generation Errors
   'ai.error.emptyDescription': 'ワークフローの説明を入力してください',

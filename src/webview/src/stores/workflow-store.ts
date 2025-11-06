@@ -139,20 +139,12 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   },
 
   addGeneratedWorkflow: (workflow: Workflow) => {
-    const currentNodes = get().nodes;
-    const currentEdges = get().edges;
-
-    // Calculate offset to avoid overlap with existing nodes
-    // Find the rightmost node position
-    const maxX = currentNodes.reduce((max, node) => Math.max(max, node.position.x), 0);
-    const offsetX = maxX + 200; // Add 200px margin to the right
-
-    // Convert workflow nodes to ReactFlow nodes with offset
+    // Convert workflow nodes to ReactFlow nodes
     const newNodes: Node[] = workflow.nodes.map((node) => ({
       id: node.id,
       type: node.type,
       position: {
-        x: node.position.x + offsetX,
+        x: node.position.x,
         y: node.position.y,
       },
       data: node.data,
@@ -172,10 +164,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       (node) => node.type !== 'start' && node.type !== 'end'
     );
 
-    // Add new nodes and edges to existing ones
+    // Completely replace existing workflow with generated workflow
     set({
-      nodes: [...currentNodes, ...newNodes],
-      edges: [...currentEdges, ...newEdges],
+      nodes: newNodes,
+      edges: newEdges,
       selectedNodeId: firstSelectableNode?.id || null,
     });
   },

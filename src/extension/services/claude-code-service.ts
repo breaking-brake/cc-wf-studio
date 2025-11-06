@@ -23,12 +23,12 @@ export interface ClaudeCodeExecutionResult {
  * Execute Claude Code CLI with a prompt and return the output
  *
  * @param prompt - The prompt to send to Claude Code CLI
- * @param timeoutMs - Timeout in milliseconds (default: 30000)
+ * @param timeoutMs - Timeout in milliseconds (default: 60000)
  * @returns Execution result with success status and output/error
  */
 export async function executeClaudeCodeCLI(
   prompt: string,
-  timeoutMs = 30000
+  timeoutMs = 60000
 ): Promise<ClaudeCodeExecutionResult> {
   const startTime = Date.now();
 
@@ -62,7 +62,7 @@ export async function executeClaudeCodeCLI(
         success: false,
         error: {
           code: 'TIMEOUT',
-          message: 'AI generation timed out after 30 seconds. Try simplifying your description.',
+          message: 'AI generation timed out after 60 seconds. Try simplifying your description.',
           details: `Timeout after ${timeoutMs}ms`,
         },
         executionTimeMs,

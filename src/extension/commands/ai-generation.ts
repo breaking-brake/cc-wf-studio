@@ -69,7 +69,7 @@ export async function handleGenerateWorkflow(
     const prompt = constructPrompt(payload.userDescription, schemaResult.schema);
 
     // Step 3: Execute Claude Code CLI
-    const timeout = payload.timeoutMs ?? 30000;
+    const timeout = payload.timeoutMs ?? 60000;
     const cliResult = await executeClaudeCodeCLI(prompt, timeout);
 
     if (!cliResult.success || !cliResult.output) {
