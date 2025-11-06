@@ -47,7 +47,7 @@ export function serializeWorkflow(
     id: `workflow-${Date.now()}`,
     name: workflowName,
     description: workflowDescription,
-    version: '0.2.1',
+    version: '0.2.2',
     nodes: workflowNodes,
     connections,
     createdAt: new Date(),
