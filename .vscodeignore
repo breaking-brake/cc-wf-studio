@@ -1,0 +1,46 @@
+# Development files
+.vscode/**
+.vscode-test/**
+.gitignore
+.git/**
+
+# Source files (use built files in out/ instead)
+src/extension/**/*.ts
+src/shared/**/*.ts
+tsconfig.json
+
+# Webview source and build dependencies
+src/webview/src/**
+src/webview/node_modules/**
+src/webview/package.json
+src/webview/package-lock.json
+src/webview/tsconfig.json
+src/webview/tsconfig.node.json
+src/webview/vite.config.ts
+src/webview/index.html
+
+# Keep only webview/dist for runtime
+!src/webview/dist/**
+
+# Development and spec files
+.specify/**
+.claude/**
+specs/**
+
+# Test files
+**/__tests__/**
+**/*.test.ts
+**/*.test.js
+**/test/**
+.vscode-test/**
+
+# Build tools
+node_modules/**
+*.vsix
+
+# Documentation
+readme.md
+CLAUDE.md
+
+# Build config
+biome.json
