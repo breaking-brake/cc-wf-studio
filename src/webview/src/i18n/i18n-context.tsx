@@ -16,7 +16,10 @@ import { zhTWWebviewTranslations } from './translations/zh-TW';
 type Translations = typeof enWebviewTranslations;
 
 interface I18nContextValue {
-  t: <K extends keyof WebviewTranslationKeys>(key: K) => string;
+  t: <K extends keyof WebviewTranslationKeys>(
+    key: K,
+    params?: Record<string, string | number>
+  ) => string;
   locale: string;
 }
 
@@ -63,8 +66,20 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ locale, children }) 
     const translations = getTranslations(locale);
 
     return {
-      t: <K extends keyof WebviewTranslationKeys>(key: K): string => {
-        return translations[key] as string;
+      t: <K extends keyof WebviewTranslationKeys>(
+        key: K,
+        params?: Record<string, string | number>
+      ): string => {
+        let text = translations[key] as string;
+
+        // Replace parameters if provided
+        if (params) {
+          for (const paramKey of Object.keys(params)) {
+            text = text.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(params[paramKey]));
+          }
+        }
+
+        return text;
       },
       locale,
     };

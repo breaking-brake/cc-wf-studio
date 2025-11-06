@@ -85,6 +85,31 @@ export interface LoadWorkflowRequestPayload {
 }
 
 // ============================================================================
+// AI Generation Payloads (001-ai-workflow-generation)
+// ============================================================================
+
+export interface GenerateWorkflowPayload {
+  userDescription: string; // Max 2000 characters
+  timeoutMs?: number; // Optional, defaults to 30000
+}
+
+export interface GenerationSuccessPayload {
+  workflow: Workflow;
+  executionTimeMs: number;
+  timestamp: string; // ISO 8601
+}
+
+export interface GenerationFailedPayload {
+  error: {
+    code: 'COMMAND_NOT_FOUND' | 'TIMEOUT' | 'PARSE_ERROR' | 'VALIDATION_ERROR' | 'UNKNOWN_ERROR';
+    message: string;
+    details?: string;
+  };
+  executionTimeMs: number;
+  timestamp: string; // ISO 8601
+}
+
+// ============================================================================
 // Extension → Webview Messages
 // ============================================================================
 
@@ -96,7 +121,9 @@ export type ExtensionMessage =
   | Message<WorkflowListPayload, 'WORKFLOW_LIST_LOADED'>
   | Message<InitialStatePayload, 'INITIAL_STATE'>
   | Message<void, 'SAVE_CANCELLED'>
-  | Message<void, 'EXPORT_CANCELLED'>;
+  | Message<void, 'EXPORT_CANCELLED'>
+  | Message<GenerationSuccessPayload, 'GENERATION_SUCCESS'>
+  | Message<GenerationFailedPayload, 'GENERATION_FAILED'>;
 
 // ============================================================================
 // Webview → Extension Messages
@@ -108,7 +135,8 @@ export type WebviewMessage =
   | Message<ConfirmOverwritePayload, 'CONFIRM_OVERWRITE'>
   | Message<void, 'LOAD_WORKFLOW_LIST'>
   | Message<LoadWorkflowRequestPayload, 'LOAD_WORKFLOW'>
-  | Message<StateUpdatePayload, 'STATE_UPDATE'>;
+  | Message<StateUpdatePayload, 'STATE_UPDATE'>
+  | Message<GenerateWorkflowPayload, 'GENERATE_WORKFLOW'>;
 
 // ============================================================================
 // Error Codes

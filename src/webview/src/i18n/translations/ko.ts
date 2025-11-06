@@ -11,6 +11,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.saving': '저장 중...',
   'toolbar.export': '내보내기',
   'toolbar.exporting': '내보내는 중...',
+  'toolbar.generateWithAI': 'AI로 생성',
   'toolbar.selectWorkflow': '워크플로 선택...',
   'toolbar.load': '불러오기',
   'toolbar.refreshList': '워크플로 목록 새로고침',
@@ -175,6 +176,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     '저장된 워크플로우를 로드하려면 드롭다운 메뉴에서 워크플로우를 선택하고 "불러오기" 버튼을 클릭하세요.',
   'tour.exportWorkflow':
     '"내보내기" 버튼을 클릭하면 Claude Code에서 실행 가능한 형식으로 내보내집니다.\n\nSub-Agent는 `.claude/agents/`로, SlashCommand는 `.claude/commands/`로 이동합니다.',
+  'tour.generateWithAI':
+    '"AI로 생성" 버튼을 사용하여 자연어 설명으로부터 워크플로우를 자동 생성할 수 있습니다.\n\n예: "코드를 스캔하고 사용자에게 우선순위를 묻고 수정 제안을 생성하는 코드 검토 워크플로 만들기"라고 입력하면 완전한 워크플로우가 생성됩니다.',
   'tour.helpButton':
     '이 투어를 다시 보려면 도움말 버튼(?)을 클릭하세요.\n\n워크플로우 생성을 즐기세요!',
 
@@ -184,4 +187,30 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': '완료',
   'tour.button.next': '다음',
   'tour.button.skip': '건너뛰기',
+
+  // AI Generation Dialog
+  'ai.dialogTitle': 'AI로 워크플로 생성',
+  'ai.dialogDescription':
+    '자연어로 생성하려는 워크플로를 설명하세요. AI가 노드와 연결이 포함된 완전한 워크플로를 생성합니다.',
+  'ai.descriptionLabel': '워크플로 설명',
+  'ai.descriptionPlaceholder':
+    '예: 코드를 스캔하고 사용자에게 우선순위 수준을 묻고 수정 제안을 생성하는 코드 검토 워크플로 만들기',
+  'ai.characterCount': '{count} / {max} 자',
+  'ai.generating': '워크플로 생성 중... 최대 60초 소요될 수 있습니다.',
+  'ai.generateButton': '생성',
+  'ai.cancelButton': '취소',
+  'ai.success': '워크플로가 성공적으로 생성되었습니다!',
+  'ai.usageNote': '*1 이 기능은 사용자 환경에 설치된 Claude Code를 사용합니다.',
+  'ai.overwriteWarning':
+    '*2 워크플로를 생성하면 현재 워크플로가 완전히 덮어쓰여집니다. 계속하기 전에 작업 내용을 저장하세요.',
+
+  // AI Generation Errors
+  'ai.error.emptyDescription': '워크플로 설명을 입력하세요',
+  'ai.error.descriptionTooLong': '설명이 너무 깁니다 (최대 {max}자)',
+  'ai.error.commandNotFound':
+    'Claude Code CLI를 찾을 수 없습니다. AI 생성 기능을 사용하려면 Claude Code를 설치하세요.',
+  'ai.error.timeout': '요청 시간이 초과되었습니다. 다시 시도하거나 설명을 간소화하세요.',
+  'ai.error.parseError': '생성에 실패했습니다 - 다시 시도하거나 설명을 다시 작성하세요',
+  'ai.error.validationError': '생성된 워크플로 검증에 실패했습니다',
+  'ai.error.unknown': '예기치 않은 오류가 발생했습니다. 다시 시도하세요.',
 };

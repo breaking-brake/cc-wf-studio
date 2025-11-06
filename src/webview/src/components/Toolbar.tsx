@@ -16,6 +16,7 @@ import {
   validateWorkflow,
 } from '../services/workflow-service';
 import { useWorkflowStore } from '../stores/workflow-store';
+import { AiGenerationDialog } from './dialogs/AiGenerationDialog';
 
 interface ToolbarProps {
   onError: (error: { code: string; message: string; details?: unknown }) => void;
@@ -37,6 +38,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [workflows, setWorkflows] = useState<WorkflowListItem[]>([]);
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>('');
+  const [showAiDialog, setShowAiDialog] = useState(false);
 
   const handleSave = async () => {
     if (!workflowName.trim()) {
@@ -242,6 +244,25 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
         {isExporting ? t('toolbar.exporting') : t('toolbar.export')}
       </button>
 
+      {/* Generate with AI Button */}
+      <button
+        type="button"
+        onClick={() => setShowAiDialog(true)}
+        data-tour="ai-generate-button"
+        style={{
+          padding: '4px 12px',
+          backgroundColor: 'var(--vscode-button-background)',
+          color: 'var(--vscode-button-foreground)',
+          border: 'none',
+          borderRadius: '2px',
+          cursor: 'pointer',
+          fontSize: '13px',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {t('toolbar.generateWithAI')}
+      </button>
+
       {/* Divider */}
       <div
         style={{
@@ -324,6 +345,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
       >
         ?
       </button>
+
+      {/* AI Generation Dialog */}
+      <AiGenerationDialog isOpen={showAiDialog} onClose={() => setShowAiDialog(false)} />
     </div>
   );
 };

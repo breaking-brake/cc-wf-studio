@@ -5,6 +5,7 @@
  * Based on: /specs/001-cc-wf-studio/research.md section 3.4
  */
 
+import type { Workflow } from '@shared/types/messages';
 import type { Edge, Node, OnConnect, OnEdgesChange, OnNodesChange } from 'reactflow';
 import { addEdge, applyEdgeChanges, applyNodeChanges } from 'reactflow';
 import { create } from 'zustand';
@@ -34,6 +35,7 @@ interface WorkflowStore {
   addNode: (node: Node) => void;
   removeNode: (nodeId: string) => void;
   clearWorkflow: () => void;
+  addGeneratedWorkflow: (workflow: Workflow) => void;
 }
 
 // ============================================================================
@@ -133,6 +135,40 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       nodes: [DEFAULT_START_NODE, DEFAULT_END_NODE],
       edges: [],
       selectedNodeId: null,
+    });
+  },
+
+  addGeneratedWorkflow: (workflow: Workflow) => {
+    // Convert workflow nodes to ReactFlow nodes
+    const newNodes: Node[] = workflow.nodes.map((node) => ({
+      id: node.id,
+      type: node.type,
+      position: {
+        x: node.position.x,
+        y: node.position.y,
+      },
+      data: node.data,
+    }));
+
+    // Convert workflow connections to ReactFlow edges
+    const newEdges: Edge[] = workflow.connections.map((conn) => ({
+      id: conn.id,
+      source: conn.from,
+      target: conn.to,
+      sourceHandle: conn.fromPort,
+      targetHandle: conn.toPort,
+    }));
+
+    // Find the first non-start/end node to select
+    const firstSelectableNode = newNodes.find(
+      (node) => node.type !== 'start' && node.type !== 'end'
+    );
+
+    // Completely replace existing workflow with generated workflow
+    set({
+      nodes: newNodes,
+      edges: newEdges,
+      selectedNodeId: firstSelectableNode?.id || null,
     });
   },
 }));

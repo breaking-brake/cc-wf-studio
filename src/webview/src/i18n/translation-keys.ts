@@ -9,6 +9,7 @@ export interface WebviewTranslationKeys {
   'toolbar.saving': string;
   'toolbar.export': string;
   'toolbar.exporting': string;
+  'toolbar.generateWithAI': string;
   'toolbar.selectWorkflow': string;
   'toolbar.load': string;
   'toolbar.refreshList': string;
@@ -158,6 +159,7 @@ export interface WebviewTranslationKeys {
   'tour.saveWorkflow': string;
   'tour.loadWorkflow': string;
   'tour.exportWorkflow': string;
+  'tour.generateWithAI': string;
   'tour.helpButton': string;
 
   // Tour buttons
@@ -166,4 +168,26 @@ export interface WebviewTranslationKeys {
   'tour.button.finish': string;
   'tour.button.next': string;
   'tour.button.skip': string;
+
+  // AI Generation Dialog
+  'ai.dialogTitle': string;
+  'ai.dialogDescription': string;
+  'ai.descriptionLabel': string;
+  'ai.descriptionPlaceholder': string;
+  'ai.characterCount': string;
+  'ai.generating': string;
+  'ai.generateButton': string;
+  'ai.cancelButton': string;
+  'ai.success': string;
+  'ai.usageNote': string;
+  'ai.overwriteWarning': string;
+
+  // AI Generation Errors
+  'ai.error.emptyDescription': string;
+  'ai.error.descriptionTooLong': string;
+  'ai.error.commandNotFound': string;
+  'ai.error.timeout': string;
+  'ai.error.parseError': string;
+  'ai.error.validationError': string;
+  'ai.error.unknown': string;
 }

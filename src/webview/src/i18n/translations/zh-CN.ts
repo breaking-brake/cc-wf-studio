@@ -11,6 +11,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.saving': '保存中...',
   'toolbar.export': '导出',
   'toolbar.exporting': '导出中...',
+  'toolbar.generateWithAI': 'AI生成',
   'toolbar.selectWorkflow': '选择工作流...',
   'toolbar.load': '加载',
   'toolbar.refreshList': '刷新工作流列表',
@@ -166,6 +167,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'tour.loadWorkflow': '要加载已保存的工作流，请从下拉菜单中选择工作流并点击"加载"按钮。',
   'tour.exportWorkflow':
     '点击"导出"按钮以Claude Code可执行的格式导出。\n\nSub-Agent导出到`.claude/agents/`，SlashCommand导出到`.claude/commands/`。',
+  'tour.generateWithAI':
+    '使用"AI生成"按钮从自然语言描述自动创建工作流。\n\n例如：只需输入"创建一个扫描代码、询问用户优先级并生成修复建议的代码审查工作流"，就会生成完整的工作流。',
   'tour.helpButton': '要再次查看此导览，请点击帮助按钮(?)。\n\n享受创建工作流的乐趣！',
 
   // Tour buttons
@@ -174,4 +177,27 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': '完成',
   'tour.button.next': '下一步',
   'tour.button.skip': '跳过',
+
+  // AI Generation Dialog
+  'ai.dialogTitle': '使用AI生成工作流',
+  'ai.dialogDescription': '用自然语言描述您要创建的工作流。AI将生成包含节点和连接的完整工作流。',
+  'ai.descriptionLabel': '工作流描述',
+  'ai.descriptionPlaceholder':
+    '示例：创建一个扫描代码、询问用户优先级并生成修复建议的代码审查工作流',
+  'ai.characterCount': '{count} / {max} 字符',
+  'ai.generating': '正在生成工作流... 可能需要最多60秒。',
+  'ai.generateButton': '生成',
+  'ai.cancelButton': '取消',
+  'ai.success': '工作流生成成功！',
+  'ai.usageNote': '*1 此功能使用您环境中安装的Claude Code。',
+  'ai.overwriteWarning': '*2 生成工作流将完全替换您当前的工作流。请在继续之前保存您的工作。',
+
+  // AI Generation Errors
+  'ai.error.emptyDescription': '请输入工作流描述',
+  'ai.error.descriptionTooLong': '描述过长（最多{max}字符）',
+  'ai.error.commandNotFound': '未找到Claude Code CLI。请安装Claude Code以使用AI生成功能。',
+  'ai.error.timeout': '请求超时。请重试或简化您的描述。',
+  'ai.error.parseError': '生成失败 - 请重试或重新表述您的描述',
+  'ai.error.validationError': '生成的工作流验证失败',
+  'ai.error.unknown': '发生意外错误。请重试。',
 };

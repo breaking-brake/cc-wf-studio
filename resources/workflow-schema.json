@@ -1,0 +1,492 @@
+{
+  "schemaVersion": "1.0.0",
+  "metadata": {
+    "description": "Workflow schema for Claude Code Workflow Studio",
+    "maxNodes": 50,
+    "supportedNodeTypes": [
+      "start",
+      "end",
+      "prompt",
+      "subAgent",
+      "askUserQuestion",
+      "ifElse",
+      "switch"
+    ]
+  },
+  "nodeTypes": {
+    "start": {
+      "description": "Workflow entry point. Exactly one required per workflow.",
+      "fields": {
+        "label": { "type": "string", "required": false, "default": "Start" }
+      },
+      "inputPorts": 0,
+      "outputPorts": 1
+    },
+    "end": {
+      "description": "Workflow exit point. At least one required per workflow.",
+      "fields": {
+        "label": { "type": "string", "required": false, "default": "End" }
+      },
+      "inputPorts": "unlimited",
+      "outputPorts": 0
+    },
+    "prompt": {
+      "description": "Display a message/instructions to user",
+      "fields": {
+        "label": { "type": "string", "required": false },
+        "prompt": { "type": "string", "required": true, "maxLength": 10000 },
+        "variables": { "type": "object", "required": false }
+      },
+      "inputPorts": 1,
+      "outputPorts": 1
+    },
+    "subAgent": {
+      "description": "AI sub-agent executing a task with given prompt",
+      "fields": {
+        "description": { "type": "string", "required": true, "maxLength": 200 },
+        "prompt": { "type": "string", "required": true, "maxLength": 10000 },
+        "tools": { "type": "string", "required": false },
+        "model": {
+          "type": "string",
+          "required": false,
+          "enum": ["sonnet", "opus", "haiku"],
+          "default": "sonnet"
+        },
+        "outputPorts": { "type": "number", "required": true, "value": 1 }
+      },
+      "inputPorts": 1,
+      "outputPorts": 1
+    },
+    "askUserQuestion": {
+      "description": "Present a question with multiple-choice options",
+      "fields": {
+        "questionText": { "type": "string", "required": true, "maxLength": 500 },
+        "options": {
+          "type": "array",
+          "required": true,
+          "minLength": 2,
+          "maxLength": 4,
+          "items": {
+            "id": { "type": "string", "required": false },
+            "label": { "type": "string", "required": true, "maxLength": 50 },
+            "description": { "type": "string", "required": true, "maxLength": 200 }
+          }
+        },
+        "multiSelect": { "type": "boolean", "required": false, "default": false },
+        "useAiSuggestions": { "type": "boolean", "required": false, "default": false },
+        "outputPorts": { "type": "number", "required": true, "min": 1, "max": 4 }
+      },
+      "inputPorts": 1,
+      "outputPorts": "2-4"
+    },
+    "ifElse": {
+      "description": "Two-way conditional branching (if/else)",
+      "fields": {
+        "evaluationTarget": { "type": "string", "required": false },
+        "branches": {
+          "type": "array",
+          "required": true,
+          "length": 2,
+          "items": {
+            "id": { "type": "string", "required": false },
+            "label": { "type": "string", "required": true, "maxLength": 50 },
+            "condition": { "type": "string", "required": true, "maxLength": 500 }
+          }
+        },
+        "outputPorts": { "type": "number", "required": true, "value": 2 }
+      },
+      "inputPorts": 1,
+      "outputPorts": 2
+    },
+    "switch": {
+      "description": "Multi-way branching (switch/case)",
+      "fields": {
+        "evaluationTarget": { "type": "string", "required": false },
+        "branches": {
+          "type": "array",
+          "required": true,
+          "minLength": 2,
+          "maxLength": 10,
+          "items": {
+            "id": { "type": "string", "required": false },
+            "label": { "type": "string", "required": true, "maxLength": 50 },
+            "condition": { "type": "string", "required": true, "maxLength": 500 }
+          }
+        },
+        "outputPorts": { "type": "number", "required": true, "min": 2, "max": 10 }
+      },
+      "inputPorts": 1,
+      "outputPorts": "2-10"
+    }
+  },
+  "connectionRules": {
+    "forbidden": [
+      "Start node cannot have input connections",
+      "End node cannot have output connections",
+      "No cycles allowed",
+      "No self-connections",
+      "One connection per output port"
+    ],
+    "required": [
+      "Exactly one Start node per workflow",
+      "At least one End node per workflow",
+      "All non-Start nodes must have input connection",
+      "All non-End nodes must have output connection"
+    ]
+  },
+  "validationRules": {
+    "workflow": { "maxNodes": 50, "nameMaxLength": 100, "versionPattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "node": { "nameMaxLength": 50, "namePattern": "^[a-zA-Z0-9_-]+$" }
+  },
+  "examples": [
+    {
+      "name": "Simple Data Analysis",
+      "complexity": "simple",
+      "workflow": {
+        "id": "ex-simple",
+        "name": "Data Analysis",
+        "version": "1.0.0",
+        "nodes": [
+          {
+            "id": "start-1",
+            "type": "start",
+            "name": "start-node",
+            "position": { "x": 100, "y": 200 },
+            "data": { "label": "Start" }
+          },
+          {
+            "id": "agent-1",
+            "type": "subAgent",
+            "name": "analyzer",
+            "position": { "x": 300, "y": 200 },
+            "data": {
+              "description": "Analyze data",
+              "prompt": "Analyze data and generate insights.",
+              "model": "sonnet",
+              "outputPorts": 1
+            }
+          },
+          {
+            "id": "end-1",
+            "type": "end",
+            "name": "end-node",
+            "position": { "x": 500, "y": 200 },
+            "data": { "label": "End" }
+          }
+        ],
+        "connections": [
+          {
+            "id": "c1",
+            "from": "start-1",
+            "to": "agent-1",
+            "fromPort": "output",
+            "toPort": "input"
+          },
+          { "id": "c2", "from": "agent-1", "to": "end-1", "fromPort": "output", "toPort": "input" }
+        ],
+        "createdAt": "2025-11-06T00:00:00Z",
+        "updatedAt": "2025-11-06T00:00:00Z"
+      }
+    },
+    {
+      "name": "Code Review with Priority",
+      "complexity": "medium",
+      "workflow": {
+        "id": "ex-medium",
+        "name": "Code Review",
+        "version": "1.0.0",
+        "nodes": [
+          {
+            "id": "start-1",
+            "type": "start",
+            "name": "start-node",
+            "position": { "x": 100, "y": 200 },
+            "data": { "label": "Start" }
+          },
+          {
+            "id": "scanner-1",
+            "type": "subAgent",
+            "name": "scanner",
+            "position": { "x": 250, "y": 200 },
+            "data": {
+              "description": "Scan code",
+              "prompt": "Scan for bugs and issues.",
+              "outputPorts": 1
+            }
+          },
+          {
+            "id": "ask-1",
+            "type": "askUserQuestion",
+            "name": "priority",
+            "position": { "x": 400, "y": 200 },
+            "data": {
+              "questionText": "Priority level?",
+              "options": [
+                { "label": "Critical", "description": "High priority only" },
+                { "label": "All", "description": "All issues" }
+              ],
+              "outputPorts": 2
+            }
+          },
+          {
+            "id": "fix-1",
+            "type": "subAgent",
+            "name": "critical-fixer",
+            "position": { "x": 550, "y": 150 },
+            "data": {
+              "description": "Critical fixes",
+              "prompt": "Generate critical fixes.",
+              "outputPorts": 1
+            }
+          },
+          {
+            "id": "fix-2",
+            "type": "subAgent",
+            "name": "all-fixer",
+            "position": { "x": 550, "y": 250 },
+            "data": {
+              "description": "All fixes",
+              "prompt": "Generate all fixes.",
+              "outputPorts": 1
+            }
+          },
+          {
+            "id": "end-1",
+            "type": "end",
+            "name": "end-node",
+            "position": { "x": 700, "y": 200 },
+            "data": { "label": "End" }
+          }
+        ],
+        "connections": [
+          {
+            "id": "c1",
+            "from": "start-1",
+            "to": "scanner-1",
+            "fromPort": "output",
+            "toPort": "input"
+          },
+          {
+            "id": "c2",
+            "from": "scanner-1",
+            "to": "ask-1",
+            "fromPort": "output",
+            "toPort": "input"
+          },
+          { "id": "c3", "from": "ask-1", "to": "fix-1", "fromPort": "branch-0", "toPort": "input" },
+          { "id": "c4", "from": "ask-1", "to": "fix-2", "fromPort": "branch-1", "toPort": "input" },
+          { "id": "c5", "from": "fix-1", "to": "end-1", "fromPort": "output", "toPort": "input" },
+          { "id": "c6", "from": "fix-2", "to": "end-1", "fromPort": "output", "toPort": "input" }
+        ],
+        "createdAt": "2025-11-06T00:00:00Z",
+        "updatedAt": "2025-11-06T00:00:00Z"
+      }
+    },
+    {
+      "name": "Document Processing Pipeline",
+      "complexity": "complex",
+      "workflow": {
+        "id": "ex-complex",
+        "name": "Doc Pipeline",
+        "version": "1.0.0",
+        "nodes": [
+          {
+            "id": "start-1",
+            "type": "start",
+            "name": "start-node",
+            "position": { "x": 100, "y": 300 },
+            "data": { "label": "Start" }
+          },
+          {
+            "id": "validator-1",
+            "type": "subAgent",
+            "name": "validator",
+            "position": { "x": 250, "y": 300 },
+            "data": {
+              "description": "Validate doc",
+              "prompt": "Validate document format.",
+              "outputPorts": 1
+            }
+          },
+          {
+            "id": "if-1",
+            "type": "ifElse",
+            "name": "valid-check",
+            "position": { "x": 400, "y": 300 },
+            "data": {
+              "branches": [
+                { "label": "Valid", "condition": "Passed" },
+                { "label": "Invalid", "condition": "Failed" }
+              ],
+              "outputPorts": 2
+            }
+          },
+          {
+            "id": "analyzer-1",
+            "type": "subAgent",
+            "name": "analyzer",
+            "position": { "x": 550, "y": 200 },
+            "data": {
+              "description": "Analyze content",
+              "prompt": "Analyze content.",
+              "outputPorts": 1
+            }
+          },
+          {
+            "id": "error-1",
+            "type": "subAgent",
+            "name": "error-handler",
+            "position": { "x": 550, "y": 400 },
+            "data": {
+              "description": "Error report",
+              "prompt": "Generate error report.",
+              "outputPorts": 1
+            }
+          },
+          {
+            "id": "ask-1",
+            "type": "askUserQuestion",
+            "name": "format",
+            "position": { "x": 700, "y": 200 },
+            "data": {
+              "questionText": "Output format?",
+              "options": [
+                { "label": "PDF", "description": "PDF" },
+                { "label": "Markdown", "description": "MD" },
+                { "label": "HTML", "description": "HTML" }
+              ],
+              "outputPorts": 3
+            }
+          },
+          {
+            "id": "fmt-pdf",
+            "type": "subAgent",
+            "name": "pdf-fmt",
+            "position": { "x": 850, "y": 100 },
+            "data": { "description": "PDF format", "prompt": "Format as PDF.", "outputPorts": 1 }
+          },
+          {
+            "id": "fmt-md",
+            "type": "subAgent",
+            "name": "md-fmt",
+            "position": { "x": 850, "y": 200 },
+            "data": {
+              "description": "MD format",
+              "prompt": "Format as Markdown.",
+              "outputPorts": 1
+            }
+          },
+          {
+            "id": "fmt-html",
+            "type": "subAgent",
+            "name": "html-fmt",
+            "position": { "x": 850, "y": 300 },
+            "data": { "description": "HTML format", "prompt": "Format as HTML.", "outputPorts": 1 }
+          },
+          {
+            "id": "end-ok",
+            "type": "end",
+            "name": "success",
+            "position": { "x": 1000, "y": 200 },
+            "data": { "label": "Success" }
+          },
+          {
+            "id": "end-err",
+            "type": "end",
+            "name": "error",
+            "position": { "x": 700, "y": 400 },
+            "data": { "label": "Error" }
+          }
+        ],
+        "connections": [
+          {
+            "id": "c1",
+            "from": "start-1",
+            "to": "validator-1",
+            "fromPort": "output",
+            "toPort": "input"
+          },
+          {
+            "id": "c2",
+            "from": "validator-1",
+            "to": "if-1",
+            "fromPort": "output",
+            "toPort": "input"
+          },
+          {
+            "id": "c3",
+            "from": "if-1",
+            "to": "analyzer-1",
+            "fromPort": "branch-0",
+            "toPort": "input"
+          },
+          {
+            "id": "c4",
+            "from": "if-1",
+            "to": "error-1",
+            "fromPort": "branch-1",
+            "toPort": "input"
+          },
+          {
+            "id": "c5",
+            "from": "analyzer-1",
+            "to": "ask-1",
+            "fromPort": "output",
+            "toPort": "input"
+          },
+          {
+            "id": "c6",
+            "from": "ask-1",
+            "to": "fmt-pdf",
+            "fromPort": "branch-0",
+            "toPort": "input"
+          },
+          {
+            "id": "c7",
+            "from": "ask-1",
+            "to": "fmt-md",
+            "fromPort": "branch-1",
+            "toPort": "input"
+          },
+          {
+            "id": "c8",
+            "from": "ask-1",
+            "to": "fmt-html",
+            "fromPort": "branch-2",
+            "toPort": "input"
+          },
+          {
+            "id": "c9",
+            "from": "fmt-pdf",
+            "to": "end-ok",
+            "fromPort": "output",
+            "toPort": "input"
+          },
+          {
+            "id": "c10",
+            "from": "fmt-md",
+            "to": "end-ok",
+            "fromPort": "output",
+            "toPort": "input"
+          },
+          {
+            "id": "c11",
+            "from": "fmt-html",
+            "to": "end-ok",
+            "fromPort": "output",
+            "toPort": "input"
+          },
+          {
+            "id": "c12",
+            "from": "error-1",
+            "to": "end-err",
+            "fromPort": "output",
+            "toPort": "input"
+          }
+        ],
+        "createdAt": "2025-11-06T00:00:00Z",
+        "updatedAt": "2025-11-06T00:00:00Z"
+      }
+    }
+  ]
+}

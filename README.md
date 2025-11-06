@@ -49,6 +49,101 @@ All operations run locally within VSCode. No network communication means zero ri
 
 🌐 **Multilingual Support** - Both the Visual Editor UI and exported workflows automatically adapt to your VSCode language (English/Japanese/Korean/Simplified Chinese/Traditional Chinese supported)
 
+🤖 **AI-Assisted Workflow Generation** - Generate complete workflows from natural language descriptions using Claude Code CLI integration
+
+## AI-Assisted Workflow Generation
+
+### Overview
+
+Generate complete workflows automatically by describing them in natural language. The AI interprets your description and creates a fully-configured workflow with nodes and connections ready to use.
+
+### Prerequisites
+
+- **Claude Code CLI** must be installed and accessible in your PATH
+- Install from: https://claude.com/claude-code
+
+To verify installation:
+```bash
+claude --version
+```
+
+### How to Use
+
+1. **Open the Editor**
+   - Launch Claude Code Workflow Studio
+
+2. **Click "Generate with AI" Button**
+   - Located in the main toolbar next to Save/Export buttons
+
+3. **Describe Your Workflow**
+   - Write a natural language description (max 2000 characters)
+   - Example: "Create a code review workflow that scans code, asks user for priority level, and generates fix suggestions"
+   - Example: "Build a data analysis pipeline with file reader, data processor, and report generator"
+
+4. **Generate**
+   - Click "Generate" or press `Ctrl+Enter` / `Cmd+Enter`
+   - AI processes your description (may take up to 60 seconds)
+   - Generated workflow appears on canvas automatically
+
+### Features
+
+- **Smart Positioning**: Generated workflows are placed automatically to avoid overlapping existing nodes
+- **Validation**: AI output is validated against schema rules (max 50 nodes, valid connections, etc.)
+- **Error Handling**: Clear error messages with actionable guidance if generation fails
+- **Multilingual**: All UI elements and error messages support 5 languages (en, ja, ko, zh-CN, zh-TW)
+
+### Tips for Best Results
+
+✅ **Be Specific**: Mention node types (Sub-Agent, AskUserQuestion, etc.) if needed
+✅ **Describe Flow**: Explain the sequence and branching logic clearly
+✅ **Keep It Simple**: Start with 3-7 nodes, then expand manually if needed
+
+❌ **Avoid**: Overly complex descriptions (20+ nodes may timeout)
+❌ **Avoid**: Vague requirements without clear steps
+
+### Example Descriptions
+
+**Simple (3-5 nodes)**
+```
+Create a workflow that reads a file, processes the content, and saves the result.
+```
+
+**Medium (7-10 nodes)**
+```
+Create a code review workflow:
+1. Scan code with a Sub-Agent
+2. Ask user to select priority level (Critical/High/Medium)
+3. Filter results based on selection
+4. Generate fix suggestions with another Sub-Agent
+```
+
+**Complex (15-20 nodes)**
+```
+Build a multi-stage data pipeline:
+- Start with data collection from multiple sources
+- Run parallel validation checks
+- Ask user to approve or reject
+- If approved: transform, analyze, and visualize
+- If rejected: log reason and end
+- Generate final report
+```
+
+### Error Messages
+
+| Error Code | Meaning | Solution |
+|------------|---------|----------|
+| `COMMAND_NOT_FOUND` | Claude Code CLI not installed | Install Claude Code CLI |
+| `TIMEOUT` | Request took > 60 seconds | Simplify description or try again |
+| `PARSE_ERROR` | AI output couldn't be parsed | Rephrase description and retry |
+| `VALIDATION_ERROR` | Workflow exceeds limits (50 nodes max) | Reduce complexity |
+
+### Limitations
+
+- Maximum 50 nodes per generated workflow
+- 60-second timeout for AI processing
+- Description limited to 2000 characters
+- Requires active Claude Code CLI installation
+
 ## Getting Started
 
 ### Installation
