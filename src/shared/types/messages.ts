@@ -138,7 +138,7 @@ export interface SkillReference {
   /** Skill scope: personal or project */
   scope: 'personal' | 'project';
   /** Validation status */
-  validationStatus: 'valid' | 'invalid';
+  validationStatus: 'valid' | 'missing' | 'invalid';
   /** Optional: Allowed tools (from YAML frontmatter) */
   allowedTools?: string;
 }

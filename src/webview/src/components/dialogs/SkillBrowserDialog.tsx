@@ -7,7 +7,6 @@
  * Based on: specs/001-skill-node/design.md Section 6.2
  */
 
-import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { browseSkills } from '../../services/skill-browser-service';
@@ -31,7 +30,40 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
   const [selectedSkill, setSelectedSkill] = useState<SkillReference | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('personal');
 
-  const { addNode } = useWorkflowStore();
+  const { addNode, nodes } = useWorkflowStore();
+
+  /**
+   * 既存のノードと重ならない位置を計算する
+   */
+  const calculateNonOverlappingPosition = (
+    defaultX: number,
+    defaultY: number
+  ): { x: number; y: number } => {
+    const OFFSET_X = 30;
+    const OFFSET_Y = 30;
+    const NODE_WIDTH = 250;
+    const NODE_HEIGHT = 100;
+
+    let newX = defaultX;
+    let newY = defaultY;
+
+    for (let i = 0; i < 100; i++) {
+      const hasOverlap = nodes.some((node) => {
+        const xOverlap =
+          Math.abs(node.position.x - newX) < NODE_WIDTH && Math.abs(node.position.y - newY) < NODE_HEIGHT;
+        return xOverlap;
+      });
+
+      if (!hasOverlap) {
+        return { x: newX, y: newY };
+      }
+
+      newX += OFFSET_X;
+      newY += OFFSET_Y;
+    }
+
+    return { x: newX, y: newY };
+  };
 
   // Load Skills when dialog opens
   useEffect(() => {
@@ -77,8 +109,11 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
     }
 
     // Add Skill node to canvas
+    const position = calculateNonOverlappingPosition(300, 250);
     addNode({
+      id: `skill-${Date.now()}`,
       type: NodeType.Skill,
+      position,
       data: {
         name: selectedSkill.name,
         description: selectedSkill.description,
