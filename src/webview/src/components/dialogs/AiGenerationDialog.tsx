@@ -8,11 +8,7 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
-import {
-  AIGenerationError,
-  cancelWorkflowGeneration,
-  generateWorkflow,
-} from '../../services/ai-generation-service';
+import { AIGenerationError, generateWorkflow } from '../../services/ai-generation-service';
 import { useWorkflowStore } from '../../stores/workflow-store';
 
 interface AiGenerationDialogProps {
@@ -21,13 +17,12 @@ interface AiGenerationDialogProps {
 }
 
 const MAX_DESCRIPTION_LENGTH = 2000;
-const MAX_GENERATION_TIME_SECONDS = 90;
+const MAX_GENERATION_TIME_SECONDS = 60;
 
 export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps) {
   const { t } = useTranslation();
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
-  const [currentRequestId, setCurrentRequestId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -92,15 +87,12 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
       return;
     }
 
-    // Generate unique request ID
-    const requestId = `req-${Date.now()}-${Math.random()}`;
-    setCurrentRequestId(requestId);
     setLoading(true);
     setError(null);
 
     try {
-      // Generate workflow via AI (pass requestId for cancellation support)
-      const workflow = await generateWorkflow(description, requestId);
+      // Generate workflow via AI
+      const workflow = await generateWorkflow(description);
 
       // Add generated workflow to canvas (with auto-positioning to avoid overlap)
       addGeneratedWorkflow(workflow);
@@ -111,16 +103,9 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
         handleClose();
       }, 1500); // Close after 1.5 seconds
     } catch (err) {
-      // Handle cancellation - don't close modal, just reset loading state
-      if (err instanceof AIGenerationError && err.code === 'CANCELLED') {
-        // Loading state will be reset in finally block
-        // Modal remains open for user to try again
-        return;
-      }
       setError(getErrorMessage(err));
     } finally {
       setLoading(false);
-      setCurrentRequestId(null);
     }
   };
 
@@ -128,24 +113,12 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
     setDescription('');
     setError(null);
     setLoading(false);
-    setCurrentRequestId(null);
     setShowSuccess(false);
     onClose();
   };
 
-  const handleCancel = () => {
-    if (loading && currentRequestId) {
-      // Send cancellation request to Extension Host
-      cancelWorkflowGeneration(currentRequestId);
-      // UI will close when GENERATION_CANCELLED message is received
-    } else {
-      // Not generating, just close the dialog
-      handleClose();
-    }
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape' && !loading) {
+    if (e.key === 'Escape') {
       handleClose();
     } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       handleGenerate();
@@ -169,13 +142,9 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
         justifyContent: 'center',
         zIndex: 1000,
       }}
-      onClick={() => {
-        if (!loading) {
-          handleClose();
-        }
-      }}
+      onClick={handleClose}
       onKeyDown={(e) => {
-        if (e.key === 'Escape' && !loading) {
+        if (e.key === 'Escape') {
           handleClose();
         }
       }}
@@ -301,118 +270,107 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
           </div>
         )}
 
-        {loading &&
-          (() => {
-            // Calculate progress using ease-out quad function for smoother UX
-            // This makes progress feel faster initially, then slower near completion
-            // At 60s (~67% of 90s): ~89% progress, at 90s: 100% progress
-            const normalizedTime = elapsedSeconds / MAX_GENERATION_TIME_SECONDS;
-            const easedProgress = 1 - (1 - normalizedTime) ** 2;
-            const percentage = Math.min(Math.round(easedProgress * 100), 100);
+        {loading && (
+          <div
+            style={{
+              marginBottom: '16px',
+              padding: '16px',
+              backgroundColor: 'var(--vscode-inputValidation-infoBackground)',
+              border: '1px solid var(--vscode-inputValidation-infoBorder)',
+              borderRadius: '4px',
+            }}
+          >
+            <div
+              style={{
+                marginBottom: '12px',
+                fontSize: '14px',
+                color: 'var(--vscode-foreground)',
+                fontWeight: 500,
+              }}
+            >
+              {t('ai.generating')}
+            </div>
 
-            return (
+            {/* Progress bar */}
+            <div
+              style={{
+                width: '100%',
+                height: '8px',
+                backgroundColor: 'var(--vscode-editor-background)',
+                borderRadius: '4px',
+                overflow: 'hidden',
+                marginBottom: '8px',
+                border: '1px solid var(--vscode-panel-border)',
+              }}
+            >
               <div
                 style={{
-                  marginBottom: '16px',
-                  padding: '16px',
-                  backgroundColor: 'var(--vscode-inputValidation-infoBackground)',
-                  border: '1px solid var(--vscode-inputValidation-infoBorder)',
-                  borderRadius: '4px',
+                  width: `${Math.min((elapsedSeconds / MAX_GENERATION_TIME_SECONDS) * 100, 100)}%`,
+                  height: '100%',
+                  backgroundColor: 'var(--vscode-progressBar-background)',
+                  transition: 'width 0.5s linear',
                 }}
-              >
-                <div
-                  style={{
-                    marginBottom: '12px',
-                    fontSize: '14px',
-                    color: 'var(--vscode-foreground)',
-                    fontWeight: 500,
-                  }}
-                >
-                  {t('ai.generating')}
-                </div>
+              />
+            </div>
 
-                {/* Progress bar */}
-                <div
-                  style={{
-                    width: '100%',
-                    height: '8px',
-                    backgroundColor: 'var(--vscode-editor-background)',
-                    borderRadius: '4px',
-                    overflow: 'hidden',
-                    marginBottom: '8px',
-                    border: '1px solid var(--vscode-panel-border)',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: `${percentage}%`,
-                      height: '100%',
-                      backgroundColor: 'var(--vscode-progressBar-background)',
-                      transition: 'width 0.5s ease-out',
-                    }}
-                  />
-                </div>
-
-                {/* Progress text */}
-                <div
-                  style={{
-                    fontSize: '12px',
-                    color: 'var(--vscode-descriptionForeground)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <span>{percentage}%</span>
-                  <span>
-                    {t('ai.progressTime', {
-                      elapsed: elapsedSeconds,
-                      max: MAX_GENERATION_TIME_SECONDS,
-                    })}
-                  </span>
-                </div>
-              </div>
-            );
-          })()}
-
-        {!showSuccess && (
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-            <button
-              type="button"
-              onClick={handleCancel}
+            {/* Progress text */}
+            <div
               style={{
-                padding: '8px 16px',
-                fontSize: '14px',
-                backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                color: 'var(--vscode-button-secondaryForeground)',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
+                fontSize: '12px',
+                color: 'var(--vscode-descriptionForeground)',
+                display: 'flex',
+                justifyContent: 'space-between',
               }}
             >
-              {loading ? t('ai.cancelGenerationButton') : t('ai.cancelButton')}
-            </button>
-            <button
-              type="button"
-              onClick={handleGenerate}
-              disabled={!isDescriptionValid || loading || showSuccess}
-              style={{
-                padding: '8px 16px',
-                fontSize: '14px',
-                backgroundColor:
-                  isDescriptionValid && !loading && !showSuccess
-                    ? 'var(--vscode-button-background)'
-                    : 'var(--vscode-button-secondaryBackground)',
-                color: 'var(--vscode-button-foreground)',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: isDescriptionValid && !loading && !showSuccess ? 'pointer' : 'not-allowed',
-                opacity: isDescriptionValid && !loading && !showSuccess ? 1 : 0.5,
-              }}
-            >
-              {t('ai.generateButton')}
-            </button>
+              <span>
+                {Math.min(Math.round((elapsedSeconds / MAX_GENERATION_TIME_SECONDS) * 100), 100)}%
+              </span>
+              <span>
+                {elapsedSeconds}秒 / {MAX_GENERATION_TIME_SECONDS}秒
+              </span>
+            </div>
           </div>
         )}
+
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+          <button
+            type="button"
+            onClick={handleClose}
+            disabled={loading}
+            style={{
+              padding: '8px 16px',
+              fontSize: '14px',
+              backgroundColor: 'var(--vscode-button-secondaryBackground)',
+              color: 'var(--vscode-button-secondaryForeground)',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.5 : 1,
+            }}
+          >
+            {t('ai.cancelButton')}
+          </button>
+          <button
+            type="button"
+            onClick={handleGenerate}
+            disabled={!isDescriptionValid || loading || showSuccess}
+            style={{
+              padding: '8px 16px',
+              fontSize: '14px',
+              backgroundColor:
+                isDescriptionValid && !loading && !showSuccess
+                  ? 'var(--vscode-button-background)'
+                  : 'var(--vscode-button-secondaryBackground)',
+              color: 'var(--vscode-button-foreground)',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: isDescriptionValid && !loading && !showSuccess ? 'pointer' : 'not-allowed',
+              opacity: isDescriptionValid && !loading && !showSuccess ? 1 : 0.5,
+            }}
+          >
+            {t('ai.generateButton')}
+          </button>
+        </div>
       </div>
     </div>
   );
