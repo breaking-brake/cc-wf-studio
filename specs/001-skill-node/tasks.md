@@ -1,6 +1,6 @@
 # 実装タスク: Skill Node Integration
 
-**Feature**: 001-skill-node | **Generated**: 2025-11-08 | **Status**: Not Started
+**Feature**: 001-skill-node | **Generated**: 2025-11-08 | **Status**: In Progress (Phase 3)
 
 このドキュメントは、Skill Node機能の実装タスクを定義します。各フェーズ完了時にユーザーによる手動E2Eテストを実施します。
 
@@ -32,10 +32,10 @@
 
 ### タスク一覧
 
-- [ ] [T001] [P1] [Setup] 機能ブランチ001-skill-nodeの作成と初期コミット
-- [ ] [T002] [P1] [Setup] 仕様書(spec.md)の最終レビューと承認
-- [ ] [T003] [P1] [Setup] データモデル(data-model.md)の最終レビューと承認
-- [ ] [T004] [P1] [Setup] メッセージ契約(contracts/skill-messages.ts)の最終レビューと承認
+- [x] [T001] [P1] [Setup] 機能ブランチ001-skill-nodeの作成と初期コミット
+- [x] [T002] [P1] [Setup] 仕様書(spec.md)の最終レビューと承認
+- [x] [T003] [P1] [Setup] データモデル(data-model.md)の最終レビューと承認
+- [x] [T004] [P1] [Setup] メッセージ契約(contracts/skill-messages.ts)の最終レビューと承認
 
 ### 詳細
 
@@ -55,8 +55,8 @@ git commit -m "feat: add Skill node specification"
 ```
 
 **完了条件**:
-- [ ] ブランチ001-skill-nodeが作成されている
-- [ ] spec.md, plan.md, data-model.md, contracts/がコミットされている
+- [x] ブランチ001-skill-nodeが作成されている
+- [x] spec.md, plan.md, data-model.md, contracts/がコミットされている
 
 ---
 
@@ -70,8 +70,8 @@ git commit -m "feat: add Skill node specification"
 - エラーハンドリング戦略(エラーコードと国際化対応)
 
 **完了条件**:
-- [ ] 各ドキュメントに矛盾がない
-- [ ] チーム/レビュアーの承認を得ている
+- [x] 各ドキュメントに矛盾がない
+- [x] チーム/レビュアーの承認を得ている
 
 ---
 
@@ -81,10 +81,10 @@ git commit -m "feat: add Skill node specification"
 
 ### タスク一覧
 
-- [ ] [T005] [P1] [Foundation] TypeScript型定義の追加 (src/shared/types/workflow-definition.ts, messages.ts)
-- [ ] [T006] [P1] [Foundation] YAMLパーサーの実装 (src/extension/services/yaml-parser.ts)
-- [ ] [T007] [P1] [Foundation] クロスプラットフォームパスユーティリティの実装 (src/extension/utils/path-utils.ts)
-- [ ] [T008] [P1] [Foundation] Skillサービスのスキャン機能実装 (src/extension/services/skill-service.ts)
+- [x] [T005] [P1] [Foundation] TypeScript型定義の追加 (src/shared/types/workflow-definition.ts, messages.ts)
+- [x] [T006] [P1] [Foundation] YAMLパーサーの実装 (src/extension/services/yaml-parser.ts)
+- [x] [T007] [P1] [Foundation] クロスプラットフォームパスユーティリティの実装 (src/extension/utils/path-utils.ts)
+- [x] [T008] [P1] [Foundation] Skillサービスのスキャン機能実装 (src/extension/services/skill-service.ts)
 
 ### 詳細
 
@@ -129,10 +129,10 @@ interface CreateSkillPayload { /* data-model.mdの通り */ }
 - `src/shared/types/messages.ts` (UPDATE)
 
 **完了条件**:
-- [ ] `NodeType.Skill`が追加されている
-- [ ] `SkillNodeData`, `SkillNode`インターフェースが定義されている
-- [ ] 11個のメッセージタイプがすべて定義されている
-- [ ] TypeScriptコンパイルエラーなし
+- [x] `NodeType.Skill`が追加されている
+- [x] `SkillNodeData`, `SkillNode`インターフェースが定義されている
+- [x] 11個のメッセージタイプがすべて定義されている
+- [x] TypeScriptコンパイルエラーなし
 
 **依存関係**: なし(Phase 2の最初のタスク)
 
@@ -173,10 +173,10 @@ export function parseSkillFrontmatter(content: string): SkillMetadata | null {
 - `src/extension/services/yaml-parser.ts` (NEW)
 
 **完了条件**:
-- [ ] `parseSkillFrontmatter`関数が実装されている
-- [ ] 必須フィールド(name, description)の抽出が動作
-- [ ] オプションフィールド(allowed-tools)の抽出が動作
-- [ ] 無効なYAMLで`null`を返す
+- [x] `parseSkillFrontmatter`関数が実装されている
+- [x] 必須フィールド(name, description)の抽出が動作
+- [x] オプションフィールド(allowed-tools)の抽出が動作
+- [x] 無効なYAMLで`null`を返す
 
 **依存関係**: T005(型定義)
 
@@ -220,10 +220,10 @@ export function resolveSkillPath(skillPath: string, scope: 'personal' | 'project
 - `src/extension/utils/path-utils.ts` (NEW)
 
 **完了条件**:
-- [ ] `getPersonalSkillsDir()`が正しいパスを返す
-- [ ] `getProjectSkillsDir()`がワークスペースルートを基準にパスを返す
-- [ ] `resolveSkillPath()`が絶対/相対パスを正しく解決
-- [ ] Windows/Unixパスセパレータが自動処理される
+- [x] `getPersonalSkillsDir()`が正しいパスを返す
+- [x] `getProjectSkillsDir()`がワークスペースルートを基準にパスを返す
+- [x] `resolveSkillPath()`が絶対/相対パスを正しく解決
+- [x] Windows/Unixパスセパレータが自動処理される
 
 **依存関係**: なし
 
@@ -299,9 +299,9 @@ export async function validateSkillFile(skillPath: string): Promise<SkillMetadat
 - `src/extension/services/skill-service.ts` (NEW)
 
 **完了条件**:
-- [ ] `scanSkills()`が有効なSkillを返す
-- [ ] 無効なSkillはスキップされログ出力される
-- [ ] ディレクトリが存在しない場合は空配列を返す
+- [x] `scanSkills()`が有効なSkillを返す
+- [x] 無効なSkillはスキップされログ出力される
+- [x] ディレクトリが存在しない場合は空配列を返す
 
 **依存関係**: T006(YAMLパーサー), T007(パスユーティリティ)
 
@@ -317,13 +317,13 @@ export async function validateSkillFile(skillPath: string): Promise<SkillMetadat
 
 ### タスク一覧
 
-- [ ] [T009] [P1] [US1] Extension側メッセージハンドラーの実装 (src/extension/commands/skill-operations.ts)
-- [ ] [T010] [P1] [US1] Webview側Skillブラウザサービスの実装 (src/webview/src/services/skill-browser-service.ts)
-- [ ] [T011] [P1] [US1] SkillノードReactコンポーネントの実装 (src/webview/src/components/nodes/SkillNode.tsx)
-- [ ] [T012] [P1] [US1] Skillブラウザダイアログの実装 (src/webview/src/components/dialogs/SkillBrowserDialog.tsx)
-- [ ] [T013] [P1] [US1] ノードパレットへのSkillノード追加 (src/webview/src/components/NodePalette.tsx)
-- [ ] [T014] [P1] [US1] プロパティパネルのSkillノード対応 (src/webview/src/components/PropertyPanel.tsx)
-- [ ] [T015] [P1] [US1] ワークフローエクスポート時のSkill依存関係ドキュメント生成 (src/extension/services/export-service.ts)
+- [x] [T009] [P1] [US1] Extension側メッセージハンドラーの実装 (src/extension/commands/skill-operations.ts)
+- [x] [T010] [P1] [US1] Webview側Skillブラウザサービスの実装 (src/webview/src/services/skill-browser-service.ts)
+- [x] [T011] [P1] [US1] SkillノードReactコンポーネントの実装 (src/webview/src/components/nodes/SkillNode.tsx)
+- [x] [T012] [P1] [US1] Skillブラウザダイアログの実装 (src/webview/src/components/dialogs/SkillBrowserDialog.tsx)
+- [x] [T013] [P1] [US1] ノードパレットへのSkillノード追加 (src/webview/src/components/NodePalette.tsx)
+- [x] [T014] [P1] [US1] プロパティパネルのSkillノード対応 (src/webview/src/components/PropertyPanel.tsx)
+- [x] [T015] [P1] [US1] ワークフローエクスポート時のSkill依存関係ドキュメント生成 (src/extension/services/export-service.ts)
 - [ ] [T016] [P1] [US1] 手動E2Eテスト: Skillノード追加からエクスポートまで
 
 ### 詳細
@@ -384,10 +384,10 @@ export async function handleValidateSkillFile(/* 必要に応じて実装 */) {}
 - `src/extension/commands/skill-operations.ts` (NEW)
 
 **完了条件**:
-- [ ] `handleBrowseSkills`が実装されている
-- [ ] personalとprojectを並列スキャンしている
-- [ ] エラー時に適切なエラーメッセージを返す
-- [ ] VSCode Output Channelにログ出力される
+- [x] `handleBrowseSkills`が実装されている
+- [x] personalとprojectを並列スキャンしている
+- [x] エラー時に適切なエラーメッセージを返す
+- [x] VSCode Output Channelにログ出力される
 
 **依存関係**: T008(Skillサービス)
 
@@ -437,9 +437,9 @@ export async function browseSkills(): Promise<SkillReference[]> {
 - `src/webview/src/services/skill-browser-service.ts` (NEW)
 
 **完了条件**:
-- [ ] `browseSkills()`が実装されている
-- [ ] タイムアウト処理が動作する
-- [ ] エラー時に適切なエラーメッセージを返す
+- [x] `browseSkills()`が実装されている
+- [x] タイムアウト処理が動作する
+- [x] エラー時に適切なエラーメッセージを返す
 
 **依存関係**: T009(メッセージハンドラー)
 
@@ -460,9 +460,9 @@ export async function browseSkills(): Promise<SkillReference[]> {
 - `src/webview/src/components/nodes/SkillNode.module.css` (NEW)
 
 **完了条件**:
-- [ ] SkillNodeがキャンバスに表示される
-- [ ] 検証ステータスに応じたアイコン表示
-- [ ] クリック時にプロパティパネルが開く
+- [x] SkillNodeがキャンバスに表示される
+- [x] 検証ステータスに応じたアイコン表示
+- [x] クリック時にプロパティパネルが開く
 
 **依存関係**: T005(型定義)
 
@@ -483,10 +483,10 @@ export async function browseSkills(): Promise<SkillReference[]> {
 - `src/webview/src/components/dialogs/SkillBrowserDialog.module.css` (NEW)
 
 **完了条件**:
-- [ ] ダイアログが開き、Skill一覧が表示される
-- [ ] Skill選択後、ダイアログが閉じる
-- [ ] キーボードナビゲーションが動作
-- [ ] 国際化対応(5言語: en, ja, ko, zh-CN, zh-TW)
+- [x] ダイアログが開き、Skill一覧が表示される
+- [x] Skill選択後、ダイアログが閉じる
+- [x] キーボードナビゲーションが動作
+- [x] 国際化対応(5言語: en, ja, ko, zh-CN, zh-TW)
 
 **依存関係**: T010(ブラウザサービス), T011(Skillノード)
 
@@ -507,8 +507,8 @@ export async function browseSkills(): Promise<SkillReference[]> {
 - `src/webview/src/components/NodePalette.tsx` (UPDATE)
 
 **完了条件**:
-- [ ] ノードパレットに"Skill"が表示される
-- [ ] ドラッグ&ドロップでキャンバスに追加できる
+- [x] ノードパレットに"Skill"が表示される
+- [x] ドラッグ&ドロップでキャンバスに追加できる
 
 **依存関係**: T011(Skillノード)
 
@@ -530,9 +530,9 @@ export async function browseSkills(): Promise<SkillReference[]> {
 - `src/webview/src/components/PropertyPanel.tsx` (UPDATE)
 
 **完了条件**:
-- [ ] Skillノード選択時にプロパティが表示される
-- [ ] "Browse Skills"ボタンでブラウザダイアログが開く
-- [ ] 検証ステータス警告が適切に表示される
+- [x] Skillノード選択時にプロパティが表示される
+- [x] "Browse Skills"ボタンでブラウザダイアログが開く
+- [x] 検証ステータス警告が適切に表示される
 
 **依存関係**: T011(Skillノード), T012(ブラウザダイアログ)
 
@@ -564,9 +564,9 @@ flowchart TD
 - `src/extension/services/export-service.ts` (UPDATE)
 
 **完了条件**:
-- [ ] Skillノードを含むワークフローのエクスポートが成功
-- [ ] エクスポートファイルにSkill依存関係セクションが含まれる
-- [ ] Mermaidフローチャートで`{{}}`が使用されている
+- [x] Skillノードを含むワークフローのエクスポートが成功
+- [x] エクスポートファイルにSkill依存関係セクションが含まれる
+- [x] Mermaidフローチャートで`[[]]`が使用されている
 
 **依存関係**: T011(Skillノード)
 
@@ -1110,14 +1110,14 @@ graph TD
 ## チェックポイント
 
 ### Checkpoint 1: Phase 2完了時
-- [ ] YAMLパーサーが有効なSKILL.mdを正しく解析できる
-- [ ] Skillスキャンが動作し、Skillを検出できる
-- [ ] 型定義が全てコンパイル通過
+- [x] YAMLパーサーが有効なSKILL.mdを正しく解析できる
+- [x] Skillスキャンが動作し、Skillを検出できる
+- [x] 型定義が全てコンパイル通過
 
 ### Checkpoint 2: Phase 3完了時(MVP)
 - [ ] US1の手動E2Eテストが全て通過
-- [ ] Skillノードがキャンバスに追加可能
-- [ ] ワークフローエクスポートにSkill依存関係が含まれる
+- [x] Skillノードがキャンバスに追加可能
+- [x] ワークフローエクスポートにSkill依存関係が含まれる
 
 ### Checkpoint 3: Phase 4完了時
 - [ ] プロジェクトSkillが相対パスで保存される
