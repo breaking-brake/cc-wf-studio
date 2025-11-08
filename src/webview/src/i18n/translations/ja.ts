@@ -275,7 +275,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'skill.creation.allowedToolsHint': 'カンマ区切りのツール名リスト（例：Read, Grep, Glob）',
   'skill.creation.scopeLabel': 'スコープ',
   'skill.creation.scopePersonal': 'パーソナル (~/.claude/skills/)',
-  'skill.creation.scopeProject': 'プロジェクト用 (.claude/skills/)',
+  'skill.creation.scopeProject': 'プロジェクト (.claude/skills/)',
   'skill.creation.cancelButton': 'キャンセル',
   'skill.creation.createButton': 'Skillを作成',
   'skill.creation.creatingButton': '作成中...',
