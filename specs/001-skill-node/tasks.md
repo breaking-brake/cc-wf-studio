@@ -324,7 +324,7 @@ export async function validateSkillFile(skillPath: string): Promise<SkillMetadat
 - [x] [T013] [P1] [US1] ノードパレットへのSkillノード追加 (src/webview/src/components/NodePalette.tsx)
 - [x] [T014] [P1] [US1] プロパティパネルのSkillノード対応 (src/webview/src/components/PropertyPanel.tsx)
 - [x] [T015] [P1] [US1] ワークフローエクスポート時のSkill依存関係ドキュメント生成 (src/extension/services/export-service.ts)
-- [ ] [T016] [P1] [US1] 手動E2Eテスト: Skillノード追加からエクスポートまで
+- [x] [T016] [P1] [US1] 手動E2Eテスト: Skillノード追加からエクスポートまで
 
 ### 詳細
 
@@ -604,8 +604,8 @@ flowchart TD
    - ✅ 参照されたSkillが正しく動作する
 
 **完了条件**:
-- [ ] US1の全4つの受け入れシナリオが手動テストで確認済み
-- [ ] テスト結果をドキュメント化(スクリーンショット含む)
+- [x] US1の全4つの受け入れシナリオが手動テストで確認済み
+- [x] テスト結果を確認済み（Skillノード追加、選択、プロパティ表示、エクスポート全て動作）
 
 **依存関係**: T009-T015(すべてのUS1タスク)
 
@@ -1115,7 +1115,7 @@ graph TD
 - [x] 型定義が全てコンパイル通過
 
 ### Checkpoint 2: Phase 3完了時(MVP)
-- [ ] US1の手動E2Eテストが全て通過
+- [x] US1の手動E2Eテストが全て通過
 - [x] Skillノードがキャンバスに追加可能
 - [x] ワークフローエクスポートにSkill依存関係が含まれる
 
