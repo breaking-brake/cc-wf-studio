@@ -21,6 +21,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.workflowNameRequiredForExport': 'エクスポートにはワークフロー名が必要です',
   'toolbar.error.selectWorkflowToLoad': '読み込むワークフローを選択してください',
   'toolbar.error.validationFailed': 'ワークフローの検証に失敗しました',
+  'toolbar.error.missingEndNode': 'ワークフローには最低1つのEndノードが必要です',
 
   // Node Palette
   'palette.title': 'ノードパレット',
@@ -33,6 +34,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'node.prompt.description': '変数を使用できるテンプレート',
   'node.subAgent.title': 'Sub-Agent',
   'node.subAgent.description': '専門タスクを実行',
+  'node.end.title': 'End',
+  'node.end.description': 'ワークフロー終了地点',
   'node.branch.title': 'Branch',
   'node.branch.description': '条件分岐ロジック',
   'node.branch.deprecationNotice': '廃止予定。If/ElseまたはSwitchノードへの移行を推奨します',
@@ -81,7 +84,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.startNodeDescription':
     'Startノードはワークフローの開始地点です。削除できず、編集可能なプロパティはありません。',
   'property.endNodeDescription':
-    'Endノードはワークフローの終了地点です。削除できず、編集可能なプロパティはありません。',
+    'Endノードはワークフローの終了地点です。編集可能なプロパティはありません。エクスポート時に最低1つのEndノードが必要です。',
   'property.unknownNodeType': '不明なノードタイプ:',
 
   // Sub-Agent properties
@@ -213,4 +216,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'ai.error.parseError': '生成に失敗しました - もう一度試すか、説明を言い換えてください',
   'ai.error.validationError': '生成されたワークフローの検証に失敗しました',
   'ai.error.unknown': '予期しないエラーが発生しました。もう一度お試しください。',
+
+  // Delete Confirmation Dialog
+  'dialog.deleteNode.title': 'ノードを削除',
+  'dialog.deleteNode.message': 'このノードを削除してもよろしいですか？',
+  'dialog.deleteNode.confirm': '削除',
+  'dialog.deleteNode.cancel': 'キャンセル',
 };

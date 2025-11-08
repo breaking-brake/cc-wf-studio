@@ -66,9 +66,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
       await saveWorkflow(workflow);
       console.log('Workflow saved successfully:', workflowName);
     } catch (error) {
+      // Translate error messages
+      let errorMessage = t('toolbar.error.validationFailed');
+      if (error instanceof Error) {
+        if (error.message.includes('at least one End node')) {
+          errorMessage = t('toolbar.error.missingEndNode');
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
       onError({
         code: 'VALIDATION_ERROR',
-        message: error instanceof Error ? error.message : t('toolbar.error.validationFailed'),
+        message: errorMessage,
         details: error,
       });
     } finally {
@@ -163,9 +173,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
         payload: { workflow },
       });
     } catch (error) {
+      // Translate error messages
+      let errorMessage = t('toolbar.error.validationFailed');
+      if (error instanceof Error) {
+        if (error.message.includes('at least one End node')) {
+          errorMessage = t('toolbar.error.missingEndNode');
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
       onError({
         code: 'VALIDATION_ERROR',
-        message: error instanceof Error ? error.message : t('toolbar.error.validationFailed'),
+        message: errorMessage,
         details: error,
       });
       setIsExporting(false);

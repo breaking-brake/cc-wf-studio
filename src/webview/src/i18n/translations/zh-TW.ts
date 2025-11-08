@@ -21,6 +21,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.workflowNameRequiredForExport': '匯出需要工作流名稱',
   'toolbar.error.selectWorkflowToLoad': '請選擇要載入的工作流',
   'toolbar.error.validationFailed': '工作流驗證失敗',
+  'toolbar.error.missingEndNode': '工作流必須至少包含一個End節點',
 
   // Node Palette
   'palette.title': '節點面板',
@@ -33,6 +34,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'node.prompt.description': '帶變數的範本',
   'node.subAgent.title': 'Sub-Agent',
   'node.subAgent.description': '執行專門任務',
+  'node.end.title': 'End',
+  'node.end.description': '工作流程結束點',
   'node.branch.title': 'Branch',
   'node.branch.description': '條件分支邏輯',
   'node.branch.deprecationNotice': '已棄用。請遷移到If/Else或Switch節點',
@@ -200,4 +203,10 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'ai.error.parseError': '產生失敗 - 請重試或重新表述您的描述',
   'ai.error.validationError': '產生的工作流驗證失敗',
   'ai.error.unknown': '發生意外錯誤。請重試。',
+
+  // Delete Confirmation Dialog
+  'dialog.deleteNode.title': '刪除節點',
+  'dialog.deleteNode.message': '確定要刪除此節點嗎？',
+  'dialog.deleteNode.confirm': '刪除',
+  'dialog.deleteNode.cancel': '取消',
 };

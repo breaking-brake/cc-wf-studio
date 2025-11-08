@@ -14,6 +14,7 @@
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import type { EndNodeData } from '../../types/node-types';
+import { DeleteButton } from './DeleteButton';
 
 /**
  * EndNodeコンポーネント
@@ -21,13 +22,14 @@ import type { EndNodeData } from '../../types/node-types';
  * @param data - ノードデータ（label: カスタムラベル）
  * @param selected - ノードが選択されているかどうか
  */
-export const EndNode: React.FC<NodeProps<EndNodeData>> = React.memo(({ data, selected }) => {
+export const EndNode: React.FC<NodeProps<EndNodeData>> = React.memo(({ id, data, selected }) => {
   // ラベルのデフォルト値
   const label = data.label || 'End';
 
   return (
     <div
       style={{
+        position: 'relative',
         padding: '12px',
         borderRadius: '8px',
         border: `2px solid ${selected ? 'var(--vscode-focusBorder)' : '#ef4444'}`,
@@ -35,6 +37,9 @@ export const EndNode: React.FC<NodeProps<EndNodeData>> = React.memo(({ data, sel
         minWidth: '120px',
       }}
     >
+      {/* Delete Button */}
+      <DeleteButton nodeId={id} selected={selected} />
+
       {/* Node Header */}
       <div
         style={{

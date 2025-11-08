@@ -21,6 +21,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.workflowNameRequiredForExport': '导出需要工作流名称',
   'toolbar.error.selectWorkflowToLoad': '请选择要加载的工作流',
   'toolbar.error.validationFailed': '工作流验证失败',
+  'toolbar.error.missingEndNode': '工作流必须至少包含一个End节点',
 
   // Node Palette
   'palette.title': '节点面板',
@@ -33,6 +34,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'node.prompt.description': '带变量的模板',
   'node.subAgent.title': 'Sub-Agent',
   'node.subAgent.description': '执行专门任务',
+  'node.end.title': 'End',
+  'node.end.description': '工作流结束点',
   'node.branch.title': 'Branch',
   'node.branch.description': '条件分支逻辑',
   'node.branch.deprecationNotice': '已弃用。请迁移到If/Else或Switch节点',
@@ -200,4 +203,10 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'ai.error.parseError': '生成失败 - 请重试或重新表述您的描述',
   'ai.error.validationError': '生成的工作流验证失败',
   'ai.error.unknown': '发生意外错误。请重试。',
+
+  // Delete Confirmation Dialog
+  'dialog.deleteNode.title': '删除节点',
+  'dialog.deleteNode.message': '确定要删除此节点吗？',
+  'dialog.deleteNode.confirm': '删除',
+  'dialog.deleteNode.cancel': '取消',
 };

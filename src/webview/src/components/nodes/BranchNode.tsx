@@ -7,6 +7,7 @@
 import type { BranchNodeData } from '@shared/types/workflow-definition';
 import React, { useEffect } from 'react';
 import { Handle, type NodeProps, Position, useUpdateNodeInternals } from 'reactflow';
+import { DeleteButton } from './DeleteButton';
 
 /**
  * BranchNode Component
@@ -26,6 +27,7 @@ export const BranchNodeComponent: React.FC<NodeProps<BranchNodeData>> = React.me
       <div
         className={`branch-node ${selected ? 'selected' : ''}`}
         style={{
+          position: 'relative',
           padding: '12px',
           borderRadius: '8px',
           border: `2px solid ${selected ? 'var(--vscode-focusBorder)' : 'var(--vscode-panel-border)'}`,
@@ -34,6 +36,8 @@ export const BranchNodeComponent: React.FC<NodeProps<BranchNodeData>> = React.me
           maxWidth: '300px',
         }}
       >
+        {/* Delete Button */}
+        <DeleteButton nodeId={id} selected={selected} />
         {/* Node Header */}
         <div
           style={{

@@ -8,6 +8,7 @@
 import type { SwitchNodeData } from '@shared/types/workflow-definition';
 import React, { useEffect } from 'react';
 import { Handle, type NodeProps, Position, useUpdateNodeInternals } from 'reactflow';
+import { DeleteButton } from './DeleteButton';
 
 /**
  * SwitchNode Component
@@ -25,6 +26,7 @@ export const SwitchNodeComponent: React.FC<NodeProps<SwitchNodeData>> = React.me
       <div
         className={`switch-node ${selected ? 'selected' : ''}`}
         style={{
+          position: 'relative',
           padding: '12px',
           borderRadius: '8px',
           border: `2px solid ${selected ? 'var(--vscode-focusBorder)' : 'var(--vscode-panel-border)'}`,
@@ -33,6 +35,8 @@ export const SwitchNodeComponent: React.FC<NodeProps<SwitchNodeData>> = React.me
           maxWidth: '300px',
         }}
       >
+        {/* Delete Button */}
+        <DeleteButton nodeId={id} selected={selected} />
         {/* Node Header */}
         <div
           style={{
