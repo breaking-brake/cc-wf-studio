@@ -98,7 +98,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Skill properties
   'property.skillPath': 'Skillパス',
   'property.scope': 'スコープ',
-  'property.scope.personal': '個人',
+  'property.scope.personal': 'パーソナル',
   'property.scope.project': 'プロジェクト',
   'property.validationStatus': '検証ステータス',
   'property.validationStatus.valid': '有効',
@@ -243,7 +243,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.title': 'Skillを参照',
   'skill.browser.description':
     'ワークフローに追加するClaude Code Skillを選択してください。SkillはClaude Codeから呼び出せる特殊なツールです。',
-  'skill.browser.personalTab': '個人',
+  'skill.browser.personalTab': 'パーソナル',
   'skill.browser.projectTab': 'プロジェクト',
   'skill.browser.noSkills': 'このディレクトリにSkillが見つかりません',
   'skill.browser.loading': 'Skillを読み込み中...',
@@ -274,7 +274,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'skill.creation.allowedToolsLabel': '許可ツール（オプション）',
   'skill.creation.allowedToolsHint': 'カンマ区切りのツール名リスト（例：Read, Grep, Glob）',
   'skill.creation.scopeLabel': 'スコープ',
-  'skill.creation.scopePersonal': '個人用 (~/.claude/skills/)',
+  'skill.creation.scopePersonal': 'パーソナル (~/.claude/skills/)',
   'skill.creation.scopeProject': 'プロジェクト用 (.claude/skills/)',
   'skill.creation.cancelButton': 'キャンセル',
   'skill.creation.createButton': 'Skillを作成',
