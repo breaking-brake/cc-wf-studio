@@ -21,6 +21,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.workflowNameRequiredForExport': '내보내기에는 워크플로 이름이 필요합니다',
   'toolbar.error.selectWorkflowToLoad': '불러올 워크플로를 선택하세요',
   'toolbar.error.validationFailed': '워크플로 검증에 실패했습니다',
+  'toolbar.error.missingEndNode': '워크플로에는 최소 1개의 End 노드가 필요합니다',
 
   // Node Palette
   'palette.title': '노드 팔레트',
@@ -33,6 +34,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'node.prompt.description': '변수가 있는 템플릿',
   'node.subAgent.title': 'Sub-Agent',
   'node.subAgent.description': '전문 작업 실행',
+  'node.end.title': 'End',
+  'node.end.description': '워크플로 종료 지점',
   'node.branch.title': 'Branch',
   'node.branch.description': '조건 분기 로직',
   'node.branch.deprecationNotice':
@@ -213,4 +216,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'ai.error.parseError': '생성에 실패했습니다 - 다시 시도하거나 설명을 다시 작성하세요',
   'ai.error.validationError': '생성된 워크플로 검증에 실패했습니다',
   'ai.error.unknown': '예기치 않은 오류가 발생했습니다. 다시 시도하세요.',
+
+  // Delete Confirmation Dialog
+  'dialog.deleteNode.title': '노드 삭제',
+  'dialog.deleteNode.message': '이 노드를 삭제하시겠습니까?',
+  'dialog.deleteNode.confirm': '삭제',
+  'dialog.deleteNode.cancel': '취소',
 };

@@ -14,13 +14,53 @@ import { useWorkflowStore } from '../stores/workflow-store';
  */
 export const NodePalette: React.FC = () => {
   const { t } = useTranslation();
-  const { addNode } = useWorkflowStore();
+  const { addNode, nodes } = useWorkflowStore();
+
+  /**
+   * 既存のノードと重ならない位置を計算する
+   * @param defaultX デフォルトのX座標
+   * @param defaultY デフォルトのY座標
+   * @returns 重複しない位置 {x, y}
+   */
+  const calculateNonOverlappingPosition = (
+    defaultX: number,
+    defaultY: number
+  ): { x: number; y: number } => {
+    let newX = defaultX;
+    let newY = defaultY;
+    const OVERLAP_THRESHOLD = 50; // 50px以内なら重複と判定
+    const OFFSET_X = 100; // 重複時の右オフセット
+    const OFFSET_Y = 80; // 重複時の下オフセット
+    const MAX_ATTEMPTS = 20; // 最大試行回数
+
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      // 現在の位置と重複するノードがあるかチェック
+      const hasOverlap = nodes.some((node) => {
+        const dx = Math.abs(node.position.x - newX);
+        const dy = Math.abs(node.position.y - newY);
+        return dx < OVERLAP_THRESHOLD && dy < OVERLAP_THRESHOLD;
+      });
+
+      if (!hasOverlap) {
+        // 重複がなければこの位置を返す
+        return { x: newX, y: newY };
+      }
+
+      // 重複があれば斜め下にオフセット
+      newX += OFFSET_X;
+      newY += OFFSET_Y;
+    }
+
+    // 最大試行回数に達した場合でも最後の位置を返す
+    return { x: newX, y: newY };
+  };
 
   const handleAddSubAgent = () => {
+    const position = calculateNonOverlappingPosition(250, 100);
     const newNode = {
       id: `agent-${Date.now()}`,
       type: 'subAgent' as const,
-      position: { x: 250, y: 100 },
+      position,
       data: {
         description: t('default.newSubAgent'),
         prompt: t('default.enterPrompt'),
@@ -32,10 +72,11 @@ export const NodePalette: React.FC = () => {
   };
 
   const handleAddAskUserQuestion = () => {
+    const position = calculateNonOverlappingPosition(250, 300);
     const newNode = {
       id: `question-${Date.now()}`,
       type: 'askUserQuestion' as const,
-      position: { x: 250, y: 300 },
+      position,
       data: {
         questionText: t('default.newQuestion'),
         options: [
@@ -49,10 +90,11 @@ export const NodePalette: React.FC = () => {
   };
 
   const handleAddPromptNode = () => {
+    const position = calculateNonOverlappingPosition(350, 200);
     const newNode = {
       id: `prompt-${Date.now()}`,
       type: 'prompt' as const,
-      position: { x: 350, y: 200 },
+      position,
       data: {
         label: t('default.newPrompt'),
         prompt: t('default.promptTemplate'),
@@ -62,11 +104,25 @@ export const NodePalette: React.FC = () => {
     addNode(newNode);
   };
 
+  const handleAddEndNode = () => {
+    const position = calculateNonOverlappingPosition(600, 200);
+    const newNode = {
+      id: `end-${Date.now()}`,
+      type: 'end' as const,
+      position,
+      data: {
+        label: 'End',
+      },
+    };
+    addNode(newNode);
+  };
+
   const handleAddBranch = () => {
+    const position = calculateNonOverlappingPosition(250, 250);
     const newNode = {
       id: `branch-${Date.now()}`,
       type: 'branch' as const,
-      position: { x: 250, y: 250 },
+      position,
       data: {
         branchType: 'conditional' as const,
         branches: [
@@ -80,10 +136,11 @@ export const NodePalette: React.FC = () => {
   };
 
   const handleAddIfElse = () => {
+    const position = calculateNonOverlappingPosition(250, 250);
     const newNode = {
       id: `ifelse-${Date.now()}`,
       type: 'ifElse' as const,
-      position: { x: 250, y: 250 },
+      position,
       data: {
         evaluationTarget: '',
         branches: [
@@ -97,10 +154,11 @@ export const NodePalette: React.FC = () => {
   };
 
   const handleAddSwitch = () => {
+    const position = calculateNonOverlappingPosition(250, 280);
     const newNode = {
       id: `switch-${Date.now()}`,
       type: 'switch' as const,
-      position: { x: 250, y: 280 },
+      position,
       data: {
         evaluationTarget: '',
         branches: [
@@ -360,6 +418,45 @@ export const NodePalette: React.FC = () => {
           }}
         >
           {t('node.askUserQuestion.description')}
+        </div>
+      </button>
+
+      {/* End Node Button */}
+      <button
+        type="button"
+        onClick={handleAddEndNode}
+        data-tour="add-end-button"
+        style={{
+          width: '100%',
+          padding: '12px',
+          marginBottom: '12px',
+          backgroundColor: 'var(--vscode-button-background)',
+          color: 'var(--vscode-button-foreground)',
+          border: '1px solid var(--vscode-button-border)',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '13px',
+          fontWeight: 500,
+          textAlign: 'left',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+        }}
+      >
+        <div style={{ fontWeight: 600 }}>{t('node.end.title')}</div>
+        <div
+          style={{
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+          }}
+        >
+          {t('node.end.description')}
         </div>
       </button>
 

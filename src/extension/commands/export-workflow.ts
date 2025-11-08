@@ -14,6 +14,7 @@ import {
   validateClaudeFileFormat,
 } from '../services/export-service';
 import type { FileService } from '../services/file-service';
+import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
 
 /**
  * Export workflow to .claude format
@@ -30,6 +31,13 @@ export async function handleExportWorkflow(
   requestId?: string
 ): Promise<void> {
   try {
+    // Validate workflow structure before export
+    const validationResult = validateAIGeneratedWorkflow(payload.workflow);
+    if (!validationResult.valid) {
+      const errorMessages = validationResult.errors.map((err) => err.message).join('\n');
+      throw new Error(`Workflow validation failed:\n${errorMessages}`);
+    }
+
     // Check if files already exist (unless overwrite is confirmed)
     if (!payload.overwriteExisting) {
       const existingFiles = await checkExistingFiles(payload.workflow, fileService);

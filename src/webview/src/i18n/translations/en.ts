@@ -21,6 +21,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.workflowNameRequiredForExport': 'Workflow name is required for export',
   'toolbar.error.selectWorkflowToLoad': 'Please select a workflow to load',
   'toolbar.error.validationFailed': 'Workflow validation failed',
+  'toolbar.error.missingEndNode': 'Workflow must have at least one End node',
 
   // Node Palette
   'palette.title': 'Node Palette',
@@ -33,6 +34,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'node.prompt.description': 'Template with variables',
   'node.subAgent.title': 'Sub-Agent',
   'node.subAgent.description': 'Execute a specialized task',
+  'node.end.title': 'End',
+  'node.end.description': 'Workflow termination point',
   'node.branch.title': 'Branch',
   'node.branch.description': 'Conditional branching logic',
   'node.branch.deprecationNotice': 'Deprecated. Please migrate to If/Else or Switch nodes',
@@ -81,7 +84,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.startNodeDescription':
     'Start node marks the beginning of the workflow. It cannot be deleted and has no editable properties.',
   'property.endNodeDescription':
-    'End node marks the completion of the workflow. It cannot be deleted and has no editable properties.',
+    'End node marks the completion of the workflow. At least one End node is required for export.',
   'property.unknownNodeType': 'Unknown node type:',
 
   // Sub-Agent properties
@@ -212,4 +215,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'ai.error.parseError': 'Generation failed - please try again or rephrase your description',
   'ai.error.validationError': 'Generated workflow failed validation',
   'ai.error.unknown': 'An unexpected error occurred. Please try again.',
+
+  // Delete Confirmation Dialog
+  'dialog.deleteNode.title': 'Delete Node',
+  'dialog.deleteNode.message': 'Are you sure you want to delete this node?',
+  'dialog.deleteNode.confirm': 'Delete',
+  'dialog.deleteNode.cancel': 'Cancel',
 };

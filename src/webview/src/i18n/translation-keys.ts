@@ -19,6 +19,7 @@ export interface WebviewTranslationKeys {
   'toolbar.error.workflowNameRequiredForExport': string;
   'toolbar.error.selectWorkflowToLoad': string;
   'toolbar.error.validationFailed': string;
+  'toolbar.error.missingEndNode': string;
 
   // Node Palette
   'palette.title': string;
@@ -31,6 +32,8 @@ export interface WebviewTranslationKeys {
   'node.prompt.description': string;
   'node.subAgent.title': string;
   'node.subAgent.description': string;
+  'node.end.title': string;
+  'node.end.description': string;
   'node.branch.title': string;
   'node.branch.description': string;
   'node.branch.deprecationNotice': string;
@@ -190,4 +193,10 @@ export interface WebviewTranslationKeys {
   'ai.error.parseError': string;
   'ai.error.validationError': string;
   'ai.error.unknown': string;
+
+  // Delete Confirmation Dialog
+  'dialog.deleteNode.title': string;
+  'dialog.deleteNode.message': string;
+  'dialog.deleteNode.confirm': string;
+  'dialog.deleteNode.cancel': string;
 }

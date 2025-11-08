@@ -47,7 +47,7 @@ export function serializeWorkflow(
     id: `workflow-${Date.now()}`,
     name: workflowName,
     description: workflowDescription,
-    version: '0.3.0',
+    version: '0.3.1',
     nodes: workflowNodes,
     connections,
     createdAt: new Date(),
@@ -136,6 +136,22 @@ export function validateWorkflow(workflow: Workflow): void {
   // Validate connections
   for (const connection of workflow.connections) {
     validateConnection(connection, workflow.nodes);
+  }
+
+  // Validate Start/End nodes
+  const startNodes = workflow.nodes.filter((n) => n.type === 'start');
+  const endNodes = workflow.nodes.filter((n) => n.type === 'end');
+
+  if (startNodes.length === 0) {
+    throw new Error('Workflow must have at least one Start node');
+  }
+
+  if (startNodes.length > 1) {
+    throw new Error('Workflow must have exactly one Start node');
+  }
+
+  if (endNodes.length === 0) {
+    throw new Error('Workflow must have at least one End node');
   }
 }
 

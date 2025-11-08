@@ -19,6 +19,7 @@ interface WorkflowStore {
   nodes: Node[];
   edges: Edge[];
   selectedNodeId: string | null;
+  pendingDeleteNodeIds: string[];
 
   // React Flow Change Handlers
   onNodesChange: OnNodesChange;
@@ -34,6 +35,9 @@ interface WorkflowStore {
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
   addNode: (node: Node) => void;
   removeNode: (nodeId: string) => void;
+  requestDeleteNode: (nodeId: string) => void;
+  confirmDeleteNodes: () => void;
+  cancelDeleteNodes: () => void;
   clearWorkflow: () => void;
   addGeneratedWorkflow: (workflow: Workflow) => void;
 }
@@ -69,12 +73,44 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   nodes: [DEFAULT_START_NODE, DEFAULT_END_NODE],
   edges: [],
   selectedNodeId: null,
+  pendingDeleteNodeIds: [],
 
   // React Flow Change Handlers (integrates with React Flow's onChange events)
   onNodesChange: (changes) => {
-    set({
-      nodes: applyNodeChanges(changes, get().nodes),
-    });
+    // Separate remove events from other changes
+    const removeChanges = changes.filter((change) => change.type === 'remove');
+    const otherChanges = changes.filter((change) => change.type !== 'remove');
+
+    // Check if there are nodes to delete (excluding Start nodes)
+    if (removeChanges.length > 0) {
+      const nodeIdsToDelete = removeChanges
+        .map((change) => {
+          if (change.type === 'remove') {
+            const nodeToRemove = get().nodes.find((node) => node.id === change.id);
+            // Start nodeは削除不可
+            if (nodeToRemove?.type === 'start') {
+              console.warn('Cannot remove Start node: Start node is required for workflow');
+              return null;
+            }
+            return change.id;
+          }
+          return null;
+        })
+        .filter((id): id is string => id !== null);
+
+      // If there are nodes to delete, show confirmation dialog
+      if (nodeIdsToDelete.length > 0) {
+        set({ pendingDeleteNodeIds: nodeIdsToDelete });
+        // Don't apply remove changes yet - wait for confirmation
+      }
+    }
+
+    // Apply all non-remove changes immediately
+    if (otherChanges.length > 0) {
+      set({
+        nodes: applyNodeChanges(otherChanges, get().nodes),
+      });
+    }
   },
 
   onEdgesChange: (changes) => {
@@ -112,14 +148,11 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   },
 
   removeNode: (nodeId: string) => {
-    // StartノードとEndノードの削除を防止
+    // Startノードの削除のみ防止
+    // Endノードは自由に削除可能（Export時にバリデーション）
     const nodeToRemove = get().nodes.find((node) => node.id === nodeId);
     if (nodeToRemove?.type === 'start') {
       console.warn('Cannot remove Start node: Start node is required for workflow');
-      return;
-    }
-    if (nodeToRemove?.type === 'end') {
-      console.warn('Cannot remove End node: End node is required for workflow');
       return;
     }
 
@@ -127,6 +160,37 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       nodes: get().nodes.filter((node) => node.id !== nodeId),
       edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
     });
+  },
+
+  requestDeleteNode: (nodeId: string) => {
+    // ×ボタンからの削除要求
+    // Start nodeは削除不可
+    const nodeToRemove = get().nodes.find((node) => node.id === nodeId);
+    if (nodeToRemove?.type === 'start') {
+      console.warn('Cannot remove Start node: Start node is required for workflow');
+      return;
+    }
+
+    // 確認ダイアログを表示するために pendingDeleteNodeIds にセット
+    set({ pendingDeleteNodeIds: [nodeId] });
+  },
+
+  confirmDeleteNodes: () => {
+    const nodeIds = get().pendingDeleteNodeIds;
+    if (nodeIds.length === 0) return;
+
+    // Delete all pending nodes
+    set({
+      nodes: get().nodes.filter((node) => !nodeIds.includes(node.id)),
+      edges: get().edges.filter(
+        (edge) => !nodeIds.includes(edge.source) && !nodeIds.includes(edge.target)
+      ),
+      pendingDeleteNodeIds: [],
+    });
+  },
+
+  cancelDeleteNodes: () => {
+    set({ pendingDeleteNodeIds: [] });
   },
 
   clearWorkflow: () => {

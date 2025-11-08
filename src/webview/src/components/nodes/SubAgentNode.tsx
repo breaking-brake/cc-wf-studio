@@ -8,16 +8,18 @@
 import type { SubAgentData } from '@shared/types/workflow-definition';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
+import { DeleteButton } from './DeleteButton';
 
 /**
  * SubAgentNode Component
  */
 export const SubAgentNodeComponent: React.FC<NodeProps<SubAgentData>> = React.memo(
-  ({ data, selected }) => {
+  ({ id, data, selected }) => {
     return (
       <div
         className={`sub-agent-node ${selected ? 'selected' : ''}`}
         style={{
+          position: 'relative',
           padding: '12px',
           borderRadius: '8px',
           border: `2px solid ${selected ? 'var(--vscode-focusBorder)' : 'var(--vscode-panel-border)'}`,
@@ -26,6 +28,8 @@ export const SubAgentNodeComponent: React.FC<NodeProps<SubAgentData>> = React.me
           maxWidth: '300px',
         }}
       >
+        {/* Delete Button */}
+        <DeleteButton nodeId={id} selected={selected} />
         {/* Node Header */}
         <div
           style={{

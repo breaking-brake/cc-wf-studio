@@ -14,8 +14,13 @@ import { PropertyPanel } from './components/PropertyPanel';
 import { Toolbar } from './components/Toolbar';
 import { Tour } from './components/Tour';
 import { WorkflowEditor } from './components/WorkflowEditor';
+import { ConfirmDialog } from './components/dialogs/ConfirmDialog';
+import { useTranslation } from './i18n/i18n-context';
+import { useWorkflowStore } from './stores/workflow-store';
 
 const App: React.FC = () => {
+  const { t } = useTranslation();
+  const { pendingDeleteNodeIds, confirmDeleteNodes, cancelDeleteNodes } = useWorkflowStore();
   const [error, setError] = useState<ErrorPayload | null>(null);
   const [runTour, setRunTour] = useState(false);
   const [tourKey, setTourKey] = useState(0); // Used to force Tour component remount
@@ -98,6 +103,17 @@ const App: React.FC = () => {
 
       {/* Interactive Tour */}
       <Tour key={tourKey} run={runTour} onFinish={handleTourFinish} />
+
+      {/* Delete Confirmation Dialog for Delete key */}
+      <ConfirmDialog
+        isOpen={pendingDeleteNodeIds.length > 0}
+        title={t('dialog.deleteNode.title')}
+        message={t('dialog.deleteNode.message')}
+        confirmLabel={t('dialog.deleteNode.confirm')}
+        cancelLabel={t('dialog.deleteNode.cancel')}
+        onConfirm={confirmDeleteNodes}
+        onCancel={cancelDeleteNodes}
+      />
     </div>
   );
 };
