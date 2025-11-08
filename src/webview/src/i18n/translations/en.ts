@@ -45,6 +45,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'node.switch.description': 'Multi-way conditional branch (2-N cases)',
   'node.askUserQuestion.title': 'Ask User Question',
   'node.askUserQuestion.description': 'Branch based on user choice',
+  'node.skill.title': 'Skill',
+  'node.skill.description': 'Execute a Claude Code Skill',
 
   // Quick start instructions
   'palette.instruction.addNode': 'Click a node to add it to the canvas',
@@ -65,6 +67,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeType.prompt': 'Prompt Node',
   'property.nodeType.start': 'Start Node',
   'property.nodeType.end': 'End Node',
+  'property.nodeType.skill': 'Skill Node',
   'property.nodeType.unknown': 'Unknown',
 
   // Common property labels
@@ -91,6 +94,20 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.tools': 'Tools (comma-separated)',
   'property.tools.placeholder': 'e.g., Read,Write,Bash',
   'property.tools.help': 'Leave empty for all tools',
+
+  // Skill properties
+  'property.skillPath': 'Skill Path',
+  'property.scope': 'Scope',
+  'property.scope.personal': 'Personal',
+  'property.scope.project': 'Project',
+  'property.validationStatus': 'Validation Status',
+  'property.validationStatus.valid': 'Valid',
+  'property.validationStatus.missing': 'Missing',
+  'property.validationStatus.invalid': 'Invalid',
+  'property.validationStatus.valid.tooltip': 'Skill is valid and ready to use',
+  'property.validationStatus.missing.tooltip': 'SKILL.md file not found at specified path',
+  'property.validationStatus.invalid.tooltip': 'SKILL.md has invalid YAML frontmatter',
+  'property.allowedTools': 'Allowed Tools',
 
   // AskUserQuestion properties
   'property.questionText': 'Question',
@@ -207,6 +224,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'ai.usageNote': '*1 This feature uses Claude Code installed in your environment.',
   'ai.overwriteWarning':
     '*2 Generating a workflow will completely replace your current workflow. Make sure to save your work before proceeding.',
+  'ai.skillLimitation':
+    '*3 Automatic generation of workflows containing Skill nodes is currently in preparation.',
 
   // AI Generation Errors
   'ai.error.emptyDescription': 'Please enter a workflow description',
@@ -223,4 +242,57 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': 'Are you sure you want to delete this node?',
   'dialog.deleteNode.confirm': 'Delete',
   'dialog.deleteNode.cancel': 'Cancel',
+
+  // Skill Browser Dialog
+  'skill.browser.title': 'Browse Skills',
+  'skill.browser.description':
+    'Select a Claude Code Skill to add to your workflow.\nSkills are specialized capabilities that Claude Code automatically utilizes.',
+  'skill.browser.personalTab': 'Personal',
+  'skill.browser.projectTab': 'Project',
+  'skill.browser.noSkills': 'No Skills found in this directory',
+  'skill.browser.loading': 'Loading Skills...',
+  'skill.browser.selectButton': 'Add to Workflow',
+  'skill.browser.cancelButton': 'Cancel',
+  'skill.browser.skillName': 'Skill Name',
+  'skill.browser.skillDescription': 'Description',
+  'skill.browser.skillPath': 'Path',
+  'skill.browser.validationStatus': 'Status',
+
+  // Skill Browser Errors
+  'skill.error.loadFailed': 'Failed to load Skills. Please check your Skill directories.',
+  'skill.error.noSelection': 'Please select a Skill',
+  'skill.error.unknown': 'An unexpected error occurred',
+
+  // Skill Creation Dialog
+  'skill.creation.title': 'Create New Skill',
+  'skill.creation.description':
+    'Create a new Claude Code Skill. Skills are specialized tools that can be invoked by Claude Code to perform specific tasks.',
+  'skill.creation.nameLabel': 'Skill Name',
+  'skill.creation.nameHint': 'Lowercase letters, numbers, and hyphens only (max 64 characters)',
+  'skill.creation.descriptionLabel': 'Description',
+  'skill.creation.descriptionPlaceholder':
+    'Brief description of what this Skill does and when to use it',
+  'skill.creation.instructionsLabel': 'Instructions',
+  'skill.creation.instructionsPlaceholder':
+    'Enter detailed instructions in Markdown format.\n\nExample:\n# My Skill\n\nThis Skill performs...',
+  'skill.creation.instructionsHint': 'Markdown-formatted instructions for Claude Code',
+  'skill.creation.allowedToolsLabel': 'Allowed Tools (optional)',
+  'skill.creation.allowedToolsHint': 'Comma-separated list of tool names (e.g., Read, Grep, Glob)',
+  'skill.creation.scopeLabel': 'Scope',
+  'skill.creation.scopePersonal': 'Personal (~/.claude/skills/)',
+  'skill.creation.scopeProject': 'Project (.claude/skills/)',
+  'skill.creation.cancelButton': 'Cancel',
+  'skill.creation.createButton': 'Create Skill',
+  'skill.creation.creatingButton': 'Creating...',
+  'skill.creation.error.unknown': 'Failed to create Skill. Please try again.',
+
+  // Skill Validation Errors
+  'skill.validation.nameRequired': 'Skill name is required',
+  'skill.validation.nameTooLong': 'Skill name must be 64 characters or less',
+  'skill.validation.nameInvalidFormat':
+    'Skill name must contain only lowercase letters, numbers, and hyphens',
+  'skill.validation.descriptionRequired': 'Description is required',
+  'skill.validation.descriptionTooLong': 'Description must be 1024 characters or less',
+  'skill.validation.instructionsRequired': 'Instructions are required',
+  'skill.validation.scopeRequired': 'Please select a scope (Personal or Project)',
 };

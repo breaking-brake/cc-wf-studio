@@ -17,6 +17,7 @@ export enum NodeType {
   Start = 'start',
   End = 'end',
   Prompt = 'prompt',
+  Skill = 'skill', // New: Claude Code Skill integration
 }
 
 // ============================================================================
@@ -102,6 +103,23 @@ export interface SwitchNodeData {
   outputPorts: number; // Variable: 2-N output ports
 }
 
+export interface SkillNodeData {
+  /** Skill name (extracted from SKILL.md frontmatter) */
+  name: string;
+  /** Skill description (extracted from SKILL.md frontmatter) */
+  description: string;
+  /** Path to SKILL.md file (absolute for personal, relative for project) */
+  skillPath: string;
+  /** Skill scope: personal or project */
+  scope: 'personal' | 'project';
+  /** Optional: Allowed tools (extracted from SKILL.md frontmatter) */
+  allowedTools?: string;
+  /** Validation status (checked when workflow loads) */
+  validationStatus: 'valid' | 'missing' | 'invalid';
+  /** Number of output ports (always 1 for Skill nodes) */
+  outputPorts: 1;
+}
+
 // ============================================================================
 // Node Types
 // ============================================================================
@@ -153,6 +171,11 @@ export interface SwitchNode extends BaseNode {
   data: SwitchNodeData;
 }
 
+export interface SkillNode extends BaseNode {
+  type: NodeType.Skill;
+  data: SkillNodeData;
+}
+
 export type WorkflowNode =
   | SubAgentNode
   | AskUserQuestionNode
@@ -161,7 +184,8 @@ export type WorkflowNode =
   | SwitchNode
   | StartNode
   | EndNode
-  | PromptNode;
+  | PromptNode
+  | SkillNode;
 
 // ============================================================================
 // Connection Type
@@ -258,5 +282,13 @@ export const VALIDATION_RULES = {
     LABEL_MAX_LENGTH: 50,
     MIN_BRANCHES: 2,
     MAX_BRANCHES: 10,
+  },
+  SKILL: {
+    NAME_MIN_LENGTH: 1,
+    NAME_MAX_LENGTH: 64,
+    NAME_PATTERN: /^[a-z0-9-]+$/, // Lowercase, numbers, hyphens only
+    DESCRIPTION_MIN_LENGTH: 1,
+    DESCRIPTION_MAX_LENGTH: 1024,
+    OUTPUT_PORTS: 1, // Fixed: 1 output port
   },
 } as const;

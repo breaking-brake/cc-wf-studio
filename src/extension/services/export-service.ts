@@ -11,6 +11,7 @@ import type {
   BranchNode,
   IfElseNode,
   PromptNode,
+  SkillNode,
   SubAgentNode,
   SwitchNode,
   Workflow,
@@ -251,6 +252,10 @@ function generateMermaidFlowchart(workflow: Workflow): string {
       const promptText = promptNode.data.prompt?.split('\n')[0] || 'Prompt';
       const label = promptText.length > 30 ? `${promptText.substring(0, 27)}...` : promptText;
       lines.push(`    ${nodeId}[${escapeLabel(label)}]`);
+    } else if (nodeType === 'skill') {
+      const skillNode = node as SkillNode;
+      const skillName = skillNode.data.name || 'Skill';
+      lines.push(`    ${nodeId}[[${escapeLabel(`Skill: ${skillName}`)}]]`);
     }
   }
 
@@ -402,12 +407,40 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
 
   // Collect node details by type
   const promptNodes = nodes.filter((n) => (n.type as string) === 'prompt') as PromptNode[];
+  const skillNodes = nodes.filter((n) => (n.type as string) === 'skill') as SkillNode[];
   const askUserQuestionNodes = nodes.filter(
     (n) => (n.type as string) === 'askUserQuestion'
   ) as AskUserQuestionNode[];
   const branchNodes = nodes.filter((n) => (n.type as string) === 'branch') as BranchNode[];
   const ifElseNodes = nodes.filter((n) => (n.type as string) === 'ifElse') as IfElseNode[];
   const switchNodes = nodes.filter((n) => (n.type as string) === 'switch') as SwitchNode[];
+
+  // Skill node details
+  if (skillNodes.length > 0) {
+    sections.push('## Skill Nodes');
+    sections.push('');
+    for (const node of skillNodes) {
+      const nodeId = sanitizeNodeId(node.id);
+      sections.push(`#### ${nodeId}(${node.data.name})`);
+      sections.push('');
+      sections.push(`**Description**: ${node.data.description}`);
+      sections.push('');
+      sections.push(`**Scope**: ${node.data.scope}`);
+      sections.push('');
+      sections.push(`**Validation Status**: ${node.data.validationStatus}`);
+      sections.push('');
+      if (node.data.allowedTools) {
+        sections.push(`**Allowed Tools**: ${node.data.allowedTools}`);
+        sections.push('');
+      }
+      sections.push(`**Skill Path**: \`${node.data.skillPath}\``);
+      sections.push('');
+      sections.push(
+        'This node executes a Claude Code Skill. The Skill definition is stored in the SKILL.md file at the path shown above.'
+      );
+      sections.push('');
+    }
+  }
 
   // Prompt node details
   if (promptNodes.length > 0) {

@@ -9,6 +9,7 @@ import type {
   AskUserQuestionData,
   BranchNodeData,
   IfElseNodeData,
+  SkillNodeData,
   SubAgentData,
   SwitchNodeData,
 } from '@shared/types/workflow-definition';
@@ -110,16 +111,19 @@ export const PropertyPanel: React.FC = () => {
                       ? t('property.nodeType.start')
                       : selectedNode.type === 'end'
                         ? t('property.nodeType.end')
-                        : t('property.nodeType.unknown')}
+                        : selectedNode.type === 'skill'
+                          ? t('property.nodeType.skill')
+                          : t('property.nodeType.unknown')}
       </div>
 
-      {/* Node Name (only for subAgent, askUserQuestion, branch, ifElse, switch, and prompt types) */}
+      {/* Node Name (only for subAgent, askUserQuestion, branch, ifElse, switch, prompt, and skill types) */}
       {(selectedNode.type === 'subAgent' ||
         selectedNode.type === 'askUserQuestion' ||
         selectedNode.type === 'branch' ||
         selectedNode.type === 'ifElse' ||
         selectedNode.type === 'switch' ||
-        selectedNode.type === 'prompt') && (
+        selectedNode.type === 'prompt' ||
+        selectedNode.type === 'skill') && (
         <div style={{ marginBottom: '16px' }}>
           <label
             htmlFor="node-name-input"
@@ -209,6 +213,11 @@ export const PropertyPanel: React.FC = () => {
       ) : selectedNode.type === 'prompt' ? (
         <PromptProperties
           node={selectedNode as Node<PromptNodeData>}
+          updateNodeData={updateNodeData}
+        />
+      ) : selectedNode.type === 'skill' ? (
+        <SkillProperties
+          node={selectedNode as Node<SkillNodeData>}
           updateNodeData={updateNodeData}
         />
       ) : selectedNode.type === 'start' || selectedNode.type === 'end' ? (
@@ -1615,6 +1624,236 @@ const SwitchProperties: React.FC<{
         >
           {t('property.minimumBranches')}
         </div>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Skill Properties Editor
+ *
+ * Feature: 001-skill-node
+ * Displays read-only properties for Skill nodes
+ */
+const SkillProperties: React.FC<{
+  node: Node<SkillNodeData>;
+  updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
+}> = ({ node }) => {
+  const { t } = useTranslation();
+  const data = node.data;
+
+  // Get validation status icon and color
+  const getValidationIcon = (status: 'valid' | 'missing' | 'invalid'): string => {
+    switch (status) {
+      case 'valid':
+        return '✓';
+      case 'missing':
+        return '⚠';
+      case 'invalid':
+        return '✗';
+    }
+  };
+
+  const getValidationColor = (status: 'valid' | 'missing' | 'invalid'): string => {
+    switch (status) {
+      case 'valid':
+        return 'var(--vscode-testing-iconPassed)';
+      case 'missing':
+        return 'var(--vscode-editorWarning-foreground)';
+      case 'invalid':
+        return 'var(--vscode-errorForeground)';
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {/* Description (Read-only) */}
+      <div>
+        <label
+          htmlFor="skill-description"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('property.description')}
+        </label>
+        <div
+          id="skill-description"
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-descriptionForeground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+            lineHeight: '1.4',
+          }}
+        >
+          {data.description}
+        </div>
+      </div>
+
+      {/* Skill Path (Read-only) */}
+      <div>
+        <label
+          htmlFor="skill-path"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('property.skillPath')}
+        </label>
+        <div
+          id="skill-path"
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-descriptionForeground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '11px',
+            fontFamily: 'monospace',
+            wordBreak: 'break-all',
+          }}
+        >
+          {data.skillPath}
+        </div>
+      </div>
+
+      {/* Scope (Read-only) */}
+      <div>
+        <label
+          htmlFor="skill-scope"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('property.scope')}
+        </label>
+        <div
+          id="skill-scope"
+          style={{
+            fontSize: '12px',
+            color: 'var(--vscode-descriptionForeground)',
+            backgroundColor:
+              data.scope === 'personal'
+                ? 'var(--vscode-badge-background)'
+                : 'var(--vscode-button-secondaryBackground)',
+            padding: '4px 8px',
+            borderRadius: '3px',
+            display: 'inline-block',
+            textTransform: 'uppercase',
+            fontWeight: 600,
+            letterSpacing: '0.3px',
+          }}
+        >
+          {data.scope === 'personal' ? t('property.scope.personal') : t('property.scope.project')}
+        </div>
+      </div>
+
+      {/* Validation Status (Read-only) */}
+      <div>
+        <label
+          htmlFor="skill-validation-status"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('property.validationStatus')}
+        </label>
+        <div
+          id="skill-validation-status"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '13px',
+          }}
+        >
+          <span
+            style={{
+              fontSize: '16px',
+              color: getValidationColor(data.validationStatus),
+              fontWeight: 'bold',
+            }}
+          >
+            {getValidationIcon(data.validationStatus)}
+          </span>
+          <span style={{ color: 'var(--vscode-foreground)' }}>
+            {data.validationStatus === 'valid'
+              ? t('property.validationStatus.valid')
+              : data.validationStatus === 'missing'
+                ? t('property.validationStatus.missing')
+                : t('property.validationStatus.invalid')}
+          </span>
+        </div>
+      </div>
+
+      {/* Allowed Tools (Read-only, optional) */}
+      {data.allowedTools && (
+        <div>
+          <label
+            htmlFor="skill-allowed-tools"
+            style={{
+              display: 'block',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--vscode-foreground)',
+              marginBottom: '6px',
+            }}
+          >
+            {t('property.allowedTools')}
+          </label>
+          <div
+            id="skill-allowed-tools"
+            style={{
+              width: '100%',
+              padding: '6px 8px',
+              backgroundColor: 'var(--vscode-input-background)',
+              color: 'var(--vscode-descriptionForeground)',
+              border: '1px solid var(--vscode-input-border)',
+              borderRadius: '2px',
+              fontSize: '12px',
+              fontFamily: 'monospace',
+            }}
+          >
+            🔧 {data.allowedTools}
+          </div>
+        </div>
+      )}
+
+      {/* Info Note */}
+      <div
+        style={{
+          padding: '12px',
+          backgroundColor: 'var(--vscode-textBlockQuote-background)',
+          border: '1px solid var(--vscode-textBlockQuote-border)',
+          borderRadius: '4px',
+          fontSize: '11px',
+          color: 'var(--vscode-descriptionForeground)',
+          lineHeight: '1.5',
+        }}
+      >
+        💡 Skill properties are read-only and loaded from SKILL.md file. To modify, edit the source
+        file directly.
       </div>
     </div>
   );

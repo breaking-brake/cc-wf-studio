@@ -15,6 +15,7 @@ import { handleExportWorkflow } from './export-workflow';
 import { loadWorkflow } from './load-workflow';
 import { loadWorkflowList } from './load-workflow-list';
 import { saveWorkflow } from './save-workflow';
+import { handleBrowseSkills, handleCreateSkill, handleValidateSkillFile } from './skill-operations';
 
 /**
  * Register the open editor command
@@ -208,6 +209,43 @@ export function registerOpenEditorCommand(
           case 'CONFIRM_OVERWRITE':
             // TODO: Will be implemented in Phase 4
             console.log('CONFIRM_OVERWRITE:', message.payload);
+            break;
+
+          case 'BROWSE_SKILLS':
+            // Browse available Claude Code Skills
+            await handleBrowseSkills(webview, message.requestId || '');
+            break;
+
+          case 'CREATE_SKILL':
+            // Create new Skill (Phase 5)
+            if (message.payload) {
+              await handleCreateSkill(message.payload, webview, message.requestId || '');
+            } else {
+              webview.postMessage({
+                type: 'ERROR',
+                requestId: message.requestId,
+                payload: {
+                  code: 'VALIDATION_ERROR',
+                  message: 'Skill creation payload is required',
+                },
+              });
+            }
+            break;
+
+          case 'VALIDATE_SKILL_FILE':
+            // Validate Skill file
+            if (message.payload) {
+              await handleValidateSkillFile(message.payload, webview, message.requestId || '');
+            } else {
+              webview.postMessage({
+                type: 'ERROR',
+                requestId: message.requestId,
+                payload: {
+                  code: 'VALIDATION_ERROR',
+                  message: 'Skill file path is required',
+                },
+              });
+            }
             break;
 
           default:

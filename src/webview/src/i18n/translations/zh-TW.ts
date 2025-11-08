@@ -45,6 +45,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'node.switch.description': '多路條件分支（2-N 種情況）',
   'node.askUserQuestion.title': 'Ask User Question',
   'node.askUserQuestion.description': '根據使用者選擇分支',
+  'node.skill.title': 'Skill',
+  'node.skill.description': '執行Claude Code Skill',
 
   // Quick start instructions
   'palette.instruction.addNode': '點擊節點將其新增到畫布',
@@ -65,6 +67,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeType.prompt': 'Prompt Node',
   'property.nodeType.start': 'Start Node',
   'property.nodeType.end': 'End Node',
+  'property.nodeType.skill': 'Skill節點',
   'property.nodeType.unknown': '未知',
 
   // Common property labels
@@ -89,6 +92,20 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'property.tools': '工具（逗號分隔）',
   'property.tools.placeholder': '例如：Read,Write,Bash',
   'property.tools.help': '留空表示所有工具',
+
+  // Skill properties
+  'property.skillPath': 'Skill路徑',
+  'property.scope': '範圍',
+  'property.scope.personal': '個人',
+  'property.scope.project': '專案',
+  'property.validationStatus': '驗證狀態',
+  'property.validationStatus.valid': '有效',
+  'property.validationStatus.missing': '缺失',
+  'property.validationStatus.invalid': '無效',
+  'property.validationStatus.valid.tooltip': 'Skill有效且可以使用',
+  'property.validationStatus.missing.tooltip': '在指定路徑找不到SKILL.md檔案',
+  'property.validationStatus.invalid.tooltip': 'SKILL.md包含無效的YAML前置內容',
+  'property.allowedTools': '允許的工具',
 
   // AskUserQuestion properties
   'property.questionText': '問題',
@@ -196,6 +213,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'ai.success': '工作流產生成功！',
   'ai.usageNote': '*1 此功能使用您環境中安裝的Claude Code。',
   'ai.overwriteWarning': '*2 產生工作流將完全取代您目前的工作流。請在繼續之前儲存您的工作。',
+  'ai.skillLimitation': '*3 包含Skill節點的工作流自動產生功能目前正在準備中。',
 
   // AI Generation Errors
   'ai.error.emptyDescription': '請輸入工作流描述',
@@ -211,4 +229,55 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': '確定要刪除此節點嗎？',
   'dialog.deleteNode.confirm': '刪除',
   'dialog.deleteNode.cancel': '取消',
+
+  // Skill Browser Dialog
+  'skill.browser.title': '瀏覽Skill',
+  'skill.browser.description':
+    '選擇要新增到工作流的Claude Code Skill。\nSkill是Claude Code自動利用的專業能力。',
+  'skill.browser.personalTab': '個人',
+  'skill.browser.projectTab': '專案',
+  'skill.browser.noSkills': '在此目錄中未找到Skill',
+  'skill.browser.loading': '正在載入Skill...',
+  'skill.browser.selectButton': '新增到工作流',
+  'skill.browser.cancelButton': '取消',
+  'skill.browser.skillName': 'Skill名稱',
+  'skill.browser.skillDescription': '描述',
+  'skill.browser.skillPath': '路徑',
+  'skill.browser.validationStatus': '狀態',
+
+  // Skill Browser Errors
+  'skill.error.loadFailed': '載入Skill失敗。請檢查Skill目錄。',
+  'skill.error.noSelection': '請選擇一個Skill',
+  'skill.error.unknown': '發生意外錯誤',
+
+  // Skill Creation Dialog
+  'skill.creation.title': '建立新技能',
+  'skill.creation.description':
+    '建立新的Claude Code技能。技能是Claude Code可以呼叫以執行特定任務的專用工具。',
+  'skill.creation.nameLabel': '技能名稱',
+  'skill.creation.nameHint': '僅小寫字母、數字和連字符（最多64個字元）',
+  'skill.creation.descriptionLabel': '描述',
+  'skill.creation.descriptionPlaceholder': '此技能的功能和使用時機的簡要描述',
+  'skill.creation.instructionsLabel': '說明',
+  'skill.creation.instructionsPlaceholder':
+    '以Markdown格式輸入詳細說明。\n\n例如：\n# 我的技能\n\n此技能...',
+  'skill.creation.instructionsHint': 'Claude Code的Markdown格式說明',
+  'skill.creation.allowedToolsLabel': '允許的工具（可選）',
+  'skill.creation.allowedToolsHint': '逗號分隔的工具名稱列表（例如：Read, Grep, Glob）',
+  'skill.creation.scopeLabel': '範圍',
+  'skill.creation.scopePersonal': '個人 (~/.claude/skills/)',
+  'skill.creation.scopeProject': '專案 (.claude/skills/)',
+  'skill.creation.cancelButton': '取消',
+  'skill.creation.createButton': '建立技能',
+  'skill.creation.creatingButton': '建立中...',
+  'skill.creation.error.unknown': '建立技能失敗。請重試。',
+
+  // Skill Validation Errors
+  'skill.validation.nameRequired': '技能名稱為必填',
+  'skill.validation.nameTooLong': '技能名稱不得超過64個字元',
+  'skill.validation.nameInvalidFormat': '技能名稱只能包含小寫字母、數字和連字符',
+  'skill.validation.descriptionRequired': '描述為必填',
+  'skill.validation.descriptionTooLong': '描述不得超過1024個字元',
+  'skill.validation.instructionsRequired': '說明為必填',
+  'skill.validation.scopeRequired': '請選擇範圍（個人/專案）',
 };

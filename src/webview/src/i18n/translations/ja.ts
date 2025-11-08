@@ -45,6 +45,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'node.switch.description': '複数分岐条件分岐（2-N個）',
   'node.askUserQuestion.title': 'Ask User Question',
   'node.askUserQuestion.description': 'ユーザーの選択に基づいて分岐',
+  'node.skill.title': 'Skill',
+  'node.skill.description': 'Claude Code Skillを実行',
 
   // Quick start instructions
   'palette.instruction.addNode': 'ノードをクリックしてキャンバスに追加',
@@ -65,6 +67,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeType.prompt': 'Prompt Node',
   'property.nodeType.start': 'Start Node',
   'property.nodeType.end': 'End Node',
+  'property.nodeType.skill': 'Skillノード',
   'property.nodeType.unknown': '不明',
 
   // Common property labels
@@ -91,6 +94,20 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.tools': 'ツール（カンマ区切り）',
   'property.tools.placeholder': '例: Read,Write,Bash',
   'property.tools.help': '空欄で全てのツールを使用',
+
+  // Skill properties
+  'property.skillPath': 'Skillパス',
+  'property.scope': 'スコープ',
+  'property.scope.personal': 'パーソナル',
+  'property.scope.project': 'プロジェクト',
+  'property.validationStatus': '検証ステータス',
+  'property.validationStatus.valid': '有効',
+  'property.validationStatus.missing': '見つかりません',
+  'property.validationStatus.invalid': '無効',
+  'property.validationStatus.valid.tooltip': 'Skillは有効で使用可能です',
+  'property.validationStatus.missing.tooltip': '指定されたパスにSKILL.mdファイルが見つかりません',
+  'property.validationStatus.invalid.tooltip': 'SKILL.mdのYAMLフロントマターが無効です',
+  'property.allowedTools': '許可ツール',
 
   // AskUserQuestion properties
   'property.questionText': '質問',
@@ -207,6 +224,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'ai.usageNote': '※1 この機能はお使いの環境にインストールされたClaude Codeを使用します。',
   'ai.overwriteWarning':
     '※2 ワークフローを生成すると、現在のワークフローが完全に上書きされます。続行する前に作業内容を保存してください。',
+  'ai.skillLimitation': '※3 Skillノードを含むワークフローの自動生成は現在準備中です。',
 
   // AI Generation Errors
   'ai.error.emptyDescription': 'ワークフローの説明を入力してください',
@@ -224,4 +242,55 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': 'このノードを削除してもよろしいですか？',
   'dialog.deleteNode.confirm': '削除',
   'dialog.deleteNode.cancel': 'キャンセル',
+
+  // Skill Browser Dialog
+  'skill.browser.title': 'Skillを参照',
+  'skill.browser.description':
+    'ワークフローに追加するClaude Code Skillを選択してください。\nSkillはClaude Codeが自動的に活用する専門的な能力です。',
+  'skill.browser.personalTab': 'パーソナル',
+  'skill.browser.projectTab': 'プロジェクト',
+  'skill.browser.noSkills': 'このディレクトリにSkillが見つかりません',
+  'skill.browser.loading': 'Skillを読み込み中...',
+  'skill.browser.selectButton': 'ワークフローに追加',
+  'skill.browser.cancelButton': 'キャンセル',
+  'skill.browser.skillName': 'Skill名',
+  'skill.browser.skillDescription': '説明',
+  'skill.browser.skillPath': 'パス',
+  'skill.browser.validationStatus': 'ステータス',
+
+  // Skill Browser Errors
+  'skill.error.loadFailed': 'Skillの読み込みに失敗しました。Skillディレクトリを確認してください。',
+  'skill.error.noSelection': 'Skillを選択してください',
+  'skill.error.unknown': '予期しないエラーが発生しました',
+
+  // Skill Creation Dialog
+  'skill.creation.title': '新しいSkillを作成',
+  'skill.creation.description':
+    '新しいClaude Code Skillを作成します。SkillはClaude Codeが特定のタスクを実行するために呼び出せる専門ツールです。',
+  'skill.creation.nameLabel': 'Skill名',
+  'skill.creation.nameHint': '小文字、数字、ハイフンのみ（最大64文字）',
+  'skill.creation.descriptionLabel': '説明',
+  'skill.creation.descriptionPlaceholder': 'このSkillが何をするか、いつ使うかの簡単な説明',
+  'skill.creation.instructionsLabel': '指示内容',
+  'skill.creation.instructionsPlaceholder':
+    'Markdown形式で詳細な指示を入力してください。\n\n例：\n# My Skill\n\nこのSkillは...',
+  'skill.creation.instructionsHint': 'Claude Code用のMarkdown形式の指示',
+  'skill.creation.allowedToolsLabel': '許可ツール（オプション）',
+  'skill.creation.allowedToolsHint': 'カンマ区切りのツール名リスト（例：Read, Grep, Glob）',
+  'skill.creation.scopeLabel': 'スコープ',
+  'skill.creation.scopePersonal': 'パーソナル (~/.claude/skills/)',
+  'skill.creation.scopeProject': 'プロジェクト (.claude/skills/)',
+  'skill.creation.cancelButton': 'キャンセル',
+  'skill.creation.createButton': 'Skillを作成',
+  'skill.creation.creatingButton': '作成中...',
+  'skill.creation.error.unknown': 'Skillの作成に失敗しました。もう一度お試しください。',
+
+  // Skill Validation Errors
+  'skill.validation.nameRequired': 'Skill名は必須です',
+  'skill.validation.nameTooLong': 'Skill名は64文字以内にしてください',
+  'skill.validation.nameInvalidFormat': 'Skill名は小文字、数字、ハイフンのみ使用できます',
+  'skill.validation.descriptionRequired': '説明は必須です',
+  'skill.validation.descriptionTooLong': '説明は1024文字以内にしてください',
+  'skill.validation.instructionsRequired': '指示内容は必須です',
+  'skill.validation.scopeRequired': 'スコープ（個人用/プロジェクト用）を選択してください',
 };

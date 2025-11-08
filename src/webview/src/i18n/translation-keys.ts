@@ -43,6 +43,8 @@ export interface WebviewTranslationKeys {
   'node.switch.description': string;
   'node.askUserQuestion.title': string;
   'node.askUserQuestion.description': string;
+  'node.skill.title': string;
+  'node.skill.description': string;
 
   // Quick start instructions
   'palette.instruction.addNode': string;
@@ -63,6 +65,7 @@ export interface WebviewTranslationKeys {
   'property.nodeType.prompt': string;
   'property.nodeType.start': string;
   'property.nodeType.end': string;
+  'property.nodeType.skill': string;
   'property.nodeType.unknown': string;
 
   // Common property labels
@@ -87,6 +90,20 @@ export interface WebviewTranslationKeys {
   'property.tools': string;
   'property.tools.placeholder': string;
   'property.tools.help': string;
+
+  // Skill properties
+  'property.skillPath': string;
+  'property.scope': string;
+  'property.scope.personal': string;
+  'property.scope.project': string;
+  'property.validationStatus': string;
+  'property.validationStatus.valid': string;
+  'property.validationStatus.missing': string;
+  'property.validationStatus.invalid': string;
+  'property.validationStatus.valid.tooltip': string;
+  'property.validationStatus.missing.tooltip': string;
+  'property.validationStatus.invalid.tooltip': string;
+  'property.allowedTools': string;
 
   // AskUserQuestion properties
   'property.questionText': string;
@@ -186,6 +203,7 @@ export interface WebviewTranslationKeys {
   'ai.success': string;
   'ai.usageNote': string;
   'ai.overwriteWarning': string;
+  'ai.skillLimitation': string;
 
   // AI Generation Errors
   'ai.error.emptyDescription': string;
@@ -201,4 +219,52 @@ export interface WebviewTranslationKeys {
   'dialog.deleteNode.message': string;
   'dialog.deleteNode.confirm': string;
   'dialog.deleteNode.cancel': string;
+
+  // Skill Browser Dialog
+  'skill.browser.title': string;
+  'skill.browser.description': string;
+  'skill.browser.personalTab': string;
+  'skill.browser.projectTab': string;
+  'skill.browser.noSkills': string;
+  'skill.browser.loading': string;
+  'skill.browser.selectButton': string;
+  'skill.browser.cancelButton': string;
+  'skill.browser.skillName': string;
+  'skill.browser.skillDescription': string;
+  'skill.browser.skillPath': string;
+  'skill.browser.validationStatus': string;
+
+  // Skill Browser Errors
+  'skill.error.loadFailed': string;
+  'skill.error.noSelection': string;
+  'skill.error.unknown': string;
+
+  // Skill Creation Dialog
+  'skill.creation.title': string;
+  'skill.creation.description': string;
+  'skill.creation.nameLabel': string;
+  'skill.creation.nameHint': string;
+  'skill.creation.descriptionLabel': string;
+  'skill.creation.descriptionPlaceholder': string;
+  'skill.creation.instructionsLabel': string;
+  'skill.creation.instructionsPlaceholder': string;
+  'skill.creation.instructionsHint': string;
+  'skill.creation.allowedToolsLabel': string;
+  'skill.creation.allowedToolsHint': string;
+  'skill.creation.scopeLabel': string;
+  'skill.creation.scopePersonal': string;
+  'skill.creation.scopeProject': string;
+  'skill.creation.cancelButton': string;
+  'skill.creation.createButton': string;
+  'skill.creation.creatingButton': string;
+  'skill.creation.error.unknown': string;
+
+  // Skill Validation Errors
+  'skill.validation.nameRequired': string;
+  'skill.validation.nameTooLong': string;
+  'skill.validation.nameInvalidFormat': string;
+  'skill.validation.descriptionRequired': string;
+  'skill.validation.descriptionTooLong': string;
+  'skill.validation.instructionsRequired': string;
+  'skill.validation.scopeRequired': string;
 }
