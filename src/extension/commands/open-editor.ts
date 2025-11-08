@@ -7,6 +7,7 @@
 
 import * as vscode from 'vscode';
 import type { WebviewMessage } from '../../shared/types/messages';
+import { cancelGeneration } from '../services/claude-code-service';
 import { FileService } from '../services/file-service';
 import { getWebviewContent } from '../webview-content';
 import { handleGenerateWorkflow } from './ai-generation';
@@ -174,6 +175,33 @@ export function registerOpenEditorCommand(
                   message: 'Generation payload is required',
                 },
               });
+            }
+            break;
+
+          case 'CANCEL_GENERATION':
+            // Cancel AI generation
+            if (message.payload?.requestId) {
+              const result = cancelGeneration(message.payload.requestId);
+
+              if (result.cancelled) {
+                webview.postMessage({
+                  type: 'GENERATION_CANCELLED',
+                  requestId: message.payload.requestId,
+                  payload: {
+                    executionTimeMs: result.executionTimeMs || 0,
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              } else {
+                webview.postMessage({
+                  type: 'ERROR',
+                  requestId: message.payload.requestId,
+                  payload: {
+                    code: 'VALIDATION_ERROR',
+                    message: 'No active generation found to cancel',
+                  },
+                });
+              }
             }
             break;
 

@@ -5,8 +5,15 @@
  * Based on: /specs/001-ai-workflow-generation/research.md Q1
  */
 
+import type { ChildProcess } from 'node:child_process';
 import { spawn } from 'node:child_process';
 import { log } from '../extension';
+
+/**
+ * Active generation processes
+ * Key: requestId, Value: process and start time
+ */
+const activeProcesses = new Map<string, { process: ChildProcess; startTime: number }>();
 
 export interface ClaudeCodeExecutionResult {
   success: boolean;
@@ -24,11 +31,13 @@ export interface ClaudeCodeExecutionResult {
  *
  * @param prompt - The prompt to send to Claude Code CLI
  * @param timeoutMs - Timeout in milliseconds (default: 60000)
+ * @param requestId - Optional request ID for cancellation support
  * @returns Execution result with success status and output/error
  */
 export async function executeClaudeCodeCLI(
   prompt: string,
-  timeoutMs = 60000
+  timeoutMs = 60000,
+  requestId?: string
 ): Promise<ClaudeCodeExecutionResult> {
   const startTime = Date.now();
 
@@ -47,10 +56,22 @@ export async function executeClaudeCodeCLI(
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
+    // Register as active process if requestId is provided
+    if (requestId) {
+      activeProcesses.set(requestId, { process, startTime });
+      log('INFO', `Registered active process for requestId: ${requestId}`, { pid: process.pid });
+    }
+
     // Set timeout
     const timeout = setTimeout(() => {
       timedOut = true;
       process.kill();
+
+      // Remove from active processes
+      if (requestId) {
+        activeProcesses.delete(requestId);
+        log('INFO', `Removed active process (timeout) for requestId: ${requestId}`);
+      }
 
       const executionTimeMs = Date.now() - startTime;
       log('WARN', 'Claude Code CLI execution timed out', {
@@ -82,6 +103,12 @@ export async function executeClaudeCodeCLI(
     // Handle process errors (e.g., ENOENT when command not found)
     process.on('error', (err: NodeJS.ErrnoException) => {
       clearTimeout(timeout);
+
+      // Remove from active processes
+      if (requestId) {
+        activeProcesses.delete(requestId);
+        log('INFO', `Removed active process (error) for requestId: ${requestId}`);
+      }
 
       if (timedOut) return; // Already handled by timeout
 
@@ -125,6 +152,12 @@ export async function executeClaudeCodeCLI(
     // Handle process exit
     process.on('exit', (code) => {
       clearTimeout(timeout);
+
+      // Remove from active processes
+      if (requestId) {
+        activeProcesses.delete(requestId);
+        log('INFO', `Removed active process (exit) for requestId: ${requestId}`);
+      }
 
       if (timedOut) return; // Already handled by timeout
 
@@ -181,4 +214,46 @@ export function parseClaudeCodeOutput(output: string): unknown {
     // If parsing fails, return null
     return null;
   }
+}
+
+/**
+ * Cancel an active generation process
+ *
+ * @param requestId - Request ID of the generation to cancel
+ * @returns True if process was found and killed, false otherwise
+ */
+export function cancelGeneration(requestId: string): {
+  cancelled: boolean;
+  executionTimeMs?: number;
+} {
+  const activeGen = activeProcesses.get(requestId);
+
+  if (!activeGen) {
+    log('WARN', `No active generation found for requestId: ${requestId}`);
+    return { cancelled: false };
+  }
+
+  const { process: childProcess, startTime } = activeGen;
+  const executionTimeMs = Date.now() - startTime;
+
+  log('INFO', `Cancelling generation for requestId: ${requestId}`, {
+    pid: childProcess.pid,
+    elapsedMs: executionTimeMs,
+  });
+
+  // Kill the process with SIGTERM (graceful termination)
+  childProcess.kill('SIGTERM');
+
+  // Force kill after 500ms if process doesn't terminate
+  setTimeout(() => {
+    if (!childProcess.killed) {
+      childProcess.kill('SIGKILL');
+      log('WARN', `Forcefully killed process for requestId: ${requestId}`);
+    }
+  }, 500);
+
+  // Remove from active processes map
+  activeProcesses.delete(requestId);
+
+  return { cancelled: true, executionTimeMs };
 }
