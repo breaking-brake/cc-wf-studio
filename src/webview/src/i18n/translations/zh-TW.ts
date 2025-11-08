@@ -252,7 +252,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'skill.creation.nameLabel': '技能名稱',
   'skill.creation.nameHint': '僅小寫字母、數字和連字符（最多64個字元）',
   'skill.creation.descriptionLabel': '描述',
-  'skill.creation.descriptionPlaceholder': '此技能功能的簡要描述',
+  'skill.creation.descriptionPlaceholder': '此技能的功能和使用時機的簡要描述',
   'skill.creation.instructionsLabel': '說明',
   'skill.creation.instructionsPlaceholder': '以Markdown格式輸入詳細說明。\n\n例如：\n# 我的技能\n\n此技能...',
   'skill.creation.instructionsHint': 'Claude Code的Markdown格式說明',

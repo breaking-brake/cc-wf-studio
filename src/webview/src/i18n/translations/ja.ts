@@ -266,7 +266,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'skill.creation.nameLabel': 'Skill名',
   'skill.creation.nameHint': '小文字、数字、ハイフンのみ（最大64文字）',
   'skill.creation.descriptionLabel': '説明',
-  'skill.creation.descriptionPlaceholder': 'このSkillが何をするかの簡単な説明',
+  'skill.creation.descriptionPlaceholder': 'このSkillが何をするか、いつ使うかの簡単な説明',
   'skill.creation.instructionsLabel': '指示内容',
   'skill.creation.instructionsPlaceholder':
     'Markdown形式で詳細な指示を入力してください。\n\n例：\n# My Skill\n\nこのSkillは...',

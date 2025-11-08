@@ -266,7 +266,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'skill.creation.nameLabel': '스킬 이름',
   'skill.creation.nameHint': '소문자, 숫자, 하이픈만 사용 (최대 64자)',
   'skill.creation.descriptionLabel': '설명',
-  'skill.creation.descriptionPlaceholder': '이 스킬이 수행하는 작업에 대한 간단한 설명',
+  'skill.creation.descriptionPlaceholder': '이 스킬이 수행하는 작업과 사용 시점에 대한 간단한 설명',
   'skill.creation.instructionsLabel': '지침',
   'skill.creation.instructionsPlaceholder':
     'Markdown 형식으로 자세한 지침을 입력하세요.\n\n예:\n# My Skill\n\n이 스킬은...',
