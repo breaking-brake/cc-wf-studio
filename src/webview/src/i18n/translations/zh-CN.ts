@@ -188,9 +188,11 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'ai.descriptionPlaceholder':
     '示例：创建一个扫描代码、询问用户优先级并生成修复建议的代码审查工作流',
   'ai.characterCount': '{count} / {max} 字符',
-  'ai.generating': '正在生成工作流... 可能需要最多60秒。',
+  'ai.generating': '正在生成工作流... 可能需要最多90秒。',
+  'ai.progressTime': '{elapsed}秒 / {max}秒',
   'ai.generateButton': '生成',
   'ai.cancelButton': '取消',
+  'ai.cancelGenerationButton': '取消生成',
   'ai.success': '工作流生成成功！',
   'ai.usageNote': '*1 此功能使用您环境中安装的Claude Code。',
   'ai.overwriteWarning': '*2 生成工作流将完全替换您当前的工作流。请在继续之前保存您的工作。',
