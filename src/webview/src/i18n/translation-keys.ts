@@ -179,8 +179,10 @@ export interface WebviewTranslationKeys {
   'ai.descriptionPlaceholder': string;
   'ai.characterCount': string;
   'ai.generating': string;
+  'ai.progressTime': string;
   'ai.generateButton': string;
   'ai.cancelButton': string;
+  'ai.cancelGenerationButton': string;
   'ai.success': string;
   'ai.usageNote': string;
   'ai.overwriteWarning': string;

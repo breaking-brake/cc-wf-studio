@@ -198,9 +198,11 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'ai.descriptionPlaceholder':
     'Example: Create a code review workflow that scans code, asks user for priority level, and generates fix suggestions',
   'ai.characterCount': '{count} / {max} characters',
-  'ai.generating': 'Generating workflow... This may take up to 60 seconds.',
+  'ai.generating': 'Generating workflow... This may take up to 90 seconds.',
+  'ai.progressTime': '{elapsed}s / {max}s',
   'ai.generateButton': 'Generate',
   'ai.cancelButton': 'Cancel',
+  'ai.cancelGenerationButton': 'Cancel Generation',
   'ai.success': 'Workflow generated successfully!',
   'ai.usageNote': '*1 This feature uses Claude Code installed in your environment.',
   'ai.overwriteWarning':

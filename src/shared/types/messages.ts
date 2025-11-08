@@ -84,6 +84,10 @@ export interface LoadWorkflowRequestPayload {
   workflowId: string;
 }
 
+export interface CancelGenerationPayload {
+  requestId: string; // キャンセル対象のリクエストID
+}
+
 // ============================================================================
 // AI Generation Payloads (001-ai-workflow-generation)
 // ============================================================================
@@ -101,10 +105,21 @@ export interface GenerationSuccessPayload {
 
 export interface GenerationFailedPayload {
   error: {
-    code: 'COMMAND_NOT_FOUND' | 'TIMEOUT' | 'PARSE_ERROR' | 'VALIDATION_ERROR' | 'UNKNOWN_ERROR';
+    code:
+      | 'COMMAND_NOT_FOUND'
+      | 'TIMEOUT'
+      | 'PARSE_ERROR'
+      | 'VALIDATION_ERROR'
+      | 'CANCELLED'
+      | 'UNKNOWN_ERROR';
     message: string;
     details?: string;
   };
+  executionTimeMs: number;
+  timestamp: string; // ISO 8601
+}
+
+export interface GenerationCancelledPayload {
   executionTimeMs: number;
   timestamp: string; // ISO 8601
 }
@@ -123,7 +138,8 @@ export type ExtensionMessage =
   | Message<void, 'SAVE_CANCELLED'>
   | Message<void, 'EXPORT_CANCELLED'>
   | Message<GenerationSuccessPayload, 'GENERATION_SUCCESS'>
-  | Message<GenerationFailedPayload, 'GENERATION_FAILED'>;
+  | Message<GenerationFailedPayload, 'GENERATION_FAILED'>
+  | Message<GenerationCancelledPayload, 'GENERATION_CANCELLED'>;
 
 // ============================================================================
 // Webview → Extension Messages
@@ -136,7 +152,8 @@ export type WebviewMessage =
   | Message<void, 'LOAD_WORKFLOW_LIST'>
   | Message<LoadWorkflowRequestPayload, 'LOAD_WORKFLOW'>
   | Message<StateUpdatePayload, 'STATE_UPDATE'>
-  | Message<GenerateWorkflowPayload, 'GENERATE_WORKFLOW'>;
+  | Message<GenerateWorkflowPayload, 'GENERATE_WORKFLOW'>
+  | Message<CancelGenerationPayload, 'CANCEL_GENERATION'>;
 
 // ============================================================================
 // Error Codes
