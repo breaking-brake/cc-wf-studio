@@ -1,6 +1,6 @@
 # 実装タスク: Skill Node Integration
 
-**Feature**: 001-skill-node | **Generated**: 2025-11-08 | **Status**: In Progress (Phase 3)
+**Feature**: 001-skill-node | **Generated**: 2025-11-08 | **Status**: Completed (Phase 4)
 
 このドキュメントは、Skill Node機能の実装タスクを定義します。各フェーズ完了時にユーザーによる手動E2Eテストを実施します。
 
@@ -619,11 +619,11 @@ flowchart TD
 
 ### タスク一覧
 
-- [ ] [T017] [P2] [US2] プロジェクトSkillスキャン機能の強化 (src/extension/services/skill-service.ts)
-- [ ] [T018] [P2] [US2] 相対パス解決ロジックの実装 (src/extension/utils/path-utils.ts)
-- [ ] [T019] [P2] [US2] Skillブラウザダイアログでのスコープ表示強化 (src/webview/src/components/dialogs/SkillBrowserDialog.tsx)
-- [ ] [T020] [P2] [US2] ワークフロー保存時の相対パス変換 (src/webview/src/stores/workflow-store.ts)
-- [ ] [T021] [P2] [US2] 手動E2Eテスト: プロジェクトSkill参照の動作確認
+- [x] [T017] [P2] [US2] プロジェクトSkillスキャン機能の強化 (src/extension/services/skill-service.ts)
+- [x] [T018] [P2] [US2] 相対パス解決ロジックの実装 (src/extension/utils/path-utils.ts)
+- [x] [T019] [P2] [US2] Skillブラウザダイアログでのスコープ表示強化 (src/webview/src/components/dialogs/SkillBrowserDialog.tsx)
+- [x] [T020] [P2] [US2] ワークフロー保存時の相対パス変換 (src/extension/services/skill-service.ts)
+- [x] [T021] [P2] [US2] 手動E2Eテスト: プロジェクトSkill参照の動作確認
 
 ### 詳細
 
@@ -636,8 +636,8 @@ flowchart TD
 - personal/projectスキャンを並列実行
 
 **完了条件**:
-- [ ] プロジェクトSkillsが正しくスキャンされる
-- [ ] スコープ='project'が設定される
+- [x] プロジェクトSkillsが正しくスキャンされる
+- [x] スコープ='project'が設定される
 
 **依存関係**: T008(Skillサービス基礎)
 
@@ -652,8 +652,8 @@ flowchart TD
 - エラーハンドリング(ワークスペースがない場合)
 
 **完了条件**:
-- [ ] 相対パスが正しく絶対パスに変換される
-- [ ] ワークスペースがない場合はnullを返す
+- [x] 相対パスが正しく絶対パスに変換される
+- [x] ワークスペースがない場合はnullを返す
 
 **依存関係**: T007(パスユーティリティ基礎)
 
@@ -668,8 +668,8 @@ flowchart TD
 - バッジスタイリング、アイコン追加
 
 **完了条件**:
-- [ ] スコープバッジが視覚的に識別可能
-- [ ] 同名Skillの区別が容易
+- [x] スコープバッジが視覚的に識別可能
+- [x] 同名Skillの区別が容易
 
 **依存関係**: T012(ブラウザダイアログ基礎)
 
@@ -684,8 +684,8 @@ flowchart TD
 - パス変換ユーティリティの共通化
 
 **完了条件**:
-- [ ] プロジェクトSkillが相対パスで保存される
-- [ ] 個人Skillは絶対パスのまま
+- [x] プロジェクトSkillが相対パスで保存される
+- [x] 個人Skillは絶対パスのまま
 
 **依存関係**: T018(相対パス解決)
 
@@ -719,7 +719,7 @@ flowchart TD
    - ✅ Skillが正しく参照される(パスが解決される)
 
 **完了条件**:
-- [ ] US2の全3つの受け入れシナリオが手動テストで確認済み
+- [x] US2の全3つの受け入れシナリオが手動テストで確認済み
 
 **依存関係**: T017-T020(すべてのUS2タスク)
 

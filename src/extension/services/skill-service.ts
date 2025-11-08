@@ -11,7 +11,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { SkillReference, CreateSkillPayload } from '../../shared/types/messages';
 import { parseSkillFrontmatter, type SkillMetadata } from './yaml-parser';
-import { getPersonalSkillsDir, getProjectSkillsDir } from '../utils/path-utils';
+import { getPersonalSkillsDir, getProjectSkillsDir, toRelativePath } from '../utils/path-utils';
 
 /**
  * Scan a Skills directory and return available Skills
@@ -47,8 +47,11 @@ export async function scanSkills(
         const metadata = parseSkillFrontmatter(content);
 
         if (metadata) {
+          // Convert to relative path for project Skills (T020)
+          const pathToStore = scope === 'project' ? toRelativePath(skillPath, scope) : skillPath;
+
           skills.push({
-            skillPath,
+            skillPath: pathToStore,
             name: metadata.name,
             description: metadata.description,
             scope,

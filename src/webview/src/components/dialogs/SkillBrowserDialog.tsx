@@ -110,6 +110,10 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
 
     // Add Skill node to canvas
     const position = calculateNonOverlappingPosition(300, 250);
+
+    // For project Skills, skillPath is already relative from Extension
+    // For personal Skills, skillPath is absolute
+    // No conversion needed here - Extension already provides the correct format
     addNode({
       id: `skill-${Date.now()}`,
       type: NodeType.Skill,
@@ -323,15 +327,35 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                     marginBottom: '4px',
                   }}
                 >
-                  <span
-                    style={{
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      color: 'var(--vscode-foreground)',
-                    }}
-                  >
-                    {skill.name}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        color: 'var(--vscode-foreground)',
+                      }}
+                    >
+                      {skill.name}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        padding: '2px 6px',
+                        borderRadius: '3px',
+                        backgroundColor:
+                          skill.scope === 'personal'
+                            ? 'var(--vscode-badge-background)'
+                            : 'var(--vscode-button-secondaryBackground)',
+                        color:
+                          skill.scope === 'personal'
+                            ? 'var(--vscode-badge-foreground)'
+                            : 'var(--vscode-button-secondaryForeground)',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {skill.scope === 'personal' ? t('skill.browser.personalTab') : t('skill.browser.projectTab')}
+                    </span>
+                  </div>
                   <span
                     style={{
                       fontSize: '11px',
