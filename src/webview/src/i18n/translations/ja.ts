@@ -45,6 +45,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'node.switch.description': '複数分岐条件分岐（2-N個）',
   'node.askUserQuestion.title': 'Ask User Question',
   'node.askUserQuestion.description': 'ユーザーの選択に基づいて分岐',
+  'node.skill.title': 'Skill',
+  'node.skill.description': 'Claude Code Skillを実行',
 
   // Quick start instructions
   'palette.instruction.addNode': 'ノードをクリックしてキャンバスに追加',
@@ -65,6 +67,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeType.prompt': 'Prompt Node',
   'property.nodeType.start': 'Start Node',
   'property.nodeType.end': 'End Node',
+  'property.nodeType.skill': 'Skillノード',
   'property.nodeType.unknown': '不明',
 
   // Common property labels
@@ -91,6 +94,17 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.tools': 'ツール（カンマ区切り）',
   'property.tools.placeholder': '例: Read,Write,Bash',
   'property.tools.help': '空欄で全てのツールを使用',
+
+  // Skill properties
+  'property.skillPath': 'Skillパス',
+  'property.scope': 'スコープ',
+  'property.scope.personal': '個人',
+  'property.scope.project': 'プロジェクト',
+  'property.validationStatus': '検証ステータス',
+  'property.validationStatus.valid': '有効',
+  'property.validationStatus.missing': '見つかりません',
+  'property.validationStatus.invalid': '無効',
+  'property.allowedTools': '許可ツール',
 
   // AskUserQuestion properties
   'property.questionText': '質問',
@@ -224,4 +238,24 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': 'このノードを削除してもよろしいですか？',
   'dialog.deleteNode.confirm': '削除',
   'dialog.deleteNode.cancel': 'キャンセル',
+
+  // Skill Browser Dialog
+  'skill.browser.title': 'Skillを参照',
+  'skill.browser.description':
+    'ワークフローに追加するClaude Code Skillを選択してください。SkillはClaude Codeから呼び出せる特殊なツールです。',
+  'skill.browser.personalTab': '個人',
+  'skill.browser.projectTab': 'プロジェクト',
+  'skill.browser.noSkills': 'このディレクトリにSkillが見つかりません',
+  'skill.browser.loading': 'Skillを読み込み中...',
+  'skill.browser.selectButton': 'ワークフローに追加',
+  'skill.browser.cancelButton': 'キャンセル',
+  'skill.browser.skillName': 'Skill名',
+  'skill.browser.skillDescription': '説明',
+  'skill.browser.skillPath': 'パス',
+  'skill.browser.validationStatus': 'ステータス',
+
+  // Skill Browser Errors
+  'skill.error.loadFailed': 'Skillの読み込みに失敗しました。Skillディレクトリを確認してください。',
+  'skill.error.noSelection': 'Skillを選択してください',
+  'skill.error.unknown': '予期しないエラーが発生しました',
 };

@@ -45,6 +45,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'node.switch.description': '多路条件分支（2-N 种情况）',
   'node.askUserQuestion.title': 'Ask User Question',
   'node.askUserQuestion.description': '根据用户选择分支',
+  'node.skill.title': 'Skill',
+  'node.skill.description': '执行Claude Code Skill',
 
   // Quick start instructions
   'palette.instruction.addNode': '点击节点将其添加到画布',
@@ -65,6 +67,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeType.prompt': 'Prompt Node',
   'property.nodeType.start': 'Start Node',
   'property.nodeType.end': 'End Node',
+  'property.nodeType.skill': 'Skill节点',
   'property.nodeType.unknown': '未知',
 
   // Common property labels
@@ -89,6 +92,17 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'property.tools': '工具（逗号分隔）',
   'property.tools.placeholder': '例如：Read,Write,Bash',
   'property.tools.help': '留空表示所有工具',
+
+  // Skill properties
+  'property.skillPath': 'Skill路径',
+  'property.scope': '范围',
+  'property.scope.personal': '个人',
+  'property.scope.project': '项目',
+  'property.validationStatus': '验证状态',
+  'property.validationStatus.valid': '有效',
+  'property.validationStatus.missing': '缺失',
+  'property.validationStatus.invalid': '无效',
+  'property.allowedTools': '允许的工具',
 
   // AskUserQuestion properties
   'property.questionText': '问题',
@@ -211,4 +225,24 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': '确定要删除此节点吗？',
   'dialog.deleteNode.confirm': '删除',
   'dialog.deleteNode.cancel': '取消',
+
+  // Skill Browser Dialog
+  'skill.browser.title': '浏览Skill',
+  'skill.browser.description':
+    '选择要添加到工作流的Claude Code Skill。Skill是可以被Claude Code调用的专用工具。',
+  'skill.browser.personalTab': '个人',
+  'skill.browser.projectTab': '项目',
+  'skill.browser.noSkills': '在此目录中未找到Skill',
+  'skill.browser.loading': '正在加载Skill...',
+  'skill.browser.selectButton': '添加到工作流',
+  'skill.browser.cancelButton': '取消',
+  'skill.browser.skillName': 'Skill名称',
+  'skill.browser.skillDescription': '描述',
+  'skill.browser.skillPath': '路径',
+  'skill.browser.validationStatus': '状态',
+
+  // Skill Browser Errors
+  'skill.error.loadFailed': '加载Skill失败。请检查Skill目录。',
+  'skill.error.noSelection': '请选择一个Skill',
+  'skill.error.unknown': '发生意外错误',
 };

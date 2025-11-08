@@ -45,6 +45,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'node.switch.description': 'Multi-way conditional branch (2-N cases)',
   'node.askUserQuestion.title': 'Ask User Question',
   'node.askUserQuestion.description': 'Branch based on user choice',
+  'node.skill.title': 'Skill',
+  'node.skill.description': 'Execute a Claude Code Skill',
 
   // Quick start instructions
   'palette.instruction.addNode': 'Click a node to add it to the canvas',
@@ -65,6 +67,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeType.prompt': 'Prompt Node',
   'property.nodeType.start': 'Start Node',
   'property.nodeType.end': 'End Node',
+  'property.nodeType.skill': 'Skill Node',
   'property.nodeType.unknown': 'Unknown',
 
   // Common property labels
@@ -91,6 +94,17 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.tools': 'Tools (comma-separated)',
   'property.tools.placeholder': 'e.g., Read,Write,Bash',
   'property.tools.help': 'Leave empty for all tools',
+
+  // Skill properties
+  'property.skillPath': 'Skill Path',
+  'property.scope': 'Scope',
+  'property.scope.personal': 'Personal',
+  'property.scope.project': 'Project',
+  'property.validationStatus': 'Validation Status',
+  'property.validationStatus.valid': 'Valid',
+  'property.validationStatus.missing': 'Missing',
+  'property.validationStatus.invalid': 'Invalid',
+  'property.allowedTools': 'Allowed Tools',
 
   // AskUserQuestion properties
   'property.questionText': 'Question',
@@ -223,4 +237,24 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': 'Are you sure you want to delete this node?',
   'dialog.deleteNode.confirm': 'Delete',
   'dialog.deleteNode.cancel': 'Cancel',
+
+  // Skill Browser Dialog
+  'skill.browser.title': 'Browse Skills',
+  'skill.browser.description':
+    'Select a Claude Code Skill to add to your workflow. Skills are specialized tools that can be invoked by Claude Code.',
+  'skill.browser.personalTab': 'Personal',
+  'skill.browser.projectTab': 'Project',
+  'skill.browser.noSkills': 'No Skills found in this directory',
+  'skill.browser.loading': 'Loading Skills...',
+  'skill.browser.selectButton': 'Add to Workflow',
+  'skill.browser.cancelButton': 'Cancel',
+  'skill.browser.skillName': 'Skill Name',
+  'skill.browser.skillDescription': 'Description',
+  'skill.browser.skillPath': 'Path',
+  'skill.browser.validationStatus': 'Status',
+
+  // Skill Browser Errors
+  'skill.error.loadFailed': 'Failed to load Skills. Please check your Skill directories.',
+  'skill.error.noSelection': 'Please select a Skill',
+  'skill.error.unknown': 'An unexpected error occurred',
 };

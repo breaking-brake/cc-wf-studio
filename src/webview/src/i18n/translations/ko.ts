@@ -46,6 +46,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'node.switch.description': '다중 조건 분기 (2-N 케이스)',
   'node.askUserQuestion.title': 'Ask User Question',
   'node.askUserQuestion.description': '사용자 선택에 따라 분기',
+  'node.skill.title': 'Skill',
+  'node.skill.description': 'Claude Code Skill 실행',
 
   // Quick start instructions
   'palette.instruction.addNode': '노드를 클릭하여 캔버스에 추가',
@@ -66,6 +68,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeType.prompt': 'Prompt Node',
   'property.nodeType.start': 'Start Node',
   'property.nodeType.end': 'End Node',
+  'property.nodeType.skill': 'Skill 노드',
   'property.nodeType.unknown': '알 수 없음',
 
   // Common property labels
@@ -92,6 +95,17 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.tools': '도구 (쉼표로 구분)',
   'property.tools.placeholder': '예: Read,Write,Bash',
   'property.tools.help': '모든 도구를 사용하려면 비워 두세요',
+
+  // Skill properties
+  'property.skillPath': 'Skill 경로',
+  'property.scope': '범위',
+  'property.scope.personal': '개인',
+  'property.scope.project': '프로젝트',
+  'property.validationStatus': '검증 상태',
+  'property.validationStatus.valid': '유효함',
+  'property.validationStatus.missing': '찾을 수 없음',
+  'property.validationStatus.invalid': '유효하지 않음',
+  'property.allowedTools': '허용된 도구',
 
   // AskUserQuestion properties
   'property.questionText': '질문',
@@ -224,4 +238,24 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': '이 노드를 삭제하시겠습니까?',
   'dialog.deleteNode.confirm': '삭제',
   'dialog.deleteNode.cancel': '취소',
+
+  // Skill Browser Dialog
+  'skill.browser.title': 'Skill 탐색',
+  'skill.browser.description':
+    '워크플로에 추가할 Claude Code Skill을 선택하세요. Skill은 Claude Code에서 호출할 수 있는 특수 도구입니다.',
+  'skill.browser.personalTab': '개인',
+  'skill.browser.projectTab': '프로젝트',
+  'skill.browser.noSkills': '이 디렉터리에서 Skill을 찾을 수 없습니다',
+  'skill.browser.loading': 'Skill 로드 중...',
+  'skill.browser.selectButton': '워크플로에 추가',
+  'skill.browser.cancelButton': '취소',
+  'skill.browser.skillName': 'Skill 이름',
+  'skill.browser.skillDescription': '설명',
+  'skill.browser.skillPath': '경로',
+  'skill.browser.validationStatus': '상태',
+
+  // Skill Browser Errors
+  'skill.error.loadFailed': 'Skill을 로드하지 못했습니다. Skill 디렉터리를 확인하세요.',
+  'skill.error.noSelection': 'Skill을 선택하세요',
+  'skill.error.unknown': '예기치 않은 오류가 발생했습니다',
 };

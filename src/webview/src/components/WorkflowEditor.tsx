@@ -24,6 +24,7 @@ import { EndNode } from './nodes/EndNode';
 import { IfElseNodeComponent } from './nodes/IfElseNode';
 import { PromptNode } from './nodes/PromptNode';
 // 新規ノードタイプのインポート
+import { SkillNodeComponent } from './nodes/SkillNode';
 import { StartNode } from './nodes/StartNode';
 import { SubAgentNodeComponent } from './nodes/SubAgentNode';
 import { SwitchNodeComponent } from './nodes/SwitchNode';
@@ -44,6 +45,7 @@ const nodeTypes: NodeTypes = {
   start: StartNode,
   end: EndNode,
   prompt: PromptNode,
+  skill: SkillNodeComponent,
 };
 
 /**
@@ -164,6 +166,8 @@ export const WorkflowEditor: React.FC = () => {
                 return 'var(--vscode-charts-red)';
               case 'prompt':
                 return 'var(--vscode-charts-purple)';
+              case 'skill':
+                return 'var(--vscode-charts-cyan)';
               default:
                 return 'var(--vscode-foreground)';
             }

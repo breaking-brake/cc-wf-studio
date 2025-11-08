@@ -43,6 +43,8 @@ export interface WebviewTranslationKeys {
   'node.switch.description': string;
   'node.askUserQuestion.title': string;
   'node.askUserQuestion.description': string;
+  'node.skill.title': string;
+  'node.skill.description': string;
 
   // Quick start instructions
   'palette.instruction.addNode': string;
@@ -63,6 +65,7 @@ export interface WebviewTranslationKeys {
   'property.nodeType.prompt': string;
   'property.nodeType.start': string;
   'property.nodeType.end': string;
+  'property.nodeType.skill': string;
   'property.nodeType.unknown': string;
 
   // Common property labels
@@ -87,6 +90,17 @@ export interface WebviewTranslationKeys {
   'property.tools': string;
   'property.tools.placeholder': string;
   'property.tools.help': string;
+
+  // Skill properties
+  'property.skillPath': string;
+  'property.scope': string;
+  'property.scope.personal': string;
+  'property.scope.project': string;
+  'property.validationStatus': string;
+  'property.validationStatus.valid': string;
+  'property.validationStatus.missing': string;
+  'property.validationStatus.invalid': string;
+  'property.allowedTools': string;
 
   // AskUserQuestion properties
   'property.questionText': string;
@@ -201,4 +215,23 @@ export interface WebviewTranslationKeys {
   'dialog.deleteNode.message': string;
   'dialog.deleteNode.confirm': string;
   'dialog.deleteNode.cancel': string;
+
+  // Skill Browser Dialog
+  'skill.browser.title': string;
+  'skill.browser.description': string;
+  'skill.browser.personalTab': string;
+  'skill.browser.projectTab': string;
+  'skill.browser.noSkills': string;
+  'skill.browser.loading': string;
+  'skill.browser.selectButton': string;
+  'skill.browser.cancelButton': string;
+  'skill.browser.skillName': string;
+  'skill.browser.skillDescription': string;
+  'skill.browser.skillPath': string;
+  'skill.browser.validationStatus': string;
+
+  // Skill Browser Errors
+  'skill.error.loadFailed': string;
+  'skill.error.noSelection': string;
+  'skill.error.unknown': string;
 }
