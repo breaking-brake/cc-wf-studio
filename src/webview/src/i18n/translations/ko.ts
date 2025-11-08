@@ -105,6 +105,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.validationStatus.valid': '유효함',
   'property.validationStatus.missing': '찾을 수 없음',
   'property.validationStatus.invalid': '유효하지 않음',
+  'property.validationStatus.valid.tooltip': 'Skill이 유효하며 사용할 수 있습니다',
+  'property.validationStatus.missing.tooltip': '지정된 경로에서 SKILL.md 파일을 찾을 수 없습니다',
+  'property.validationStatus.invalid.tooltip':
+    'SKILL.md에 유효하지 않은 YAML frontmatter가 있습니다',
   'property.allowedTools': '허용된 도구',
 
   // AskUserQuestion properties
@@ -242,7 +246,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Skill Browser Dialog
   'skill.browser.title': 'Skill 탐색',
   'skill.browser.description':
-    '워크플로에 추가할 Claude Code Skill을 선택하세요. Skill은 Claude Code에서 호출할 수 있는 특수 도구입니다.',
+    '워크플로에 추가할 Claude Code Skill을 선택하세요.\nSkill은 Claude Code가 자동으로 활용하는 전문적인 능력입니다.',
   'skill.browser.personalTab': '개인',
   'skill.browser.projectTab': '프로젝트',
   'skill.browser.noSkills': '이 디렉터리에서 Skill을 찾을 수 없습니다',

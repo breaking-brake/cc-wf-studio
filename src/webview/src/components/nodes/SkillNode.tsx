@@ -10,6 +10,7 @@
 import type { SkillNodeData } from '@shared/types/workflow-definition';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
+import { useTranslation } from '../../i18n/i18n-context';
 import { DeleteButton } from './DeleteButton';
 
 /**
@@ -45,6 +46,20 @@ function getValidationColor(status: 'valid' | 'missing' | 'invalid'): string {
  */
 export const SkillNodeComponent: React.FC<NodeProps<SkillNodeData>> = React.memo(
   ({ id, data, selected }) => {
+    const { t } = useTranslation();
+
+    // Get tooltip message based on validation status
+    const getTooltipMessage = (status: 'valid' | 'missing' | 'invalid'): string => {
+      switch (status) {
+        case 'valid':
+          return t('property.validationStatus.valid.tooltip');
+        case 'missing':
+          return t('property.validationStatus.missing.tooltip');
+        case 'invalid':
+          return t('property.validationStatus.invalid.tooltip');
+      }
+    };
+
     return (
       <div
         className={`skill-node ${selected ? 'selected' : ''}`}
@@ -83,7 +98,7 @@ export const SkillNodeComponent: React.FC<NodeProps<SkillNodeData>> = React.memo
               color: getValidationColor(data.validationStatus),
               fontWeight: 'bold',
             }}
-            title={`Validation: ${data.validationStatus}`}
+            title={getTooltipMessage(data.validationStatus)}
           >
             {getValidationIcon(data.validationStatus)}
           </span>

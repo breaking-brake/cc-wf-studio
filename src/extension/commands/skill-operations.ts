@@ -8,8 +8,8 @@
  */
 
 import * as vscode from 'vscode';
-import { scanAllSkills, validateSkillFile, createSkill } from '../services/skill-service';
 import type { CreateSkillPayload, ValidateSkillFilePayload } from '../../shared/types/messages';
+import { createSkill, scanAllSkills, validateSkillFile } from '../services/skill-service';
 
 /**
  * Output channel for logging Skill operations

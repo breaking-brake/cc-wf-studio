@@ -102,6 +102,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'property.validationStatus.valid': '有效',
   'property.validationStatus.missing': '缺失',
   'property.validationStatus.invalid': '无效',
+  'property.validationStatus.valid.tooltip': 'Skill有效且可以使用',
+  'property.validationStatus.missing.tooltip': '在指定路径找不到SKILL.md文件',
+  'property.validationStatus.invalid.tooltip': 'SKILL.md包含无效的YAML前置内容',
   'property.allowedTools': '允许的工具',
 
   // AskUserQuestion properties
@@ -229,7 +232,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // Skill Browser Dialog
   'skill.browser.title': '浏览Skill',
   'skill.browser.description':
-    '选择要添加到工作流的Claude Code Skill。Skill是可以被Claude Code调用的专用工具。',
+    '选择要添加到工作流的Claude Code Skill。\nSkill是Claude Code自动利用的专业能力。',
   'skill.browser.personalTab': '个人',
   'skill.browser.projectTab': '项目',
   'skill.browser.noSkills': '在此目录中未找到Skill',

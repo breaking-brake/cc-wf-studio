@@ -100,6 +100,9 @@ export interface WebviewTranslationKeys {
   'property.validationStatus.valid': string;
   'property.validationStatus.missing': string;
   'property.validationStatus.invalid': string;
+  'property.validationStatus.valid.tooltip': string;
+  'property.validationStatus.missing.tooltip': string;
+  'property.validationStatus.invalid.tooltip': string;
   'property.allowedTools': string;
 
   // AskUserQuestion properties

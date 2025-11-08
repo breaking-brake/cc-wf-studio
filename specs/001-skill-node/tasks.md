@@ -1,6 +1,6 @@
 # 実装タスク: Skill Node Integration
 
-**Feature**: 001-skill-node | **Generated**: 2025-11-08 | **Status**: Completed (Phase 4)
+**Feature**: 001-skill-node | **Generated**: 2025-11-08 | **Status**: Completed (Phase 5)
 
 このドキュメントは、Skill Node機能の実装タスクを定義します。各フェーズ完了時にユーザーによる手動E2Eテストを実施します。
 
@@ -733,12 +733,12 @@ flowchart TD
 
 ### タスク一覧
 
-- [ ] [T022] [P3] [US3] Skill作成ダイアログのUI実装 (src/webview/src/components/dialogs/SkillCreationDialog.tsx)
-- [ ] [T023] [P3] [US3] Skill作成フォームのバリデーション実装 (src/webview/src/utils/skill-validation.ts)
-- [ ] [T024] [P3] [US3] Skill作成処理の実装(Extension側) (src/extension/services/skill-service.ts)
-- [ ] [T025] [P3] [US3] SKILL.mdファイル生成ロジック (src/extension/services/skill-file-generator.ts)
-- [ ] [T026] [P3] [US3] 国際化対応(Skill作成ダイアログ) (src/webview/src/i18n/translations/)
-- [ ] [T027] [P3] [US3] 手動E2Eテスト: Skill新規作成からワークフロー組み込みまで
+- [x] [T022] [P3] [US3] Skill作成ダイアログのUI実装 (src/webview/src/components/dialogs/SkillCreationDialog.tsx)
+- [x] [T023] [P3] [US3] Skill作成フォームのバリデーション実装 (src/webview/src/utils/skill-validation.ts)
+- [x] [T024] [P3] [US3] Skill作成処理の実装(Extension側) (src/extension/services/skill-service.ts)
+- [x] [T025] [P3] [US3] SKILL.mdファイル生成ロジック (src/extension/services/skill-file-generator.ts)
+- [x] [T026] [P3] [US3] 国際化対応(Skill作成ダイアログ) (src/webview/src/i18n/translations/)
+- [x] [T027] [P3] [US3] 手動E2Eテスト: Skill新規作成からワークフロー組み込みまで
 
 ### 詳細
 
@@ -759,9 +759,9 @@ flowchart TD
 - `src/webview/src/components/dialogs/SkillCreationDialog.module.css` (NEW)
 
 **完了条件**:
-- [ ] ダイアログが正しく表示される
-- [ ] 全フィールドが入力可能
-- [ ] キーボードショートカット(Ctrl/Cmd+Enter: 保存, Esc: キャンセル)
+- [x] ダイアログが正しく表示される
+- [x] 全フィールドが入力可能
+- [x] キーボードショートカット(Ctrl/Cmd+Enter: 保存, Esc: キャンセル)
 
 **依存関係**: なし
 
@@ -783,8 +783,8 @@ flowchart TD
 - `src/webview/src/utils/skill-validation.ts` (NEW)
 
 **完了条件**:
-- [ ] 全バリデーションルールが動作
-- [ ] 適切なエラーメッセージを返す
+- [x] 全バリデーションルールが動作
+- [x] 適切なエラーメッセージを返す
 
 **依存関係**: なし
 
@@ -807,8 +807,8 @@ flowchart TD
 - `src/extension/services/skill-service.ts` (UPDATE)
 
 **完了条件**:
-- [ ] Skill作成が成功する
-- [ ] 名前衝突時にエラーを返す
+- [x] Skill作成が成功する
+- [x] 名前衝突時にエラーを返す
 
 **依存関係**: T009(メッセージハンドラー基礎)
 
@@ -833,8 +833,8 @@ allowed-tools: [allowedTools] (if provided)
 - `src/extension/services/skill-file-generator.ts` (NEW)
 
 **完了条件**:
-- [ ] 生成されたSKILL.mdがYAMLパーサーで正しく解析できる
-- [ ] allowed-toolsがオプションで正しく処理される
+- [x] 生成されたSKILL.mdがYAMLパーサーで正しく解析できる
+- [x] allowed-toolsがオプションで正しく処理される
 
 **依存関係**: T006(YAMLパーサー)
 
@@ -861,8 +861,8 @@ allowed-tools: [allowedTools] (if provided)
 - `src/webview/src/i18n/translations/zh-TW.ts` (UPDATE)
 
 **完了条件**:
-- [ ] 5言語すべてで翻訳が表示される
-- [ ] エラーメッセージも翻訳対応
+- [x] 5言語すべてで翻訳が表示される
+- [x] エラーメッセージも翻訳対応
 
 **依存関係**: T022(Skill作成ダイアログ)
 
@@ -895,7 +895,7 @@ allowed-tools: [allowedTools] (if provided)
    - ✅ Skillノードが新しいSkillを自動的に参照している
 
 **完了条件**:
-- [ ] US3の全4つの受け入れシナリオが手動テストで確認済み
+- [x] US3の全4つの受け入れシナリオが手動テストで確認済み
 
 **依存関係**: T022-T026(すべてのUS3タスク)
 
@@ -907,11 +907,11 @@ allowed-tools: [allowedTools] (if provided)
 
 ### タスク一覧
 
-- [ ] [T028] [P2] [Polish] Skill検証ステータス表示の改善(missing/invalid時の警告)
+- [x] [T028] [P2] [Polish] Skill検証ステータス表示の改善(missing/invalid時の警告)
 - [ ] [T029] [P2] [Polish] パフォーマンス最適化(Skillスキャンキャッシュ)
 - [ ] [T030] [P3] [Polish] アクセシビリティ監査とARIA属性追加
 - [ ] [T031] [P3] [Polish] ユーザーガイド(quickstart.md)の更新
-- [ ] [T032] [P3] [Polish] 開発者向けドキュメント(README.md)の更新
+- [x] [T032] [P3] [Polish] 開発者向けドキュメント(README.md)の更新
 
 ### 詳細
 
@@ -923,8 +923,8 @@ allowed-tools: [allowedTools] (if provided)
 - `src/webview/src/components/nodes/SkillNode.tsx` (UPDATE)
 
 **完了条件**:
-- [ ] 赤い警告アイコンが表示される
-- [ ] ツールチップでエラー内容が表示される
+- [x] 赤い警告アイコンが表示される
+- [x] ツールチップでエラー内容が表示される
 
 **依存関係**: T011(Skillノード基礎)
 
@@ -969,7 +969,7 @@ allowed-tools: [allowedTools] (if provided)
 
 **完了条件**:
 - [ ] quickstart.mdにスクリーンショット追加
-- [ ] README.mdにSkillノード機能を記載
+- [x] README.mdにSkillノード機能を記載
 
 **依存関係**: T016, T021, T027(全US完了)
 
@@ -1077,16 +1077,16 @@ graph TD
 各ユーザーストーリー完了時に以下のテストを実施します:
 
 ### Phase 3完了時: T016(US1テスト)
-- [ ] Skillノードの追加・設定・エクスポートが動作
-- [ ] テスト結果をドキュメント化(スクリーンショット付き)
+- [x] Skillノードの追加・設定・エクスポートが動作
+- [x] テスト結果をドキュメント化(スクリーンショット付き)
 
 ### Phase 4完了時: T021(US2テスト)
-- [ ] プロジェクトSkillの参照・相対パス保存が動作
-- [ ] チーム間共有の動作確認
+- [x] プロジェクトSkillの参照・相対パス保存が動作
+- [x] チーム間共有の動作確認
 
 ### Phase 5完了時: T027(US3テスト)
-- [ ] Skill新規作成・自動参照が動作
-- [ ] バリデーションが正しく機能
+- [x] Skill新規作成・自動参照が動作
+- [x] バリデーションが正しく機能
 
 ### Phase 6完了時: 統合テスト
 - [ ] 全機能を通しで実行し、リグレッションがないことを確認
@@ -1120,12 +1120,12 @@ graph TD
 - [x] ワークフローエクスポートにSkill依存関係が含まれる
 
 ### Checkpoint 3: Phase 4完了時
-- [ ] プロジェクトSkillが相対パスで保存される
-- [ ] チーム間でワークフローが共有可能
+- [x] プロジェクトSkillが相対パスで保存される
+- [x] チーム間でワークフローが共有可能
 
 ### Checkpoint 4: Phase 5完了時
-- [ ] Skill作成ダイアログが5言語対応
-- [ ] 新規SKILL.mdファイルが正しく生成される
+- [x] Skill作成ダイアログが5言語対応
+- [x] 新規SKILL.mdファイルが正しく生成される
 
 ### Checkpoint 5: Phase 6完了時(リリース準備)
 - [ ] 全手動E2Eテストが通過

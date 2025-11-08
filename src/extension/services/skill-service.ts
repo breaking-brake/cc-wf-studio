@@ -9,10 +9,10 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import type { SkillReference, CreateSkillPayload } from '../../shared/types/messages';
-import { parseSkillFrontmatter, type SkillMetadata } from './yaml-parser';
+import type { CreateSkillPayload, SkillReference } from '../../shared/types/messages';
 import { getPersonalSkillsDir, getProjectSkillsDir, toRelativePath } from '../utils/path-utils';
 import { generateSkillFileContent } from './skill-file-generator';
+import { type SkillMetadata, parseSkillFrontmatter } from './yaml-parser';
 
 /**
  * Scan a Skills directory and return available Skills

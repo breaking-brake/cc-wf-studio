@@ -51,6 +51,8 @@ All operations run locally within VSCode. No network communication means zero ri
 
 🤖 **AI-Assisted Workflow Generation** - Generate complete workflows from natural language descriptions using Claude Code CLI integration
 
+📚 **Skill Nodes** - Reference existing Claude Code Skills from personal (`~/.claude/skills/`) or project (`.claude/skills/`) directories, or create new Skills directly from the visual editor
+
 ## AI-Assisted Workflow Generation
 
 ### Overview
@@ -218,6 +220,27 @@ Configure autonomous AI agents with:
 - Tool permissions (Read, Write, Bash, etc.)
 - Model selection (Sonnet for balance, Opus for complex tasks, Haiku for speed)
 
+### Skill Nodes
+Integrate Claude Code Skills into your workflows:
+- **Personal Skills**: Reference Skills from `~/.claude/skills/` for individual use
+- **Project Skills**: Use team-shared Skills from `.claude/skills/` for consistent collaboration
+- **Create New Skills**: Build Skills directly from the visual editor with a guided form
+- **Browse & Select**: Interactive Skill browser displays available Skills with descriptions and scope indicators
+- **Automatic Dependency Tracking**: Exported workflows include documentation of all referenced Skills
+
+Skills are specialized agent capabilities defined in `SKILL.md` files with YAML frontmatter. When a workflow references a Skill, Claude Code automatically invokes it based on the Skill's description trigger.
+
+**Creating a New Skill:**
+1. Select a Skill node in your workflow
+2. Click "Create New Skill" in the property panel
+3. Fill in the Skill details:
+   - **Name**: Lowercase, hyphens allowed (e.g., `pdf-analyzer`)
+   - **Description**: Brief summary of what the Skill does and when to use it
+   - **Instructions**: Full prompt/instructions in markdown format
+   - **Allowed Tools**: Optional tool restrictions (Read, Grep, Bash, etc.)
+   - **Scope**: Choose Personal (your machine only) or Project (shared with team)
+4. The Skill is automatically created and referenced by the node
+
 ### Conditional Branching Nodes
 Implement conditional logic with specialized nodes:
 
@@ -266,6 +289,13 @@ Generates ready-to-use files:
 3. **Filter Results** Sub-Agent
 4. **Generate Fix Suggestions** Sub-Agent
 
+### Example 3: Document Processing with Skills
+1. **Upload Document** Prompt → Asks user for file path
+2. **PDF Extractor** Skill (Personal) → Extracts text from PDF files
+3. **Ask User**: "Processing type?" → Summarize / Translate / Analyze
+4. **Document Processor** Skill (Project) → Team-shared processing logic
+5. **Format Results** Sub-Agent → Creates final output
+
 ## FAQ
 
 **Q: What is Claude Code?**
@@ -285,6 +315,18 @@ A: Up to 50 nodes per workflow. Most workflows use 3-10 nodes.
 
 **Q: What languages are supported?**
 A: Both the Visual Editor UI and exported workflows automatically use your VSCode display language setting. Currently supported: English (default), Japanese, Korean, Simplified Chinese (zh-CN), and Traditional Chinese (zh-TW/zh-HK). The extension detects `vscode.env.language` and displays all UI elements and generates documentation in the appropriate language. This includes toolbar buttons, node palette, property panel labels, and all exported files.
+
+**Q: What are Skill nodes?**
+A: Skill nodes allow you to integrate Claude Code Skills (specialized agent capabilities) into your workflows. Skills are defined in `SKILL.md` files with YAML frontmatter and can be invoked automatically by Claude based on their description triggers.
+
+**Q: What's the difference between Personal and Project Skills?**
+A: Personal Skills are stored in `~/.claude/skills/` and are specific to your machine. Project Skills are stored in `.claude/skills/` within your project directory and can be shared with your team via version control. Use Personal Skills for individual workflows and Project Skills for team collaboration.
+
+**Q: Can I create Skills manually instead of using the visual editor?**
+A: Yes! You can create `SKILL.md` files manually in the appropriate directory (`~/.claude/skills/[skill-name]/` or `.claude/skills/[skill-name]/`). The Skill browser will automatically detect them. The visual editor's "Create New Skill" feature is just a convenience.
+
+**Q: What happens if a referenced Skill file is missing?**
+A: The visual editor will detect missing Skill files when loading workflows and display a warning indicator on the Skill node. You can then re-select a valid Skill or remove the broken reference.
 
 ## Troubleshooting
 

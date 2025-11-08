@@ -7,13 +7,13 @@
  * Based on: specs/001-skill-node/tasks.md T022
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
-import {
-  validateCreateSkillPayload,
-  type SkillValidationErrors,
-} from '../../utils/skill-validation';
 import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
+import {
+  type SkillValidationErrors,
+  validateCreateSkillPayload,
+} from '../../utils/skill-validation';
 
 interface SkillCreationDialogProps {
   isOpen: boolean;

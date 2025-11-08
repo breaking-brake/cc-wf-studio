@@ -104,6 +104,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.validationStatus.valid': 'Valid',
   'property.validationStatus.missing': 'Missing',
   'property.validationStatus.invalid': 'Invalid',
+  'property.validationStatus.valid.tooltip': 'Skill is valid and ready to use',
+  'property.validationStatus.missing.tooltip': 'SKILL.md file not found at specified path',
+  'property.validationStatus.invalid.tooltip': 'SKILL.md has invalid YAML frontmatter',
   'property.allowedTools': 'Allowed Tools',
 
   // AskUserQuestion properties
@@ -241,7 +244,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Skill Browser Dialog
   'skill.browser.title': 'Browse Skills',
   'skill.browser.description':
-    'Select a Claude Code Skill to add to your workflow. Skills are specialized tools that can be invoked by Claude Code.',
+    'Select a Claude Code Skill to add to your workflow.\nSkills are specialized capabilities that Claude Code automatically utilizes.',
   'skill.browser.personalTab': 'Personal',
   'skill.browser.projectTab': 'Project',
   'skill.browser.noSkills': 'No Skills found in this directory',

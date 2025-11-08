@@ -8,9 +8,9 @@
  */
 
 import type {
-  SkillReference,
   CreateSkillPayload,
   SkillCreationSuccessPayload,
+  SkillReference,
 } from '../../../shared/types/messages';
 
 // VSCode API bridge (injected by Extension Host)

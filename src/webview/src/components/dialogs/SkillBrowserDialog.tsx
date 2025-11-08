@@ -7,13 +7,13 @@
  * Based on: specs/001-skill-node/design.md Section 6.2
  */
 
+import type { SkillReference } from '@shared/types/messages';
+import { NodeType } from '@shared/types/workflow-definition';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { browseSkills, createSkill } from '../../services/skill-browser-service';
-import type { SkillReference } from '@shared/types/messages';
 import { useWorkflowStore } from '../../stores/workflow-store';
-import { NodeType } from '@shared/types/workflow-definition';
-import { SkillCreationDialog, type CreateSkillFormData } from './SkillCreationDialog';
+import { type CreateSkillFormData, SkillCreationDialog } from './SkillCreationDialog';
 
 interface SkillBrowserDialogProps {
   isOpen: boolean;

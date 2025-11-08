@@ -104,6 +104,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.validationStatus.valid': '有効',
   'property.validationStatus.missing': '見つかりません',
   'property.validationStatus.invalid': '無効',
+  'property.validationStatus.valid.tooltip': 'Skillは有効で使用可能です',
+  'property.validationStatus.missing.tooltip': '指定されたパスにSKILL.mdファイルが見つかりません',
+  'property.validationStatus.invalid.tooltip': 'SKILL.mdのYAMLフロントマターが無効です',
   'property.allowedTools': '許可ツール',
 
   // AskUserQuestion properties
@@ -242,7 +245,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Skill Browser Dialog
   'skill.browser.title': 'Skillを参照',
   'skill.browser.description':
-    'ワークフローに追加するClaude Code Skillを選択してください。SkillはClaude Codeから呼び出せる特殊なツールです。',
+    'ワークフローに追加するClaude Code Skillを選択してください。\nSkillはClaude Codeが自動的に活用する専門的な能力です。',
   'skill.browser.personalTab': 'パーソナル',
   'skill.browser.projectTab': 'プロジェクト',
   'skill.browser.noSkills': 'このディレクトリにSkillが見つかりません',
