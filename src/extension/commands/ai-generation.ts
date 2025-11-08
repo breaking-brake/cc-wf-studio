@@ -68,9 +68,9 @@ export async function handleGenerateWorkflow(
     // Step 2: Construct prompt
     const prompt = constructPrompt(payload.userDescription, schemaResult.schema);
 
-    // Step 3: Execute Claude Code CLI
+    // Step 3: Execute Claude Code CLI (pass requestId for cancellation support)
     const timeout = payload.timeoutMs ?? 60000;
-    const cliResult = await executeClaudeCodeCLI(prompt, timeout);
+    const cliResult = await executeClaudeCodeCLI(prompt, timeout, requestId);
 
     if (!cliResult.success || !cliResult.output) {
       // CLI execution failed
@@ -153,15 +153,18 @@ export async function handleGenerateWorkflow(
       connectionCount: (parsedOutput as Workflow).connections?.length ?? 0,
     });
 
-    // Step 6: Success - send generated workflow
+    // Step 6: Adjust node positions for better spacing
+    const adjustedWorkflow = adjustNodeSpacing(parsedOutput as Workflow);
+
+    // Step 7: Success - send generated workflow
     log('INFO', 'AI Workflow Generation completed successfully', {
       requestId,
       executionTimeMs: cliResult.executionTimeMs,
-      workflowName: (parsedOutput as Workflow).name,
+      workflowName: adjustedWorkflow.name,
     });
 
     sendGenerationSuccess(webview, requestId, {
-      workflow: parsedOutput as Workflow,
+      workflow: adjustedWorkflow,
       executionTimeMs: cliResult.executionTimeMs,
       timestamp: new Date().toISOString(),
     });
@@ -185,6 +188,101 @@ export async function handleGenerateWorkflow(
       timestamp: new Date().toISOString(),
     });
   }
+}
+
+/**
+ * Estimated widths for each node type (in pixels)
+ * These values are based on typical rendered widths in React Flow
+ */
+const NODE_TYPE_WIDTHS: Record<string, number> = {
+  start: 150,
+  end: 150,
+  prompt: 250,
+  subAgent: 280,
+  ifElse: 300,
+  switch: 350,
+  askUserQuestion: 400, // Wide due to multiple choice options
+};
+
+/**
+ * Get estimated width for a node based on its type
+ */
+function getNodeWidth(nodeType: string): number {
+  return NODE_TYPE_WIDTHS[nodeType] ?? 250; // Default to 250px for unknown types
+}
+
+/**
+ * Adjust node spacing for better visual layout
+ *
+ * AI-generated workflows may have overlapping nodes due to tight X-axis spacing.
+ * This function redistributes nodes horizontally based on their actual widths,
+ * ensuring wider nodes (like AskUserQuestion) don't overlap with subsequent nodes.
+ *
+ * @param workflow - The AI-generated workflow
+ * @returns Workflow with adjusted node positions
+ */
+function adjustNodeSpacing(workflow: Workflow): Workflow {
+  const LAYER_TOLERANCE = 100; // Nodes within this X distance are considered same layer
+  const HORIZONTAL_PADDING = 40; // Minimum padding between node layers
+  const START_X = 100; // Starting X position
+
+  // Sort nodes by X position
+  const sortedNodes = [...workflow.nodes].sort((a, b) => a.position.x - b.position.x);
+
+  // Group nodes into layers (columns) based on X proximity
+  const layers: (typeof sortedNodes)[] = [];
+  let currentLayer: typeof sortedNodes = [];
+  let lastX = Number.NEGATIVE_INFINITY;
+
+  for (const node of sortedNodes) {
+    if (currentLayer.length === 0 || node.position.x - lastX <= LAYER_TOLERANCE) {
+      // Same layer
+      currentLayer.push(node);
+      lastX = Math.max(lastX, node.position.x);
+    } else {
+      // New layer
+      layers.push(currentLayer);
+      currentLayer = [node];
+      lastX = node.position.x;
+    }
+  }
+  if (currentLayer.length > 0) {
+    layers.push(currentLayer);
+  }
+
+  // Calculate X position for each layer based on maximum width of previous layer
+  const layerXPositions: number[] = [];
+  let currentX = START_X;
+
+  for (let i = 0; i < layers.length; i++) {
+    layerXPositions.push(currentX);
+
+    // Find maximum width in current layer
+    const maxWidth = Math.max(...layers[i].map((node) => getNodeWidth(node.type)));
+
+    // Next layer starts at: current X + max width of current layer + padding
+    currentX += maxWidth + HORIZONTAL_PADDING;
+  }
+
+  // Assign new X positions to each node based on its layer
+  const adjustedNodes = workflow.nodes.map((node) => {
+    // Find which layer this node belongs to
+    const layerIndex = layers.findIndex((layer) => layer.some((n) => n.id === node.id));
+    const newX = layerXPositions[layerIndex] ?? START_X;
+
+    return {
+      ...node,
+      position: {
+        x: newX,
+        y: node.position.y, // Keep Y position unchanged
+      },
+    };
+  });
+
+  return {
+    ...workflow,
+    nodes: adjustedNodes,
+  };
 }
 
 /**

@@ -199,9 +199,11 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'ai.descriptionPlaceholder':
     '예: 코드를 스캔하고 사용자에게 우선순위 수준을 묻고 수정 제안을 생성하는 코드 검토 워크플로 만들기',
   'ai.characterCount': '{count} / {max} 자',
-  'ai.generating': '워크플로 생성 중... 최대 60초 소요될 수 있습니다.',
+  'ai.generating': '워크플로 생성 중... 최대 90초 소요될 수 있습니다.',
+  'ai.progressTime': '{elapsed}초 / {max}초',
   'ai.generateButton': '생성',
   'ai.cancelButton': '취소',
+  'ai.cancelGenerationButton': '생성 취소',
   'ai.success': '워크플로가 성공적으로 생성되었습니다!',
   'ai.usageNote': '*1 이 기능은 사용자 환경에 설치된 Claude Code를 사용합니다.',
   'ai.overwriteWarning':
