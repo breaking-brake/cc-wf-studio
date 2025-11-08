@@ -26,17 +26,14 @@ export class AIGenerationError extends Error {
  * Generate a workflow using AI from a natural language description
  *
  * @param userDescription - Natural language description of the desired workflow (max 2000 characters)
- * @param requestId - Request ID for this generation (used for cancellation)
- * @param timeoutMs - Optional timeout in milliseconds (default: 95000, which is 5 seconds more than server timeout)
+ * @param timeoutMs - Optional timeout in milliseconds (default: 65000, which is 5 seconds more than server timeout)
  * @returns Promise that resolves to the generated workflow
  * @throws {AIGenerationError} If generation fails
  */
-export function generateWorkflow(
-  userDescription: string,
-  requestId: string,
-  timeoutMs = 95000
-): Promise<Workflow> {
+export function generateWorkflow(userDescription: string, timeoutMs = 65000): Promise<Workflow> {
   return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
     // Register response handler
     const handler = (event: MessageEvent) => {
       const message: ExtensionMessage = event.data;
@@ -46,9 +43,6 @@ export function generateWorkflow(
 
         if (message.type === 'GENERATION_SUCCESS' && message.payload) {
           resolve(message.payload.workflow);
-        } else if (message.type === 'GENERATION_CANCELLED') {
-          // Handle cancellation
-          reject(new AIGenerationError('Generation cancelled by user', 'CANCELLED'));
         } else if (message.type === 'GENERATION_FAILED' && message.payload) {
           reject(
             new AIGenerationError(
@@ -68,7 +62,7 @@ export function generateWorkflow(
     // Send request
     const payload: GenerateWorkflowPayload = {
       userDescription,
-      timeoutMs: 90000, // Server-side timeout (Extension will timeout after 90s)
+      timeoutMs: 60000, // Server-side timeout (Extension will timeout after 60s)
     };
     vscode.postMessage({
       type: 'GENERATE_WORKFLOW',
@@ -86,17 +80,5 @@ export function generateWorkflow(
         )
       );
     }, timeoutMs);
-  });
-}
-
-/**
- * Cancel an ongoing workflow generation
- *
- * @param requestId - Request ID of the generation to cancel
- */
-export function cancelWorkflowGeneration(requestId: string): void {
-  vscode.postMessage({
-    type: 'CANCEL_GENERATION',
-    payload: { requestId },
   });
 }
