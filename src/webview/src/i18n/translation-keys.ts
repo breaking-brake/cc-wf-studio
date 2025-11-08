@@ -234,4 +234,33 @@ export interface WebviewTranslationKeys {
   'skill.error.loadFailed': string;
   'skill.error.noSelection': string;
   'skill.error.unknown': string;
+
+  // Skill Creation Dialog
+  'skill.creation.title': string;
+  'skill.creation.description': string;
+  'skill.creation.nameLabel': string;
+  'skill.creation.nameHint': string;
+  'skill.creation.descriptionLabel': string;
+  'skill.creation.descriptionPlaceholder': string;
+  'skill.creation.instructionsLabel': string;
+  'skill.creation.instructionsPlaceholder': string;
+  'skill.creation.instructionsHint': string;
+  'skill.creation.allowedToolsLabel': string;
+  'skill.creation.allowedToolsHint': string;
+  'skill.creation.scopeLabel': string;
+  'skill.creation.scopePersonal': string;
+  'skill.creation.scopeProject': string;
+  'skill.creation.cancelButton': string;
+  'skill.creation.createButton': string;
+  'skill.creation.creatingButton': string;
+  'skill.creation.error.unknown': string;
+
+  // Skill Validation Errors
+  'skill.validation.nameRequired': string;
+  'skill.validation.nameTooLong': string;
+  'skill.validation.nameInvalidFormat': string;
+  'skill.validation.descriptionRequired': string;
+  'skill.validation.descriptionTooLong': string;
+  'skill.validation.instructionsRequired': string;
+  'skill.validation.scopeRequired': string;
 }

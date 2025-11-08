@@ -257,4 +257,36 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'skill.error.loadFailed': 'Failed to load Skills. Please check your Skill directories.',
   'skill.error.noSelection': 'Please select a Skill',
   'skill.error.unknown': 'An unexpected error occurred',
+
+  // Skill Creation Dialog
+  'skill.creation.title': 'Create New Skill',
+  'skill.creation.description':
+    'Create a new Claude Code Skill. Skills are specialized tools that can be invoked by Claude Code to perform specific tasks.',
+  'skill.creation.nameLabel': 'Skill Name',
+  'skill.creation.nameHint': 'Lowercase letters, numbers, and hyphens only (max 64 characters)',
+  'skill.creation.descriptionLabel': 'Description',
+  'skill.creation.descriptionPlaceholder': 'Brief description of what this Skill does',
+  'skill.creation.instructionsLabel': 'Instructions',
+  'skill.creation.instructionsPlaceholder':
+    'Enter detailed instructions in Markdown format.\n\nExample:\n# My Skill\n\nThis Skill performs...',
+  'skill.creation.instructionsHint': 'Markdown-formatted instructions for Claude Code',
+  'skill.creation.allowedToolsLabel': 'Allowed Tools (optional)',
+  'skill.creation.allowedToolsHint': 'Comma-separated list of tool names (e.g., Read, Grep, Glob)',
+  'skill.creation.scopeLabel': 'Scope',
+  'skill.creation.scopePersonal': 'Personal (~/.claude/skills/)',
+  'skill.creation.scopeProject': 'Project (.claude/skills/)',
+  'skill.creation.cancelButton': 'Cancel',
+  'skill.creation.createButton': 'Create Skill',
+  'skill.creation.creatingButton': 'Creating...',
+  'skill.creation.error.unknown': 'Failed to create Skill. Please try again.',
+
+  // Skill Validation Errors
+  'skill.validation.nameRequired': 'Skill name is required',
+  'skill.validation.nameTooLong': 'Skill name must be 64 characters or less',
+  'skill.validation.nameInvalidFormat':
+    'Skill name must contain only lowercase letters, numbers, and hyphens',
+  'skill.validation.descriptionRequired': 'Description is required',
+  'skill.validation.descriptionTooLong': 'Description must be 1024 characters or less',
+  'skill.validation.instructionsRequired': 'Instructions are required',
+  'skill.validation.scopeRequired': 'Please select a scope (Personal or Project)',
 };

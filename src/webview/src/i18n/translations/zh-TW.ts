@@ -245,4 +245,33 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'skill.error.loadFailed': '載入Skill失敗。請檢查Skill目錄。',
   'skill.error.noSelection': '請選擇一個Skill',
   'skill.error.unknown': '發生意外錯誤',
+
+  // Skill Creation Dialog
+  'skill.creation.title': '建立新技能',
+  'skill.creation.description': '建立新的Claude Code技能。技能是Claude Code可以呼叫以執行特定任務的專用工具。',
+  'skill.creation.nameLabel': '技能名稱',
+  'skill.creation.nameHint': '僅小寫字母、數字和連字符（最多64個字元）',
+  'skill.creation.descriptionLabel': '描述',
+  'skill.creation.descriptionPlaceholder': '此技能功能的簡要描述',
+  'skill.creation.instructionsLabel': '說明',
+  'skill.creation.instructionsPlaceholder': '以Markdown格式輸入詳細說明。\n\n例如：\n# 我的技能\n\n此技能...',
+  'skill.creation.instructionsHint': 'Claude Code的Markdown格式說明',
+  'skill.creation.allowedToolsLabel': '允許的工具（可選）',
+  'skill.creation.allowedToolsHint': '逗號分隔的工具名稱列表（例如：Read, Grep, Glob）',
+  'skill.creation.scopeLabel': '範圍',
+  'skill.creation.scopePersonal': '個人 (~/.claude/skills/)',
+  'skill.creation.scopeProject': '專案 (.claude/skills/)',
+  'skill.creation.cancelButton': '取消',
+  'skill.creation.createButton': '建立技能',
+  'skill.creation.creatingButton': '建立中...',
+  'skill.creation.error.unknown': '建立技能失敗。請重試。',
+
+  // Skill Validation Errors
+  'skill.validation.nameRequired': '技能名稱為必填',
+  'skill.validation.nameTooLong': '技能名稱不得超過64個字元',
+  'skill.validation.nameInvalidFormat': '技能名稱只能包含小寫字母、數字和連字符',
+  'skill.validation.descriptionRequired': '描述為必填',
+  'skill.validation.descriptionTooLong': '描述不得超過1024個字元',
+  'skill.validation.instructionsRequired': '說明為必填',
+  'skill.validation.scopeRequired': '請選擇範圍（個人/專案）',
 };

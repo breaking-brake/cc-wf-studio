@@ -258,4 +258,35 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'skill.error.loadFailed': 'Skill을 로드하지 못했습니다. Skill 디렉터리를 확인하세요.',
   'skill.error.noSelection': 'Skill을 선택하세요',
   'skill.error.unknown': '예기치 않은 오류가 발생했습니다',
+
+  // Skill Creation Dialog
+  'skill.creation.title': '새 스킬 만들기',
+  'skill.creation.description':
+    '새로운 Claude Code 스킬을 만듭니다. 스킬은 Claude Code가 특정 작업을 수행하기 위해 호출할 수 있는 전문 도구입니다.',
+  'skill.creation.nameLabel': '스킬 이름',
+  'skill.creation.nameHint': '소문자, 숫자, 하이픈만 사용 (최대 64자)',
+  'skill.creation.descriptionLabel': '설명',
+  'skill.creation.descriptionPlaceholder': '이 스킬이 수행하는 작업에 대한 간단한 설명',
+  'skill.creation.instructionsLabel': '지침',
+  'skill.creation.instructionsPlaceholder':
+    'Markdown 형식으로 자세한 지침을 입력하세요.\n\n예:\n# My Skill\n\n이 스킬은...',
+  'skill.creation.instructionsHint': 'Claude Code용 Markdown 형식 지침',
+  'skill.creation.allowedToolsLabel': '허용된 도구 (선택사항)',
+  'skill.creation.allowedToolsHint': '쉼표로 구분된 도구 이름 목록 (예: Read, Grep, Glob)',
+  'skill.creation.scopeLabel': '범위',
+  'skill.creation.scopePersonal': '개인용 (~/.claude/skills/)',
+  'skill.creation.scopeProject': '프로젝트용 (.claude/skills/)',
+  'skill.creation.cancelButton': '취소',
+  'skill.creation.createButton': '스킬 만들기',
+  'skill.creation.creatingButton': '만드는 중...',
+  'skill.creation.error.unknown': '스킬 생성에 실패했습니다. 다시 시도해 주세요.',
+
+  // Skill Validation Errors
+  'skill.validation.nameRequired': '스킬 이름은 필수입니다',
+  'skill.validation.nameTooLong': '스킬 이름은 64자 이하여야 합니다',
+  'skill.validation.nameInvalidFormat': '스킬 이름은 소문자, 숫자, 하이픈만 사용할 수 있습니다',
+  'skill.validation.descriptionRequired': '설명은 필수입니다',
+  'skill.validation.descriptionTooLong': '설명은 1024자 이하여야 합니다',
+  'skill.validation.instructionsRequired': '지침은 필수입니다',
+  'skill.validation.scopeRequired': '범위(개인용/프로젝트용)를 선택해 주세요',
 };

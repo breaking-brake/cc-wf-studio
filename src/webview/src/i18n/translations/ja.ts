@@ -258,4 +258,35 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'skill.error.loadFailed': 'Skillの読み込みに失敗しました。Skillディレクトリを確認してください。',
   'skill.error.noSelection': 'Skillを選択してください',
   'skill.error.unknown': '予期しないエラーが発生しました',
+
+  // Skill Creation Dialog
+  'skill.creation.title': '新しいSkillを作成',
+  'skill.creation.description':
+    '新しいClaude Code Skillを作成します。SkillはClaude Codeが特定のタスクを実行するために呼び出せる専門ツールです。',
+  'skill.creation.nameLabel': 'Skill名',
+  'skill.creation.nameHint': '小文字、数字、ハイフンのみ（最大64文字）',
+  'skill.creation.descriptionLabel': '説明',
+  'skill.creation.descriptionPlaceholder': 'このSkillが何をするかの簡単な説明',
+  'skill.creation.instructionsLabel': '指示内容',
+  'skill.creation.instructionsPlaceholder':
+    'Markdown形式で詳細な指示を入力してください。\n\n例：\n# My Skill\n\nこのSkillは...',
+  'skill.creation.instructionsHint': 'Claude Code用のMarkdown形式の指示',
+  'skill.creation.allowedToolsLabel': '許可ツール（オプション）',
+  'skill.creation.allowedToolsHint': 'カンマ区切りのツール名リスト（例：Read, Grep, Glob）',
+  'skill.creation.scopeLabel': 'スコープ',
+  'skill.creation.scopePersonal': '個人用 (~/.claude/skills/)',
+  'skill.creation.scopeProject': 'プロジェクト用 (.claude/skills/)',
+  'skill.creation.cancelButton': 'キャンセル',
+  'skill.creation.createButton': 'Skillを作成',
+  'skill.creation.creatingButton': '作成中...',
+  'skill.creation.error.unknown': 'Skillの作成に失敗しました。もう一度お試しください。',
+
+  // Skill Validation Errors
+  'skill.validation.nameRequired': 'Skill名は必須です',
+  'skill.validation.nameTooLong': 'Skill名は64文字以内にしてください',
+  'skill.validation.nameInvalidFormat': 'Skill名は小文字、数字、ハイフンのみ使用できます',
+  'skill.validation.descriptionRequired': '説明は必須です',
+  'skill.validation.descriptionTooLong': '説明は1024文字以内にしてください',
+  'skill.validation.instructionsRequired': '指示内容は必須です',
+  'skill.validation.scopeRequired': 'スコープ（個人用/プロジェクト用）を選択してください',
 };

@@ -12,6 +12,7 @@ import path from 'node:path';
 import type { SkillReference, CreateSkillPayload } from '../../shared/types/messages';
 import { parseSkillFrontmatter, type SkillMetadata } from './yaml-parser';
 import { getPersonalSkillsDir, getProjectSkillsDir, toRelativePath } from '../utils/path-utils';
+import { generateSkillFileContent } from './skill-file-generator';
 
 /**
  * Scan a Skills directory and return available Skills
@@ -123,13 +124,56 @@ export async function validateSkillFile(skillPath: string): Promise<SkillMetadat
 /**
  * Create a new Skill
  *
- * @param _payload - Skill creation payload (unused until Phase 5)
+ * @param payload - Skill creation payload
  * @returns Absolute path to created SKILL.md file
  * @throws Error if validation fails or file write fails
  *
- * NOTE: Full implementation will be added in Phase 5 (T024-T025)
+ * Implementation: T024-T025
  */
-export async function createSkill(_payload: CreateSkillPayload): Promise<string> {
-  // Phase 5: T024-T025 will implement this
-  throw new Error('Not implemented: createSkill() will be implemented in Phase 5');
+export async function createSkill(payload: CreateSkillPayload): Promise<string> {
+  // 1. Get base directory for scope
+  const baseDir = payload.scope === 'personal' ? getPersonalSkillsDir() : getProjectSkillsDir();
+
+  if (!baseDir) {
+    throw new Error('No workspace folder is open. Cannot create project Skill.');
+  }
+
+  // 2. Check for name collision
+  const skillDir = path.join(baseDir, payload.name);
+  const skillPath = path.join(skillDir, 'SKILL.md');
+
+  try {
+    await fs.access(skillDir);
+    // Directory exists - name collision
+    throw new Error(
+      `A Skill with the name "${payload.name}" already exists in ${baseDir}. Choose a different name.`
+    );
+  } catch (err) {
+    // Directory doesn't exist - this is what we want (continue)
+    if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
+      // Some other error occurred
+      throw err;
+    }
+  }
+
+  // 3. Create directory
+  await fs.mkdir(skillDir, { recursive: true });
+
+  // 4. Generate and write SKILL.md content
+  const content = generateSkillFileContent(payload);
+
+  try {
+    await fs.writeFile(skillPath, content, 'utf-8');
+  } catch (err) {
+    // Clean up directory if file write fails
+    try {
+      await fs.rm(skillDir, { recursive: true, force: true });
+    } catch {
+      // Ignore cleanup errors
+    }
+    throw new Error(`Failed to create SKILL.md file: ${err instanceof Error ? err.message : String(err)}`);
+  }
+
+  // 5. Return absolute path
+  return skillPath;
 }
