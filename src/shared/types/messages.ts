@@ -125,6 +125,91 @@ export interface GenerationCancelledPayload {
 }
 
 // ============================================================================
+// Skill Node Payloads (001-skill-node)
+// ============================================================================
+
+export interface SkillReference {
+  /** Absolute path to SKILL.md file */
+  skillPath: string;
+  /** Skill name (from YAML frontmatter) */
+  name: string;
+  /** Skill description (from YAML frontmatter) */
+  description: string;
+  /** Skill scope: personal or project */
+  scope: 'personal' | 'project';
+  /** Validation status */
+  validationStatus: 'valid' | 'invalid';
+  /** Optional: Allowed tools (from YAML frontmatter) */
+  allowedTools?: string;
+}
+
+export interface CreateSkillPayload {
+  /** Skill name (lowercase, hyphens, max 64 chars) */
+  name: string;
+  /** Skill description (max 1024 chars) */
+  description: string;
+  /** Markdown content for Skill instructions */
+  instructions: string;
+  /** Optional: Comma-separated allowed tools */
+  allowedTools?: string;
+  /** Scope: personal or project */
+  scope: 'personal' | 'project';
+}
+
+export interface SkillCreationSuccessPayload {
+  /** Path to created SKILL.md file */
+  skillPath: string;
+  /** Skill name */
+  name: string;
+  /** Skill description */
+  description: string;
+  /** Scope */
+  scope: 'personal' | 'project';
+  /** Timestamp of creation */
+  timestamp: string; // ISO 8601
+}
+
+export interface SkillValidationErrorPayload {
+  /** Error code for i18n lookup */
+  errorCode:
+    | 'SKILL_NOT_FOUND'
+    | 'INVALID_FRONTMATTER'
+    | 'NAME_CONFLICT'
+    | 'INVALID_NAME_FORMAT'
+    | 'DESCRIPTION_TOO_LONG'
+    | 'INSTRUCTIONS_EMPTY'
+    | 'FILE_WRITE_ERROR'
+    | 'UNKNOWN_ERROR';
+  /** Human-readable error message (English fallback) */
+  errorMessage: string;
+  /** Optional: File path related to error */
+  filePath?: string;
+  /** Optional: Additional details for debugging */
+  details?: string;
+}
+
+export interface SkillListLoadedPayload {
+  /** Array of available Skills (personal + project) */
+  skills: SkillReference[];
+  /** Timestamp of scan */
+  timestamp: string; // ISO 8601
+  /** Number of personal Skills found */
+  personalCount: number;
+  /** Number of project Skills found */
+  projectCount: number;
+}
+
+export interface ValidateSkillFilePayload {
+  /** Path to SKILL.md file to validate */
+  skillPath: string;
+}
+
+export interface SkillValidationSuccessPayload {
+  /** Validated Skill reference */
+  skill: SkillReference;
+}
+
+// ============================================================================
 // Extension → Webview Messages
 // ============================================================================
 
@@ -139,7 +224,12 @@ export type ExtensionMessage =
   | Message<void, 'EXPORT_CANCELLED'>
   | Message<GenerationSuccessPayload, 'GENERATION_SUCCESS'>
   | Message<GenerationFailedPayload, 'GENERATION_FAILED'>
-  | Message<GenerationCancelledPayload, 'GENERATION_CANCELLED'>;
+  | Message<GenerationCancelledPayload, 'GENERATION_CANCELLED'>
+  | Message<SkillListLoadedPayload, 'SKILL_LIST_LOADED'>
+  | Message<SkillCreationSuccessPayload, 'SKILL_CREATION_SUCCESS'>
+  | Message<SkillValidationErrorPayload, 'SKILL_CREATION_FAILED'>
+  | Message<SkillValidationSuccessPayload, 'SKILL_VALIDATION_SUCCESS'>
+  | Message<SkillValidationErrorPayload, 'SKILL_VALIDATION_FAILED'>;
 
 // ============================================================================
 // Webview → Extension Messages
@@ -153,7 +243,10 @@ export type WebviewMessage =
   | Message<LoadWorkflowRequestPayload, 'LOAD_WORKFLOW'>
   | Message<StateUpdatePayload, 'STATE_UPDATE'>
   | Message<GenerateWorkflowPayload, 'GENERATE_WORKFLOW'>
-  | Message<CancelGenerationPayload, 'CANCEL_GENERATION'>;
+  | Message<CancelGenerationPayload, 'CANCEL_GENERATION'>
+  | Message<void, 'BROWSE_SKILLS'>
+  | Message<CreateSkillPayload, 'CREATE_SKILL'>
+  | Message<ValidateSkillFilePayload, 'VALIDATE_SKILL_FILE'>;
 
 // ============================================================================
 // Error Codes
