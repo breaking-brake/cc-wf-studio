@@ -1852,8 +1852,8 @@ const SkillProperties: React.FC<{
           lineHeight: '1.5',
         }}
       >
-        💡 Skill properties are read-only and loaded from SKILL.md file. To modify, edit the
-        source file directly.
+        💡 Skill properties are read-only and loaded from SKILL.md file. To modify, edit the source
+        file directly.
       </div>
     </div>
   );

@@ -248,13 +248,15 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
 
   // Skill Creation Dialog
   'skill.creation.title': '创建新技能',
-  'skill.creation.description': '创建新的Claude Code技能。技能是Claude Code可以调用以执行特定任务的专用工具。',
+  'skill.creation.description':
+    '创建新的Claude Code技能。技能是Claude Code可以调用以执行特定任务的专用工具。',
   'skill.creation.nameLabel': '技能名称',
   'skill.creation.nameHint': '仅小写字母、数字和连字符（最多64个字符）',
   'skill.creation.descriptionLabel': '描述',
   'skill.creation.descriptionPlaceholder': '此技能的功能和使用时机的简要描述',
   'skill.creation.instructionsLabel': '说明',
-  'skill.creation.instructionsPlaceholder': '以Markdown格式输入详细说明。\n\n例如：\n# 我的技能\n\n此技能...',
+  'skill.creation.instructionsPlaceholder':
+    '以Markdown格式输入详细说明。\n\n例如：\n# 我的技能\n\n此技能...',
   'skill.creation.instructionsHint': 'Claude Code的Markdown格式说明',
   'skill.creation.allowedToolsLabel': '允许的工具（可选）',
   'skill.creation.allowedToolsHint': '逗号分隔的工具名称列表（例如：Read, Grep, Glob）',

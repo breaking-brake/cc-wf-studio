@@ -58,10 +58,7 @@ export function getProjectSkillsDir(): string | null {
  * resolveSkillPath('.claude/skills/team-skill/SKILL.md', 'project');
  * // => '/workspace/myproject/.claude/skills/team-skill/SKILL.md'
  */
-export function resolveSkillPath(
-  skillPath: string,
-  scope: 'personal' | 'project'
-): string {
+export function resolveSkillPath(skillPath: string, scope: 'personal' | 'project'): string {
   if (scope === 'personal') {
     // Personal Skills use absolute paths
     return skillPath;
@@ -80,7 +77,10 @@ export function resolveSkillPath(
 
   // Resolve relative path from workspace root
   const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-  return path.resolve(workspaceRoot!, skillPath);
+  if (!workspaceRoot) {
+    throw new Error('No workspace folder found for Skill path resolution');
+  }
+  return path.resolve(workspaceRoot, skillPath);
 }
 
 /**
@@ -99,10 +99,7 @@ export function resolveSkillPath(
  * toRelativePath('/Users/alice/.claude/skills/my-skill/SKILL.md', 'personal');
  * // => '/Users/alice/.claude/skills/my-skill/SKILL.md'
  */
-export function toRelativePath(
-  absolutePath: string,
-  scope: 'personal' | 'project'
-): string {
+export function toRelativePath(absolutePath: string, scope: 'personal' | 'project'): string {
   if (scope === 'personal') {
     // Personal Skills always use absolute paths
     return absolutePath;

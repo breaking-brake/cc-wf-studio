@@ -265,7 +265,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'skill.creation.nameLabel': 'Skill Name',
   'skill.creation.nameHint': 'Lowercase letters, numbers, and hyphens only (max 64 characters)',
   'skill.creation.descriptionLabel': 'Description',
-  'skill.creation.descriptionPlaceholder': 'Brief description of what this Skill does and when to use it',
+  'skill.creation.descriptionPlaceholder':
+    'Brief description of what this Skill does and when to use it',
   'skill.creation.instructionsLabel': 'Instructions',
   'skill.creation.instructionsPlaceholder':
     'Enter detailed instructions in Markdown format.\n\nExample:\n# My Skill\n\nThis Skill performs...',

@@ -48,7 +48,11 @@ import type { CreateSkillPayload } from '../../shared/types/messages';
  * ```
  */
 export function generateSkillFileContent(payload: CreateSkillPayload): string {
-  const frontmatter: string[] = ['---', `name: ${payload.name}`, `description: ${payload.description}`];
+  const frontmatter: string[] = [
+    '---',
+    `name: ${payload.name}`,
+    `description: ${payload.description}`,
+  ];
 
   // Add allowed-tools if provided
   if (payload.allowedTools && payload.allowedTools.trim().length > 0) {

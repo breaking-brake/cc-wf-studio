@@ -435,7 +435,9 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
       }
       sections.push(`**Skill Path**: \`${node.data.skillPath}\``);
       sections.push('');
-      sections.push('This node executes a Claude Code Skill. The Skill definition is stored in the SKILL.md file at the path shown above.');
+      sections.push(
+        'This node executes a Claude Code Skill. The Skill definition is stored in the SKILL.md file at the path shown above.'
+      );
       sections.push('');
     }
   }

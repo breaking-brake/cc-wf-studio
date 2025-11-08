@@ -15,11 +15,7 @@ import { handleExportWorkflow } from './export-workflow';
 import { loadWorkflow } from './load-workflow';
 import { loadWorkflowList } from './load-workflow-list';
 import { saveWorkflow } from './save-workflow';
-import {
-  handleBrowseSkills,
-  handleCreateSkill,
-  handleValidateSkillFile,
-} from './skill-operations';
+import { handleBrowseSkills, handleCreateSkill, handleValidateSkillFile } from './skill-operations';
 
 /**
  * Register the open editor command

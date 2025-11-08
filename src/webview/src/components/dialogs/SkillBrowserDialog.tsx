@@ -52,7 +52,8 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
     for (let i = 0; i < 100; i++) {
       const hasOverlap = nodes.some((node) => {
         const xOverlap =
-          Math.abs(node.position.x - newX) < NODE_WIDTH && Math.abs(node.position.y - newY) < NODE_HEIGHT;
+          Math.abs(node.position.x - newX) < NODE_WIDTH &&
+          Math.abs(node.position.y - newY) < NODE_HEIGHT;
         return xOverlap;
       });
 
@@ -174,6 +175,12 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
         zIndex: 1000,
       }}
       onClick={handleClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          handleClose();
+        }
+      }}
+      role="presentation"
     >
       <div
         style={{
@@ -187,6 +194,10 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
           overflow: 'auto',
         }}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+        // biome-ignore lint/a11y/useSemanticElements: Using div with role for React modal pattern
+        role="dialog"
+        aria-modal="true"
       >
         {/* Header */}
         <h2
@@ -317,6 +328,15 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
               <div
                 key={skill.skillPath}
                 onClick={() => setSelectedSkill(skill)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedSkill(skill);
+                  }
+                }}
+                // biome-ignore lint/a11y/useSemanticElements: Using div with role for list item selection pattern
+                role="button"
+                tabIndex={0}
                 style={{
                   padding: '12px',
                   borderBottom: '1px solid var(--vscode-panel-border)',
@@ -371,7 +391,9 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                         fontWeight: 500,
                       }}
                     >
-                      {skill.scope === 'personal' ? t('skill.browser.personalTab') : t('skill.browser.projectTab')}
+                      {skill.scope === 'personal'
+                        ? t('skill.browser.personalTab')
+                        : t('skill.browser.projectTab')}
                     </span>
                   </div>
                   <span
@@ -435,7 +457,8 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
               fontWeight: 500,
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--vscode-button-secondaryHoverBackground)';
+              e.currentTarget.style.backgroundColor =
+                'var(--vscode-button-secondaryHoverBackground)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'var(--vscode-button-secondaryBackground)';

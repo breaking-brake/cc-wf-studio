@@ -68,7 +68,7 @@ export async function scanSkills(
         console.warn(`[Skill Service] Failed to read ${skillPath}:`, err);
       }
     }
-  } catch (err) {
+  } catch (_err) {
     // Directory doesn't exist - return empty array
     console.warn(`[Skill Service] Skill directory not found: ${baseDir}`);
   }
@@ -109,7 +109,9 @@ export async function validateSkillFile(skillPath: string): Promise<SkillMetadat
     const metadata = parseSkillFrontmatter(content);
 
     if (!metadata) {
-      throw new Error('Invalid SKILL.md frontmatter: missing required fields (name or description)');
+      throw new Error(
+        'Invalid SKILL.md frontmatter: missing required fields (name or description)'
+      );
     }
 
     return metadata;
@@ -171,7 +173,9 @@ export async function createSkill(payload: CreateSkillPayload): Promise<string> 
     } catch {
       // Ignore cleanup errors
     }
-    throw new Error(`Failed to create SKILL.md file: ${err instanceof Error ? err.message : String(err)}`);
+    throw new Error(
+      `Failed to create SKILL.md file: ${err instanceof Error ? err.message : String(err)}`
+    );
   }
 
   // 5. Return absolute path

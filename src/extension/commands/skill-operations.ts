@@ -9,10 +9,7 @@
 
 import * as vscode from 'vscode';
 import { scanAllSkills, validateSkillFile, createSkill } from '../services/skill-service';
-import type {
-  CreateSkillPayload,
-  ValidateSkillFilePayload,
-} from '../../shared/types/messages';
+import type { CreateSkillPayload, ValidateSkillFilePayload } from '../../shared/types/messages';
 
 /**
  * Output channel for logging Skill operations
@@ -56,9 +53,7 @@ export async function handleBrowseSkills(
     });
   } catch (error) {
     const executionTime = Date.now() - startTime;
-    outputChannel.appendLine(
-      `[Skill Browse] Error after ${executionTime}ms: ${error}`
-    );
+    outputChannel.appendLine(`[Skill Browse] Error after ${executionTime}ms: ${error}`);
 
     webview.postMessage({
       type: 'SKILL_VALIDATION_FAILED',
@@ -97,9 +92,7 @@ export async function handleCreateSkill(
     const skillPath = await createSkill(payload);
     const executionTime = Date.now() - startTime;
 
-    outputChannel.appendLine(
-      `[Skill Create] Skill created in ${executionTime}ms at ${skillPath}`
-    );
+    outputChannel.appendLine(`[Skill Create] Skill created in ${executionTime}ms at ${skillPath}`);
 
     webview.postMessage({
       type: 'SKILL_CREATION_SUCCESS',
@@ -114,9 +107,7 @@ export async function handleCreateSkill(
     });
   } catch (error) {
     const executionTime = Date.now() - startTime;
-    outputChannel.appendLine(
-      `[Skill Create] Error after ${executionTime}ms: ${error}`
-    );
+    outputChannel.appendLine(`[Skill Create] Error after ${executionTime}ms: ${error}`);
 
     webview.postMessage({
       type: 'SKILL_CREATION_FAILED',
@@ -176,9 +167,7 @@ export async function handleValidateSkillFile(
     });
   } catch (error) {
     const executionTime = Date.now() - startTime;
-    outputChannel.appendLine(
-      `[Skill Validate] Error after ${executionTime}ms: ${error}`
-    );
+    outputChannel.appendLine(`[Skill Validate] Error after ${executionTime}ms: ${error}`);
 
     // Determine error code
     const errorMessage = String(error);

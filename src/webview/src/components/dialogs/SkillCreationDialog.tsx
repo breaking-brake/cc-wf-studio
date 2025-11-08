@@ -9,7 +9,10 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
-import { validateCreateSkillPayload, type SkillValidationErrors } from '../../utils/skill-validation';
+import {
+  validateCreateSkillPayload,
+  type SkillValidationErrors,
+} from '../../utils/skill-validation';
 import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
 
 interface SkillCreationDialogProps {
@@ -76,7 +79,7 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, formData]);
+  }, [isOpen]);
 
   if (!isOpen) {
     return null;
@@ -139,6 +142,12 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
         zIndex: 1000,
       }}
       onClick={handleClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          handleClose();
+        }
+      }}
+      role="presentation"
     >
       <div
         style={{
@@ -152,6 +161,10 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
           overflow: 'auto',
         }}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+        // biome-ignore lint/a11y/useSemanticElements: Using div with role for React modal pattern
+        role="dialog"
+        aria-modal="true"
       >
         {/* Header */}
         <h2
@@ -396,7 +409,7 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
 
           {/* Scope */}
           <div>
-            <label
+            <div
               style={{
                 display: 'block',
                 marginBottom: '8px',
@@ -406,7 +419,7 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
               }}
             >
               {t('skill.creation.scopeLabel')} *
-            </label>
+            </div>
             <div style={{ display: 'flex', gap: '16px' }}>
               <label
                 style={{
