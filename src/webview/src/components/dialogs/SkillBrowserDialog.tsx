@@ -9,10 +9,11 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
-import { browseSkills } from '../../services/skill-browser-service';
+import { browseSkills, createSkill } from '../../services/skill-browser-service';
 import type { SkillReference } from '@shared/types/messages';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { NodeType } from '@shared/types/workflow-definition';
+import { SkillCreationDialog, type CreateSkillFormData } from './SkillCreationDialog';
 
 interface SkillBrowserDialogProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
   const [projectSkills, setProjectSkills] = useState<SkillReference[]>([]);
   const [selectedSkill, setSelectedSkill] = useState<SkillReference | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('personal');
+  const [isSkillCreationOpen, setIsSkillCreationOpen] = useState(false);
 
   const { addNode, nodes } = useWorkflowStore();
 
@@ -137,6 +139,22 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
     setError(null);
     setLoading(false);
     onClose();
+  };
+
+  const handleSkillCreate = async (formData: CreateSkillFormData) => {
+    await createSkill({
+      name: formData.name,
+      description: formData.description,
+      instructions: formData.instructions,
+      allowedTools: formData.allowedTools,
+      scope: formData.scope as 'personal' | 'project',
+    });
+    // Refresh skill list after creation
+    const skills = await browseSkills();
+    const personal = skills.filter((s) => s.scope === 'personal');
+    const project = skills.filter((s) => s.scope === 'project');
+    setPersonalSkills(personal);
+    setProjectSkills(project);
   };
 
   const currentSkills = activeTab === 'personal' ? personalSkills : projectSkills;
@@ -398,6 +416,35 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
           </div>
         )}
 
+        {/* Create New Skill Button */}
+        {!loading && (
+          <button
+            type="button"
+            onClick={() => setIsSkillCreationOpen(true)}
+            style={{
+              width: '100%',
+              padding: '12px',
+              marginTop: '16px',
+              fontSize: '13px',
+              border: '1px solid var(--vscode-button-border)',
+              borderRadius: '4px',
+              backgroundColor: 'var(--vscode-button-secondaryBackground)',
+              color: 'var(--vscode-button-secondaryForeground)',
+              cursor: 'pointer',
+              textAlign: 'center',
+              fontWeight: 500,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--vscode-button-secondaryHoverBackground)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--vscode-button-secondaryBackground)';
+            }}
+          >
+            + Create New Skill
+          </button>
+        )}
+
         {/* Actions */}
         <div
           style={{
@@ -445,6 +492,13 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
           </button>
         </div>
       </div>
+
+      {/* Skill Creation Dialog */}
+      <SkillCreationDialog
+        isOpen={isSkillCreationOpen}
+        onClose={() => setIsSkillCreationOpen(false)}
+        onSubmit={handleSkillCreate}
+      />
     </div>
   );
 }

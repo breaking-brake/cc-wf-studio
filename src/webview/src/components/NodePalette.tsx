@@ -10,8 +10,6 @@ import { useState } from 'react';
 import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { SkillBrowserDialog } from './dialogs/SkillBrowserDialog';
-import { SkillCreationDialog, type CreateSkillFormData } from './dialogs/SkillCreationDialog';
-import { createSkill } from '../services/skill-browser-service';
 
 /**
  * NodePalette Component
@@ -20,7 +18,6 @@ export const NodePalette: React.FC = () => {
   const { t } = useTranslation();
   const { addNode, nodes } = useWorkflowStore();
   const [isSkillBrowserOpen, setIsSkillBrowserOpen] = useState(false);
-  const [isSkillCreationOpen, setIsSkillCreationOpen] = useState(false);
 
   /**
    * 既存のノードと重ならない位置を計算する
@@ -59,16 +56,6 @@ export const NodePalette: React.FC = () => {
 
     // 最大試行回数に達した場合でも最後の位置を返す
     return { x: newX, y: newY };
-  };
-
-  const handleSkillCreate = async (formData: CreateSkillFormData) => {
-    await createSkill({
-      name: formData.name,
-      description: formData.description,
-      instructions: formData.instructions,
-      allowedTools: formData.allowedTools,
-      scope: formData.scope as 'personal' | 'project',
-    });
   };
 
   const handleAddSubAgent = () => {
@@ -346,33 +333,6 @@ export const NodePalette: React.FC = () => {
         </div>
       </button>
 
-      {/* Create New Skill Button */}
-      <button
-        type="button"
-        onClick={() => setIsSkillCreationOpen(true)}
-        style={{
-          width: '100%',
-          padding: '12px',
-          marginBottom: '12px',
-          backgroundColor: 'var(--vscode-button-secondaryBackground)',
-          color: 'var(--vscode-button-secondaryForeground)',
-          border: '1px solid var(--vscode-button-border)',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontSize: '13px',
-          fontWeight: 500,
-          textAlign: 'center',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--vscode-button-secondaryHoverBackground)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--vscode-button-secondaryBackground)';
-        }}
-      >
-        + Create New Skill
-      </button>
-
       {/* Section: Control Flow */}
       <div
         style={{
@@ -619,13 +579,6 @@ export const NodePalette: React.FC = () => {
       <SkillBrowserDialog
         isOpen={isSkillBrowserOpen}
         onClose={() => setIsSkillBrowserOpen(false)}
-      />
-
-      {/* Skill Creation Dialog */}
-      <SkillCreationDialog
-        isOpen={isSkillCreationOpen}
-        onClose={() => setIsSkillCreationOpen(false)}
-        onSubmit={handleSkillCreate}
       />
     </div>
   );
