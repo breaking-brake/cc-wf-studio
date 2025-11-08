@@ -30,6 +30,7 @@ declare global {
   interface Window {
     acquireVsCodeApi?: () => VSCodeAPI;
     initialLocale?: string;
+    vscode?: VSCodeAPI;
   }
 }
 
@@ -46,6 +47,9 @@ export const vscode = window.acquireVsCodeApi?.() ?? {
     console.log('[Dev Mode] setState:', state);
   },
 };
+
+// Make vscode API available globally for services that can't import ES modules
+window.vscode = vscode;
 
 // ============================================================================
 // React 18 Root Initialization

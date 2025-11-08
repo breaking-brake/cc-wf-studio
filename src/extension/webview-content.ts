@@ -57,9 +57,6 @@ export function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.
 <body>
     <div id="root"></div>
     <script nonce="${nonce}">
-      // Acquire VSCode API (must be called before any other scripts)
-      const vscode = acquireVsCodeApi();
-      window.vscode = vscode;
       window.initialLocale = "${locale}";
     </script>
     <script nonce="${nonce}" src="${scriptUri}"></script>
