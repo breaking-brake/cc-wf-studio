@@ -17,12 +17,24 @@
 
 ---
 
+<!-- AI Generation Demo GIF -->
 <p align="center">
-  <img src="./resources/ai-generation.gif" alt="AI-Assisted Workflow Generation Demo" width="800">
+  <img src="./resources/ai-generation-demo.gif" alt="AI-Assisted Workflow Generation Demo" width="800">
 </p>
 
 <p align="center">
   <em>✨ Describe your workflow in plain language – AI builds it instantly</em>
+</p>
+
+---
+
+<!-- Export Demo GIF -->
+<p align="center">
+  <img src="./resources/export-demo.gif" alt="One-Click Export to Slash Commands Demo" width="800">
+</p>
+
+<p align="center">
+  <em>📤 One click to transform visual workflows into ready-to-use slash commands</em>
 </p>
 
 ---
