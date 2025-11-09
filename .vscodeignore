@@ -42,5 +42,9 @@ node_modules/**
 readme.md
 CLAUDE.md
 
+# Heavy assets (for README only, not needed in VSIX)
+resources/ai-generation.gif
+resources/hero.png
+
 # Build config
 biome.json
