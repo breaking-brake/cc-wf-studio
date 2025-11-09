@@ -16,7 +16,7 @@
     "react-dom": "^18.2.0",
     "react-joyride": "^2.9.3",
     "reactflow": "^11.10.0",
-    "zustand": "^4.4.0"
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
