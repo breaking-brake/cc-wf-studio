@@ -384,6 +384,7 @@ ${schemaJSON}
 **Output Requirements**:
 - Output ONLY valid JSON matching the Workflow interface
 - Do NOT include explanations, markdown, or additional text
+- ONLY use node types that are listed in the supportedNodeTypes array
 - Ensure the workflow has exactly one Start node and at least one End node
 - Respect the maximum node limit of 50
 - All connections must be valid (no connections from End nodes, no connections to Start nodes)

@@ -47,7 +47,7 @@ const STOPWORDS = new Set([
  * Configuration constants
  */
 export const MAX_SKILLS_IN_PROMPT = 20; // Limit to prevent timeout (plan.md constraint)
-export const SKILL_RELEVANCE_THRESHOLD = 0.6; // Minimum score for inclusion (60%)
+export const SKILL_RELEVANCE_THRESHOLD = 0.3; // Minimum score for inclusion (30%)
 
 /**
  * Skill relevance score result

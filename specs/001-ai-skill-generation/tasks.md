@@ -155,11 +155,11 @@ Phase 6: Polish & Cross-Cutting Concerns
 
 ### 3.4 手動E2Eテスト
 
-- [ ] T027 [US1] VSCode拡張機能をローカルビルド(`npm run compile`)→実行(`F5`)、AI Generation Dialog開く
-- [ ] T028 [US1] テスト用Skillファイル作成: `~/.claude/skills/pdf-analyzer/SKILL.md` に有効なYAML frontmatterを持つファイルを作成
-- [ ] T029 [US1] AI Dialog で "Create a workflow to analyze PDF documents" と入力して生成実行
-- [ ] T030 [US1] 生成されたワークフローにSkillノード(pdf-analyzer)が含まれること、skillPathが解決済み(`/Users/.../pdf-analyzer/SKILL.md`)、validationStatus='valid'であることをcanvas上で確認
-- [ ] T031 [US1] 異常系テスト: `~/.claude/skills/pdf-analyzer/SKILL.md` を削除 → 再度生成 → validationStatus='missing'になることを確認
+- [x] T027 [US1] VSCode拡張機能をローカルビルド(`npm run compile`)→実行(`F5`)、AI Generation Dialog開く
+- [x] T028 [US1] テスト用Skillファイル作成: `~/.claude/skills/pdf-analyzer/SKILL.md` に有効なYAML frontmatterを持つファイルを作成
+- [x] T029 [US1] AI Dialog で "Create a workflow to analyze PDF documents" と入力して生成実行
+- [x] T030 [US1] 生成されたワークフローにSkillノード(pdf-analyzer)が含まれること、skillPathが解決済み(`/Users/.../pdf-analyzer/SKILL.md`)、validationStatus='valid'であることをcanvas上で確認
+- [x] T031 [US1] 異常系テスト: `~/.claude/skills/pdf-analyzer/SKILL.md` を削除 → 再度生成 → validationStatus='missing'になることを確認
 
 **User Story 1 完了基準**:
 - AIが関連するSkillノードを自動生成できる

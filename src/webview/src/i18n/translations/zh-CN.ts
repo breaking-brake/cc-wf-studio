@@ -213,7 +213,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'ai.success': '工作流生成成功！',
   'ai.usageNote': '*1 此功能使用您环境中安装的Claude Code。',
   'ai.overwriteWarning': '*2 生成工作流将完全替换您当前的工作流。请在继续之前保存您的工作。',
-  'ai.skillLimitation': '*3 包含Skill节点的工作流自动生成功能目前正在准备中。',
 
   // AI Generation Errors
   'ai.error.emptyDescription': '请输入工作流描述',

@@ -224,8 +224,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'ai.usageNote': '*1 This feature uses Claude Code installed in your environment.',
   'ai.overwriteWarning':
     '*2 Generating a workflow will completely replace your current workflow. Make sure to save your work before proceeding.',
-  'ai.skillLimitation':
-    '*3 Automatic generation of workflows containing Skill nodes is currently in preparation.',
 
   // AI Generation Errors
   'ai.error.emptyDescription': 'Please enter a workflow description',

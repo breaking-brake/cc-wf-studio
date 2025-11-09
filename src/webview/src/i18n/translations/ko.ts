@@ -226,7 +226,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'ai.usageNote': '*1 이 기능은 사용자 환경에 설치된 Claude Code를 사용합니다.',
   'ai.overwriteWarning':
     '*2 워크플로를 생성하면 현재 워크플로가 완전히 덮어쓰여집니다. 계속하기 전에 작업 내용을 저장하세요.',
-  'ai.skillLimitation': '*3 Skill 노드를 포함한 워크플로의 자동 생성은 현재 준비 중입니다.',
 
   // AI Generation Errors
   'ai.error.emptyDescription': '워크플로 설명을 입력하세요',
