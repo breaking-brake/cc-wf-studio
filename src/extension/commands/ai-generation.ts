@@ -17,11 +17,11 @@ import type { SkillNodeData } from '../../shared/types/workflow-definition';
 import { log } from '../extension';
 import { executeClaudeCodeCLI, parseClaudeCodeOutput } from '../services/claude-code-service';
 import { getDefaultSchemaPath, loadWorkflowSchema } from '../services/schema-loader-service';
-import { scanAllSkills } from '../services/skill-service';
 import {
   type SkillRelevanceScore,
   filterSkillsByRelevance,
 } from '../services/skill-relevance-matcher';
+import { scanAllSkills } from '../services/skill-service';
 import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
 
 /**
@@ -76,10 +76,7 @@ export async function handleGenerateWorkflow(
     log('INFO', 'Workflow schema loaded successfully', { requestId });
 
     // Combine personal and project Skills
-    const availableSkills: SkillReference[] = [
-      ...skillsResult.personal,
-      ...skillsResult.project,
-    ];
+    const availableSkills: SkillReference[] = [...skillsResult.personal, ...skillsResult.project];
 
     log('INFO', 'Skills scanned successfully', {
       requestId,
@@ -442,16 +439,15 @@ async function resolveSkillPaths(
           validationStatus: matchedSkill.validationStatus,
         } as SkillNodeData,
       };
-    } else {
-      // Skill not found - mark as missing (T020, preserve all existing fields)
-      return {
-        ...node,
-        data: {
-          ...skillData,
-          validationStatus: 'missing' as const,
-        } as SkillNodeData,
-      };
     }
+    // Skill not found - mark as missing (T020, preserve all existing fields)
+    return {
+      ...node,
+      data: {
+        ...skillData,
+        validationStatus: 'missing' as const,
+      } as SkillNodeData,
+    };
   });
 
   return {

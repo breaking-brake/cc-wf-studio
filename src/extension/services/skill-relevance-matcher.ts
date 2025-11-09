@@ -86,14 +86,12 @@ export interface FilterOptions {
  * Implementation: T008
  */
 export function tokenize(text: string): string[] {
-  return (
-    text
-      .toLowerCase()
-      .split(/\s+/) // Split by whitespace
-      .map((word) => word.replace(/[^a-z0-9-]/g, '')) // Remove punctuation
-      .filter((word) => word.length > 2) // Min length 3 chars
-      .filter((word) => !STOPWORDS.has(word))
-  ); // Remove common words
+  return text
+    .toLowerCase()
+    .split(/\s+/) // Split by whitespace
+    .map((word) => word.replace(/[^a-z0-9-]/g, '')) // Remove punctuation
+    .filter((word) => word.length > 2) // Min length 3 chars
+    .filter((word) => !STOPWORDS.has(word)); // Remove common words
 }
 
 /**
@@ -174,9 +172,7 @@ export function filterSkillsByRelevance(
   const maxResults = options?.maxResults ?? MAX_SKILLS_IN_PROMPT;
 
   // Calculate relevance for all Skills
-  const scored = availableSkills.map((skill) =>
-    calculateSkillRelevance(userDescription, skill)
-  );
+  const scored = availableSkills.map((skill) => calculateSkillRelevance(userDescription, skill));
 
   // Filter by threshold
   const filtered = scored.filter((item) => item.score >= threshold);
