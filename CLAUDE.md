@@ -38,6 +38,66 @@ TypeScript 5.x (VSCode Extension Host), React 18.x (Webview UI): Follow standard
 
 <!-- MANUAL ADDITIONS START -->
 
+## AI-Assisted Skill Node Generation (Feature 001-ai-skill-generation)
+
+### Key Files and Components
+
+#### Extension Host Services
+- **src/extension/services/skill-relevance-matcher.ts**
+  - Calculates relevance scores between user descriptions and Skills using keyword matching
+  - `tokenize()`: Removes stopwords, filters by min length (3 chars)
+  - `calculateSkillRelevance()`: Formula: `score = |intersection| / sqrt(|userTokens| * |skillTokens|)`
+  - `filterSkillsByRelevance()`: Filters by threshold (0.6), limits to 20, prefers project scope
+  - No new library dependencies (per user constraint)
+
+- **src/extension/commands/ai-generation.ts** (Enhanced)
+  - Scans personal + project Skills in parallel (`Promise.all`)
+  - Filters Skills by relevance to user description
+  - Constructs AI prompt with "Available Skills" section (JSON format)
+  - Resolves `skillPath` post-generation for AI-generated Skill nodes
+  - Marks missing Skills as `validationStatus: 'missing'`
+
+- **src/extension/utils/validate-workflow.ts** (Extended)
+  - `validateSkillNode()`: Validates required fields, name format, length constraints
+  - Error codes: SKILL_MISSING_FIELD, SKILL_INVALID_NAME, SKILL_NAME_TOO_LONG, etc.
+  - Integrated into `validateAIGeneratedWorkflow()` flow
+
+#### Resources
+- **resources/workflow-schema.json** (Updated)
+  - Added Skill node type documentation (~1.5KB addition)
+  - Instructions for AI: "Use when user description matches Skill's purpose"
+  - Field descriptions: name, description, scope, skillPath (auto-resolved), validationStatus
+  - File size: 16.5KB (within tolerance)
+
+### Message Flow
+```
+Webview (AiGenerationDialog)
+  → postMessage(GENERATE_WORKFLOW)
+  → Extension (ai-generation.ts)
+  → scanAllSkills() + loadWorkflowSchema() (parallel)
+  → filterSkillsByRelevance(userDescription, availableSkills)
+  → constructPrompt(description, schema, filteredSkills)
+  → ClaudeCodeService.executeClaudeCodeCLI()
+  → Parse & resolveSkillPaths(workflow, availableSkills)
+  → Validate (including Skill nodes)
+  → postMessage(GENERATION_SUCCESS | GENERATION_FAILED)
+  → Webview (workflow-store.addGeneratedWorkflow())
+```
+
+### Key Constraints
+- Max 20 Skills in AI prompt (prevent timeout)
+- Relevance threshold: 0.6 (60%)
+- Keyword matching: O(n+m) complexity
+- Duplicate handling: Project scope preferred over personal
+- Generation timeout: 90 seconds
+
+### Error Handling
+- Skill not found → `validationStatus: 'missing'`
+- Skill file malformed → `validationStatus: 'invalid'`
+- All errors logged to "Claude Code Workflow Studio" Output Channel
+
+---
+
 ## AI-Assisted Workflow Generation (Feature 001-ai-workflow-generation)
 
 ### Key Files and Components

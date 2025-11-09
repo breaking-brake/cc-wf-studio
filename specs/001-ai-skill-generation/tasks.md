@@ -148,10 +148,10 @@ Phase 6: Polish & Cross-Cutting Concerns
 
 **ファイル**: `src/extension/utils/validate-workflow.ts` [EXTEND]
 
-- [ ] T023 [US1] `VALIDATION_RULES.SKILL` 定数追加: NAME_PATTERN(/^[a-z0-9-]+$/), NAME_MAX_LENGTH(64), DESCRIPTION_MAX_LENGTH(1024), OUTPUT_PORTS(1), REQUIRED_FIELDS配列(data-model.md参照)
-- [ ] T024 [US1] `validateSkillNode()` 新規関数実装: required fields, name format, length制約をチェック(contracts/skill-scanning-api.md 5.1参照)
-- [ ] T025 [US1] エラーコード定義追加: SKILL_MISSING_FIELD, SKILL_INVALID_NAME, SKILL_NAME_TOO_LONG, SKILL_DESC_TOO_LONG, SKILL_FILE_NOT_FOUND, SKILL_INVALID_YAML, SKILL_INVALID_PORTS
-- [ ] T026 [US1] `validateAIGeneratedWorkflow()` 修正: Skillノードに対して `validateSkillNode()` を呼び出すロジックを追加
+- [x] T023 [US1] `VALIDATION_RULES.SKILL` 定数追加: NAME_PATTERN(/^[a-z0-9-]+$/), NAME_MAX_LENGTH(64), DESCRIPTION_MAX_LENGTH(1024), OUTPUT_PORTS(1), REQUIRED_FIELDS配列(data-model.md参照)
+- [x] T024 [US1] `validateSkillNode()` 新規関数実装: required fields, name format, length制約をチェック(contracts/skill-scanning-api.md 5.1参照)
+- [x] T025 [US1] エラーコード定義追加: SKILL_MISSING_FIELD, SKILL_INVALID_NAME, SKILL_NAME_TOO_LONG, SKILL_DESC_TOO_LONG, SKILL_FILE_NOT_FOUND, SKILL_INVALID_YAML, SKILL_INVALID_PORTS
+- [x] T026 [US1] `validateAIGeneratedWorkflow()` 修正: Skillノードに対して `validateSkillNode()` を呼び出すロジックを追加
 
 ### 3.4 手動E2Eテスト
 
@@ -247,17 +247,17 @@ Phase 6: Polish & Cross-Cutting Concerns
 
 ### 6.1 ドキュメント更新
 
-- [ ] T049 [P] CLAUDE.mdにAI Skill Generation機能のセクション追加: 主要ファイル、メッセージフロー、エラーハンドリング(既存001-ai-workflow-generationセクション参照)
-- [ ] T050 [P] README.md更新: AI Skill Generation機能の使い方、制限事項(20 Skills limit)、パフォーマンス特性を記載
+- [x] T049 [P] CLAUDE.mdにAI Skill Generation機能のセクション追加: 主要ファイル、メッセージフロー、エラーハンドリング(既存001-ai-workflow-generationセクション参照)
+- [x] T050 [P] README.md更新: AI Skill Generation機能の使い方、制限事項(20 Skills limit)、パフォーマンス特性を記載
 
 ### 6.2 パフォーマンス最適化
 
-- [ ] T051 Skillスキャン並列化確認: `Promise.all([scanPersonalSkills(), scanProjectSkills()])` が正しく動作することをログで確認
+- [x] T051 Skillスキャン並列化確認: `Promise.all([scanPersonalSkills(), scanProjectSkills()])` が正しく動作することをログで確認
 - [ ] T052 Keyword matching最適化: tokenize処理をSkillスキャン時に事前計算(pre-tokenization)し、relevance計算時の処理時間を短縮
 
 ### 6.3 エラーハンドリング強化
 
-- [ ] T053 ログ出力拡張: `log('DEBUG', ...)` でSkill scan結果、filtering結果、prompt token数、実行時間を記録(ai-generation.ts)
+- [x] T053 ログ出力拡張: `log('DEBUG', ...)` でSkill scan結果、filtering結果、prompt token数、実行時間を記録(ai-generation.ts)
 - [ ] T054 タイムアウトエラー処理確認: AI生成が90秒を超える場合、適切なタイムアウトエラーメッセージが表示されることを確認
 
 ### 6.4 最終手動E2Eテスト
