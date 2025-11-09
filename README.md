@@ -142,7 +142,7 @@ Build a multi-stage data pipeline:
 ### Limitations
 
 - Maximum 50 nodes per generated workflow
-- 60-second timeout for AI processing
+- 90-second timeout for AI processing
 - Description limited to 2000 characters
 - Requires active Claude Code CLI installation
 
