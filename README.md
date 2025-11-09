@@ -15,6 +15,18 @@
 <!-- Hero image placeholder - recommended size: 1600x900px or 16:9 aspect ratio -->
 <!-- Place image at: /resources/hero.png -->
 
+---
+
+<p align="center">
+  <img src="./resources/ai-generation.gif" alt="AI-Assisted Workflow Generation Demo" width="800">
+</p>
+
+<p align="center">
+  <em>✨ Describe your workflow in plain language – AI builds it instantly</em>
+</p>
+
+---
+
 ## Why Claude Code Workflow Studio?
 
 ### 🎯 No-Code Workflow Design
