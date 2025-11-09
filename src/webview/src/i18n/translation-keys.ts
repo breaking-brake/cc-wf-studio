@@ -203,7 +203,6 @@ export interface WebviewTranslationKeys {
   'ai.success': string;
   'ai.usageNote': string;
   'ai.overwriteWarning': string;
-  'ai.skillLimitation': string;
 
   // AI Generation Errors
   'ai.error.emptyDescription': string;

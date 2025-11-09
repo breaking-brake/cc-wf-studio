@@ -269,16 +269,6 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
           {t('ai.overwriteWarning')}
         </div>
 
-        <div
-          style={{
-            marginBottom: '16px',
-            fontSize: '12px',
-            color: 'var(--vscode-descriptionForeground)',
-          }}
-        >
-          {t('ai.skillLimitation')}
-        </div>
-
         {error && (
           <div
             style={{

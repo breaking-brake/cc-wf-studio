@@ -8,6 +8,7 @@
 import {
   type Connection,
   NodeType,
+  type SkillNodeData,
   VALIDATION_RULES,
   type Workflow,
   type WorkflowNode,
@@ -182,6 +183,86 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
         field: `nodes[${node.id}].position`,
       });
     }
+
+    // Validate Skill nodes (T026)
+    if (node.type === NodeType.Skill) {
+      const skillErrors = validateSkillNode(node);
+      errors.push(...skillErrors);
+    }
+  }
+
+  return errors;
+}
+
+/**
+ * Validate Skill node structure and fields
+ *
+ * Based on: /specs/001-ai-skill-generation/contracts/skill-scanning-api.md Section 5.1
+ *
+ * @param node - Skill node to validate
+ * @returns Array of validation errors (T024-T025)
+ */
+function validateSkillNode(node: WorkflowNode): ValidationError[] {
+  const errors: ValidationError[] = [];
+  const skillData = node.data as Partial<SkillNodeData>;
+
+  // Required fields check
+  const requiredFields: (keyof SkillNodeData)[] = [
+    'name',
+    'description',
+    'skillPath',
+    'scope',
+    'validationStatus',
+    'outputPorts',
+  ];
+
+  for (const field of requiredFields) {
+    if (!skillData[field]) {
+      errors.push({
+        code: 'SKILL_MISSING_FIELD',
+        message: `Skill node missing required field: ${field}`,
+        field: `nodes[${node.id}].data.${field}`,
+      });
+    }
+  }
+
+  // Name validation
+  if (skillData.name) {
+    if (!VALIDATION_RULES.SKILL.NAME_PATTERN.test(skillData.name)) {
+      errors.push({
+        code: 'SKILL_INVALID_NAME',
+        message: 'Skill name must be lowercase with hyphens only',
+        field: `nodes[${node.id}].data.name`,
+      });
+    }
+
+    if (skillData.name.length > VALIDATION_RULES.SKILL.NAME_MAX_LENGTH) {
+      errors.push({
+        code: 'SKILL_NAME_TOO_LONG',
+        message: `Skill name exceeds ${VALIDATION_RULES.SKILL.NAME_MAX_LENGTH} characters`,
+        field: `nodes[${node.id}].data.name`,
+      });
+    }
+  }
+
+  // Description validation
+  if (skillData.description) {
+    if (skillData.description.length > VALIDATION_RULES.SKILL.DESCRIPTION_MAX_LENGTH) {
+      errors.push({
+        code: 'SKILL_DESC_TOO_LONG',
+        message: `Skill description exceeds ${VALIDATION_RULES.SKILL.DESCRIPTION_MAX_LENGTH} characters`,
+        field: `nodes[${node.id}].data.description`,
+      });
+    }
+  }
+
+  // Output ports validation
+  if (skillData.outputPorts !== VALIDATION_RULES.SKILL.OUTPUT_PORTS) {
+    errors.push({
+      code: 'SKILL_INVALID_PORTS',
+      message: 'Skill outputPorts must equal 1',
+      field: `nodes[${node.id}].data.outputPorts`,
+    });
   }
 
   return errors;

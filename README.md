@@ -35,6 +35,10 @@ All operations run locally within VSCode. No network communication means zero ri
 
 🎓 **Interactive Onboarding Tour** - Step-by-step guided tutorial for first-time users, automatically launched on first use with ? button for anytime replay
 
+🤖 **AI-Assisted Workflow Generation** - Describe your workflow in natural language and let AI generate a complete workflow with automatic Skill node selection
+
+🎯 **Smart Skill Integration** - AI automatically scans your personal and project Skills, filters by relevance, and includes appropriate Skill nodes in generated workflows (max 20 Skills to prevent timeout)
+
 🤖 **Sub-Agent Nodes** - Configure Claude Code Sub-Agents with custom prompts, tool permissions, and model selection (Sonnet/Opus/Haiku)
 
 ❓ **AskUserQuestion Nodes** - Create dynamic conditional branches with 2-4 user-selectable options
@@ -48,8 +52,6 @@ All operations run locally within VSCode. No network communication means zero ri
 ⚙️ **Intuitive Property Panel** - Configure all node settings in a dedicated right-side panel
 
 🌐 **Multilingual Support** - Both the Visual Editor UI and exported workflows automatically adapt to your VSCode language (English/Japanese/Korean/Simplified Chinese/Traditional Chinese supported)
-
-🤖 **AI-Assisted Workflow Generation** - Generate complete workflows from natural language descriptions using Claude Code CLI integration
 
 📚 **Skill Nodes** - Reference existing Claude Code Skills from personal (`~/.claude/skills/`) or project (`.claude/skills/`) directories, or create new Skills directly from the visual editor
 
@@ -142,7 +144,7 @@ Build a multi-stage data pipeline:
 ### Limitations
 
 - Maximum 50 nodes per generated workflow
-- 60-second timeout for AI processing
+- 90-second timeout for AI processing
 - Description limited to 2000 characters
 - Requires active Claude Code CLI installation
 

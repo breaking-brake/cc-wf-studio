@@ -10,6 +10,8 @@ Auto-generated from all feature plans. Last updated: 2025-11-01
 - File system (workflow schema JSON in resources/, generated workflows in canvas state) (001-ai-workflow-generation)
 - TypeScript 5.3.0 (001-skill-node)
 - File system (SKILL.md files in `~/.claude/skills/` and `.claude/skills/`), workflow JSON files in `.vscode/workflows/` (001-skill-node)
+- TypeScript 5.3 (Extension Host), React 18.2 (Webview UI) (001-ai-skill-generation)
+- File system (existing SKILL.md files in `~/.claude/skills/` and `.claude/skills/`, workflow-schema.json in resources/) (001-ai-skill-generation)
 
 - TypeScript 5.x (VSCode Extension Host), React 18.x (Webview UI) (001-cc-wf-studio)
 
@@ -29,12 +31,92 @@ npm test && npm run lint
 TypeScript 5.x (VSCode Extension Host), React 18.x (Webview UI): Follow standard conventions
 
 ## Recent Changes
+- 001-ai-skill-generation: Added TypeScript 5.3 (Extension Host), React 18.2 (Webview UI)
 - 001-skill-node: Added TypeScript 5.3.0
 - 001-ai-workflow-generation: Added TypeScript 5.3 (Extension Host & Webview shared types), React 18.2 (Webview UI)
-- 001-node-types-extension: Added TypeScript 5.3 (VSCode Extension Host), React 18.2 (Webview UI)
 
 
 <!-- MANUAL ADDITIONS START -->
+
+## AI-Assisted Skill Node Generation (Feature 001-ai-skill-generation)
+
+### Key Files and Components
+
+#### Extension Host Services
+- **src/extension/services/skill-relevance-matcher.ts**
+  - Calculates relevance scores between user descriptions and Skills using keyword matching
+  - `tokenize()`: Removes stopwords, filters by min length (3 chars)
+  - `calculateSkillRelevance()`: Formula: `score = |intersection| / sqrt(|userTokens| * |skillTokens|)`
+  - `filterSkillsByRelevance()`: Filters by threshold (0.6), limits to 20, prefers project scope
+  - No new library dependencies (per user constraint)
+
+- **src/extension/commands/ai-generation.ts** (Enhanced)
+  - Scans personal + project Skills in parallel (`Promise.all`)
+  - Filters Skills by relevance to user description
+  - Constructs AI prompt with "Available Skills" section (JSON format)
+  - Resolves `skillPath` post-generation for AI-generated Skill nodes
+  - Marks missing Skills as `validationStatus: 'missing'`
+
+- **src/extension/utils/validate-workflow.ts** (Extended)
+  - `validateSkillNode()`: Validates required fields, name format, length constraints
+  - Error codes: SKILL_MISSING_FIELD, SKILL_INVALID_NAME, SKILL_NAME_TOO_LONG, etc.
+  - Integrated into `validateAIGeneratedWorkflow()` flow
+
+#### Resources
+- **resources/workflow-schema.json** (Updated)
+  - Added Skill node type documentation (~1.5KB addition)
+  - Instructions for AI: "Use when user description matches Skill's purpose"
+  - Field descriptions: name, description, scope, skillPath (auto-resolved), validationStatus
+  - File size: 16.5KB (within tolerance)
+
+### Message Flow
+```
+Webview (AiGenerationDialog)
+  → postMessage(GENERATE_WORKFLOW)
+  → Extension (ai-generation.ts)
+  → scanAllSkills() + loadWorkflowSchema() (parallel)
+  → filterSkillsByRelevance(userDescription, availableSkills)
+  → constructPrompt(description, schema, filteredSkills)
+  → ClaudeCodeService.executeClaudeCodeCLI()
+  → Parse & resolveSkillPaths(workflow, availableSkills)
+  → Validate (including Skill nodes)
+  → postMessage(GENERATION_SUCCESS | GENERATION_FAILED)
+  → Webview (workflow-store.addGeneratedWorkflow())
+```
+
+### Key Constraints
+- Max 20 Skills in AI prompt (prevent timeout)
+- Relevance threshold: 0.3 (30%) - tested 0.5 but 0.3 provides better recall without sacrificing quality
+- Keyword matching: O(n+m) complexity
+- Duplicate handling: Project scope preferred over personal
+- Generation timeout: 90 seconds
+
+### Error Handling
+- Skill not found → `validationStatus: 'missing'`
+- Skill file malformed → `validationStatus: 'invalid'`
+- All errors logged to "Claude Code Workflow Studio" Output Channel
+
+### Design Decisions & Lessons Learned
+
+**Phase 5 (User Skill Selection) - Rejected**
+
+During development, we attempted to implement a UI feature allowing users to manually select which Skills to include/exclude in AI generation. This was intended to prevent timeouts when users have many Skills installed.
+
+**Why it was rejected:**
+- **AI generation control has inherent limitations**: The AI prompt is a "suggestion" not a "command"
+- **Unpredictable behavior**: Even when Skills are excluded from the prompt, the AI may still generate Skill nodes based on its own interpretation of the user's description
+- **Poor UX**: Users selecting "don't use this Skill" would experience confusion when the AI uses it anyway
+- **Uncontrollable AI behavior**: The final decision of which nodes to generate belongs to the AI, not the prompt engineering
+
+**Key lesson:**
+> Do not implement user-facing features that promise control over AI behavior that cannot be guaranteed. AI generation is inherently probabilistic, and features requiring deterministic outcomes should be avoided.
+
+**Alternative approaches for timeout prevention:**
+- Dynamic timeout adjustment based on Skill count
+- Adaptive relevance threshold tuning (e.g., 0.3 → 0.5 for high Skill counts)
+- Maintain strict MAX_SKILLS_IN_PROMPT limit (currently 20)
+
+---
 
 ## AI-Assisted Workflow Generation (Feature 001-ai-workflow-generation)
 
