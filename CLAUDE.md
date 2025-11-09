@@ -86,7 +86,7 @@ Webview (AiGenerationDialog)
 
 ### Key Constraints
 - Max 20 Skills in AI prompt (prevent timeout)
-- Relevance threshold: 0.6 (60%)
+- Relevance threshold: 0.3 (30%) - tested 0.5 but 0.3 provides better recall without sacrificing quality
 - Keyword matching: O(n+m) complexity
 - Duplicate handling: Project scope preferred over personal
 - Generation timeout: 90 seconds
@@ -95,6 +95,26 @@ Webview (AiGenerationDialog)
 - Skill not found → `validationStatus: 'missing'`
 - Skill file malformed → `validationStatus: 'invalid'`
 - All errors logged to "Claude Code Workflow Studio" Output Channel
+
+### Design Decisions & Lessons Learned
+
+**Phase 5 (User Skill Selection) - Rejected**
+
+During development, we attempted to implement a UI feature allowing users to manually select which Skills to include/exclude in AI generation. This was intended to prevent timeouts when users have many Skills installed.
+
+**Why it was rejected:**
+- **AI generation control has inherent limitations**: The AI prompt is a "suggestion" not a "command"
+- **Unpredictable behavior**: Even when Skills are excluded from the prompt, the AI may still generate Skill nodes based on its own interpretation of the user's description
+- **Poor UX**: Users selecting "don't use this Skill" would experience confusion when the AI uses it anyway
+- **Uncontrollable AI behavior**: The final decision of which nodes to generate belongs to the AI, not the prompt engineering
+
+**Key lesson:**
+> Do not implement user-facing features that promise control over AI behavior that cannot be guaranteed. AI generation is inherently probabilistic, and features requiring deterministic outcomes should be avoided.
+
+**Alternative approaches for timeout prevention:**
+- Dynamic timeout adjustment based on Skill count
+- Adaptive relevance threshold tuning (e.g., 0.3 → 0.5 for high Skill counts)
+- Maintain strict MAX_SKILLS_IN_PROMPT limit (currently 20)
 
 ---
 
