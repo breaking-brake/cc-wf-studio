@@ -10,7 +10,8 @@
       "subAgent",
       "askUserQuestion",
       "ifElse",
-      "switch"
+      "switch",
+      "skill"
     ]
   },
   "nodeTypes": {
@@ -117,6 +118,53 @@
       },
       "inputPorts": 1,
       "outputPorts": "2-10"
+    },
+    "skill": {
+      "description": "Reference a Claude Code Skill (specialized agent capability defined in SKILL.md files). Use when user description matches a Skill's documented purpose.",
+      "fields": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "maxLength": 64,
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Exact Skill name from available Skills list"
+        },
+        "description": {
+          "type": "string",
+          "required": true,
+          "maxLength": 1024,
+          "description": "Exact description from available Skills list"
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["personal", "project"],
+          "required": true,
+          "description": "Skill scope (personal or project)"
+        },
+        "skillPath": {
+          "type": "string",
+          "required": false,
+          "description": "Auto-resolved by system after generation - do NOT include in AI output"
+        },
+        "allowedTools": {
+          "type": "string",
+          "required": false,
+          "description": "Optional tool restrictions from Skill definition"
+        },
+        "validationStatus": {
+          "type": "string",
+          "enum": ["valid", "missing", "invalid"],
+          "required": true,
+          "default": "valid"
+        },
+        "outputPorts": {
+          "type": "number",
+          "required": true,
+          "value": 1
+        }
+      },
+      "inputPorts": 1,
+      "outputPorts": 1
     }
   },
   "connectionRules": {

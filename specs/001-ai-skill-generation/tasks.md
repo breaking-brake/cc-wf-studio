@@ -79,11 +79,11 @@ Phase 6: Polish & Cross-Cutting Concerns
 
 **ゴール**: 開発環境準備とドキュメント整備
 
-- [ ] T001 仕様書・設計ドキュメントの確認 (spec.md, plan.md, data-model.md, contracts/)を完了し、実装方針を理解する
-- [ ] T002 既存コード調査: `src/extension/services/skill-service.ts`, `src/extension/commands/ai-generation.ts`, `src/extension/utils/validate-workflow.ts`の現状把握
-- [ ] T003 workflow-schema.jsonのSkillノードタイプドキュメントを確認(存在すればT004をスキップ、なければ追加)
-- [ ] T004 (条件付き) `resources/workflow-schema.json`にSkillノードタイプドキュメントを追加(research.md Q2参照、約800バイト)
-- [ ] T005 開発環境セットアップ確認: `npm install`, `npm run compile`が正常に実行できることを確認
+- [x] T001 仕様書・設計ドキュメントの確認 (spec.md, plan.md, data-model.md, contracts/)を完了し、実装方針を理解する
+- [x] T002 既存コード調査: `src/extension/services/skill-service.ts`, `src/extension/commands/ai-generation.ts`, `src/extension/utils/validate-workflow.ts`の現状把握
+- [x] T003 workflow-schema.jsonのSkillノードタイプドキュメントを確認(存在すればT004をスキップ、なければ追加)
+- [x] T004 (条件付き) `resources/workflow-schema.json`にSkillノードタイプドキュメントを追加(research.md Q2参照、約800バイト)
+- [x] T005 開発環境セットアップ確認: `npm install`, `npm run compile`が正常に実行できることを確認
 
 **完了基準**:
 - 全ドキュメント読了済み
@@ -98,23 +98,23 @@ Phase 6: Polish & Cross-Cutting Concerns
 
 ### 2.1 Skillスキャン機能検証
 
-- [ ] T006 [P] 既存 `scanPersonalSkills()`, `scanProjectSkills()` の動作確認(skill-service.ts)。テスト用モックSkillファイルを作成してスキャン結果をconsole.logで確認
-- [ ] T007 [P] SkillReference型定義が `src/shared/types/messages.ts` に存在することを確認。存在しない場合はdata-model.mdに基づいて型定義を追加
+- [x] T006 [P] 既存 `scanPersonalSkills()`, `scanProjectSkills()` の動作確認(skill-service.ts)。テスト用モックSkillファイルを作成してスキャン結果をconsole.logで確認
+- [x] T007 [P] SkillReference型定義が `src/shared/types/messages.ts` に存在することを確認。存在しない場合はdata-model.mdに基づいて型定義を追加
 
 ### 2.2 Keyword Matchingアルゴリズム実装
 
 **ファイル**: `src/extension/services/skill-relevance-matcher.ts` [NEW]
 
-- [ ] T008 `tokenize()` 関数実装: 文字列を小文字化、ストップワード除去、最小長3文字フィルタ(data-model.md参照)
-- [ ] T009 `calculateSkillRelevance()` 関数実装: userTokensとskillTokensの交差を計算し、スコア算出(formula: |intersection| / sqrt(|userTokens| * |skillTokens|))
+- [x] T008 `tokenize()` 関数実装: 文字列を小文字化、ストップワード除去、最小長3文字フィルタ(data-model.md参照)
+- [x] T009 `calculateSkillRelevance()` 関数実装: userTokensとskillTokensの交差を計算し、スコア算出(formula: |intersection| / sqrt(|userTokens| * |skillTokens|))
 - [ ] T010 動作確認: console.logで "Analyze PDF documents" と sample Skill description のスコア計算結果を出力し、0.0-1.0の範囲であることを確認
 
 ### 2.3 Skillフィルタリング実装
 
 **ファイル**: `src/extension/services/skill-relevance-matcher.ts` [MODIFY]
 
-- [ ] T011 `filterSkillsByRelevance()` 関数実装: 全Skillsに対して関連度計算、threshold(0.6)でフィルタ、maxResults(20)で制限
-- [ ] T012 Duplicate Skill名処理実装: 同名Skillが複数scopeに存在する場合、project scopeを優先(data-model.md参照)
+- [x] T011 `filterSkillsByRelevance()` 関数実装: 全Skillsに対して関連度計算、threshold(0.6)でフィルタ、maxResults(20)で制限
+- [x] T012 Duplicate Skill名処理実装: 同名Skillが複数scopeに存在する場合、project scopeを優先(data-model.md参照)
 - [ ] T013 動作確認: 10個のモックSkillを用意し、filterSkillsByRelevanceの出力をconsole.logで確認(ソート順序、duplicate処理、maxResults制限)
 
 ---
@@ -129,19 +129,19 @@ Phase 6: Polish & Cross-Cutting Concerns
 
 **ファイル**: `src/extension/commands/ai-generation.ts` [MODIFY]
 
-- [ ] T014 [US1] `handleGenerateWorkflow()` 修正: Skill scanning実行(`scanPersonalSkills()` + `scanProjectSkills()`)をPromise.allで並列実行
-- [ ] T015 [US1] `handleGenerateWorkflow()` 修正: `filterSkillsByRelevance()`を呼び出してtop 20 Skillsを取得
-- [ ] T016 [US1] `constructPrompt()` 関数シグネチャ拡張: 第3引数に `filteredSkills: SkillRelevanceScore[]` を追加
-- [ ] T017 [US1] `constructPrompt()` 修正: "Available Skills"セクションをpromptに追加(JSON配列形式、name/description/scopeのみ含む)。contracts/skill-scanning-api.md参照
+- [x] T014 [US1] `handleGenerateWorkflow()` 修正: Skill scanning実行(`scanPersonalSkills()` + `scanProjectSkills()`)をPromise.allで並列実行
+- [x] T015 [US1] `handleGenerateWorkflow()` 修正: `filterSkillsByRelevance()`を呼び出してtop 20 Skillsを取得
+- [x] T016 [US1] `constructPrompt()` 関数シグネチャ拡張: 第3引数に `filteredSkills: SkillRelevanceScore[]` を追加
+- [x] T017 [US1] `constructPrompt()` 修正: "Available Skills"セクションをpromptに追加(JSON配列形式、name/description/scopeのみ含む)。contracts/skill-scanning-api.md参照
 - [ ] T018 [US1] 動作確認: 生成されたprompt文字列をconsole.logで出力し、"Available Skills"セクションが含まれ、Skill情報が正しいJSON配列形式であることを確認
 
 ### 3.2 SkillPath解決
 
 **ファイル**: `src/extension/commands/ai-generation.ts` [MODIFY]
 
-- [ ] T019 [US1] `resolveSkillPaths()` 新規関数実装: Workflowノードを走査し、type==='skill'のノードに対してskillPathを解決(contracts/skill-scanning-api.md 4.1参照)
-- [ ] T020 [US1] `resolveSkillPaths()` エラーハンドリング: Skillが見つからない場合 `validationStatus: 'missing'` を設定
-- [ ] T021 [US1] `handleGenerateWorkflow()` 修正: CLI実行後、parseしたworkflowに対して `resolveSkillPaths()` を呼び出す
+- [x] T019 [US1] `resolveSkillPaths()` 新規関数実装: Workflowノードを走査し、type==='skill'のノードに対してskillPathを解決(contracts/skill-scanning-api.md 4.1参照)
+- [x] T020 [US1] `resolveSkillPaths()` エラーハンドリング: Skillが見つからない場合 `validationStatus: 'missing'` を設定
+- [x] T021 [US1] `handleGenerateWorkflow()` 修正: CLI実行後、parseしたworkflowに対して `resolveSkillPaths()` を呼び出す
 - [ ] T022 [US1] 動作確認: console.logでskillPath解決前後のSkillノードデータを出力し、skillPathが正しく設定されることを確認
 
 ### 3.3 バリデーション拡張
