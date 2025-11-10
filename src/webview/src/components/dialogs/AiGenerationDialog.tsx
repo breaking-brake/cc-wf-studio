@@ -6,7 +6,7 @@
  */
 
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import {
   AIGenerationError,
@@ -25,6 +25,7 @@ const MAX_GENERATION_TIME_SECONDS = 90;
 
 export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps) {
   const { t } = useTranslation();
+  const descriptionId = useId();
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [currentRequestId, setCurrentRequestId] = useState<string | null>(null);
@@ -216,7 +217,7 @@ export function AiGenerationDialog({ isOpen, onClose }: AiGenerationDialogProps)
             {t('ai.descriptionLabel')}
           </label>
           <textarea
-            id="workflow-description"
+            id={descriptionId}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={t('ai.descriptionPlaceholder')}

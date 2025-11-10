@@ -14,7 +14,9 @@
   border-radius: 8px;
   background: #ecfdf5;
   min-width: 120px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .start-node.selected {
@@ -51,7 +53,9 @@
   border-radius: 8px;
   background: #fef2f2;
   min-width: 120px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .end-node.selected {
@@ -89,7 +93,9 @@
   background: #eff6ff;
   min-width: 200px;
   max-width: 300px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .prompt-node.selected {

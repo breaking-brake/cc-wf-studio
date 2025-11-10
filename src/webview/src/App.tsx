@@ -8,13 +8,13 @@
 import type { ErrorPayload, InitialStatePayload } from '@shared/types/messages';
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { ConfirmDialog } from './components/dialogs/ConfirmDialog';
 import { ErrorNotification } from './components/ErrorNotification';
 import { NodePalette } from './components/NodePalette';
 import { PropertyPanel } from './components/PropertyPanel';
 import { Toolbar } from './components/Toolbar';
 import { Tour } from './components/Tour';
 import { WorkflowEditor } from './components/WorkflowEditor';
-import { ConfirmDialog } from './components/dialogs/ConfirmDialog';
 import { useTranslation } from './i18n/i18n-context';
 import { useWorkflowStore } from './stores/workflow-store';
 

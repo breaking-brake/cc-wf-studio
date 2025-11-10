@@ -2,7 +2,7 @@
   "name": "cc-wf-studio",
   "displayName": "Claude Code Workflow Studio",
   "description": "Visual workflow editor for Claude Code Slash Commands, Sub Agents, and Agent Skills",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "publisher": "breaking-brake",
   "icon": "resources/icon.png",
   "repository": {
@@ -10,11 +10,21 @@
     "url": "https://github.com/breaking-brake/cc-wf-studio"
   },
   "homepage": "https://breaking-brake.github.io/",
-  "keywords": ["claude", "claude-code", "workflow", "visual-editor", "automation", "ai"],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "workflow",
+    "visual-editor",
+    "automation",
+    "ai"
+  ],
   "engines": {
     "vscode": "^1.80.0"
   },
-  "categories": ["AI", "Visualization"],
+  "categories": [
+    "AI",
+    "Visualization"
+  ],
   "main": "./out/extension/extension.js",
   "contributes": {
     "commands": [
@@ -55,12 +65,11 @@
     "test:e2e": "wdio run wdio.conf.ts"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.4",
+    "@biomejs/biome": "2.3.4",
     "@types/node": "^24.10.0",
     "@types/vscode": "^1.80.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.3.8",
     "typescript": "^5.3.0"
-  },
-  "dependencies": {}
+  }
 }
