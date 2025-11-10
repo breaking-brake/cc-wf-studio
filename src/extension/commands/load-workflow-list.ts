@@ -4,8 +4,8 @@
  * Loads list of available workflows from .vscode/workflows/ directory
  */
 
-import * as vscode from 'vscode';
 import type { Webview } from 'vscode';
+import * as vscode from 'vscode';
 import type { WorkflowListPayload } from '../../shared/types/messages';
 import type { FileService } from '../services/file-service';
 

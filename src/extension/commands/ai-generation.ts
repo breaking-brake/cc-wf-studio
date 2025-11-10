@@ -18,8 +18,8 @@ import { log } from '../extension';
 import { executeClaudeCodeCLI, parseClaudeCodeOutput } from '../services/claude-code-service';
 import { getDefaultSchemaPath, loadWorkflowSchema } from '../services/schema-loader-service';
 import {
-  type SkillRelevanceScore,
   filterSkillsByRelevance,
+  type SkillRelevanceScore,
 } from '../services/skill-relevance-matcher';
 import { scanAllSkills } from '../services/skill-service';
 import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';

@@ -195,7 +195,6 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
         }}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
-        // biome-ignore lint/a11y/useSemanticElements: Using div with role for React modal pattern
         role="dialog"
         aria-modal="true"
       >
@@ -334,7 +333,6 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                     setSelectedSkill(skill);
                   }
                 }}
-                // biome-ignore lint/a11y/useSemanticElements: Using div with role for list item selection pattern
                 role="button"
                 tabIndex={0}
                 style={{

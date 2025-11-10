@@ -9,13 +9,13 @@ import type React from 'react';
 import { useCallback, useMemo } from 'react';
 import ReactFlow, {
   Background,
+  type Connection,
   Controls,
+  type DefaultEdgeOptions,
+  type EdgeTypes,
   MiniMap,
   type Node,
   type NodeTypes,
-  type EdgeTypes,
-  type DefaultEdgeOptions,
-  type Connection,
 } from 'reactflow';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { AskUserQuestionNodeComponent } from './nodes/AskUserQuestionNode';

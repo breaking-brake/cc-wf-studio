@@ -5,8 +5,8 @@
  */
 
 import * as path from 'node:path';
-import * as vscode from 'vscode';
 import type { Webview } from 'vscode';
+import * as vscode from 'vscode';
 import type { ExportSuccessPayload, ExportWorkflowPayload } from '../../shared/types/messages';
 import {
   checkExistingFiles,
