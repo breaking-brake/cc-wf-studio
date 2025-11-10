@@ -43,7 +43,7 @@ export interface SubAgentData {
   description: string;
   prompt: string;
   tools?: string;
-  model?: 'sonnet' | 'opus' | 'haiku';
+  model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
   outputPorts: number;
 }
 
