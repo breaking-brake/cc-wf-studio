@@ -5,7 +5,7 @@
  */
 
 import type React from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -30,6 +30,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onCancel,
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
 
   // ダイアログが開いたときに自動的にフォーカス
   useEffect(() => {
@@ -62,7 +63,6 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           onCancel();
         }
       }}
-      aria-label="Close dialog overlay"
     >
       <div
         ref={dialogRef}
@@ -79,11 +79,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         }}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
-        aria-labelledby="dialog-title"
       >
         {/* Title */}
         <div
-          id="dialog-title"
+          id={titleId}
           style={{
             fontSize: '16px',
             fontWeight: 600,
