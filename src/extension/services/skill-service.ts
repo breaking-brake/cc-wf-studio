@@ -12,7 +12,7 @@ import path from 'node:path';
 import type { CreateSkillPayload, SkillReference } from '../../shared/types/messages';
 import { getPersonalSkillsDir, getProjectSkillsDir, toRelativePath } from '../utils/path-utils';
 import { generateSkillFileContent } from './skill-file-generator';
-import { type SkillMetadata, parseSkillFrontmatter } from './yaml-parser';
+import { parseSkillFrontmatter, type SkillMetadata } from './yaml-parser';
 
 /**
  * Scan a Skills directory and return available Skills

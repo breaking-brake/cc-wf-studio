@@ -1,26 +1,30 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.4.1/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.4/schema.json",
   "files": {
-    "ignore": ["out/**", "dist/**", "node_modules/**", ".vscode/**"]
+    "includes": ["**", "!**/out", "!**/dist", "!**/node_modules", "!**/.vscode"]
   },
-  "organizeImports": {
-    "enabled": true
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
       "recommended": true,
+      "a11y": {
+        "useSemanticElements": "off",
+        "noStaticElementInteractions": "off"
+      },
       "complexity": {
         "noExtraBooleanCast": "error",
-        "noMultipleSpacesInRegularExpressionLiterals": "error",
         "noUselessCatch": "error",
         "noUselessConstructor": "error",
         "noUselessLoneBlockStatements": "error",
         "noUselessRename": "error",
-        "noWith": "error"
+        "noAdjacentSpacesInRegex": "error"
       },
       "correctness": {
         "noUnusedVariables": "warn"
+      },
+      "suspicious": {
+        "noWith": "error"
       }
     }
   },

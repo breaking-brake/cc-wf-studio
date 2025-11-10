@@ -7,7 +7,7 @@
  * Based on: specs/001-skill-node/tasks.md T022
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
 import {
@@ -31,6 +31,10 @@ export interface CreateSkillFormData {
 
 export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreationDialogProps) {
   const { t } = useTranslation();
+  const nameId = useId();
+  const descriptionId = useId();
+  const instructionsId = useId();
+  const allowedToolsId = useId();
   const [formData, setFormData] = useState<CreateSkillFormData>({
     name: '',
     description: '',
@@ -58,40 +62,13 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
     }
   }, [isOpen]);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Esc: Close dialog
-      if (e.key === 'Escape') {
-        handleClose();
-      }
-
-      // Ctrl/Cmd + Enter: Submit form
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        e.preventDefault();
-        handleSubmit();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
-
-  if (!isOpen) {
-    return null;
-  }
-
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (!isSubmitting) {
       onClose();
     }
-  };
+  }, [isSubmitting, onClose]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     // Validate all fields
     const validationErrors = validateCreateSkillPayload(formData);
 
@@ -113,7 +90,34 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [formData, onSubmit, handleClose, t]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Esc: Close dialog
+      if (e.key === 'Escape') {
+        handleClose();
+      }
+
+      // Ctrl/Cmd + Enter: Submit form
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        handleSubmit();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, handleClose, handleSubmit]);
+
+  if (!isOpen) {
+    return null;
+  }
 
   const handleFieldChange = (field: keyof CreateSkillFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -162,7 +166,6 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
         }}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
-        // biome-ignore lint/a11y/useSemanticElements: Using div with role for React modal pattern
         role="dialog"
         aria-modal="true"
       >
@@ -222,7 +225,7 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
               {t('skill.creation.nameLabel')} *
             </label>
             <input
-              id="skill-name"
+              id={nameId}
               type="text"
               value={formData.name}
               onChange={(e) => handleFieldChange('name', e.target.value)}
@@ -276,7 +279,7 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
               {t('skill.creation.descriptionLabel')} *
             </label>
             <textarea
-              id="skill-description"
+              id={descriptionId}
               value={formData.description}
               onChange={(e) => handleFieldChange('description', e.target.value)}
               placeholder={t('skill.creation.descriptionPlaceholder')}
@@ -323,7 +326,7 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
               {t('skill.creation.instructionsLabel')} *
             </label>
             <textarea
-              id="skill-instructions"
+              id={instructionsId}
               value={formData.instructions}
               onChange={(e) => handleFieldChange('instructions', e.target.value)}
               placeholder={t('skill.creation.instructionsPlaceholder')}
@@ -379,7 +382,7 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
               {t('skill.creation.allowedToolsLabel')}
             </label>
             <input
-              id="skill-allowed-tools"
+              id={allowedToolsId}
               type="text"
               value={formData.allowedTools}
               onChange={(e) => handleFieldChange('allowedTools', e.target.value)}

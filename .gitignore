@@ -7,8 +7,6 @@ dist/
 *.vsix
 
 # IDE
-.vscode/settings.json
-.vscode/launch.json
 .idea/
 
 # OS
