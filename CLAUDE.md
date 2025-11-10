@@ -26,6 +26,20 @@ tests/
 
 npm test && npm run lint
 
+## Version Update Procedure
+
+When updating the version number, you must update the following files:
+
+1. **package.json** (root directory)
+   - Update `"version"` field
+
+2. **src/webview/package.json** (webview directory)
+   - Update `"version"` field
+   - **IMPORTANT**: After updating, run `npm install` in the webview directory to update `package-lock.json`
+   - Command: `cd src/webview && npm install`
+
+Both package.json files and the webview's package-lock.json must be committed together for a version update.
+
 ## Code Style
 
 TypeScript 5.x (VSCode Extension Host), React 18.x (Webview UI): Follow standard conventions

@@ -50,7 +50,7 @@
         "model": {
           "type": "string",
           "required": false,
-          "enum": ["sonnet", "opus", "haiku"],
+          "enum": ["sonnet", "opus", "haiku", "inherit"],
           "default": "sonnet"
         },
         "outputPorts": { "type": "number", "required": true, "value": 1 }
