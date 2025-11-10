@@ -349,7 +349,9 @@ const SubAgentProperties: React.FC<{
           id="model-select"
           value={data.model || 'sonnet'}
           onChange={(e) =>
-            updateNodeData(node.id, { model: e.target.value as 'sonnet' | 'opus' | 'haiku' })
+            updateNodeData(node.id, {
+              model: e.target.value as 'sonnet' | 'opus' | 'haiku' | 'inherit',
+            })
           }
           className="nodrag"
           style={{
@@ -365,6 +367,7 @@ const SubAgentProperties: React.FC<{
           <option value="sonnet">Sonnet</option>
           <option value="opus">Opus</option>
           <option value="haiku">Haiku</option>
+          <option value="inherit">Inherit</option>
         </select>
       </div>
 
