@@ -201,6 +201,50 @@ export interface Connection {
 }
 
 // ============================================================================
+// Conversation Types (for AI-assisted workflow refinement)
+// ============================================================================
+
+/**
+ * Individual conversation message
+ *
+ * Represents a single message in the conversation history.
+ * Based on: /specs/001-ai-workflow-refinement/data-model.md
+ */
+export interface ConversationMessage {
+  /** Message ID (UUID v4) */
+  id: string;
+  /** Message sender type */
+  sender: 'user' | 'ai';
+  /** Message content (1-5000 characters) */
+  content: string;
+  /** Message timestamp (ISO 8601) */
+  timestamp: string;
+  /** Optional reference to workflow snapshot */
+  workflowSnapshotId?: string;
+}
+
+/**
+ * Conversation history for workflow refinement
+ *
+ * Stores the entire conversation history associated with a workflow.
+ * Based on: /specs/001-ai-workflow-refinement/data-model.md
+ */
+export interface ConversationHistory {
+  /** Schema version (for future migrations) */
+  schemaVersion: '1.0.0';
+  /** Array of conversation messages */
+  messages: ConversationMessage[];
+  /** Current iteration count (0-20) */
+  currentIteration: number;
+  /** Maximum iteration count (fixed at 20) */
+  maxIterations: 20;
+  /** Conversation start timestamp (ISO 8601) */
+  createdAt: string;
+  /** Last update timestamp (ISO 8601) */
+  updatedAt: string;
+}
+
+// ============================================================================
 // Workflow Type
 // ============================================================================
 
@@ -224,6 +268,8 @@ export interface Workflow {
   createdAt: Date;
   updatedAt: Date;
   metadata?: WorkflowMetadata;
+  /** Optional conversation history for AI-assisted workflow refinement */
+  conversationHistory?: ConversationHistory;
 }
 
 // ============================================================================

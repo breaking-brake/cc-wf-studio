@@ -210,6 +210,72 @@ export interface SkillValidationSuccessPayload {
 }
 
 // ============================================================================
+// AI Workflow Refinement Payloads (001-ai-workflow-refinement)
+// ============================================================================
+
+import type { ConversationHistory, ConversationMessage } from './workflow-definition';
+
+export interface RefineWorkflowPayload {
+  /** ID of the workflow being refined */
+  workflowId: string;
+  /** User's refinement request (1-5000 characters) */
+  userMessage: string;
+  /** Current workflow state (full Workflow object) */
+  currentWorkflow: Workflow;
+  /** Existing conversation history */
+  conversationHistory: ConversationHistory;
+  /** Optional timeout in milliseconds (default: 60000, min: 10000, max: 120000) */
+  timeoutMs?: number;
+}
+
+export interface RefinementSuccessPayload {
+  /** The refined workflow (full Workflow object) */
+  refinedWorkflow: Workflow;
+  /** AI's response message */
+  aiMessage: ConversationMessage;
+  /** Updated conversation history with new messages */
+  updatedConversationHistory: ConversationHistory;
+  /** Optional: brief summary of changes made (max 500 chars) */
+  changesSummary?: string;
+  /** Time taken to execute refinement (in milliseconds) */
+  executionTimeMs: number;
+  /** Response timestamp */
+  timestamp: string; // ISO 8601
+}
+
+export interface RefinementFailedPayload {
+  /** Structured error information */
+  error: {
+    /** Error code for i18n lookup */
+    code:
+      | 'COMMAND_NOT_FOUND'
+      | 'TIMEOUT'
+      | 'PARSE_ERROR'
+      | 'VALIDATION_ERROR'
+      | 'ITERATION_LIMIT_REACHED'
+      | 'UNKNOWN_ERROR';
+    /** Human-readable error message */
+    message: string;
+    /** Optional: detailed error information */
+    details?: string;
+  };
+  /** Time taken before error occurred */
+  executionTimeMs: number;
+  /** Error timestamp */
+  timestamp: string; // ISO 8601
+}
+
+export interface ClearConversationPayload {
+  /** ID of the workflow to clear conversation for */
+  workflowId: string;
+}
+
+export interface ConversationClearedPayload {
+  /** ID of the workflow that was cleared */
+  workflowId: string;
+}
+
+// ============================================================================
 // Extension → Webview Messages
 // ============================================================================
 
@@ -229,7 +295,10 @@ export type ExtensionMessage =
   | Message<SkillCreationSuccessPayload, 'SKILL_CREATION_SUCCESS'>
   | Message<SkillValidationErrorPayload, 'SKILL_CREATION_FAILED'>
   | Message<SkillValidationSuccessPayload, 'SKILL_VALIDATION_SUCCESS'>
-  | Message<SkillValidationErrorPayload, 'SKILL_VALIDATION_FAILED'>;
+  | Message<SkillValidationErrorPayload, 'SKILL_VALIDATION_FAILED'>
+  | Message<RefinementSuccessPayload, 'REFINEMENT_SUCCESS'>
+  | Message<RefinementFailedPayload, 'REFINEMENT_FAILED'>
+  | Message<ConversationClearedPayload, 'CONVERSATION_CLEARED'>;
 
 // ============================================================================
 // Webview → Extension Messages
@@ -246,7 +315,9 @@ export type WebviewMessage =
   | Message<CancelGenerationPayload, 'CANCEL_GENERATION'>
   | Message<void, 'BROWSE_SKILLS'>
   | Message<CreateSkillPayload, 'CREATE_SKILL'>
-  | Message<ValidateSkillFilePayload, 'VALIDATE_SKILL_FILE'>;
+  | Message<ValidateSkillFilePayload, 'VALIDATE_SKILL_FILE'>
+  | Message<RefineWorkflowPayload, 'REFINE_WORKFLOW'>
+  | Message<ClearConversationPayload, 'CLEAR_CONVERSATION'>;
 
 // ============================================================================
 // Error Codes
