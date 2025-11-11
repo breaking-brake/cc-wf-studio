@@ -293,4 +293,55 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'skill.validation.descriptionTooLong': 'Description must be 1024 characters or less',
   'skill.validation.instructionsRequired': 'Instructions are required',
   'skill.validation.scopeRequired': 'Please select a scope (Personal or Project)',
+
+  // Workflow Refinement (001-ai-workflow-refinement)
+  'refinement.toolbar.refineButton': 'Refine with AI',
+  'refinement.toolbar.refineButton.tooltip': 'Open chat to refine this workflow with AI assistance',
+
+  // Refinement Chat Panel
+  'refinement.chat.title': 'Workflow Refinement Chat',
+  'refinement.chat.description':
+    'Chat with AI to iteratively improve your workflow. Describe what changes you want, and the AI will update the workflow automatically.',
+  'refinement.chat.inputPlaceholder': 'Describe the changes you want (e.g., "Add error handling")',
+  'refinement.chat.sendButton': 'Send',
+  'refinement.chat.sendButton.shortcut': 'Ctrl+Enter to send',
+  'refinement.chat.sendButton.shortcutMac': 'Cmd+Enter to send',
+  'refinement.chat.cancelButton': 'Cancel',
+  'refinement.chat.closeButton': 'Close',
+  'refinement.chat.clearButton': 'Clear Conversation',
+  'refinement.chat.clearButton.tooltip': 'Clear conversation history and start fresh',
+  'refinement.chat.refining': 'AI is refining workflow... This may take up to 120 seconds.',
+  'refinement.chat.progressTime': '{elapsed}s / {max}s',
+  'refinement.chat.characterCount': '{count} / {max} characters',
+  'refinement.chat.iterationCounter': 'Iteration {current} / {max}',
+  'refinement.chat.iterationWarning': 'Approaching iteration limit ({current}/{max})',
+  'refinement.chat.iterationLimitReached':
+    'Maximum iteration limit reached ({max}). Please clear conversation to continue.',
+  'refinement.chat.noMessages': 'No messages yet. Start by describing what you want to improve.',
+  'refinement.chat.userMessageLabel': 'You',
+  'refinement.chat.aiMessageLabel': 'AI',
+  'refinement.chat.success': 'Workflow refined successfully!',
+  'refinement.chat.changesSummary': 'Changes: {summary}',
+
+  // Refinement Errors
+  'refinement.error.emptyMessage': 'Please enter a message',
+  'refinement.error.messageTooLong': 'Message is too long (max {max} characters)',
+  'refinement.error.commandNotFound':
+    'Claude Code CLI not found. Please install Claude Code to use AI refinement.',
+  'refinement.error.timeout':
+    'AI refinement timed out. Please try again with a simpler request, or increase timeout.',
+  'refinement.error.parseError':
+    'Failed to parse AI response. Please try again or rephrase your request.',
+  'refinement.error.validationError':
+    'Refined workflow failed validation. Please try a different request.',
+  'refinement.error.iterationLimitReached':
+    'Maximum iteration limit (20) has been reached. Clear conversation history to start fresh, or manually edit the workflow.',
+  'refinement.error.unknown': 'An unexpected error occurred. Check logs for details.',
+
+  // Clear Conversation Confirmation
+  'refinement.clearDialog.title': 'Clear Conversation',
+  'refinement.clearDialog.message':
+    'Are you sure you want to clear the conversation history? This cannot be undone.',
+  'refinement.clearDialog.confirm': 'Clear',
+  'refinement.clearDialog.cancel': 'Cancel',
 };

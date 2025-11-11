@@ -118,7 +118,12 @@
         },
         "payload": {
           "type": "object",
-          "required": ["refinedWorkflow", "aiMessage", "updatedConversationHistory", "executionTimeMs"],
+          "required": [
+            "refinedWorkflow",
+            "aiMessage",
+            "updatedConversationHistory",
+            "executionTimeMs"
+          ],
           "properties": {
             "refinedWorkflow": {
               "type": "object",
@@ -361,15 +366,8 @@
     }
   },
   "messages": {
-    "webviewToExtension": [
-      "REFINE_WORKFLOW",
-      "CLEAR_CONVERSATION"
-    ],
-    "extensionToWebview": [
-      "REFINEMENT_SUCCESS",
-      "REFINEMENT_FAILED",
-      "CONVERSATION_CLEARED"
-    ]
+    "webviewToExtension": ["REFINE_WORKFLOW", "CLEAR_CONVERSATION"],
+    "extensionToWebview": ["REFINEMENT_SUCCESS", "REFINEMENT_FAILED", "CONVERSATION_CLEARED"]
   },
   "errorCodes": {
     "COMMAND_NOT_FOUND": {

@@ -42,7 +42,7 @@
 
 - [x] T001 [P] 型定義の追加: ConversationHistory, ConversationMessage を src/shared/types/workflow-definition.ts に追加
 - [x] T002 [P] メッセージ型の追加: RefineWorkflowMessage, RefinementSuccessMessage, RefinementFailedMessage, ClearConversationMessage, ConversationClearedMessage を src/shared/types/messages.ts に追加
-- [ ] T003 [P] i18n翻訳キーの追加: refinement 関連の翻訳キーを src/webview/src/i18n/translations/ の5言語ファイル（en.ts, ja.ts, ko.ts, zh-CN.ts, zh-TW.ts）に追加
+- [x] T003 [P] i18n翻訳キーの追加: refinement 関連の翻訳キーを src/webview/src/i18n/translations/ の5言語ファイル（en.ts, ja.ts, ko.ts, zh-CN.ts, zh-TW.ts）に追加
 
 ---
 

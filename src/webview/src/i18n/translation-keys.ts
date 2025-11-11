@@ -266,4 +266,47 @@ export interface WebviewTranslationKeys {
   'skill.validation.descriptionTooLong': string;
   'skill.validation.instructionsRequired': string;
   'skill.validation.scopeRequired': string;
+
+  // Workflow Refinement (001-ai-workflow-refinement)
+  'refinement.toolbar.refineButton': string;
+  'refinement.toolbar.refineButton.tooltip': string;
+
+  // Refinement Chat Panel
+  'refinement.chat.title': string;
+  'refinement.chat.description': string;
+  'refinement.chat.inputPlaceholder': string;
+  'refinement.chat.sendButton': string;
+  'refinement.chat.sendButton.shortcut': string;
+  'refinement.chat.sendButton.shortcutMac': string;
+  'refinement.chat.cancelButton': string;
+  'refinement.chat.closeButton': string;
+  'refinement.chat.clearButton': string;
+  'refinement.chat.clearButton.tooltip': string;
+  'refinement.chat.refining': string;
+  'refinement.chat.progressTime': string;
+  'refinement.chat.characterCount': string;
+  'refinement.chat.iterationCounter': string;
+  'refinement.chat.iterationWarning': string;
+  'refinement.chat.iterationLimitReached': string;
+  'refinement.chat.noMessages': string;
+  'refinement.chat.userMessageLabel': string;
+  'refinement.chat.aiMessageLabel': string;
+  'refinement.chat.success': string;
+  'refinement.chat.changesSummary': string;
+
+  // Refinement Errors
+  'refinement.error.emptyMessage': string;
+  'refinement.error.messageTooLong': string;
+  'refinement.error.commandNotFound': string;
+  'refinement.error.timeout': string;
+  'refinement.error.parseError': string;
+  'refinement.error.validationError': string;
+  'refinement.error.iterationLimitReached': string;
+  'refinement.error.unknown': string;
+
+  // Clear Conversation Confirmation
+  'refinement.clearDialog.title': string;
+  'refinement.clearDialog.message': string;
+  'refinement.clearDialog.confirm': string;
+  'refinement.clearDialog.cancel': string;
 }

@@ -292,4 +292,56 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'skill.validation.descriptionTooLong': '説明は1024文字以内にしてください',
   'skill.validation.instructionsRequired': '指示内容は必須です',
   'skill.validation.scopeRequired': 'スコープ（個人用/プロジェクト用）を選択してください',
+
+  // Workflow Refinement (001-ai-workflow-refinement)
+  'refinement.toolbar.refineButton': 'AIで修正',
+  'refinement.toolbar.refineButton.tooltip': 'AIとチャットしてワークフローを改善します',
+
+  // Refinement Chat Panel
+  'refinement.chat.title': 'ワークフロー改善チャット',
+  'refinement.chat.description':
+    'AIとチャットして、ワークフローを段階的に改善できます。希望する変更内容を入力すると、AIが自動的にワークフローを更新します。',
+  'refinement.chat.inputPlaceholder':
+    '変更内容を入力してください（例：「エラーハンドリングを追加して」）',
+  'refinement.chat.sendButton': '送信',
+  'refinement.chat.sendButton.shortcut': 'Ctrl+Enterで送信',
+  'refinement.chat.sendButton.shortcutMac': 'Cmd+Enterで送信',
+  'refinement.chat.cancelButton': 'キャンセル',
+  'refinement.chat.closeButton': '閉じる',
+  'refinement.chat.clearButton': '会話をクリア',
+  'refinement.chat.clearButton.tooltip': '会話履歴をクリアして最初からやり直します',
+  'refinement.chat.refining': 'AIがワークフローを改善中... 最大120秒かかる場合があります。',
+  'refinement.chat.progressTime': '{elapsed}秒 / {max}秒',
+  'refinement.chat.characterCount': '{count} / {max} 文字',
+  'refinement.chat.iterationCounter': '反復 {current} / {max}',
+  'refinement.chat.iterationWarning': '反復回数の上限に近づいています ({current}/{max})',
+  'refinement.chat.iterationLimitReached':
+    '最大反復回数に達しました ({max})。会話をクリアして続けてください。',
+  'refinement.chat.noMessages': 'メッセージはまだありません。改善したい内容を入力してください。',
+  'refinement.chat.userMessageLabel': 'あなた',
+  'refinement.chat.aiMessageLabel': 'AI',
+  'refinement.chat.success': 'ワークフローの改善が完了しました！',
+  'refinement.chat.changesSummary': '変更内容: {summary}',
+
+  // Refinement Errors
+  'refinement.error.emptyMessage': 'メッセージを入力してください',
+  'refinement.error.messageTooLong': 'メッセージが長すぎます（最大{max}文字）',
+  'refinement.error.commandNotFound':
+    'Claude Code CLIが見つかりません。AI改善機能を使用するにはClaude Codeをインストールしてください。',
+  'refinement.error.timeout':
+    'AI改善がタイムアウトしました。もう一度試すか、リクエストを簡略化してください。',
+  'refinement.error.parseError':
+    'AI応答の解析に失敗しました。もう一度試すか、リクエストを言い換えてください。',
+  'refinement.error.validationError':
+    '改善されたワークフローが検証に失敗しました。別のリクエストを試してください。',
+  'refinement.error.iterationLimitReached':
+    '最大反復回数(20)に達しました。会話履歴をクリアして最初からやり直すか、手動でワークフローを編集してください。',
+  'refinement.error.unknown': '予期しないエラーが発生しました。ログを確認してください。',
+
+  // Clear Conversation Confirmation
+  'refinement.clearDialog.title': '会話をクリア',
+  'refinement.clearDialog.message':
+    '会話履歴をクリアしてもよろしいですか？この操作は取り消せません。',
+  'refinement.clearDialog.confirm': 'クリア',
+  'refinement.clearDialog.cancel': 'キャンセル',
 };

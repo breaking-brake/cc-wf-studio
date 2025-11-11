@@ -280,4 +280,49 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'skill.validation.descriptionTooLong': '描述不得超過1024個字元',
   'skill.validation.instructionsRequired': '說明為必填',
   'skill.validation.scopeRequired': '請選擇範圍（個人/專案）',
+
+  // Workflow Refinement (001-ai-workflow-refinement)
+  'refinement.toolbar.refineButton': '使用AI優化',
+  'refinement.toolbar.refineButton.tooltip': '與AI聊天以優化此工作流程',
+
+  // Refinement Chat Panel
+  'refinement.chat.title': '工作流程優化聊天',
+  'refinement.chat.description':
+    '與AI聊天以逐步改進您的工作流程。描述您想要的更改，AI將自動更新工作流程。',
+  'refinement.chat.inputPlaceholder': '描述您想要的更改（例如：「新增錯誤處理」）',
+  'refinement.chat.sendButton': '傳送',
+  'refinement.chat.sendButton.shortcut': 'Ctrl+Enter傳送',
+  'refinement.chat.sendButton.shortcutMac': 'Cmd+Enter傳送',
+  'refinement.chat.cancelButton': '取消',
+  'refinement.chat.closeButton': '關閉',
+  'refinement.chat.clearButton': '清除對話',
+  'refinement.chat.clearButton.tooltip': '清除對話歷史記錄並重新開始',
+  'refinement.chat.refining': 'AI正在優化工作流程... 最多可能需要120秒。',
+  'refinement.chat.progressTime': '{elapsed}秒 / {max}秒',
+  'refinement.chat.characterCount': '{count} / {max} 字元',
+  'refinement.chat.iterationCounter': '迭代 {current} / {max}',
+  'refinement.chat.iterationWarning': '接近迭代限制 ({current}/{max})',
+  'refinement.chat.iterationLimitReached': '已達到最大迭代限制 ({max})。請清除對話以繼續。',
+  'refinement.chat.noMessages': '還沒有訊息。開始描述您想要改進的內容。',
+  'refinement.chat.userMessageLabel': '您',
+  'refinement.chat.aiMessageLabel': 'AI',
+  'refinement.chat.success': '工作流程優化成功！',
+  'refinement.chat.changesSummary': '更改：{summary}',
+
+  // Refinement Errors
+  'refinement.error.emptyMessage': '請輸入訊息',
+  'refinement.error.messageTooLong': '訊息太長（最多{max}個字元）',
+  'refinement.error.commandNotFound': '未找到Claude Code CLI。請安裝Claude Code以使用AI優化功能。',
+  'refinement.error.timeout': 'AI優化逾時。請重試或簡化您的請求。',
+  'refinement.error.parseError': '無法解析AI回應。請重試或重新表述您的請求。',
+  'refinement.error.validationError': '優化後的工作流程驗證失敗。請嘗試不同的請求。',
+  'refinement.error.iterationLimitReached':
+    '已達到最大迭代限制(20)。清除對話歷史記錄重新開始，或手動編輯工作流程。',
+  'refinement.error.unknown': '發生意外錯誤。請檢查日誌以取得詳細資訊。',
+
+  // Clear Conversation Confirmation
+  'refinement.clearDialog.title': '清除對話',
+  'refinement.clearDialog.message': '確定要清除對話歷史記錄嗎？此操作無法復原。',
+  'refinement.clearDialog.confirm': '清除',
+  'refinement.clearDialog.cancel': '取消',
 };

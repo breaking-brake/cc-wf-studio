@@ -293,4 +293,53 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'skill.validation.descriptionTooLong': '설명은 1024자 이하여야 합니다',
   'skill.validation.instructionsRequired': '지침은 필수입니다',
   'skill.validation.scopeRequired': '범위(개인용/프로젝트용)를 선택해 주세요',
+
+  // Workflow Refinement (001-ai-workflow-refinement)
+  'refinement.toolbar.refineButton': 'AI로 개선',
+  'refinement.toolbar.refineButton.tooltip': 'AI와 채팅하여 워크플로를 개선합니다',
+
+  // Refinement Chat Panel
+  'refinement.chat.title': '워크플로 개선 채팅',
+  'refinement.chat.description':
+    'AI와 채팅하여 워크플로를 점진적으로 개선할 수 있습니다. 원하는 변경 사항을 설명하면 AI가 자동으로 워크플로를 업데이트합니다.',
+  'refinement.chat.inputPlaceholder': '변경 사항을 입력하세요 (예: "오류 처리 추가")',
+  'refinement.chat.sendButton': '전송',
+  'refinement.chat.sendButton.shortcut': 'Ctrl+Enter로 전송',
+  'refinement.chat.sendButton.shortcutMac': 'Cmd+Enter로 전송',
+  'refinement.chat.cancelButton': '취소',
+  'refinement.chat.closeButton': '닫기',
+  'refinement.chat.clearButton': '대화 지우기',
+  'refinement.chat.clearButton.tooltip': '대화 기록을 지우고 처음부터 시작합니다',
+  'refinement.chat.refining': 'AI가 워크플로를 개선하는 중... 최대 120초가 소요될 수 있습니다.',
+  'refinement.chat.progressTime': '{elapsed}초 / {max}초',
+  'refinement.chat.characterCount': '{count} / {max} 자',
+  'refinement.chat.iterationCounter': '반복 {current} / {max}',
+  'refinement.chat.iterationWarning': '반복 제한에 가까워지고 있습니다 ({current}/{max})',
+  'refinement.chat.iterationLimitReached':
+    '최대 반복 횟수에 도달했습니다 ({max}). 계속하려면 대화를 지우세요.',
+  'refinement.chat.noMessages': '아직 메시지가 없습니다. 개선하고 싶은 내용을 입력하세요.',
+  'refinement.chat.userMessageLabel': '나',
+  'refinement.chat.aiMessageLabel': 'AI',
+  'refinement.chat.success': '워크플로 개선이 완료되었습니다!',
+  'refinement.chat.changesSummary': '변경 사항: {summary}',
+
+  // Refinement Errors
+  'refinement.error.emptyMessage': '메시지를 입력하세요',
+  'refinement.error.messageTooLong': '메시지가 너무 깁니다 (최대 {max}자)',
+  'refinement.error.commandNotFound':
+    'Claude Code CLI를 찾을 수 없습니다. AI 개선 기능을 사용하려면 Claude Code를 설치하세요.',
+  'refinement.error.timeout': 'AI 개선 시간이 초과되었습니다. 다시 시도하거나 요청을 단순화하세요.',
+  'refinement.error.parseError':
+    'AI 응답 파싱에 실패했습니다. 다시 시도하거나 요청을 다시 표현하세요.',
+  'refinement.error.validationError':
+    '개선된 워크플로가 검증에 실패했습니다. 다른 요청을 시도하세요.',
+  'refinement.error.iterationLimitReached':
+    '최대 반복 횟수(20)에 도달했습니다. 대화 기록을 지우고 처음부터 시작하거나 워크플로를 수동으로 편집하세요.',
+  'refinement.error.unknown': '예상치 못한 오류가 발생했습니다. 로그를 확인하세요.',
+
+  // Clear Conversation Confirmation
+  'refinement.clearDialog.title': '대화 지우기',
+  'refinement.clearDialog.message': '대화 기록을 지우시겠습니까? 이 작업은 취소할 수 없습니다.',
+  'refinement.clearDialog.confirm': '지우기',
+  'refinement.clearDialog.cancel': '취소',
 };
