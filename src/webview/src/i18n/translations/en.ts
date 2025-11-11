@@ -174,21 +174,21 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Tour
   'tour.welcome':
-    'Welcome to Claude Code Workflow Studio!\n\nThis tour will guide you through creating your first workflow.',
+    "Welcome to Claude Code Workflow Studio!\n\nThis tour will introduce the key features and show you where everything is. Let's get familiar with the basics before creating your first workflow.",
   'tour.nodePalette':
     'The Node Palette contains various nodes you can use in your workflow.\n\nClick on Prompt, Sub-Agent, AskUserQuestion, If/Else, Switch, and other nodes to add them to the canvas.',
   'tour.addPrompt':
-    'Click the "Prompt" button to add your first node.\n\nA Prompt node is a template that supports variables and is the basic building block of workflows.',
+    'This "Prompt" button lets you add Prompt nodes to the canvas.\n\nA Prompt node is a template that supports variables and is the basic building block of workflows.',
   'tour.canvas':
     'This is the canvas. Drag nodes to adjust their position and drag handles to connect nodes.\n\nStart and End nodes are already placed.',
   'tour.propertyPanel':
     'The Property Panel lets you configure the selected node.\n\nYou can edit node name, prompt, model selection, and more.',
   'tour.addAskUserQuestion':
-    'Now add an "AskUserQuestion" node.\n\nThis node lets you branch the workflow based on user selection.',
+    'The "AskUserQuestion" node lets you branch the workflow based on user selection.\n\nYou can add it to the canvas using this button.',
   'tour.connectNodes':
     'Connect nodes to create your workflow.\n\nDrag from the output handle (⚪) on the right of a node to the input handle on the left of another node.',
   'tour.workflowName':
-    'Name your workflow.\n\nYou can use letters, numbers, hyphens, and underscores.',
+    'This is where you name your workflow.\n\nYou can use letters, numbers, hyphens, and underscores.',
   'tour.saveWorkflow':
     'Click the "Save" button to save your workflow as JSON in the `.vscode/workflows/` directory.\n\nYou can load and continue editing later.',
   'tour.loadWorkflow':
@@ -204,7 +204,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.back': 'Back',
   'tour.button.close': 'Close',
   'tour.button.finish': 'Finish',
-  'tour.button.next': 'Next',
+  'tour.button.next': 'Next ({step}/{steps})',
   'tour.button.skip': 'Skip',
 
   // AI Generation Dialog

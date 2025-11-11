@@ -131,5 +131,6 @@ export const getTourLocale = (t: (key: string) => string) => ({
   close: t('tour.button.close'),
   last: t('tour.button.finish'),
   next: t('tour.button.next'),
+  nextLabelWithProgress: t('tour.button.next'), // Used when showProgress is enabled
   skip: t('tour.button.skip'),
 });

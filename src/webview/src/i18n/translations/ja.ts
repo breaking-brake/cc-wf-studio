@@ -174,21 +174,21 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Tour
   'tour.welcome':
-    'Claude Code Workflow Studioへようこそ！\n\nこのツアーでは、初めてのワークフロー作成を通じて、基本的な使い方をご案内します。',
+    'Claude Code Workflow Studioへようこそ！\n\nこのツアーでは、各機能の場所と役割をご紹介します。基本的な使い方を理解して、ワークフロー作成を始めましょう。',
   'tour.nodePalette':
     'ノードパレットには、ワークフローで使用できる様々なノードが用意されています。\n\nPrompt、Sub-Agent、AskUserQuestion、If/Else、Switchなどのノードをクリックしてキャンバスに追加できます。',
   'tour.addPrompt':
-    '「Prompt」ボタンをクリックして、最初のノードを追加してみましょう。\n\nPromptノードは変数を使用できるテンプレートで、ワークフローの基本的な構成要素です。',
+    'この「Prompt」ボタンから、Promptノードをキャンバスに追加できます。\n\nPromptノードは変数を使用できるテンプレートで、ワークフローの基本的な構成要素です。',
   'tour.canvas':
     'ここがキャンバスです。ノードをドラッグして配置を調整し、ハンドルをドラッグしてノード間を接続できます。\n\n既にStartノードとEndノードが配置されています。',
   'tour.propertyPanel':
     'プロパティパネルでは、選択したノードの詳細設定を行います。\n\nノード名、プロンプト、モデル選択などを編集できます。',
   'tour.addAskUserQuestion':
-    '次に「AskUserQuestion」ノードを追加してみましょう。\n\nこのノードを使うと、ユーザーの選択に応じてワークフローを分岐できます。',
+    '「AskUserQuestion」ノードは、ユーザーの選択に応じてワークフローを分岐させるために使用します。\n\nこのボタンからキャンバスに追加できます。',
   'tour.connectNodes':
     'ノードを接続してワークフローを作りましょう。\n\nノードの右側の出力ハンドル(⚪)を別のノードの左側の入力ハンドルにドラッグして接続します。',
   'tour.workflowName':
-    'ワークフローに名前を付けます。\n\n英数字、ハイフン、アンダースコアが使用できます。',
+    'ここでワークフローに名前を付けることができます。\n\n英数字、ハイフン、アンダースコアが使用できます。',
   'tour.saveWorkflow':
     '「保存」ボタンをクリックすると、ワークフローが`.vscode/workflows/`ディレクトリにJSON形式で保存されます。\n\n後で読み込んで編集を続けることができます。',
   'tour.loadWorkflow':
@@ -204,7 +204,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.back': '戻る',
   'tour.button.close': '閉じる',
   'tour.button.finish': '完了',
-  'tour.button.next': '次へ',
+  'tour.button.next': '次へ ({step}/{steps})',
   'tour.button.skip': 'スキップ',
 
   // AI Generation Dialog
