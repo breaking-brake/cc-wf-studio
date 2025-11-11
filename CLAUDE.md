@@ -12,6 +12,7 @@ Auto-generated from all feature plans. Last updated: 2025-11-01
 - File system (SKILL.md files in `~/.claude/skills/` and `.claude/skills/`), workflow JSON files in `.vscode/workflows/` (001-skill-node)
 - TypeScript 5.3 (Extension Host), React 18.2 (Webview UI) (001-ai-skill-generation)
 - File system (existing SKILL.md files in `~/.claude/skills/` and `.claude/skills/`, workflow-schema.json in resources/) (001-ai-skill-generation)
+- Workflow JSON files in `.vscode/workflows/` directory (conversation history embedded in workflow metadata) (001-ai-workflow-refinement)
 
 - TypeScript 5.x (VSCode Extension Host), React 18.x (Webview UI) (001-cc-wf-studio)
 
@@ -45,9 +46,9 @@ Both package.json files and the webview's package-lock.json must be committed to
 TypeScript 5.x (VSCode Extension Host), React 18.x (Webview UI): Follow standard conventions
 
 ## Recent Changes
+- 001-ai-workflow-refinement: Added TypeScript 5.3 (VSCode Extension Host), React 18.2 (Webview UI)
 - 001-ai-skill-generation: Added TypeScript 5.3 (Extension Host), React 18.2 (Webview UI)
 - 001-skill-node: Added TypeScript 5.3.0
-- 001-ai-workflow-generation: Added TypeScript 5.3 (Extension Host & Webview shared types), React 18.2 (Webview UI)
 
 
 <!-- MANUAL ADDITIONS START -->

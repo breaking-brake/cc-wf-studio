@@ -1,0 +1,400 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Workflow Refinement Message Protocol",
+  "description": "Message protocol for AI-assisted workflow refinement between Webview and Extension Host",
+  "version": "1.0.0",
+  "definitions": {
+    "RefineWorkflowMessage": {
+      "type": "object",
+      "description": "Request from Webview to Extension Host to refine a workflow",
+      "required": ["type", "requestId", "payload"],
+      "properties": {
+        "type": {
+          "const": "REFINE_WORKFLOW",
+          "description": "Message type identifier"
+        },
+        "requestId": {
+          "type": "string",
+          "description": "Unique request identifier (UUID v4)",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "payload": {
+          "type": "object",
+          "required": ["workflowId", "userMessage", "currentWorkflow", "conversationHistory"],
+          "properties": {
+            "workflowId": {
+              "type": "string",
+              "description": "ID of the workflow being refined"
+            },
+            "userMessage": {
+              "type": "string",
+              "description": "User's refinement request",
+              "minLength": 1,
+              "maxLength": 5000
+            },
+            "currentWorkflow": {
+              "type": "object",
+              "description": "Current workflow state (full Workflow object)"
+            },
+            "conversationHistory": {
+              "type": "object",
+              "description": "Existing conversation history",
+              "required": ["schemaVersion", "messages", "currentIteration", "maxIterations"],
+              "properties": {
+                "schemaVersion": {
+                  "const": "1.0.0"
+                },
+                "messages": {
+                  "type": "array",
+                  "description": "Array of conversation messages",
+                  "items": {
+                    "$ref": "#/definitions/ConversationMessage"
+                  }
+                },
+                "currentIteration": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 20
+                },
+                "maxIterations": {
+                  "const": 20
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            },
+            "timeoutMs": {
+              "type": "integer",
+              "description": "Optional timeout in milliseconds",
+              "default": 60000,
+              "minimum": 10000,
+              "maximum": 120000
+            }
+          }
+        }
+      },
+      "example": {
+        "type": "REFINE_WORKFLOW",
+        "requestId": "550e8400-e29b-41d4-a716-446655440000",
+        "payload": {
+          "workflowId": "workflow-123",
+          "userMessage": "もっとエラーハンドリングを追加してください",
+          "currentWorkflow": {
+            "id": "workflow-123",
+            "name": "my-workflow",
+            "nodes": [],
+            "connections": []
+          },
+          "conversationHistory": {
+            "schemaVersion": "1.0.0",
+            "messages": [],
+            "currentIteration": 0,
+            "maxIterations": 20,
+            "createdAt": "2025-11-12T10:00:00.000Z",
+            "updatedAt": "2025-11-12T10:00:00.000Z"
+          },
+          "timeoutMs": 60000
+        }
+      }
+    },
+    "RefinementSuccessMessage": {
+      "type": "object",
+      "description": "Success response from Extension Host to Webview",
+      "required": ["type", "requestId", "payload"],
+      "properties": {
+        "type": {
+          "const": "REFINEMENT_SUCCESS",
+          "description": "Message type identifier"
+        },
+        "requestId": {
+          "type": "string",
+          "description": "Request ID matching the original REFINE_WORKFLOW message"
+        },
+        "payload": {
+          "type": "object",
+          "required": ["refinedWorkflow", "aiMessage", "updatedConversationHistory", "executionTimeMs"],
+          "properties": {
+            "refinedWorkflow": {
+              "type": "object",
+              "description": "The refined workflow (full Workflow object)"
+            },
+            "aiMessage": {
+              "$ref": "#/definitions/ConversationMessage",
+              "description": "AI's response message"
+            },
+            "updatedConversationHistory": {
+              "type": "object",
+              "description": "Updated conversation history with new messages"
+            },
+            "changesSummary": {
+              "type": "string",
+              "description": "Brief summary of changes made (optional)",
+              "maxLength": 500
+            },
+            "executionTimeMs": {
+              "type": "integer",
+              "description": "Time taken to execute refinement (in milliseconds)",
+              "minimum": 0
+            },
+            "timestamp": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Response timestamp"
+            }
+          }
+        }
+      },
+      "example": {
+        "type": "REFINEMENT_SUCCESS",
+        "requestId": "550e8400-e29b-41d4-a716-446655440000",
+        "payload": {
+          "refinedWorkflow": {
+            "id": "workflow-123",
+            "name": "my-workflow",
+            "nodes": [],
+            "connections": []
+          },
+          "aiMessage": {
+            "id": "msg-456",
+            "sender": "ai",
+            "content": "エラーハンドリング用のIfElseノードを2つ追加しました。",
+            "timestamp": "2025-11-12T10:30:25.000Z"
+          },
+          "updatedConversationHistory": {
+            "schemaVersion": "1.0.0",
+            "messages": [
+              {
+                "id": "msg-123",
+                "sender": "user",
+                "content": "もっとエラーハンドリングを追加してください",
+                "timestamp": "2025-11-12T10:30:00.000Z"
+              },
+              {
+                "id": "msg-456",
+                "sender": "ai",
+                "content": "エラーハンドリング用のIfElseノードを2つ追加しました。",
+                "timestamp": "2025-11-12T10:30:25.000Z"
+              }
+            ],
+            "currentIteration": 1,
+            "maxIterations": 20,
+            "createdAt": "2025-11-12T10:00:00.000Z",
+            "updatedAt": "2025-11-12T10:30:25.000Z"
+          },
+          "changesSummary": "Added 2 IfElse nodes for error handling",
+          "executionTimeMs": 25340,
+          "timestamp": "2025-11-12T10:30:25.123Z"
+        }
+      }
+    },
+    "RefinementFailedMessage": {
+      "type": "object",
+      "description": "Error response from Extension Host to Webview",
+      "required": ["type", "requestId", "payload"],
+      "properties": {
+        "type": {
+          "const": "REFINEMENT_FAILED",
+          "description": "Message type identifier"
+        },
+        "requestId": {
+          "type": "string",
+          "description": "Request ID matching the original REFINE_WORKFLOW message"
+        },
+        "payload": {
+          "type": "object",
+          "required": ["error", "executionTimeMs", "timestamp"],
+          "properties": {
+            "error": {
+              "type": "object",
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "COMMAND_NOT_FOUND",
+                    "TIMEOUT",
+                    "PARSE_ERROR",
+                    "VALIDATION_ERROR",
+                    "ITERATION_LIMIT_REACHED",
+                    "UNKNOWN_ERROR"
+                  ],
+                  "description": "Error code for i18n lookup"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Human-readable error message"
+                },
+                "details": {
+                  "type": "string",
+                  "description": "Optional detailed error information"
+                }
+              }
+            },
+            "executionTimeMs": {
+              "type": "integer",
+              "description": "Time taken before error occurred",
+              "minimum": 0
+            },
+            "timestamp": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Error timestamp"
+            }
+          }
+        }
+      },
+      "example": {
+        "type": "REFINEMENT_FAILED",
+        "requestId": "550e8400-e29b-41d4-a716-446655440000",
+        "payload": {
+          "error": {
+            "code": "TIMEOUT",
+            "message": "AI refinement timed out after 60 seconds. Please try again.",
+            "details": "Claude Code CLI process timeout"
+          },
+          "executionTimeMs": 60123,
+          "timestamp": "2025-11-12T10:31:00.123Z"
+        }
+      }
+    },
+    "ClearConversationMessage": {
+      "type": "object",
+      "description": "Request from Webview to Extension Host to clear conversation history",
+      "required": ["type", "requestId", "payload"],
+      "properties": {
+        "type": {
+          "const": "CLEAR_CONVERSATION",
+          "description": "Message type identifier"
+        },
+        "requestId": {
+          "type": "string",
+          "description": "Unique request identifier"
+        },
+        "payload": {
+          "type": "object",
+          "required": ["workflowId"],
+          "properties": {
+            "workflowId": {
+              "type": "string",
+              "description": "ID of the workflow to clear conversation for"
+            }
+          }
+        }
+      },
+      "example": {
+        "type": "CLEAR_CONVERSATION",
+        "requestId": "550e8400-e29b-41d4-a716-446655440001",
+        "payload": {
+          "workflowId": "workflow-123"
+        }
+      }
+    },
+    "ConversationClearedMessage": {
+      "type": "object",
+      "description": "Response confirming conversation was cleared",
+      "required": ["type", "requestId", "payload"],
+      "properties": {
+        "type": {
+          "const": "CONVERSATION_CLEARED",
+          "description": "Message type identifier"
+        },
+        "requestId": {
+          "type": "string",
+          "description": "Request ID matching CLEAR_CONVERSATION"
+        },
+        "payload": {
+          "type": "object",
+          "required": ["workflowId"],
+          "properties": {
+            "workflowId": {
+              "type": "string",
+              "description": "ID of the workflow that was cleared"
+            }
+          }
+        }
+      },
+      "example": {
+        "type": "CONVERSATION_CLEARED",
+        "requestId": "550e8400-e29b-41d4-a716-446655440001",
+        "payload": {
+          "workflowId": "workflow-123"
+        }
+      }
+    },
+    "ConversationMessage": {
+      "type": "object",
+      "description": "Individual conversation message",
+      "required": ["id", "sender", "content", "timestamp"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Message ID (UUID v4)",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "sender": {
+          "type": "string",
+          "enum": ["user", "ai"],
+          "description": "Message sender type"
+        },
+        "content": {
+          "type": "string",
+          "description": "Message content",
+          "minLength": 1,
+          "maxLength": 5000
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Message timestamp (ISO 8601)"
+        },
+        "workflowSnapshotId": {
+          "type": "string",
+          "description": "Optional reference to workflow snapshot"
+        }
+      }
+    }
+  },
+  "messages": {
+    "webviewToExtension": [
+      "REFINE_WORKFLOW",
+      "CLEAR_CONVERSATION"
+    ],
+    "extensionToWebview": [
+      "REFINEMENT_SUCCESS",
+      "REFINEMENT_FAILED",
+      "CONVERSATION_CLEARED"
+    ]
+  },
+  "errorCodes": {
+    "COMMAND_NOT_FOUND": {
+      "description": "Claude Code CLI command not found in system PATH",
+      "recovery": "Install Claude Code CLI or check PATH environment variable"
+    },
+    "TIMEOUT": {
+      "description": "AI refinement request timed out",
+      "recovery": "Try again with a simpler refinement request, or increase timeout"
+    },
+    "PARSE_ERROR": {
+      "description": "Failed to parse AI response as valid JSON workflow",
+      "recovery": "Report this issue - AI returned invalid format"
+    },
+    "VALIDATION_ERROR": {
+      "description": "Refined workflow failed validation (invalid nodes, connections, etc.)",
+      "recovery": "Try rephrasing the refinement request"
+    },
+    "ITERATION_LIMIT_REACHED": {
+      "description": "Maximum iteration limit (20) has been reached",
+      "recovery": "Clear conversation history to start fresh, or manually edit the workflow"
+    },
+    "UNKNOWN_ERROR": {
+      "description": "An unexpected error occurred",
+      "recovery": "Check Extension Host logs for details"
+    }
+  }
+}
