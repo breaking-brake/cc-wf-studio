@@ -30,6 +30,8 @@ export default defineConfig({
     // Target modern browsers (VSCode uses Electron)
     target: 'esnext',
     minify: 'esbuild',
+    // Increase chunk size warning limit to 1000 kB (VSCode extension context)
+    chunkSizeWarningLimit: 1000,
   },
   // Resolve configuration
   resolve: {
