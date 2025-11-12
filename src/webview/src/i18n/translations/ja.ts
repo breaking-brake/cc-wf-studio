@@ -337,7 +337,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.clearDialog.cancel': 'キャンセル',
 
   // Initial instructional message (Phase 3.12)
-  'refinement.initialMessage.description': '作成したいワークフローを自然言語で説明してください。',
+  'refinement.initialMessage.description': '実現したいワークフローを自然言語で説明してください。',
   'refinement.initialMessage.note':
     '※ この機能はお使いの環境にインストールされたClaude Codeを使用します。',
 };

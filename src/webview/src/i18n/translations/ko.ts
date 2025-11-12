@@ -336,6 +336,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.clearDialog.cancel': '취소',
 
   // Initial instructional message (Phase 3.12)
-  'refinement.initialMessage.description': '생성하려는 워크플로를 자연어로 설명해주세요.',
+  'refinement.initialMessage.description': '실현하려는 워크플로를 자연어로 설명해주세요.',
   'refinement.initialMessage.note': '※ 이 기능은 환경에 설치된 Claude Code를 사용합니다.',
 };

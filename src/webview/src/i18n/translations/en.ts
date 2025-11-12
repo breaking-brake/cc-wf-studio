@@ -339,7 +339,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Initial instructional message (Phase 3.12)
   'refinement.initialMessage.description':
-    'Describe the workflow you want to create in natural language.',
+    'Describe the workflow you want to achieve in natural language.',
   'refinement.initialMessage.note':
     '※ This feature uses Claude Code installed in your environment.',
 };
