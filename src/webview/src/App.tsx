@@ -8,6 +8,7 @@
 import type { ErrorPayload, InitialStatePayload } from '@shared/types/messages';
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { ProcessingOverlay } from './components/common/ProcessingOverlay';
 import { ConfirmDialog } from './components/dialogs/ConfirmDialog';
 import { RefinementChatPanel } from './components/dialogs/RefinementChatPanel';
 import { ErrorNotification } from './components/ErrorNotification';
@@ -23,7 +24,7 @@ import { useWorkflowStore } from './stores/workflow-store';
 const App: React.FC = () => {
   const { t } = useTranslation();
   const { pendingDeleteNodeIds, confirmDeleteNodes, cancelDeleteNodes } = useWorkflowStore();
-  const { isOpen: isRefinementPanelOpen } = useRefinementStore();
+  const { isOpen: isRefinementPanelOpen, isProcessing } = useRefinementStore();
   const [error, setError] = useState<ErrorPayload | null>(null);
   const [runTour, setRunTour] = useState(false);
   const [tourKey, setTourKey] = useState(0); // Used to force Tour component remount
@@ -89,12 +90,18 @@ const App: React.FC = () => {
           overflow: 'hidden',
         }}
       >
-        {/* Left Panel: Node Palette */}
-        <NodePalette />
+        {/* Left 2 columns with overlay (Phase 3.10) */}
+        <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
+          {/* Left Panel: Node Palette */}
+          <NodePalette />
 
-        {/* Center: Workflow Editor */}
-        <div style={{ flex: 1, position: 'relative' }}>
-          <WorkflowEditor />
+          {/* Center: Workflow Editor */}
+          <div style={{ flex: 1, position: 'relative' }}>
+            <WorkflowEditor />
+          </div>
+
+          {/* Processing Overlay for left 2 columns (Phase 3.10) */}
+          <ProcessingOverlay isVisible={isProcessing} message={t('refinement.processingOverlay')} />
         </div>
 
         {/* Right Panel: Property Panel or Refinement Chat Panel */}

@@ -319,6 +319,9 @@ export interface WebviewTranslationKeys {
   // Refinement Error Display (Phase 3.8)
   'refinement.error.retryButton': string;
 
+  // Processing Overlay (Phase 3.10)
+  'refinement.processingOverlay': string;
+
   // Clear Conversation Confirmation
   'refinement.clearDialog.title': string;
   'refinement.clearDialog.message': string;

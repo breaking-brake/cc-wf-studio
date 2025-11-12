@@ -355,6 +355,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Refinement Error Display (Phase 3.8)
   'refinement.error.retryButton': 'Retry',
 
+  // Processing Overlay (Phase 3.10)
+  'refinement.processingOverlay': 'AI is processing your request...',
+
   // Clear Conversation Confirmation
   'refinement.clearDialog.title': 'Clear Conversation',
   'refinement.clearDialog.message':

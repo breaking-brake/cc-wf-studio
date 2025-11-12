@@ -354,6 +354,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Refinement Error Display (Phase 3.8)
   'refinement.error.retryButton': '다시 시도',
 
+  // Processing Overlay (Phase 3.10)
+  'refinement.processingOverlay': 'AI가 처리 중입니다...',
+
   // Clear Conversation Confirmation
   'refinement.clearDialog.title': '대화 지우기',
   'refinement.clearDialog.message': '대화 기록을 지우시겠습니까? 이 작업은 취소할 수 없습니다.',

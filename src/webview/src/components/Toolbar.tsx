@@ -17,6 +17,7 @@ import {
 } from '../services/workflow-service';
 import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
+import { ProcessingOverlay } from './common/ProcessingOverlay';
 import { AiGenerationDialog } from './dialogs/AiGenerationDialog';
 
 interface ToolbarProps {
@@ -34,7 +35,8 @@ interface WorkflowListItem {
 export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
   const { t } = useTranslation();
   const { nodes, edges, setNodes, setEdges, activeWorkflow } = useWorkflowStore();
-  const { openChat, initConversation, loadConversationHistory } = useRefinementStore();
+  const { openChat, initConversation, loadConversationHistory, isProcessing } =
+    useRefinementStore();
   const [workflowName, setWorkflowName] = useState('my-workflow');
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -216,6 +218,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
   return (
     <div
       style={{
+        position: 'relative',
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
@@ -410,6 +413,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
 
       {/* AI Generation Dialog */}
       <AiGenerationDialog isOpen={showAiDialog} onClose={() => setShowAiDialog(false)} />
+
+      {/* Processing Overlay (Phase 3.10) */}
+      <ProcessingOverlay isVisible={isProcessing} />
     </div>
   );
 };

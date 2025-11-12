@@ -337,6 +337,9 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   // Refinement Error Display (Phase 3.8)
   'refinement.error.retryButton': '重試',
 
+  // Processing Overlay (Phase 3.10)
+  'refinement.processingOverlay': 'AI正在處理您的請求...',
+
   // Clear Conversation Confirmation
   'refinement.clearDialog.title': '清除對話',
   'refinement.clearDialog.message': '確定要清除對話歷史記錄嗎？此操作無法復原。',

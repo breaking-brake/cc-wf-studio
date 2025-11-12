@@ -777,3 +777,30 @@ Phase 3.5でSkillノードの出力ポート制約をAIに伝えたが、新た�
 - [x] T096 [P3.9] ビルド検証と動作確認: `npm run build` でコンパイル成功を確認。リトライ時に新しいメッセージが作成されず、既存メッセージが再利用されることを確認
 
 **Checkpoint**: ✅ Phase 3.9 完了。この修正により、エラー発生時にローディング中のメッセージが残らず、エラーメッセージのみが表示されるようになる。また、リトライ時は既存のエラーメッセージがローディング状態に変換され、新しいメッセージが作成されなくなる
+
+---
+
+### Phase 3.10: AI処理中のUI非活性化 (オーバーレイ方式)
+
+**目的**: AI修正処理中にノードパレット、キャンバスエリアなどのUI要素への操作を防ぐため、半透明オーバーレイを表示してユーザーインタラクションをブロックする
+
+**実装方針**:
+- `refinement-store.ts`の`isProcessing`フラグを活用
+- キャンバス全体を覆う半透明オーバーレイコンポーネントを作成
+- オーバーレイは`isProcessing === true`の時のみ表示
+- z-indexを適切に設定し、全てのUI要素より前面に配置
+- オーバーレイ上にオプションで「AI処理中...」メッセージを表示可能
+
+**影響範囲**:
+- Webview UI (新規オーバーレイコンポーネント追加)
+- 既存の`refinement-store.ts`の`isProcessing`状態を参照
+
+#### Tasks
+
+- [x] **[P3.10] T097**: オーバーレイコンポーネントの作成 - src/webview/src/components/common/ProcessingOverlay.tsx を新規作成。Props: `isVisible: boolean`, `message?: string`。半透明オーバーレイ (rgba(0, 0, 0, 0.3)) + 中央メッセージ表示エリア
+- [x] **[P3.10] T098**: App.tsxへのオーバーレイ統合 (修正版) - src/webview/src/App.tsx の左2カラム (NodePalette + WorkflowEditor) を囲むdivを追加し、position: relative設定。ProcessingOverlayを配置。RefinementChatPanelは除外し、AI処理中も操作可能に (lines 93-105)
+- [x] **[P3.10] T099**: 国際化対応 - src/webview/src/i18n/translations/{en,ja,ko,zh-CN,zh-TW}.ts に `refinement.processingOverlay` キーを追加。src/webview/src/i18n/translation-keys.ts の型定義も更新 (line 323)
+- [x] **[P3.10] T100**: Toolbarへのオーバーレイ追加 - src/webview/src/components/Toolbar.tsx にProcessingOverlayをインポート。`isProcessing`を取得し、Toolbarのルート要素に position: relative を追加してオーバーレイを配置 (lines 10, 38, 220, 417)
+- [x] **[P3.10] T101**: 動作確認とビルドテスト - `npm run build` 成功。ユーザー確認により、AI処理中にToolbar + 左2カラムが非活性化され、RefinementChatPanelのキャンセルボタンは操作可能なことを確認
+
+**Checkpoint**: ✅ Phase 3.10 完了。AI処理中にToolbarと左2カラム（NodePalette + WorkflowEditor）が半透明オーバーレイで覆われ、ユーザーが誤操作できなくなる。RefinementChatPanelは除外され、キャンセルボタンなどの操作が可能
