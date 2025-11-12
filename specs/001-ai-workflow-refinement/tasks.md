@@ -333,3 +333,26 @@ Task: "IterationCounter コンポーネントの作成 in src/webview/src/compon
 - 各タスクまたは論理的グループ後にコミット
 - 任意のチェックポイントで停止し、ストーリーを独立して検証
 - 避けるべき: 曖昧なタスク、同じファイルの競合、独立性を壊すストーリー間の依存関係
+
+---
+
+## Phase 3.1: AIで修正UIのサイドバー化 (UI/UX改善)
+
+**目的**: RefinementChatPanelをモーダルダイアログからサイドバー形式に変更し、PropertyPanelと同じ位置に表示させることで、より自然なワークフロー編集体験を提供する
+
+**背景**: 現在の実装ではチャットパネルがモーダルダイアログとして画面中央に表示されるため、キャンバスが隠れてワークフローの確認が困難。サイドバー形式にすることで、ワークフローを見ながらAIとの会話が可能になる。
+
+**設計方針**:
+- PropertyPanelと同じ幅(300px)、背景色、ボーダースタイルを使用
+- `useRefinementStore.isOpen` 状態に基づいて表示切り替え
+- `isOpen === true`: RefinementChatPanel を表示
+- `isOpen === false`: PropertyPanel を表示
+- 同じ位置に表示されるため、レイアウトシフトなし
+
+### Implementation for Phase 3.1
+
+- [x] T042 [P3.1] RefinementChatPanel のサイドバー化: src/webview/src/components/dialogs/RefinementChatPanel.tsx のモーダルスタイルを削除し、PropertyPanelと同じサイドバースタイル(width: 300px, borderLeft, overflowY: auto)を適用。オーバーレイ、中央配置、ボックスシャドウを削除
+- [x] T043 [P3.1] App.tsx のレイアウト更新: src/webview/src/App.tsx の右パネルエリアで条件分岐を実装し、`useRefinementStore().isOpen` に基づいて `<RefinementChatPanel />` または `<PropertyPanel />` を表示。現在のモーダル形式の呼び出しを削除
+- [x] T044 [P3.1] UI動作確認: 「AIで修正」ボタンクリック時の切り替え動作、閉じるボタンでPropertyPanelへの復帰、スタイル整合性(幅、背景色、ボーダー)、スクロール動作を確認
+
+**Checkpoint**: この時点で、AIで修正機能がサイドバーとして自然に統合され、ワークフローを見ながらAI会話が可能になる

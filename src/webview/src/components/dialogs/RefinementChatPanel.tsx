@@ -1,11 +1,11 @@
 /**
  * Refinement Chat Panel Component
  *
- * Modal panel for AI-assisted workflow refinement chat interface.
+ * Sidebar panel for AI-assisted workflow refinement chat interface.
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.2
+ * Updated: Phase 3.1 - Changed from modal dialog to sidebar format
  */
 
-import type React from 'react';
 import { useEffect } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { refineWorkflow } from '../../services/refinement-service';
@@ -72,95 +72,71 @@ export function RefinementChatPanel() {
     closeChat();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      handleClose();
-    }
-  };
-
   return (
     <div
+      className="refinement-chat-panel"
       style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        width: '300px',
+        height: '100%',
+        backgroundColor: 'var(--vscode-sideBar-background)',
+        borderLeft: '1px solid var(--vscode-panel-border)',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
+        flexDirection: 'column',
+        overflow: 'hidden',
       }}
-      onClick={handleClose}
-      onKeyDown={handleKeyDown}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="refinement-title"
     >
+      {/* Header */}
       <div
         style={{
-          width: '80%',
-          maxWidth: '800px',
-          height: '80%',
-          backgroundColor: 'var(--vscode-editor-background)',
-          borderRadius: '8px',
-          border: '1px solid var(--vscode-panel-border)',
+          padding: '16px',
+          borderBottom: '1px solid var(--vscode-panel-border)',
           display: 'flex',
-          flexDirection: 'column',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexShrink: 0,
         }}
-        onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div
+        <h2
+          id="refinement-title"
           style={{
-            padding: '16px',
-            borderBottom: '1px solid var(--vscode-panel-border)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            margin: 0,
+            fontSize: '13px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
           }}
         >
-          <h2
-            id="refinement-title"
+          {t('refinement.title')}
+        </h2>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <IterationCounter />
+
+          <button
+            type="button"
+            onClick={handleClose}
             style={{
-              margin: 0,
+              padding: '4px 8px',
+              backgroundColor: 'transparent',
+              color: 'var(--vscode-foreground)',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
               fontSize: '16px',
-              fontWeight: 'bold',
             }}
+            aria-label="Close"
           >
-            {t('refinement.title')}
-          </h2>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <IterationCounter />
-
-            <button
-              type="button"
-              onClick={handleClose}
-              style={{
-                padding: '4px 8px',
-                backgroundColor: 'transparent',
-                color: 'var(--vscode-foreground)',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '16px',
-              }}
-              aria-label="Close"
-            >
-              ✕
-            </button>
-          </div>
+            ✕
+          </button>
         </div>
-
-        {/* Message List */}
-        <MessageList />
-
-        {/* Input */}
-        <MessageInput onSend={handleSend} />
       </div>
+
+      {/* Message List */}
+      <MessageList />
+
+      {/* Input */}
+      <MessageInput onSend={handleSend} />
     </div>
   );
 }

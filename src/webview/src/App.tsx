@@ -17,11 +17,13 @@ import { Toolbar } from './components/Toolbar';
 import { Tour } from './components/Tour';
 import { WorkflowEditor } from './components/WorkflowEditor';
 import { useTranslation } from './i18n/i18n-context';
+import { useRefinementStore } from './stores/refinement-store';
 import { useWorkflowStore } from './stores/workflow-store';
 
 const App: React.FC = () => {
   const { t } = useTranslation();
   const { pendingDeleteNodeIds, confirmDeleteNodes, cancelDeleteNodes } = useWorkflowStore();
+  const { isOpen: isRefinementPanelOpen } = useRefinementStore();
   const [error, setError] = useState<ErrorPayload | null>(null);
   const [runTour, setRunTour] = useState(false);
   const [tourKey, setTourKey] = useState(0); // Used to force Tour component remount
@@ -95,8 +97,8 @@ const App: React.FC = () => {
           <WorkflowEditor />
         </div>
 
-        {/* Right Panel: Property Panel */}
-        <PropertyPanel />
+        {/* Right Panel: Property Panel or Refinement Chat Panel */}
+        {isRefinementPanelOpen ? <RefinementChatPanel /> : <PropertyPanel />}
       </div>
 
       {/* Error Notification Overlay */}
@@ -115,9 +117,6 @@ const App: React.FC = () => {
         onConfirm={confirmDeleteNodes}
         onCancel={cancelDeleteNodes}
       />
-
-      {/* AI Refinement Chat Panel */}
-      <RefinementChatPanel />
     </div>
   );
 };
