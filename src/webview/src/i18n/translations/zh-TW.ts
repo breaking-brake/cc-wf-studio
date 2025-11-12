@@ -12,6 +12,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.export': '匯出',
   'toolbar.exporting': '匯出中...',
   'toolbar.generateWithAI': 'AI生成',
+  'toolbar.refineWithAI': 'AI優化',
   'toolbar.selectWorkflow': '選擇工作流...',
   'toolbar.load': '載入',
   'toolbar.refreshList': '重新整理工作流清單',
@@ -22,6 +23,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.selectWorkflowToLoad': '請選擇要載入的工作流',
   'toolbar.error.validationFailed': '工作流驗證失敗',
   'toolbar.error.missingEndNode': '工作流必須至少包含一個End節點',
+  'toolbar.error.noActiveWorkflow': '請先載入工作流',
 
   // Node Palette
   'palette.title': '節點面板',
@@ -285,7 +287,17 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'refinement.toolbar.refineButton': '使用AI優化',
   'refinement.toolbar.refineButton.tooltip': '與AI聊天以優化此工作流程',
 
-  // Refinement Chat Panel
+  // Refinement Chat Panel (Short form keys for components)
+  'refinement.title': 'AI優化',
+  'refinement.inputPlaceholder': '描述您想要的變更...',
+  'refinement.sendButton': '傳送',
+  'refinement.processing': '處理中...',
+  'refinement.charactersRemaining': '剩餘 {count} 字元',
+  'refinement.iterationCounter': '{current}/{max}',
+  'refinement.approachingLimit': '接近迭代限制',
+  'refinement.limitReached': '已達迭代限制',
+
+  // Refinement Chat Panel (Detailed keys)
   'refinement.chat.title': '工作流程優化聊天',
   'refinement.chat.description':
     '與AI聊天以逐步改進您的工作流程。描述您想要的更改，AI將自動更新工作流程。',

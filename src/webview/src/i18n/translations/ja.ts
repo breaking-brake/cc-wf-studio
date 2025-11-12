@@ -12,6 +12,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.export': 'エクスポート',
   'toolbar.exporting': 'エクスポート中...',
   'toolbar.generateWithAI': 'AIで生成',
+  'toolbar.refineWithAI': 'AIで修正',
   'toolbar.selectWorkflow': 'ワークフローを選択...',
   'toolbar.load': '読み込み',
   'toolbar.refreshList': 'ワークフローリストを更新',
@@ -22,6 +23,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.selectWorkflowToLoad': '読み込むワークフローを選択してください',
   'toolbar.error.validationFailed': 'ワークフローの検証に失敗しました',
   'toolbar.error.missingEndNode': 'ワークフローには最低1つのEndノードが必要です',
+  'toolbar.error.noActiveWorkflow': 'ワークフローを読み込んでください',
 
   // Node Palette
   'palette.title': 'ノードパレット',
@@ -297,7 +299,17 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.toolbar.refineButton': 'AIで修正',
   'refinement.toolbar.refineButton.tooltip': 'AIとチャットしてワークフローを改善します',
 
-  // Refinement Chat Panel
+  // Refinement Chat Panel (Short form keys for components)
+  'refinement.title': 'AIで修正',
+  'refinement.inputPlaceholder': 'ワークフローの改善内容を入力してください...',
+  'refinement.sendButton': '送信',
+  'refinement.processing': '処理中...',
+  'refinement.charactersRemaining': '残り {count} 文字',
+  'refinement.iterationCounter': '{current}/{max}',
+  'refinement.approachingLimit': '反復回数の上限に近づいています',
+  'refinement.limitReached': '反復回数の上限に達しました',
+
+  // Refinement Chat Panel (Detailed keys)
   'refinement.chat.title': 'ワークフロー改善チャット',
   'refinement.chat.description':
     'AIとチャットして、ワークフローを段階的に改善できます。希望する変更内容を入力すると、AIが自動的にワークフローを更新します。',

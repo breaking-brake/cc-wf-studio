@@ -95,15 +95,15 @@
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] MessageBubble コンポーネントの作成: src/webview/src/components/chat/MessageBubble.tsx を作成し、ユーザー/AIメッセージの表示を実装
-- [ ] T011 [P] [US1] MessageList コンポーネントの作成: src/webview/src/components/chat/MessageList.tsx を作成し、会話履歴の表示と自動スクロールを実装
-- [ ] T012 [P] [US1] MessageInput コンポーネントの作成: src/webview/src/components/chat/MessageInput.tsx を作成し、テキスト入力・送信ボタン・文字数カウンターを実装
-- [ ] T013 [P] [US1] IterationCounter コンポーネントの作成: src/webview/src/components/chat/IterationCounter.tsx を作成し、X/20の反復回数表示を実装
-- [ ] T014 [US1] RefinementChatPanel コンポーネントの作成: src/webview/src/components/dialogs/RefinementChatPanel.tsx を作成し、チャットパネルのレイアウトと子コンポーネントの統合を実装（T010-T013に依存）
-- [ ] T015 [US1] Toolbar の拡張: src/webview/src/components/Toolbar.tsx に「AIで修正」ボタンを追加し、クリック時にチャットパネルを開く機能を実装
-- [ ] T016 [US1] App コンポーネントの統合: src/webview/src/App.tsx に RefinementChatPanel を追加し、表示制御を実装
-- [ ] T017 [US1] メッセージフロー統合: Webview → Extension Host → AI → Webview の双方向メッセージング実装と、ワークフロー自動更新の統合
-- [ ] T018 [US1] エラーハンドリングの追加: タイムアウト、ネットワークエラー、バリデーションエラーのエラーメッセージ表示を実装
+- [x] T010 [P] [US1] MessageBubble コンポーネントの作成: src/webview/src/components/chat/MessageBubble.tsx を作成し、ユーザー/AIメッセージの表示を実装
+- [x] T011 [P] [US1] MessageList コンポーネントの作成: src/webview/src/components/chat/MessageList.tsx を作成し、会話履歴の表示と自動スクロールを実装
+- [x] T012 [P] [US1] MessageInput コンポーネントの作成: src/webview/src/components/chat/MessageInput.tsx を作成し、テキスト入力・送信ボタン・文字数カウンターを実装
+- [x] T013 [P] [US1] IterationCounter コンポーネントの作成: src/webview/src/components/chat/IterationCounter.tsx を作成し、X/20の反復回数表示を実装
+- [x] T014 [US1] RefinementChatPanel コンポーネントの作成: src/webview/src/components/dialogs/RefinementChatPanel.tsx を作成し、チャットパネルのレイアウトと子コンポーネントの統合を実装（T010-T013に依存）
+- [x] T015 [US1] Toolbar の拡張: src/webview/src/components/Toolbar.tsx に「AIで修正」ボタンを追加し、クリック時にチャットパネルを開く機能を実装
+- [x] T016 [US1] App コンポーネントの統合: src/webview/src/App.tsx に RefinementChatPanel を追加し、表示制御を実装
+- [x] T017 [US1] メッセージフロー統合: Webview → Extension Host → AI → Webview の双方向メッセージング実装と、ワークフロー自動更新の統合
+- [x] T018 [US1] エラーハンドリングの追加: タイムアウト、ネットワークエラー、バリデーションエラーのエラーメッセージ表示を実装
 
 **Checkpoint**: この時点で、User Story 1 は完全に機能し、独立してテスト可能
 

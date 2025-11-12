@@ -12,6 +12,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.export': '내보내기',
   'toolbar.exporting': '내보내는 중...',
   'toolbar.generateWithAI': 'AI로 생성',
+  'toolbar.refineWithAI': 'AI로 수정',
   'toolbar.selectWorkflow': '워크플로 선택...',
   'toolbar.load': '불러오기',
   'toolbar.refreshList': '워크플로 목록 새로고침',
@@ -22,6 +23,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.selectWorkflowToLoad': '불러올 워크플로를 선택하세요',
   'toolbar.error.validationFailed': '워크플로 검증에 실패했습니다',
   'toolbar.error.missingEndNode': '워크플로에는 최소 1개의 End 노드가 필요합니다',
+  'toolbar.error.noActiveWorkflow': '먼저 워크플로를 불러오세요',
 
   // Node Palette
   'palette.title': '노드 팔레트',
@@ -298,7 +300,17 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.toolbar.refineButton': 'AI로 개선',
   'refinement.toolbar.refineButton.tooltip': 'AI와 채팅하여 워크플로를 개선합니다',
 
-  // Refinement Chat Panel
+  // Refinement Chat Panel (Short form keys for components)
+  'refinement.title': 'AI로 수정',
+  'refinement.inputPlaceholder': '변경하고 싶은 내용을 입력하세요...',
+  'refinement.sendButton': '전송',
+  'refinement.processing': '처리 중...',
+  'refinement.charactersRemaining': '남은 문자 수: {count}',
+  'refinement.iterationCounter': '{current}/{max}',
+  'refinement.approachingLimit': '반복 한도에 근접',
+  'refinement.limitReached': '반복 한도 도달',
+
+  // Refinement Chat Panel (Detailed keys)
   'refinement.chat.title': '워크플로 개선 채팅',
   'refinement.chat.description':
     'AI와 채팅하여 워크플로를 점진적으로 개선할 수 있습니다. 원하는 변경 사항을 설명하면 AI가 자동으로 워크플로를 업데이트합니다.',

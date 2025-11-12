@@ -9,6 +9,7 @@ import type { ErrorPayload, InitialStatePayload } from '@shared/types/messages';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { ConfirmDialog } from './components/dialogs/ConfirmDialog';
+import { RefinementChatPanel } from './components/dialogs/RefinementChatPanel';
 import { ErrorNotification } from './components/ErrorNotification';
 import { NodePalette } from './components/NodePalette';
 import { PropertyPanel } from './components/PropertyPanel';
@@ -114,6 +115,9 @@ const App: React.FC = () => {
         onConfirm={confirmDeleteNodes}
         onCancel={cancelDeleteNodes}
       />
+
+      {/* AI Refinement Chat Panel */}
+      <RefinementChatPanel />
     </div>
   );
 };

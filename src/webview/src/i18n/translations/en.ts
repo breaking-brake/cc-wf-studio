@@ -12,6 +12,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.export': 'Export',
   'toolbar.exporting': 'Exporting...',
   'toolbar.generateWithAI': 'Generate with AI',
+  'toolbar.refineWithAI': 'Refine with AI',
   'toolbar.selectWorkflow': 'Select workflow...',
   'toolbar.load': 'Load',
   'toolbar.refreshList': 'Refresh workflow list',
@@ -22,6 +23,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.selectWorkflowToLoad': 'Please select a workflow to load',
   'toolbar.error.validationFailed': 'Workflow validation failed',
   'toolbar.error.missingEndNode': 'Workflow must have at least one End node',
+  'toolbar.error.noActiveWorkflow': 'Please load a workflow first',
 
   // Node Palette
   'palette.title': 'Node Palette',
@@ -298,7 +300,17 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'refinement.toolbar.refineButton': 'Refine with AI',
   'refinement.toolbar.refineButton.tooltip': 'Open chat to refine this workflow with AI assistance',
 
-  // Refinement Chat Panel
+  // Refinement Chat Panel (Short form keys for components)
+  'refinement.title': 'Refine with AI',
+  'refinement.inputPlaceholder': 'Describe the changes you want to make...',
+  'refinement.sendButton': 'Send',
+  'refinement.processing': 'Processing...',
+  'refinement.charactersRemaining': '{count} characters remaining',
+  'refinement.iterationCounter': '{current}/{max}',
+  'refinement.approachingLimit': 'Approaching iteration limit',
+  'refinement.limitReached': 'Iteration limit reached',
+
+  // Refinement Chat Panel (Detailed keys)
   'refinement.chat.title': 'Workflow Refinement Chat',
   'refinement.chat.description':
     'Chat with AI to iteratively improve your workflow. Describe what changes you want, and the AI will update the workflow automatically.',

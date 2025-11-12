@@ -15,6 +15,7 @@ import {
   serializeWorkflow,
   validateWorkflow,
 } from '../services/workflow-service';
+import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { AiGenerationDialog } from './dialogs/AiGenerationDialog';
 
@@ -32,7 +33,8 @@ interface WorkflowListItem {
 
 export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
   const { t } = useTranslation();
-  const { nodes, edges, setNodes, setEdges } = useWorkflowStore();
+  const { nodes, edges, setNodes, setEdges, activeWorkflow } = useWorkflowStore();
+  const { openChat, initConversation, loadConversationHistory } = useRefinementStore();
   const [workflowName, setWorkflowName] = useState('my-workflow');
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -192,6 +194,25 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
     }
   };
 
+  const handleOpenRefinementChat = () => {
+    if (!activeWorkflow) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.noActiveWorkflow'),
+      });
+      return;
+    }
+
+    // Load conversation history if exists, otherwise initialize
+    if (activeWorkflow.conversationHistory) {
+      loadConversationHistory(activeWorkflow.conversationHistory);
+    } else {
+      initConversation();
+    }
+
+    openChat();
+  };
+
   return (
     <div
       style={{
@@ -281,6 +302,27 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
         }}
       >
         {t('toolbar.generateWithAI')}
+      </button>
+
+      {/* Refine with AI Button */}
+      <button
+        type="button"
+        onClick={handleOpenRefinementChat}
+        disabled={!activeWorkflow}
+        data-tour="ai-refine-button"
+        style={{
+          padding: '4px 12px',
+          backgroundColor: 'var(--vscode-button-background)',
+          color: 'var(--vscode-button-foreground)',
+          border: 'none',
+          borderRadius: '2px',
+          cursor: !activeWorkflow ? 'not-allowed' : 'pointer',
+          fontSize: '13px',
+          opacity: !activeWorkflow ? 0.6 : 1,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {t('toolbar.refineWithAI')}
       </button>
 
       {/* Divider */}

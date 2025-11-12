@@ -10,6 +10,7 @@ export interface WebviewTranslationKeys {
   'toolbar.export': string;
   'toolbar.exporting': string;
   'toolbar.generateWithAI': string;
+  'toolbar.refineWithAI': string;
   'toolbar.selectWorkflow': string;
   'toolbar.load': string;
   'toolbar.refreshList': string;
@@ -20,6 +21,7 @@ export interface WebviewTranslationKeys {
   'toolbar.error.selectWorkflowToLoad': string;
   'toolbar.error.validationFailed': string;
   'toolbar.error.missingEndNode': string;
+  'toolbar.error.noActiveWorkflow': string;
 
   // Node Palette
   'palette.title': string;
@@ -272,6 +274,14 @@ export interface WebviewTranslationKeys {
   'refinement.toolbar.refineButton.tooltip': string;
 
   // Refinement Chat Panel
+  'refinement.title': string;
+  'refinement.inputPlaceholder': string;
+  'refinement.sendButton': string;
+  'refinement.processing': string;
+  'refinement.charactersRemaining': string;
+  'refinement.iterationCounter': string;
+  'refinement.approachingLimit': string;
+  'refinement.limitReached': string;
   'refinement.chat.title': string;
   'refinement.chat.description': string;
   'refinement.chat.inputPlaceholder': string;

@@ -20,6 +20,7 @@ interface WorkflowStore {
   edges: Edge[];
   selectedNodeId: string | null;
   pendingDeleteNodeIds: string[];
+  activeWorkflow: Workflow | null;
 
   // React Flow Change Handlers
   onNodesChange: OnNodesChange;
@@ -40,6 +41,7 @@ interface WorkflowStore {
   cancelDeleteNodes: () => void;
   clearWorkflow: () => void;
   addGeneratedWorkflow: (workflow: Workflow) => void;
+  updateWorkflow: (workflow: Workflow) => void;
 }
 
 // ============================================================================
@@ -74,6 +76,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   edges: [],
   selectedNodeId: null,
   pendingDeleteNodeIds: [],
+  activeWorkflow: null,
 
   // React Flow Change Handlers (integrates with React Flow's onChange events)
   onNodesChange: (changes) => {
@@ -233,6 +236,36 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       nodes: newNodes,
       edges: newEdges,
       selectedNodeId: firstSelectableNode?.id || null,
+      activeWorkflow: workflow,
+    });
+  },
+
+  updateWorkflow: (workflow: Workflow) => {
+    // Convert workflow nodes to ReactFlow nodes
+    const newNodes: Node[] = workflow.nodes.map((node) => ({
+      id: node.id,
+      type: node.type,
+      position: {
+        x: node.position.x,
+        y: node.position.y,
+      },
+      data: node.data,
+    }));
+
+    // Convert workflow connections to ReactFlow edges
+    const newEdges: Edge[] = workflow.connections.map((conn) => ({
+      id: conn.id,
+      source: conn.from,
+      target: conn.to,
+      sourceHandle: conn.fromPort,
+      targetHandle: conn.toPort,
+    }));
+
+    // Update workflow while preserving selection
+    set({
+      nodes: newNodes,
+      edges: newEdges,
+      activeWorkflow: workflow,
     });
   },
 }));
