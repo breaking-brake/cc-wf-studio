@@ -54,12 +54,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
 
     setIsSaving(true);
     try {
-      // Serialize workflow
+      // Phase 5 (T024): Serialize workflow with conversation history
       const workflow = serializeWorkflow(
         nodes,
         edges,
         workflowName,
-        'Created with Workflow Studio'
+        'Created with Workflow Studio',
+        activeWorkflow?.conversationHistory
       );
 
       // Validate workflow before saving
