@@ -345,4 +345,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'refinement.clearDialog.message': '确定要清除对话历史记录吗？此操作无法撤消。',
   'refinement.clearDialog.confirm': '清除',
   'refinement.clearDialog.cancel': '取消',
+
+  // Initial instructional message (Phase 3.12)
+  'refinement.initialMessage.description': '用自然语言描述您要创建的工作流。',
+  'refinement.initialMessage.note': '※ 此功能使用您环境中安装的Claude Code。',
 };

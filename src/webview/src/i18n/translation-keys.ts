@@ -327,4 +327,8 @@ export interface WebviewTranslationKeys {
   'refinement.clearDialog.message': string;
   'refinement.clearDialog.confirm': string;
   'refinement.clearDialog.cancel': string;
+
+  // Initial instructional message (Phase 3.12)
+  'refinement.initialMessage.description': string;
+  'refinement.initialMessage.note': string;
 }

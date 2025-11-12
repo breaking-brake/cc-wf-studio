@@ -854,3 +854,75 @@ Phase 3.5でSkillノードの出力ポート制約をAIに伝えたが、新た�
     - `npm run build`でビルドエラーがないことを確認
 
 **Checkpoint**: Phase 3.11 完了後、AI修正処理をキャンセルした際にローディング中のメッセージが会話履歴から削除され、クリーンな状態に戻る
+
+---
+
+### Phase 3.12: 空のキャンバスからAI修正を開始可能にする
+
+**目的**: activeWorkflowが存在しない状態（空のキャンバス）でも「AIで修正」ボタンを押せるようにし、最初からAI修正で会話しながらワークフローを作成できるようにする
+
+**現状の問題**:
+- 現在は「AIで生成」→「AIで修正」という2段階の操作が必要
+- activeWorkflowがnullの場合、「AIで修正」ボタンが非活性になっている（Toolbar.tsx:314）
+- 空のキャンバスから直接AI修正を使えた方がユーザー体験が向上する
+
+**実装方針（Option 1: 空のワークフローを自動生成）**:
+- 「AIで修正」ボタン押下時に、activeWorkflowがなければ空のワークフローを自動生成
+- 空のワークフローにはStart/Endノードのみを含む（現在のデフォルトキャンバスと同じ）
+- 会話履歴は生成された空のワークフローに紐づく
+- 既存のrefinement-service.tsをそのまま使用可能（修正不要）
+
+**設計上の利点**:
+- 実装コストが最小（Toolbar.tsxとworkflow-store.tsのみ修正）
+- 既存の「会話履歴は常にワークフローに紐づく」設計を維持
+- activeWorkflowの概念を変更する必要がない
+- リスクが低く、既存機能への影響がほぼない
+
+**影響範囲**:
+- `src/webview/src/components/Toolbar.tsx` (ボタンの非活性条件を削除、空ワークフロー生成ロジック追加)
+- `src/webview/src/stores/workflow-store.ts` (createEmptyWorkflowヘルパー関数追加)
+
+#### Tasks
+
+- [x] **[P3.12] T106**: workflow-storeにcreateEmptyWorkflowヘルパー関数を追加
+  - **File**: `src/webview/src/stores/workflow-store.ts`
+  - **Action**: `createEmptyWorkflow()`関数を実装 ✓
+    - 空のワークフローオブジェクトを生成（Start/Endノードのみ）
+    - ワークフローIDはユニークに生成（`workflow-${Date.now()}-${Math.random()}`）
+    - 名前は"Untitled Workflow"
+    - conversationHistoryは未定義（後でrefinement-storeが初期化）
+    - NodeTypeを正しくimport（require使用を避ける）
+  - **Action**: WorkflowStoreインターフェースに`setActiveWorkflow`メソッドを追加 ✓
+    - activeWorkflowを設定し、対応するノード・エッジをキャンバスに反映
+
+- [x] **[P3.12] T107**: Toolbarの「AIで修正」ボタンを常に有効化
+  - **File**: `src/webview/src/components/Toolbar.tsx`
+  - **Action**: `handleOpenRefinementChat`を修正 ✓
+    - activeWorkflowがnullの場合、createEmptyWorkflow()で空のワークフローを生成
+    - setActiveWorkflow()でstoreに設定
+    - その後、既存の会話履歴ロード/初期化処理を実行
+  - **Action**: ボタンの`disabled`属性を削除（常に有効） ✓
+  - **Action**: ボタンの`opacity`スタイル調整を削除 ✓
+
+- [x] **[P3.12] T108**: 翻訳キーの追加と初期メッセージ表示
+  - **Files**: `src/webview/src/i18n/translations/*.ts`, `src/webview/src/i18n/translation-keys.ts`
+  - **Action**: 初期メッセージ用翻訳キーを追加 ✓
+    - `refinement.initialMessage.description`: メイン説明文
+    - `refinement.initialMessage.note`: Claude Code使用の注記
+    - 全5言語（ja, en, ko, zh-CN, zh-TW）に追加
+  - **File**: `src/webview/src/components/chat/MessageList.tsx`
+  - **Action**: メッセージがない場合の初期表示を修正 ✓
+    - 中央揃えで説明文と注記を表示
+    - dangerouslySetInnerHTMLを使用せず、通常のテキスト表示
+
+- [x] **[P3.12] T109**: 動作確認とビルドテスト
+  - **Actions**:
+    - 空のキャンバス状態で「AIで修正」ボタンが有効化されていることを確認 ✓
+    - ボタン押下で空のワークフローが生成され、会話パネルが開くことを確認 ✓
+    - 初期メッセージが中央に表示されることを確認 ✓
+    - `npm run build`でビルドエラーがないことを確認 ✓
+    - `npm run lint`でlintエラーがないことを確認 ✓
+
+**Checkpoint**: Phase 3.12 完了後、空のキャンバスから直接「AIで修正」を使ってワークフローを作成できるようになり、「AIで生成」と「AIで修正」のどちらから始めても良い柔軟なUXを実現。初期表示には簡潔な説明文を表示し、ユーザーに使い方を案内
+
+---

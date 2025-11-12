@@ -16,7 +16,7 @@ import {
   validateWorkflow,
 } from '../services/workflow-service';
 import { useRefinementStore } from '../stores/refinement-store';
-import { useWorkflowStore } from '../stores/workflow-store';
+import { createEmptyWorkflow, useWorkflowStore } from '../stores/workflow-store';
 import { ProcessingOverlay } from './common/ProcessingOverlay';
 import { AiGenerationDialog } from './dialogs/AiGenerationDialog';
 
@@ -34,7 +34,8 @@ interface WorkflowListItem {
 
 export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
   const { t } = useTranslation();
-  const { nodes, edges, setNodes, setEdges, activeWorkflow } = useWorkflowStore();
+  const { nodes, edges, setNodes, setEdges, activeWorkflow, setActiveWorkflow } =
+    useWorkflowStore();
   const { openChat, initConversation, loadConversationHistory, isProcessing } =
     useRefinementStore();
   const [workflowName, setWorkflowName] = useState('my-workflow');
@@ -196,18 +197,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
     }
   };
 
+  // Phase 3.12: Always enable refinement, auto-generate empty workflow if needed
   const handleOpenRefinementChat = () => {
-    if (!activeWorkflow) {
-      onError({
-        code: 'VALIDATION_ERROR',
-        message: t('toolbar.error.noActiveWorkflow'),
-      });
-      return;
+    let workflow = activeWorkflow;
+
+    // If no active workflow exists, create an empty one
+    if (!workflow) {
+      workflow = createEmptyWorkflow();
+      setActiveWorkflow(workflow);
     }
 
     // Load conversation history if exists, otherwise initialize
-    if (activeWorkflow.conversationHistory) {
-      loadConversationHistory(activeWorkflow.conversationHistory);
+    if (workflow.conversationHistory) {
+      loadConversationHistory(workflow.conversationHistory);
     } else {
       initConversation();
     }
@@ -307,11 +309,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
         {t('toolbar.generateWithAI')}
       </button>
 
-      {/* Refine with AI Button */}
+      {/* Refine with AI Button - Phase 3.12: Always enabled */}
       <button
         type="button"
         onClick={handleOpenRefinementChat}
-        disabled={!activeWorkflow}
         data-tour="ai-refine-button"
         style={{
           padding: '4px 12px',
@@ -319,9 +320,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
           color: 'var(--vscode-button-foreground)',
           border: 'none',
           borderRadius: '2px',
-          cursor: !activeWorkflow ? 'not-allowed' : 'pointer',
+          cursor: 'pointer',
           fontSize: '13px',
-          opacity: !activeWorkflow ? 0.6 : 1,
           whiteSpace: 'nowrap',
         }}
       >

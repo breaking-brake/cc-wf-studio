@@ -362,4 +362,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.clearDialog.message': '대화 기록을 지우시겠습니까? 이 작업은 취소할 수 없습니다.',
   'refinement.clearDialog.confirm': '지우기',
   'refinement.clearDialog.cancel': '취소',
+
+  // Initial instructional message (Phase 3.12)
+  'refinement.initialMessage.description': '생성하려는 워크플로를 자연어로 설명해주세요.',
+  'refinement.initialMessage.note': '※ 이 기능은 환경에 설치된 Claude Code를 사용합니다.',
 };

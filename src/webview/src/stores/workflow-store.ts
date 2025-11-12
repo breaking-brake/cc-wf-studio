@@ -6,6 +6,7 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
+import { NodeType } from '@shared/types/workflow-definition';
 import type { Edge, Node, OnConnect, OnEdgesChange, OnNodesChange } from 'reactflow';
 import { addEdge, applyEdgeChanges, applyNodeChanges } from 'reactflow';
 import { create } from 'zustand';
@@ -42,6 +43,7 @@ interface WorkflowStore {
   clearWorkflow: () => void;
   addGeneratedWorkflow: (workflow: Workflow) => void;
   updateWorkflow: (workflow: Workflow) => void;
+  setActiveWorkflow: (workflow: Workflow) => void; // Phase 3.12
 }
 
 // ============================================================================
@@ -69,6 +71,41 @@ const DEFAULT_END_NODE: Node = {
   position: { x: 600, y: 200 },
   data: { label: 'End' },
 };
+
+/**
+ * Phase 3.12: 空のワークフローを生成するヘルパー関数
+ * StartノードとEndノードのみを持つ最小限のワークフローを作成
+ */
+export function createEmptyWorkflow(): Workflow {
+  const now = new Date();
+
+  return {
+    id: `workflow-${Date.now()}-${Math.random()}`,
+    name: 'Untitled Workflow',
+    description: 'Created with AI refinement',
+    version: '1.0.0',
+    createdAt: now,
+    updatedAt: now,
+    nodes: [
+      {
+        id: 'start-node-default',
+        name: 'Start',
+        type: NodeType.Start,
+        position: { x: 100, y: 200 },
+        data: { label: 'Start' },
+      },
+      {
+        id: 'end-node-default',
+        name: 'End',
+        type: NodeType.End,
+        position: { x: 600, y: 200 },
+        data: { label: 'End' },
+      },
+    ],
+    connections: [],
+    conversationHistory: undefined,
+  };
+}
 
 export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   // Initial State - デフォルトでStartノードとEndノードを含む
@@ -262,6 +299,36 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     }));
 
     // Update workflow while preserving selection
+    set({
+      nodes: newNodes,
+      edges: newEdges,
+      activeWorkflow: workflow,
+    });
+  },
+
+  // Phase 3.12: Set active workflow and update canvas
+  setActiveWorkflow: (workflow: Workflow) => {
+    // Convert workflow nodes to ReactFlow nodes
+    const newNodes: Node[] = workflow.nodes.map((node) => ({
+      id: node.id,
+      type: node.type,
+      position: {
+        x: node.position.x,
+        y: node.position.y,
+      },
+      data: node.data,
+    }));
+
+    // Convert workflow connections to ReactFlow edges
+    const newEdges: Edge[] = workflow.connections.map((conn) => ({
+      id: conn.id,
+      source: conn.from,
+      target: conn.to,
+      sourceHandle: conn.fromPort,
+      targetHandle: conn.toPort,
+    }));
+
+    // Set active workflow and update canvas
     set({
       nodes: newNodes,
       edges: newEdges,
