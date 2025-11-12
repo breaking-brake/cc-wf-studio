@@ -4,9 +4,11 @@
  * Sidebar panel for AI-assisted workflow refinement chat interface.
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.2
  * Updated: Phase 3.1 - Changed from modal dialog to sidebar format
+ * Updated: Phase 3.3 - Added resizable width functionality
  */
 
 import { useEffect } from 'react';
+import { useResizablePanel } from '../../hooks/useResizablePanel';
 import { useTranslation } from '../../i18n/i18n-context';
 import { refineWorkflow } from '../../services/refinement-service';
 import { useRefinementStore } from '../../stores/refinement-store';
@@ -14,9 +16,11 @@ import { useWorkflowStore } from '../../stores/workflow-store';
 import { IterationCounter } from '../chat/IterationCounter';
 import { MessageInput } from '../chat/MessageInput';
 import { MessageList } from '../chat/MessageList';
+import { ResizeHandle } from '../common/ResizeHandle';
 
 export function RefinementChatPanel() {
   const { t } = useTranslation();
+  const { width, handleMouseDown } = useResizablePanel();
   const {
     isOpen,
     closeChat,
@@ -80,7 +84,8 @@ export function RefinementChatPanel() {
     <div
       className="refinement-chat-panel"
       style={{
-        width: '300px',
+        position: 'relative',
+        width: `${width}px`,
         height: '100%',
         backgroundColor: 'var(--vscode-sideBar-background)',
         borderLeft: '1px solid var(--vscode-panel-border)',
@@ -89,6 +94,7 @@ export function RefinementChatPanel() {
         overflow: 'hidden',
       }}
     >
+      <ResizeHandle onMouseDown={handleMouseDown} />
       {/* Header */}
       <div
         style={{
