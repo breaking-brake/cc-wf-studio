@@ -91,7 +91,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   },
 
   handleRefinementSuccess: (
-    aiMessage: ConversationMessage,
+    _aiMessage: ConversationMessage,
     updatedHistory: ConversationHistory
   ) => {
     set({
