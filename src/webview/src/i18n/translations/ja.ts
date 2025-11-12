@@ -12,7 +12,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.export': 'エクスポート',
   'toolbar.exporting': 'エクスポート中...',
   'toolbar.generateWithAI': 'AIで生成',
-  'toolbar.refineWithAI': 'AIで修正',
+  'toolbar.refineWithAI': 'AIで編集',
   'toolbar.selectWorkflow': 'ワークフローを選択...',
   'toolbar.load': '読み込み',
   'toolbar.refreshList': 'ワークフローリストを更新',
@@ -198,7 +198,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'tour.exportWorkflow':
     '「エクスポート」ボタンをクリックすると、Claude Codeで実行可能な形式にエクスポートされます。\n\nSub-Agentは`.claude/agents/`に、SlashCommandは`.claude/commands/`に出力されます。',
   'tour.refineWithAI':
-    '「AIで修正」ボタンで、AIとチャットしながらワークフローを生成・改善できます。\n\n空のキャンバスから新規作成も、既存のワークフローの修正も対話的に行えます。',
+    '「AIで編集」ボタンで、AIとチャットしながらワークフローを生成・改善できます。\n\n空のキャンバスから新規作成も、既存のワークフローの修正も対話的に行えます。',
   'tour.helpButton':
     'このツアーをもう一度見たい場合は、ヘルプボタン(?)をクリックしてください。\n\nそれでは、ワークフロー作成を楽しんでください！',
 
@@ -267,11 +267,11 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'skill.validation.scopeRequired': 'スコープ（個人用/プロジェクト用）を選択してください',
 
   // Workflow Refinement (001-ai-workflow-refinement)
-  'refinement.toolbar.refineButton': 'AIで修正',
-  'refinement.toolbar.refineButton.tooltip': 'AIとチャットしてワークフローを改善します',
+  'refinement.toolbar.refineButton': 'AIで編集',
+  'refinement.toolbar.refineButton.tooltip': 'AIとチャットしてワークフローを編集します',
 
   // Refinement Chat Panel (Short form keys for components)
-  'refinement.title': 'AIで修正',
+  'refinement.title': 'AIで編集',
   'refinement.inputPlaceholder': 'ワークフローの改善内容を入力してください...',
   'refinement.sendButton': '送信',
   'refinement.cancelButton': 'キャンセル',

@@ -12,7 +12,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.export': '내보내기',
   'toolbar.exporting': '내보내는 중...',
   'toolbar.generateWithAI': 'AI로 생성',
-  'toolbar.refineWithAI': 'AI로 수정',
+  'toolbar.refineWithAI': 'AI로 편집',
   'toolbar.selectWorkflow': '워크플로 선택...',
   'toolbar.load': '불러오기',
   'toolbar.refreshList': '워크플로 목록 새로고침',
@@ -200,7 +200,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'tour.exportWorkflow':
     '"내보내기" 버튼을 클릭하면 Claude Code에서 실행 가능한 형식으로 내보내집니다.\n\nSub-Agent는 `.claude/agents/`로, SlashCommand는 `.claude/commands/`로 이동합니다.',
   'tour.refineWithAI':
-    '"AI로 수정" 버튼을 사용하여 AI와 대화하며 워크플로우를 생성하거나 개선할 수 있습니다.\n\n빈 캔버스에서 시작하거나 기존 워크플로우를 대화형으로 수정할 수 있습니다.',
+    '"AI로 편집" 버튼을 사용하여 AI와 대화하며 워크플로우를 생성하거나 개선할 수 있습니다.\n\n빈 캔버스에서 시작하거나 기존 워크플로우를 대화형으로 수정할 수 있습니다.',
   'tour.helpButton':
     '이 투어를 다시 보려면 도움말 버튼(?)을 클릭하세요.\n\n워크플로우 생성을 즐기세요!',
 
@@ -273,7 +273,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.toolbar.refineButton.tooltip': 'AI와 채팅하여 워크플로를 개선합니다',
 
   // Refinement Chat Panel (Short form keys for components)
-  'refinement.title': 'AI로 수정',
+  'refinement.title': 'AI로 편집',
   'refinement.inputPlaceholder': '변경하고 싶은 내용을 입력하세요...',
   'refinement.sendButton': '전송',
   'refinement.cancelButton': '취소',

@@ -12,7 +12,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.export': '匯出',
   'toolbar.exporting': '匯出中...',
   'toolbar.generateWithAI': 'AI生成',
-  'toolbar.refineWithAI': 'AI優化',
+  'toolbar.refineWithAI': 'AI編輯',
   'toolbar.selectWorkflow': '選擇工作流...',
   'toolbar.load': '載入',
   'toolbar.refreshList': '重新整理工作流清單',
@@ -191,7 +191,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'tour.exportWorkflow':
     '點擊「匯出」按鈕以Claude Code可執行的格式匯出。\n\nSub-Agent匯出到`.claude/agents/`，SlashCommand匯出到`.claude/commands/`。',
   'tour.refineWithAI':
-    '使用「AI優化」按鈕透過與AI對話建立或改善工作流程。\n\n可以從空白畫布開始或以對話方式優化現有工作流程。',
+    '使用「AI編輯」按鈕透過與AI對話建立或改善工作流程。\n\n可以從空白畫布開始或以對話方式編輯現有工作流程。',
   'tour.helpButton': '要再次檢視此導覽，請點擊說明按鈕(?)。\n\n享受建立工作流程的樂趣！',
 
   // Tour buttons
@@ -259,11 +259,11 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'skill.validation.scopeRequired': '請選擇範圍（個人/專案）',
 
   // Workflow Refinement (001-ai-workflow-refinement)
-  'refinement.toolbar.refineButton': '使用AI優化',
-  'refinement.toolbar.refineButton.tooltip': '與AI聊天以優化此工作流程',
+  'refinement.toolbar.refineButton': '使用AI編輯',
+  'refinement.toolbar.refineButton.tooltip': '與AI聊天以編輯此工作流程',
 
   // Refinement Chat Panel (Short form keys for components)
-  'refinement.title': 'AI優化',
+  'refinement.title': 'AI編輯',
   'refinement.inputPlaceholder': '描述您想要的變更...',
   'refinement.sendButton': '傳送',
   'refinement.cancelButton': '取消',
