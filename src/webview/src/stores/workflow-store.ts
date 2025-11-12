@@ -6,8 +6,8 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
-import { NodeType } from '@shared/types/workflow-definition';
 import type { WorkflowNode } from '@shared/types/workflow-definition';
+import { NodeType } from '@shared/types/workflow-definition';
 import type { Edge, Node, OnConnect, OnEdgesChange, OnNodesChange } from 'reactflow';
 import { addEdge, applyEdgeChanges, applyNodeChanges } from 'reactflow';
 import { create } from 'zustand';

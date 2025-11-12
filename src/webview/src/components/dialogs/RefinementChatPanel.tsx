@@ -8,16 +8,21 @@
  * Updated: Phase 3.7 - Added immediate loading message display
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useResizablePanel } from '../../hooks/useResizablePanel';
 import { useTranslation } from '../../i18n/i18n-context';
-import { refineWorkflow, WorkflowRefinementError } from '../../services/refinement-service';
+import {
+  clearConversation,
+  refineWorkflow,
+  WorkflowRefinementError,
+} from '../../services/refinement-service';
 import { useRefinementStore } from '../../stores/refinement-store';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { IterationCounter } from '../chat/IterationCounter';
 import { MessageInput } from '../chat/MessageInput';
 import { MessageList } from '../chat/MessageList';
 import { ResizeHandle } from '../common/ResizeHandle';
+import { ConfirmDialog } from './ConfirmDialog';
 
 export function RefinementChatPanel() {
   const { t } = useTranslation();
@@ -36,8 +41,10 @@ export function RefinementChatPanel() {
     updateMessageContent,
     updateMessageErrorState,
     removeMessage,
+    clearHistory,
   } = useRefinementStore();
   const { activeWorkflow, updateWorkflow } = useWorkflowStore();
+  const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
 
   // Load conversation history when panel opens
   useEffect(() => {
@@ -114,6 +121,38 @@ export function RefinementChatPanel() {
 
   const handleClose = () => {
     closeChat();
+  };
+
+  const handleClearHistoryClick = () => {
+    setIsConfirmClearOpen(true);
+  };
+
+  const handleConfirmClear = async () => {
+    if (!activeWorkflow) {
+      return;
+    }
+
+    try {
+      // Generate request ID for clear conversation request
+      const requestId = `clear-${Date.now()}-${Math.random()}`;
+
+      // Clear conversation history via Extension Host
+      await clearConversation(activeWorkflow.id, requestId);
+
+      // Clear local store
+      clearHistory();
+
+      // Close confirmation dialog
+      setIsConfirmClearOpen(false);
+    } catch (error) {
+      console.error('Failed to clear conversation history:', error);
+      // Still close the dialog even if there's an error
+      setIsConfirmClearOpen(false);
+    }
+  };
+
+  const handleCancelClear = () => {
+    setIsConfirmClearOpen(false);
   };
 
   // Phase 3.8: Retry handler for failed refinements
@@ -241,6 +280,29 @@ export function RefinementChatPanel() {
 
           <button
             type="button"
+            onClick={handleClearHistoryClick}
+            disabled={!conversationHistory || conversationHistory.messages.length === 0}
+            style={{
+              padding: '4px 8px',
+              backgroundColor: 'transparent',
+              color: 'var(--vscode-foreground)',
+              border: '1px solid var(--vscode-panel-border)',
+              borderRadius: '4px',
+              cursor:
+                conversationHistory && conversationHistory.messages.length > 0
+                  ? 'pointer'
+                  : 'not-allowed',
+              fontSize: '11px',
+              opacity: conversationHistory && conversationHistory.messages.length > 0 ? 1 : 0.5,
+            }}
+            title={t('refinement.chat.clearButton.tooltip')}
+            aria-label={t('refinement.chat.clearButton')}
+          >
+            {t('refinement.chat.clearButton')}
+          </button>
+
+          <button
+            type="button"
             onClick={handleClose}
             style={{
               padding: '4px 8px',
@@ -263,6 +325,17 @@ export function RefinementChatPanel() {
 
       {/* Input */}
       <MessageInput onSend={handleSend} />
+
+      {/* Clear Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={isConfirmClearOpen}
+        title={t('refinement.clearDialog.title')}
+        message={t('refinement.clearDialog.message')}
+        confirmLabel={t('refinement.clearDialog.confirm')}
+        cancelLabel={t('refinement.clearDialog.cancel')}
+        onConfirm={handleConfirmClear}
+        onCancel={handleCancelClear}
+      />
     </div>
   );
 }

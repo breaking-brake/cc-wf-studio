@@ -141,11 +141,11 @@
 
 ### Implementation for User Story 2
 
-- [ ] T019 [US2] 会話コンテキスト管理: constructRefinementPrompt() を拡張し、直近3-5往復の会話履歴をプロンプトに含めるロジックを実装（src/extension/services/refinement-service.ts）
-- [ ] T020 [US2] 反復回数の追跡: conversationHistory.currentIteration のインクリメント処理を実装し、メッセージ送信時に更新（src/extension/commands/workflow-refinement.ts, src/webview/src/stores/refinement-store.ts）
-- [ ] T021 [US2] 反復上限チェック: canSend() メソッドで currentIteration < maxIterations を検証し、上限到達時に送信ボタンを無効化（src/webview/src/stores/refinement-store.ts）
-- [ ] T022 [US2] 反復上限警告表示: isApproachingLimit() メソッド（currentIteration >= 18）を実装し、警告色でカウンター表示（src/webview/src/components/chat/IterationCounter.tsx）
-- [ ] T023 [US2] 上限到達時エラーハンドリング: ITERATION_LIMIT_REACHED エラーコードの処理を追加し、適切なエラーメッセージを表示（src/extension/commands/workflow-refinement.ts, src/webview/src/stores/refinement-store.ts）
+- [x] T019 [US2] 会話コンテキスト管理: constructRefinementPrompt() を拡張し、直近3-5往復の会話履歴をプロンプトに含めるロジックを実装（src/extension/services/refinement-service.ts）
+- [x] T020 [US2] 反復回数の追跡: conversationHistory.currentIteration のインクリメント処理を実装し、メッセージ送信時に更新（src/extension/commands/workflow-refinement.ts, src/webview/src/stores/refinement-store.ts）
+- [x] T021 [US2] 反復上限チェック: canSend() メソッドで currentIteration < maxIterations を検証し、上限到達時に送信ボタンを無効化（src/webview/src/stores/refinement-store.ts）
+- [x] T022 [US2] 反復上限警告表示: isApproachingLimit() メソッド（currentIteration >= 18）を実装し、警告色でカウンター表示（src/webview/src/components/chat/IterationCounter.tsx）
+- [x] T023 [US2] 上限到達時エラーハンドリング: ITERATION_LIMIT_REACHED エラーコードの処理を追加し、適切なエラーメッセージを表示（src/extension/commands/workflow-refinement.ts, src/webview/src/stores/refinement-store.ts）
 
 **Checkpoint**: この時点で、User Story 1 と User Story 2 の両方が独立して機能する
 
@@ -178,11 +178,11 @@
 
 ### Implementation for User Story 3
 
-- [ ] T024 [US3] 会話履歴のシリアライズ: ワークフローJSONに conversationHistory フィールドを保存する機能を実装（src/extension/services/file-service.ts）
-- [ ] T025 [US3] 会話履歴のデシリアライズ: ワークフロー読み込み時に conversationHistory を復元する機能を実装（src/extension/services/file-service.ts）
-- [ ] T026 [US3] チャットパネル開閉時の履歴復元: openChat() 時に既存の conversationHistory をストアに読み込む処理を実装（src/webview/src/stores/refinement-store.ts）
-- [ ] T027 [US3] 初回使用時の履歴初期化: conversationHistory が null の場合、initConversation() で空の履歴を初期化（src/webview/src/stores/refinement-store.ts）
-- [ ] T028 [US3] 拡張機能リロード対応: ワークフローストアとの統合により、リロード後も conversationHistory が復元されることを確認（src/webview/src/stores/workflow-store.ts, refinement-store.ts）
+- [x] T024 [US3] 会話履歴のシリアライズ: ワークフローJSONに conversationHistory フィールドを保存する機能を実装（src/extension/services/file-service.ts）
+- [x] T025 [US3] 会話履歴のデシリアライズ: ワークフロー読み込み時に conversationHistory を復元する機能を実装（src/extension/services/file-service.ts）
+- [x] T026 [US3] チャットパネル開閉時の履歴復元: openChat() 時に既存の conversationHistory をストアに読み込む処理を実装（src/webview/src/stores/refinement-store.ts）
+- [x] T027 [US3] 初回使用時の履歴初期化: conversationHistory が null の場合、initConversation() で空の履歴を初期化（src/webview/src/stores/refinement-store.ts）
+- [x] T028 [US3] 拡張機能リロード対応: ワークフローストアとの統合により、リロード後も conversationHistory が復元されることを確認（src/webview/src/stores/workflow-store.ts, refinement-store.ts）
 
 **Checkpoint**: この時点で、User Story 1, 2, 3 がすべて独立して機能する
 
@@ -220,11 +220,11 @@
 
 ### Implementation for User Story 4
 
-- [ ] T029 [P] [US4] 会話履歴クリアボタンの追加: RefinementChatPanel ヘッダーに「会話履歴クリア」ボタンを追加（src/webview/src/components/dialogs/RefinementChatPanel.tsx）
-- [ ] T030 [P] [US4] 確認ダイアログコンポーネントの作成（または既存のConfirmDialogを使用）: クリア確認用のダイアログを実装（src/webview/src/components/dialogs/ConfirmDialog.tsx）
-- [ ] T031 [US4] clearHistory() アクションの実装: Zustand ストアに会話履歴クリア機能を実装（messages: [], currentIteration: 0, updatedAt更新）（src/webview/src/stores/refinement-store.ts）
-- [ ] T032 [US4] Extension Host でのクリア処理: handleClearConversation() で conversationHistory を null に設定し、ワークフローJSONを保存（src/extension/commands/workflow-refinement.ts）
-- [ ] T033 [US4] クリア後のメッセージフロー: CLEAR_CONVERSATION → Extension Host → CONVERSATION_CLEARED → Webview のメッセージングを統合（src/webview/src/services/refinement-service.ts, src/extension/commands/workflow-refinement.ts）
+- [x] T029 [P] [US4] 会話履歴クリアボタンの追加: RefinementChatPanel ヘッダーに「会話履歴クリア」ボタンを追加（src/webview/src/components/dialogs/RefinementChatPanel.tsx）
+- [x] T030 [P] [US4] 確認ダイアログコンポーネントの作成（または既存のConfirmDialogを使用）: クリア確認用のダイアログを実装（src/webview/src/components/dialogs/ConfirmDialog.tsx）
+- [x] T031 [US4] clearHistory() アクションの実装: Zustand ストアに会話履歴クリア機能を実装（messages: [], currentIteration: 0, updatedAt更新）（src/webview/src/stores/refinement-store.ts）
+- [x] T032 [US4] Extension Host でのクリア処理: handleClearConversation() で conversationHistory を null に設定し、ワークフローJSONを保存（src/extension/commands/workflow-refinement.ts）
+- [x] T033 [US4] クリア後のメッセージフロー: CLEAR_CONVERSATION → Extension Host → CONVERSATION_CLEARED → Webview のメッセージングを統合（src/webview/src/services/refinement-service.ts, src/extension/commands/workflow-refinement.ts）
 
 **Checkpoint**: すべてのユーザーストーリーが独立して機能し、完全な機能セットが実現
 
@@ -1081,5 +1081,193 @@ Phase 3.5でSkillノードの出力ポート制約をAIに伝えたが、新た�
   - **検証結果**: すべてのシナリオで正常動作を確認。UIが統一され、ユーザーエクスペリエンスが向上した。
 
 **Checkpoint**: Phase 3.14 完了 ✓ - 「AIで生成」と「AIで修正」の機能が「AIで修正」1つに統一され、ユーザーは1つのボタンで新規生成も修正も実行できるシンプルなUIとなった。Phase 3.13の機能により、空のキャンバスでも手動配置済みのキャンバスでも対応可能。10ファイル変更、617行削除、UIがクリーンで直感的に改善された。
+
+---
+
+### Phase 3.15: ハイブリッドアプローチ - VSCodeターミナル統合 (UI/UX改善)
+
+**目的**: チャットUIを残しつつ、「ターミナルで編集」ボタンを追加し、Claude Code CLIの対話セッションをVSCodeターミナルで起動できるようにする
+
+**背景**:
+- 現在のチャットUIは簡易的な修正に適している（Phase 3.1-3.14で洗練されたUI）
+- 複雑な修正や詳細な対話が必要な場合、Claude Code CLIの全機能を活用したい
+- ユーザーに両方のワークフローを提供し、状況に応じて使い分けられるようにする
+
+**ユースケース**:
+1. **簡易修正**: チャットUIで「エラーハンドリングを追加」などの短い指示
+2. **複雏な修正**: ターミナルでClaude Codeと詳細に対話しながら編集
+3. **ファイル直接編集**: Claude Codeのツール機能（Read, Edit, Write等）をフル活用
+
+**実装方針（ハイブリッドアプローチ）**:
+```
+[RefinementChatPanel]
+  ├─ 通常の会話（現在の実装を維持）
+  ├─ メッセージ履歴表示
+  ├─ メッセージ入力エリア
+  └─ [🖥️ ターミナルで編集] ボタン（ヘッダーに追加）
+       ↓
+  [VSCode Terminal] Claude Code対話セッション起動
+       - 現在のワークフローファイルパスを渡す
+       - 会話履歴をsystem-promptで注入
+       - ワークフローファイル変更後、Extension側でFileSystemWatcherで検知
+       - Webview側で自動再読み込み
+```
+
+**Claude Code CLI起動例**:
+```bash
+cd /path/to/workspace
+claude --system-prompt "あなたはワークフロー編集の専門家です。
+現在のワークフロー: .vscode/workflows/workflow-123.json
+
+会話履歴:
+[USER]: エラーハンドリングを追加して
+[AI]: IfElseノードを追加しました
+
+このワークフローを改善してください。" \
+"ユーザーからの次の指示を待っています"
+```
+
+**設計上の利点**:
+- 既存のPhase 3.1-3.14の実装を無駄にしない
+- 簡易修正と複雑な修正の両方をサポート
+- ユーザーが自由に選択可能
+- ファイル変更の同期はFileSystemWatcherで自動化
+
+**技術的考慮事項**:
+- VSCode Terminal API (`vscode.window.createTerminal()`) を使用
+- `terminal.sendText()` でコマンド送信
+- FileSystemWatcher でワークフローJSONファイルの変更を監視
+- 変更検知後、workflow-storeで再読み込み
+- 会話履歴は最新3-5往復をsystem-promptに含める（トークン制限考慮）
+
+**影響範囲**:
+- `src/webview/src/components/dialogs/RefinementChatPanel.tsx` (ボタン追加)
+- `src/extension/commands/workflow-refinement.ts` (新規: handleOpenTerminal)
+- `src/extension/services/terminal-service.ts` (新規: Claude Code起動ロジック)
+- `src/extension/services/file-watcher-service.ts` (新規: ワークフロー変更監視)
+- `src/shared/types/messages.ts` (新規: OPEN_TERMINAL_EDITOR メッセージ型)
+- `src/webview/src/i18n/translations/*.ts` (翻訳キー追加)
+
+### Implementation for Phase 3.15
+
+- [ ] **[P3.15] T120**: メッセージ型の追加
+  - **File**: `src/shared/types/messages.ts`
+  - **Action**: `OpenTerminalEditorMessage` 型を追加
+    ```typescript
+    export interface OpenTerminalEditorMessage {
+      type: 'OPEN_TERMINAL_EDITOR';
+      requestId: string;
+      payload: {
+        workflowId: string;
+        workflowFilePath: string;
+        conversationHistory: ConversationHistory;
+      };
+    }
+    ```
+  - WebviewMessageユニオン型に追加
+
+- [ ] **[P3.15] T121**: terminal-service の作成
+  - **File**: `src/extension/services/terminal-service.ts` (新規作成)
+  - **Action**: `openClaudeCodeTerminal()` 関数を実装
+    - 現在のワークスペースのルートディレクトリを取得
+    - 会話履歴から直近3-5往復を抽出してsystem-promptを構築
+    - `vscode.window.createTerminal()` でターミナル作成
+    - `terminal.sendText()` でClaude Codeコマンド送信
+      - `claude --system-prompt "..." "ワークフローの改善を開始します"`
+    - `terminal.show()` でターミナルを表示
+  - エラーハンドリング（Claude Codeがインストールされていない場合）
+
+- [ ] **[P3.15] T122**: file-watcher-service の作成
+  - **File**: `src/extension/services/file-watcher-service.ts` (新規作成)
+  - **Action**: `watchWorkflowFile()` 関数を実装
+    - `vscode.workspace.createFileSystemWatcher()` で特定のワークフローJSONファイルを監視
+    - 変更検知時にWebviewに `WORKFLOW_FILE_CHANGED` メッセージを送信
+    - ペイロードに更新されたワークフロー内容を含める
+  - `disposeWatcher()` でクリーンアップ
+
+- [ ] **[P3.15] T123**: handleOpenTerminal コマンドハンドラの作成
+  - **File**: `src/extension/commands/workflow-refinement.ts`
+  - **Action**: `handleOpenTerminal()` 関数を実装
+    - OpenTerminalEditorMessage を受信
+    - ワークフローファイルパスを解決
+    - terminal-service.openClaudeCodeTerminal() を呼び出し
+    - file-watcher-service.watchWorkflowFile() で監視開始
+    - 成功/失敗メッセージをWebviewに送信
+
+- [ ] **[P3.15] T124**: Extension メッセージハンドラの登録
+  - **File**: `src/extension/extension.ts`
+  - **Action**: OPEN_TERMINAL_EDITOR メッセージハンドラを追加
+    - `case 'OPEN_TERMINAL_EDITOR': await handleOpenTerminal(message, panel.webview);`
+
+- [ ] **[P3.15] T125**: RefinementChatPanel に「ターミナルで編集」ボタン追加
+  - **File**: `src/webview/src/components/dialogs/RefinementChatPanel.tsx`
+  - **Action**: ヘッダーエリアに新しいボタンを追加
+    - アイコン: 🖥️ または VSCode Terminal アイコン
+    - クリック時に `handleOpenTerminal()` を呼び出し
+    - `refinement-service.openTerminalEditor()` 経由でメッセージ送信
+  - スタイル: 既存の「会話履歴クリア」ボタンと同じデザイン
+
+- [ ] **[P3.15] T126**: refinement-service にターミナル起動関数追加
+  - **File**: `src/webview/src/services/refinement-service.ts`
+  - **Action**: `openTerminalEditor()` 関数を実装
+    - OPEN_TERMINAL_EDITOR メッセージを構築
+    - postMessage() でExtension Hostに送信
+    - 成功/失敗の通知を受け取る
+
+- [ ] **[P3.15] T127**: ワークフロー変更の自動再読み込み
+  - **File**: `src/webview/src/stores/workflow-store.ts`
+  - **Action**: WORKFLOW_FILE_CHANGED メッセージハンドラを追加
+    - Extension Hostからの変更通知を受信
+    - 更新されたワークフローでストアを更新
+    - キャンバスのノード・エッジを再描画
+  - 会話履歴も更新されている場合は refinement-store も同期
+
+- [ ] **[P3.15] T128**: i18n 翻訳キーの追加
+  - **Files**: `src/webview/src/i18n/translations/*.ts` (5言語)
+  - **Action**: 翻訳キーを追加
+    - `refinement.openTerminalButton`: "ターミナルで編集" (ja), "Edit in Terminal" (en), etc.
+    - `refinement.openTerminalTooltip`: "Claude Codeをターミナルで起動し、詳細な対話編集を行います" (ja), etc.
+    - `refinement.terminalOpenSuccess`: "ターミナルでClaude Codeを起動しました" (ja), etc.
+    - `refinement.error.terminalOpenFailed`: "ターミナルの起動に失敗しました" (ja), etc.
+  - `translation-keys.ts` の型定義も更新
+
+- [ ] **[P3.15] T129**: system-prompt構築ロジックの実装
+  - **File**: `src/extension/services/terminal-service.ts`
+  - **Action**: `constructTerminalSystemPrompt()` ヘルパー関数を実装
+    - 現在のワークフローファイルパスを含める
+    - 会話履歴から直近3-5往復を抽出（トークン制限考慮）
+    - workflow-schema.json の要約を含める（オプション）
+    - プロンプト例:
+      ```
+      あなたはClaude Code Workflow Studioのワークフロー編集専門家です。
+
+      現在のワークフローファイル: .vscode/workflows/workflow-123.json
+
+      会話履歴（最新5往復）:
+      [USER]: エラーハンドリングを追加
+      [AI]: IfElseノードを2つ追加しました
+      [USER]: もっと詳細にして
+      [AI]: バリデーションロジックを追加しました
+
+      ユーザーはターミナルで詳細な編集を行いたいと考えています。
+      ワークフローファイルを直接編集し、改善してください。
+      ```
+
+- [ ] **[P3.15] T130**: ビルドとLintテスト
+  - **Actions**:
+    - `npm run build` でビルドエラーがないことを確認
+    - `npm run lint` でlintエラーがないことを確認
+    - TypeScript型エラーがないことを確認
+
+- [ ] **[P3.15] T131**: 手動E2Eテスト（ユーザーによる拡張機能実行時に検証）
+  - **Test Scenarios**:
+    1. チャットパネルで数回の会話後、「ターミナルで編集」ボタンをクリック
+    2. VSCodeターミナルが開き、Claude Codeが起動することを確認
+    3. system-promptに会話履歴が含まれていることを確認
+    4. ターミナルでワークフローファイルを編集
+    5. ファイル保存後、Webview上のキャンバスが自動更新されることを確認
+    6. 会話履歴も同期されることを確認（ターミナルで編集した内容が反映）
+
+**Checkpoint**: Phase 3.15 完了後、ユーザーは簡易修正（チャットUI）と複雑な修正（ターミナル）を状況に応じて使い分けられるようになる。既存のチャットUI実装を維持しながら、Claude Code CLIの全機能を活用可能になり、柔軟なワークフロー編集体験を提供する。
 
 ---
