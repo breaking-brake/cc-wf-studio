@@ -52,7 +52,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             textAlign: 'right',
           }}
         >
-          {new Date(message.timestamp).toLocaleTimeString()}
+          {new Date(message.timestamp).toLocaleString()}
         </div>
       </div>
     </div>

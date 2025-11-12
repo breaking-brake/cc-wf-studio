@@ -7,14 +7,17 @@
 
 import type * as vscode from 'vscode';
 import type {
+  CancelRefinementPayload,
   ClearConversationPayload,
   ConversationClearedPayload,
+  RefinementCancelledPayload,
   RefinementFailedPayload,
   RefinementSuccessPayload,
   RefineWorkflowPayload,
 } from '../../shared/types/messages';
 import type { ConversationMessage } from '../../shared/types/workflow-definition';
 import { log } from '../extension';
+import { cancelRefinement } from '../services/claude-code-service';
 import { refineWorkflow } from '../services/refinement-service';
 
 /**
@@ -242,6 +245,83 @@ function sendConversationCleared(
 ): void {
   webview.postMessage({
     type: 'CONVERSATION_CLEARED',
+    requestId,
+    payload,
+  });
+}
+
+/**
+ * Handle workflow refinement cancellation request
+ *
+ * @param payload - Cancellation request from Webview
+ * @param webview - Webview to send response messages to
+ * @param requestId - Request ID for correlation
+ */
+export async function handleCancelRefinement(
+  payload: CancelRefinementPayload,
+  webview: vscode.Webview,
+  requestId: string
+): Promise<void> {
+  const { requestId: targetRequestId } = payload;
+
+  log('INFO', 'Refinement cancellation request received', {
+    requestId,
+    targetRequestId,
+  });
+
+  try {
+    // Cancel the active refinement process
+    const result = cancelRefinement(targetRequestId);
+
+    if (result.cancelled) {
+      log('INFO', 'Refinement cancelled successfully', {
+        requestId,
+        targetRequestId,
+        executionTimeMs: result.executionTimeMs,
+      });
+
+      // Send cancellation confirmation
+      sendRefinementCancelled(webview, targetRequestId, {
+        executionTimeMs: result.executionTimeMs ?? 0,
+        timestamp: new Date().toISOString(),
+      });
+    } else {
+      log('WARN', 'Refinement process not found or already completed', {
+        requestId,
+        targetRequestId,
+      });
+
+      // Still send cancellation message (process may have already completed)
+      sendRefinementCancelled(webview, targetRequestId, {
+        executionTimeMs: 0,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  } catch (error) {
+    log('ERROR', 'Unexpected error in handleCancelRefinement', {
+      requestId,
+      targetRequestId,
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
+
+    // Send cancellation message anyway
+    sendRefinementCancelled(webview, targetRequestId, {
+      executionTimeMs: 0,
+      timestamp: new Date().toISOString(),
+    });
+  }
+}
+
+/**
+ * Send refinement cancelled message to Webview
+ */
+function sendRefinementCancelled(
+  webview: vscode.Webview,
+  requestId: string,
+  payload: RefinementCancelledPayload
+): void {
+  webview.postMessage({
+    type: 'REFINEMENT_CANCELLED',
     requestId,
     payload,
   });

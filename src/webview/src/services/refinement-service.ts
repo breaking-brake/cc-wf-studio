@@ -57,6 +57,9 @@ export function refineWorkflow(
 
         if (message.type === 'REFINEMENT_SUCCESS' && message.payload) {
           resolve(message.payload);
+        } else if (message.type === 'REFINEMENT_CANCELLED') {
+          // Handle cancellation
+          reject(new WorkflowRefinementError('Refinement cancelled by user', 'CANCELLED'));
         } else if (message.type === 'REFINEMENT_FAILED' && message.payload) {
           reject(
             new WorkflowRefinementError(
@@ -145,5 +148,17 @@ export function clearConversation(workflowId: string, requestId: string): Promis
       window.removeEventListener('message', handler);
       reject(new Error('Clear conversation request timed out'));
     }, 5000);
+  });
+}
+
+/**
+ * Cancel an ongoing workflow refinement
+ *
+ * @param requestId - Request ID of the refinement to cancel
+ */
+export function cancelWorkflowRefinement(requestId: string): void {
+  vscode.postMessage({
+    type: 'CANCEL_REFINEMENT',
+    payload: { requestId },
   });
 }

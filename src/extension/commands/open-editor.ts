@@ -16,7 +16,11 @@ import { loadWorkflow } from './load-workflow';
 import { loadWorkflowList } from './load-workflow-list';
 import { saveWorkflow } from './save-workflow';
 import { handleBrowseSkills, handleCreateSkill, handleValidateSkillFile } from './skill-operations';
-import { handleClearConversation, handleRefineWorkflow } from './workflow-refinement';
+import {
+  handleCancelRefinement,
+  handleClearConversation,
+  handleRefineWorkflow,
+} from './workflow-refinement';
 
 /**
  * Register the open editor command
@@ -264,6 +268,22 @@ export function registerOpenEditorCommand(
                   },
                   executionTimeMs: 0,
                   timestamp: new Date().toISOString(),
+                },
+              });
+            }
+            break;
+
+          case 'CANCEL_REFINEMENT':
+            // Cancel workflow refinement
+            if (message.payload) {
+              await handleCancelRefinement(message.payload, webview, message.requestId || '');
+            } else {
+              webview.postMessage({
+                type: 'ERROR',
+                requestId: message.requestId,
+                payload: {
+                  code: 'VALIDATION_ERROR',
+                  message: 'Cancel refinement payload is required',
                 },
               });
             }

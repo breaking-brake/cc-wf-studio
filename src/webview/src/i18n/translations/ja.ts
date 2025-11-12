@@ -303,6 +303,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.title': 'AIで修正',
   'refinement.inputPlaceholder': 'ワークフローの改善内容を入力してください...',
   'refinement.sendButton': '送信',
+  'refinement.cancelButton': 'キャンセル',
   'refinement.processing': '処理中...',
   'refinement.charactersRemaining': '残り {count} 文字',
   'refinement.iterationCounter': '{current}/{max}',

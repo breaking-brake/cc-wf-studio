@@ -10,7 +10,7 @@
 import { useEffect } from 'react';
 import { useResizablePanel } from '../../hooks/useResizablePanel';
 import { useTranslation } from '../../i18n/i18n-context';
-import { refineWorkflow } from '../../services/refinement-service';
+import { refineWorkflow, WorkflowRefinementError } from '../../services/refinement-service';
 import { useRefinementStore } from '../../stores/refinement-store';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { IterationCounter } from '../chat/IterationCounter';
@@ -53,7 +53,7 @@ export function RefinementChatPanel() {
     addUserMessage(message);
 
     const requestId = `refine-${Date.now()}-${Math.random()}`;
-    startProcessing();
+    startProcessing(requestId);
 
     try {
       const result = await refineWorkflow(
@@ -70,6 +70,13 @@ export function RefinementChatPanel() {
       // Update refinement store with AI response
       handleRefinementSuccess(result.aiMessage, result.updatedConversationHistory);
     } catch (error) {
+      // Handle cancellation - don't show error, just reset loading state
+      if (error instanceof WorkflowRefinementError && error.code === 'CANCELLED') {
+        // Loading state will be reset in handleRefinementFailed
+        handleRefinementFailed();
+        return;
+      }
+
       console.error('Refinement failed:', error);
       handleRefinementFailed();
       // TODO: Show error notification

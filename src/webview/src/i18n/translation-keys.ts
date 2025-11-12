@@ -290,6 +290,7 @@ export interface WebviewTranslationKeys {
   'refinement.chat.sendButton.shortcutMac': string;
   'refinement.chat.cancelButton': string;
   'refinement.chat.closeButton': string;
+  'refinement.cancelButton': string;
   'refinement.chat.clearButton': string;
   'refinement.chat.clearButton.tooltip': string;
   'refinement.chat.refining': string;

@@ -88,6 +88,10 @@ export interface CancelGenerationPayload {
   requestId: string; // キャンセル対象のリクエストID
 }
 
+export interface CancelRefinementPayload {
+  requestId: string; // キャンセル対象のリクエストID
+}
+
 // ============================================================================
 // AI Generation Payloads (001-ai-workflow-generation)
 // ============================================================================
@@ -253,6 +257,7 @@ export interface RefinementFailedPayload {
       | 'PARSE_ERROR'
       | 'VALIDATION_ERROR'
       | 'ITERATION_LIMIT_REACHED'
+      | 'CANCELLED'
       | 'UNKNOWN_ERROR';
     /** Human-readable error message */
     message: string;
@@ -273,6 +278,13 @@ export interface ClearConversationPayload {
 export interface ConversationClearedPayload {
   /** ID of the workflow that was cleared */
   workflowId: string;
+}
+
+export interface RefinementCancelledPayload {
+  /** Time taken before cancellation (in milliseconds) */
+  executionTimeMs: number;
+  /** Cancellation timestamp */
+  timestamp: string; // ISO 8601
 }
 
 // ============================================================================
@@ -298,6 +310,7 @@ export type ExtensionMessage =
   | Message<SkillValidationErrorPayload, 'SKILL_VALIDATION_FAILED'>
   | Message<RefinementSuccessPayload, 'REFINEMENT_SUCCESS'>
   | Message<RefinementFailedPayload, 'REFINEMENT_FAILED'>
+  | Message<RefinementCancelledPayload, 'REFINEMENT_CANCELLED'>
   | Message<ConversationClearedPayload, 'CONVERSATION_CLEARED'>;
 
 // ============================================================================
@@ -317,6 +330,7 @@ export type WebviewMessage =
   | Message<CreateSkillPayload, 'CREATE_SKILL'>
   | Message<ValidateSkillFilePayload, 'VALIDATE_SKILL_FILE'>
   | Message<RefineWorkflowPayload, 'REFINE_WORKFLOW'>
+  | Message<CancelRefinementPayload, 'CANCEL_REFINEMENT'>
   | Message<ClearConversationPayload, 'CLEAR_CONVERSATION'>;
 
 // ============================================================================

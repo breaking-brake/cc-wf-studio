@@ -9,6 +9,7 @@
 import type React from 'react';
 import { useEffect, useId, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
+import { cancelWorkflowRefinement } from '../../services/refinement-service';
 import { useRefinementStore } from '../../stores/refinement-store';
 
 const MAX_MESSAGE_LENGTH = 5000;
@@ -22,7 +23,7 @@ interface MessageInputProps {
 export function MessageInput({ onSend }: MessageInputProps) {
   const { t } = useTranslation();
   const textareaId = useId();
-  const { currentInput, setInput, canSend, isProcessing } = useRefinementStore();
+  const { currentInput, setInput, canSend, isProcessing, currentRequestId } = useRefinementStore();
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   // Progress timer - same as AI Generation
@@ -47,6 +48,14 @@ export function MessageInput({ onSend }: MessageInputProps) {
   const handleSend = () => {
     if (canSend()) {
       onSend(currentInput);
+    }
+  };
+
+  const handleCancel = () => {
+    if (isProcessing && currentRequestId) {
+      // Send cancellation request to Extension Host
+      cancelWorkflowRefinement(currentRequestId);
+      // UI will update when REFINEMENT_CANCELLED message is received
     }
   };
 
@@ -176,23 +185,39 @@ export function MessageInput({ onSend }: MessageInputProps) {
           {t('refinement.charactersRemaining', { count: remainingChars })}
         </div>
 
-        <button
-          type="button"
-          onClick={handleSend}
-          disabled={!canSend() || isTooLong || isTooShort || isProcessing}
-          style={{
-            padding: '6px 16px',
-            backgroundColor: 'var(--vscode-button-background)',
-            color: 'var(--vscode-button-foreground)',
-            border: 'none',
-            borderRadius: '4px',
-            cursor:
-              canSend() && !isTooLong && !isTooShort && !isProcessing ? 'pointer' : 'not-allowed',
-            opacity: canSend() && !isTooLong && !isTooShort && !isProcessing ? 1 : 0.5,
-          }}
-        >
-          {isProcessing ? t('refinement.processing') : t('refinement.sendButton')}
-        </button>
+        {isProcessing ? (
+          <button
+            type="button"
+            onClick={handleCancel}
+            style={{
+              padding: '6px 16px',
+              backgroundColor: 'var(--vscode-button-secondaryBackground)',
+              color: 'var(--vscode-button-secondaryForeground)',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            {t('refinement.cancelButton')}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={!canSend() || isTooLong || isTooShort}
+            style={{
+              padding: '6px 16px',
+              backgroundColor: 'var(--vscode-button-background)',
+              color: 'var(--vscode-button-foreground)',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: canSend() && !isTooLong && !isTooShort ? 'pointer' : 'not-allowed',
+              opacity: canSend() && !isTooLong && !isTooShort ? 1 : 0.5,
+            }}
+          >
+            {t('refinement.sendButton')}
+          </button>
+        )}
       </div>
     </div>
   );

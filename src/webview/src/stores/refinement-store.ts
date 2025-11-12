@@ -18,6 +18,7 @@ interface RefinementStore {
   conversationHistory: ConversationHistory | null;
   isProcessing: boolean;
   currentInput: string;
+  currentRequestId: string | null;
 
   // Actions
   openChat: () => void;
@@ -26,7 +27,7 @@ interface RefinementStore {
   loadConversationHistory: (history: ConversationHistory | undefined) => void;
   setInput: (input: string) => void;
   addUserMessage: (message: string) => void;
-  startProcessing: () => void;
+  startProcessing: (requestId: string) => void;
   handleRefinementSuccess: (
     aiMessage: ConversationMessage,
     updatedHistory: ConversationHistory
@@ -52,6 +53,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   conversationHistory: null,
   isProcessing: false,
   currentInput: '',
+  currentRequestId: null,
 
   // Actions
   openChat: () => {
@@ -110,8 +112,8 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     });
   },
 
-  startProcessing: () => {
-    set({ isProcessing: true });
+  startProcessing: (requestId: string) => {
+    set({ isProcessing: true, currentRequestId: requestId });
   },
 
   handleRefinementSuccess: (
@@ -121,11 +123,12 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     set({
       conversationHistory: updatedHistory,
       isProcessing: false,
+      currentRequestId: null,
     });
   },
 
   handleRefinementFailed: () => {
-    set({ isProcessing: false });
+    set({ isProcessing: false, currentRequestId: null });
   },
 
   clearHistory: () => {

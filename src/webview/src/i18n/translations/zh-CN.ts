@@ -291,6 +291,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'refinement.title': 'AI优化',
   'refinement.inputPlaceholder': '描述您想要的更改...',
   'refinement.sendButton': '发送',
+  'refinement.cancelButton': '取消',
   'refinement.processing': '处理中...',
   'refinement.charactersRemaining': '剩余 {count} 字符',
   'refinement.iterationCounter': '{current}/{max}',

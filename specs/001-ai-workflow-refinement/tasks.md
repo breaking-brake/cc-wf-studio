@@ -427,3 +427,57 @@ Task: "IterationCounter コンポーネントの作成 in src/webview/src/compon
 - [x] T053 [P3.3] UI動作確認: ドラッグ操作による幅調整、最小/最大幅の制限、幅の永続化と復元、PropertyPanelとRefinementChatPanelの両方での動作を確認
 
 **Checkpoint**: この時点で、ユーザーは自分の見やすい横幅にサイドバーを調整でき、その設定が次回起動時にも保持されるようになる
+
+---
+
+## Phase 3.4: AIで修正のキャンセル機能とタイムスタンプ改善 (UI/UX改善)
+
+**目的**: AI処理のキャンセル機能を追加し、チャットメッセージのタイムスタンプに日付を含めることで、操作性とユーザビリティを向上させる
+
+**背景**:
+- 現在、AIで修正の処理中にキャンセルする機能がない。処理が長引いた場合やユーザーが考え直した場合に、ユーザーは完了を待つしかない
+- AIで生成機能には既にキャンセル機能が実装されており、同様のUXをAIで修正にも提供すべき
+- チャットメッセージのタイムスタンプは時刻のみ表示され、日付が含まれていないため、古い会話の時期が分かりづらい
+
+**解決策**:
+1. **キャンセル機能の追加**:
+   - AIで生成機能の実装パターンを参考に、CANCEL_REFINEMENT / REFINEMENT_CANCELLED メッセージ型を追加
+   - 処理中の「送信」ボタンを「キャンセル」ボタンに変更
+   - キャンセル時はExtension Hostに通知し、進行中のAI処理を中止
+   - キャンセル後もチャットパネルは開いたままで、ユーザーは再試行可能
+
+2. **タイムスタンプに日付を追加**:
+   - MessageBubble コンポーネントのタイムスタンプ表示を `toLocaleTimeString()` から `toLocaleString()` に変更
+   - または、日付と時刻を別々にフォーマットして「YYYY/MM/DD HH:MM:SS」形式で表示
+   - 同日のメッセージは時刻のみ、異なる日のメッセージは日付を含める最適化も検討
+
+**設計方針**:
+- AIで生成機能のキャンセル実装を参考にする:
+  - `cancelWorkflowGeneration()` → `cancelWorkflowRefinement()`
+  - `CANCEL_GENERATION` → `CANCEL_REFINEMENT`
+  - `GENERATION_CANCELLED` → `REFINEMENT_CANCELLED`
+  - AIGenerationError の CANCELLED コード処理パターンを踏襲
+- Extension Host側でキャンセルリクエストを受信し、進行中のClaude Code CLI プロセスを終了
+- タイムスタンプは `toLocaleString()` を使用してブラウザのロケールに合わせた日付時刻表示
+
+**技術的考慮事項**:
+- Extension Host側: `handleRefineWorkflow()` でキャンセルリクエストを処理し、child processをkill
+- Webview側: `refineWorkflow()` Promiseで REFINEMENT_CANCELLED メッセージを受信してreject
+- RefinementChatPanel: キャンセル時はエラー表示せず、loading状態のみリセット
+- MessageInput: 処理中は送信ボタンを「キャンセル」に変更し、クリック時に `cancelWorkflowRefinement()` を呼び出す
+
+### Implementation for Phase 3.4
+
+- [x] T054 [P3.4] メッセージ型の追加: src/shared/types/messages.ts に CancelRefinementPayload, RefinementCancelledMessage 型を追加。WebviewMessage と ExtensionMessage のユニオン型に CANCEL_REFINEMENT と REFINEMENT_CANCELLED を追加
+- [x] T055 [P3.4] refinement-service へのキャンセル関数追加: src/webview/src/services/refinement-service.ts に `cancelWorkflowRefinement(requestId: string)` 関数を追加。ai-generation-service.ts の `cancelWorkflowGeneration()` パターンを参考
+- [x] T056 [P3.4] refineWorkflow() のキャンセル処理: src/webview/src/services/refinement-service.ts の `refineWorkflow()` Promise内で REFINEMENT_CANCELLED メッセージを受信時に WorkflowRefinementError (code: 'CANCELLED') をreject
+- [x] T057 [P3.4] Extension Host のキャンセルハンドラ実装: src/extension/commands/workflow-refinement.ts に `handleCancelRefinement()` 関数を追加し、進行中のrequestIdに紐づくClaude Code CLI プロセスをkillし、REFINEMENT_CANCELLED メッセージを送信
+- [x] T058 [P3.4] Extension メッセージハンドラの登録: src/extension/extension.ts に CANCEL_REFINEMENT メッセージハンドラを追加し、`handleCancelRefinement()` を呼び出す
+- [x] T059 [P3.4] RefinementChatPanel のキャンセル処理: src/webview/src/components/dialogs/RefinementChatPanel.tsx の `handleSend()` でキャンセルエラー (code: 'CANCELLED') を受信時はエラー表示せず、loading状態のみリセット。AiGenerationDialog.tsx:116-119 のパターンを参考
+- [x] T060 [P3.4] MessageInput のキャンセルボタン実装: src/webview/src/components/chat/MessageInput.tsx に `handleCancel()` 関数を追加。処理中は送信ボタンを「キャンセル」に変更し、クリック時に `cancelWorkflowRefinement(currentRequestId)` を呼び出す
+- [x] T061 [P3.4] refinement-store への requestId 管理: src/webview/src/stores/refinement-store.ts に `currentRequestId` 状態を追加し、`startProcessing(requestId)` で保存、処理完了/エラー時にクリア
+- [x] T062 [P3.4] MessageBubble のタイムスタンプ改善: src/webview/src/components/chat/MessageBubble.tsx のタイムスタンプ表示を `toLocaleTimeString()` から `toLocaleString()` に変更し、日付と時刻を両方表示
+- [x] T063 [P3.4] i18n翻訳キーの追加: src/webview/src/i18n/translations/ の5言語ファイルに `refinement.cancelButton` キーを追加
+- [x] T064 [P3.4] UI動作確認: キャンセルボタンの表示切り替え、キャンセル実行時のプロセス終了、キャンセル後の再試行、タイムスタンプの日付表示を確認
+
+**Checkpoint**: この時点で、ユーザーはAI処理をキャンセルでき、チャットメッセージの日時を正確に把握できるようになる

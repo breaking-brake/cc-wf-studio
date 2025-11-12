@@ -304,6 +304,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.title': 'AI로 수정',
   'refinement.inputPlaceholder': '변경하고 싶은 내용을 입력하세요...',
   'refinement.sendButton': '전송',
+  'refinement.cancelButton': '취소',
   'refinement.processing': '처리 중...',
   'refinement.charactersRemaining': '남은 문자 수: {count}',
   'refinement.iterationCounter': '{current}/{max}',
