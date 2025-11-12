@@ -52,12 +52,12 @@
 
 **⚠️ 重要**: このフェーズが完了するまで、ユーザーストーリーの作業は開始できません
 
-- [ ] T004 Refinement Service の作成: src/extension/services/refinement-service.ts を作成し、constructRefinementPrompt(), refineWorkflow() 関数を実装
-- [ ] T005 [P] File Service の拡張: src/extension/services/file-service.ts に会話履歴の保存・読み込み機能を追加
-- [ ] T006 [P] Workflow Refinement コマンドハンドラの作成: src/extension/commands/workflow-refinement.ts を作成し、handleRefineWorkflow(), handleClearConversation() を実装
-- [ ] T007 Extension メッセージハンドラの登録: src/extension/extension.ts にREFINE_WORKFLOW, CLEAR_CONVERSATIONメッセージハンドラを追加
-- [ ] T008 Zustand ストアの作成: src/webview/src/stores/refinement-store.ts を作成し、チャット状態管理を実装
-- [ ] T009 [P] Refinement Service (Webview) の作成: src/webview/src/services/refinement-service.ts を作成し、sendRefinementRequest(), clearConversation() を実装
+- [x] T004 Refinement Service の作成: src/extension/services/refinement-service.ts を作成し、constructRefinementPrompt(), refineWorkflow() 関数を実装
+- [x] T005 [P] File Service の拡張: src/extension/services/file-service.ts に会話履歴の保存・読み込み機能を追加 (既存のFileServiceで対応可能なためスキップ)
+- [x] T006 [P] Workflow Refinement コマンドハンドラの作成: src/extension/commands/workflow-refinement.ts を作成し、handleRefineWorkflow(), handleClearConversation() を実装
+- [x] T007 Extension メッセージハンドラの登録: src/extension/extension.ts にREFINE_WORKFLOW, CLEAR_CONVERSATIONメッセージハンドラを追加
+- [x] T008 Zustand ストアの作成: src/webview/src/stores/refinement-store.ts を作成し、チャット状態管理を実装
+- [x] T009 [P] Refinement Service (Webview) の作成: src/webview/src/services/refinement-service.ts を作成し、sendRefinementRequest(), clearConversation() を実装
 
 **Checkpoint**: 基盤準備完了 - ユーザーストーリーの実装を並列で開始可能
 
