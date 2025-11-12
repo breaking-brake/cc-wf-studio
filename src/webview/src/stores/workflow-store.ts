@@ -7,6 +7,7 @@
 
 import type { Workflow } from '@shared/types/messages';
 import { NodeType } from '@shared/types/workflow-definition';
+import type { WorkflowNode } from '@shared/types/workflow-definition';
 import type { Edge, Node, OnConnect, OnEdgesChange, OnNodesChange } from 'reactflow';
 import { addEdge, applyEdgeChanges, applyNodeChanges } from 'reactflow';
 import { create } from 'zustand';
@@ -103,6 +104,70 @@ export function createEmptyWorkflow(): Workflow {
       },
     ],
     connections: [],
+    conversationHistory: undefined,
+  };
+}
+
+/**
+ * Phase 3.13: キャンバスの実際の状態からワークフローを生成するヘルパー関数
+ * React FlowのNode/EdgeをWorkflow型に変換する
+ *
+ * @param nodes - React Flowのノード配列
+ * @param edges - React Flowのエッジ配列
+ * @returns Workflow - 生成されたワークフローオブジェクト
+ */
+export function createWorkflowFromCanvas(nodes: Node[], edges: Edge[]): Workflow {
+  const now = new Date();
+
+  // ノードが全くない場合はデフォルトのStart/Endノードを含める
+  let workflowNodes: WorkflowNode[];
+  if (nodes.length === 0) {
+    workflowNodes = [
+      {
+        id: 'start-node-default',
+        name: 'Start',
+        type: NodeType.Start,
+        position: { x: 100, y: 200 },
+        data: { label: 'Start' },
+      },
+      {
+        id: 'end-node-default',
+        name: 'End',
+        type: NodeType.End,
+        position: { x: 600, y: 200 },
+        data: { label: 'End' },
+      },
+    ];
+  } else {
+    // React FlowのNodeをWorkflowNodeに変換
+    workflowNodes = nodes.map((node) => ({
+      id: node.id,
+      name: node.data?.label || node.id,
+      type: node.type as NodeType,
+      position: node.position,
+      data: node.data,
+    })) as WorkflowNode[];
+  }
+
+  // React FlowのEdgeをConnectionに変換
+  const connections = edges.map((edge) => ({
+    id: edge.id,
+    from: edge.source,
+    to: edge.target,
+    fromPort: edge.sourceHandle || 'default',
+    toPort: edge.targetHandle || 'default',
+    condition: edge.data?.condition,
+  }));
+
+  return {
+    id: `workflow-${Date.now()}-${Math.random()}`,
+    name: 'Untitled Workflow',
+    description: 'Created with AI refinement',
+    version: '1.0.0',
+    createdAt: now,
+    updatedAt: now,
+    nodes: workflowNodes,
+    connections,
     conversationHistory: undefined,
   };
 }

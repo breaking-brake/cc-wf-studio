@@ -926,3 +926,56 @@ Phase 3.5でSkillノードの出力ポート制約をAIに伝えたが、新た�
 **Checkpoint**: Phase 3.12 完了後、空のキャンバスから直接「AIで修正」を使ってワークフローを作成できるようになり、「AIで生成」と「AIで修正」のどちらから始めても良い柔軟なUXを実現。初期表示には簡潔な説明文を表示し、ユーザーに使い方を案内
 
 ---
+
+### Phase 3.13: キャンバスの実際の状態をAI修正に反映
+
+**目的**: 初回の「AIで修正」実行時に、空のワークフロー（StartとEndのみ）ではなく、キャンバス上の実際のノード配置状態をAIに渡すようにする
+
+**現状の問題**:
+- Phase 3.12で、activeWorkflowがない場合は自動的に空のワークフロー（StartとEndノードのみ）を生成している
+- ユーザーが手動でノードを配置した後に「AIで修正」を押した場合、その配置状態がAIに渡されず、空のワークフローから開始される
+- ユーザーの意図：手動で配置したノードを基にAIに修正してほしい
+
+**実装方針**:
+- `createEmptyWorkflow()`の代わりに、現在のキャンバス状態（nodes, edges）から実際のWorkflowオブジェクトを生成する`createWorkflowFromCanvas()`を実装
+- 手動で配置されたノードがある場合はそれらを含むワークフローをAIに渡す
+- ノードが全くない場合はデフォルトのStart/Endノードのみを含む
+
+**設計上の利点**:
+- ユーザーが手動で配置したノードを尊重
+- AIがユーザーの意図をより正確に理解できる
+- 「手動配置 + AI修正」という柔軟なワークフロー作成方法を提供
+
+**影響範囲**:
+- `src/webview/src/stores/workflow-store.ts` (createWorkflowFromCanvas関数追加)
+- `src/webview/src/components/Toolbar.tsx` (handleOpenRefinementChatを修正)
+
+#### Tasks
+
+- [x] **[P3.13] T110**: workflow-storeにcreateWorkflowFromCanvas関数を追加
+  - **File**: `src/webview/src/stores/workflow-store.ts`
+  - **Action**: `createWorkflowFromCanvas(nodes: Node[], edges: Edge[]): Workflow`関数を実装 ✓
+    - 現在のキャンバス状態（nodes, edges）からWorkflowオブジェクトを生成
+    - React FlowのNode/EdgeをWorkflow型のnodes/connectionsに変換
+    - ワークフローIDはユニークに生成（`workflow-${Date.now()}-${Math.random()}`）
+    - 名前は"Untitled Workflow"
+    - conversationHistoryは未定義（後でrefinement-storeが初期化）
+    - ノードが全くない場合はデフォルトのStart/Endノードを含める
+    - WorkflowNode型注釈を追加してlintエラーを解消
+
+- [x] **[P3.13] T111**: Toolbarの「AIで修正」ロジックを変更
+  - **File**: `src/webview/src/components/Toolbar.tsx`
+  - **Action**: `handleOpenRefinementChat`を修正 ✓
+    - activeWorkflowがnullの場合、`createWorkflowFromCanvas(nodes, edges)`を呼び出す
+    - `createEmptyWorkflow()`の代わりに`createWorkflowFromCanvas()`をimport
+    - キャンバスの実際の状態がWorkflowとしてAIに渡されるようにする
+
+- [x] **[P3.13] T112**: 動作確認とビルドテスト
+  - **Actions**:
+    - `npm run build`でビルドエラーがないことを確認 ✓
+    - `npm run lint`でlintエラーがないことを確認 ✓
+    - 実際の動作確認は拡張機能実行時にユーザーが検証
+
+**Checkpoint**: Phase 3.13 完了後、初回「AIで修正」実行時にキャンバスの実際の状態がAIに渡され、ユーザーが手動で配置したノードを基にAIが修正を行うようになる。これにより、「手動配置 + AI修正」という柔軟なワークフロー作成方法が実現される。
+
+---

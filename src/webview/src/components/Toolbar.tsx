@@ -16,7 +16,7 @@ import {
   validateWorkflow,
 } from '../services/workflow-service';
 import { useRefinementStore } from '../stores/refinement-store';
-import { createEmptyWorkflow, useWorkflowStore } from '../stores/workflow-store';
+import { createWorkflowFromCanvas, useWorkflowStore } from '../stores/workflow-store';
 import { ProcessingOverlay } from './common/ProcessingOverlay';
 import { AiGenerationDialog } from './dialogs/AiGenerationDialog';
 
@@ -197,13 +197,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
     }
   };
 
-  // Phase 3.12: Always enable refinement, auto-generate empty workflow if needed
+  // Phase 3.13: Always enable refinement, generate workflow from current canvas state
   const handleOpenRefinementChat = () => {
     let workflow = activeWorkflow;
 
-    // If no active workflow exists, create an empty one
+    // If no active workflow exists, create one from current canvas state
     if (!workflow) {
-      workflow = createEmptyWorkflow();
+      workflow = createWorkflowFromCanvas(nodes, edges);
       setActiveWorkflow(workflow);
     }
 
