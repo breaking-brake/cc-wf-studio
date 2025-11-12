@@ -25,6 +25,7 @@ interface RefinementStore {
   initConversation: () => void;
   loadConversationHistory: (history: ConversationHistory | undefined) => void;
   setInput: (input: string) => void;
+  addUserMessage: (message: string) => void;
   startProcessing: () => void;
   handleRefinementSuccess: (
     aiMessage: ConversationMessage,
@@ -86,8 +87,31 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     set({ currentInput: input });
   },
 
+  addUserMessage: (message: string) => {
+    const history = get().conversationHistory;
+    if (!history) {
+      return;
+    }
+
+    const userMessage: ConversationMessage = {
+      id: `msg-${Date.now()}-${Math.random()}`,
+      sender: 'user',
+      content: message,
+      timestamp: new Date().toISOString(),
+    };
+
+    set({
+      conversationHistory: {
+        ...history,
+        messages: [...history.messages, userMessage],
+        updatedAt: new Date().toISOString(),
+      },
+      currentInput: '',
+    });
+  },
+
   startProcessing: () => {
-    set({ isProcessing: true, currentInput: '' });
+    set({ isProcessing: true });
   },
 
   handleRefinementSuccess: (

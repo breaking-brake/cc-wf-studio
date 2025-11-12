@@ -6,7 +6,6 @@
  */
 
 import type { ConversationMessage } from '@shared/types/workflow-definition';
-import type React from 'react';
 
 interface MessageBubbleProps {
   message: ConversationMessage;

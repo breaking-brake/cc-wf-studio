@@ -356,3 +356,34 @@ Task: "IterationCounter コンポーネントの作成 in src/webview/src/compon
 - [x] T044 [P3.1] UI動作確認: 「AIで修正」ボタンクリック時の切り替え動作、閉じるボタンでPropertyPanelへの復帰、スタイル整合性(幅、背景色、ボーダー)、スクロール動作を確認
 
 **Checkpoint**: この時点で、AIで修正機能がサイドバーとして自然に統合され、ワークフローを見ながらAI会話が可能になる
+
+---
+
+## Phase 3.2: AIで修正の送信フィードバック改善 (UI/UX改善)
+
+**目的**: ユーザーがチャットで指示を送信した後、指示が処理中であることを明確にフィードバックすることで、操作感を向上させる
+
+**課題**:
+- 現在の実装では、ユーザーがメッセージを送信してもUIに即座に反映されないため、「送信されたのか?」「処理中なのか?」が分かりづらい
+- AIで生成機能には進捗バーがあるが、AIで修正にはない
+- ユーザーは自分の発言が送信されたことを確認できない
+
+**解決策**:
+1. **即座のメッセージ表示**: ユーザーがメッセージを送信したら、チャット履歴に即座に自分の発言を表示
+2. **プログレスバーの追加**: AIで生成と同様に、処理中を示すプログレスバーをチャット入力エリアまたはチャットパネル内に表示
+3. **送信ボタンの無効化**: 処理中は送信ボタンを無効化し、重複送信を防止
+
+**設計方針**:
+- `MessageInput` コンポーネントにプログレスバー表示機能を追加
+- `refinement-store` の `isProcessing` 状態を活用
+- ユーザーメッセージは送信直後に `conversationHistory` に追加し、UIに即座に反映
+- AI応答は従来通りバックエンドからの成功レスポンス後に追加
+
+### Implementation for Phase 3.2
+
+- [x] T045 [P3.2] MessageInput のプログレスバー実装: src/webview/src/components/chat/MessageInput.tsx にプログレスバー表示機能を追加。`useRefinementStore().isProcessing` に基づいてプログレスバーを表示・非表示。送信ボタンを処理中は無効化
+- [x] T046 [P3.2] refinement-store のメッセージ送信フロー改善: src/webview/src/stores/refinement-store.ts にユーザーメッセージの即座追加機能を実装。`startProcessing()` 前にユーザーメッセージを `conversationHistory.messages` に追加する処理を追加
+- [x] T047 [P3.2] RefinementChatPanel のメッセージ送信ロジック更新: src/webview/src/components/dialogs/RefinementChatPanel.tsx の `handleSend()` を修正し、メッセージ送信直後にユーザーメッセージをストアに追加。AI応答受信後は従来通り `handleRefinementSuccess()` で追加
+- [x] T048 [P3.2] UI動作確認: メッセージ送信時の即座表示、プログレスバーの表示・非表示、送信ボタンの無効化・有効化、エラー時の挙動を確認
+
+**Checkpoint**: この時点で、ユーザーはメッセージ送信が成功したことを即座に確認でき、処理中であることも明確に分かるようになる

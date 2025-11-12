@@ -22,6 +22,7 @@ export function RefinementChatPanel() {
     closeChat,
     conversationHistory,
     loadConversationHistory,
+    addUserMessage,
     startProcessing,
     handleRefinementSuccess,
     handleRefinementFailed,
@@ -44,6 +45,9 @@ export function RefinementChatPanel() {
       return;
     }
 
+    // Add user message to conversation history immediately for instant feedback
+    addUserMessage(message);
+
     const requestId = `refine-${Date.now()}-${Math.random()}`;
     startProcessing();
 
@@ -59,7 +63,7 @@ export function RefinementChatPanel() {
       // Update workflow in store
       updateWorkflow(result.refinedWorkflow);
 
-      // Update refinement store
+      // Update refinement store with AI response
       handleRefinementSuccess(result.aiMessage, result.updatedConversationHistory);
     } catch (error) {
       console.error('Refinement failed:', error);
