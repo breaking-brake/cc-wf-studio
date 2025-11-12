@@ -98,13 +98,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
       if (message.type === 'WORKFLOW_LIST_LOADED') {
         setWorkflows(message.payload?.workflows || []);
       } else if (message.type === 'LOAD_WORKFLOW') {
-        // Load workflow into canvas
+        // Phase 5 (T025): Load workflow into canvas and set as active workflow
         const workflow: Workflow = message.payload?.workflow;
         if (workflow) {
           const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(workflow);
           setNodes(loadedNodes);
           setEdges(loadedEdges);
           setWorkflowName(workflow.name);
+          // Set as active workflow to preserve conversation history
+          setActiveWorkflow(workflow);
         }
       } else if (message.type === 'EXPORT_SUCCESS') {
         setIsExporting(false);
@@ -116,7 +118,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
 
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, [setNodes, setEdges]);
+  }, [setNodes, setEdges, setActiveWorkflow]);
 
   // Load workflow list on mount
   useEffect(() => {

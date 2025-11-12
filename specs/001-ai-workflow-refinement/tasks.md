@@ -179,7 +179,7 @@
 ### Implementation for User Story 3
 
 - [x] T024 [US3] 会話履歴のシリアライズ: ワークフローJSONに conversationHistory フィールドを保存する機能を実装（src/webview/src/services/workflow-service.ts, src/webview/src/components/Toolbar.tsx）
-- [x] T025 [US3] 会話履歴のデシリアライズ: ワークフロー読み込み時に conversationHistory を復元する機能を実装（src/extension/services/file-service.ts）
+- [x] T025 [US3] 会話履歴のデシリアライズ: ワークフロー読み込み時に conversationHistory を復元する機能を実装（src/extension/commands/load-workflow.ts, src/webview/src/components/Toolbar.tsx）
 - [x] T026 [US3] チャットパネル開閉時の履歴復元: openChat() 時に既存の conversationHistory をストアに読み込む処理を実装（src/webview/src/stores/refinement-store.ts）
 - [x] T027 [US3] 初回使用時の履歴初期化: conversationHistory が null の場合、initConversation() で空の履歴を初期化（src/webview/src/stores/refinement-store.ts）
 - [x] T028 [US3] 拡張機能リロード対応: ワークフローストアとの統合により、リロード後も conversationHistory が復元されることを確認（src/webview/src/stores/workflow-store.ts, refinement-store.ts）
