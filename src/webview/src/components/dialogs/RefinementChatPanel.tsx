@@ -83,9 +83,6 @@ export function RefinementChatPanel() {
       // Update refinement store with AI response
       handleRefinementSuccess(result.aiMessage, result.updatedConversationHistory);
     } catch (error) {
-      // Phase 3.7: Remove loading state
-      updateMessageLoadingState(aiMessageId, false);
-
       // Handle cancellation - don't show error, just reset loading state
       if (error instanceof WorkflowRefinementError && error.code === 'CANCELLED') {
         // Loading state will be reset in handleRefinementFailed
@@ -93,7 +90,7 @@ export function RefinementChatPanel() {
         return;
       }
 
-      // Phase 3.8: Set error state on AI message
+      // Phase 3.9: Set error state on AI message (loading state is cleared automatically)
       if (error instanceof WorkflowRefinementError) {
         updateMessageErrorState(
           aiMessageId,
@@ -119,7 +116,7 @@ export function RefinementChatPanel() {
   };
 
   // Phase 3.8: Retry handler for failed refinements
-  const handleRetry = (messageId: string) => {
+  const handleRetry = async (messageId: string) => {
     if (!conversationHistory) {
       return;
     }
@@ -141,12 +138,60 @@ export function RefinementChatPanel() {
       return;
     }
 
-    // Remove the error message from history
-    updateMessageErrorState(messageId, false);
-    updateMessageLoadingState(messageId, true);
+    // Phase 3.9: Reuse existing AI message for retry (don't create new message)
+    const aiMessageId = messageId;
 
-    // Retry the refinement with the same user message
-    handleSend(userMessage.content);
+    // Reset error state and set loading state
+    updateMessageErrorState(aiMessageId, false);
+    updateMessageLoadingState(aiMessageId, true);
+
+    const requestId = `refine-${Date.now()}-${Math.random()}`;
+    startProcessing(requestId);
+
+    try {
+      const result = await refineWorkflow(
+        activeWorkflow.id,
+        userMessage.content,
+        activeWorkflow,
+        conversationHistory,
+        requestId
+      );
+
+      // Update workflow in store
+      updateWorkflow(result.refinedWorkflow);
+
+      // Update existing message with actual AI response content
+      updateMessageContent(aiMessageId, result.aiMessage.content);
+      updateMessageLoadingState(aiMessageId, false);
+
+      // Update refinement store with AI response
+      handleRefinementSuccess(result.aiMessage, result.updatedConversationHistory);
+    } catch (error) {
+      // Handle cancellation - don't show error, just reset loading state
+      if (error instanceof WorkflowRefinementError && error.code === 'CANCELLED') {
+        handleRefinementFailed();
+        return;
+      }
+
+      // Phase 3.9: Set error state on AI message (loading state is cleared automatically)
+      if (error instanceof WorkflowRefinementError) {
+        updateMessageErrorState(
+          aiMessageId,
+          true,
+          error.code as
+            | 'COMMAND_NOT_FOUND'
+            | 'TIMEOUT'
+            | 'PARSE_ERROR'
+            | 'VALIDATION_ERROR'
+            | 'UNKNOWN_ERROR'
+        );
+      } else {
+        updateMessageErrorState(aiMessageId, true, 'UNKNOWN_ERROR');
+      }
+
+      console.error('Refinement retry failed:', error);
+      handleRefinementFailed();
+    }
   };
 
   return (

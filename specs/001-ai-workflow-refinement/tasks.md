@@ -733,3 +733,47 @@ Phase 3.5でSkillノードの出力ポート制約をAIに伝えたが、新た�
 - [x] T090 [P3.8] ビルド検証と動作確認: `npm run build` でTypeScriptコンパイル成功を確認。型エラーを修正して正常にビルド完了
 
 **Checkpoint**: ✅ Phase 3.8 完了。この時点で、ユーザーはエラー発生時に何が起きたかを理解でき、ワンクリックでリトライできるようになる。タイムアウト時間も統一され（90秒）、AI修正の成功率が向上する
+
+---
+
+## Phase 3.9: エラー時のローディング表示残存問題の修正
+
+**問題**: タイムアウトやエラー発生時、ローディング中のAI吹き出しがそのまま残り、新しいエラー吹き出しとは別に表示されてしまう
+
+**現在の挙動**:
+```
+[ユーザー] ワークフローを改善して
+[AI] AIがリクエストを処理中です... 95% 90s/90s  ← これが残る
+[AI] ⚠️ AI修正がタイムアウトしました... [リトライ]
+```
+
+**期待される挙動**:
+```
+[ユーザー] ワークフローを改善して
+[AI] ⚠️ AI修正がタイムアウトしました... [リトライ]
+```
+
+**根本原因**:
+- RefinementChatPanel.tsx で `updateMessageLoadingState(aiMessageId, false)` を呼んだ後、`updateMessageErrorState()` を呼んでいる
+- 2つの状態更新の間でメッセージが空の状態になる
+
+**解決方針**:
+- `updateMessageErrorState()` 内で `isLoading: false` も同時に設定
+- RefinementChatPanel.tsx から `updateMessageLoadingState()` の呼び出しを削除
+- MessageBubble.tsx で `isError` が true の場合は `isLoading` を無視
+
+### Implementation for Phase 3.9
+
+- [x] T091 [P3.9] refinement-store のエラー設定時にローディングもクリア: src/webview/src/stores/refinement-store.ts の `updateMessageErrorState()` メソッドで `isLoading: false` も同時に設定 (line 244)
+- [x] T092 [P3.9] RefinementChatPanel のローディング解除処理を削除: src/webview/src/components/dialogs/RefinementChatPanel.tsx の catch ブロックから `updateMessageLoadingState(aiMessageId, false)` を削除 (line 85-93)
+- [x] T093 [P3.9] MessageBubble のローディング表示条件を修正: src/webview/src/components/chat/MessageBubble.tsx で `const isLoading = (message.isLoading ?? false) && !isError;` として、エラー時はローディングを表示しない (line 27)
+- [x] T094 [P3.9] ビルド検証と動作確認: `npm run build` でコンパイル成功を確認。タイムアウト時にローディング表示が残らないことを確認
+
+**Issue Found**: リトライボタン押下時に既存エラーメッセージ+新規ローディングメッセージの2つが同時表示される問題を発見
+
+### Additional Implementation for Phase 3.9 (Retry Fix)
+
+- [x] T095 [P3.9] handleRetry のリトライロジック修正: src/webview/src/components/dialogs/RefinementChatPanel.tsx の `handleRetry()` を async 関数に変更し、`handleSend()` を呼ばずにリトライ専用処理フローを実装。既存のエラーメッセージIDを再利用してローディング状態に変換し、refinement 処理結果を同じメッセージに反映 (lines 119-195)
+- [x] T096 [P3.9] ビルド検証と動作確認: `npm run build` でコンパイル成功を確認。リトライ時に新しいメッセージが作成されず、既存メッセージが再利用されることを確認
+
+**Checkpoint**: ✅ Phase 3.9 完了。この修正により、エラー発生時にローディング中のメッセージが残らず、エラーメッセージのみが表示されるようになる。また、リトライ時は既存のエラーメッセージがローディング状態に変換され、新しいメッセージが作成されなくなる

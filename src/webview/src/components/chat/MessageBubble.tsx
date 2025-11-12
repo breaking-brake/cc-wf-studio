@@ -20,9 +20,11 @@ interface MessageBubbleProps {
 export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
   const { t } = useTranslation();
   const isUser = message.sender === 'user';
-  const isLoading = message.isLoading ?? false;
   const isError = message.isError ?? false;
   const errorCode = message.errorCode;
+
+  // Phase 3.9: Don't show loading when error state is active
+  const isLoading = (message.isLoading ?? false) && !isError;
 
   // Get error message info if this is an error message
   const errorMessageInfo = isError && errorCode ? getErrorMessageInfo(errorCode) : null;

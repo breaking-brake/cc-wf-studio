@@ -241,7 +241,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     }
 
     const updatedMessages = history.messages.map((msg) =>
-      msg.id === messageId ? { ...msg, isError, errorCode } : msg
+      msg.id === messageId ? { ...msg, isError, errorCode, isLoading: false } : msg
     );
 
     set({
