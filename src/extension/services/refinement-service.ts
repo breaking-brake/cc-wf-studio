@@ -9,6 +9,7 @@ import type { ConversationHistory, Workflow } from '../../shared/types/workflow-
 import { log } from '../extension';
 import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
 import { executeClaudeCodeCLI, parseClaudeCodeOutput } from './claude-code-service';
+import { getDefaultSchemaPath, loadWorkflowSchema } from './schema-loader-service';
 
 export interface RefinementResult {
   success: boolean;
@@ -27,12 +28,14 @@ export interface RefinementResult {
  * @param currentWorkflow - The current workflow state
  * @param conversationHistory - Full conversation history
  * @param userMessage - User's current refinement request
+ * @param schema - Workflow schema for node type validation
  * @returns Prompt string for Claude Code CLI
  */
 export function constructRefinementPrompt(
   currentWorkflow: Workflow,
   conversationHistory: ConversationHistory,
-  userMessage: string
+  userMessage: string,
+  schema: unknown
 ): string {
   // Get last 6 messages (3 rounds of user-AI conversation)
   // This provides sufficient context without overwhelming the prompt
@@ -43,6 +46,8 @@ export function constructRefinementPrompt(
       ? `**Conversation History** (last ${recentMessages.length} messages):
 ${recentMessages.map((msg) => `[${msg.sender.toUpperCase()}]: ${msg.content}`).join('\n')}\n`
       : '**Conversation History**: (This is the first message)\n';
+
+  const schemaJSON = JSON.stringify(schema, null, 2);
 
   return `You are an expert workflow designer for Claude Code Workflow Studio.
 
@@ -63,6 +68,19 @@ ${userMessage}
 5. Respect node IDs - do not regenerate IDs for unchanged nodes
 6. Update only what the user requested - minimize unnecessary changes
 
+**Skill Node Constraints**:
+- Skill nodes MUST have exactly 1 output port (outputPorts: 1)
+- If branching is needed after Skill execution, add an ifElse or switch node after the Skill node
+- Never modify Skill node's outputPorts field
+
+**Branching Node Selection**:
+- Use ifElse node for 2-way conditional branching (true/false)
+- Use switch node for 3+ way branching or multiple conditions
+- Each branch output should connect to exactly one downstream node - never create serial connections from different branch outputs
+
+**Workflow Schema** (reference for valid node types and structure):
+${schemaJSON}
+
 **Output Format**: Output ONLY valid JSON matching the Workflow interface. Do not include markdown code blocks or explanations.`;
 }
 
@@ -72,6 +90,7 @@ ${userMessage}
  * @param currentWorkflow - The current workflow state
  * @param conversationHistory - Full conversation history
  * @param userMessage - User's current refinement request
+ * @param extensionPath - VSCode extension path for schema loading
  * @param timeoutMs - Timeout in milliseconds (default: 60000)
  * @param requestId - Optional request ID for cancellation support
  * @returns Refinement result with success status and refined workflow or error
@@ -80,6 +99,7 @@ export async function refineWorkflow(
   currentWorkflow: Workflow,
   conversationHistory: ConversationHistory,
   userMessage: string,
+  extensionPath: string,
   timeoutMs = 60000,
   requestId?: string
 ): Promise<RefinementResult> {
@@ -95,10 +115,36 @@ export async function refineWorkflow(
   });
 
   try {
-    // Step 1: Construct refinement prompt
-    const prompt = constructRefinementPrompt(currentWorkflow, conversationHistory, userMessage);
+    // Step 1: Load workflow schema
+    const schemaPath = getDefaultSchemaPath(extensionPath);
+    const schemaResult = await loadWorkflowSchema(schemaPath);
 
-    // Step 2: Execute Claude Code CLI
+    if (!schemaResult.success || !schemaResult.schema) {
+      log('ERROR', 'Failed to load workflow schema', {
+        requestId,
+        errorMessage: schemaResult.error?.message,
+      });
+
+      return {
+        success: false,
+        error: {
+          code: 'UNKNOWN_ERROR',
+          message: 'Failed to load workflow schema',
+          details: schemaResult.error?.message,
+        },
+        executionTimeMs: Date.now() - startTime,
+      };
+    }
+
+    // Step 2: Construct refinement prompt
+    const prompt = constructRefinementPrompt(
+      currentWorkflow,
+      conversationHistory,
+      userMessage,
+      schemaResult.schema
+    );
+
+    // Step 3: Execute Claude Code CLI
     const cliResult = await executeClaudeCodeCLI(prompt, timeoutMs, requestId);
 
     if (!cliResult.success || !cliResult.output) {

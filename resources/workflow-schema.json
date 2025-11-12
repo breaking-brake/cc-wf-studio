@@ -81,7 +81,7 @@
       "outputPorts": "2-4"
     },
     "ifElse": {
-      "description": "Two-way conditional branching (if/else)",
+      "description": "Two-way conditional branching (if/else). Use for 2-way branching only (true/false).",
       "fields": {
         "evaluationTarget": { "type": "string", "required": false },
         "branches": {
@@ -100,7 +100,7 @@
       "outputPorts": 2
     },
     "switch": {
-      "description": "Multi-way branching (switch/case)",
+      "description": "Multi-way branching (switch/case). Use for 3+ way branching - ideal for time-based, case-based, or multi-condition routing.",
       "fields": {
         "evaluationTarget": { "type": "string", "required": false },
         "branches": {
@@ -120,7 +120,7 @@
       "outputPorts": "2-10"
     },
     "skill": {
-      "description": "Reference a Claude Code Skill (specialized agent capability defined in SKILL.md files). Use when user description matches a Skill's documented purpose.",
+      "description": "Reference a Claude Code Skill (specialized agent capability defined in SKILL.md files). Use when user description matches a Skill's documented purpose. **Important: Skills always have exactly 1 output port. For conditional branching based on Skill results, add an ifElse or switch node after the Skill node.**",
       "fields": {
         "name": {
           "type": "string",

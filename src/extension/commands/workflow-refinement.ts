@@ -26,11 +26,13 @@ import { refineWorkflow } from '../services/refinement-service';
  * @param payload - Refinement request from Webview
  * @param webview - Webview to send response messages to
  * @param requestId - Request ID for correlation
+ * @param extensionPath - VSCode extension path for schema loading
  */
 export async function handleRefineWorkflow(
   payload: RefineWorkflowPayload,
   webview: vscode.Webview,
-  requestId: string
+  requestId: string,
+  extensionPath: string
 ): Promise<void> {
   const { workflowId, userMessage, currentWorkflow, conversationHistory, timeoutMs } = payload;
   const startTime = Date.now();
@@ -69,6 +71,7 @@ export async function handleRefineWorkflow(
       currentWorkflow,
       conversationHistory,
       userMessage,
+      extensionPath,
       timeoutMs,
       requestId
     );

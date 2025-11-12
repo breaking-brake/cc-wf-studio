@@ -260,7 +260,8 @@ function validateSkillNode(node: WorkflowNode): ValidationError[] {
   if (skillData.outputPorts !== VALIDATION_RULES.SKILL.OUTPUT_PORTS) {
     errors.push({
       code: 'SKILL_INVALID_PORTS',
-      message: 'Skill outputPorts must equal 1',
+      message:
+        'Skill outputPorts must equal 1. For branching, use ifElse or switch nodes after the Skill node.',
       field: `nodes[${node.id}].data.outputPorts`,
     });
   }

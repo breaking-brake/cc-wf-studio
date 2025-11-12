@@ -256,7 +256,12 @@ export function registerOpenEditorCommand(
           case 'REFINE_WORKFLOW':
             // AI-assisted workflow refinement
             if (message.payload) {
-              await handleRefineWorkflow(message.payload, webview, message.requestId || '');
+              await handleRefineWorkflow(
+                message.payload,
+                webview,
+                message.requestId || '',
+                context.extensionPath
+              );
             } else {
               webview.postMessage({
                 type: 'REFINEMENT_FAILED',

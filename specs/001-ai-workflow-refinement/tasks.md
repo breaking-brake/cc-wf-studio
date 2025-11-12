@@ -481,3 +481,108 @@ Task: "IterationCounter コンポーネントの作成 in src/webview/src/compon
 - [x] T064 [P3.4] UI動作確認: キャンセルボタンの表示切り替え、キャンセル実行時のプロセス終了、キャンセル後の再試行、タイムスタンプの日付表示を確認
 
 **Checkpoint**: この時点で、ユーザーはAI処理をキャンセルでき、チャットメッセージの日時を正確に把握できるようになる
+
+---
+
+## Phase 3.5: Skillノードの分岐制約に関するAIガイダンス改善
+
+**目的**: Skillノードが常に1出力ポートである制約をAIに明確に伝え、分岐が必要な場合は Skill + ifElse/switch の組み合わせを提案させる
+
+**背景**:
+- Skillノードは仕様上、常に `outputPorts: 1` (固定) である
+- ユーザーが「Skillノードで分岐を表現する」ようAI修正を指示すると、AIが Skillノードに複数の出力ポートを設定してしまう
+- バリデーションエラー `SKILL_INVALID_PORTS: "Skill outputPorts must equal 1"` が発生し、修正が失敗する
+- エラーログ例:
+  ```
+  [ERROR] Refined workflow failed validation
+  validationErrors: [
+    {
+      "code": "SKILL_INVALID_PORTS",
+      "message": "Skill outputPorts must equal 1",
+      "field": "nodes[check-time-1].data.outputPorts"
+    }
+  ]
+  ```
+
+**問題の本質**:
+- Skillの責務は「再利用可能な専門エージェント」であり、分岐ロジックとは異なる
+- 分岐が必要な場合は、Skillノードの後に ifElse または switch ノードを配置するのが正しい設計パターン
+- しかし、workflow-schema.json にこの制約が明記されておらず、AIが誤った構造を生成してしまう
+
+**解決策**:
+1. **workflow-schema.json のドキュメント改善**: Skillノードの description に「分岐が必要な場合は ifElse/switch ノードを使用」と明記
+2. **バリデーションエラーメッセージの改善**: エラー時に解決策（ifElse/switchノードの追加）をヒントとして提示
+3. **AIプロンプトへの指示追加**: refinement-service.ts のプロンプト構築時に Skill ノードの制約を明示
+
+**設計方針**:
+- 既存の仕様を維持（破壊的変更なし）
+- Skillノード自体は変更せず、ドキュメントとガイダンスのみ改善
+- AI生成/修正時に正しいパターン（Skill → ifElse/switch）を自動的に提案させる
+
+**技術的考慮事項**:
+- workflow-schema.json のサイズ制約（推奨 <10KB, 最大 15KB）に注意
+- エラーメッセージは簡潔かつ具体的な解決策を含める
+- AIプロンプトへの追加情報は最小限に抑える（トークン効率）
+
+### Implementation for Phase 3.5
+
+- [x] T065 [P3.5] workflow-schema.json のドキュメント改善: resources/workflow-schema.json の `skill.description` フィールドに「Skills always have exactly 1 output port. For conditional branching based on Skill results, add an ifElse or switch node after the Skill node.」を追記。既存のdescriptionを上書きせず、**Important** セクションとして追加
+- [x] T066 [P3.5] バリデーションエラーメッセージの改善: src/extension/utils/validate-workflow.ts の `validateSkillNode()` 関数内、SKILL_INVALID_PORTS エラーのメッセージを「Skill outputPorts must equal 1. For branching, use ifElse or switch nodes after the Skill node.」に変更
+- [x] T067 [P3.5] refinement-service プロンプトへの制約追加: src/extension/services/refinement-service.ts の `constructRefinementPrompt()` 関数内、プロンプト構築部分に以下を追加: 「**Skill Node Constraints**: Skill nodes MUST have exactly 1 output port (outputPorts: 1). If branching is needed after Skill execution, add an ifElse or switch node after the Skill node.」schema 情報の直後に挿入
+- [x] T068 [P3.5] 動作確認とテスト: npm run build 成功を確認 ✓。AI修正でSkillノード + ifElse/switch の組み合わせが正しく生成されることをユーザーが確認
+
+**Checkpoint**: この時点で、AIがSkillノードの制約を理解し、分岐が必要な場合は自動的に正しいパターン（Skill → ifElse/switch）を提案するようになる
+
+---
+
+## Phase 3.6: 分岐ノード選択の改善（3分岐以上でswitchノード選択）
+
+**目的**: AI修正時に3分岐以上が必要な場合、ifElseノードではなくswitchノードを正しく選択させ、接続の論理エラーを防止する
+
+**背景**:
+Phase 3.5でSkillノードの出力ポート制約をAIに伝えたが、新たな問題が発覚:
+- ユーザーが「時間帯別で返信」(朝・昼・夜の3分岐)を要求
+- AIがifElseノード(2分岐専用)を選択してしまう
+- 3つ目の分岐を表現できず、接続が論理的に破綻(skill-afternoon → skill-evening の直列接続)
+
+**問題の詳細**:
+```json
+// ユーザー期待: switchノード → 朝・昼・夜の3並列分岐
+// AI生成結果: ifElseノード → true(朝), false(昼 → 夜)という誤った構造
+{
+  "connections": [
+    {"from": "ifelse-1", "to": "skill-morning", "fromPort": "true"},
+    {"from": "ifelse-1", "to": "skill-afternoon", "fromPort": "false"},
+    {"from": "skill-afternoon", "to": "skill-evening"} // ← 誤った直列接続
+  ]
+}
+```
+
+**根本原因**:
+1. AIプロンプトに「分岐数に応じたノード選択ガイダンス」が不足
+2. workflow-schema.json の ifElse/switch 説明が不十分
+3. 分岐ノードからの直列接続を検出するバリデーションが存在しない
+
+**解決アプローチ (Option 3: 多層的改善)**:
+1. **AIプロンプト改善**: 分岐数に応じたノード選択ルールを明記
+2. **スキーマ改善**: ifElse(2分岐専用), switch(3+分岐)の使い分けを明記
+3. **バリデーション追加**: 分岐ノードからの論理エラー接続を検出(オプション)
+
+**設計原則**:
+- Phase 3.5と同様、ドキュメント・プロンプトレベルの改善のみ（破壊的変更なし）
+- AI生成とAI修正の両方で効果を発揮
+- トークン効率を考慮したコンパクトな記述
+
+**技術的考慮事項**:
+- 日本語キーワード("時間帯別"等)のハードコードは避け、汎用的な表現を使用
+- バリデーション追加(T071)はオプション（実装コスト vs 効果を検証）
+- workflow-schema.json サイズ制約（推奨 <10KB, 最大 15KB）に注意
+
+### Implementation for Phase 3.6
+
+- [x] T069 [P3.6] refinement-service.ts に分岐ノード選択ガイダンスを追加: src/extension/services/refinement-service.ts の `constructRefinementPrompt()` 関数内、「Skill Node Constraints」セクションの直後に以下を追加: 「**Branching Node Selection**: Use ifElse node for 2-way conditional branching (true/false). Use switch node for 3+ way branching or multiple conditions. Each branch output should connect to exactly one downstream node - never create serial connections from different branch outputs.」
+- [x] T070 [P3.6] workflow-schema.json の ifElse/switch ノード説明を改善: resources/workflow-schema.json の `ifElse.description` に「Use for 2-way branching only (true/false)」を追記、`switch.description` に「Use for 3+ way branching - ideal for time-based, case-based, or multi-condition routing」を追記
+- [ ] T071 [P3.6] (Optional) 分岐ノードからの直列接続バリデーション追加: src/extension/utils/validate-workflow.ts に新規検証ルール追加。ifElse/switchノードの出力ポートから接続された複数ノード間に直列接続が存在する場合、警告エラーを出力（エラーコード: BRANCH_SERIAL_CONNECTION）。T072の動作確認後、必要に応じて実装
+- [x] T072 [P3.6] 動作確認とテスト: npm run build の成功を確認 ✓。実際のAI修正動作確認(「時間帯別で返信」等の3分岐シナリオ)はユーザーによる手動テストが必要
+
+**Checkpoint**: この時点で、AIが分岐数に応じて適切なノードタイプ(ifElse vs switch)を選択し、接続の論理エラーが発生しなくなる
