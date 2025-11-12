@@ -234,7 +234,7 @@
 
 **目的**: 複数のユーザーストーリーに影響する改善
 
-- [ ] T034 [P] アクセシビリティ対応: ARIA labels（role="log", aria-live="polite"）、キーボードナビゲーション（Esc で閉じる、Ctrl/Cmd+Enter で送信）を実装
+- [x] T034 [P] アクセシビリティ対応: ARIA labels（role="log", aria-live="polite"）、キーボードナビゲーション（Esc で閉じる、Ctrl/Cmd+Enter で送信）を実装
 - [ ] T035 [P] パフォーマンス最適化: メッセージリストの仮想化（react-window または単純なスクロール最適化）、不要な再レンダリングの削減
 - [ ] T036 [P] エラーメッセージの国際化検証: 全5言語（en, ja, ko, zh-CN, zh-TW）でエラーメッセージが正しく表示されることを確認
 - [ ] T037 [P] VSCode テーマ統合の検証: Light/Dark/High Contrast テーマでUIが適切に表示されることを確認

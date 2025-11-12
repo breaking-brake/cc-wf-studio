@@ -8,7 +8,7 @@
  * Updated: Phase 3.7 - Added immediate loading message display
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useResizablePanel } from '../../hooks/useResizablePanel';
 import { useTranslation } from '../../i18n/i18n-context';
 import {
@@ -46,12 +46,34 @@ export function RefinementChatPanel() {
   const { activeWorkflow, updateWorkflow } = useWorkflowStore();
   const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
 
+  // Phase 7 (T034): Define handleClose early for use in useEffect
+  const handleClose = useCallback(() => {
+    closeChat();
+  }, [closeChat]);
+
   // Load conversation history when panel opens
   useEffect(() => {
     if (isOpen && activeWorkflow) {
       loadConversationHistory(activeWorkflow.conversationHistory);
     }
   }, [isOpen, activeWorkflow, loadConversationHistory]);
+
+  // Phase 7 (T034): Accessibility - Close panel on Escape key
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, handleClose]);
 
   if (!isOpen || !activeWorkflow) {
     return null;
@@ -117,10 +139,6 @@ export function RefinementChatPanel() {
       console.error('Refinement failed:', error);
       handleRefinementFailed();
     }
-  };
-
-  const handleClose = () => {
-    closeChat();
   };
 
   const handleClearHistoryClick = () => {
