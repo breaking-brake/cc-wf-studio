@@ -387,3 +387,43 @@ Task: "IterationCounter コンポーネントの作成 in src/webview/src/compon
 - [x] T048 [P3.2] UI動作確認: メッセージ送信時の即座表示、プログレスバーの表示・非表示、送信ボタンの無効化・有効化、エラー時の挙動を確認
 
 **Checkpoint**: この時点で、ユーザーはメッセージ送信が成功したことを即座に確認でき、処理中であることも明確に分かるようになる
+
+---
+
+## Phase 3.3: サイドバー横幅のリサイズ機能 (UI/UX改善)
+
+**目的**: PropertyPanelとRefinementChatPanelの横幅をユーザーがドラッグ操作で調整できるようにし、各ユーザーの見やすい幅で作業できるようにする
+
+**背景**:
+- 現在、PropertyPanelとRefinementChatPanelは固定幅300pxで実装されている
+- ユーザーによって最適な幅が異なる（画面サイズ、表示内容の長さ、個人の好みなど）
+- 特にRefinementChatPanelでは長いメッセージを表示する場合、より広い幅が望ましい場合がある
+
+**解決策**:
+1. **リサイズハンドルの追加**: 左端にドラッグ可能なリサイズハンドル（縦線）を表示
+2. **ドラッグ操作によるリサイズ**: マウスドラッグで横幅を200px〜600pxの範囲で調整可能
+3. **幅の永続化**: 調整した幅をlocalStorageに保存し、次回起動時に復元
+4. **視覚的フィードバック**: ドラッグ中はカーソルを変更し、リサイズ中であることを明示
+
+**設計方針**:
+- リサイズロジックを共通化するカスタムフック `useResizablePanel` を作成
+- 最小幅: 200px（コンテンツが見切れない最小限の幅）
+- 最大幅: 600px（キャンバスエリアを圧迫しない最大幅）
+- デフォルト幅: 300px（現在の固定幅を維持）
+- localStorage キー: `cc-wf-studio.sidebarWidth`
+
+**技術的考慮事項**:
+- マウスイベント（mousedown, mousemove, mouseup）を使用したドラッグ実装
+- `document.addEventListener` を使用してグローバルなマウスイベントをキャプチャ
+- クリーンアップ関数でイベントリスナーを適切に削除
+- PropertyPanelとRefinementChatPanelの両方で同じ幅を共有
+
+### Implementation for Phase 3.3
+
+- [x] T049 [P3.3] useResizablePanel カスタムフックの作成: src/webview/src/hooks/useResizablePanel.ts を作成。ドラッグ操作による横幅調整ロジック、最小/最大幅の制限、localStorageへの永続化機能を実装
+- [x] T050 [P3.3] ResizeHandle コンポーネントの作成: src/webview/src/components/common/ResizeHandle.tsx を作成。ドラッグ可能な縦線UI、ホバー時の視覚的フィードバック、カーソル変更を実装
+- [x] T051 [P3.3] PropertyPanel へのリサイズ機能統合: src/webview/src/components/PropertyPanel.tsx に useResizablePanel と ResizeHandle を統合。固定幅300pxを動的な幅に変更
+- [x] T052 [P3.3] RefinementChatPanel へのリサイズ機能統合: src/webview/src/components/dialogs/RefinementChatPanel.tsx に useResizablePanel と ResizeHandle を統合。固定幅300pxを動的な幅に変更
+- [x] T053 [P3.3] UI動作確認: ドラッグ操作による幅調整、最小/最大幅の制限、幅の永続化と復元、PropertyPanelとRefinementChatPanelの両方での動作を確認
+
+**Checkpoint**: この時点で、ユーザーは自分の見やすい横幅にサイドバーを調整でき、その設定が次回起動時にも保持されるようになる

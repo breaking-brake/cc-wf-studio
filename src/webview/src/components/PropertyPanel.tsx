@@ -3,6 +3,7 @@
  *
  * Property editor for selected nodes
  * Based on: /specs/001-cc-wf-studio/plan.md
+ * Updated: Phase 3.3 - Added resizable width functionality
  */
 
 import type {
@@ -15,10 +16,12 @@ import type {
 } from '@shared/types/workflow-definition';
 import type React from 'react';
 import type { Node } from 'reactflow';
+import { useResizablePanel } from '../hooks/useResizablePanel';
 import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
 import type { PromptNodeData } from '../types/node-types';
 import { extractVariables } from '../utils/template-utils';
+import { ResizeHandle } from './common/ResizeHandle';
 
 /**
  * PropertyPanel Component
@@ -26,6 +29,7 @@ import { extractVariables } from '../utils/template-utils';
 export const PropertyPanel: React.FC = () => {
   const { t } = useTranslation();
   const { nodes, selectedNodeId, updateNodeData, setNodes } = useWorkflowStore();
+  const { width, handleMouseDown } = useResizablePanel();
 
   // Find the selected node
   const selectedNode = nodes.find((node) => node.id === selectedNodeId);
@@ -35,7 +39,8 @@ export const PropertyPanel: React.FC = () => {
       <div
         className="property-panel"
         style={{
-          width: '300px',
+          position: 'relative',
+          width: `${width}px`,
           height: '100%',
           backgroundColor: 'var(--vscode-sideBar-background)',
           borderLeft: '1px solid var(--vscode-panel-border)',
@@ -43,6 +48,7 @@ export const PropertyPanel: React.FC = () => {
           overflowY: 'auto',
         }}
       >
+        <ResizeHandle onMouseDown={handleMouseDown} />
         <div
           style={{
             fontSize: '13px',
@@ -61,7 +67,8 @@ export const PropertyPanel: React.FC = () => {
     <div
       className="property-panel"
       style={{
-        width: '300px',
+        position: 'relative',
+        width: `${width}px`,
         height: '100%',
         backgroundColor: 'var(--vscode-sideBar-background)',
         borderLeft: '1px solid var(--vscode-panel-border)',
@@ -69,6 +76,7 @@ export const PropertyPanel: React.FC = () => {
         overflowY: 'auto',
       }}
     >
+      <ResizeHandle onMouseDown={handleMouseDown} />
       {/* Header */}
       <div
         style={{
