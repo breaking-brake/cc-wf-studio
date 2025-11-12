@@ -586,3 +586,157 @@ Phase 3.5でSkillノードの出力ポート制約をAIに伝えたが、新た�
 - [x] T072 [P3.6] 動作確認とテスト: npm run build の成功を確認 ✓。実際のAI修正動作確認(「時間帯別で返信」等の3分岐シナリオ)はユーザーによる手動テストが必要
 
 **Checkpoint**: この時点で、AIが分岐数に応じて適切なノードタイプ(ifElse vs switch)を選択し、接続の論理エラーが発生しなくなる
+
+---
+
+## Phase 3.7: AI修正プログレスバーの吹き出し内表示 (UI/UX改善)
+
+**目的**: ユーザーがAI修正指示を送信した直後に、ローディング状態のAI吹き出しを表示し、その中でプログレスバーを表現することで、より自然なチャット体験を提供する
+
+**背景**:
+- 現在の実装（Phase 3.2）では、プログレスバーがMessageInput（入力エリア）に表示される
+- ユーザーからの要望: AI吹き出しの中でプログレスバーを表示したい
+- チャットアプリとして自然な体験: AIが「考えている」様子を視覚的に表現
+
+**問題点**:
+- MessageInputのプログレスバーは入力エリアと視覚的に分離されており、「AIが動作中」という感覚が薄い
+- AI応答が完了するまで、チャット履歴に何も表示されないため、処理が進んでいるか不安になる
+- 長時間処理の場合、ユーザーが待機状態を把握しづらい
+
+**解決策（Option 1）**:
+1. **即座のフィードバック**: ユーザーメッセージ送信直後に、ローディング状態のAI吹き出しを表示
+2. **吹き出し内プログレス表示**: AI吹き出し内にスピナー、プログレスバー、経過時間を表示
+3. **完了時の置き換え**: AI応答完了時、ローディングメッセージを実際の応答内容で置き換え
+
+**表示イメージ**:
+```
+[ユーザー] 時間帯別で返信して
+
+[AI] 🔄 ワークフローを修正しています...
+     ▓▓▓▓▓▓▓░░░░░░░░ 45%
+     (15秒経過)
+```
+
+完了後:
+```
+[AI] ワークフローを修正しました。
+```
+
+**設計原則**:
+- `ConversationMessage` に `isLoading` フラグを追加（破壊的変更なし）
+- MessageBubble コンポーネントにローディング状態表示を追加
+- MessageInput のプログレスバーは削除（Phase 3.2の実装を置き換え）
+- チャット履歴にローディング状態は残さない（完了時に置き換え）
+
+**技術的考慮事項**:
+- ローディングメッセージのIDは一時的（`loading-${requestId}` 形式）
+- 完了時は `removeMessage()` → `addMessage()` で置き換え
+- キャンセル時もローディングメッセージを削除
+- エラー時はローディングメッセージをエラー内容で置き換え
+
+### Implementation for Phase 3.7
+
+- [x] T073 [P3.7] ConversationMessage 型に isLoading フラグ追加: src/shared/types/workflow-definition.ts の `ConversationMessage` インターフェースに `isLoading?: boolean` フィールドを追加
+- [x] T074 [P3.7] ProgressBar コンポーネント作成: src/webview/src/components/chat/ProgressBar.tsx を新規作成。プログレスバー、パーセンテージ、経過時間表示を実装。タイムアウト時間（90秒）を基準に進捗率を計算（最大95%）
+- [x] T075 [P3.7] MessageBubble のローディング状態表示: src/webview/src/components/chat/MessageBubble.tsx に `isLoading` 状態の表示ロジックを追加。ProgressBar コンポーネントと翻訳テキストを表示
+- [x] T076 [P3.7] refinement-store にメッセージ操作メソッド追加: src/webview/src/stores/refinement-store.ts に `addLoadingAiMessage()`, `updateMessageLoadingState()`, `updateMessageContent()` メソッドを追加
+- [x] T077 [P3.7] RefinementChatPanel のローディングメッセージ追加: src/webview/src/components/dialogs/RefinementChatPanel.tsx の `handleSend()` を修正。送信直後にローディング状態のAIメッセージを追加し、完了時に内容更新とローディング解除
+- [x] T078 [P3.7] MessageInput のプログレスバー削除: src/webview/src/components/chat/MessageInput.tsx からプログレスバー表示ロジックとタイマーを削除（Phase 3.2 の T045 実装を削除）
+- [x] T079 [P3.7] i18n 翻訳キーの追加: src/webview/src/i18n/translations/ の5言語ファイルとtranslation-keys.tsに `refinement.aiProcessing` キーを追加
+- [x] T080 [P3.7] ビルド検証: `npm run build` でTypeScriptコンパイルエラーがないことを確認（UI動作確認はユーザー実施）
+
+**Checkpoint**: この時点で、ユーザーはAI修正指示後、即座にAIが動作中であることを視覚的に確認でき、より自然なチャット体験が提供される
+
+---
+
+## Phase 3.8: エラー表示とリトライ機能 (UI/UX改善)
+
+**目的**: AI修正処理が失敗した場合に、エラー内容をAI吹き出し内に表示し、ユーザーがワンクリックでリトライできる機能を提供する
+
+**背景**:
+- Phase 3.7実装後の発見事項:
+  1. タイムアウト時間がAI生成(90秒)よりも短い(60秒)
+  2. エラー発生時、ローディングメッセージが空のまま残り、何が起きたか分からない
+- ユーザー体験の問題:
+  - エラーが発生してもフィードバックがない
+  - 再試行するには同じメッセージを再入力する必要がある
+
+**問題点**:
+- **タイムアウト不一致**: refinement-service.tsのデフォルトタイムアウトが60秒、AI生成は90秒
+- **エラーフィードバック不足**: エラー時にローディングが解除されるだけで、原因が表示されない
+- **再試行の手間**: 失敗後、ユーザーが手動でメッセージを再入力する必要がある
+
+**解決策（Option 1 + リトライボタン）**:
+1. **タイムアウト統一**: refinement-service.tsのデフォルトタイムアウトを90秒に変更
+2. **エラー状態の型追加**: ConversationMessageに`isError`と`errorCode`フィールドを追加
+3. **エラーメッセージ表示**: AI吹き出し内にエラー内容を表示（赤背景、⚠️アイコン）
+4. **リトライボタン**: エラー吹き出しに「もう一度試す」ボタンを表示
+5. **リトライ時の動作**: 元のユーザーメッセージを再送信（エラーメッセージは削除）
+
+**表示イメージ**:
+
+エラー発生時:
+```
+[ユーザー] 時間帯別で返信して
+
+[AI] ⚠️ AIの処理がタイムアウトしました。
+     もう一度お試しいただくか、より簡潔な指示に変更してください。
+
+     [🔄 もう一度試す]
+```
+
+リトライクリック後:
+```
+[ユーザー] 時間帯別で返信して
+
+[AI] 🔄 ワークフローを修正しています...
+     ▓▓▓▓░░░░░░░░░░ 30%
+     (10秒経過)
+```
+
+**設計原則**:
+- エラーメッセージはAI吹き出し内に表示（チャット履歴として残る）
+- エラー吹き出しは通常のAI吹き出しと視覚的に区別（赤背景）
+- リトライボタンは元のユーザーメッセージを保持して再送信
+- リトライ時はエラーメッセージを削除し、新しいローディングメッセージで置き換え
+
+**技術的考慮事項**:
+- `ConversationMessage`に破壊的変更なし（オプショナルフィールドのみ追加）
+- エラーコードに応じた適切なエラーメッセージを多言語で提供
+- リトライ時は新しいrequestIdとmessageIdを生成
+- 元のユーザーメッセージはRefinementChatPanelのローカルステートに保持
+
+**エラーコード別メッセージ**:
+- `TIMEOUT`: 「AIの処理がタイムアウトしました。もう一度お試しいただくか、より簡潔な指示に変更してください。」
+- `PARSE_ERROR`: 「AI応答の解析に失敗しました。もう一度お試しください。」
+- `VALIDATION_ERROR`: 「生成されたワークフローが検証に失敗しました。別の指示をお試しください。」
+- `COMMAND_NOT_FOUND`: 「Claude Code CLIが見つかりません。Claude Codeをインストールしてください。」（リトライ不可）
+- `ITERATION_LIMIT_REACHED`: 「反復回数の上限に達しました。会話履歴をクリアしてください。」（リトライ不可）
+- `CANCELLED`: リトライボタン不要（ユーザーが明示的にキャンセル）
+- `UNKNOWN_ERROR`: 「予期しないエラーが発生しました。もう一度お試しください。」
+
+**リトライ可否の判定**:
+- リトライ可能: `TIMEOUT`, `PARSE_ERROR`, `VALIDATION_ERROR`, `UNKNOWN_ERROR`
+- リトライ不可: `COMMAND_NOT_FOUND`, `ITERATION_LIMIT_REACHED`, `CANCELLED`
+
+### Implementation for Phase 3.8
+
+- [ ] T081 [P3.8] タイムアウト時間の統一: src/extension/services/refinement-service.ts (line 103) のデフォルトタイムアウトを `60000` → `90000` に変更。定数 `MAX_REFINEMENT_TIMEOUT_MS` を定義して統一
+- [ ] T082 [P3.8] ConversationMessage 型にエラーフィールド追加: src/shared/types/workflow-definition.ts の `ConversationMessage` インターフェースに `isError?: boolean` と `errorCode?: string` フィールドを追加
+- [ ] T083 [P3.8] refinement-store にエラー操作メソッド追加: src/webview/src/stores/refinement-store.ts に `updateMessageErrorState(messageId, isError, errorCode)` メソッドを追加。エラー状態とコードを更新
+- [ ] T084 [P3.8] エラーコード別メッセージマッピング: src/webview/src/components/chat/MessageBubble.tsx にエラーコードから翻訳キーへのマッピング関数 `getErrorMessageKey()` を実装
+- [ ] T085 [P3.8] MessageBubble のエラー表示スタイル: MessageBubble.tsx にエラー状態の表示ロジックを追加。赤背景 (`var(--vscode-inputValidation-errorBackground)`)、⚠️アイコン、エラーメッセージ表示
+- [ ] T086 [P3.8] リトライボタンコンポーネント: MessageBubble.tsx にリトライボタンを追加。リトライ可能なエラーコードの場合のみ表示。`onRetry` コールバックを親から受け取る
+- [ ] T087 [P3.8] RefinementChatPanel のエラーハンドリング修正: RefinementChatPanel.tsx の `handleSend()` の catch ブロックを修正。エラーメッセージとコードを抽出し、`updateMessageContent()`, `updateMessageErrorState()` を呼び出す
+- [ ] T088 [P3.8] RefinementChatPanel のリトライロジック: RefinementChatPanel.tsx に `handleRetry(messageId)` メソッドを実装。エラーメッセージを削除し、元のユーザーメッセージを再送信
+- [ ] T089 [P3.8] i18n エラーメッセージキーの追加: src/webview/src/i18n/translations/ の5言語ファイルとtranslation-keys.tsに以下を追加:
+  - `refinement.error.timeout.bubble`: タイムアウトエラーメッセージ
+  - `refinement.error.parseError.bubble`: パースエラーメッセージ
+  - `refinement.error.validationError.bubble`: バリデーションエラーメッセージ
+  - `refinement.error.commandNotFound.bubble`: CLI未検出エラーメッセージ
+  - `refinement.error.iterationLimitReached.bubble`: 反復上限エラーメッセージ
+  - `refinement.error.unknown.bubble`: 不明エラーメッセージ
+  - `refinement.retryButton`: リトライボタンテキスト（「もう一度試す」）
+- [ ] T090 [P3.8] ビルド検証と動作確認: `npm run build` でTypeScriptコンパイル成功を確認。タイムアウト発生、エラー表示、リトライボタン動作を手動テスト
+
+**Checkpoint**: この時点で、ユーザーはエラー発生時に何が起きたかを理解でき、ワンクリックでリトライできるようになる。タイムアウト時間も統一され、AI修正の成功率が向上する

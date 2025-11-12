@@ -5,6 +5,7 @@
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.2
  * Updated: Phase 3.1 - Changed from modal dialog to sidebar format
  * Updated: Phase 3.3 - Added resizable width functionality
+ * Updated: Phase 3.7 - Added immediate loading message display
  */
 
 import { useEffect } from 'react';
@@ -30,6 +31,9 @@ export function RefinementChatPanel() {
     startProcessing,
     handleRefinementSuccess,
     handleRefinementFailed,
+    addLoadingAiMessage,
+    updateMessageLoadingState,
+    updateMessageContent,
   } = useRefinementStore();
   const { activeWorkflow, updateWorkflow } = useWorkflowStore();
 
@@ -49,10 +53,14 @@ export function RefinementChatPanel() {
       return;
     }
 
-    // Add user message to conversation history immediately for instant feedback
+    // Phase 3.7: Add user message and loading AI message immediately for instant feedback
     addUserMessage(message);
 
     const requestId = `refine-${Date.now()}-${Math.random()}`;
+    const aiMessageId = `ai-${Date.now()}-${Math.random()}`;
+
+    // Add loading AI message bubble immediately
+    addLoadingAiMessage(aiMessageId);
     startProcessing(requestId);
 
     try {
@@ -67,9 +75,16 @@ export function RefinementChatPanel() {
       // Update workflow in store
       updateWorkflow(result.refinedWorkflow);
 
+      // Update loading message with actual AI response content
+      updateMessageContent(aiMessageId, result.aiMessage.content);
+      updateMessageLoadingState(aiMessageId, false);
+
       // Update refinement store with AI response
       handleRefinementSuccess(result.aiMessage, result.updatedConversationHistory);
     } catch (error) {
+      // Phase 3.7: Remove loading message on error
+      updateMessageLoadingState(aiMessageId, false);
+
       // Handle cancellation - don't show error, just reset loading state
       if (error instanceof WorkflowRefinementError && error.code === 'CANCELLED') {
         // Loading state will be reset in handleRefinementFailed

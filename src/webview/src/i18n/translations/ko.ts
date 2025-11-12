@@ -306,6 +306,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.sendButton': '전송',
   'refinement.cancelButton': '취소',
   'refinement.processing': '처리 중...',
+  'refinement.aiProcessing': 'AI가 요청을 처리하고 있습니다...',
   'refinement.charactersRemaining': '남은 문자 수: {count}',
   'refinement.iterationCounter': '{current}/{max}',
   'refinement.approachingLimit': '반복 한도에 근접',

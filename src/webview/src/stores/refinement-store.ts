@@ -35,6 +35,11 @@ interface RefinementStore {
   handleRefinementFailed: () => void;
   clearHistory: () => void;
 
+  // Phase 3.7: Message operations for loading state
+  addLoadingAiMessage: (messageId: string) => void;
+  updateMessageLoadingState: (messageId: string, isLoading: boolean) => void;
+  updateMessageContent: (messageId: string, content: string) => void;
+
   // Computed
   canSend: () => boolean;
   isApproachingLimit: () => boolean;
@@ -143,6 +148,68 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
         },
       });
     }
+  },
+
+  // Phase 3.7: Message operations
+  addLoadingAiMessage: (messageId: string) => {
+    const history = get().conversationHistory;
+    if (!history) {
+      return;
+    }
+
+    const loadingMessage: ConversationMessage = {
+      id: messageId,
+      sender: 'ai',
+      content: '', // Empty content during loading
+      timestamp: new Date().toISOString(),
+      isLoading: true,
+    };
+
+    set({
+      conversationHistory: {
+        ...history,
+        messages: [...history.messages, loadingMessage],
+        updatedAt: new Date().toISOString(),
+      },
+    });
+  },
+
+  updateMessageLoadingState: (messageId: string, isLoading: boolean) => {
+    const history = get().conversationHistory;
+    if (!history) {
+      return;
+    }
+
+    const updatedMessages = history.messages.map((msg) =>
+      msg.id === messageId ? { ...msg, isLoading } : msg
+    );
+
+    set({
+      conversationHistory: {
+        ...history,
+        messages: updatedMessages,
+        updatedAt: new Date().toISOString(),
+      },
+    });
+  },
+
+  updateMessageContent: (messageId: string, content: string) => {
+    const history = get().conversationHistory;
+    if (!history) {
+      return;
+    }
+
+    const updatedMessages = history.messages.map((msg) =>
+      msg.id === messageId ? { ...msg, content } : msg
+    );
+
+    set({
+      conversationHistory: {
+        ...history,
+        messages: updatedMessages,
+        updatedAt: new Date().toISOString(),
+      },
+    });
   },
 
   // Computed Methods

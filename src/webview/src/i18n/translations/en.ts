@@ -306,6 +306,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'refinement.sendButton': 'Send',
   'refinement.cancelButton': 'Cancel',
   'refinement.processing': 'Processing...',
+  'refinement.aiProcessing': 'AI is processing your request...',
   'refinement.charactersRemaining': '{count} characters remaining',
   'refinement.iterationCounter': '{current}/{max}',
   'refinement.approachingLimit': 'Approaching iteration limit',

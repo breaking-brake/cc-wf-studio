@@ -221,6 +221,8 @@ export interface ConversationMessage {
   timestamp: string;
   /** Optional reference to workflow snapshot */
   workflowSnapshotId?: string;
+  /** Loading state flag (for AI messages during processing) */
+  isLoading?: boolean;
 }
 
 /**

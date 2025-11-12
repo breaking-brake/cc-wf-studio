@@ -278,6 +278,7 @@ export interface WebviewTranslationKeys {
   'refinement.inputPlaceholder': string;
   'refinement.sendButton': string;
   'refinement.processing': string;
+  'refinement.aiProcessing': string;
   'refinement.charactersRemaining': string;
   'refinement.iterationCounter': string;
   'refinement.approachingLimit': string;

@@ -293,6 +293,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'refinement.sendButton': '傳送',
   'refinement.cancelButton': '取消',
   'refinement.processing': '處理中...',
+  'refinement.aiProcessing': 'AI正在處理您的請求...',
   'refinement.charactersRemaining': '剩餘 {count} 字元',
   'refinement.iterationCounter': '{current}/{max}',
   'refinement.approachingLimit': '接近迭代限制',

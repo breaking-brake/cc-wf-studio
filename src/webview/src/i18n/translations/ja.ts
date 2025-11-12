@@ -305,6 +305,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.sendButton': '送信',
   'refinement.cancelButton': 'キャンセル',
   'refinement.processing': '処理中...',
+  'refinement.aiProcessing': 'AIがリクエストを処理中です...',
   'refinement.charactersRemaining': '残り {count} 文字',
   'refinement.iterationCounter': '{current}/{max}',
   'refinement.approachingLimit': '反復回数の上限に近づいています',
