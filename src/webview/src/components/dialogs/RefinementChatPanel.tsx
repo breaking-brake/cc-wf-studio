@@ -35,6 +35,7 @@ export function RefinementChatPanel() {
     updateMessageLoadingState,
     updateMessageContent,
     updateMessageErrorState,
+    removeMessage,
   } = useRefinementStore();
   const { activeWorkflow, updateWorkflow } = useWorkflowStore();
 
@@ -83,9 +84,9 @@ export function RefinementChatPanel() {
       // Update refinement store with AI response
       handleRefinementSuccess(result.aiMessage, result.updatedConversationHistory);
     } catch (error) {
-      // Handle cancellation - don't show error, just reset loading state
+      // Phase 3.11: Handle cancellation - remove loading message and reset state
       if (error instanceof WorkflowRefinementError && error.code === 'CANCELLED') {
-        // Loading state will be reset in handleRefinementFailed
+        removeMessage(aiMessageId);
         handleRefinementFailed();
         return;
       }
@@ -167,8 +168,9 @@ export function RefinementChatPanel() {
       // Update refinement store with AI response
       handleRefinementSuccess(result.aiMessage, result.updatedConversationHistory);
     } catch (error) {
-      // Handle cancellation - don't show error, just reset loading state
+      // Phase 3.11: Handle cancellation - remove loading message and reset state
       if (error instanceof WorkflowRefinementError && error.code === 'CANCELLED') {
+        removeMessage(aiMessageId);
         handleRefinementFailed();
         return;
       }

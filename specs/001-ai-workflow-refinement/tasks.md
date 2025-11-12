@@ -804,3 +804,53 @@ Phase 3.5でSkillノードの出力ポート制約をAIに伝えたが、新た�
 - [x] **[P3.10] T101**: 動作確認とビルドテスト - `npm run build` 成功。ユーザー確認により、AI処理中にToolbar + 左2カラムが非活性化され、RefinementChatPanelのキャンセルボタンは操作可能なことを確認
 
 **Checkpoint**: ✅ Phase 3.10 完了。AI処理中にToolbarと左2カラム（NodePalette + WorkflowEditor）が半透明オーバーレイで覆われ、ユーザーが誤操作できなくなる。RefinementChatPanelは除外され、キャンセルボタンなどの操作が可能
+
+---
+
+### Phase 3.11: キャンセル時のローディングメッセージ削除
+
+**目的**: AI修正処理をキャンセルした際に、ローディング中のAIメッセージ（「AIがリクエストを処理中です... 64% 39s / 90s」）が会話履歴に残ってしまう問題を解決する
+
+**問題の詳細**:
+- 現在、キャンセル時に`handleRefinementFailed()`を呼んで`isProcessing`をfalseにしているが、ローディング中のAIメッセージは残ったまま
+- ユーザーはキャンセル＝「やっぱりやめた」という意図なので、痕跡を残さない方が自然
+
+**実装方針**:
+- `refinement-store.ts`に`removeMessage(messageId)`メソッドを追加
+- キャンセル処理時（CANCELLED error）に該当のAIメッセージを会話履歴から削除
+- エラー時はメッセージを残してエラー状態表示、キャンセル時はメッセージ削除という一貫した設計
+
+**影響範囲**:
+- `src/webview/src/stores/refinement-store.ts` (新規メソッド追加)
+- `src/webview/src/components/dialogs/RefinementChatPanel.tsx` (キャンセル処理の修正)
+
+#### Tasks
+
+- [x] **[P3.11] T102**: refinement-storeにremoveMessageメソッド追加
+  - **File**: `src/webview/src/stores/refinement-store.ts`
+  - **Action**: `removeMessage(messageId: string)`メソッドを実装
+    - 指定されたmessageIdを持つメッセージを会話履歴から削除
+    - `messages.filter(msg => msg.id !== messageId)`で実装
+    - `updatedAt`を更新
+    - 型定義(RefinementStore interface)にも追加
+
+- [x] **[P3.11] T103**: handleSendのキャンセル処理でメッセージ削除
+  - **File**: `src/webview/src/components/dialogs/RefinementChatPanel.tsx`
+  - **Action**: `handleSend`のcatchブロック（error.code === 'CANCELLED'）を修正
+    - `removeMessage(aiMessageId)`を呼び出してローディング中のAIメッセージを削除
+    - `handleRefinementFailed()`は引き続き呼び出す
+
+- [x] **[P3.11] T104**: handleRetryのキャンセル処理でメッセージ削除
+  - **File**: `src/webview/src/components/dialogs/RefinementChatPanel.tsx`
+  - **Action**: `handleRetry`のcatchブロック（error.code === 'CANCELLED'）を修正
+    - `removeMessage(aiMessageId)`を呼び出してローディング中のAIメッセージを削除
+    - `handleRefinementFailed()`は引き続き呼び出す
+
+- [x] **[P3.11] T105**: 動作確認とビルドテスト
+  - **Actions**:
+    - AI修正開始後にキャンセルボタンを押し、ローディングメッセージが削除されることを確認
+    - リトライ中にキャンセルボタンを押し、ローディングメッセージが削除されることを確認
+    - タイムアウトやその他のエラー時は、メッセージが残ってエラー表示されることを確認（既存動作）
+    - `npm run build`でビルドエラーがないことを確認
+
+**Checkpoint**: Phase 3.11 完了後、AI修正処理をキャンセルした際にローディング中のメッセージが会話履歴から削除され、クリーンな状態に戻る

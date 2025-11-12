@@ -52,6 +52,9 @@ interface RefinementStore {
       | 'UNKNOWN_ERROR'
   ) => void;
 
+  // Phase 3.11: Message removal operation
+  removeMessage: (messageId: string) => void;
+
   // Computed
   canSend: () => boolean;
   isApproachingLimit: () => boolean;
@@ -243,6 +246,24 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     const updatedMessages = history.messages.map((msg) =>
       msg.id === messageId ? { ...msg, isError, errorCode, isLoading: false } : msg
     );
+
+    set({
+      conversationHistory: {
+        ...history,
+        messages: updatedMessages,
+        updatedAt: new Date().toISOString(),
+      },
+    });
+  },
+
+  // Phase 3.11: Message removal operation
+  removeMessage: (messageId: string) => {
+    const history = get().conversationHistory;
+    if (!history) {
+      return;
+    }
+
+    const updatedMessages = history.messages.filter((msg) => msg.id !== messageId);
 
     set({
       conversationHistory: {
