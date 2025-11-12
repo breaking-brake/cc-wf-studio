@@ -4,9 +4,11 @@
  * Displays the conversation history with auto-scroll to bottom.
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.2
  * Updated: Phase 3.8 - Added retry handler support
+ * Updated: Phase 3.12 - Added initial instructional message
  */
 
 import { useEffect, useRef } from 'react';
+import { useTranslation } from '../../i18n/i18n-context';
 import { useRefinementStore } from '../../stores/refinement-store';
 import { MessageBubble } from './MessageBubble';
 
@@ -15,6 +17,7 @@ interface MessageListProps {
 }
 
 export function MessageList({ onRetry }: MessageListProps) {
+  const { t } = useTranslation();
   const { conversationHistory } = useRefinementStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -25,20 +28,40 @@ export function MessageList({ onRetry }: MessageListProps) {
     }
   });
 
+  // Phase 3.12: Show initial instructional message when no messages
   if (!conversationHistory || conversationHistory.messages.length === 0) {
     return (
       <div
         style={{
           flex: 1,
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          color: 'var(--vscode-descriptionForeground)',
           padding: '20px',
-          textAlign: 'center',
         }}
       >
-        Start by sending a refinement request to improve your workflow.
+        <div
+          style={{
+            color: 'var(--vscode-foreground)',
+            fontSize: '13px',
+            lineHeight: '1.6',
+            marginBottom: '16px',
+            textAlign: 'center',
+          }}
+        >
+          {t('refinement.initialMessage.description')}
+        </div>
+        <div
+          style={{
+            color: 'var(--vscode-descriptionForeground)',
+            fontSize: '12px',
+            lineHeight: '1.6',
+            textAlign: 'center',
+          }}
+        >
+          {t('refinement.initialMessage.note')}
+        </div>
       </div>
     );
   }

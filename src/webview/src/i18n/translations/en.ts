@@ -364,4 +364,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Are you sure you want to clear the conversation history? This cannot be undone.',
   'refinement.clearDialog.confirm': 'Clear',
   'refinement.clearDialog.cancel': 'Cancel',
+
+  // Initial instructional message (Phase 3.12)
+  'refinement.initialMessage.description':
+    'Describe the workflow you want to create in natural language.',
+  'refinement.initialMessage.note':
+    '※ This feature uses Claude Code installed in your environment.',
 };

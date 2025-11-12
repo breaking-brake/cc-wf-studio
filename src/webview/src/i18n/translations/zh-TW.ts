@@ -345,4 +345,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'refinement.clearDialog.message': '確定要清除對話歷史記錄嗎？此操作無法復原。',
   'refinement.clearDialog.confirm': '清除',
   'refinement.clearDialog.cancel': '取消',
+
+  // Initial instructional message (Phase 3.12)
+  'refinement.initialMessage.description': '用自然語言描述您要建立的工作流。',
+  'refinement.initialMessage.note': '※ 此功能使用您環境中安裝的Claude Code。',
 };
