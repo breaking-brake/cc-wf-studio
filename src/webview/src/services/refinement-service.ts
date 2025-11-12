@@ -7,8 +7,8 @@
 
 import type {
   ExtensionMessage,
-  RefineWorkflowPayload,
   RefinementSuccessPayload,
+  RefineWorkflowPayload,
 } from '@shared/types/messages';
 import type { ConversationHistory, Workflow } from '@shared/types/workflow-definition';
 import { vscode } from '../main';

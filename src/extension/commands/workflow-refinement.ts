@@ -9,9 +9,9 @@ import type * as vscode from 'vscode';
 import type {
   ClearConversationPayload,
   ConversationClearedPayload,
-  RefineWorkflowPayload,
   RefinementFailedPayload,
   RefinementSuccessPayload,
+  RefineWorkflowPayload,
 } from '../../shared/types/messages';
 import type { ConversationMessage } from '../../shared/types/workflow-definition';
 import { log } from '../extension';
