@@ -979,3 +979,106 @@ Phase 3.5でSkillノードの出力ポート制約をAIに伝えたが、新た�
 **Checkpoint**: Phase 3.13 完了後、初回「AIで修正」実行時にキャンバスの実際の状態がAIに渡され、ユーザーが手動で配置したノードを基にAIが修正を行うようになる。これにより、「手動配置 + AI修正」という柔軟なワークフロー作成方法が実現される。
 
 ---
+
+### Phase 3.14: 「AIで生成」機能の削除と「AIで修正」への統一
+
+**目的**: Phase 3.13により「AIで修正」が「AIで生成」の完全上位互換となったため、UIを統一し、「AIで修正」ボタン1つに集約する
+
+**現状の問題**:
+- 「AIで生成」と「AIで修正」の2つのボタンが存在し、機能的に重複している
+- 「AIで生成」: モーダルダイアログで1回限りの生成
+- 「AIで修正」: チャットパネルで対話的な生成・修正（Phase 3.13により初回生成も可能）
+- ユーザーが「どちらを使うべきか」迷う可能性がある
+
+**Phase 3.13による機能状況**:
+- 「AIで修正」は空のキャンバスから新規生成できる（「AIで生成」と同等）
+- 「AIで修正」は手動配置ノードを尊重して修正できる（「AIで生成」以上）
+- 「AIで修正」は対話的な改善が可能（「AIで生成」にない機能）
+- 「AIで修正」は会話履歴を保持（「AIで生成」にない機能）
+
+**実装方針**:
+- 「AIで生成」ボタンをToolbarから削除
+- 「AIで生成」関連のUIコンポーネント（AiGenerationDialog）を削除
+- 「AIで生成」関連のサービス（ai-generation-service）は**削除しない**（Extension Hostで使用中）
+- 「AIで修正」ボタンを強調表示（プライマリボタンスタイル）
+- 翻訳キーを更新し、「AIで修正」の説明を拡充
+- オンボーディングツアーを更新
+
+**削除対象**:
+- Toolbar.tsx: 「AIで生成」ボタンとAiGenerationDialogコンポーネント
+- src/webview/src/components/dialogs/AiGenerationDialog.tsx: ファイル全体
+- src/webview/src/i18n/translations/*.ts: ai.* 翻訳キー（dialogTitle, dialogDescription, descriptionLabel等）
+
+**削除しない対象**:
+- src/webview/src/services/ai-generation-service.ts: Extension Hostが使用中（src/extension/commands/ai-generation.ts）
+- Extension Host側のai-generation関連コード: Webview以外のワークフロー生成で使用される可能性
+
+**影響範囲**:
+- `src/webview/src/components/Toolbar.tsx` (ボタン削除、ダイアログimport削除)
+- `src/webview/src/components/dialogs/AiGenerationDialog.tsx` (ファイル削除)
+- `src/webview/src/i18n/translations/*.ts` (翻訳キー削除: ai.dialogTitle, ai.dialogDescription等)
+- `src/webview/src/i18n/translation-keys.ts` (型定義から ai.* キーを削除)
+- `src/webview/src/components/Tour.tsx` (ツアーステップ更新: ai-generate-button関連削除)
+
+#### Tasks
+
+- [x] **[P3.14] T113**: Toolbarから「AIで生成」ボタンとダイアログを削除 ✓
+  - **File**: `src/webview/src/components/Toolbar.tsx`
+  - **Actions**:
+    - Line 21: `import { AiGenerationDialog } from './dialogs/AiGenerationDialog';` 削除 ✓
+    - Line 46: `const [showAiDialog, setShowAiDialog] = useState(false);` 削除 ✓
+    - Line 293-310: 「Generate with AI Button」コメントとボタン要素を削除 ✓
+    - Line 415: `<AiGenerationDialog isOpen={showAiDialog} onClose={() => setShowAiDialog(false)} />` 削除 ✓
+    - コメントを「Phase 3.14: Unified AI generation/refinement」に更新 ✓
+
+- [x] **[P3.14] T114**: AiGenerationDialogコンポーネントファイルを削除 ✓
+  - **File**: `src/webview/src/components/dialogs/AiGenerationDialog.tsx`
+  - **Action**: ファイル全体を削除（421行） ✓
+
+- [x] **[P3.14] T115**: 翻訳キーの削除（5言語分） ✓
+  - **Files**:
+    - `src/webview/src/i18n/translations/en.ts` ✓
+    - `src/webview/src/i18n/translations/ja.ts` ✓
+    - `src/webview/src/i18n/translations/ko.ts` ✓
+    - `src/webview/src/i18n/translations/zh-CN.ts` ✓
+    - `src/webview/src/i18n/translations/zh-TW.ts` ✓
+  - **Actions**: 以下の`ai.*`翻訳キーを削除 ✓
+    - ai.dialogTitle, ai.dialogDescription, ai.descriptionLabel, ai.descriptionPlaceholder
+    - ai.characterCount, ai.usageNote, ai.overwriteWarning
+    - ai.generateButton, ai.cancelButton, ai.cancelGenerationButton
+    - ai.generating, ai.progressTime, ai.success
+    - ai.error.emptyDescription, ai.error.descriptionTooLong, ai.error.commandNotFound
+    - ai.error.timeout, ai.error.parseError, ai.error.validationError, ai.error.unknown
+
+- [x] **[P3.14] T116**: translation-keys.tsの型定義を更新 ✓
+  - **File**: `src/webview/src/i18n/translation-keys.ts`
+  - **Action**: `TranslationKeys`型から`ai.*`キーを削除（T115で削除した翻訳キーに対応） ✓
+
+- [x] **[P3.14] T117**: Tourコンポーネントからai-generate-buttonステップを削除 ✓
+  - **File**: `src/webview/src/constants/tour-steps.ts`
+  - **Actions**:
+    - Line 80-85: ai-generate-buttonステップを削除し、ai-refine-buttonステップに置き換え ✓
+    - 翻訳ファイル5言語すべてでtour.generateWithAIをtour.refineWithAIに更新 ✓
+      - ja: 「「AIで修正」ボタンで、AIとチャットしながらワークフローを生成・改善できます...」
+      - en: "Use the 'Refine with AI' button to create or improve workflows..."
+      - ko: "「AI로 수정」버튼을 사용하여 AI와 대화하며 워크플로우를 생성하거나 개선..."
+      - zh-CN: "使用「AI优化」按钮通过与AI对话创建或改进工作流..."
+      - zh-TW: "使用「AI優化」按鈕透過與AI對話建立或改善工作流程..."
+    - translation-keys.tsにtour.refineWithAIを追加 ✓
+
+- [x] **[P3.14] T118**: ビルドとLintテスト ✓
+  - **Actions**:
+    - `npm run build`でビルドエラーがないことを確認 ✓
+    - `npm run lint`でlintエラーがないことを確認 ✓
+    - 未使用import、未定義の翻訳キー参照がないことを確認 ✓
+
+- [ ] **[P3.14] T119**: 手動E2Eテスト（ユーザーによる拡張機能実行時に検証）
+  - **Test Scenarios**:
+    1. 空のキャンバスで「AIで修正」を開き、「ユーザー管理システムを作って」と入力してワークフローが生成されることを確認
+    2. 生成されたワークフローに対して「エラーハンドリングを追加」と修正要求を送信し、更新されることを確認
+    3. 手動でノードを配置した後、「AIで修正」を開き、「このフローを改善して」と入力してノードが尊重されることを確認
+    4. ツアー機能で「AIで修正」ステップが正しく表示されることを確認
+
+**Checkpoint**: Phase 3.14 完了後、「AIで生成」と「AIで修正」の機能が「AIで修正」1つに統一され、ユーザーは1つのボタンで新規生成も修正も実行できるシンプルなUIとなる。Phase 3.13の機能により、空のキャンバスでも手動配置済みのキャンバスでも対応可能。
+
+---

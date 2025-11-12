@@ -197,8 +197,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     '保存したワークフローを読み込むには、ドロップダウンメニューからワークフローを選択し、「読み込み」ボタンをクリックします。',
   'tour.exportWorkflow':
     '「エクスポート」ボタンをクリックすると、Claude Codeで実行可能な形式にエクスポートされます。\n\nSub-Agentは`.claude/agents/`に、SlashCommandは`.claude/commands/`に出力されます。',
-  'tour.generateWithAI':
-    '「AI生成」ボタンで、自然言語の説明からワークフローを自動生成できます。\n\n例：「コードをスキャンし、ユーザーに優先度を尋ねて修正案を生成するワークフロー」と入力するだけで、完全なワークフローが作成されます。',
+  'tour.refineWithAI':
+    '「AIで修正」ボタンで、AIとチャットしながらワークフローを生成・改善できます。\n\n空のキャンバスから新規作成も、既存のワークフローの修正も対話的に行えます。',
   'tour.helpButton':
     'このツアーをもう一度見たい場合は、ヘルプボタン(?)をクリックしてください。\n\nそれでは、ワークフロー作成を楽しんでください！',
 
@@ -208,35 +208,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': '完了',
   'tour.button.next': '次へ ({step}/{steps})',
   'tour.button.skip': 'スキップ',
-
-  // AI Generation Dialog
-  'ai.dialogTitle': 'AIでワークフローを生成',
-  'ai.dialogDescription':
-    '作成したいワークフローを自然言語で説明してください。AIがノードと接続を含む完全なワークフローを生成します。',
-  'ai.descriptionLabel': 'ワークフローの説明',
-  'ai.descriptionPlaceholder':
-    '例: コードをスキャンし、ユーザーに優先度レベルを尋ね、修正案を生成するコードレビューワークフローを作成',
-  'ai.characterCount': '{count} / {max} 文字',
-  'ai.generating': 'ワークフローを生成中... 最大90秒かかることがあります。',
-  'ai.progressTime': '{elapsed}秒 / {max}秒',
-  'ai.generateButton': '生成',
-  'ai.cancelButton': 'キャンセル',
-  'ai.cancelGenerationButton': '生成を中止',
-  'ai.success': 'ワークフローが正常に生成されました！',
-  'ai.usageNote': '※1 この機能はお使いの環境にインストールされたClaude Codeを使用します。',
-  'ai.overwriteWarning':
-    '※2 ワークフローを生成すると、現在のワークフローが完全に上書きされます。続行する前に作業内容を保存してください。',
-
-  // AI Generation Errors
-  'ai.error.emptyDescription': 'ワークフローの説明を入力してください',
-  'ai.error.descriptionTooLong': '説明が長すぎます（最大{max}文字）',
-  'ai.error.commandNotFound':
-    'Claude Code CLIが見つかりません。AI生成機能を使用するにはClaude Codeをインストールしてください。',
-  'ai.error.timeout':
-    'リクエストがタイムアウトしました。もう一度試すか、説明を簡潔にしてください。',
-  'ai.error.parseError': '生成に失敗しました - もう一度試すか、説明を言い換えてください',
-  'ai.error.validationError': '生成されたワークフローの検証に失敗しました',
-  'ai.error.unknown': '予期しないエラーが発生しました。もう一度お試しください。',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'ノードを削除',

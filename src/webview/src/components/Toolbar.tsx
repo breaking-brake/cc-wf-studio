@@ -18,7 +18,6 @@ import {
 import { useRefinementStore } from '../stores/refinement-store';
 import { createWorkflowFromCanvas, useWorkflowStore } from '../stores/workflow-store';
 import { ProcessingOverlay } from './common/ProcessingOverlay';
-import { AiGenerationDialog } from './dialogs/AiGenerationDialog';
 
 interface ToolbarProps {
   onError: (error: { code: string; message: string; details?: unknown }) => void;
@@ -43,7 +42,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [workflows, setWorkflows] = useState<WorkflowListItem[]>([]);
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>('');
-  const [showAiDialog, setShowAiDialog] = useState(false);
 
   const handleSave = async () => {
     if (!workflowName.trim()) {
@@ -290,26 +288,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
         {isExporting ? t('toolbar.exporting') : t('toolbar.export')}
       </button>
 
-      {/* Generate with AI Button */}
-      <button
-        type="button"
-        onClick={() => setShowAiDialog(true)}
-        data-tour="ai-generate-button"
-        style={{
-          padding: '4px 12px',
-          backgroundColor: 'var(--vscode-button-background)',
-          color: 'var(--vscode-button-foreground)',
-          border: 'none',
-          borderRadius: '2px',
-          cursor: 'pointer',
-          fontSize: '13px',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {t('toolbar.generateWithAI')}
-      </button>
-
-      {/* Refine with AI Button - Phase 3.12: Always enabled */}
+      {/* Refine with AI Button - Phase 3.14: Unified AI generation/refinement */}
       <button
         type="button"
         onClick={handleOpenRefinementChat}
@@ -410,9 +389,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
       >
         ?
       </button>
-
-      {/* AI Generation Dialog */}
-      <AiGenerationDialog isOpen={showAiDialog} onClose={() => setShowAiDialog(false)} />
 
       {/* Processing Overlay (Phase 3.10) */}
       <ProcessingOverlay isVisible={isProcessing} />
