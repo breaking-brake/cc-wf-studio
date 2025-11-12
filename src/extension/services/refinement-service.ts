@@ -85,13 +85,19 @@ ${schemaJSON}
 }
 
 /**
+ * Maximum timeout for workflow refinement (90 seconds)
+ * Aligned with AI generation timeout for consistency
+ */
+const MAX_REFINEMENT_TIMEOUT_MS = 90000;
+
+/**
  * Execute workflow refinement via Claude Code CLI
  *
  * @param currentWorkflow - The current workflow state
  * @param conversationHistory - Full conversation history
  * @param userMessage - User's current refinement request
  * @param extensionPath - VSCode extension path for schema loading
- * @param timeoutMs - Timeout in milliseconds (default: 60000)
+ * @param timeoutMs - Timeout in milliseconds (default: 90000)
  * @param requestId - Optional request ID for cancellation support
  * @returns Refinement result with success status and refined workflow or error
  */
@@ -100,7 +106,7 @@ export async function refineWorkflow(
   conversationHistory: ConversationHistory,
   userMessage: string,
   extensionPath: string,
-  timeoutMs = 60000,
+  timeoutMs = MAX_REFINEMENT_TIMEOUT_MS,
   requestId?: string
 ): Promise<RefinementResult> {
   const startTime = Date.now();

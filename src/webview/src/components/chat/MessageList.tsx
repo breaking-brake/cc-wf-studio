@@ -3,13 +3,18 @@
  *
  * Displays the conversation history with auto-scroll to bottom.
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.2
+ * Updated: Phase 3.8 - Added retry handler support
  */
 
 import { useEffect, useRef } from 'react';
 import { useRefinementStore } from '../../stores/refinement-store';
 import { MessageBubble } from './MessageBubble';
 
-export function MessageList() {
+interface MessageListProps {
+  onRetry?: (messageId: string) => void;
+}
+
+export function MessageList({ onRetry }: MessageListProps) {
   const { conversationHistory } = useRefinementStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +54,11 @@ export function MessageList() {
       aria-live="polite"
     >
       {conversationHistory.messages.map((message) => (
-        <MessageBubble key={message.id} message={message} />
+        <MessageBubble
+          key={message.id}
+          message={message}
+          onRetry={onRetry ? () => onRetry(message.id) : undefined}
+        />
       ))}
       <div ref={messagesEndRef} />
     </div>

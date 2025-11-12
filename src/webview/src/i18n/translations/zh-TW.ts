@@ -334,6 +334,9 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
     '已達到最大迭代限制(20)。清除對話歷史記錄重新開始，或手動編輯工作流程。',
   'refinement.error.unknown': '發生意外錯誤。請檢查日誌以取得詳細資訊。',
 
+  // Refinement Error Display (Phase 3.8)
+  'refinement.error.retryButton': '重試',
+
   // Clear Conversation Confirmation
   'refinement.clearDialog.title': '清除對話',
   'refinement.clearDialog.message': '確定要清除對話歷史記錄嗎？此操作無法復原。',

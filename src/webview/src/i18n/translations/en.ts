@@ -352,6 +352,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Maximum iteration limit (20) has been reached. Clear conversation history to start fresh, or manually edit the workflow.',
   'refinement.error.unknown': 'An unexpected error occurred. Check logs for details.',
 
+  // Refinement Error Display (Phase 3.8)
+  'refinement.error.retryButton': 'Retry',
+
   // Clear Conversation Confirmation
   'refinement.clearDialog.title': 'Clear Conversation',
   'refinement.clearDialog.message':

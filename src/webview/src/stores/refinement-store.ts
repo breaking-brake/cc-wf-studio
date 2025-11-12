@@ -40,6 +40,18 @@ interface RefinementStore {
   updateMessageLoadingState: (messageId: string, isLoading: boolean) => void;
   updateMessageContent: (messageId: string, content: string) => void;
 
+  // Phase 3.8: Error state operations
+  updateMessageErrorState: (
+    messageId: string,
+    isError: boolean,
+    errorCode?:
+      | 'COMMAND_NOT_FOUND'
+      | 'TIMEOUT'
+      | 'PARSE_ERROR'
+      | 'VALIDATION_ERROR'
+      | 'UNKNOWN_ERROR'
+  ) => void;
+
   // Computed
   canSend: () => boolean;
   isApproachingLimit: () => boolean;
@@ -201,6 +213,35 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
 
     const updatedMessages = history.messages.map((msg) =>
       msg.id === messageId ? { ...msg, content } : msg
+    );
+
+    set({
+      conversationHistory: {
+        ...history,
+        messages: updatedMessages,
+        updatedAt: new Date().toISOString(),
+      },
+    });
+  },
+
+  // Phase 3.8: Error state operations
+  updateMessageErrorState: (
+    messageId: string,
+    isError: boolean,
+    errorCode?:
+      | 'COMMAND_NOT_FOUND'
+      | 'TIMEOUT'
+      | 'PARSE_ERROR'
+      | 'VALIDATION_ERROR'
+      | 'UNKNOWN_ERROR'
+  ) => {
+    const history = get().conversationHistory;
+    if (!history) {
+      return;
+    }
+
+    const updatedMessages = history.messages.map((msg) =>
+      msg.id === messageId ? { ...msg, isError, errorCode } : msg
     );
 
     set({

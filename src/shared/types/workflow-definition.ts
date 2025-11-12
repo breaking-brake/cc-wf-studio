@@ -223,6 +223,15 @@ export interface ConversationMessage {
   workflowSnapshotId?: string;
   /** Loading state flag (for AI messages during processing) */
   isLoading?: boolean;
+  /** Error state flag (for AI messages that failed) */
+  isError?: boolean;
+  /** Error code (for AI messages that failed) */
+  errorCode?:
+    | 'COMMAND_NOT_FOUND'
+    | 'TIMEOUT'
+    | 'PARSE_ERROR'
+    | 'VALIDATION_ERROR'
+    | 'UNKNOWN_ERROR';
 }
 
 /**

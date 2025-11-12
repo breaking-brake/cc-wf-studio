@@ -352,6 +352,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     '最大反復回数(20)に達しました。会話履歴をクリアして最初からやり直すか、手動でワークフローを編集してください。',
   'refinement.error.unknown': '予期しないエラーが発生しました。ログを確認してください。',
 
+  // Refinement Error Display (Phase 3.8)
+  'refinement.error.retryButton': 'リトライ',
+
   // Clear Conversation Confirmation
   'refinement.clearDialog.title': '会話をクリア',
   'refinement.clearDialog.message':

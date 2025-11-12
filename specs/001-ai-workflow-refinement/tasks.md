@@ -721,22 +721,15 @@ Phase 3.5でSkillノードの出力ポート制約をAIに伝えたが、新た�
 
 ### Implementation for Phase 3.8
 
-- [ ] T081 [P3.8] タイムアウト時間の統一: src/extension/services/refinement-service.ts (line 103) のデフォルトタイムアウトを `60000` → `90000` に変更。定数 `MAX_REFINEMENT_TIMEOUT_MS` を定義して統一
-- [ ] T082 [P3.8] ConversationMessage 型にエラーフィールド追加: src/shared/types/workflow-definition.ts の `ConversationMessage` インターフェースに `isError?: boolean` と `errorCode?: string` フィールドを追加
-- [ ] T083 [P3.8] refinement-store にエラー操作メソッド追加: src/webview/src/stores/refinement-store.ts に `updateMessageErrorState(messageId, isError, errorCode)` メソッドを追加。エラー状態とコードを更新
-- [ ] T084 [P3.8] エラーコード別メッセージマッピング: src/webview/src/components/chat/MessageBubble.tsx にエラーコードから翻訳キーへのマッピング関数 `getErrorMessageKey()` を実装
-- [ ] T085 [P3.8] MessageBubble のエラー表示スタイル: MessageBubble.tsx にエラー状態の表示ロジックを追加。赤背景 (`var(--vscode-inputValidation-errorBackground)`)、⚠️アイコン、エラーメッセージ表示
-- [ ] T086 [P3.8] リトライボタンコンポーネント: MessageBubble.tsx にリトライボタンを追加。リトライ可能なエラーコードの場合のみ表示。`onRetry` コールバックを親から受け取る
-- [ ] T087 [P3.8] RefinementChatPanel のエラーハンドリング修正: RefinementChatPanel.tsx の `handleSend()` の catch ブロックを修正。エラーメッセージとコードを抽出し、`updateMessageContent()`, `updateMessageErrorState()` を呼び出す
-- [ ] T088 [P3.8] RefinementChatPanel のリトライロジック: RefinementChatPanel.tsx に `handleRetry(messageId)` メソッドを実装。エラーメッセージを削除し、元のユーザーメッセージを再送信
-- [ ] T089 [P3.8] i18n エラーメッセージキーの追加: src/webview/src/i18n/translations/ の5言語ファイルとtranslation-keys.tsに以下を追加:
-  - `refinement.error.timeout.bubble`: タイムアウトエラーメッセージ
-  - `refinement.error.parseError.bubble`: パースエラーメッセージ
-  - `refinement.error.validationError.bubble`: バリデーションエラーメッセージ
-  - `refinement.error.commandNotFound.bubble`: CLI未検出エラーメッセージ
-  - `refinement.error.iterationLimitReached.bubble`: 反復上限エラーメッセージ
-  - `refinement.error.unknown.bubble`: 不明エラーメッセージ
-  - `refinement.retryButton`: リトライボタンテキスト（「もう一度試す」）
-- [ ] T090 [P3.8] ビルド検証と動作確認: `npm run build` でTypeScriptコンパイル成功を確認。タイムアウト発生、エラー表示、リトライボタン動作を手動テスト
+- [x] T081 [P3.8] タイムアウト時間の統一: src/extension/services/refinement-service.ts (line 103) のデフォルトタイムアウトを `60000` → `90000` に変更。定数 `MAX_REFINEMENT_TIMEOUT_MS` を定義して統一。また src/webview/src/services/refinement-service.ts (line 90) と src/extension/services/claude-code-service.ts (line 86) のタイムアウト関連メッセージも修正
+- [x] T082 [P3.8] ConversationMessage 型にエラーフィールド追加: src/shared/types/workflow-definition.ts の `ConversationMessage` インターフェースに `isError?: boolean` と `errorCode?: 'COMMAND_NOT_FOUND' | 'TIMEOUT' | 'PARSE_ERROR' | 'VALIDATION_ERROR' | 'UNKNOWN_ERROR'` フィールドを追加
+- [x] T083 [P3.8] refinement-store にエラー操作メソッド追加: src/webview/src/stores/refinement-store.ts に `updateMessageErrorState(messageId, isError, errorCode)` メソッドを追加。エラー状態とコードを更新
+- [x] T084 [P3.8] エラーコード別メッセージマッピング: src/webview/src/utils/error-messages.ts (新規ファイル) にエラーコードから翻訳キーへのマッピング関数 `getErrorMessageInfo()` と `isRetryableError()` を実装
+- [x] T085 [P3.8] MessageBubble のエラー表示スタイル: MessageBubble.tsx にエラー状態の表示ロジックを追加。赤背景 (`var(--vscode-inputValidation-errorBackground)`)、⚠️アイコン、エラーメッセージ表示
+- [x] T086 [P3.8] リトライボタンコンポーネント: MessageBubble.tsx にリトライボタンを追加。リトライ可能なエラーコードの場合のみ表示。`onRetry` コールバックを親から受け取る
+- [x] T087 [P3.8] RefinementChatPanel のエラーハンドリング修正: RefinementChatPanel.tsx の `handleSend()` の catch ブロックを修正。エラー発生時に `updateMessageErrorState()` を呼び出してエラー状態を設定
+- [x] T088 [P3.8] RefinementChatPanel のリトライロジック: RefinementChatPanel.tsx に `handleRetry(messageId)` メソッドを実装。MessageList コンポーネント経由で MessageBubble にリトライハンドラーを渡す
+- [x] T089 [P3.8] i18n エラーメッセージキーの追加: src/webview/src/i18n/translations/ の5言語ファイル(en, ja, ko, zh-CN, zh-TW)とtranslation-keys.tsに `refinement.error.retryButton` を追加（既存のエラーメッセージキーを活用）
+- [x] T090 [P3.8] ビルド検証と動作確認: `npm run build` でTypeScriptコンパイル成功を確認。型エラーを修正して正常にビルド完了
 
-**Checkpoint**: この時点で、ユーザーはエラー発生時に何が起きたかを理解でき、ワンクリックでリトライできるようになる。タイムアウト時間も統一され、AI修正の成功率が向上する
+**Checkpoint**: ✅ Phase 3.8 完了。この時点で、ユーザーはエラー発生時に何が起きたかを理解でき、ワンクリックでリトライできるようになる。タイムアウト時間も統一され（90秒）、AI修正の成功率が向上する

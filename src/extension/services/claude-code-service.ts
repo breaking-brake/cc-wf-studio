@@ -83,7 +83,7 @@ export async function executeClaudeCodeCLI(
         success: false,
         error: {
           code: 'TIMEOUT',
-          message: 'AI generation timed out after 60 seconds. Try simplifying your description.',
+          message: `AI generation timed out after ${Math.floor(timeoutMs / 1000)} seconds. Try simplifying your description.`,
           details: `Timeout after ${timeoutMs}ms`,
         },
         executionTimeMs,

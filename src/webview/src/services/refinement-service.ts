@@ -87,7 +87,7 @@ export function refineWorkflow(
       userMessage,
       currentWorkflow,
       conversationHistory,
-      timeoutMs: 60000, // Server-side timeout (Extension will timeout after 60s)
+      timeoutMs: 90000, // Server-side timeout (Extension will timeout after 90s)
     };
 
     vscode.postMessage({

@@ -351,6 +351,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     '최대 반복 횟수(20)에 도달했습니다. 대화 기록을 지우고 처음부터 시작하거나 워크플로를 수동으로 편집하세요.',
   'refinement.error.unknown': '예상치 못한 오류가 발생했습니다. 로그를 확인하세요.',
 
+  // Refinement Error Display (Phase 3.8)
+  'refinement.error.retryButton': '다시 시도',
+
   // Clear Conversation Confirmation
   'refinement.clearDialog.title': '대화 지우기',
   'refinement.clearDialog.message': '대화 기록을 지우시겠습니까? 이 작업은 취소할 수 없습니다.',

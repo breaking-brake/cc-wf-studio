@@ -34,6 +34,7 @@ export function RefinementChatPanel() {
     addLoadingAiMessage,
     updateMessageLoadingState,
     updateMessageContent,
+    updateMessageErrorState,
   } = useRefinementStore();
   const { activeWorkflow, updateWorkflow } = useWorkflowStore();
 
@@ -82,7 +83,7 @@ export function RefinementChatPanel() {
       // Update refinement store with AI response
       handleRefinementSuccess(result.aiMessage, result.updatedConversationHistory);
     } catch (error) {
-      // Phase 3.7: Remove loading message on error
+      // Phase 3.7: Remove loading state
       updateMessageLoadingState(aiMessageId, false);
 
       // Handle cancellation - don't show error, just reset loading state
@@ -92,14 +93,60 @@ export function RefinementChatPanel() {
         return;
       }
 
+      // Phase 3.8: Set error state on AI message
+      if (error instanceof WorkflowRefinementError) {
+        updateMessageErrorState(
+          aiMessageId,
+          true,
+          error.code as
+            | 'COMMAND_NOT_FOUND'
+            | 'TIMEOUT'
+            | 'PARSE_ERROR'
+            | 'VALIDATION_ERROR'
+            | 'UNKNOWN_ERROR'
+        );
+      } else {
+        updateMessageErrorState(aiMessageId, true, 'UNKNOWN_ERROR');
+      }
+
       console.error('Refinement failed:', error);
       handleRefinementFailed();
-      // TODO: Show error notification
     }
   };
 
   const handleClose = () => {
     closeChat();
+  };
+
+  // Phase 3.8: Retry handler for failed refinements
+  const handleRetry = (messageId: string) => {
+    if (!conversationHistory) {
+      return;
+    }
+
+    // Find the user message that triggered this AI response
+    const messages = conversationHistory.messages;
+    const errorMessageIndex = messages.findIndex((msg) => msg.id === messageId);
+
+    if (errorMessageIndex <= 0) {
+      // No user message found before this AI message
+      return;
+    }
+
+    // Get the user message immediately before the error message
+    const userMessage = messages[errorMessageIndex - 1];
+
+    if (userMessage.sender !== 'user') {
+      // Unexpected state - should always have a user message before AI message
+      return;
+    }
+
+    // Remove the error message from history
+    updateMessageErrorState(messageId, false);
+    updateMessageLoadingState(messageId, true);
+
+    // Retry the refinement with the same user message
+    handleSend(userMessage.content);
   };
 
   return (
@@ -165,7 +212,7 @@ export function RefinementChatPanel() {
       </div>
 
       {/* Message List */}
-      <MessageList />
+      <MessageList onRetry={handleRetry} />
 
       {/* Input */}
       <MessageInput onSend={handleSend} />

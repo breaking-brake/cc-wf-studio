@@ -316,6 +316,9 @@ export interface WebviewTranslationKeys {
   'refinement.error.iterationLimitReached': string;
   'refinement.error.unknown': string;
 
+  // Refinement Error Display (Phase 3.8)
+  'refinement.error.retryButton': string;
+
   // Clear Conversation Confirmation
   'refinement.clearDialog.title': string;
   'refinement.clearDialog.message': string;
