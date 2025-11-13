@@ -272,7 +272,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Refinement Chat Panel (Short form keys for components)
   'refinement.title': 'AI編集',
-  'refinement.inputPlaceholder': 'ワークフローの改善内容を入力してください...',
+  'refinement.inputPlaceholder': 'ワークフローの編集内容を入力してください...',
   'refinement.sendButton': '送信',
   'refinement.cancelButton': 'キャンセル',
   'refinement.processing': '処理中...',
