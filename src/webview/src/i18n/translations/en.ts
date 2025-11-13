@@ -280,9 +280,12 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'refinement.processing': 'Processing...',
   'refinement.aiProcessing': 'AI is processing your request...',
   'refinement.charactersRemaining': '{count} characters remaining',
-  'refinement.iterationCounter': '{current}/{max}',
-  'refinement.approachingLimit': 'Approaching iteration limit',
-  'refinement.limitReached': 'Iteration limit reached',
+  'refinement.iterationCounter': 'Edits: {current}',
+  'refinement.iterationCounter.tooltip':
+    'High edit counts may slow down save/load operations and impact editing workflow',
+  'refinement.warning.title': 'Long Conversation',
+  'refinement.warning.message':
+    'The conversation history is getting large, which may increase file size and impact performance. Consider clearing the conversation history.',
 
   // Refinement Chat Panel (Detailed keys)
   'refinement.chat.title': 'Workflow Refinement Chat',

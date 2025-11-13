@@ -280,9 +280,12 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.processing': '처리 중...',
   'refinement.aiProcessing': 'AI가 요청을 처리하고 있습니다...',
   'refinement.charactersRemaining': '남은 문자 수: {count}',
-  'refinement.iterationCounter': '{current}/{max}',
-  'refinement.approachingLimit': '반복 한도에 근접',
-  'refinement.limitReached': '반복 한도 도달',
+  'refinement.iterationCounter': '편집 횟수: {current}회',
+  'refinement.iterationCounter.tooltip':
+    '편집 횟수가 많으면 저장·불러오기가 느려지고 편집 작업에 지장이 생길 수 있습니다',
+  'refinement.warning.title': '긴 대화',
+  'refinement.warning.message':
+    '대화 기록이 길어져 파일 크기가 증가하고 성능에 영향을 줄 수 있습니다. 대화 기록 지우기를 고려해 주세요.',
 
   // Refinement Chat Panel (Detailed keys)
   'refinement.chat.title': '워크플로 개선 채팅',

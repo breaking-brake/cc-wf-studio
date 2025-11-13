@@ -257,8 +257,9 @@ export interface WebviewTranslationKeys {
   'refinement.aiProcessing': string;
   'refinement.charactersRemaining': string;
   'refinement.iterationCounter': string;
-  'refinement.approachingLimit': string;
-  'refinement.limitReached': string;
+  'refinement.iterationCounter.tooltip': string;
+  'refinement.warning.title': string;
+  'refinement.warning.message': string;
   'refinement.chat.title': string;
   'refinement.chat.description': string;
   'refinement.chat.inputPlaceholder': string;

@@ -98,7 +98,8 @@
 - [x] T010 [P] [US1] MessageBubble コンポーネントの作成: src/webview/src/components/chat/MessageBubble.tsx を作成し、ユーザー/AIメッセージの表示を実装
 - [x] T011 [P] [US1] MessageList コンポーネントの作成: src/webview/src/components/chat/MessageList.tsx を作成し、会話履歴の表示と自動スクロールを実装
 - [x] T012 [P] [US1] MessageInput コンポーネントの作成: src/webview/src/components/chat/MessageInput.tsx を作成し、テキスト入力・送信ボタン・文字数カウンターを実装
-- [x] T013 [P] [US1] IterationCounter コンポーネントの作成: src/webview/src/components/chat/IterationCounter.tsx を作成し、X/20の反復回数表示を実装
+- [x] T013 [P] [US1] IterationCounter コンポーネントの作成: src/webview/src/components/chat/IterationCounter.tsx を作成し、反復回数表示を実装
+- [x] T013-1 [P] [US1] WarningBanner コンポーネントの作成: src/webview/src/components/chat/WarningBanner.tsx を作成し、20回以降の警告バナー表示を実装
 - [x] T014 [US1] RefinementChatPanel コンポーネントの作成: src/webview/src/components/dialogs/RefinementChatPanel.tsx を作成し、チャットパネルのレイアウトと子コンポーネントの統合を実装（T010-T013に依存）
 - [x] T015 [US1] Toolbar の拡張: src/webview/src/components/Toolbar.tsx に「AIで修正」ボタンを追加し、クリック時にチャットパネルを開く機能を実装
 - [x] T016 [US1] App コンポーネントの統合: src/webview/src/App.tsx に RefinementChatPanel を追加し、表示制御を実装
@@ -130,22 +131,22 @@
    - Then: すべてのユーザー要求とAI応答が時系列順に表示される
 
 3. **反復回数カウンターの表示**
-   - Given: ユーザーが反復上限に近づいている
+   - Given: ユーザーが複数回の改善を実施した
    - When: チャットパネルを表示
-   - Then: カウンターが「15/20 iterations remaining」のように表示される
+   - Then: カウンターが「15 iterations」のように表示される
 
-4. **反復上限の制御**
-   - Given: 反復上限（20回）に達した
-   - When: ユーザーが追加の要求を送信しようとする
-   - Then: システムが送信を防止し、上限に達したメッセージを表示する
+4. **警告バナーの表示**
+   - Given: 反復回数が20回以上に達した
+   - When: チャットパネルを表示
+   - Then: 警告バナーが表示され、会話履歴クリアを推奨するが、送信は可能
 
 ### Implementation for User Story 2
 
 - [x] T019 [US2] 会話コンテキスト管理: constructRefinementPrompt() を拡張し、直近3-5往復の会話履歴をプロンプトに含めるロジックを実装（src/extension/services/refinement-service.ts）
 - [x] T020 [US2] 反復回数の追跡: conversationHistory.currentIteration のインクリメント処理を実装し、メッセージ送信時に更新（src/extension/commands/workflow-refinement.ts, src/webview/src/stores/refinement-store.ts）
-- [x] T021 [US2] 反復上限チェック: canSend() メソッドで currentIteration < maxIterations を検証し、上限到達時に送信ボタンを無効化（src/webview/src/stores/refinement-store.ts）
-- [x] T022 [US2] 反復上限警告表示: isApproachingLimit() メソッド（currentIteration >= 18）を実装し、警告色でカウンター表示（src/webview/src/components/chat/IterationCounter.tsx）
-- [x] T023 [US2] 上限到達時エラーハンドリング: ITERATION_LIMIT_REACHED エラーコードの処理を追加し、適切なエラーメッセージを表示（src/extension/commands/workflow-refinement.ts, src/webview/src/stores/refinement-store.ts）
+- [x] T021 [US2] 警告バナー表示ロジック: shouldShowWarning() メソッドで currentIteration >= 20 を検証し、警告バナーを表示（src/webview/src/stores/refinement-store.ts）
+- [x] T022 [US2] WarningBanner コンポーネント統合: RefinementChatPanel に WarningBanner を追加し、shouldShowWarning() の結果に基づいて表示制御（src/webview/src/components/dialogs/RefinementChatPanel.tsx, src/webview/src/components/chat/WarningBanner.tsx）
+- [x] T023 [US2] 国際化テキスト追加: 警告バナーメッセージを5言語で追加（src/webview/src/i18n/translations/*.ts）
 
 **Checkpoint**: この時点で、User Story 1 と User Story 2 の両方が独立して機能する
 
@@ -206,7 +207,7 @@
 2. **確認時の履歴クリア**
    - Given: クリア確認ダイアログが表示されている
    - When: ユーザーが確認ボタンをクリック
-   - Then: 会話履歴がクリアされ、反復カウンターが0/20にリセットされ、チャットパネルが空状態で表示される
+   - Then: 会話履歴がクリアされ、反復カウンターが0にリセットされ、チャットパネルが空状態で表示される
 
 3. **クリア後の新規会話**
    - Given: 会話履歴がクリアされた
@@ -711,13 +712,12 @@ Phase 3.5でSkillノードの出力ポート制約をAIに伝えたが、新た�
 - `PARSE_ERROR`: 「AI応答の解析に失敗しました。もう一度お試しください。」
 - `VALIDATION_ERROR`: 「生成されたワークフローが検証に失敗しました。別の指示をお試しください。」
 - `COMMAND_NOT_FOUND`: 「Claude Code CLIが見つかりません。Claude Codeをインストールしてください。」（リトライ不可）
-- `ITERATION_LIMIT_REACHED`: 「反復回数の上限に達しました。会話履歴をクリアしてください。」（リトライ不可）
 - `CANCELLED`: リトライボタン不要（ユーザーが明示的にキャンセル）
 - `UNKNOWN_ERROR`: 「予期しないエラーが発生しました。もう一度お試しください。」
 
 **リトライ可否の判定**:
 - リトライ可能: `TIMEOUT`, `PARSE_ERROR`, `VALIDATION_ERROR`, `UNKNOWN_ERROR`
-- リトライ不可: `COMMAND_NOT_FOUND`, `ITERATION_LIMIT_REACHED`, `CANCELLED`
+- リトライ不可: `COMMAND_NOT_FOUND`, `CANCELLED`
 
 ### Implementation for Phase 3.8
 
@@ -1081,6 +1081,79 @@ Phase 3.5でSkillノードの出力ポート制約をAIに伝えたが、新た�
   - **検証結果**: すべてのシナリオで正常動作を確認。UIが統一され、ユーザーエクスペリエンスが向上した。
 
 **Checkpoint**: Phase 3.14 完了 ✓ - 「AIで生成」と「AIで修正」の機能が「AIで修正」1つに統一され、ユーザーは1つのボタンで新規生成も修正も実行できるシンプルなUIとなった。Phase 3.13の機能により、空のキャンバスでも手動配置済みのキャンバスでも対応可能。10ファイル変更、617行削除、UIがクリーンで直感的に改善された。
+
+---
+
+### Phase 3.14.1: 反復制限のソフトウォーニング化とUX改善 ✓
+
+**目的**: 20回の反復制限をハードリミットからソフトウォーニングに変更し、ユーザーエクスペリエンスを向上させる
+
+**背景**:
+- 従来は20回の反復でメッセージ送信がブロックされていた
+- ユーザーが作業を継続したい場合に不便
+- ソフトウォーニングに変更し、情報提供しつつ送信は許可する方針に変更
+
+**実装内容**:
+
+- [x] **[P3.14.1] 反復制限の削除**:
+  - **File**: `src/webview/src/stores/refinement-store.ts:295-298`
+  - **Action**: `canSend()` メソッドから反復回数20回の制限チェックを削除 ✓
+  - **Before**: `if (conversationHistory.currentIteration >= 20) { return false; }`
+  - **After**: 制限チェックを削除し、常に送信可能に
+
+- [x] **[P3.14.1] ソフトウォーニング機能の追加**:
+  - **File**: `src/webview/src/stores/refinement-store.ts`
+  - **Action**: `shouldShowWarning()` メソッドを追加 ✓
+  - **Logic**: `currentIteration >= 20` で警告バナーを表示
+
+- [x] **[P3.14.1] 表示形式の改善**:
+  - **Files**: `src/webview/src/i18n/translations/{ja,en,ko,zh-CN,zh-TW}.ts`
+  - **Action**: `refinement.iterationCounter` キーの値を変更 ✓
+  - **Before**: `"{current} iterations"` (技術的で分かりにくい)
+  - **After**:
+    - 日本語: `"編集回数: {current}回"`
+    - 英語: `"Edits: {current}"`
+    - 韓国語: `"편집 횟수: {current}회"`
+    - 簡体字中国語: `"编辑次数: {current}次"`
+    - 繁体字中国語: `"編輯次數: {current}次"`
+
+- [x] **[P3.14.1] ツールチップの追加**:
+  - **File**: `src/webview/src/components/chat/IterationCounter.tsx`
+  - **Action**: バッジにツールチップを追加し、パフォーマンス影響を説明 ✓
+  - **Files**: `src/webview/src/i18n/translations/{ja,en,ko,zh-CN,zh-TW}.ts`
+  - **新規キー**: `refinement.iterationCounter.tooltip`
+  - **内容**:
+    - 日本語: `"編集回数が多いと保存・読み込みが遅くなり、編集作業に支障が出る可能性があります"`
+    - 英語: `"High edit counts may slow down save/load operations and impact editing workflow"`
+    - 韓国語: `"편집 횟수가 많으면 저장·불러오기가 느려지고 편집 작업에 지장이 생길 수 있습니다"`
+    - 簡体字中国語: `"编辑次数过多可能导致保存·加载速度变慢,影响编辑工作"`
+    - 繁体字中国語: `"編輯次數過多可能導致儲存·載入速度變慢,影響編輯工作"`
+
+- [x] **[P3.14.1] IterationCounterの簡素化**:
+  - **File**: `src/webview/src/components/chat/IterationCounter.tsx`
+  - **Action**: 色分け警告表示を削除し、シンプルなバッジに統一 ✓
+  - **Removed**: `isApproachingLimit` 使用と条件付き背景色変更
+  - **Result**: 常に同じスタイルのバッジを表示
+
+**影響範囲**:
+- `src/webview/src/stores/refinement-store.ts` (canSend, shouldShowWarning)
+- `src/webview/src/components/chat/WarningBanner.tsx` (既存、Phase 3でT013-1で作成済み)
+- `src/webview/src/components/chat/IterationCounter.tsx` (表示形式、ツールチップ)
+- `src/webview/src/components/dialogs/RefinementChatPanel.tsx` (WarningBanner統合、T022で完了済み)
+- `src/webview/src/i18n/translation-keys.ts` (型定義追加)
+- `src/webview/src/i18n/translations/*.ts` (5言語の翻訳更新)
+
+**ビルド確認**:
+- [x] `npm run check`: ✓ Biome linting passed
+- [x] `npm run build`: ✓ TypeScript compilation and Vite build successful
+
+**UX改善ポイント**:
+1. **ブロック解除**: ユーザーは20回以上でも作業を継続可能
+2. **明確な表示**: 「編集回数」と明記し、何をカウントしているか明確化
+3. **情報提供**: ツールチップでパフォーマンス影響を説明し、ユーザー教育
+4. **ソフトウォーニング**: 警告バナーで情報提供しつつ、送信はブロックしない
+
+**Checkpoint**: Phase 3.14.1 完了 ✓ - 20回反復制限がハードリミットからソフトウォーニングに変更され、ユーザーは情報を得つつも作業を継続できるようになった。表示形式とツールチップの改善により、UXが大幅に向上。6ファイル変更、ユーザーフレンドリーなインターフェースを実現。
 
 ---
 

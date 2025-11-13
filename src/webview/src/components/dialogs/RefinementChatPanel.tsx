@@ -21,6 +21,7 @@ import { useWorkflowStore } from '../../stores/workflow-store';
 import { IterationCounter } from '../chat/IterationCounter';
 import { MessageInput } from '../chat/MessageInput';
 import { MessageList } from '../chat/MessageList';
+import { WarningBanner } from '../chat/WarningBanner';
 import { ResizeHandle } from '../common/ResizeHandle';
 import { ConfirmDialog } from './ConfirmDialog';
 
@@ -42,6 +43,7 @@ export function RefinementChatPanel() {
     updateMessageErrorState,
     removeMessage,
     clearHistory,
+    shouldShowWarning,
   } = useRefinementStore();
   const { activeWorkflow, updateWorkflow } = useWorkflowStore();
   const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
@@ -337,6 +339,9 @@ export function RefinementChatPanel() {
           </button>
         </div>
       </div>
+
+      {/* Warning Banner - Show when 20+ iterations */}
+      {shouldShowWarning() && <WarningBanner />}
 
       {/* Message List */}
       <MessageList onRetry={handleRetry} />

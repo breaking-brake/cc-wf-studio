@@ -270,9 +270,11 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'refinement.processing': '处理中...',
   'refinement.aiProcessing': 'AI正在处理您的请求...',
   'refinement.charactersRemaining': '剩余 {count} 字符',
-  'refinement.iterationCounter': '{current}/{max}',
-  'refinement.approachingLimit': '接近迭代限制',
-  'refinement.limitReached': '已达迭代限制',
+  'refinement.iterationCounter': '编辑次数: {current}次',
+  'refinement.iterationCounter.tooltip': '编辑次数过多可能导致保存·加载速度变慢，影响编辑工作',
+  'refinement.warning.title': '对话较长',
+  'refinement.warning.message':
+    '对话历史记录变大,可能会增加文件大小并影响性能。建议清除对话历史记录。',
 
   // Refinement Chat Panel (Detailed keys)
   'refinement.chat.title': '工作流优化聊天',

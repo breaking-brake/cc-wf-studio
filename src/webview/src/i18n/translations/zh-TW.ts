@@ -270,9 +270,11 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'refinement.processing': '處理中...',
   'refinement.aiProcessing': 'AI正在處理您的請求...',
   'refinement.charactersRemaining': '剩餘 {count} 字元',
-  'refinement.iterationCounter': '{current}/{max}',
-  'refinement.approachingLimit': '接近迭代限制',
-  'refinement.limitReached': '已達迭代限制',
+  'refinement.iterationCounter': '編輯次數: {current}次',
+  'refinement.iterationCounter.tooltip': '編輯次數過多可能導致儲存·載入速度變慢，影響編輯工作',
+  'refinement.warning.title': '對話較長',
+  'refinement.warning.message':
+    '對話歷史記錄變大,可能會增加檔案大小並影響效能。建議清除對話歷史記錄。',
 
   // Refinement Chat Panel (Detailed keys)
   'refinement.chat.title': '工作流程優化聊天',

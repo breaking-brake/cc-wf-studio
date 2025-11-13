@@ -57,7 +57,7 @@ interface RefinementStore {
 
   // Computed
   canSend: () => boolean;
-  isApproachingLimit: () => boolean;
+  shouldShowWarning: () => boolean;
 }
 
 // ============================================================================
@@ -292,22 +292,18 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
       return false;
     }
 
-    // Cannot send if iteration limit reached
-    if (conversationHistory.currentIteration >= conversationHistory.maxIterations) {
-      return false;
-    }
-
+    // No hard limit - always allow sending if other conditions are met
     return true;
   },
 
-  isApproachingLimit: () => {
+  shouldShowWarning: () => {
     const { conversationHistory } = get();
 
     if (!conversationHistory) {
       return false;
     }
 
-    // Approaching limit if 18 or more iterations completed (2 or fewer remaining)
-    return conversationHistory.currentIteration >= 18;
+    // Show warning when 20 or more iterations have been completed
+    return conversationHistory.currentIteration >= 20;
   },
 }));

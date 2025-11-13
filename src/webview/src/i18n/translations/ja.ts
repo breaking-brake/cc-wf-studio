@@ -278,9 +278,12 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.processing': '処理中...',
   'refinement.aiProcessing': 'AIがリクエストを処理中です...',
   'refinement.charactersRemaining': '残り {count} 文字',
-  'refinement.iterationCounter': '{current}/{max}',
-  'refinement.approachingLimit': '反復回数の上限に近づいています',
-  'refinement.limitReached': '反復回数の上限に達しました',
+  'refinement.iterationCounter': '編集回数: {current}回',
+  'refinement.iterationCounter.tooltip':
+    '編集回数が多いと保存・読み込みが遅くなり、編集作業に支障が出る可能性があります',
+  'refinement.warning.title': '会話が長くなっています',
+  'refinement.warning.message':
+    'ファイルサイズが大きくなりパフォーマンスが低下する可能性があります。会話履歴のクリアをご検討ください。',
 
   // Refinement Chat Panel (Detailed keys)
   'refinement.chat.title': 'ワークフロー改善チャット',
