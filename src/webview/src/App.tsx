@@ -9,6 +9,7 @@ import type { ErrorPayload, InitialStatePayload } from '@shared/types/messages';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { ProcessingOverlay } from './components/common/ProcessingOverlay';
+import { SimpleOverlay } from './components/common/SimpleOverlay';
 import { ConfirmDialog } from './components/dialogs/ConfirmDialog';
 import { RefinementChatPanel } from './components/dialogs/RefinementChatPanel';
 import { ErrorNotification } from './components/ErrorNotification';
@@ -90,17 +91,17 @@ const App: React.FC = () => {
           overflow: 'hidden',
         }}
       >
-        {/* Left 2 columns with overlay (Phase 3.10) */}
-        <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
-          {/* Left Panel: Node Palette */}
+        {/* Left Panel: Node Palette with simple overlay (Phase 3.10 - modified) */}
+        <div style={{ position: 'relative' }}>
           <NodePalette />
+          {/* Simple overlay for Node Palette (no message) */}
+          <SimpleOverlay isVisible={isProcessing} />
+        </div>
 
-          {/* Center: Workflow Editor */}
-          <div style={{ flex: 1, position: 'relative' }}>
-            <WorkflowEditor />
-          </div>
-
-          {/* Processing Overlay for left 2 columns (Phase 3.10) */}
+        {/* Center: Workflow Editor with processing overlay (Phase 3.10 - modified) */}
+        <div style={{ flex: 1, position: 'relative' }}>
+          <WorkflowEditor />
+          {/* Processing overlay for canvas area only (with message centered in canvas) */}
           <ProcessingOverlay isVisible={isProcessing} message={t('refinement.processingOverlay')} />
         </div>
 
