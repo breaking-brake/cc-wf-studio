@@ -68,7 +68,7 @@ export function RefinementChatPanel() {
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' && !isProcessing) {
         e.preventDefault();
         handleClose();
       }
@@ -76,7 +76,7 @@ export function RefinementChatPanel() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, handleClose]);
+  }, [isOpen, handleClose, isProcessing]);
 
   if (!isOpen || !activeWorkflow) {
     return null;
@@ -330,14 +330,16 @@ export function RefinementChatPanel() {
           <button
             type="button"
             onClick={handleClose}
+            disabled={isProcessing}
             style={{
               padding: '4px 8px',
               backgroundColor: 'transparent',
               color: 'var(--vscode-foreground)',
               border: 'none',
               borderRadius: '4px',
-              cursor: 'pointer',
+              cursor: isProcessing ? 'not-allowed' : 'pointer',
               fontSize: '16px',
+              opacity: isProcessing ? 0.5 : 1,
             }}
             aria-label="Close"
           >
