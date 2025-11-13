@@ -166,11 +166,13 @@ export function registerOpenEditorCommand(
           case 'GENERATE_WORKFLOW':
             // AI-assisted workflow generation
             if (message.payload) {
+              const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
               await handleGenerateWorkflow(
                 message.payload,
                 webview,
                 context.extensionPath,
-                message.requestId || ''
+                message.requestId || '',
+                workspaceRoot
               );
             } else {
               webview.postMessage({
@@ -256,11 +258,13 @@ export function registerOpenEditorCommand(
           case 'REFINE_WORKFLOW':
             // AI-assisted workflow refinement
             if (message.payload) {
+              const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
               await handleRefineWorkflow(
                 message.payload,
                 webview,
                 message.requestId || '',
-                context.extensionPath
+                context.extensionPath,
+                workspaceRoot
               );
             } else {
               webview.postMessage({

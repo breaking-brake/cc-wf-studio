@@ -32,18 +32,21 @@ export interface ClaudeCodeExecutionResult {
  * @param prompt - The prompt to send to Claude Code CLI
  * @param timeoutMs - Timeout in milliseconds (default: 60000)
  * @param requestId - Optional request ID for cancellation support
+ * @param workingDirectory - Working directory for CLI execution (defaults to current directory)
  * @returns Execution result with success status and output/error
  */
 export async function executeClaudeCodeCLI(
   prompt: string,
   timeoutMs = 60000,
-  requestId?: string
+  requestId?: string,
+  workingDirectory?: string
 ): Promise<ClaudeCodeExecutionResult> {
   const startTime = Date.now();
 
   log('INFO', 'Starting Claude Code CLI execution', {
     promptLength: prompt.length,
     timeoutMs,
+    cwd: workingDirectory ?? process.cwd(),
   });
 
   return new Promise((resolve) => {
@@ -52,20 +55,23 @@ export async function executeClaudeCodeCLI(
     let timedOut = false;
 
     // Spawn Claude Code CLI process
-    const process = spawn('claude', ['-p', prompt], {
+    const childProcess = spawn('claude', ['-p', prompt], {
       stdio: ['ignore', 'pipe', 'pipe'],
+      cwd: workingDirectory,
     });
 
     // Register as active process if requestId is provided
     if (requestId) {
-      activeProcesses.set(requestId, { process, startTime });
-      log('INFO', `Registered active process for requestId: ${requestId}`, { pid: process.pid });
+      activeProcesses.set(requestId, { process: childProcess, startTime });
+      log('INFO', `Registered active process for requestId: ${requestId}`, {
+        pid: childProcess.pid,
+      });
     }
 
     // Set timeout
     const timeout = setTimeout(() => {
       timedOut = true;
-      process.kill();
+      childProcess.kill();
 
       // Remove from active processes
       if (requestId) {
@@ -91,17 +97,17 @@ export async function executeClaudeCodeCLI(
     }, timeoutMs);
 
     // Collect stdout
-    process.stdout?.on('data', (chunk: Buffer) => {
+    childProcess.stdout?.on('data', (chunk: Buffer) => {
       stdout += chunk.toString();
     });
 
     // Collect stderr
-    process.stderr?.on('data', (chunk: Buffer) => {
+    childProcess.stderr?.on('data', (chunk: Buffer) => {
       stderr += chunk.toString();
     });
 
     // Handle process errors (e.g., ENOENT when command not found)
-    process.on('error', (err: NodeJS.ErrnoException) => {
+    childProcess.on('error', (err: NodeJS.ErrnoException) => {
       clearTimeout(timeout);
 
       // Remove from active processes
@@ -150,7 +156,7 @@ export async function executeClaudeCodeCLI(
     });
 
     // Handle process exit
-    process.on('exit', (code) => {
+    childProcess.on('exit', (code) => {
       clearTimeout(timeout);
 
       // Remove from active processes

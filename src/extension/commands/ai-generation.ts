@@ -31,12 +31,14 @@ import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
  * @param webview - The webview to send response messages to
  * @param extensionPath - The extension's root path
  * @param requestId - The request ID for correlation
+ * @param workspaceRoot - The workspace root path for CLI execution
  */
 export async function handleGenerateWorkflow(
   payload: GenerateWorkflowPayload,
   webview: vscode.Webview,
   extensionPath: string,
-  requestId: string
+  requestId: string,
+  workspaceRoot?: string
 ): Promise<void> {
   const startTime = Date.now();
 
@@ -99,7 +101,7 @@ export async function handleGenerateWorkflow(
 
     // Step 3: Execute Claude Code CLI (pass requestId for cancellation support)
     const timeout = payload.timeoutMs ?? 60000;
-    const cliResult = await executeClaudeCodeCLI(prompt, timeout, requestId);
+    const cliResult = await executeClaudeCodeCLI(prompt, timeout, requestId, workspaceRoot);
 
     if (!cliResult.success || !cliResult.output) {
       // CLI execution failed
