@@ -16,6 +16,11 @@ import { loadWorkflow } from './load-workflow';
 import { loadWorkflowList } from './load-workflow-list';
 import { saveWorkflow } from './save-workflow';
 import { handleBrowseSkills, handleCreateSkill, handleValidateSkillFile } from './skill-operations';
+import {
+  handleCancelRefinement,
+  handleClearConversation,
+  handleRefineWorkflow,
+} from './workflow-refinement';
 
 /**
  * Register the open editor command
@@ -243,6 +248,63 @@ export function registerOpenEditorCommand(
                 payload: {
                   code: 'VALIDATION_ERROR',
                   message: 'Skill file path is required',
+                },
+              });
+            }
+            break;
+
+          case 'REFINE_WORKFLOW':
+            // AI-assisted workflow refinement
+            if (message.payload) {
+              await handleRefineWorkflow(
+                message.payload,
+                webview,
+                message.requestId || '',
+                context.extensionPath
+              );
+            } else {
+              webview.postMessage({
+                type: 'REFINEMENT_FAILED',
+                requestId: message.requestId,
+                payload: {
+                  error: {
+                    code: 'VALIDATION_ERROR',
+                    message: 'Refinement payload is required',
+                  },
+                  executionTimeMs: 0,
+                  timestamp: new Date().toISOString(),
+                },
+              });
+            }
+            break;
+
+          case 'CANCEL_REFINEMENT':
+            // Cancel workflow refinement
+            if (message.payload) {
+              await handleCancelRefinement(message.payload, webview, message.requestId || '');
+            } else {
+              webview.postMessage({
+                type: 'ERROR',
+                requestId: message.requestId,
+                payload: {
+                  code: 'VALIDATION_ERROR',
+                  message: 'Cancel refinement payload is required',
+                },
+              });
+            }
+            break;
+
+          case 'CLEAR_CONVERSATION':
+            // Clear conversation history
+            if (message.payload) {
+              await handleClearConversation(message.payload, webview, message.requestId || '');
+            } else {
+              webview.postMessage({
+                type: 'ERROR',
+                requestId: message.requestId,
+                payload: {
+                  code: 'VALIDATION_ERROR',
+                  message: 'Clear conversation payload is required',
                 },
               });
             }

@@ -12,6 +12,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.export': '匯出',
   'toolbar.exporting': '匯出中...',
   'toolbar.generateWithAI': 'AI生成',
+  'toolbar.refineWithAI': 'AI編輯',
   'toolbar.selectWorkflow': '選擇工作流...',
   'toolbar.load': '載入',
   'toolbar.refreshList': '重新整理工作流清單',
@@ -22,6 +23,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.selectWorkflowToLoad': '請選擇要載入的工作流',
   'toolbar.error.validationFailed': '工作流驗證失敗',
   'toolbar.error.missingEndNode': '工作流必須至少包含一個End節點',
+  'toolbar.error.noActiveWorkflow': '請先載入工作流',
 
   // Node Palette
   'palette.title': '節點面板',
@@ -188,8 +190,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'tour.loadWorkflow': '要載入已儲存的工作流程，請從下拉選單中選擇工作流程並點擊「載入」按鈕。',
   'tour.exportWorkflow':
     '點擊「匯出」按鈕以Claude Code可執行的格式匯出。\n\nSub-Agent匯出到`.claude/agents/`，SlashCommand匯出到`.claude/commands/`。',
-  'tour.generateWithAI':
-    '使用「AI生成」按鈕從自然語言描述自動建立工作流程。\n\n例如：只需輸入「建立一個掃描程式碼、詢問使用者優先順序並產生修復建議的程式碼審查工作流程」，就會產生完整的工作流程。',
+  'tour.refineWithAI':
+    '使用「AI編輯」按鈕透過與AI對話建立或改善工作流程。\n\n可以從空白畫布開始或以對話方式編輯現有工作流程。',
   'tour.helpButton': '要再次檢視此導覽，請點擊說明按鈕(?)。\n\n享受建立工作流程的樂趣！',
 
   // Tour buttons
@@ -198,31 +200,6 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': '完成',
   'tour.button.next': '下一步 ({step}/{steps})',
   'tour.button.skip': '略過',
-
-  // AI Generation Dialog
-  'ai.dialogTitle': '使用AI生成工作流',
-  'ai.dialogDescription': '用自然語言描述您要建立的工作流。AI將產生包含節點和連接的完整工作流。',
-  'ai.descriptionLabel': '工作流描述',
-  'ai.descriptionPlaceholder':
-    '範例：建立一個掃描程式碼、詢問使用者優先順序並產生修復建議的程式碼審查工作流',
-  'ai.characterCount': '{count} / {max} 字元',
-  'ai.generating': '正在產生工作流... 可能需要最多90秒。',
-  'ai.progressTime': '{elapsed}秒 / {max}秒',
-  'ai.generateButton': '產生',
-  'ai.cancelButton': '取消',
-  'ai.cancelGenerationButton': '取消產生',
-  'ai.success': '工作流產生成功！',
-  'ai.usageNote': '*1 此功能使用您環境中安裝的Claude Code。',
-  'ai.overwriteWarning': '*2 產生工作流將完全取代您目前的工作流。請在繼續之前儲存您的工作。',
-
-  // AI Generation Errors
-  'ai.error.emptyDescription': '請輸入工作流描述',
-  'ai.error.descriptionTooLong': '描述過長（最多{max}字元）',
-  'ai.error.commandNotFound': '未找到Claude Code CLI。請安裝Claude Code以使用AI產生功能。',
-  'ai.error.timeout': '請求逾時。請重試或簡化您的描述。',
-  'ai.error.parseError': '產生失敗 - 請重試或重新表述您的描述',
-  'ai.error.validationError': '產生的工作流驗證失敗',
-  'ai.error.unknown': '發生意外錯誤。請重試。',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '刪除節點',
@@ -280,4 +257,76 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'skill.validation.descriptionTooLong': '描述不得超過1024個字元',
   'skill.validation.instructionsRequired': '說明為必填',
   'skill.validation.scopeRequired': '請選擇範圍（個人/專案）',
+
+  // Workflow Refinement (001-ai-workflow-refinement)
+  'refinement.toolbar.refineButton': '使用AI編輯',
+  'refinement.toolbar.refineButton.tooltip': '與AI聊天以編輯此工作流程',
+
+  // Refinement Chat Panel (Short form keys for components)
+  'refinement.title': 'AI編輯',
+  'refinement.inputPlaceholder': '描述您想要的變更...',
+  'refinement.sendButton': '傳送',
+  'refinement.cancelButton': '取消',
+  'refinement.processing': '處理中...',
+  'refinement.aiProcessing': 'AI正在處理您的請求...',
+  'refinement.charactersRemaining': '剩餘 {count} 字元',
+  'refinement.iterationCounter': '編輯次數: {current}次',
+  'refinement.iterationCounter.tooltip': '編輯次數過多可能導致儲存·載入速度變慢，影響編輯工作',
+  'refinement.warning.title': '對話較長',
+  'refinement.warning.message':
+    '對話歷史記錄變大,可能會增加檔案大小並影響效能。建議清除對話歷史記錄。',
+
+  // Refinement Chat Panel (Detailed keys)
+  'refinement.chat.title': '工作流程優化聊天',
+  'refinement.chat.description':
+    '與AI聊天以逐步改進您的工作流程。描述您想要的更改，AI將自動更新工作流程。',
+  'refinement.chat.inputPlaceholder': '描述您想要的更改（例如：「新增錯誤處理」）',
+  'refinement.chat.sendButton': '傳送',
+  'refinement.chat.sendButton.shortcut': 'Ctrl+Enter傳送',
+  'refinement.chat.sendButton.shortcutMac': 'Cmd+Enter傳送',
+  'refinement.chat.cancelButton': '取消',
+  'refinement.chat.closeButton': '關閉',
+  'refinement.chat.clearButton': '清除對話',
+  'refinement.chat.clearButton.tooltip': '清除對話歷史記錄並重新開始',
+  'refinement.chat.useSkillsCheckbox': '包含Skill',
+  'refinement.chat.claudeMdTip':
+    '💡 提示：在 `~/.claude/CLAUDE.md` 中新增工作流程特定的規則和約束，AI可以進行更準確的編輯',
+  'refinement.chat.refining': 'AI正在優化工作流程... 最多可能需要120秒。',
+  'refinement.chat.progressTime': '{elapsed}秒 / {max}秒',
+  'refinement.chat.characterCount': '{count} / {max} 字元',
+  'refinement.chat.iterationCounter': '迭代 {current} / {max}',
+  'refinement.chat.iterationWarning': '接近迭代限制 ({current}/{max})',
+  'refinement.chat.iterationLimitReached': '已達到最大迭代限制 ({max})。請清除對話以繼續。',
+  'refinement.chat.noMessages': '還沒有訊息。開始描述您想要改進的內容。',
+  'refinement.chat.userMessageLabel': '您',
+  'refinement.chat.aiMessageLabel': 'AI',
+  'refinement.chat.success': '工作流程優化成功！',
+  'refinement.chat.changesSummary': '更改：{summary}',
+
+  // Refinement Errors
+  'refinement.error.emptyMessage': '請輸入訊息',
+  'refinement.error.messageTooLong': '訊息太長（最多{max}個字元）',
+  'refinement.error.commandNotFound': '未找到Claude Code CLI。請安裝Claude Code以使用AI優化功能。',
+  'refinement.error.timeout': 'AI優化逾時。請重試或簡化您的請求。',
+  'refinement.error.parseError': '無法解析AI回應。請重試或重新表述您的請求。',
+  'refinement.error.validationError': '優化後的工作流程驗證失敗。請嘗試不同的請求。',
+  'refinement.error.iterationLimitReached':
+    '已達到最大迭代限制(20)。清除對話歷史記錄重新開始，或手動編輯工作流程。',
+  'refinement.error.unknown': '發生意外錯誤。請檢查日誌以取得詳細資訊。',
+
+  // Refinement Error Display (Phase 3.8)
+  'refinement.error.retryButton': '重試',
+
+  // Processing Overlay (Phase 3.10)
+  'refinement.processingOverlay': 'AI正在處理您的請求...',
+
+  // Clear Conversation Confirmation
+  'refinement.clearDialog.title': '清除對話',
+  'refinement.clearDialog.message': '確定要清除對話歷史記錄嗎？此操作無法復原。',
+  'refinement.clearDialog.confirm': '清除',
+  'refinement.clearDialog.cancel': '取消',
+
+  // Initial instructional message (Phase 3.12)
+  'refinement.initialMessage.description': '用自然語言描述您要實現的工作流。',
+  'refinement.initialMessage.note': '※ 此功能使用您環境中安裝的Claude Code。',
 };

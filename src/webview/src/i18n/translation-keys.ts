@@ -10,6 +10,7 @@ export interface WebviewTranslationKeys {
   'toolbar.export': string;
   'toolbar.exporting': string;
   'toolbar.generateWithAI': string;
+  'toolbar.refineWithAI': string;
   'toolbar.selectWorkflow': string;
   'toolbar.load': string;
   'toolbar.refreshList': string;
@@ -20,6 +21,7 @@ export interface WebviewTranslationKeys {
   'toolbar.error.selectWorkflowToLoad': string;
   'toolbar.error.validationFailed': string;
   'toolbar.error.missingEndNode': string;
+  'toolbar.error.noActiveWorkflow': string;
 
   // Node Palette
   'palette.title': string;
@@ -179,7 +181,7 @@ export interface WebviewTranslationKeys {
   'tour.saveWorkflow': string;
   'tour.loadWorkflow': string;
   'tour.exportWorkflow': string;
-  'tour.generateWithAI': string;
+  'tour.refineWithAI': string;
   'tour.helpButton': string;
 
   // Tour buttons
@@ -188,30 +190,6 @@ export interface WebviewTranslationKeys {
   'tour.button.finish': string;
   'tour.button.next': string;
   'tour.button.skip': string;
-
-  // AI Generation Dialog
-  'ai.dialogTitle': string;
-  'ai.dialogDescription': string;
-  'ai.descriptionLabel': string;
-  'ai.descriptionPlaceholder': string;
-  'ai.characterCount': string;
-  'ai.generating': string;
-  'ai.progressTime': string;
-  'ai.generateButton': string;
-  'ai.cancelButton': string;
-  'ai.cancelGenerationButton': string;
-  'ai.success': string;
-  'ai.usageNote': string;
-  'ai.overwriteWarning': string;
-
-  // AI Generation Errors
-  'ai.error.emptyDescription': string;
-  'ai.error.descriptionTooLong': string;
-  'ai.error.commandNotFound': string;
-  'ai.error.timeout': string;
-  'ai.error.parseError': string;
-  'ai.error.validationError': string;
-  'ai.error.unknown': string;
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': string;
@@ -266,4 +244,70 @@ export interface WebviewTranslationKeys {
   'skill.validation.descriptionTooLong': string;
   'skill.validation.instructionsRequired': string;
   'skill.validation.scopeRequired': string;
+
+  // Workflow Refinement (001-ai-workflow-refinement)
+  'refinement.toolbar.refineButton': string;
+  'refinement.toolbar.refineButton.tooltip': string;
+
+  // Refinement Chat Panel
+  'refinement.title': string;
+  'refinement.inputPlaceholder': string;
+  'refinement.sendButton': string;
+  'refinement.processing': string;
+  'refinement.aiProcessing': string;
+  'refinement.charactersRemaining': string;
+  'refinement.iterationCounter': string;
+  'refinement.iterationCounter.tooltip': string;
+  'refinement.warning.title': string;
+  'refinement.warning.message': string;
+  'refinement.chat.title': string;
+  'refinement.chat.description': string;
+  'refinement.chat.inputPlaceholder': string;
+  'refinement.chat.sendButton': string;
+  'refinement.chat.sendButton.shortcut': string;
+  'refinement.chat.sendButton.shortcutMac': string;
+  'refinement.chat.cancelButton': string;
+  'refinement.chat.closeButton': string;
+  'refinement.cancelButton': string;
+  'refinement.chat.clearButton': string;
+  'refinement.chat.clearButton.tooltip': string;
+  'refinement.chat.useSkillsCheckbox': string;
+  'refinement.chat.claudeMdTip': string;
+  'refinement.chat.refining': string;
+  'refinement.chat.progressTime': string;
+  'refinement.chat.characterCount': string;
+  'refinement.chat.iterationCounter': string;
+  'refinement.chat.iterationWarning': string;
+  'refinement.chat.iterationLimitReached': string;
+  'refinement.chat.noMessages': string;
+  'refinement.chat.userMessageLabel': string;
+  'refinement.chat.aiMessageLabel': string;
+  'refinement.chat.success': string;
+  'refinement.chat.changesSummary': string;
+
+  // Refinement Errors
+  'refinement.error.emptyMessage': string;
+  'refinement.error.messageTooLong': string;
+  'refinement.error.commandNotFound': string;
+  'refinement.error.timeout': string;
+  'refinement.error.parseError': string;
+  'refinement.error.validationError': string;
+  'refinement.error.iterationLimitReached': string;
+  'refinement.error.unknown': string;
+
+  // Refinement Error Display (Phase 3.8)
+  'refinement.error.retryButton': string;
+
+  // Processing Overlay (Phase 3.10)
+  'refinement.processingOverlay': string;
+
+  // Clear Conversation Confirmation
+  'refinement.clearDialog.title': string;
+  'refinement.clearDialog.message': string;
+  'refinement.clearDialog.confirm': string;
+  'refinement.clearDialog.cancel': string;
+
+  // Initial instructional message (Phase 3.12)
+  'refinement.initialMessage.description': string;
+  'refinement.initialMessage.note': string;
 }

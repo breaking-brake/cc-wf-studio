@@ -15,8 +15,9 @@ import {
   serializeWorkflow,
   validateWorkflow,
 } from '../services/workflow-service';
-import { useWorkflowStore } from '../stores/workflow-store';
-import { AiGenerationDialog } from './dialogs/AiGenerationDialog';
+import { useRefinementStore } from '../stores/refinement-store';
+import { createWorkflowFromCanvas, useWorkflowStore } from '../stores/workflow-store';
+import { ProcessingOverlay } from './common/ProcessingOverlay';
 
 interface ToolbarProps {
   onError: (error: { code: string; message: string; details?: unknown }) => void;
@@ -32,13 +33,15 @@ interface WorkflowListItem {
 
 export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
   const { t } = useTranslation();
-  const { nodes, edges, setNodes, setEdges } = useWorkflowStore();
+  const { nodes, edges, setNodes, setEdges, activeWorkflow, setActiveWorkflow } =
+    useWorkflowStore();
+  const { openChat, initConversation, loadConversationHistory, isProcessing } =
+    useRefinementStore();
   const [workflowName, setWorkflowName] = useState('my-workflow');
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [workflows, setWorkflows] = useState<WorkflowListItem[]>([]);
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>('');
-  const [showAiDialog, setShowAiDialog] = useState(false);
 
   const handleSave = async () => {
     if (!workflowName.trim()) {
@@ -51,12 +54,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
 
     setIsSaving(true);
     try {
-      // Serialize workflow
+      // Phase 5 (T024): Serialize workflow with conversation history
       const workflow = serializeWorkflow(
         nodes,
         edges,
         workflowName,
-        'Created with Workflow Studio'
+        'Created with Workflow Studio',
+        activeWorkflow?.conversationHistory
       );
 
       // Validate workflow before saving
@@ -94,13 +98,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
       if (message.type === 'WORKFLOW_LIST_LOADED') {
         setWorkflows(message.payload?.workflows || []);
       } else if (message.type === 'LOAD_WORKFLOW') {
-        // Load workflow into canvas
+        // Phase 5 (T025): Load workflow into canvas and set as active workflow
         const workflow: Workflow = message.payload?.workflow;
         if (workflow) {
           const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(workflow);
           setNodes(loadedNodes);
           setEdges(loadedEdges);
           setWorkflowName(workflow.name);
+          // Set as active workflow to preserve conversation history
+          setActiveWorkflow(workflow);
         }
       } else if (message.type === 'EXPORT_SUCCESS') {
         setIsExporting(false);
@@ -112,7 +118,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
 
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, [setNodes, setEdges]);
+  }, [setNodes, setEdges, setActiveWorkflow]);
 
   // Load workflow list on mount
   useEffect(() => {
@@ -192,9 +198,30 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
     }
   };
 
+  // Phase 3.13: Always enable refinement, generate workflow from current canvas state
+  const handleOpenRefinementChat = () => {
+    let workflow = activeWorkflow;
+
+    // If no active workflow exists, create one from current canvas state
+    if (!workflow) {
+      workflow = createWorkflowFromCanvas(nodes, edges);
+      setActiveWorkflow(workflow);
+    }
+
+    // Load conversation history if exists, otherwise initialize
+    if (workflow.conversationHistory) {
+      loadConversationHistory(workflow.conversationHistory);
+    } else {
+      initConversation();
+    }
+
+    openChat();
+  };
+
   return (
     <div
       style={{
+        position: 'relative',
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
@@ -264,11 +291,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
         {isExporting ? t('toolbar.exporting') : t('toolbar.export')}
       </button>
 
-      {/* Generate with AI Button */}
+      {/* Refine with AI Button - Phase 3.14: Unified AI generation/refinement */}
       <button
         type="button"
-        onClick={() => setShowAiDialog(true)}
-        data-tour="ai-generate-button"
+        onClick={handleOpenRefinementChat}
+        data-tour="ai-refine-button"
         style={{
           padding: '4px 12px',
           backgroundColor: 'var(--vscode-button-background)',
@@ -280,7 +307,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
           whiteSpace: 'nowrap',
         }}
       >
-        {t('toolbar.generateWithAI')}
+        {t('toolbar.refineWithAI')}
       </button>
 
       {/* Divider */}
@@ -366,8 +393,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
         ?
       </button>
 
-      {/* AI Generation Dialog */}
-      <AiGenerationDialog isOpen={showAiDialog} onClose={() => setShowAiDialog(false)} />
+      {/* Processing Overlay (Phase 3.10) */}
+      <ProcessingOverlay isVisible={isProcessing} />
     </div>
   );
 };

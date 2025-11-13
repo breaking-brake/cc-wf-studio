@@ -5,7 +5,12 @@
  * Based on: /specs/001-cc-wf-studio/data-model.md
  */
 
-import type { Connection, Workflow, WorkflowNode } from '@shared/types/workflow-definition';
+import type {
+  Connection,
+  ConversationHistory,
+  Workflow,
+  WorkflowNode,
+} from '@shared/types/workflow-definition';
 import type { Edge, Node } from 'reactflow';
 
 /**
@@ -15,13 +20,15 @@ import type { Edge, Node } from 'reactflow';
  * @param edges - React Flow edges
  * @param workflowName - Workflow name
  * @param workflowDescription - Workflow description
+ * @param conversationHistory - Optional conversation history to preserve
  * @returns Workflow definition
  */
 export function serializeWorkflow(
   nodes: Node[],
   edges: Edge[],
   workflowName: string,
-  workflowDescription?: string
+  workflowDescription?: string,
+  conversationHistory?: ConversationHistory
 ): Workflow {
   // Convert React Flow nodes to WorkflowNodes
   const workflowNodes: WorkflowNode[] = nodes.map((node) => ({
@@ -52,6 +59,8 @@ export function serializeWorkflow(
     connections,
     createdAt: new Date(),
     updatedAt: new Date(),
+    // Phase 5 (T024): Include conversation history if provided
+    conversationHistory,
   };
 
   return workflow;
