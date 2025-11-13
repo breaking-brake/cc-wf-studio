@@ -44,6 +44,7 @@ export function RefinementChatPanel() {
     removeMessage,
     clearHistory,
     shouldShowWarning,
+    isProcessing,
   } = useRefinementStore();
   const { activeWorkflow, updateWorkflow } = useWorkflowStore();
   const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
@@ -301,7 +302,9 @@ export function RefinementChatPanel() {
           <button
             type="button"
             onClick={handleClearHistoryClick}
-            disabled={!conversationHistory || conversationHistory.messages.length === 0}
+            disabled={
+              !conversationHistory || conversationHistory.messages.length === 0 || isProcessing
+            }
             style={{
               padding: '4px 8px',
               backgroundColor: 'transparent',
@@ -309,11 +312,14 @@ export function RefinementChatPanel() {
               border: '1px solid var(--vscode-panel-border)',
               borderRadius: '4px',
               cursor:
-                conversationHistory && conversationHistory.messages.length > 0
+                conversationHistory && conversationHistory.messages.length > 0 && !isProcessing
                   ? 'pointer'
                   : 'not-allowed',
               fontSize: '11px',
-              opacity: conversationHistory && conversationHistory.messages.length > 0 ? 1 : 0.5,
+              opacity:
+                conversationHistory && conversationHistory.messages.length > 0 && !isProcessing
+                  ? 1
+                  : 0.5,
             }}
             title={t('refinement.chat.clearButton.tooltip')}
             aria-label={t('refinement.chat.clearButton')}
