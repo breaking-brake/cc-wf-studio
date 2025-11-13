@@ -303,6 +303,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.success': '工作流优化成功！',
   'refinement.chat.changesSummary': '更改：{summary}',
 
+  // Refinement Success Messages
+  'refinement.success.defaultMessage': '已编辑工作流。',
+
   // Refinement Errors
   'refinement.error.emptyMessage': '请输入消息',
   'refinement.error.messageTooLong': '消息太长（最多{max}个字符）',

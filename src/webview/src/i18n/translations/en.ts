@@ -315,6 +315,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.success': 'Workflow refined successfully!',
   'refinement.chat.changesSummary': 'Changes: {summary}',
 
+  // Refinement Success Messages
+  'refinement.success.defaultMessage': 'Workflow has been updated.',
+
   // Refinement Errors
   'refinement.error.emptyMessage': 'Please enter a message',
   'refinement.error.messageTooLong': 'Message is too long (max {max} characters)',
