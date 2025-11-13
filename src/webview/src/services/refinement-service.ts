@@ -35,6 +35,7 @@ export class WorkflowRefinementError extends Error {
  * @param currentWorkflow - Current workflow state
  * @param conversationHistory - Current conversation history
  * @param requestId - Request ID for this refinement
+ * @param useSkills - Whether to include skills in refinement (default: true)
  * @param timeoutMs - Optional timeout in milliseconds (default: 65000, which is 5 seconds more than server timeout)
  * @returns Promise that resolves to the refinement success payload
  * @throws {WorkflowRefinementError} If refinement fails
@@ -45,6 +46,7 @@ export function refineWorkflow(
   currentWorkflow: Workflow,
   conversationHistory: ConversationHistory,
   requestId: string,
+  useSkills = true,
   timeoutMs = 65000
 ): Promise<RefinementSuccessPayload> {
   return new Promise((resolve, reject) => {
@@ -87,6 +89,7 @@ export function refineWorkflow(
       userMessage,
       currentWorkflow,
       conversationHistory,
+      useSkills,
       timeoutMs: 90000, // Server-side timeout (Extension will timeout after 90s)
     };
 

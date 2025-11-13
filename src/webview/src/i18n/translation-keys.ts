@@ -271,6 +271,7 @@ export interface WebviewTranslationKeys {
   'refinement.cancelButton': string;
   'refinement.chat.clearButton': string;
   'refinement.chat.clearButton.tooltip': string;
+  'refinement.chat.useSkillsCheckbox': string;
   'refinement.chat.refining': string;
   'refinement.chat.progressTime': string;
   'refinement.chat.characterCount': string;

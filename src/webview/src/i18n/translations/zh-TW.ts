@@ -288,6 +288,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.closeButton': '關閉',
   'refinement.chat.clearButton': '清除對話',
   'refinement.chat.clearButton.tooltip': '清除對話歷史記錄並重新開始',
+  'refinement.chat.useSkillsCheckbox': '包含Skill',
   'refinement.chat.refining': 'AI正在優化工作流程... 最多可能需要120秒。',
   'refinement.chat.progressTime': '{elapsed}秒 / {max}秒',
   'refinement.chat.characterCount': '{count} / {max} 字元',

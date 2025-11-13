@@ -34,7 +34,14 @@ export async function handleRefineWorkflow(
   requestId: string,
   extensionPath: string
 ): Promise<void> {
-  const { workflowId, userMessage, currentWorkflow, conversationHistory, timeoutMs } = payload;
+  const {
+    workflowId,
+    userMessage,
+    currentWorkflow,
+    conversationHistory,
+    useSkills = true,
+    timeoutMs,
+  } = payload;
   const startTime = Date.now();
 
   log('INFO', 'Workflow refinement request received', {
@@ -43,6 +50,7 @@ export async function handleRefineWorkflow(
     messageLength: userMessage.length,
     currentIteration: conversationHistory.currentIteration,
     maxIterations: conversationHistory.maxIterations,
+    useSkills,
   });
 
   try {
@@ -72,6 +80,7 @@ export async function handleRefineWorkflow(
       conversationHistory,
       userMessage,
       extensionPath,
+      useSkills,
       timeoutMs,
       requestId
     );

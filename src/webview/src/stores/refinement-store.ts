@@ -19,10 +19,12 @@ interface RefinementStore {
   isProcessing: boolean;
   currentInput: string;
   currentRequestId: string | null;
+  useSkills: boolean;
 
   // Actions
   openChat: () => void;
   closeChat: () => void;
+  toggleUseSkills: () => void;
   initConversation: () => void;
   loadConversationHistory: (history: ConversationHistory | undefined) => void;
   setInput: (input: string) => void;
@@ -74,6 +76,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   isProcessing: false,
   currentInput: '',
   currentRequestId: null,
+  useSkills: true,
 
   // Actions
   openChat: () => {
@@ -82,6 +85,10 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
 
   closeChat: () => {
     set({ isOpen: false });
+  },
+
+  toggleUseSkills: () => {
+    set({ useSkills: !get().useSkills });
   },
 
   initConversation: () => {

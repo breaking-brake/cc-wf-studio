@@ -228,6 +228,8 @@ export interface RefineWorkflowPayload {
   currentWorkflow: Workflow;
   /** Existing conversation history */
   conversationHistory: ConversationHistory;
+  /** Whether to include skills in refinement (default: true) */
+  useSkills?: boolean;
   /** Optional timeout in milliseconds (default: 60000, min: 10000, max: 120000) */
   timeoutMs?: number;
 }

@@ -5,11 +5,18 @@
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md
  */
 
-import type { ConversationHistory, Workflow } from '../../shared/types/workflow-definition';
+import type { SkillReference } from '../../shared/types/messages';
+import type {
+  ConversationHistory,
+  SkillNodeData,
+  Workflow,
+} from '../../shared/types/workflow-definition';
 import { log } from '../extension';
 import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
 import { executeClaudeCodeCLI, parseClaudeCodeOutput } from './claude-code-service';
 import { getDefaultSchemaPath, loadWorkflowSchema } from './schema-loader-service';
+import { filterSkillsByRelevance, type SkillRelevanceScore } from './skill-relevance-matcher';
+import { scanAllSkills } from './skill-service';
 
 export interface RefinementResult {
   success: boolean;
@@ -29,13 +36,15 @@ export interface RefinementResult {
  * @param conversationHistory - Full conversation history
  * @param userMessage - User's current refinement request
  * @param schema - Workflow schema for node type validation
+ * @param filteredSkills - Skills filtered by relevance (optional)
  * @returns Prompt string for Claude Code CLI
  */
 export function constructRefinementPrompt(
   currentWorkflow: Workflow,
   conversationHistory: ConversationHistory,
   userMessage: string,
-  schema: unknown
+  schema: unknown,
+  filteredSkills: SkillRelevanceScore[] = []
 ): string {
   // Get last 6 messages (3 rounds of user-AI conversation)
   // This provides sufficient context without overwhelming the prompt
@@ -48,6 +57,32 @@ ${recentMessages.map((msg) => `[${msg.sender.toUpperCase()}]: ${msg.content}`).j
       : '**Conversation History**: (This is the first message)\n';
 
   const schemaJSON = JSON.stringify(schema, null, 2);
+
+  // Construct skills section (similar to ai-generation.ts)
+  const skillsSection =
+    filteredSkills.length > 0
+      ? `
+
+**Available Skills** (use when user description matches their purpose):
+${JSON.stringify(
+  filteredSkills.map((s) => ({
+    name: s.skill.name,
+    description: s.skill.description,
+    scope: s.skill.scope,
+  })),
+  null,
+  2
+)}
+
+**Instructions for Using Skills**:
+- Use a Skill node when the user's description matches a Skill's documented purpose
+- Copy the name, description, and scope exactly from the Available Skills list above
+- Set validationStatus to "valid" and outputPorts to 1
+- Do NOT include skillPath in your response (the system will resolve it automatically)
+- If both personal and project Skills match, prefer the project Skill
+
+`
+      : '';
 
   return `You are an expert workflow designer for Claude Code Workflow Studio.
 
@@ -77,7 +112,7 @@ ${userMessage}
 - Use ifElse node for 2-way conditional branching (true/false)
 - Use switch node for 3+ way branching or multiple conditions
 - Each branch output should connect to exactly one downstream node - never create serial connections from different branch outputs
-
+${skillsSection}
 **Workflow Schema** (reference for valid node types and structure):
 ${schemaJSON}
 
@@ -97,6 +132,7 @@ const MAX_REFINEMENT_TIMEOUT_MS = 90000;
  * @param conversationHistory - Full conversation history
  * @param userMessage - User's current refinement request
  * @param extensionPath - VSCode extension path for schema loading
+ * @param useSkills - Whether to include skills in refinement (default: true)
  * @param timeoutMs - Timeout in milliseconds (default: 90000)
  * @param requestId - Optional request ID for cancellation support
  * @returns Refinement result with success status and refined workflow or error
@@ -106,6 +142,7 @@ export async function refineWorkflow(
   conversationHistory: ConversationHistory,
   userMessage: string,
   extensionPath: string,
+  useSkills = true,
   timeoutMs = MAX_REFINEMENT_TIMEOUT_MS,
   requestId?: string
 ): Promise<RefinementResult> {
@@ -117,40 +154,96 @@ export async function refineWorkflow(
     messageLength: userMessage.length,
     historyLength: conversationHistory.messages.length,
     currentIteration: conversationHistory.currentIteration,
+    useSkills,
     timeoutMs,
   });
 
   try {
-    // Step 1: Load workflow schema
+    // Step 1: Load workflow schema (and optionally scan skills)
     const schemaPath = getDefaultSchemaPath(extensionPath);
-    const schemaResult = await loadWorkflowSchema(schemaPath);
 
-    if (!schemaResult.success || !schemaResult.schema) {
-      log('ERROR', 'Failed to load workflow schema', {
+    let schemaResult: Awaited<ReturnType<typeof loadWorkflowSchema>>;
+    let availableSkills: SkillReference[] = [];
+    let filteredSkills: SkillRelevanceScore[] = [];
+
+    if (useSkills) {
+      // Scan skills in parallel with schema loading
+      const [loadedSchema, skillsResult] = await Promise.all([
+        loadWorkflowSchema(schemaPath),
+        scanAllSkills(),
+      ]);
+
+      schemaResult = loadedSchema;
+
+      if (!schemaResult.success || !schemaResult.schema) {
+        log('ERROR', 'Failed to load workflow schema', {
+          requestId,
+          errorMessage: schemaResult.error?.message,
+        });
+
+        return {
+          success: false,
+          error: {
+            code: 'UNKNOWN_ERROR',
+            message: 'Failed to load workflow schema',
+            details: schemaResult.error?.message,
+          },
+          executionTimeMs: Date.now() - startTime,
+        };
+      }
+
+      // Combine personal and project skills
+      availableSkills = [...skillsResult.personal, ...skillsResult.project];
+
+      log('INFO', 'Skills scanned successfully', {
         requestId,
-        errorMessage: schemaResult.error?.message,
+        personalCount: skillsResult.personal.length,
+        projectCount: skillsResult.project.length,
+        totalCount: availableSkills.length,
       });
 
-      return {
-        success: false,
-        error: {
-          code: 'UNKNOWN_ERROR',
-          message: 'Failed to load workflow schema',
-          details: schemaResult.error?.message,
-        },
-        executionTimeMs: Date.now() - startTime,
-      };
+      // Step 2: Filter skills by relevance to user's message
+      filteredSkills = filterSkillsByRelevance(userMessage, availableSkills);
+
+      log('INFO', 'Skills filtered by relevance', {
+        requestId,
+        filteredCount: filteredSkills.length,
+        topSkills: filteredSkills.slice(0, 5).map((s) => ({ name: s.skill.name, score: s.score })),
+      });
+    } else {
+      // Skip skill scanning
+      schemaResult = await loadWorkflowSchema(schemaPath);
+
+      if (!schemaResult.success || !schemaResult.schema) {
+        log('ERROR', 'Failed to load workflow schema', {
+          requestId,
+          errorMessage: schemaResult.error?.message,
+        });
+
+        return {
+          success: false,
+          error: {
+            code: 'UNKNOWN_ERROR',
+            message: 'Failed to load workflow schema',
+            details: schemaResult.error?.message,
+          },
+          executionTimeMs: Date.now() - startTime,
+        };
+      }
+
+      log('INFO', 'Skipping skill scan (useSkills=false)', { requestId });
     }
 
-    // Step 2: Construct refinement prompt
+    // Step 3: Construct refinement prompt (with or without skills)
     const prompt = constructRefinementPrompt(
       currentWorkflow,
       conversationHistory,
       userMessage,
-      schemaResult.schema
+      schemaResult.schema,
+      filteredSkills
     );
 
-    // Step 3: Execute Claude Code CLI
+    // Step 4: Execute Claude Code CLI
     const cliResult = await executeClaudeCodeCLI(prompt, timeoutMs, requestId);
 
     if (!cliResult.success || !cliResult.output) {
@@ -177,7 +270,7 @@ export async function refineWorkflow(
       executionTimeMs: cliResult.executionTimeMs,
     });
 
-    // Step 3: Parse CLI output
+    // Step 5: Parse CLI output
     const parsedOutput = parseClaudeCodeOutput(cliResult.output);
 
     if (!parsedOutput) {
@@ -200,7 +293,7 @@ export async function refineWorkflow(
     }
 
     // Type check: ensure parsed output is a Workflow
-    const refinedWorkflow = parsedOutput as Workflow;
+    let refinedWorkflow = parsedOutput as Workflow;
 
     if (!refinedWorkflow.id || !refinedWorkflow.nodes || !refinedWorkflow.connections) {
       log('ERROR', 'Parsed output is not a valid Workflow', {
@@ -222,7 +315,19 @@ export async function refineWorkflow(
       };
     }
 
-    // Step 4: Validate refined workflow
+    // Step 6: Resolve skill paths for skill nodes (only if useSkills is true)
+    if (useSkills) {
+      refinedWorkflow = await resolveSkillPaths(refinedWorkflow, availableSkills);
+
+      log('INFO', 'Skill paths resolved', {
+        requestId,
+        skillNodesCount: refinedWorkflow.nodes.filter((n) => n.type === 'skill').length,
+      });
+    } else {
+      log('INFO', 'Skipping skill path resolution (useSkills=false)', { requestId });
+    }
+
+    // Step 7: Validate refined workflow
     const validation = validateAIGeneratedWorkflow(refinedWorkflow);
 
     if (!validation.valid) {
@@ -276,4 +381,55 @@ export async function refineWorkflow(
       executionTimeMs,
     };
   }
+}
+
+/**
+ * Resolve skill paths for skill nodes in the workflow
+ *
+ * @param workflow - The workflow containing skill nodes
+ * @param availableSkills - List of available skills to match against
+ * @returns Workflow with resolved skill paths
+ */
+async function resolveSkillPaths(
+  workflow: Workflow,
+  availableSkills: SkillReference[]
+): Promise<Workflow> {
+  const resolvedNodes = workflow.nodes.map((node) => {
+    if (node.type !== 'skill') {
+      return node; // Not a Skill node, no changes
+    }
+
+    const skillData = node.data as SkillNodeData;
+
+    // Find matching skill by name and scope
+    const matchedSkill = availableSkills.find(
+      (skill) => skill.name === skillData.name && skill.scope === skillData.scope
+    );
+
+    if (matchedSkill) {
+      // Skill found - resolve path
+      return {
+        ...node,
+        data: {
+          ...skillData,
+          skillPath: matchedSkill.skillPath,
+          validationStatus: matchedSkill.validationStatus,
+        } as SkillNodeData,
+      };
+    }
+
+    // Skill not found - mark as missing
+    return {
+      ...node,
+      data: {
+        ...skillData,
+        validationStatus: 'missing' as const,
+      } as SkillNodeData,
+    };
+  });
+
+  return {
+    ...workflow,
+    nodes: resolvedNodes,
+  };
 }

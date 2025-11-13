@@ -299,6 +299,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.closeButton': '닫기',
   'refinement.chat.clearButton': '대화 지우기',
   'refinement.chat.clearButton.tooltip': '대화 기록을 지우고 처음부터 시작합니다',
+  'refinement.chat.useSkillsCheckbox': 'Skill 포함',
   'refinement.chat.refining': 'AI가 워크플로를 개선하는 중... 최대 120초가 소요될 수 있습니다.',
   'refinement.chat.progressTime': '{elapsed}초 / {max}초',
   'refinement.chat.characterCount': '{count} / {max} 자',

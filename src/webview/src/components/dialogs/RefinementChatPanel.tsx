@@ -45,6 +45,8 @@ export function RefinementChatPanel() {
     clearHistory,
     shouldShowWarning,
     isProcessing,
+    useSkills,
+    toggleUseSkills,
   } = useRefinementStore();
   const { activeWorkflow, updateWorkflow } = useWorkflowStore();
   const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
@@ -103,7 +105,8 @@ export function RefinementChatPanel() {
         message,
         activeWorkflow,
         conversationHistory,
-        requestId
+        requestId,
+        useSkills
       );
 
       // Update workflow in store
@@ -215,7 +218,8 @@ export function RefinementChatPanel() {
         userMessage.content,
         activeWorkflow,
         conversationHistory,
-        requestId
+        requestId,
+        useSkills
       );
 
       // Update workflow in store
@@ -298,6 +302,28 @@ export function RefinementChatPanel() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <IterationCounter />
+
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: '11px',
+              color: 'var(--vscode-foreground)',
+              cursor: isProcessing ? 'not-allowed' : 'pointer',
+              opacity: isProcessing ? 0.5 : 1,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={useSkills}
+              onChange={toggleUseSkills}
+              disabled={isProcessing}
+              style={{ cursor: isProcessing ? 'not-allowed' : 'pointer' }}
+              aria-label={t('refinement.chat.useSkillsCheckbox')}
+            />
+            {t('refinement.chat.useSkillsCheckbox')}
+          </label>
 
           <button
             type="button"

@@ -299,6 +299,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.closeButton': 'Close',
   'refinement.chat.clearButton': 'Clear Conversation',
   'refinement.chat.clearButton.tooltip': 'Clear conversation history and start fresh',
+  'refinement.chat.useSkillsCheckbox': 'Include Skills',
   'refinement.chat.refining': 'AI is refining workflow... This may take up to 120 seconds.',
   'refinement.chat.progressTime': '{elapsed}s / {max}s',
   'refinement.chat.characterCount': '{count} / {max} characters',
