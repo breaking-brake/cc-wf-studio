@@ -22,6 +22,7 @@ import { IterationCounter } from '../chat/IterationCounter';
 import { MessageInput } from '../chat/MessageInput';
 import { MessageList } from '../chat/MessageList';
 import { WarningBanner } from '../chat/WarningBanner';
+import { Checkbox } from '../common/Checkbox';
 import { ResizeHandle } from '../common/ResizeHandle';
 import { ConfirmDialog } from './ConfirmDialog';
 
@@ -303,27 +304,13 @@ export function RefinementChatPanel() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <IterationCounter />
 
-          <label
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              fontSize: '11px',
-              color: 'var(--vscode-foreground)',
-              cursor: isProcessing ? 'not-allowed' : 'pointer',
-              opacity: isProcessing ? 0.5 : 1,
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={useSkills}
-              onChange={toggleUseSkills}
-              disabled={isProcessing}
-              style={{ cursor: isProcessing ? 'not-allowed' : 'pointer' }}
-              aria-label={t('refinement.chat.useSkillsCheckbox')}
-            />
-            {t('refinement.chat.useSkillsCheckbox')}
-          </label>
+          <Checkbox
+            checked={useSkills}
+            onChange={toggleUseSkills}
+            disabled={isProcessing}
+            label={t('refinement.chat.useSkillsCheckbox')}
+            ariaLabel={t('refinement.chat.useSkillsCheckbox')}
+          />
 
           <button
             type="button"

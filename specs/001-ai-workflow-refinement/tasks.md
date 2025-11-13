@@ -1771,4 +1771,63 @@ Phase 8.1でスキル参照機能を実装したが、以下の課題が判明:
 - タイムアウト防止
 - 不要なスキル選択の回避
 
+### Phase 8.3: VSCodeテーマ対応チェックボックス実装 ✅ 2025-11-13
+
+**目的**: ネイティブHTMLチェックボックスをVSCodeテーマ変数を使用したカスタムコンポーネントに置き換え、ライト/ダークモード両対応を実現。
+
+#### T149: カスタムCheckboxコンポーネント作成 ✅ 2025-11-13
+- **ファイル**: `src/webview/src/components/common/Checkbox.tsx` (新規作成)
+- **実装内容**:
+  - VSCode CSS変数を使用 (`--vscode-inputOption-activeBackground`, `--vscode-focusBorder`, `--vscode-input-border`, `--vscode-input-background`, `--vscode-inputOption-activeForeground`)
+  - 16x16px カスタムチェックボックス、3px角丸
+  - カスタムSVGチェックマークアイコン (12x12px)
+  - キーボードサポート (Space/Enter)
+  - 完全なARIAアクセシビリティ対応 (role="checkbox", aria-checked, aria-label, aria-disabled, tabIndex)
+  - ラベルクリック対応 (外側divにonClick/onKeyDownを追加)
+  - トランジション効果なし (即座に切り替わり)
+- **Props**: `checked`, `onChange`, `disabled?`, `label?`, `ariaLabel?`
+
+#### T150: RefinementChatPanelで使用 ✅ 2025-11-13
+- **ファイル**: `src/webview/src/components/dialogs/RefinementChatPanel.tsx`
+- **Line 25**: `import { Checkbox } from '../common/Checkbox';` 追加
+- **Line 307-313**: ネイティブチェックボックスをカスタムコンポーネントに置き換え
+  ```typescript
+  <Checkbox
+    checked={useSkills}
+    onChange={toggleUseSkills}
+    disabled={isProcessing}
+    label={t('refinement.chat.useSkillsCheckbox')}
+    ariaLabel={t('refinement.chat.useSkillsCheckbox')}
+  />
+  ```
+
+#### T151: ビルド・Lintテスト ✅ 2025-11-13
+- `npm run lint`: 成功 (95ファイル)
+- `npm run build`: 成功
+
+#### T152: 手動E2Eテスト ✅ 2025-11-13
+- チェックボックス本体クリック: ✅ 動作確認
+- ラベルテキストクリック: ✅ 動作確認
+- VSCodeテーマカラー適用: ✅ 動作確認
+- キーボード操作: ✅ 動作確認
+- トランジション削除: ✅ 動作確認
+
+#### 修正履歴
+1. **Biome Lint Error修正** (`<label>`→`<div>` 変更)
+2. **SVG title追加** (アクセシビリティ対応)
+3. **ラベルクリック対応** (外側divにonClick/onKeyDown追加)
+4. **トランジション削除** (`transition: 'all 0.15s ease'` 削除)
+
+#### 既知の課題 (Phase 8.3では対応しない)
+**Issue**: `useSkills=false`でも会話履歴経由でSkillノードが生成される可能性
+- **原因**: 会話履歴(最大6メッセージ)に過去のSkillノード情報が含まれる
+- **シナリオ**:
+  1. useSkills=ON → Skillノード生成 → 会話履歴に記録
+  2. useSkills=OFF → "skillをpromptで置き換えて" → Skillノード削除
+  3. useSkills=OFF → "use skill" → 会話履歴を参照してSkillノードを再生成
+- **対策候補**:
+  - useSkills=false時に会話履歴からSkillノード記述をフィルタリング
+  - プロンプトに明示的な禁止指示追加
+- **決定**: 次バージョンでの対応とする
+
 ---
