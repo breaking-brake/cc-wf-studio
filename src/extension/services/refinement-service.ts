@@ -144,6 +144,7 @@ const MAX_REFINEMENT_TIMEOUT_MS = 90000;
  * @param useSkills - Whether to include skills in refinement (default: true)
  * @param timeoutMs - Timeout in milliseconds (default: 90000)
  * @param requestId - Optional request ID for cancellation support
+ * @param workspaceRoot - The workspace root path for CLI execution
  * @returns Refinement result with success status and refined workflow or error
  */
 export async function refineWorkflow(
@@ -153,7 +154,8 @@ export async function refineWorkflow(
   extensionPath: string,
   useSkills = true,
   timeoutMs = MAX_REFINEMENT_TIMEOUT_MS,
-  requestId?: string
+  requestId?: string,
+  workspaceRoot?: string
 ): Promise<RefinementResult> {
   const startTime = Date.now();
 
@@ -253,7 +255,7 @@ export async function refineWorkflow(
     );
 
     // Step 4: Execute Claude Code CLI
-    const cliResult = await executeClaudeCodeCLI(prompt, timeoutMs, requestId);
+    const cliResult = await executeClaudeCodeCLI(prompt, timeoutMs, requestId, workspaceRoot);
 
     if (!cliResult.success || !cliResult.output) {
       // CLI execution failed

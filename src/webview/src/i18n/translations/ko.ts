@@ -301,7 +301,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.clearButton.tooltip': '대화 기록을 지우고 처음부터 시작합니다',
   'refinement.chat.useSkillsCheckbox': 'Skill 포함',
   'refinement.chat.claudeMdTip':
-    '💡 팁: `~/.claude/CLAUDE.md` 에 워크플로별 규칙과 제약을 추가하면AI가 더 정확한 편집을 수행합니다',
+    '💡 팁: CLAUDE.md 에 워크플로별 규칙과 제약을 추가하면AI가 더 정확한 편집을 수행합니다',
   'refinement.chat.refining': 'AI가 워크플로를 개선하는 중... 최대 120초가 소요될 수 있습니다.',
   'refinement.chat.progressTime': '{elapsed}초 / {max}초',
   'refinement.chat.characterCount': '{count} / {max} 자',

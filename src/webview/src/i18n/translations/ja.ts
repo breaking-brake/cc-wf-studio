@@ -300,7 +300,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.clearButton.tooltip': '会話履歴をクリアして最初からやり直します',
   'refinement.chat.useSkillsCheckbox': 'Skillを含める',
   'refinement.chat.claudeMdTip':
-    '💡 Tip: ワークフロー固有のルールや制約を`~/.claude/CLAUDE.md` に記載すると、AIがより的確な編集を行えます',
+    '💡 Tip: ワークフロー固有のルールや制約をCLAUDE.mdに記載すると、AIがより的確な編集を行えます',
   'refinement.chat.refining': 'AIがワークフローを改善中... 最大120秒かかる場合があります。',
   'refinement.chat.progressTime': '{elapsed}秒 / {max}秒',
   'refinement.chat.characterCount': '{count} / {max} 文字',
