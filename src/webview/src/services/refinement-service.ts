@@ -7,6 +7,7 @@
 
 import type {
   ExtensionMessage,
+  RefinementClarificationPayload,
   RefinementSuccessPayload,
   RefineWorkflowPayload,
 } from '@shared/types/messages';
@@ -28,6 +29,13 @@ export class WorkflowRefinementError extends Error {
 }
 
 /**
+ * Result type for workflow refinement (success or clarification)
+ */
+export type RefinementResult =
+  | { type: 'success'; payload: RefinementSuccessPayload }
+  | { type: 'clarification'; payload: RefinementClarificationPayload };
+
+/**
  * Refine a workflow using AI based on user feedback
  *
  * @param workflowId - ID of the workflow being refined
@@ -37,7 +45,7 @@ export class WorkflowRefinementError extends Error {
  * @param requestId - Request ID for this refinement
  * @param useSkills - Whether to include skills in refinement (default: true)
  * @param timeoutMs - Optional timeout in milliseconds (default: 65000, which is 5 seconds more than server timeout)
- * @returns Promise that resolves to the refinement success payload
+ * @returns Promise that resolves to the refinement result (success or clarification)
  * @throws {WorkflowRefinementError} If refinement fails
  */
 export function refineWorkflow(
@@ -48,7 +56,7 @@ export function refineWorkflow(
   requestId: string,
   useSkills = true,
   timeoutMs = 65000
-): Promise<RefinementSuccessPayload> {
+): Promise<RefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
     const handler = (event: MessageEvent) => {
@@ -58,7 +66,9 @@ export function refineWorkflow(
         window.removeEventListener('message', handler);
 
         if (message.type === 'REFINEMENT_SUCCESS' && message.payload) {
-          resolve(message.payload);
+          resolve({ type: 'success', payload: message.payload });
+        } else if (message.type === 'REFINEMENT_CLARIFICATION' && message.payload) {
+          resolve({ type: 'clarification', payload: message.payload });
         } else if (message.type === 'REFINEMENT_CANCELLED') {
           // Handle cancellation
           reject(new WorkflowRefinementError('Refinement cancelled by user', 'CANCELLED'));

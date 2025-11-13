@@ -314,6 +314,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.success': 'ワークフローの改善が完了しました！',
   'refinement.chat.changesSummary': '変更内容: {summary}',
 
+  // Refinement Success Messages
+  'refinement.success.defaultMessage': 'ワークフローを編集しました。',
+
   // Refinement Errors
   'refinement.error.emptyMessage': 'メッセージを入力してください',
   'refinement.error.messageTooLong': 'メッセージが長すぎます（最大{max}文字）',

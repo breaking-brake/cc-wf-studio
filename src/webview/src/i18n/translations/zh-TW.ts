@@ -303,6 +303,9 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.success': '工作流程優化成功！',
   'refinement.chat.changesSummary': '更改：{summary}',
 
+  // Refinement Success Messages
+  'refinement.success.defaultMessage': '已編輯工作流程。',
+
   // Refinement Errors
   'refinement.error.emptyMessage': '請輸入訊息',
   'refinement.error.messageTooLong': '訊息太長（最多{max}個字元）',

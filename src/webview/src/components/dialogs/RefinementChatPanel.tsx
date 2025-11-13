@@ -110,15 +110,31 @@ export function RefinementChatPanel() {
         useSkills
       );
 
-      // Update workflow in store
-      updateWorkflow(result.refinedWorkflow);
+      // Handle different result types
+      if (result.type === 'success') {
+        // Update workflow in store
+        updateWorkflow(result.payload.refinedWorkflow);
 
-      // Update loading message with actual AI response content
-      updateMessageContent(aiMessageId, result.aiMessage.content);
-      updateMessageLoadingState(aiMessageId, false);
+        // Update loading message with actual AI response content
+        updateMessageContent(aiMessageId, result.payload.aiMessage.content);
+        updateMessageLoadingState(aiMessageId, false);
 
-      // Update refinement store with AI response
-      handleRefinementSuccess(result.aiMessage, result.updatedConversationHistory);
+        // Update refinement store with AI response
+        handleRefinementSuccess(
+          result.payload.aiMessage,
+          result.payload.updatedConversationHistory
+        );
+      } else if (result.type === 'clarification') {
+        // AI is asking for clarification - update loading message with clarification content
+        updateMessageContent(aiMessageId, result.payload.aiMessage.content);
+        updateMessageLoadingState(aiMessageId, false);
+
+        // Update conversation history without updating workflow
+        handleRefinementSuccess(
+          result.payload.aiMessage,
+          result.payload.updatedConversationHistory
+        );
+      }
     } catch (error) {
       // Phase 3.11: Handle cancellation - remove loading message and reset state
       if (error instanceof WorkflowRefinementError && error.code === 'CANCELLED') {
@@ -223,15 +239,31 @@ export function RefinementChatPanel() {
         useSkills
       );
 
-      // Update workflow in store
-      updateWorkflow(result.refinedWorkflow);
+      // Handle different result types
+      if (result.type === 'success') {
+        // Update workflow in store
+        updateWorkflow(result.payload.refinedWorkflow);
 
-      // Update existing message with actual AI response content
-      updateMessageContent(aiMessageId, result.aiMessage.content);
-      updateMessageLoadingState(aiMessageId, false);
+        // Update existing message with actual AI response content
+        updateMessageContent(aiMessageId, result.payload.aiMessage.content);
+        updateMessageLoadingState(aiMessageId, false);
 
-      // Update refinement store with AI response
-      handleRefinementSuccess(result.aiMessage, result.updatedConversationHistory);
+        // Update refinement store with AI response
+        handleRefinementSuccess(
+          result.payload.aiMessage,
+          result.payload.updatedConversationHistory
+        );
+      } else if (result.type === 'clarification') {
+        // AI is asking for clarification - update message with clarification content
+        updateMessageContent(aiMessageId, result.payload.aiMessage.content);
+        updateMessageLoadingState(aiMessageId, false);
+
+        // Update conversation history without updating workflow
+        handleRefinementSuccess(
+          result.payload.aiMessage,
+          result.payload.updatedConversationHistory
+        );
+      }
     } catch (error) {
       // Phase 3.11: Handle cancellation - remove loading message and reset state
       if (error instanceof WorkflowRefinementError && error.code === 'CANCELLED') {

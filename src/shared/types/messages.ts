@@ -289,6 +289,17 @@ export interface RefinementCancelledPayload {
   timestamp: string; // ISO 8601
 }
 
+export interface RefinementClarificationPayload {
+  /** AI's clarification message asking for more information */
+  aiMessage: ConversationMessage;
+  /** Updated conversation history with the clarification message */
+  updatedConversationHistory: ConversationHistory;
+  /** Time taken to execute refinement before clarification */
+  executionTimeMs: number;
+  /** Response timestamp */
+  timestamp: string; // ISO 8601
+}
+
 // ============================================================================
 // Extension → Webview Messages
 // ============================================================================
@@ -313,6 +324,7 @@ export type ExtensionMessage =
   | Message<RefinementSuccessPayload, 'REFINEMENT_SUCCESS'>
   | Message<RefinementFailedPayload, 'REFINEMENT_FAILED'>
   | Message<RefinementCancelledPayload, 'REFINEMENT_CANCELLED'>
+  | Message<RefinementClarificationPayload, 'REFINEMENT_CLARIFICATION'>
   | Message<ConversationClearedPayload, 'CONVERSATION_CLEARED'>;
 
 // ============================================================================
