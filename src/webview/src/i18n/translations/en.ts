@@ -12,6 +12,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.export': 'Export',
   'toolbar.exporting': 'Exporting...',
   'toolbar.generateWithAI': 'Generate with AI',
+  'toolbar.refineWithAI': 'Edit with AI',
   'toolbar.selectWorkflow': 'Select workflow...',
   'toolbar.load': 'Load',
   'toolbar.refreshList': 'Refresh workflow list',
@@ -22,6 +23,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.selectWorkflowToLoad': 'Please select a workflow to load',
   'toolbar.error.validationFailed': 'Workflow validation failed',
   'toolbar.error.missingEndNode': 'Workflow must have at least one End node',
+  'toolbar.error.noActiveWorkflow': 'Please load a workflow first',
 
   // Node Palette
   'palette.title': 'Node Palette',
@@ -195,8 +197,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'To load a saved workflow, select it from the dropdown menu and click the "Load" button.',
   'tour.exportWorkflow':
     'Click the "Export" button to export in a format executable by Claude Code.\n\nSub-Agents go to `.claude/agents/` and SlashCommands to `.claude/commands/`.',
-  'tour.generateWithAI':
-    'Use the "Generate with AI" button to automatically create workflows from natural language descriptions.\n\nFor example: Simply input "Create a code review workflow that scans code, asks user for priority level, and generates fix suggestions" to generate a complete workflow.',
+  'tour.refineWithAI':
+    'Use the "Edit with AI" button to create or improve workflows through an interactive chat with AI.\n\nYou can start from an empty canvas or edit existing workflows conversationally.',
   'tour.helpButton':
     'To see this tour again, click the help button (?).\n\nEnjoy creating workflows!',
 
@@ -206,34 +208,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': 'Finish',
   'tour.button.next': 'Next ({step}/{steps})',
   'tour.button.skip': 'Skip',
-
-  // AI Generation Dialog
-  'ai.dialogTitle': 'Generate Workflow with AI',
-  'ai.dialogDescription':
-    'Describe the workflow you want to create in natural language. The AI will generate a complete workflow with nodes and connections.',
-  'ai.descriptionLabel': 'Workflow Description',
-  'ai.descriptionPlaceholder':
-    'Example: Create a code review workflow that scans code, asks user for priority level, and generates fix suggestions',
-  'ai.characterCount': '{count} / {max} characters',
-  'ai.generating': 'Generating workflow... This may take up to 90 seconds.',
-  'ai.progressTime': '{elapsed}s / {max}s',
-  'ai.generateButton': 'Generate',
-  'ai.cancelButton': 'Cancel',
-  'ai.cancelGenerationButton': 'Cancel Generation',
-  'ai.success': 'Workflow generated successfully!',
-  'ai.usageNote': '*1 This feature uses Claude Code installed in your environment.',
-  'ai.overwriteWarning':
-    '*2 Generating a workflow will completely replace your current workflow. Make sure to save your work before proceeding.',
-
-  // AI Generation Errors
-  'ai.error.emptyDescription': 'Please enter a workflow description',
-  'ai.error.descriptionTooLong': 'Description is too long (max {max} characters)',
-  'ai.error.commandNotFound':
-    'Claude Code CLI not found. Please install Claude Code to use AI generation.',
-  'ai.error.timeout': 'Request timed out. Please try again or simplify your description.',
-  'ai.error.parseError': 'Generation failed - please try again or rephrase your description',
-  'ai.error.validationError': 'Generated workflow failed validation',
-  'ai.error.unknown': 'An unexpected error occurred. Please try again.',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'Delete Node',
@@ -293,4 +267,85 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'skill.validation.descriptionTooLong': 'Description must be 1024 characters or less',
   'skill.validation.instructionsRequired': 'Instructions are required',
   'skill.validation.scopeRequired': 'Please select a scope (Personal or Project)',
+
+  // Workflow Refinement (001-ai-workflow-refinement)
+  'refinement.toolbar.refineButton': 'Edit with AI',
+  'refinement.toolbar.refineButton.tooltip': 'Open chat to edit this workflow with AI assistance',
+
+  // Refinement Chat Panel (Short form keys for components)
+  'refinement.title': 'Edit with AI',
+  'refinement.inputPlaceholder': 'Describe the changes you want to make...',
+  'refinement.sendButton': 'Send',
+  'refinement.cancelButton': 'Cancel',
+  'refinement.processing': 'Processing...',
+  'refinement.aiProcessing': 'AI is processing your request...',
+  'refinement.charactersRemaining': '{count} characters remaining',
+  'refinement.iterationCounter': 'Edits: {current}',
+  'refinement.iterationCounter.tooltip':
+    'High edit counts may slow down save/load operations and impact editing workflow',
+  'refinement.warning.title': 'Long Conversation',
+  'refinement.warning.message':
+    'The conversation history is getting large, which may increase file size and impact performance. Consider clearing the conversation history.',
+
+  // Refinement Chat Panel (Detailed keys)
+  'refinement.chat.title': 'Workflow Refinement Chat',
+  'refinement.chat.description':
+    'Chat with AI to iteratively improve your workflow. Describe what changes you want, and the AI will update the workflow automatically.',
+  'refinement.chat.inputPlaceholder': 'Describe the changes you want (e.g., "Add error handling")',
+  'refinement.chat.sendButton': 'Send',
+  'refinement.chat.sendButton.shortcut': 'Ctrl+Enter to send',
+  'refinement.chat.sendButton.shortcutMac': 'Cmd+Enter to send',
+  'refinement.chat.cancelButton': 'Cancel',
+  'refinement.chat.closeButton': 'Close',
+  'refinement.chat.clearButton': 'Clear Conversation',
+  'refinement.chat.clearButton.tooltip': 'Clear conversation history and start fresh',
+  'refinement.chat.useSkillsCheckbox': 'Include Skills',
+  'refinement.chat.claudeMdTip':
+    '💡 Tip: Add workflow-specific rules and constraints to `~/.claude/CLAUDE.md` for more accurate AI edits',
+  'refinement.chat.refining': 'AI is refining workflow... This may take up to 120 seconds.',
+  'refinement.chat.progressTime': '{elapsed}s / {max}s',
+  'refinement.chat.characterCount': '{count} / {max} characters',
+  'refinement.chat.iterationCounter': 'Iteration {current} / {max}',
+  'refinement.chat.iterationWarning': 'Approaching iteration limit ({current}/{max})',
+  'refinement.chat.iterationLimitReached':
+    'Maximum iteration limit reached ({max}). Please clear conversation to continue.',
+  'refinement.chat.noMessages': 'No messages yet. Start by describing what you want to improve.',
+  'refinement.chat.userMessageLabel': 'You',
+  'refinement.chat.aiMessageLabel': 'AI',
+  'refinement.chat.success': 'Workflow refined successfully!',
+  'refinement.chat.changesSummary': 'Changes: {summary}',
+
+  // Refinement Errors
+  'refinement.error.emptyMessage': 'Please enter a message',
+  'refinement.error.messageTooLong': 'Message is too long (max {max} characters)',
+  'refinement.error.commandNotFound':
+    'Claude Code CLI not found. Please install Claude Code to use AI refinement.',
+  'refinement.error.timeout':
+    'AI refinement timed out. Please try again with a simpler request, or increase timeout.',
+  'refinement.error.parseError':
+    'Failed to parse AI response. Please try again or rephrase your request.',
+  'refinement.error.validationError':
+    'Refined workflow failed validation. Please try a different request.',
+  'refinement.error.iterationLimitReached':
+    'Maximum iteration limit (20) has been reached. Clear conversation history to start fresh, or manually edit the workflow.',
+  'refinement.error.unknown': 'An unexpected error occurred. Check logs for details.',
+
+  // Refinement Error Display (Phase 3.8)
+  'refinement.error.retryButton': 'Retry',
+
+  // Processing Overlay (Phase 3.10)
+  'refinement.processingOverlay': 'AI is processing your request...',
+
+  // Clear Conversation Confirmation
+  'refinement.clearDialog.title': 'Clear Conversation',
+  'refinement.clearDialog.message':
+    'Are you sure you want to clear the conversation history? This cannot be undone.',
+  'refinement.clearDialog.confirm': 'Clear',
+  'refinement.clearDialog.cancel': 'Cancel',
+
+  // Initial instructional message (Phase 3.12)
+  'refinement.initialMessage.description':
+    'Describe the workflow you want to achieve in natural language.',
+  'refinement.initialMessage.note':
+    '※ This feature uses Claude Code installed in your environment.',
 };

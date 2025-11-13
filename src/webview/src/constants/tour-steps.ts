@@ -78,8 +78,8 @@ export const getTourSteps = (t: (key: string) => string): Step[] => [
     disableBeacon: true,
   },
   {
-    target: '[data-tour="ai-generate-button"]',
-    content: t('tour.generateWithAI'),
+    target: '[data-tour="ai-refine-button"]',
+    content: t('tour.refineWithAI'),
     placement: 'bottom',
     disableBeacon: true,
   },

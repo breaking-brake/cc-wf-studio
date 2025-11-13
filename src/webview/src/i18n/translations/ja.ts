@@ -12,6 +12,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.export': 'エクスポート',
   'toolbar.exporting': 'エクスポート中...',
   'toolbar.generateWithAI': 'AIで生成',
+  'toolbar.refineWithAI': 'AI編集',
   'toolbar.selectWorkflow': 'ワークフローを選択...',
   'toolbar.load': '読み込み',
   'toolbar.refreshList': 'ワークフローリストを更新',
@@ -22,6 +23,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.selectWorkflowToLoad': '読み込むワークフローを選択してください',
   'toolbar.error.validationFailed': 'ワークフローの検証に失敗しました',
   'toolbar.error.missingEndNode': 'ワークフローには最低1つのEndノードが必要です',
+  'toolbar.error.noActiveWorkflow': 'ワークフローを読み込んでください',
 
   // Node Palette
   'palette.title': 'ノードパレット',
@@ -195,8 +197,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     '保存したワークフローを読み込むには、ドロップダウンメニューからワークフローを選択し、「読み込み」ボタンをクリックします。',
   'tour.exportWorkflow':
     '「エクスポート」ボタンをクリックすると、Claude Codeで実行可能な形式にエクスポートされます。\n\nSub-Agentは`.claude/agents/`に、SlashCommandは`.claude/commands/`に出力されます。',
-  'tour.generateWithAI':
-    '「AI生成」ボタンで、自然言語の説明からワークフローを自動生成できます。\n\n例：「コードをスキャンし、ユーザーに優先度を尋ねて修正案を生成するワークフロー」と入力するだけで、完全なワークフローが作成されます。',
+  'tour.refineWithAI':
+    '「AI編集」ボタンで、AIとチャットしながらワークフローを生成・改善できます。\n\n空のキャンバスから新規作成も、既存のワークフローの修正も対話的に行えます。',
   'tour.helpButton':
     'このツアーをもう一度見たい場合は、ヘルプボタン(?)をクリックしてください。\n\nそれでは、ワークフロー作成を楽しんでください！',
 
@@ -206,35 +208,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': '完了',
   'tour.button.next': '次へ ({step}/{steps})',
   'tour.button.skip': 'スキップ',
-
-  // AI Generation Dialog
-  'ai.dialogTitle': 'AIでワークフローを生成',
-  'ai.dialogDescription':
-    '作成したいワークフローを自然言語で説明してください。AIがノードと接続を含む完全なワークフローを生成します。',
-  'ai.descriptionLabel': 'ワークフローの説明',
-  'ai.descriptionPlaceholder':
-    '例: コードをスキャンし、ユーザーに優先度レベルを尋ね、修正案を生成するコードレビューワークフローを作成',
-  'ai.characterCount': '{count} / {max} 文字',
-  'ai.generating': 'ワークフローを生成中... 最大90秒かかることがあります。',
-  'ai.progressTime': '{elapsed}秒 / {max}秒',
-  'ai.generateButton': '生成',
-  'ai.cancelButton': 'キャンセル',
-  'ai.cancelGenerationButton': '生成を中止',
-  'ai.success': 'ワークフローが正常に生成されました！',
-  'ai.usageNote': '※1 この機能はお使いの環境にインストールされたClaude Codeを使用します。',
-  'ai.overwriteWarning':
-    '※2 ワークフローを生成すると、現在のワークフローが完全に上書きされます。続行する前に作業内容を保存してください。',
-
-  // AI Generation Errors
-  'ai.error.emptyDescription': 'ワークフローの説明を入力してください',
-  'ai.error.descriptionTooLong': '説明が長すぎます（最大{max}文字）',
-  'ai.error.commandNotFound':
-    'Claude Code CLIが見つかりません。AI生成機能を使用するにはClaude Codeをインストールしてください。',
-  'ai.error.timeout':
-    'リクエストがタイムアウトしました。もう一度試すか、説明を簡潔にしてください。',
-  'ai.error.parseError': '生成に失敗しました - もう一度試すか、説明を言い換えてください',
-  'ai.error.validationError': '生成されたワークフローの検証に失敗しました',
-  'ai.error.unknown': '予期しないエラーが発生しました。もう一度お試しください。',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'ノードを削除',
@@ -292,4 +265,85 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'skill.validation.descriptionTooLong': '説明は1024文字以内にしてください',
   'skill.validation.instructionsRequired': '指示内容は必須です',
   'skill.validation.scopeRequired': 'スコープ（個人用/プロジェクト用）を選択してください',
+
+  // Workflow Refinement (001-ai-workflow-refinement)
+  'refinement.toolbar.refineButton': 'AI編集',
+  'refinement.toolbar.refineButton.tooltip': 'AIとチャットしてワークフローを編集します',
+
+  // Refinement Chat Panel (Short form keys for components)
+  'refinement.title': 'AI編集',
+  'refinement.inputPlaceholder': 'ワークフローの編集内容を入力してください...',
+  'refinement.sendButton': '送信',
+  'refinement.cancelButton': 'キャンセル',
+  'refinement.processing': '処理中...',
+  'refinement.aiProcessing': 'AIがリクエストを処理中です...',
+  'refinement.charactersRemaining': '残り {count} 文字',
+  'refinement.iterationCounter': '編集回数: {current}回',
+  'refinement.iterationCounter.tooltip':
+    '編集回数が多いと保存・読み込みが遅くなり、編集作業に支障が出る可能性があります',
+  'refinement.warning.title': '会話が長くなっています',
+  'refinement.warning.message':
+    'ファイルサイズが大きくなりパフォーマンスが低下する可能性があります。会話履歴のクリアをご検討ください。',
+
+  // Refinement Chat Panel (Detailed keys)
+  'refinement.chat.title': 'ワークフロー改善チャット',
+  'refinement.chat.description':
+    'AIとチャットして、ワークフローを段階的に改善できます。希望する変更内容を入力すると、AIが自動的にワークフローを更新します。',
+  'refinement.chat.inputPlaceholder':
+    '変更内容を入力してください（例：「エラーハンドリングを追加して」）',
+  'refinement.chat.sendButton': '送信',
+  'refinement.chat.sendButton.shortcut': 'Ctrl+Enterで送信',
+  'refinement.chat.sendButton.shortcutMac': 'Cmd+Enterで送信',
+  'refinement.chat.cancelButton': 'キャンセル',
+  'refinement.chat.closeButton': '閉じる',
+  'refinement.chat.clearButton': '会話をクリア',
+  'refinement.chat.clearButton.tooltip': '会話履歴をクリアして最初からやり直します',
+  'refinement.chat.useSkillsCheckbox': 'Skillを含める',
+  'refinement.chat.claudeMdTip':
+    '💡 Tip: ワークフロー固有のルールや制約を`~/.claude/CLAUDE.md` に記載すると、AIがより的確な編集を行えます',
+  'refinement.chat.refining': 'AIがワークフローを改善中... 最大120秒かかる場合があります。',
+  'refinement.chat.progressTime': '{elapsed}秒 / {max}秒',
+  'refinement.chat.characterCount': '{count} / {max} 文字',
+  'refinement.chat.iterationCounter': '反復 {current} / {max}',
+  'refinement.chat.iterationWarning': '反復回数の上限に近づいています ({current}/{max})',
+  'refinement.chat.iterationLimitReached':
+    '最大反復回数に達しました ({max})。会話をクリアして続けてください。',
+  'refinement.chat.noMessages': 'メッセージはまだありません。改善したい内容を入力してください。',
+  'refinement.chat.userMessageLabel': 'あなた',
+  'refinement.chat.aiMessageLabel': 'AI',
+  'refinement.chat.success': 'ワークフローの改善が完了しました！',
+  'refinement.chat.changesSummary': '変更内容: {summary}',
+
+  // Refinement Errors
+  'refinement.error.emptyMessage': 'メッセージを入力してください',
+  'refinement.error.messageTooLong': 'メッセージが長すぎます（最大{max}文字）',
+  'refinement.error.commandNotFound':
+    'Claude Code CLIが見つかりません。AI改善機能を使用するにはClaude Codeをインストールしてください。',
+  'refinement.error.timeout':
+    'AI改善がタイムアウトしました。もう一度試すか、リクエストを簡略化してください。',
+  'refinement.error.parseError':
+    'AI応答の解析に失敗しました。もう一度試すか、リクエストを言い換えてください。',
+  'refinement.error.validationError':
+    '改善されたワークフローが検証に失敗しました。別のリクエストを試してください。',
+  'refinement.error.iterationLimitReached':
+    '最大反復回数(20)に達しました。会話履歴をクリアして最初からやり直すか、手動でワークフローを編集してください。',
+  'refinement.error.unknown': '予期しないエラーが発生しました。ログを確認してください。',
+
+  // Refinement Error Display (Phase 3.8)
+  'refinement.error.retryButton': 'リトライ',
+
+  // Processing Overlay (Phase 3.10)
+  'refinement.processingOverlay': 'AIが処理中です...',
+
+  // Clear Conversation Confirmation
+  'refinement.clearDialog.title': '会話をクリア',
+  'refinement.clearDialog.message':
+    '会話履歴をクリアしてもよろしいですか？この操作は取り消せません。',
+  'refinement.clearDialog.confirm': 'クリア',
+  'refinement.clearDialog.cancel': 'キャンセル',
+
+  // Initial instructional message (Phase 3.12)
+  'refinement.initialMessage.description': '実現したいワークフローを自然言語で説明してください。',
+  'refinement.initialMessage.note':
+    '※ この機能はお使いの環境にインストールされたClaude Codeを使用します。',
 };

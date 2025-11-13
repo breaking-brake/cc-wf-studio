@@ -12,6 +12,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.export': '내보내기',
   'toolbar.exporting': '내보내는 중...',
   'toolbar.generateWithAI': 'AI로 생성',
+  'toolbar.refineWithAI': 'AI로 편집',
   'toolbar.selectWorkflow': '워크플로 선택...',
   'toolbar.load': '불러오기',
   'toolbar.refreshList': '워크플로 목록 새로고침',
@@ -22,6 +23,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.selectWorkflowToLoad': '불러올 워크플로를 선택하세요',
   'toolbar.error.validationFailed': '워크플로 검증에 실패했습니다',
   'toolbar.error.missingEndNode': '워크플로에는 최소 1개의 End 노드가 필요합니다',
+  'toolbar.error.noActiveWorkflow': '먼저 워크플로를 불러오세요',
 
   // Node Palette
   'palette.title': '노드 팔레트',
@@ -197,8 +199,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     '저장된 워크플로우를 로드하려면 드롭다운 메뉴에서 워크플로우를 선택하고 "불러오기" 버튼을 클릭하세요.',
   'tour.exportWorkflow':
     '"내보내기" 버튼을 클릭하면 Claude Code에서 실행 가능한 형식으로 내보내집니다.\n\nSub-Agent는 `.claude/agents/`로, SlashCommand는 `.claude/commands/`로 이동합니다.',
-  'tour.generateWithAI':
-    '"AI로 생성" 버튼을 사용하여 자연어 설명으로부터 워크플로우를 자동 생성할 수 있습니다.\n\n예: "코드를 스캔하고 사용자에게 우선순위를 묻고 수정 제안을 생성하는 코드 검토 워크플로 만들기"라고 입력하면 완전한 워크플로우가 생성됩니다.',
+  'tour.refineWithAI':
+    '"AI로 편집" 버튼을 사용하여 AI와 대화하며 워크플로우를 생성하거나 개선할 수 있습니다.\n\n빈 캔버스에서 시작하거나 기존 워크플로우를 대화형으로 수정할 수 있습니다.',
   'tour.helpButton':
     '이 투어를 다시 보려면 도움말 버튼(?)을 클릭하세요.\n\n워크플로우 생성을 즐기세요!',
 
@@ -208,34 +210,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': '완료',
   'tour.button.next': '다음 ({step}/{steps})',
   'tour.button.skip': '건너뛰기',
-
-  // AI Generation Dialog
-  'ai.dialogTitle': 'AI로 워크플로 생성',
-  'ai.dialogDescription':
-    '자연어로 생성하려는 워크플로를 설명하세요. AI가 노드와 연결이 포함된 완전한 워크플로를 생성합니다.',
-  'ai.descriptionLabel': '워크플로 설명',
-  'ai.descriptionPlaceholder':
-    '예: 코드를 스캔하고 사용자에게 우선순위 수준을 묻고 수정 제안을 생성하는 코드 검토 워크플로 만들기',
-  'ai.characterCount': '{count} / {max} 자',
-  'ai.generating': '워크플로 생성 중... 최대 90초 소요될 수 있습니다.',
-  'ai.progressTime': '{elapsed}초 / {max}초',
-  'ai.generateButton': '생성',
-  'ai.cancelButton': '취소',
-  'ai.cancelGenerationButton': '생성 취소',
-  'ai.success': '워크플로가 성공적으로 생성되었습니다!',
-  'ai.usageNote': '*1 이 기능은 사용자 환경에 설치된 Claude Code를 사용합니다.',
-  'ai.overwriteWarning':
-    '*2 워크플로를 생성하면 현재 워크플로가 완전히 덮어쓰여집니다. 계속하기 전에 작업 내용을 저장하세요.',
-
-  // AI Generation Errors
-  'ai.error.emptyDescription': '워크플로 설명을 입력하세요',
-  'ai.error.descriptionTooLong': '설명이 너무 깁니다 (최대 {max}자)',
-  'ai.error.commandNotFound':
-    'Claude Code CLI를 찾을 수 없습니다. AI 생성 기능을 사용하려면 Claude Code를 설치하세요.',
-  'ai.error.timeout': '요청 시간이 초과되었습니다. 다시 시도하거나 설명을 간소화하세요.',
-  'ai.error.parseError': '생성에 실패했습니다 - 다시 시도하거나 설명을 다시 작성하세요',
-  'ai.error.validationError': '생성된 워크플로 검증에 실패했습니다',
-  'ai.error.unknown': '예기치 않은 오류가 발생했습니다. 다시 시도하세요.',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '노드 삭제',
@@ -293,4 +267,81 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'skill.validation.descriptionTooLong': '설명은 1024자 이하여야 합니다',
   'skill.validation.instructionsRequired': '지침은 필수입니다',
   'skill.validation.scopeRequired': '범위(개인용/프로젝트용)를 선택해 주세요',
+
+  // Workflow Refinement (001-ai-workflow-refinement)
+  'refinement.toolbar.refineButton': 'AI로 개선',
+  'refinement.toolbar.refineButton.tooltip': 'AI와 채팅하여 워크플로를 개선합니다',
+
+  // Refinement Chat Panel (Short form keys for components)
+  'refinement.title': 'AI로 편집',
+  'refinement.inputPlaceholder': '변경하고 싶은 내용을 입력하세요...',
+  'refinement.sendButton': '전송',
+  'refinement.cancelButton': '취소',
+  'refinement.processing': '처리 중...',
+  'refinement.aiProcessing': 'AI가 요청을 처리하고 있습니다...',
+  'refinement.charactersRemaining': '남은 문자 수: {count}',
+  'refinement.iterationCounter': '편집 횟수: {current}회',
+  'refinement.iterationCounter.tooltip':
+    '편집 횟수가 많으면 저장·불러오기가 느려지고 편집 작업에 지장이 생길 수 있습니다',
+  'refinement.warning.title': '긴 대화',
+  'refinement.warning.message':
+    '대화 기록이 길어져 파일 크기가 증가하고 성능에 영향을 줄 수 있습니다. 대화 기록 지우기를 고려해 주세요.',
+
+  // Refinement Chat Panel (Detailed keys)
+  'refinement.chat.title': '워크플로 개선 채팅',
+  'refinement.chat.description':
+    'AI와 채팅하여 워크플로를 점진적으로 개선할 수 있습니다. 원하는 변경 사항을 설명하면 AI가 자동으로 워크플로를 업데이트합니다.',
+  'refinement.chat.inputPlaceholder': '변경 사항을 입력하세요 (예: "오류 처리 추가")',
+  'refinement.chat.sendButton': '전송',
+  'refinement.chat.sendButton.shortcut': 'Ctrl+Enter로 전송',
+  'refinement.chat.sendButton.shortcutMac': 'Cmd+Enter로 전송',
+  'refinement.chat.cancelButton': '취소',
+  'refinement.chat.closeButton': '닫기',
+  'refinement.chat.clearButton': '대화 지우기',
+  'refinement.chat.clearButton.tooltip': '대화 기록을 지우고 처음부터 시작합니다',
+  'refinement.chat.useSkillsCheckbox': 'Skill 포함',
+  'refinement.chat.claudeMdTip':
+    '💡 팁: `~/.claude/CLAUDE.md` 에 워크플로별 규칙과 제약을 추가하면AI가 더 정확한 편집을 수행합니다',
+  'refinement.chat.refining': 'AI가 워크플로를 개선하는 중... 최대 120초가 소요될 수 있습니다.',
+  'refinement.chat.progressTime': '{elapsed}초 / {max}초',
+  'refinement.chat.characterCount': '{count} / {max} 자',
+  'refinement.chat.iterationCounter': '반복 {current} / {max}',
+  'refinement.chat.iterationWarning': '반복 제한에 가까워지고 있습니다 ({current}/{max})',
+  'refinement.chat.iterationLimitReached':
+    '최대 반복 횟수에 도달했습니다 ({max}). 계속하려면 대화를 지우세요.',
+  'refinement.chat.noMessages': '아직 메시지가 없습니다. 개선하고 싶은 내용을 입력하세요.',
+  'refinement.chat.userMessageLabel': '나',
+  'refinement.chat.aiMessageLabel': 'AI',
+  'refinement.chat.success': '워크플로 개선이 완료되었습니다!',
+  'refinement.chat.changesSummary': '변경 사항: {summary}',
+
+  // Refinement Errors
+  'refinement.error.emptyMessage': '메시지를 입력하세요',
+  'refinement.error.messageTooLong': '메시지가 너무 깁니다 (최대 {max}자)',
+  'refinement.error.commandNotFound':
+    'Claude Code CLI를 찾을 수 없습니다. AI 개선 기능을 사용하려면 Claude Code를 설치하세요.',
+  'refinement.error.timeout': 'AI 개선 시간이 초과되었습니다. 다시 시도하거나 요청을 단순화하세요.',
+  'refinement.error.parseError':
+    'AI 응답 파싱에 실패했습니다. 다시 시도하거나 요청을 다시 표현하세요.',
+  'refinement.error.validationError':
+    '개선된 워크플로가 검증에 실패했습니다. 다른 요청을 시도하세요.',
+  'refinement.error.iterationLimitReached':
+    '최대 반복 횟수(20)에 도달했습니다. 대화 기록을 지우고 처음부터 시작하거나 워크플로를 수동으로 편집하세요.',
+  'refinement.error.unknown': '예상치 못한 오류가 발생했습니다. 로그를 확인하세요.',
+
+  // Refinement Error Display (Phase 3.8)
+  'refinement.error.retryButton': '다시 시도',
+
+  // Processing Overlay (Phase 3.10)
+  'refinement.processingOverlay': 'AI가 처리 중입니다...',
+
+  // Clear Conversation Confirmation
+  'refinement.clearDialog.title': '대화 지우기',
+  'refinement.clearDialog.message': '대화 기록을 지우시겠습니까? 이 작업은 취소할 수 없습니다.',
+  'refinement.clearDialog.confirm': '지우기',
+  'refinement.clearDialog.cancel': '취소',
+
+  // Initial instructional message (Phase 3.12)
+  'refinement.initialMessage.description': '실현하려는 워크플로를 자연어로 설명해주세요.',
+  'refinement.initialMessage.note': '※ 이 기능은 환경에 설치된 Claude Code를 사용합니다.',
 };

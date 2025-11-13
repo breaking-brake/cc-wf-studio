@@ -83,7 +83,7 @@ export async function executeClaudeCodeCLI(
         success: false,
         error: {
           code: 'TIMEOUT',
-          message: 'AI generation timed out after 60 seconds. Try simplifying your description.',
+          message: `AI generation timed out after ${Math.floor(timeoutMs / 1000)} seconds. Try simplifying your description.`,
           details: `Timeout after ${timeoutMs}ms`,
         },
         executionTimeMs,
@@ -249,6 +249,48 @@ export function cancelGeneration(requestId: string): {
     if (!childProcess.killed) {
       childProcess.kill('SIGKILL');
       log('WARN', `Forcefully killed process for requestId: ${requestId}`);
+    }
+  }, 500);
+
+  // Remove from active processes map
+  activeProcesses.delete(requestId);
+
+  return { cancelled: true, executionTimeMs };
+}
+
+/**
+ * Cancel an active refinement process
+ *
+ * @param requestId - Request ID of the refinement to cancel
+ * @returns True if process was found and killed, false otherwise
+ */
+export function cancelRefinement(requestId: string): {
+  cancelled: boolean;
+  executionTimeMs?: number;
+} {
+  const activeGen = activeProcesses.get(requestId);
+
+  if (!activeGen) {
+    log('WARN', `No active refinement found for requestId: ${requestId}`);
+    return { cancelled: false };
+  }
+
+  const { process: childProcess, startTime } = activeGen;
+  const executionTimeMs = Date.now() - startTime;
+
+  log('INFO', `Cancelling refinement for requestId: ${requestId}`, {
+    pid: childProcess.pid,
+    elapsedMs: executionTimeMs,
+  });
+
+  // Kill the process with SIGTERM (graceful termination)
+  childProcess.kill('SIGTERM');
+
+  // Force kill after 500ms if process doesn't terminate
+  setTimeout(() => {
+    if (!childProcess.killed) {
+      childProcess.kill('SIGKILL');
+      log('WARN', `Forcefully killed refinement process for requestId: ${requestId}`);
     }
   }, 500);
 
