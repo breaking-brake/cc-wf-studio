@@ -27,12 +27,14 @@ import { refineWorkflow } from '../services/refinement-service';
  * @param webview - Webview to send response messages to
  * @param requestId - Request ID for correlation
  * @param extensionPath - VSCode extension path for schema loading
+ * @param workspaceRoot - The workspace root path for CLI execution
  */
 export async function handleRefineWorkflow(
   payload: RefineWorkflowPayload,
   webview: vscode.Webview,
   requestId: string,
-  extensionPath: string
+  extensionPath: string,
+  workspaceRoot?: string
 ): Promise<void> {
   const {
     workflowId,
@@ -82,7 +84,8 @@ export async function handleRefineWorkflow(
       extensionPath,
       useSkills,
       timeoutMs,
-      requestId
+      requestId,
+      workspaceRoot
     );
 
     if (!result.success || !result.refinedWorkflow) {

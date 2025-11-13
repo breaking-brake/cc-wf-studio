@@ -290,7 +290,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.clearButton.tooltip': '清除对话历史记录并重新开始',
   'refinement.chat.useSkillsCheckbox': '包含Skill',
   'refinement.chat.claudeMdTip':
-    '💡 提示：在 `~/.claude/CLAUDE.md` 中添加工作流特定的规则和约束，AI可以进行更准确的编辑',
+    '💡 提示：在 CLAUDE.md 中添加工作流特定的规则和约束，AI可以进行更准确的编辑',
   'refinement.chat.refining': 'AI正在优化工作流... 最多可能需要120秒。',
   'refinement.chat.progressTime': '{elapsed}秒 / {max}秒',
   'refinement.chat.characterCount': '{count} / {max} 字符',

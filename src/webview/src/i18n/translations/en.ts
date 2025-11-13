@@ -301,7 +301,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.clearButton.tooltip': 'Clear conversation history and start fresh',
   'refinement.chat.useSkillsCheckbox': 'Include Skills',
   'refinement.chat.claudeMdTip':
-    '💡 Tip: Add workflow-specific rules and constraints to `~/.claude/CLAUDE.md` for more accurate AI edits',
+    '💡 Tip: Add workflow-specific rules and constraints to CLAUDE.md for more accurate AI edits',
   'refinement.chat.refining': 'AI is refining workflow... This may take up to 120 seconds.',
   'refinement.chat.progressTime': '{elapsed}s / {max}s',
   'refinement.chat.characterCount': '{count} / {max} characters',
