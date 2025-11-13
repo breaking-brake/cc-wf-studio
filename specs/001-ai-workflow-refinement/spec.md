@@ -60,8 +60,8 @@ A user who has already made one refinement request wants to continue improving t
 
 1. **Given** a previous refinement conversation exists in the chat panel, **When** the user enters a new refinement request, **Then** the AI considers the previous conversation context and applies the new change on top of existing modifications
 2. **Given** multiple refinements have been requested, **When** the user reviews the chat history, **Then** all previous user requests and AI responses are visible in chronological order
-3. **Given** the user is approaching the iteration limit, **When** viewing the chat panel, **Then** a counter displays remaining iterations (e.g., "15/20 iterations remaining")
-4. **Given** the iteration limit (20) is reached, **When** the user tries to send another request, **Then** the system prevents sending and displays a message indicating the limit has been reached
+3. **Given** the user has made multiple refinements, **When** viewing the chat panel, **Then** an iteration counter displays the current number (e.g., "15 iterations")
+4. **Given** the iteration count reaches 20 or more, **When** viewing the chat panel, **Then** the system displays a warning banner recommending to clear conversation history, but still allows sending additional requests
 
 ---
 
@@ -92,7 +92,7 @@ A user wants to start fresh with their workflow refinements, clearing the existi
 **Acceptance Scenarios**:
 
 1. **Given** a conversation history exists, **When** the user clicks the "会話履歴クリア" button, **Then** a confirmation dialog appears
-2. **Given** the clear history confirmation dialog is shown, **When** the user confirms, **Then** the conversation history is cleared, the iteration counter resets to 0/20, and the chat panel shows an empty state
+2. **Given** the clear history confirmation dialog is shown, **When** the user confirms, **Then** the conversation history is cleared, the iteration counter resets to 0, and the chat panel shows an empty state
 3. **Given** the conversation history is cleared, **When** the user makes a new refinement request, **Then** the AI treats it as a fresh conversation without considering previous context
 4. **Given** the clear history confirmation dialog is shown, **When** the user cancels, **Then** the conversation history remains unchanged
 
@@ -103,7 +103,7 @@ A user wants to start fresh with their workflow refinements, clearing the existi
 - What happens when the AI refinement request results in an invalid workflow (e.g., creating disconnected nodes, violating workflow schema rules)?
 - How does the system handle network failures or timeouts during refinement processing?
 - What happens when the user closes the chat panel while a refinement request is still processing?
-- How does the system handle very long conversation histories (e.g., approaching 20 iterations with lengthy messages)?
+- How does the system handle very long conversation histories (e.g., 50+ iterations with lengthy messages causing large file sizes)?
 - What happens when a user tries to refine a workflow that hasn't been saved yet?
 - How does the system handle simultaneous editing - if a user manually edits the workflow while a refinement request is processing?
 - What happens when the user switches to a different workflow while a refinement request is in progress?
@@ -121,8 +121,8 @@ A user wants to start fresh with their workflow refinements, clearing the existi
 - **FR-007**: System MUST display a progress indicator when a refinement request is being processed
 - **FR-008**: System MUST automatically update the canvas workflow when a refinement is successfully completed
 - **FR-009**: System MUST preserve conversation history for each workflow and restore it when the chat panel is reopened
-- **FR-010**: System MUST track and display the number of refinement iterations used out of the maximum allowed (20)
-- **FR-011**: System MUST prevent additional refinement requests when the iteration limit (20) is reached
+- **FR-010**: System MUST track and display the current number of refinement iterations
+- **FR-011**: System MUST display a warning banner when the iteration count reaches 20 or more, recommending users to clear conversation history to avoid large file sizes and potential performance issues
 - **FR-012**: System MUST provide a button to clear conversation history with user confirmation
 - **FR-013**: System MUST reset the iteration counter to 0 when conversation history is cleared
 - **FR-014**: System MUST maintain workflow state on canvas when conversation history is cleared
@@ -147,7 +147,7 @@ A user wants to start fresh with their workflow refinements, clearing the existi
 - **SC-002**: Refinement requests complete and update the canvas within 30 seconds in 95% of cases under normal network conditions
 - **SC-003**: Conversation history is successfully persisted and restored across extension reloads in 100% of test cases
 - **SC-004**: Users can understand and operate the chat interface without documentation (measured by usability testing with 5+ users)
-- **SC-005**: The iteration counter accurately reflects the number of refinement requests made and prevents requests beyond the limit in 100% of cases
+- **SC-005**: The iteration counter accurately reflects the number of refinement requests made and the warning banner appears when reaching 20 iterations in 100% of cases
 
 ## Assumptions
 
@@ -157,5 +157,5 @@ A user wants to start fresh with their workflow refinements, clearing the existi
 - Network connectivity is available for AI service communication
 - The extension has storage capabilities to persist conversation history (localStorage, IndexedDB, or similar)
 - The existing workflow validation infrastructure can validate AI-generated refinements
-- The iteration limit of 20 is sufficient for most user refinement scenarios
-- Conversation history size will remain manageable within browser storage constraints
+- Users will heed the warning at 20 iterations and clear conversation history when file size or performance becomes an issue
+- Most users will complete their refinements within 20 iterations, though the system supports unlimited iterations if needed

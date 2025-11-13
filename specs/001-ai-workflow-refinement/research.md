@@ -135,16 +135,21 @@ export interface ConversationMessage {
 #### 2.3 パフォーマンス考慮事項
 
 **制約:**
-- **最大反復回数**: 20回
+- **推奨反復回数**: 20回（超過時は警告表示）
 - **メッセージ長**: 最大5000文字（ユーザー入力）
 - **スナップショット**: 初回ワークフロー + 改善版を保持（差分管理は将来対応）
 
-**ファイルサイズ試算:**
+**ファイルサイズ試算（20往復時）:**
 ```
 メッセージ（20往復 × 2 = 40メッセージ × 平均2000文字）: ~160KB
 ワークフロースナップショット（簡略化）: 参照IDのみ保存
 合計: ~200KB（許容範囲内）
 ```
+
+**注意事項:**
+- 20回以降も送信可能だが、ファイルサイズ増加とパフォーマンス低下のリスクがある
+- 警告バナーでユーザーに会話履歴クリアを推奨
+- 50往復（100メッセージ）の場合: ~400KB（やや大きいが技術的には可能）
 
 ### Alternatives Considered（検討した代替案）
 
@@ -226,8 +231,8 @@ Output the refined workflow as JSON.`;
 **実装戦略**:
 
 1. **自動適用**: AIの改善結果を自動的にキャンバスに反映（既存のAI生成と同様）
-2. **反復回数制限**: 20回上限
-3. **警告表示**: 18回以降は警告表示
+2. **反復回数の追跡**: 現在の反復回数を表示
+3. **警告表示**: 20回以降は警告バナーを表示（送信は可能）
 4. **バリデーション**: 既存のワークフロー検証機能を使用
 
 ### Alternatives Considered（検討した代替案）
@@ -332,13 +337,13 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     const { conversationHistory, isProcessing, currentInput } = get();
     if (!conversationHistory || isProcessing) return false;
     if (!currentInput.trim()) return false;
-    return conversationHistory.currentIteration < conversationHistory.maxIterations;
+    return true; // 常に送信可能（制限なし）
   },
 
-  isApproachingLimit: () => {
+  shouldShowWarning: () => {
     const { conversationHistory } = get();
     if (!conversationHistory) return false;
-    return conversationHistory.currentIteration >= 18;
+    return conversationHistory.currentIteration >= 20;
   },
 }));
 ```

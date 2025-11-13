@@ -18,8 +18,8 @@
 |-------|------|----------|-------------|------------|
 | `schemaVersion` | `string` | Yes | スキーマバージョン（将来の移行用） | Must be `"1.0.0"` |
 | `messages` | `ConversationMessage[]` | Yes | 会話メッセージのリスト | Array of valid ConversationMessage |
-| `currentIteration` | `number` | Yes | 現在の反復回数 | 0 <= value <= maxIterations |
-| `maxIterations` | `number` | Yes | 最大反復回数 | Must be `20` |
+| `currentIteration` | `number` | Yes | 現在の反復回数 | 0 <= value |
+| `maxIterations` | `number` | Yes | 推奨反復回数（警告表示の閾値） | Must be `20` |
 | `createdAt` | `string` | Yes | 会話開始日時 | ISO 8601 timestamp |
 | `updatedAt` | `string` | Yes | 最終更新日時 | ISO 8601 timestamp |
 
@@ -164,9 +164,8 @@
 
 | State | Condition | UI Behavior |
 |-------|-----------|-------------|
-| Normal | `currentIteration < 18` | 通常表示（カウンター: X/20） |
-| Warning | `18 <= currentIteration < 20` | 警告色で表示（カウンター: X/20） |
-| Limit Reached | `currentIteration == 20` | 送信ボタン無効化、警告メッセージ表示 |
+| Normal | `currentIteration < 20` | 通常表示（カウンター: X iterations） |
+| Warning | `currentIteration >= 20` | 警告バナー表示、送信は可能（カウンター: X iterations） |
 
 ---
 
@@ -184,12 +183,12 @@ function validateConversationHistory(history: ConversationHistory): ValidationRe
   }
 
   // Iteration count validation
-  if (history.currentIteration < 0 || history.currentIteration > history.maxIterations) {
-    errors.push(`Invalid currentIteration: ${history.currentIteration} (must be 0-${history.maxIterations})`);
+  if (history.currentIteration < 0) {
+    errors.push(`Invalid currentIteration: ${history.currentIteration} (must be >= 0)`);
   }
 
   if (history.maxIterations !== 20) {
-    errors.push('Invalid maxIterations: must be 20');
+    errors.push('Invalid maxIterations: must be 20 (warning threshold)');
   }
 
   // Messages validation

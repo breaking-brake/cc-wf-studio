@@ -21,12 +21,12 @@ This feature enables users to iteratively refine AI-generated workflows through 
 - Refinement requests complete within 30 seconds in 95% of cases
 - Chat UI updates (message display, scroll) within 100ms
 **Constraints**:
-- Maximum 20 refinement iterations per workflow
+- Warning displayed at 20 refinement iterations (unlimited iterations supported)
 - Conversation history size limited by practical JSON file size (<1MB recommended)
 - Must work offline for UI interactions (only refinement processing requires network)
 **Scale/Scope**:
 - Support workflows with up to 50 nodes (existing limit)
-- Handle conversations with up to 20 messages (user + AI pairs)
+- Handle conversations with 20+ iterations (warning shown at 20)
 - Support existing 5 languages (en, ja, ko, zh-CN, zh-TW)
 
 ## Constitution Check
@@ -51,7 +51,7 @@ This feature enables users to iteratively refine AI-generated workflows through 
 ### II. テスト駆動開発
 - [x] テストファースト開発プロセスが計画されているか
   - Unit tests for conversation history persistence logic
-  - Unit tests for iteration counter logic
+  - Unit tests for iteration counter and warning banner logic
   - Integration tests for message flow (Webview ↔ Extension Host)
 - [x] 契約テスト・統合テスト・ユニットテストの計画があるか
   - Contract: Refinement message protocol validation
@@ -59,7 +59,7 @@ This feature enables users to iteratively refine AI-generated workflows through 
   - Unit: Individual components (chat panel, message list, input area)
 - [x] テストカバレッジ目標(80%以上)が設定されているか
   - Target 80%+ for new code (matches existing project standards)
-  - Critical paths (history persistence, iteration limit) require 100% coverage
+  - Critical paths (history persistence, warning banner display) require 100% coverage
 
 ### III. UX一貫性
 - [x] 一貫したUIパターンが定義されているか
@@ -90,7 +90,7 @@ This feature enables users to iteratively refine AI-generated workflows through 
   - Refinement chat is independent module (can be reused for other features)
   - Clear separation: UI (ChatPanel) ↔ Service (RefinementService) ↔ Storage (WorkflowFileService)
 - [x] 設定管理の方針が明確か
-  - Iteration limit (20) defined as constant (can be made configurable later)
+  - Warning threshold (20) defined as constant (can be made configurable later)
   - Timeout values follow existing pattern (configurable via payload)
 - [x] バージョニング戦略が定義されているか
   - Follows existing extension versioning (semantic versioning)
@@ -135,7 +135,8 @@ src/webview/src/  # Webview UI (React + TypeScript)
 │   │   ├── MessageList.tsx          # NEW: Conversation history display
 │   │   ├── MessageInput.tsx         # NEW: User input area
 │   │   ├── MessageBubble.tsx        # NEW: Individual message component
-│   │   └── IterationCounter.tsx     # NEW: Shows X/20 iterations
+│   │   ├── IterationCounter.tsx     # NEW: Shows iteration count
+│   │   └── WarningBanner.tsx        # NEW: Warning at 20+ iterations
 │   └── Toolbar.tsx                  # MODIFIED: Add "AIで修正" button
 ├── services/
 │   └── refinement-service.ts        # NEW: Webview-side refinement API
