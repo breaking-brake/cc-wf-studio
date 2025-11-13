@@ -11,6 +11,7 @@ import type {
   ClearConversationPayload,
   ConversationClearedPayload,
   RefinementCancelledPayload,
+  RefinementClarificationPayload,
   RefinementFailedPayload,
   RefinementSuccessPayload,
   RefineWorkflowPayload,
@@ -88,6 +89,56 @@ export async function handleRefineWorkflow(
       workspaceRoot
     );
 
+    // Check if AI is asking for clarification
+    if (result.success && result.clarificationMessage && !result.refinedWorkflow) {
+      // AI is requesting clarification
+      log('INFO', 'AI requested clarification', {
+        requestId,
+        workflowId,
+        messagePreview: result.clarificationMessage.substring(0, 100),
+        executionTimeMs: result.executionTimeMs,
+      });
+
+      // Create AI clarification message
+      const aiMessage: ConversationMessage = {
+        id: crypto.randomUUID(),
+        sender: 'ai',
+        content: result.clarificationMessage,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Create user message
+      const userMessageObj: ConversationMessage = {
+        id: crypto.randomUUID(),
+        sender: 'user',
+        content: userMessage,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Update conversation history
+      const updatedHistory = {
+        ...conversationHistory,
+        messages: [...conversationHistory.messages, userMessageObj, aiMessage],
+        currentIteration: conversationHistory.currentIteration + 1,
+        updatedAt: new Date().toISOString(),
+      };
+
+      log('INFO', 'Sending clarification request to webview', {
+        requestId,
+        workflowId,
+        newIteration: updatedHistory.currentIteration,
+      });
+
+      // Send clarification message
+      sendRefinementClarification(webview, requestId, {
+        aiMessage,
+        updatedConversationHistory: updatedHistory,
+        executionTimeMs: result.executionTimeMs,
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
     if (!result.success || !result.refinedWorkflow) {
       // Refinement failed
       log('ERROR', 'Workflow refinement failed', {
@@ -109,12 +160,12 @@ export async function handleRefineWorkflow(
       return;
     }
 
-    // Create AI message
-    // TODO: Future enhancement - extract summary from AI response
+    // Create AI message with translation key
     const aiMessage: ConversationMessage = {
       id: crypto.randomUUID(),
       sender: 'ai',
-      content: 'Workflow has been refined based on your request.',
+      content: 'Workflow has been updated.', // Fallback English text
+      translationKey: 'refinement.success.defaultMessage',
       timestamp: new Date().toISOString(),
     };
 
@@ -245,6 +296,21 @@ function sendRefinementFailed(
 ): void {
   webview.postMessage({
     type: 'REFINEMENT_FAILED',
+    requestId,
+    payload,
+  });
+}
+
+/**
+ * Send refinement clarification message to Webview
+ */
+function sendRefinementClarification(
+  webview: vscode.Webview,
+  requestId: string,
+  payload: RefinementClarificationPayload
+): void {
+  webview.postMessage({
+    type: 'REFINEMENT_CLARIFICATION',
     requestId,
     payload,
   });

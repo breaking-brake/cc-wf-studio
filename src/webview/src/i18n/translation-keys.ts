@@ -285,6 +285,9 @@ export interface WebviewTranslationKeys {
   'refinement.chat.success': string;
   'refinement.chat.changesSummary': string;
 
+  // Refinement Success Messages
+  'refinement.success.defaultMessage': string;
+
   // Refinement Errors
   'refinement.error.emptyMessage': string;
   'refinement.error.messageTooLong': string;

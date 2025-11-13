@@ -21,12 +21,58 @@ import { scanAllSkills } from './skill-service';
 export interface RefinementResult {
   success: boolean;
   refinedWorkflow?: Workflow;
+  clarificationMessage?: string;
   error?: {
     code: 'COMMAND_NOT_FOUND' | 'TIMEOUT' | 'PARSE_ERROR' | 'VALIDATION_ERROR' | 'UNKNOWN_ERROR';
     message: string;
     details?: string;
   };
   executionTimeMs: number;
+}
+
+/**
+ * Check if AI output is a clarification message instead of a workflow
+ *
+ * @param output - AI output text
+ * @returns true if output appears to be a clarification message
+ */
+function isClarificationMessage(output: string): boolean {
+  // Remove JSON code blocks to avoid false positives
+  const textWithoutCodeBlocks = output.replace(/```json[\s\S]*?```/g, '');
+
+  // Clarification indicators (case-insensitive)
+  const clarificationPatterns = [
+    /I need to understand/i,
+    /could you (please\s+)?(clarify|specify|tell me more)/i,
+    /ambiguous/i,
+    /unclear/i,
+    /could mean/i,
+    /which (one|approach|option|method)/i,
+    /would you like me to/i,
+    /please (clarify|specify)/i,
+    /not sure (what|which|how)/i,
+    /can you provide more (details|information)/i,
+  ];
+
+  return clarificationPatterns.some((pattern) => pattern.test(textWithoutCodeBlocks));
+}
+
+/**
+ * Extract clarification message from AI output (removes JSON blocks)
+ *
+ * @param output - AI output text containing clarification and possibly JSON
+ * @returns Clarification message without JSON blocks
+ */
+function extractClarificationMessage(output: string): string {
+  // Remove JSON code blocks (```json ... ```)
+  let cleanedOutput = output.replace(/```json[\s\S]*?```/g, '');
+
+  // Remove standalone JSON blocks (raw JSON without markdown code blocks)
+  // This regex matches JSON objects that start with { and end with }
+  cleanedOutput = cleanedOutput.replace(/\n\s*\{[\s\S]*\}\s*$/g, '');
+
+  // Trim whitespace
+  return cleanedOutput.trim();
 }
 
 /**
@@ -276,12 +322,29 @@ export async function refineWorkflow(
       };
     }
 
-    log('INFO', 'CLI execution successful, parsing output', {
+    log('INFO', 'CLI execution successful, checking output type', {
       requestId,
       executionTimeMs: cliResult.executionTimeMs,
     });
 
-    // Step 5: Parse CLI output
+    // Step 5: Check if output is a clarification message
+    if (isClarificationMessage(cliResult.output)) {
+      const clarificationText = extractClarificationMessage(cliResult.output);
+
+      log('INFO', 'AI is requesting clarification', {
+        requestId,
+        outputPreview: clarificationText.substring(0, 200),
+        executionTimeMs: cliResult.executionTimeMs,
+      });
+
+      return {
+        success: true,
+        clarificationMessage: clarificationText,
+        executionTimeMs: cliResult.executionTimeMs,
+      };
+    }
+
+    // Step 6: Parse CLI output as workflow JSON
     const parsedOutput = parseClaudeCodeOutput(cliResult.output);
 
     if (!parsedOutput) {
@@ -296,7 +359,7 @@ export async function refineWorkflow(
         success: false,
         error: {
           code: 'PARSE_ERROR',
-          message: 'Refinement failed - please try again or rephrase your request',
+          message: 'Failed to parse AI response. Please try again or rephrase your request',
           details: 'Failed to parse JSON from Claude Code output',
         },
         executionTimeMs: cliResult.executionTimeMs,
@@ -326,7 +389,7 @@ export async function refineWorkflow(
       };
     }
 
-    // Step 6: Resolve skill paths for skill nodes (only if useSkills is true)
+    // Step 7: Resolve skill paths for skill nodes (only if useSkills is true)
     if (useSkills) {
       refinedWorkflow = await resolveSkillPaths(refinedWorkflow, availableSkills);
 
@@ -338,7 +401,7 @@ export async function refineWorkflow(
       log('INFO', 'Skipping skill path resolution (useSkills=false)', { requestId });
     }
 
-    // Step 7: Validate refined workflow
+    // Step 8: Validate refined workflow
     const validation = validateAIGeneratedWorkflow(refinedWorkflow);
 
     if (!validation.valid) {

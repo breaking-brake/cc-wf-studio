@@ -9,6 +9,7 @@
 
 import type { ConversationMessage } from '@shared/types/workflow-definition';
 import { useTranslation } from '../../i18n/i18n-context';
+import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
 import { getErrorMessageInfo } from '../../utils/error-messages';
 import { ProgressBar } from './ProgressBar';
 
@@ -113,7 +114,11 @@ export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
 
         {/* Normal content */}
         {!isError && message.content && (
-          <div style={{ whiteSpace: 'pre-wrap' }}>{message.content}</div>
+          <div style={{ whiteSpace: 'pre-wrap' }}>
+            {message.translationKey
+              ? t(message.translationKey as keyof WebviewTranslationKeys)
+              : message.content}
+          </div>
         )}
 
         {/* Loading state */}

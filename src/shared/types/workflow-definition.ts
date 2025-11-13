@@ -221,6 +221,8 @@ export interface ConversationMessage {
   timestamp: string;
   /** Optional reference to workflow snapshot */
   workflowSnapshotId?: string;
+  /** Optional i18n translation key (if set, content is used as fallback) */
+  translationKey?: string;
   /** Loading state flag (for AI messages during processing) */
   isLoading?: boolean;
   /** Error state flag (for AI messages that failed) */

@@ -315,6 +315,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.success': '워크플로 개선이 완료되었습니다!',
   'refinement.chat.changesSummary': '변경 사항: {summary}',
 
+  // Refinement Success Messages
+  'refinement.success.defaultMessage': '워크플로를 편집했습니다.',
+
   // Refinement Errors
   'refinement.error.emptyMessage': '메시지를 입력하세요',
   'refinement.error.messageTooLong': '메시지가 너무 깁니다 (최대 {max}자)',
