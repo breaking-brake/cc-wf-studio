@@ -103,6 +103,15 @@ ${userMessage}
 5. Respect node IDs - do not regenerate IDs for unchanged nodes
 6. Update only what the user requested - minimize unnecessary changes
 
+**Node Positioning Guidelines**:
+1. Horizontal spacing between regular nodes: Use 300px (e.g., x: 350, 650, 950, 1250, 1550)
+2. Spacing after Start node: Use 250px (e.g., Start at x: 100, next at x: 350)
+3. Spacing before End node: Use 350px (e.g., previous at x: 1550, End at x: 1900)
+4. Vertical spacing: Use 150px between nodes on different branches
+5. When adding new nodes, calculate positions based on existing node positions and connections
+6. Preserve existing node positions unless repositioning is explicitly requested
+7. For branch nodes: offset vertically by 150px from the main path (e.g., y: 300 for main, y: 150/450 for branches)
+
 **Skill Node Constraints**:
 - Skill nodes MUST have exactly 1 output port (outputPorts: 1)
 - If branching is needed after Skill execution, add an ifElse or switch node after the Skill node

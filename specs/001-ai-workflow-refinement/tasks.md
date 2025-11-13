@@ -1831,3 +1831,166 @@ Phase 8.1でスキル参照機能を実装したが、以下の課題が判明:
 - **決定**: 次バージョンでの対応とする
 
 ---
+
+### Phase 8.4: ノード配置間隔の最適化 ✅ 2025-11-13
+
+**目的**: AIで編集により生成されるワークフローのノード間隔を改善し、視認性を向上させる
+
+**問題**: AIで編集機能で生成されたワークフローのノード間隔が詰まりすぎて見づらい
+
+**原因分析**:
+- workflow-schema.jsonの例として提供されている間隔が狭すぎた (水平150px、垂直100px)
+- refinement-service.tsのプロンプトにノード配置ガイドラインが不足していた
+
+#### T153: workflow-schema.jsonの間隔調整 ✅ 2025-11-13
+
+**変更ファイル**: `resources/workflow-schema.json`
+
+**調整内容**:
+- 水平間隔（通常ノード間）: 150px → **300px**
+- 水平間隔（Start後）: 200px → **250px**
+- 水平間隔（End前）: 150px → **350px**
+- 垂直間隔（分岐）: 100px → **150px**
+
+**変更前後の比較**:
+
+| Example | 変更前 | 変更後 |
+|---------|--------|--------|
+| Simple | x: 100→300→500 | x: 100→350→700 |
+| Medium | x: 100→250→400→550→700<br>y: 150/250 | x: 100→350→650→950→1300<br>y: 150/450 |
+| Complex | x: 100→250→400→550→700→850→1000<br>y: 100/200/300 | x: 100→350→650→950→1250→1550→1900<br>y: 50/200/350 |
+
+**具体例** (Medium example):
+```json
+// Start node
+{ "position": { "x": 100, "y": 300 } }
+
+// First node after Start (250px spacing)
+{ "position": { "x": 350, "y": 300 } }
+
+// Regular nodes (300px spacing)
+{ "position": { "x": 650, "y": 300 } }
+{ "position": { "x": 950, "y": 150 } }  // Branch: 150px offset
+{ "position": { "x": 950, "y": 450 } }  // Branch: 150px offset
+
+// End node (350px spacing from previous)
+{ "position": { "x": 1300, "y": 300 } }
+```
+
+#### T154: refinement-service.tsプロンプトガイドライン追加 ✅ 2025-11-13
+
+**変更ファイル**: `src/extension/services/refinement-service.ts` (Line 106-113)
+
+**追加内容**:
+```typescript
+**Node Positioning Guidelines**:
+1. Horizontal spacing between regular nodes: Use 300px (e.g., x: 350, 650, 950, 1250, 1550)
+2. Spacing after Start node: Use 250px (e.g., Start at x: 100, next at x: 350)
+3. Spacing before End node: Use 350px (e.g., previous at x: 1550, End at x: 1900)
+4. Vertical spacing: Use 150px between nodes on different branches
+5. When adding new nodes, calculate positions based on existing node positions and connections
+6. Preserve existing node positions unless repositioning is explicitly requested
+7. For branch nodes: offset vertically by 150px from the main path (e.g., y: 300 for main, y: 150/450 for branches)
+```
+
+**ガイドライン設計の意図**:
+- **Start後の間隔を短く (250px)**: Startノードは固定的なため、次の実質的なノードとの距離を適度に保つ
+- **通常ノード間を標準 (300px)**: ラベルやアイコンが重ならず、接続線が見やすい間隔
+- **End前の間隔を長く (350px)**: ワークフローの終端を視覚的に明確にする
+- **垂直間隔を適度に (150px)**: 分岐が多い場合でも重ならず、画面内に収まりやすい
+
+#### T155: ビルド・動作確認 ✅ 2025-11-13
+- `npm run lint`: 成功
+- `npm run build`: 成功
+- 手動E2Eテスト: AIで編集機能でノード追加 → 間隔が改善されたことを確認 ✅
+
+#### 実装効果
+- ✅ AIで編集により生成されるワークフローの視認性が大幅に向上
+- ✅ ノード間の接続線が見やすくなり、フロー構造が理解しやすくなった
+- ✅ 既存ワークフローの位置は保持されるため、下位互換性も維持
+
+---
+
+### Phase 8.5: CLAUDE.md活用のヒント表示 ✅ 2025-11-13
+
+**目的**: AI編集パネルにCLAUDE.md活用のヒントを表示し、ユーザーがワークフロー固有のコンテキストを提供できることを周知する
+
+**背景**:
+- AI編集機能は `~/.claude/CLAUDE.md` の内容をコンテキストとして使用する
+- ワークフロー固有のルール・制約を記載することで、より的確な編集が可能
+- ユーザーがこの機能を知らない可能性があるため、UI上でヒントを表示
+
+#### T156: 翻訳キー追加と翻訳文作成 ✅ 2025-11-13
+
+**変更ファイル**:
+- `src/webview/src/i18n/translation-keys.ts` (Line 275)
+- `src/webview/src/i18n/translations/ja.ts` (Line 302-303)
+- `src/webview/src/i18n/translations/en.ts` (Line 303-304)
+- `src/webview/src/i18n/translations/ko.ts` (Line 303-304)
+- `src/webview/src/i18n/translations/zh-CN.ts` (Line 292-293)
+- `src/webview/src/i18n/translations/zh-TW.ts` (Line 292-293)
+
+**追加した翻訳キー**: `refinement.chat.claudeMdTip`
+
+**翻訳内容**:
+- 日本語: `💡 Tip: ワークフロー固有のルールや制約を`~/.claude/CLAUDE.md` に記載すると、AIがより的確な編集を行えます`
+- 英語: `💡 Tip: Add workflow-specific rules and constraints to `~/.claude/CLAUDE.md` for more accurate AI edits`
+- 韓国語: `💡 팁: `~/.claude/CLAUDE.md` 에 워크플로별 규칙과 제약을 추가하면AI가 더 정확한 편집을 수행합니다`
+- 中国語簡体字: `💡 提示：在 `~/.claude/CLAUDE.md` 中添加工作流特定的规则和约束，AI可以进行更准确的编辑`
+- 中国語繁体字: `💡 提示：在 `~/.claude/CLAUDE.md` 中新增工作流程特定的規則和約束，AI可以進行更準確的編輯`
+
+**文言調整の経緯**:
+1. 初期案: "プロジェクト固有の情報" → 一般的なClaude Code使用法と誤解される可能性
+2. 改善版: "実現したいワークフロー固有のルールや制約" → ワークフロー編集コンテキストと明確化
+3. 最終版: "ワークフロー固有のルールや制約" → 簡潔化(「実現したい」を削除)
+4. パス指定: `CLAUDE.md` → `~/.claude/CLAUDE.md` → 実際に反映されるファイルを明示
+
+**表示形式の調整**:
+- 当初2行表示(改行あり)で実装
+- ユーザー要望により1行表示に変更
+- 理由: 青枠線の横幅を広く見せたい
+
+#### T157: UI表示実装 ✅ 2025-11-13
+
+**変更ファイル**: `src/webview/src/components/chat/MessageList.tsx` (Line 65-81)
+
+**実装内容**:
+```typescript
+<div
+  style={{
+    marginTop: '16px',
+    padding: '8px 12px',
+    backgroundColor: 'var(--vscode-textBlockQuote-background)',
+    border: '1px solid var(--vscode-textBlockQuote-border)',
+    borderRadius: '4px',
+    fontSize: '11px',
+    lineHeight: '1.6',
+    color: 'var(--vscode-foreground)',
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
+    textAlign: 'left',
+  }}
+>
+  {t('refinement.chat.claudeMdTip')}
+</div>
+```
+
+**表示位置**: 初期メッセージエリア、「※ This feature uses Claude Code installed in your environment.」の直下
+
+**デザイン方針**:
+- VSCodeテーマに合わせた色設定 (`var(--vscode-textBlockQuote-*)`)
+- 青枠線で視覚的に目立たせる
+- アイコン(💡)で「ヒント」であることを強調
+- 小さめのフォント(11px)で控えめに表示
+
+#### T158: ビルド・動作確認 ✅ 2025-11-13
+- `npm run build`: 成功
+- 手動E2Eテスト: AI編集パネル表示 → ヒントが正しく表示されることを確認 ✅
+
+#### 実装効果
+- ✅ ユーザーに `~/.claude/CLAUDE.md` の活用方法を周知
+- ✅ ワークフロー固有のコンテキストを提供できることを明示
+- ✅ 全5言語対応でグローバルユーザーにも対応
+- ✅ VSCodeテーマに調和するデザインで違和感なし
+
+---
