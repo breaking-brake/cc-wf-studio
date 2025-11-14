@@ -193,14 +193,14 @@ Change the AskUserQuestion node to have 3 options instead of 2: High, Medium, Lo
 | Error Code | Meaning | Solution |
 |------------|---------|----------|
 | `COMMAND_NOT_FOUND` | Claude Code CLI not installed | Install Claude Code CLI |
-| `TIMEOUT` | Request took > 60 seconds | Simplify request or try again |
+| `TIMEOUT` | Request exceeded configured timeout | Simplify request, increase timeout setting, or try again |
 | `PARSE_ERROR` | AI output couldn't be parsed | Rephrase request and retry |
 | `VALIDATION_ERROR` | Workflow exceeds limits (50 nodes max) | Remove nodes or reduce complexity |
 
 ### Limitations
 
 - Maximum 50 nodes per workflow
-- 90-second timeout for AI processing
+- AI processing timeout (default 90 seconds, configurable 30-300 seconds in settings)
 - Request limited to 2000 characters
 - Conversation history stored only during active session
 - Requires active Claude Code CLI installation
@@ -264,6 +264,22 @@ Change the AskUserQuestion node to have 3 options instead of 2: High, Medium, Lo
    - Enter a workflow name in the toolbar
    - Click **Save** to store as JSON in `.vscode/workflows/`
    - Click **Export** to generate `.claude` files ready for Claude Code
+
+### Configuration
+
+You can customize the extension behavior through VSCode settings (`Ctrl+,` / `Cmd+,`):
+
+**AI Refinement Timeout** (`cc-wf-studio.aiRefinement.timeout`)
+- Controls how long the extension waits for AI workflow refinement responses
+- **Default**: 90 seconds
+- **Range**: 30-300 seconds
+- **Usage**: Increase for complex workflows, decrease for faster feedback on simple changes
+- **Location**: Settings → Extensions → Claude Code Workflow Studio
+
+To adjust:
+1. Open VSCode Settings (`Ctrl+,` / `Cmd+,`)
+2. Search for "Claude Code Workflow Studio"
+3. Adjust "AI Refinement Timeout" to your preference
 
 ## How It Works
 
