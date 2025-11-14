@@ -17,13 +17,24 @@
 
 ---
 
-<!-- AI Generation Demo GIF -->
+<!-- AI Refinement Demo GIF 1: Initial Creation -->
 <p align="center">
-  <img src="./resources/ai-generation-demo.gif" alt="AI-Assisted Workflow Generation Demo" width="800">
+  <img src="./resources/ai-refinement-demo-1.gif" alt="AI-Assisted Workflow Refinement Demo - Initial Creation" width="800">
 </p>
 
 <p align="center">
-  <em>✨ Describe your workflow in plain language – AI builds it instantly</em>
+  <em>✨ AI Refinement #1: "Create a workflow that sends a greeting prompt" – Build workflows from scratch with AI</em>
+</p>
+
+---
+
+<!-- AI Refinement Demo GIF 2: Iterative Refinement -->
+<p align="center">
+  <img src="./resources/ai-refinement-demo-2.gif" alt="AI-Assisted Workflow Refinement Demo - Iterative Refinement" width="800">
+</p>
+
+<p align="center">
+  <em>✨ AI Refinement #2: "Can you modify it to change the greeting based on the current time?" – Refine iteratively through conversation</em>
 </p>
 
 ---
@@ -59,9 +70,9 @@ All operations run locally within VSCode. No network communication means zero ri
 
 🎓 **Interactive Onboarding Tour** - Step-by-step guided tutorial for first-time users, automatically launched on first use with ? button for anytime replay
 
-🤖 **AI-Assisted Workflow Generation** - Describe your workflow in natural language and let AI generate a complete workflow with automatic Skill node selection
+🤖 **AI-Assisted Workflow Refinement** - Iteratively improve workflows through conversational AI - ask for changes, add features, or refine logic with natural language feedback
 
-🎯 **Smart Skill Integration** - AI automatically scans your personal and project Skills, filters by relevance, and includes appropriate Skill nodes in generated workflows (max 20 Skills to prevent timeout)
+🎯 **Smart Skill Integration** - AI automatically scans your personal and project Skills, filters by relevance, and includes appropriate Skill nodes in refined workflows (max 20 Skills to prevent timeout)
 
 🤖 **Sub-Agent Nodes** - Configure Claude Code Sub-Agents with custom prompts, tool permissions, and model selection (Sonnet/Opus/Haiku)
 
@@ -79,11 +90,11 @@ All operations run locally within VSCode. No network communication means zero ri
 
 📚 **Skill Nodes** - Reference existing Claude Code Skills from personal (`~/.claude/skills/`) or project (`.claude/skills/`) directories, or create new Skills directly from the visual editor
 
-## AI-Assisted Workflow Generation
+## AI-Assisted Workflow Refinement
 
 ### Overview
 
-Generate complete workflows automatically by describing them in natural language. The AI interprets your description and creates a fully-configured workflow with nodes and connections ready to use.
+Iteratively improve your workflows through conversational AI. Instead of generating workflows from scratch once, you can continuously refine them by asking for changes, adding features, or adjusting logic - all in natural language. The AI maintains conversation history and applies your feedback incrementally.
 
 ### Prerequisites
 
@@ -97,63 +108,84 @@ claude --version
 
 ### How to Use
 
-1. **Open the Editor**
+1. **Open or Create a Workflow**
    - Launch Claude Code Workflow Studio
+   - Create a new workflow or open an existing one
 
-2. **Click "Generate with AI" Button**
-   - Located in the main toolbar next to Save/Export buttons
+2. **Click "Edit with AI" Button**
+   - Located in the main toolbar (sparkle icon ✨)
+   - Opens the AI refinement dialog
 
-3. **Describe Your Workflow**
-   - Write a natural language description (max 2000 characters)
-   - Example: "Create a code review workflow that scans code, asks user for priority level, and generates fix suggestions"
-   - Example: "Build a data analysis pipeline with file reader, data processor, and report generator"
+3. **Describe Your Changes**
+   - Write a natural language request (max 2000 characters)
+   - Example: "Add a new Sub-Agent node that validates the input data"
+   - Example: "Add an AskUserQuestion node before the processor to choose the output format"
+   - Example: "Connect the error handler to a logging Sub-Agent"
 
-4. **Generate**
-   - Click "Generate" or press `Ctrl+Enter` / `Cmd+Enter`
-   - AI processes your description (may take up to 60 seconds)
-   - Generated workflow appears on canvas automatically
+4. **Refine Iteratively**
+   - Click "Apply Changes" or press `Ctrl+Enter` / `Cmd+Enter`
+   - AI processes your request and updates the workflow
+   - Review the changes on the canvas
+   - Ask follow-up questions or request further refinements
+   - Repeat until satisfied
+
+5. **Accept or Discard**
+   - Click "Accept Changes" to keep the refined workflow
+   - Click "Cancel" to discard all AI modifications and return to your original workflow
 
 ### Features
 
-- **Smart Positioning**: Generated workflows are placed automatically to avoid overlapping existing nodes
-- **Validation**: AI output is validated against schema rules (max 50 nodes, valid connections, etc.)
-- **Error Handling**: Clear error messages with actionable guidance if generation fails
+- **Conversational Refinement**: Build workflows through multiple rounds of feedback
+- **Context Awareness**: AI remembers previous changes in the conversation
+- **Smart Positioning**: New nodes are placed automatically to avoid overlaps
+- **Incremental Updates**: Only requested changes are applied, preserving the rest of your workflow
+- **Validation**: All AI output is validated against schema rules (max 50 nodes, valid connections, etc.)
+- **Error Handling**: Clear error messages with actionable guidance if refinement fails
 - **Multilingual**: All UI elements and error messages support 5 languages (en, ja, ko, zh-CN, zh-TW)
 
 ### Tips for Best Results
 
-✅ **Be Specific**: Mention node types (Sub-Agent, AskUserQuestion, etc.) if needed
-✅ **Describe Flow**: Explain the sequence and branching logic clearly
-✅ **Keep It Simple**: Start with 3-7 nodes, then expand manually if needed
+✅ **Be Specific**: Mention exact node types and connections
+✅ **One Change at a Time**: Request small, focused changes for better accuracy
+✅ **Build Incrementally**: Start simple, then add complexity through iterations
+✅ **Review Each Step**: Verify changes before requesting more refinements
 
-❌ **Avoid**: Overly complex descriptions (20+ nodes may timeout)
-❌ **Avoid**: Vague requirements without clear steps
+❌ **Avoid**: Vague requests like "make it better"
+❌ **Avoid**: Asking for complete rewrites (use "Generate with AI" instead)
+❌ **Avoid**: Too many changes in one request (break into smaller steps)
 
-### Example Descriptions
+### Example Refinement Requests
 
-**Simple (3-5 nodes)**
+**Pattern 1: Initial Creation** (See Demo GIF #1 above)
 ```
-Create a workflow that reads a file, processes the content, and saves the result.
-```
-
-**Medium (7-10 nodes)**
-```
-Create a code review workflow:
-1. Scan code with a Sub-Agent
-2. Ask user to select priority level (Critical/High/Medium)
-3. Filter results based on selection
-4. Generate fix suggestions with another Sub-Agent
+Create a workflow that sends a greeting prompt
 ```
 
-**Complex (15-20 nodes)**
+**Pattern 2: Iterative Refinement** (See Demo GIF #2 above)
 ```
-Build a multi-stage data pipeline:
-- Start with data collection from multiple sources
-- Run parallel validation checks
-- Ask user to approve or reject
-- If approved: transform, analyze, and visualize
-- If rejected: log reason and end
-- Generate final report
+Can you modify it to change the greeting based on the current time?
+```
+
+**Adding Validation Logic**
+```
+Add a Sub-Agent node that validates user input before processing
+```
+
+**Modifying Connections**
+```
+Connect the error output of the validator to a new error handler Sub-Agent
+```
+
+**Adjusting Configuration**
+```
+Change the AskUserQuestion node to have 3 options instead of 2: High, Medium, Low
+```
+
+**Complex Multi-Step Request**
+```
+1. Add a Skill node that reads PDF files
+2. Connect it after the input Prompt node
+3. Add error handling if the PDF read fails
 ```
 
 ### Error Messages
@@ -161,15 +193,16 @@ Build a multi-stage data pipeline:
 | Error Code | Meaning | Solution |
 |------------|---------|----------|
 | `COMMAND_NOT_FOUND` | Claude Code CLI not installed | Install Claude Code CLI |
-| `TIMEOUT` | Request took > 60 seconds | Simplify description or try again |
-| `PARSE_ERROR` | AI output couldn't be parsed | Rephrase description and retry |
-| `VALIDATION_ERROR` | Workflow exceeds limits (50 nodes max) | Reduce complexity |
+| `TIMEOUT` | Request took > 60 seconds | Simplify request or try again |
+| `PARSE_ERROR` | AI output couldn't be parsed | Rephrase request and retry |
+| `VALIDATION_ERROR` | Workflow exceeds limits (50 nodes max) | Remove nodes or reduce complexity |
 
 ### Limitations
 
-- Maximum 50 nodes per generated workflow
+- Maximum 50 nodes per workflow
 - 90-second timeout for AI processing
-- Description limited to 2000 characters
+- Request limited to 2000 characters
+- Conversation history stored only during active session
 - Requires active Claude Code CLI installation
 
 ## Getting Started
