@@ -44,7 +44,7 @@ export type RefinementResult =
  * @param conversationHistory - Current conversation history
  * @param requestId - Request ID for this refinement
  * @param useSkills - Whether to include skills in refinement (default: true)
- * @param timeoutMs - Optional timeout in milliseconds (default: 65000, which is 5 seconds more than server timeout)
+ * @param serverTimeoutMs - Server-side timeout in milliseconds (default: undefined, uses settings)
  * @returns Promise that resolves to the refinement result (success or clarification)
  * @throws {WorkflowRefinementError} If refinement fails
  */
@@ -55,7 +55,7 @@ export function refineWorkflow(
   conversationHistory: ConversationHistory,
   requestId: string,
   useSkills = true,
-  timeoutMs = 65000
+  serverTimeoutMs?: number
 ): Promise<RefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
@@ -100,7 +100,7 @@ export function refineWorkflow(
       currentWorkflow,
       conversationHistory,
       useSkills,
-      timeoutMs: 90000, // Server-side timeout (Extension will timeout after 90s)
+      timeoutMs: serverTimeoutMs, // Pass timeout to server (undefined = use settings)
     };
 
     vscode.postMessage({
@@ -109,7 +109,9 @@ export function refineWorkflow(
       payload,
     });
 
-    // Local timeout (5 seconds more than server timeout to allow for response)
+    // Local timeout: 5 seconds more than server timeout to allow for response
+    // Default server timeout is 90s (from settings), so client timeout is 95s
+    const clientTimeoutMs = serverTimeoutMs ? serverTimeoutMs + 5000 : 95000;
     setTimeout(() => {
       window.removeEventListener('message', handler);
       reject(
@@ -118,7 +120,7 @@ export function refineWorkflow(
           'TIMEOUT'
         )
       );
-    }, timeoutMs);
+    }, clientTimeoutMs);
   });
 }
 
