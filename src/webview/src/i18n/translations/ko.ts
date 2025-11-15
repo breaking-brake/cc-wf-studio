@@ -353,4 +353,71 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Initial instructional message (Phase 3.12)
   'refinement.initialMessage.description': '실현하려는 워크플로를 자연어로 설명해주세요.',
   'refinement.initialMessage.note': '※ 이 기능은 환경에 설치된 Claude Code를 사용합니다.',
+
+  // MCP Node (Feature: 001-mcp-node)
+  'node.mcp.title': 'MCP Tool',
+  'node.mcp.description': 'MCP 도구 실행',
+
+  // MCP Server List
+  'mcp.loading.servers': 'MCP 서버 로드 중...',
+  'mcp.error.serverLoadFailed': 'MCP 서버 로드 실패',
+  'mcp.empty.servers': '구성된 MCP 서버가 없습니다',
+
+  // MCP Tool List
+  'mcp.loading.tools': '도구 로드 중...',
+  'mcp.error.toolLoadFailed': '서버에서 도구 로드 실패',
+  'mcp.empty.tools': '이 서버에서 사용할 수 있는 도구가 없습니다',
+
+  // MCP Tool Search
+  'mcp.search.placeholder': '이름이나 설명으로 도구 검색...',
+  'mcp.search.noResults': '"{query}"와 일치하는 도구를 찾을 수 없습니다',
+
+  // MCP Node Dialog
+  'mcp.dialog.title': '사용 가능한 MCP Tool 참조',
+  'mcp.dialog.selectServer': 'MCP 서버 선택',
+  'mcp.dialog.selectTool': '도구 선택',
+  'mcp.dialog.addButton': '도구 추가',
+  'mcp.dialog.cancelButton': '취소',
+  'mcp.dialog.error.noServerSelected': 'MCP 서버를 선택하세요',
+  'mcp.dialog.error.noToolSelected': '도구를 선택하세요',
+
+  // MCP Property Panel
+  'property.nodeType.mcp': 'MCP Tool',
+  'property.mcp.serverId': '서버',
+  'property.mcp.toolName': '도구 이름',
+  'property.mcp.toolDescription': '설명',
+  'property.mcp.parameters': '매개변수',
+  'property.mcp.parameterValues': '매개변수 값',
+  'property.mcp.parameterCount': '매개변수 개수',
+  'property.mcp.editParameters': '매개변수 편집',
+  'property.mcp.infoNote':
+    'MCP 도구 속성은 서버에서 로드됩니다. "매개변수 편집"을 클릭하여 매개변수 값을 구성하세요.',
+
+  // MCP Parameter Form
+  'mcp.parameter.formTitle': '도구 매개변수',
+  'mcp.parameter.noParameters': '이 도구에는 매개변수가 없습니다',
+  'mcp.parameter.selectOption': '-- 옵션 선택 --',
+  'mcp.parameter.enterValue': '값 입력',
+  'mcp.parameter.minLength': '최소 길이',
+  'mcp.parameter.maxLength': '최대 길이',
+  'mcp.parameter.pattern': '패턴',
+  'mcp.parameter.minimum': '최소값',
+  'mcp.parameter.maximum': '최대값',
+  'mcp.parameter.default': '기본값',
+  'mcp.parameter.addItem': '항목 추가',
+  'mcp.parameter.add': '추가',
+  'mcp.parameter.remove': '제거',
+  'mcp.parameter.arrayCount': '항목',
+  'mcp.parameter.jsonFormat': 'JSON 형식이 필요합니다',
+  'mcp.parameter.jsonInvalid': '잘못된 JSON 형식입니다',
+  'mcp.parameter.objectInvalid': '값은 JSON 객체여야 합니다',
+  'mcp.parameter.unsupportedType': '지원되지 않는 매개변수 유형: {name}의 {type}',
+  'mcp.parameter.validationErrors': '다음 검증 오류를 수정하세요:',
+
+  // MCP Edit Dialog
+  'mcp.editDialog.title': 'MCP 도구 매개변수 구성',
+  'mcp.editDialog.saveButton': '저장',
+  'mcp.editDialog.cancelButton': '취소',
+  'mcp.editDialog.loading': '도구 스키마 로드 중...',
+  'mcp.editDialog.error.schemaLoadFailed': '도구 스키마 로드 실패',
 };

@@ -1,0 +1,596 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Extension ↔ Webview Message Contracts for MCP Node",
+  "description": "Defines all messages exchanged between VSCode Extension Host and Webview for MCP node operations",
+  "type": "object",
+  "properties": {
+    "messageTypes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/MessageType"
+      }
+    }
+  },
+  "definitions": {
+    "MessageType": {
+      "oneOf": [
+        { "$ref": "#/definitions/ListMcpServersMessage" },
+        { "$ref": "#/definitions/McpServersResultMessage" },
+        { "$ref": "#/definitions/GetMcpToolsMessage" },
+        { "$ref": "#/definitions/McpToolsResultMessage" },
+        { "$ref": "#/definitions/ValidateMcpNodeMessage" },
+        { "$ref": "#/definitions/ValidateMcpNodeResultMessage" },
+        { "$ref": "#/definitions/UpdateMcpNodeMessage" },
+        { "$ref": "#/definitions/McpErrorMessage" }
+      ]
+    },
+    "BaseMessage": {
+      "title": "Base Message",
+      "description": "Common fields for all messages",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Message type identifier"
+        },
+        "requestId": {
+          "type": "string",
+          "description": "Unique request identifier for correlation (UUID)",
+          "pattern": "^[a-f0-9-]{36}$"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp"
+        }
+      },
+      "required": ["type"]
+    },
+    "ListMcpServersMessage": {
+      "title": "LIST_MCP_SERVERS",
+      "description": "Webview → Extension: Request to list all configured MCP servers",
+      "allOf": [
+        { "$ref": "#/definitions/BaseMessage" },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "LIST_MCP_SERVERS"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "options": {
+                  "type": "object",
+                  "description": "Optional filtering/sorting options",
+                  "properties": {
+                    "filterByScope": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": ["user", "project", "enterprise"]
+                      },
+                      "description": "Filter servers by scope"
+                    },
+                    "sortBy": {
+                      "type": "string",
+                      "enum": ["name", "scope", "status"],
+                      "description": "Sort field"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": ["type"]
+        }
+      ]
+    },
+    "McpServersResultMessage": {
+      "title": "MCP_SERVERS_RESULT",
+      "description": "Extension → Webview: Response with list of MCP servers",
+      "allOf": [
+        { "$ref": "#/definitions/BaseMessage" },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "MCP_SERVERS_RESULT"
+            },
+            "requestId": {
+              "type": "string",
+              "description": "Correlates with the LIST_MCP_SERVERS request"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "Whether the operation succeeded"
+                },
+                "servers": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/McpServerInfo"
+                  },
+                  "description": "Array of available MCP servers"
+                },
+                "error": {
+                  "$ref": "#/definitions/McpError",
+                  "description": "Error information if success is false"
+                },
+                "executionTimeMs": {
+                  "type": "number",
+                  "description": "Time taken to list servers"
+                }
+              },
+              "required": ["success"]
+            }
+          },
+          "required": ["type", "payload"]
+        }
+      ]
+    },
+    "GetMcpToolsMessage": {
+      "title": "GET_MCP_TOOLS",
+      "description": "Webview → Extension: Request to get tools for a specific MCP server",
+      "allOf": [
+        { "$ref": "#/definitions/BaseMessage" },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "GET_MCP_TOOLS"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "serverId": {
+                  "type": "string",
+                  "description": "MCP server identifier (e.g., 'aws-knowledge-mcp')"
+                }
+              },
+              "required": ["serverId"]
+            }
+          },
+          "required": ["type", "payload"]
+        }
+      ]
+    },
+    "McpToolsResultMessage": {
+      "title": "MCP_TOOLS_RESULT",
+      "description": "Extension → Webview: Response with list of tools for a server",
+      "allOf": [
+        { "$ref": "#/definitions/BaseMessage" },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "MCP_TOOLS_RESULT"
+            },
+            "requestId": {
+              "type": "string",
+              "description": "Correlates with the GET_MCP_TOOLS request"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "serverId": {
+                  "type": "string"
+                },
+                "tools": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/McpToolInfo"
+                  },
+                  "description": "Array of tools available from the server"
+                },
+                "error": {
+                  "$ref": "#/definitions/McpError",
+                  "description": "Error information if success is false"
+                },
+                "executionTimeMs": {
+                  "type": "number"
+                }
+              },
+              "required": ["success", "serverId"]
+            }
+          },
+          "required": ["type", "payload"]
+        }
+      ]
+    },
+    "ValidateMcpNodeMessage": {
+      "title": "VALIDATE_MCP_NODE",
+      "description": "Webview → Extension: Request to validate an MCP node configuration",
+      "allOf": [
+        { "$ref": "#/definitions/BaseMessage" },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "VALIDATE_MCP_NODE"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "node": {
+                  "$ref": "#/definitions/McpNodeForValidation",
+                  "description": "MCP node to validate"
+                }
+              },
+              "required": ["node"]
+            }
+          },
+          "required": ["type", "payload"]
+        }
+      ]
+    },
+    "ValidateMcpNodeResultMessage": {
+      "title": "VALIDATE_MCP_NODE_RESULT",
+      "description": "Extension → Webview: Response with validation results",
+      "allOf": [
+        { "$ref": "#/definitions/BaseMessage" },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "VALIDATE_MCP_NODE_RESULT"
+            },
+            "requestId": {
+              "type": "string",
+              "description": "Correlates with the VALIDATE_MCP_NODE request"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "nodeId": {
+                  "type": "string",
+                  "description": "ID of the node being validated"
+                },
+                "valid": {
+                  "type": "boolean",
+                  "description": "Overall validation result"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["valid", "missing", "invalid"],
+                  "description": "Detailed validation status"
+                },
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/ValidationError"
+                  },
+                  "description": "Array of validation errors (empty if valid)"
+                }
+              },
+              "required": ["nodeId", "valid", "status"]
+            }
+          },
+          "required": ["type", "payload"]
+        }
+      ]
+    },
+    "UpdateMcpNodeMessage": {
+      "title": "UPDATE_MCP_NODE",
+      "description": "Webview → Extension: Update an MCP node's configuration",
+      "allOf": [
+        { "$ref": "#/definitions/BaseMessage" },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "UPDATE_MCP_NODE"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "nodeId": {
+                  "type": "string",
+                  "description": "ID of the node to update"
+                },
+                "updates": {
+                  "type": "object",
+                  "description": "Fields to update",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "parameterValues": { "type": "object" }
+                  }
+                }
+              },
+              "required": ["nodeId", "updates"]
+            }
+          },
+          "required": ["type", "payload"]
+        }
+      ]
+    },
+    "McpErrorMessage": {
+      "title": "MCP_ERROR",
+      "description": "Extension → Webview: MCP-specific error notification",
+      "allOf": [
+        { "$ref": "#/definitions/BaseMessage" },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "MCP_ERROR"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "$ref": "#/definitions/McpError"
+                }
+              },
+              "required": ["error"]
+            }
+          },
+          "required": ["type", "payload"]
+        }
+      ]
+    },
+    "McpServerInfo": {
+      "title": "MCP Server Info",
+      "description": "Information about a configured MCP server",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Server identifier (e.g., 'aws-knowledge-mcp')"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Human-readable name"
+        },
+        "description": {
+          "type": ["string", "null"],
+          "description": "Server description"
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["user", "project", "enterprise"],
+          "description": "Configuration scope"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["connected", "disconnected"],
+          "description": "Current connection status"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["stdio", "sse", "http"],
+          "description": "Transport type"
+        },
+        "command": {
+          "type": "string",
+          "description": "Executable command"
+        },
+        "args": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Command arguments"
+        }
+      },
+      "required": ["id", "displayName", "scope", "status", "type", "command", "args"]
+    },
+    "McpToolInfo": {
+      "title": "MCP Tool Info",
+      "description": "Information about a tool from an MCP server",
+      "type": "object",
+      "properties": {
+        "serverId": {
+          "type": "string",
+          "description": "Reference to parent server"
+        },
+        "name": {
+          "type": "string",
+          "description": "Tool function name (e.g., 'aws___get_regional_availability')"
+        },
+        "description": {
+          "type": "string",
+          "description": "Tool description"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ParameterInfo"
+          },
+          "description": "Tool parameters"
+        }
+      },
+      "required": ["serverId", "name", "description", "parameters"]
+    },
+    "ParameterInfo": {
+      "title": "Parameter Info",
+      "description": "Information about a tool parameter",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["string", "number", "boolean", "integer", "array", "object"]
+        },
+        "description": {
+          "type": ["string", "null"]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "default": {},
+        "validation": {
+          "type": "object",
+          "description": "Validation constraints"
+        },
+        "items": {
+          "$ref": "#/definitions/ParameterInfo",
+          "description": "For array types: schema of items"
+        },
+        "properties": {
+          "type": "object",
+          "description": "For object types: nested properties"
+        }
+      },
+      "required": ["name", "type", "required"]
+    },
+    "McpNodeForValidation": {
+      "title": "MCP Node for Validation",
+      "description": "MCP node data sent for validation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "serverId": { "type": "string" },
+        "toolName": { "type": "string" },
+        "parameterValues": { "type": "object" },
+        "parameters": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ParameterInfo" }
+        }
+      },
+      "required": ["id", "serverId", "toolName", "parameterValues", "parameters"]
+    },
+    "McpError": {
+      "title": "MCP Error",
+      "description": "Error information from MCP operations",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Machine-readable error code (for i18n)",
+          "enum": [
+            "MCP_CLI_NOT_FOUND",
+            "MCP_CLI_TIMEOUT",
+            "MCP_SERVER_NOT_FOUND",
+            "MCP_CONNECTION_FAILED",
+            "MCP_TOOL_NOT_FOUND",
+            "MCP_TOOL_SCHEMA_INVALID",
+            "MCP_PARSE_ERROR",
+            "MCP_VALIDATION_FAILED",
+            "UNKNOWN_ERROR"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable error message"
+        },
+        "details": {
+          "type": ["string", "null"],
+          "description": "Additional error details (e.g., stderr output)"
+        }
+      },
+      "required": ["code", "message"]
+    },
+    "ValidationError": {
+      "title": "Validation Error",
+      "description": "A single validation error from node validation",
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Field that failed validation (e.g., 'parameterValues.region')"
+        },
+        "code": {
+          "type": "string",
+          "description": "Error code for i18n"
+        },
+        "message": {
+          "type": "string",
+          "description": "User-friendly error message"
+        }
+      },
+      "required": ["field", "code", "message"]
+    }
+  },
+  "messageFlow": {
+    "description": "Typical message flow for MCP node operations",
+    "discoverServers": {
+      "steps": [
+        "1. User clicks 'Browse MCP Servers'",
+        "2. Webview sends LIST_MCP_SERVERS",
+        "3. Extension executes 'claude mcp list'",
+        "4. Extension parses output and sends MCP_SERVERS_RESULT",
+        "5. Webview displays server list in dialog"
+      ]
+    },
+    "discoverTools": {
+      "steps": [
+        "1. User selects a server from list",
+        "2. Webview sends GET_MCP_TOOLS with serverId",
+        "3. Extension executes 'claude mcp get <serverId>'",
+        "4. Extension parses output and sends MCP_TOOLS_RESULT",
+        "5. Webview displays tool list for server"
+      ]
+    },
+    "selectTool": {
+      "steps": [
+        "1. User clicks 'Add' on a tool",
+        "2. Webview creates McpNode with tool information",
+        "3. Webview sends VALIDATE_MCP_NODE to confirm server/tool still exist",
+        "4. Extension validates and sends VALIDATE_MCP_NODE_RESULT",
+        "5. If valid, node is added to canvas"
+      ]
+    },
+    "editParameters": {
+      "steps": [
+        "1. User selects MCP node on canvas",
+        "2. Property panel displays parameters",
+        "3. User enters/edits parameter values",
+        "4. User clicks 'Save Configuration'",
+        "5. Webview sends UPDATE_MCP_NODE with new parameter values",
+        "6. Extension validates and updates node in workflow"
+      ]
+    }
+  },
+  "errorHandling": {
+    "cliNotFound": {
+      "code": "MCP_CLI_NOT_FOUND",
+      "trigger": "Claude Code CLI not installed or not in PATH",
+      "flow": "Extension catches ENOENT and sends MCP_ERROR",
+      "userMessage": "Claude Code CLI is not installed. Please install it first.",
+      "action": "Disable MCP node browser until CLI is available"
+    },
+    "timeout": {
+      "code": "MCP_CLI_TIMEOUT",
+      "trigger": "MCP command takes longer than 5 seconds",
+      "flow": "Extension catches timeout and sends MCP_ERROR",
+      "userMessage": "MCP server query timed out. Please try again.",
+      "action": "Show 'Retry' button in error dialog"
+    },
+    "serverNotFound": {
+      "code": "MCP_SERVER_NOT_FOUND",
+      "trigger": "User tries to get tools for non-existent server",
+      "flow": "CLI returns exit code 1, Extension sends MCP_ERROR",
+      "userMessage": "MCP server is not configured. Please add it using 'claude mcp add'.",
+      "action": "Show configuration guidance"
+    },
+    "connectionFailed": {
+      "code": "MCP_CONNECTION_FAILED",
+      "trigger": "MCP server not running or unreachable",
+      "flow": "Detected from connection status in server list",
+      "userMessage": "Cannot connect to this MCP server. Is it running?",
+      "action": "Show warning badge on server in list"
+    }
+  },
+  "implementation": {
+    "messageHandling": {
+      "extension": "Use vscode.postMessage(message) to send messages to Webview",
+      "webview": "Use window.addEventListener('message', event => { const message = event.data; ... })"
+    },
+    "requestCorrelation": {
+      "pattern": "All request messages include requestId (UUID)",
+      "response": "Response messages include the same requestId for correlation",
+      "timeout": "Webview should timeout waiting for response after 30 seconds"
+    },
+    "errorRecovery": {
+      "strategy": "All errors are communicated via McpError payload",
+      "userFeedback": "UI should display error message to user with optional 'Retry' action",
+      "logging": "Extension logs all errors to 'Claude Code Workflow Studio' output channel"
+    }
+  }
+}

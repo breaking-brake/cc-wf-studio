@@ -90,6 +90,8 @@ All operations run locally within VSCode. No network communication means zero ri
 
 📚 **Skill Nodes** - Reference existing Claude Code Skills from personal (`~/.claude/skills/`) or project (`.claude/skills/`) directories, or create new Skills directly from the visual editor
 
+🔌 **MCP Tool Nodes** - Integrate Model Context Protocol (MCP) tools with automatic server discovery, tool browsing, dynamic parameter forms, and real-time validation
+
 ## AI-Assisted Workflow Refinement
 
 ### Overview
@@ -257,6 +259,7 @@ Change the AskUserQuestion node to have 3 options instead of 2: High, Medium, Lo
    - **Add Nodes**: The left palette is organized into sections:
      - **Basic Nodes**: Prompt (templates), Sub-Agent (AI tasks)
      - **Control Flow**: IfElse (binary branching), Switch (multi-way branching), AskUserQuestion (user decisions)
+     - **Integration**: Skill (Claude Code Skills), MCP (Model Context Protocol tools)
    - **Configure**: Click a node to edit its properties in the right panel
    - **Connect**: Drag from output ports (right) to input ports (left) to create flow
 
@@ -316,6 +319,32 @@ Skills are specialized agent capabilities defined in `SKILL.md` files with YAML 
    - **Scope**: Choose Personal (your machine only) or Project (shared with team)
 4. The Skill is automatically created and referenced by the node
 
+### MCP Tool Nodes
+Integrate Model Context Protocol (MCP) tools into your workflows:
+- **MCP Server Discovery**: Browse available MCP servers configured in Claude Code
+- **Tool Selection**: Search and filter MCP tools from any connected server
+- **Parameter Configuration**: Dynamic form generation based on tool schemas (string, number, boolean, array, object types)
+- **Real-time Validation**: Automatic parameter validation with error messages
+- **Export Integration**: Exported workflows include complete MCP tool documentation with server, tool name, and configured parameters
+
+MCP (Model Context Protocol) is Claude Code's extensibility system that allows integration with external tools and services. MCP tools can access databases, APIs, file systems, and more - extending Claude's capabilities beyond built-in tools.
+
+**Adding an MCP Tool:**
+1. Add an MCP node to your workflow from the palette
+2. Select an MCP server from the dropdown (configured in Claude Code)
+3. Browse available tools or use the search to filter by name
+4. Select a tool - the node will display its description
+5. Configure parameters in the property panel:
+   - Required parameters are marked with asterisks
+   - Each parameter shows its type (string, number, boolean, etc.)
+   - Validation errors appear in real-time
+6. Save your workflow - MCP tool configuration is preserved
+
+**Prerequisites:**
+- Claude Code CLI must be installed and configured with MCP servers
+- MCP servers must be properly configured in Claude Code settings (user/project/enterprise scope)
+- Network connectivity may be required depending on the MCP server
+
 ### Conditional Branching Nodes
 Implement conditional logic with specialized nodes:
 
@@ -371,6 +400,13 @@ Generates ready-to-use files:
 4. **Document Processor** Skill (Project) → Team-shared processing logic
 5. **Format Results** Sub-Agent → Creates final output
 
+### Example 4: Web Automation with MCP Tools
+1. **Input URL** Prompt → Asks user for target website
+2. **Playwright Navigate** MCP Tool → Opens browser and navigates to URL (using playwright-mcp server)
+3. **Ask User**: "Action type?" → Screenshot / Extract Text / Click Element
+4. **Playwright Action** MCP Tool → Performs the selected browser action
+5. **Process Results** Sub-Agent → Analyzes and formats the output
+
 ## FAQ
 
 **Q: What is Claude Code?**
@@ -402,6 +438,15 @@ A: Yes! You can create `SKILL.md` files manually in the appropriate directory (`
 
 **Q: What happens if a referenced Skill file is missing?**
 A: The visual editor will detect missing Skill files when loading workflows and display a warning indicator on the Skill node. You can then re-select a valid Skill or remove the broken reference.
+
+**Q: What are MCP Tool nodes?**
+A: MCP (Model Context Protocol) Tool nodes allow you to integrate external tools and services into your workflows. MCP is Claude Code's extensibility system that can connect to databases, APIs, web browsers (via Playwright), file systems, and more. The visual editor automatically discovers available MCP servers and tools configured in Claude Code.
+
+**Q: How do I set up MCP servers?**
+A: MCP servers are configured in Claude Code settings, not in this extension. You need to install and configure MCP servers through Claude Code CLI first. Once configured, they will automatically appear in the MCP node's server dropdown. See Claude Code documentation for MCP server setup instructions.
+
+**Q: What happens if an MCP server is not running?**
+A: The visual editor will detect unavailable MCP servers when loading the tool list and display a validation warning on the MCP node. The workflow can still be saved and exported, but execution will fail if the server is not available at runtime. Make sure all required MCP servers are running before executing exported workflows.
 
 ## Troubleshooting
 

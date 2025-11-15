@@ -22,8 +22,9 @@ import { AskUserQuestionNodeComponent } from './nodes/AskUserQuestionNode';
 import { BranchNodeComponent } from './nodes/BranchNode';
 import { EndNode } from './nodes/EndNode';
 import { IfElseNodeComponent } from './nodes/IfElseNode';
-import { PromptNode } from './nodes/PromptNode';
 // 新規ノードタイプのインポート
+import { McpNodeComponent } from './nodes/McpNode/McpNode';
+import { PromptNode } from './nodes/PromptNode';
 import { SkillNodeComponent } from './nodes/SkillNode';
 import { StartNode } from './nodes/StartNode';
 import { SubAgentNodeComponent } from './nodes/SubAgentNode';
@@ -46,6 +47,7 @@ const nodeTypes: NodeTypes = {
   end: EndNode,
   prompt: PromptNode,
   skill: SkillNodeComponent,
+  mcp: McpNodeComponent, // Feature: 001-mcp-node
 };
 
 /**

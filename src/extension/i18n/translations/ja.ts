@@ -57,4 +57,18 @@ export const jaTranslations: TranslationKeys = {
   'switchNode.title': '### Switchノード詳細',
   'switchNode.multiple': '複数分岐(2-N)',
   'switchNode.evaluationTarget': '評価対象',
+
+  // MCP node details
+  'mcpNode.title': '## MCPツールノード',
+  'mcpNode.description': '**説明**',
+  'mcpNode.server': '**MCPサーバー**',
+  'mcpNode.toolName': '**ツール名**',
+  'mcpNode.validationStatus': '**検証状態**',
+  'mcpNode.configuredParameters': '**設定済みパラメータ**',
+  'mcpNode.availableParameters': '**利用可能なパラメータ**',
+  'mcpNode.required': '必須',
+  'mcpNode.optional': '任意',
+  'mcpNode.noDescription': '説明なし',
+  'mcpNode.executionMethod':
+    'このノードはMCP(Model Context Protocol)ツールを呼び出します。ワークフロー実行時は、設定されたパラメータを使用してMCPサーバー経由でツールを呼び出してください。',
 };

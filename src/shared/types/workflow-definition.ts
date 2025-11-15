@@ -18,6 +18,7 @@ export enum NodeType {
   End = 'end',
   Prompt = 'prompt',
   Skill = 'skill', // New: Claude Code Skill integration
+  Mcp = 'mcp', // New: MCP (Model Context Protocol) tool integration
 }
 
 // ============================================================================
@@ -120,6 +121,52 @@ export interface SkillNodeData {
   outputPorts: 1;
 }
 
+/**
+ * Tool parameter schema definition (from MCP)
+ */
+export interface ToolParameter {
+  /** Parameter identifier (e.g., 'region') */
+  name: string;
+  /** Parameter data type */
+  type: 'string' | 'number' | 'boolean' | 'integer' | 'array' | 'object';
+  /** User-friendly description of the parameter */
+  description?: string | null;
+  /** Whether this parameter is mandatory for tool execution */
+  required: boolean;
+  /** Default value if not provided by user */
+  default?: unknown;
+  /** Constraints and validation rules */
+  validation?: {
+    minLength?: number;
+    maxLength?: number;
+    pattern?: string;
+    minimum?: number;
+    maximum?: number;
+    enum?: (string | number)[];
+  };
+  /** For array types: schema of array items */
+  items?: ToolParameter;
+  /** For object types: schema of nested properties */
+  properties?: Record<string, ToolParameter>;
+}
+
+export interface McpNodeData {
+  /** MCP server identifier (from 'claude mcp list') */
+  serverId: string;
+  /** Tool function name from the MCP server */
+  toolName: string;
+  /** Human-readable description of the tool's functionality */
+  toolDescription: string;
+  /** Array of parameter schemas for this tool (immutable, from MCP definition) */
+  parameters: ToolParameter[];
+  /** User-configured values for the tool's parameters */
+  parameterValues: Record<string, unknown>;
+  /** Validation status (computed during workflow load) */
+  validationStatus: 'valid' | 'missing' | 'invalid';
+  /** Number of output ports (fixed at 1 for MCP nodes) */
+  outputPorts: 1;
+}
+
 // ============================================================================
 // Node Types
 // ============================================================================
@@ -176,6 +223,11 @@ export interface SkillNode extends BaseNode {
   data: SkillNodeData;
 }
 
+export interface McpNode extends BaseNode {
+  type: NodeType.Mcp;
+  data: McpNodeData;
+}
+
 export type WorkflowNode =
   | SubAgentNode
   | AskUserQuestionNode
@@ -185,7 +237,8 @@ export type WorkflowNode =
   | StartNode
   | EndNode
   | PromptNode
-  | SkillNode;
+  | SkillNode
+  | McpNode;
 
 // ============================================================================
 // Connection Type
@@ -348,6 +401,17 @@ export const VALIDATION_RULES = {
     NAME_PATTERN: /^[a-z0-9-]+$/, // Lowercase, numbers, hyphens only
     DESCRIPTION_MIN_LENGTH: 1,
     DESCRIPTION_MAX_LENGTH: 1024,
+    OUTPUT_PORTS: 1, // Fixed: 1 output port
+  },
+  MCP: {
+    NAME_MIN_LENGTH: 1,
+    NAME_MAX_LENGTH: 64,
+    NAME_PATTERN: /^[a-z0-9-]+$/, // Lowercase, numbers, hyphens only (same as workflow-mcp-node.schema.json)
+    SERVER_ID_MIN_LENGTH: 1,
+    SERVER_ID_MAX_LENGTH: 100,
+    TOOL_NAME_MIN_LENGTH: 1,
+    TOOL_NAME_MAX_LENGTH: 200,
+    TOOL_DESCRIPTION_MAX_LENGTH: 2048,
     OUTPUT_PORTS: 1, // Fixed: 1 output port
   },
 } as const;

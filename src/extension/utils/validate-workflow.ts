@@ -7,6 +7,7 @@
 
 import {
   type Connection,
+  type McpNodeData,
   NodeType,
   type SkillNodeData,
   VALIDATION_RULES,
@@ -189,6 +190,12 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
       const skillErrors = validateSkillNode(node);
       errors.push(...skillErrors);
     }
+
+    // Validate MCP nodes (T017)
+    if (node.type === NodeType.Mcp) {
+      const mcpErrors = validateMcpNode(node);
+      errors.push(...mcpErrors);
+    }
   }
 
   return errors;
@@ -262,6 +269,141 @@ function validateSkillNode(node: WorkflowNode): ValidationError[] {
       code: 'SKILL_INVALID_PORTS',
       message:
         'Skill outputPorts must equal 1. For branching, use ifElse or switch nodes after the Skill node.',
+      field: `nodes[${node.id}].data.outputPorts`,
+    });
+  }
+
+  return errors;
+}
+
+/**
+ * Validate MCP node structure and fields
+ *
+ * Based on: contracts/workflow-mcp-node.schema.json
+ *
+ * @param node - MCP node to validate
+ * @returns Array of validation errors (T017)
+ */
+function validateMcpNode(node: WorkflowNode): ValidationError[] {
+  const errors: ValidationError[] = [];
+  const mcpData = node.data as Partial<McpNodeData>;
+
+  // Required fields check
+  const requiredFields: (keyof McpNodeData)[] = [
+    'serverId',
+    'toolName',
+    'toolDescription',
+    'parameters',
+    'parameterValues',
+    'validationStatus',
+    'outputPorts',
+  ];
+
+  for (const field of requiredFields) {
+    const value = mcpData[field as keyof typeof mcpData];
+    if (value === undefined || value === null || value === '') {
+      errors.push({
+        code: 'MCP_MISSING_FIELD',
+        message: `MCP node missing required field: ${field}`,
+        field: `nodes[${node.id}].data.${field}`,
+      });
+    }
+  }
+
+  // Server ID validation
+  if (mcpData.serverId) {
+    if (mcpData.serverId.length < VALIDATION_RULES.MCP.SERVER_ID_MIN_LENGTH) {
+      errors.push({
+        code: 'MCP_INVALID_SERVER_ID',
+        message: `MCP server ID too short (min ${VALIDATION_RULES.MCP.SERVER_ID_MIN_LENGTH} characters)`,
+        field: `nodes[${node.id}].data.serverId`,
+      });
+    }
+
+    if (mcpData.serverId.length > VALIDATION_RULES.MCP.SERVER_ID_MAX_LENGTH) {
+      errors.push({
+        code: 'MCP_SERVER_ID_TOO_LONG',
+        message: `MCP server ID exceeds ${VALIDATION_RULES.MCP.SERVER_ID_MAX_LENGTH} characters`,
+        field: `nodes[${node.id}].data.serverId`,
+      });
+    }
+  }
+
+  // Tool name validation
+  if (mcpData.toolName) {
+    if (mcpData.toolName.length < VALIDATION_RULES.MCP.TOOL_NAME_MIN_LENGTH) {
+      errors.push({
+        code: 'MCP_INVALID_TOOL_NAME',
+        message: `MCP tool name too short (min ${VALIDATION_RULES.MCP.TOOL_NAME_MIN_LENGTH} characters)`,
+        field: `nodes[${node.id}].data.toolName`,
+      });
+    }
+
+    if (mcpData.toolName.length > VALIDATION_RULES.MCP.TOOL_NAME_MAX_LENGTH) {
+      errors.push({
+        code: 'MCP_TOOL_NAME_TOO_LONG',
+        message: `MCP tool name exceeds ${VALIDATION_RULES.MCP.TOOL_NAME_MAX_LENGTH} characters`,
+        field: `nodes[${node.id}].data.toolName`,
+      });
+    }
+  }
+
+  // Tool description validation
+  if (
+    mcpData.toolDescription &&
+    mcpData.toolDescription.length > VALIDATION_RULES.MCP.TOOL_DESCRIPTION_MAX_LENGTH
+  ) {
+    errors.push({
+      code: 'MCP_TOOL_DESC_TOO_LONG',
+      message: `MCP tool description exceeds ${VALIDATION_RULES.MCP.TOOL_DESCRIPTION_MAX_LENGTH} characters`,
+      field: `nodes[${node.id}].data.toolDescription`,
+    });
+  }
+
+  // Parameters array validation
+  if (mcpData.parameters) {
+    if (!Array.isArray(mcpData.parameters)) {
+      errors.push({
+        code: 'MCP_INVALID_PARAMETERS',
+        message: 'MCP parameters must be an array',
+        field: `nodes[${node.id}].data.parameters`,
+      });
+    }
+  }
+
+  // Parameter values validation
+  if (mcpData.parameterValues) {
+    if (
+      typeof mcpData.parameterValues !== 'object' ||
+      mcpData.parameterValues === null ||
+      Array.isArray(mcpData.parameterValues)
+    ) {
+      errors.push({
+        code: 'MCP_INVALID_PARAMETER_VALUES',
+        message: 'MCP parameterValues must be an object',
+        field: `nodes[${node.id}].data.parameterValues`,
+      });
+    }
+  }
+
+  // Validation status check
+  if (mcpData.validationStatus) {
+    const validStatuses = ['valid', 'missing', 'invalid'];
+    if (!validStatuses.includes(mcpData.validationStatus)) {
+      errors.push({
+        code: 'MCP_INVALID_STATUS',
+        message: `MCP validationStatus must be one of: ${validStatuses.join(', ')}`,
+        field: `nodes[${node.id}].data.validationStatus`,
+      });
+    }
+  }
+
+  // Output ports validation
+  if (mcpData.outputPorts !== VALIDATION_RULES.MCP.OUTPUT_PORTS) {
+    errors.push({
+      code: 'MCP_INVALID_PORTS',
+      message:
+        'MCP outputPorts must equal 1. For branching, use ifElse or switch nodes after the MCP node.',
       field: `nodes[${node.id}].data.outputPorts`,
     });
   }

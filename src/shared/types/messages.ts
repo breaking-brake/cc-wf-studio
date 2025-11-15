@@ -301,6 +301,209 @@ export interface RefinementClarificationPayload {
 }
 
 // ============================================================================
+// MCP Node Payloads (001-mcp-node)
+// ============================================================================
+
+import type { McpServerReference, McpToolReference } from './mcp-node';
+
+// Re-export for Webview usage
+export type { McpServerReference, McpToolReference };
+
+/**
+ * Options for filtering MCP servers
+ */
+export interface ListMcpServersOptions {
+  /** Filter by scope (optional) */
+  filterByScope?: Array<'user' | 'project' | 'enterprise'>;
+}
+
+/**
+ * MCP Server list request payload
+ */
+export interface ListMcpServersPayload {
+  /** Request options */
+  options?: ListMcpServersOptions;
+}
+
+/**
+ * MCP Server list result payload
+ */
+export interface McpServersResultPayload {
+  /** Whether the request succeeded */
+  success: boolean;
+  /** List of MCP servers (if success) */
+  servers?: McpServerReference[];
+  /** Error information (if failure) */
+  error?: {
+    code:
+      | 'MCP_CLI_NOT_FOUND'
+      | 'MCP_CLI_TIMEOUT'
+      | 'MCP_SERVER_NOT_FOUND'
+      | 'MCP_CONNECTION_FAILED'
+      | 'MCP_PARSE_ERROR'
+      | 'MCP_UNKNOWN_ERROR'
+      | 'MCP_UNSUPPORTED_TRANSPORT'
+      | 'MCP_INVALID_CONFIG'
+      | 'MCP_CONNECTION_TIMEOUT'
+      | 'MCP_CONNECTION_ERROR';
+    message: string;
+    details?: string;
+  };
+  /** Request timestamp */
+  timestamp: string; // ISO 8601
+  /** Execution time in milliseconds */
+  executionTimeMs: number;
+}
+
+/**
+ * Get MCP tools request payload
+ */
+export interface GetMcpToolsPayload {
+  /** MCP server identifier */
+  serverId: string;
+}
+
+/**
+ * MCP Tools result payload
+ */
+export interface McpToolsResultPayload {
+  /** Whether the request succeeded */
+  success: boolean;
+  /** Server identifier */
+  serverId: string;
+  /** List of MCP tools (if success) */
+  tools?: McpToolReference[];
+  /** Error information (if failure) */
+  error?: {
+    code:
+      | 'MCP_CLI_NOT_FOUND'
+      | 'MCP_CLI_TIMEOUT'
+      | 'MCP_SERVER_NOT_FOUND'
+      | 'MCP_CONNECTION_FAILED'
+      | 'MCP_PARSE_ERROR'
+      | 'MCP_UNKNOWN_ERROR'
+      | 'MCP_UNSUPPORTED_TRANSPORT'
+      | 'MCP_INVALID_CONFIG'
+      | 'MCP_CONNECTION_TIMEOUT'
+      | 'MCP_CONNECTION_ERROR';
+    message: string;
+    details?: string;
+  };
+  /** Request timestamp */
+  timestamp: string; // ISO 8601
+  /** Execution time in milliseconds */
+  executionTimeMs: number;
+}
+
+/**
+ * Get MCP tool schema request payload
+ */
+export interface GetMcpToolSchemaPayload {
+  /** MCP server identifier */
+  serverId: string;
+  /** Tool name */
+  toolName: string;
+}
+
+/**
+ * MCP Tool schema result payload
+ */
+export interface McpToolSchemaResultPayload {
+  /** Whether the request succeeded */
+  success: boolean;
+  /** Server identifier */
+  serverId: string;
+  /** Tool name */
+  toolName: string;
+  /** Tool schema (if success) */
+  schema?: McpToolReference;
+  /** Error information (if failure) */
+  error?: {
+    code:
+      | 'MCP_CLI_NOT_FOUND'
+      | 'MCP_CLI_TIMEOUT'
+      | 'MCP_SERVER_NOT_FOUND'
+      | 'MCP_TOOL_NOT_FOUND'
+      | 'MCP_PARSE_ERROR'
+      | 'MCP_UNKNOWN_ERROR'
+      | 'MCP_CONNECTION_FAILED'
+      | 'MCP_CONNECTION_TIMEOUT'
+      | 'MCP_CONNECTION_ERROR'
+      | 'MCP_UNSUPPORTED_TRANSPORT'
+      | 'MCP_INVALID_CONFIG';
+    message: string;
+    details?: string;
+  };
+  /** Request timestamp */
+  timestamp: string; // ISO 8601
+  /** Execution time in milliseconds */
+  executionTimeMs: number;
+}
+
+/**
+ * Validate MCP node payload
+ */
+export interface ValidateMcpNodePayload {
+  /** MCP server identifier */
+  serverId: string;
+  /** Tool name */
+  toolName: string;
+  /** Parameter values to validate */
+  parameterValues: Record<string, unknown>;
+}
+
+/**
+ * MCP node validation result payload
+ */
+export interface McpNodeValidationResultPayload {
+  /** Whether validation succeeded */
+  success: boolean;
+  /** Validation status */
+  validationStatus: 'valid' | 'invalid';
+  /** Validation errors (if invalid) */
+  errors?: Array<{
+    /** Parameter name */
+    parameterName: string;
+    /** Error code */
+    code: 'MISSING_REQUIRED' | 'INVALID_TYPE' | 'VALIDATION_FAILED';
+    /** Error message */
+    message: string;
+  }>;
+}
+
+/**
+ * Update MCP node payload
+ */
+export interface UpdateMcpNodePayload {
+  /** Node ID */
+  nodeId: string;
+  /** Updated parameter values */
+  parameterValues: Record<string, unknown>;
+}
+
+/**
+ * MCP error payload
+ */
+export interface McpErrorPayload {
+  /** Error code */
+  code:
+    | 'MCP_CLI_NOT_FOUND'
+    | 'MCP_CLI_TIMEOUT'
+    | 'MCP_SERVER_NOT_FOUND'
+    | 'MCP_CONNECTION_FAILED'
+    | 'MCP_TOOL_NOT_FOUND'
+    | 'MCP_PARSE_ERROR'
+    | 'MCP_VALIDATION_ERROR'
+    | 'MCP_UNKNOWN_ERROR';
+  /** Error message */
+  message: string;
+  /** Optional: detailed error information */
+  details?: string;
+  /** Request timestamp */
+  timestamp: string; // ISO 8601
+}
+
+// ============================================================================
 // Extension → Webview Messages
 // ============================================================================
 
@@ -325,7 +528,12 @@ export type ExtensionMessage =
   | Message<RefinementFailedPayload, 'REFINEMENT_FAILED'>
   | Message<RefinementCancelledPayload, 'REFINEMENT_CANCELLED'>
   | Message<RefinementClarificationPayload, 'REFINEMENT_CLARIFICATION'>
-  | Message<ConversationClearedPayload, 'CONVERSATION_CLEARED'>;
+  | Message<ConversationClearedPayload, 'CONVERSATION_CLEARED'>
+  | Message<McpServersResultPayload, 'MCP_SERVERS_RESULT'>
+  | Message<McpToolsResultPayload, 'MCP_TOOLS_RESULT'>
+  | Message<McpToolSchemaResultPayload, 'MCP_TOOL_SCHEMA_RESULT'>
+  | Message<McpNodeValidationResultPayload, 'MCP_NODE_VALIDATION_RESULT'>
+  | Message<McpErrorPayload, 'MCP_ERROR'>;
 
 // ============================================================================
 // Webview → Extension Messages
@@ -345,7 +553,12 @@ export type WebviewMessage =
   | Message<ValidateSkillFilePayload, 'VALIDATE_SKILL_FILE'>
   | Message<RefineWorkflowPayload, 'REFINE_WORKFLOW'>
   | Message<CancelRefinementPayload, 'CANCEL_REFINEMENT'>
-  | Message<ClearConversationPayload, 'CLEAR_CONVERSATION'>;
+  | Message<ClearConversationPayload, 'CLEAR_CONVERSATION'>
+  | Message<ListMcpServersPayload, 'LIST_MCP_SERVERS'>
+  | Message<GetMcpToolsPayload, 'GET_MCP_TOOLS'>
+  | Message<GetMcpToolSchemaPayload, 'GET_MCP_TOOL_SCHEMA'>
+  | Message<ValidateMcpNodePayload, 'VALIDATE_MCP_NODE'>
+  | Message<UpdateMcpNodePayload, 'UPDATE_MCP_NODE'>;
 
 // ============================================================================
 // Error Codes

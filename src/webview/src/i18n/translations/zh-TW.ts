@@ -337,4 +337,70 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   // Initial instructional message (Phase 3.12)
   'refinement.initialMessage.description': '用自然語言描述您要實現的工作流。',
   'refinement.initialMessage.note': '※ 此功能使用您環境中安裝的Claude Code。',
+
+  // MCP Node (Feature: 001-mcp-node)
+  'node.mcp.title': 'MCP Tool',
+  'node.mcp.description': '執行MCP工具',
+
+  // MCP Server List
+  'mcp.loading.servers': '正在載入MCP伺服器...',
+  'mcp.error.serverLoadFailed': '載入MCP伺服器失敗',
+  'mcp.empty.servers': '未設定MCP伺服器',
+
+  // MCP Tool List
+  'mcp.loading.tools': '正在載入工具...',
+  'mcp.error.toolLoadFailed': '從伺服器載入工具失敗',
+  'mcp.empty.tools': '此伺服器沒有可用工具',
+
+  // MCP Tool Search
+  'mcp.search.placeholder': '按名稱或描述搜尋工具...',
+  'mcp.search.noResults': '未找到與"{query}"匹配的工具',
+
+  // MCP Node Dialog
+  'mcp.dialog.title': '參考可用的MCP Tool',
+  'mcp.dialog.selectServer': '選擇MCP伺服器',
+  'mcp.dialog.selectTool': '選擇工具',
+  'mcp.dialog.addButton': '新增工具',
+  'mcp.dialog.cancelButton': '取消',
+  'mcp.dialog.error.noServerSelected': '請選擇MCP伺服器',
+  'mcp.dialog.error.noToolSelected': '請選擇工具',
+
+  // MCP Property Panel
+  'property.nodeType.mcp': 'MCP Tool',
+  'property.mcp.serverId': '伺服器',
+  'property.mcp.toolName': '工具名稱',
+  'property.mcp.toolDescription': '描述',
+  'property.mcp.parameters': '參數',
+  'property.mcp.parameterValues': '參數值',
+  'property.mcp.parameterCount': '參數數量',
+  'property.mcp.editParameters': '編輯參數',
+  'property.mcp.infoNote': 'MCP工具屬性從伺服器載入。點擊「編輯參數」以設定參數值。',
+
+  // MCP Parameter Form
+  'mcp.parameter.formTitle': '工具參數',
+  'mcp.parameter.noParameters': '此工具沒有參數',
+  'mcp.parameter.selectOption': '-- 選擇選項 --',
+  'mcp.parameter.enterValue': '輸入值',
+  'mcp.parameter.minLength': '最小長度',
+  'mcp.parameter.maxLength': '最大長度',
+  'mcp.parameter.pattern': '模式',
+  'mcp.parameter.minimum': '最小值',
+  'mcp.parameter.maximum': '最大值',
+  'mcp.parameter.default': '預設值',
+  'mcp.parameter.addItem': '新增項目',
+  'mcp.parameter.add': '新增',
+  'mcp.parameter.remove': '刪除',
+  'mcp.parameter.arrayCount': '項目',
+  'mcp.parameter.jsonFormat': '需要JSON格式',
+  'mcp.parameter.jsonInvalid': '無效的JSON格式',
+  'mcp.parameter.objectInvalid': '值必須是JSON物件',
+  'mcp.parameter.unsupportedType': '不支援的參數類型: {name}的{type}',
+  'mcp.parameter.validationErrors': '請修正以下驗證錯誤:',
+
+  // MCP Edit Dialog
+  'mcp.editDialog.title': '配置MCP工具參數',
+  'mcp.editDialog.saveButton': '儲存',
+  'mcp.editDialog.cancelButton': '取消',
+  'mcp.editDialog.loading': '正在載入工具架構...',
+  'mcp.editDialog.error.schemaLoadFailed': '載入工具架構失敗',
 };

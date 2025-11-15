@@ -318,4 +318,70 @@ export interface WebviewTranslationKeys {
   // Initial instructional message (Phase 3.12)
   'refinement.initialMessage.description': string;
   'refinement.initialMessage.note': string;
+
+  // MCP Node (Feature: 001-mcp-node)
+  'node.mcp.title': string;
+  'node.mcp.description': string;
+
+  // MCP Server List
+  'mcp.loading.servers': string;
+  'mcp.error.serverLoadFailed': string;
+  'mcp.empty.servers': string;
+
+  // MCP Tool List
+  'mcp.loading.tools': string;
+  'mcp.error.toolLoadFailed': string;
+  'mcp.empty.tools': string;
+
+  // MCP Tool Search
+  'mcp.search.placeholder': string;
+  'mcp.search.noResults': string;
+
+  // MCP Node Dialog
+  'mcp.dialog.title': string;
+  'mcp.dialog.selectServer': string;
+  'mcp.dialog.selectTool': string;
+  'mcp.dialog.addButton': string;
+  'mcp.dialog.cancelButton': string;
+  'mcp.dialog.error.noServerSelected': string;
+  'mcp.dialog.error.noToolSelected': string;
+
+  // MCP Property Panel
+  'property.nodeType.mcp': string;
+  'property.mcp.serverId': string;
+  'property.mcp.toolName': string;
+  'property.mcp.toolDescription': string;
+  'property.mcp.parameters': string;
+  'property.mcp.parameterValues': string;
+  'property.mcp.parameterCount': string;
+  'property.mcp.editParameters': string;
+  'property.mcp.infoNote': string;
+
+  // MCP Parameter Form
+  'mcp.parameter.formTitle': string;
+  'mcp.parameter.noParameters': string;
+  'mcp.parameter.selectOption': string;
+  'mcp.parameter.enterValue': string;
+  'mcp.parameter.minLength': string;
+  'mcp.parameter.maxLength': string;
+  'mcp.parameter.pattern': string;
+  'mcp.parameter.minimum': string;
+  'mcp.parameter.maximum': string;
+  'mcp.parameter.default': string;
+  'mcp.parameter.addItem': string;
+  'mcp.parameter.add': string;
+  'mcp.parameter.remove': string;
+  'mcp.parameter.arrayCount': string;
+  'mcp.parameter.jsonFormat': string;
+  'mcp.parameter.jsonInvalid': string;
+  'mcp.parameter.objectInvalid': string;
+  'mcp.parameter.unsupportedType': string;
+  'mcp.parameter.validationErrors': string;
+
+  // MCP Edit Dialog
+  'mcp.editDialog.title': string;
+  'mcp.editDialog.saveButton': string;
+  'mcp.editDialog.cancelButton': string;
+  'mcp.editDialog.loading': string;
+  'mcp.editDialog.error.schemaLoadFailed': string;
 }

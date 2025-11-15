@@ -354,4 +354,71 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.initialMessage.description': '実現したいワークフローを自然言語で説明してください。',
   'refinement.initialMessage.note':
     '※ この機能はお使いの環境にインストールされたClaude Codeを使用します。',
+
+  // MCP Node (Feature: 001-mcp-node)
+  'node.mcp.title': 'MCP Tool',
+  'node.mcp.description': 'MCPツールを実行',
+
+  // MCP Server List
+  'mcp.loading.servers': 'MCPサーバーを読み込み中...',
+  'mcp.error.serverLoadFailed': 'MCPサーバーの読み込みに失敗しました',
+  'mcp.empty.servers': '設定されたMCPサーバーがありません',
+
+  // MCP Tool List
+  'mcp.loading.tools': 'ツールを読み込み中...',
+  'mcp.error.toolLoadFailed': 'サーバーからツールの読み込みに失敗しました',
+  'mcp.empty.tools': 'このサーバーで利用可能なツールがありません',
+
+  // MCP Tool Search
+  'mcp.search.placeholder': 'ツール名または説明で検索...',
+  'mcp.search.noResults': '"{query}" に一致するツールが見つかりません',
+
+  // MCP Node Dialog
+  'mcp.dialog.title': '使用可能なMCPツールを参照',
+  'mcp.dialog.selectServer': 'MCPサーバーを選択',
+  'mcp.dialog.selectTool': 'ツールを選択',
+  'mcp.dialog.addButton': 'ツールを追加',
+  'mcp.dialog.cancelButton': 'キャンセル',
+  'mcp.dialog.error.noServerSelected': 'MCPサーバーを選択してください',
+  'mcp.dialog.error.noToolSelected': 'ツールを選択してください',
+
+  // MCP Property Panel
+  'property.nodeType.mcp': 'MCP Tool',
+  'property.mcp.serverId': 'サーバー',
+  'property.mcp.toolName': 'ツール名',
+  'property.mcp.toolDescription': '説明',
+  'property.mcp.parameters': 'パラメータ',
+  'property.mcp.parameterValues': 'パラメータ値',
+  'property.mcp.parameterCount': 'パラメータ数',
+  'property.mcp.editParameters': 'パラメータを編集',
+  'property.mcp.infoNote':
+    'MCPツールのプロパティはサーバーから読み込まれます。「パラメータを編集」をクリックしてパラメータ値を設定してください。',
+
+  // MCP Parameter Form
+  'mcp.parameter.formTitle': 'ツールパラメータ',
+  'mcp.parameter.noParameters': 'このツールにはパラメータがありません',
+  'mcp.parameter.selectOption': '-- オプションを選択 --',
+  'mcp.parameter.enterValue': '値を入力',
+  'mcp.parameter.minLength': '最小長',
+  'mcp.parameter.maxLength': '最大長',
+  'mcp.parameter.pattern': 'パターン',
+  'mcp.parameter.minimum': '最小値',
+  'mcp.parameter.maximum': '最大値',
+  'mcp.parameter.default': 'デフォルト',
+  'mcp.parameter.addItem': '項目を追加',
+  'mcp.parameter.add': '追加',
+  'mcp.parameter.remove': '削除',
+  'mcp.parameter.arrayCount': '項目数',
+  'mcp.parameter.jsonFormat': 'JSON形式が必要です',
+  'mcp.parameter.jsonInvalid': '無効なJSON形式です',
+  'mcp.parameter.objectInvalid': '値はJSONオブジェクトである必要があります',
+  'mcp.parameter.unsupportedType': 'サポートされていないパラメータ型: {name}の{type}',
+  'mcp.parameter.validationErrors': '以下の検証エラーを修正してください:',
+
+  // MCP Edit Dialog
+  'mcp.editDialog.title': 'MCPツールパラメータの設定',
+  'mcp.editDialog.saveButton': '保存',
+  'mcp.editDialog.cancelButton': 'キャンセル',
+  'mcp.editDialog.loading': 'ツールスキーマを読み込み中...',
+  'mcp.editDialog.error.schemaLoadFailed': 'ツールスキーマの読み込みに失敗しました',
 };

@@ -57,4 +57,18 @@ export const koTranslations: TranslationKeys = {
   'switchNode.title': '### Switch 노드 세부 정보',
   'switchNode.multiple': '다중 분기 (2-N)',
   'switchNode.evaluationTarget': '평가 대상',
+
+  // MCP node details
+  'mcpNode.title': '## MCP 도구 노드',
+  'mcpNode.description': '**설명**',
+  'mcpNode.server': '**MCP 서버**',
+  'mcpNode.toolName': '**도구 이름**',
+  'mcpNode.validationStatus': '**검증 상태**',
+  'mcpNode.configuredParameters': '**구성된 매개변수**',
+  'mcpNode.availableParameters': '**사용 가능한 매개변수**',
+  'mcpNode.required': '필수',
+  'mcpNode.optional': '선택 사항',
+  'mcpNode.noDescription': '설명 없음',
+  'mcpNode.executionMethod':
+    '이 노드는 MCP(Model Context Protocol) 도구를 호출합니다. 워크플로를 실행할 때 구성된 매개변수를 사용하여 MCP 서버를 통해 도구를 호출하세요.',
 };
