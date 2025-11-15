@@ -99,47 +99,75 @@
   - MCPノード編集ダイアログの動作
   - パラメータ値の保存・復元
 
-## Phase 5: ユーザーストーリー3実装 (US3: Workflow Integration) - 3日
+## Phase 5: ユーザーストーリー3実装 (US3: Workflow Integration) - 2日
 
-**ストーリーゴール**: MCPノードを含むワークフローを実行できる
+**🔄 Phase 5再計画実施日**: 2025-11-15
+
+**再計画の理由**:
+当初のタスク設計は「ワークフロー実行機能」の実装を想定していたが、調査の結果、このプロジェクトはワークフロー**編集**に特化したエディタであり、実行機能は持たないことが判明。ワークフローはSlash Command形式でエクスポートされ、Claude Code CLIが実行する設計。
+
+**変更内容**:
+- タスク数: 7個 → 3個に削減(T039-T045 → T039-T041)
+- 期間: 3日 → 2日に短縮
+- 削除タスク: T042(executeTool実装), T043(結果パース), T044(実行状態表示) - すべて実行機能関連
+- 変更タスク: T039(シリアライズ → エクスポート), T040(デシリアライズ → 国際化)
+- 新規タスク: T041(検証拡張), T041.5(統合テスト)
+
+**ストーリーゴール**: MCPノードを含むワークフローをエクスポートして実行可能にする
+
+**背景説明**:
+このプロジェクトはワークフロー編集に特化しており、実行機能は持たない。
+ワークフローはSlash Command形式でエクスポートされ、Claude Code CLIが実行する。
+したがって、MCPノードの"実行"とは「エクスポート時に適切な実行指示を生成すること」を意味する。
 
 **独立テスト基準**:
-- MCPノードがワークフローJSONに正しくシリアライズされる
-- ワークフロー実行時にMCPツールが呼び出される
-- 実行結果がコンソールに表示される
+- MCPノードがワークフローJSONに正しく保存・読み込みされる
+- MCPノードがSlash Commandファイルに正しくエクスポートされる
+- エクスポートされたファイルでMCPツールが実行可能(Claude Code CLI経由)
+- バリデーションが正しく動作する
 
-- [ ] T039 [US3] MCPノードのシリアライズ処理を実装 in src/extension/utils/workflow-serializer.ts
-- [ ] T040 [US3] MCPノードのデシリアライズ処理を実装 in src/extension/utils/workflow-deserializer.ts
-- [ ] T041 [US3] ワークフロー実行時のMCPノード処理を実装 in src/extension/services/workflow-executor.ts
-- [ ] T042 [US3] executeTool()メソッドを実装（claude mcp run実行） in src/extension/services/mcp-cli-service.ts
-- [ ] T043 [US3] MCP実行結果のパース処理を実装 in src/extension/utils/mcp-result-parser.ts
-- [ ] T044 [US3] MCPノードの実行状態表示を実装 in src/webview/src/components/nodes/McpNode/McpNodeStatus.tsx
-- [ ] T045 [US3] ワークフロー保存時のMCPノード検証を実装 in src/extension/utils/validate-mcp-workflow.ts
-- [ ] T045.5 [E2E] ワークフロー実行テスト - MCPノード含むワークフロー実行の疎通確認
+- [ ] T039 [US3] MCPノードのエクスポート処理を実装 in src/extension/services/export-service.ts
+  - generateMermaidFlowchart()にMCPノードのサポート追加
+  - generateWorkflowExecutionLogic()にMCPノード実行指示追加
+  - checkExistingFiles()は修正不要(MCPノード独自ファイル不要)
+- [ ] T040 [US3] MCPノードの国際化対応を実装 in src/extension/i18n/translations/*.ts
+  - Mermaidフローチャート用ラベル追加
+  - 実行ガイド用テキスト追加(5言語: en, ja, ko, zh-CN, zh-TW)
+- [ ] T041 [US3] ワークフロー保存時のMCPノード検証を拡張 in src/extension/utils/validate-workflow.ts
+  - MCPノードの検証ルール確認・必要に応じて強化
+  - エラーメッセージの国際化確認
+- [ ] T041.5 [E2E] ワークフロー統合テスト - MCPノード含むワークフローの疎通確認
   - MCPノード含むワークフローの保存・読み込み
-  - ワークフロー実行時のMCPツール呼び出し
-  - 実行結果の表示
-  - エラー時の挙動確認(ツール実行失敗、タイムアウト等)
+  - ワークフローのエクスポート
+  - エクスポートされたSlash Commandファイルの内容確認
+  - バリデーションエラーの表示確認
+  - 国際化対応確認(5言語)
 
-## Phase 6: 仕上げと横断的関心事 (Polish & Cross-Cutting) - 2日
+## Phase 6: 仕上げと横断的関心事 (Polish & Cross-Cutting) - 1日
 
-最終統合、ドキュメント化、エラーハンドリング
+最終統合、ドキュメント化、スタイリング
 
-- [ ] T046 [P] MCPノードのアイコンとスタイリングを実装 in src/webview/src/components/nodes/McpNode/McpNode.css
-- [ ] T047 [P] MCPエラーメッセージの国際化対応を追加 in src/webview/src/i18n/locales/*/mcp.json
-- [ ] T048 エラーハンドリングとリトライ機構を実装 in src/extension/services/mcp-cli-service.ts
-- [ ] T049 MCPノードのツールチップとヘルプテキストを実装 in src/webview/src/components/nodes/McpNode/McpNodeHelp.tsx
-- [ ] T050 MCP実行ログをVSCode Output Channelに出力 in src/extension/services/mcp-logger.ts
-- [ ] T051 ワークフローテンプレートにMCPノード例を追加 in resources/workflow-templates/mcp-example.json
-- [ ] T052 README.mdにMCPノード機能の説明を追加 in README.md
-- [ ] T053 CHANGELOG.mdにMCPノード機能を記載 in CHANGELOG.md
-- [ ] T053.5 [E2E] 総合テスト - 全機能の統合疎通確認
-  - 全機能の統合動作確認(MVP + パラメータ設定 + ワークフロー実行)
+- [ ] T042 [P] MCPノードのアイコンとスタイリングを改善 in src/webview/src/components/nodes/McpNode.tsx
+  - 現在のスタイリングを確認・必要に応じて改善
+  - アイコンの視認性向上
+- [ ] T043 README.mdにMCPノード機能の説明を追加 in README.md
+  - MCPノードの概要説明
+  - 使用方法(検索・選択・パラメータ設定・エクスポート)
+  - スクリーンショット(オプション)
+- [ ] T044 CHANGELOG.mdにMCPノード機能を記載 in CHANGELOG.md
+  - バージョン番号を確認
+  - 新機能としてMCPノード追加を記載
+- [ ] T044.5 [E2E] 総合テスト - 全機能の統合疎通確認
+  - 全機能の統合動作確認(MVP + パラメータ設定 + エクスポート)
   - 国際化対応確認(5言語: en, ja, ko, zh-CN, zh-TW)
   - パフォーマンス確認(キャッシュ動作、CLI呼び出し時間)
   - エラーハンドリング網羅確認
   - ドキュメント整合性確認(README, CHANGELOG)
   - リリース前最終チェック
+
+**削除されたタスク** (Phase 5再計画により不要):
+- T050 MCP実行ログ出力 → エクスポート時のログは不要
+- T051 ワークフローテンプレート → 基本機能実装後に検討
 
 ## 依存関係 (Dependencies)
 
@@ -184,12 +212,12 @@ graph TD
 - シンプルなMCPノード作成
 - 最小限のUI実装
 
-**段階的デリバリー**:
-1. **Week 1**: Setup + Foundation (T001-T017)
-2. **Week 2**: US1実装でMVP完成 (T018-T027)
-3. **Week 3**: US2実装でパラメータ設定追加 (T028-T038)
-4. **Week 4**: US3実装でワークフロー統合 (T039-T045)
-5. **Week 5**: Polish & 最終調整 (T046-T053)
+**段階的デリバリー** (Phase 5再計画後):
+1. ✅ **Week 1**: Setup + Foundation (T001-T017) - 完了
+2. ✅ **Week 2**: US1実装でMVP完成 (T018-T027) - 完了
+3. ✅ **Week 3**: US2実装でパラメータ設定追加 (T028-T038) - 完了
+4. **Week 4**: US3実装でワークフロー統合 (T039-T041) - 2日
+5. **Week 5**: Polish & 最終調整 (T042-T044) - 1日
 
 ### リスク軽減策
 
@@ -199,18 +227,19 @@ graph TD
 
 ### 成功指標
 
-- [ ] MVPリリース: Phase 3完了時点 (T027.5 E2Eテスト合格)
-- [ ] フル機能リリース: Phase 5完了時点 (T045.5 E2Eテスト合格)
-- [ ] ユーザー満足度: Phase 6のPolish完了後 (T053.5 総合テスト合格)
+- [x] MVPリリース: Phase 3完了時点 (T027.5 E2Eテスト合格) ✅
+- [x] パラメータ設定リリース: Phase 4完了時点 (T038.5 E2Eテスト合格) ✅
+- [ ] フル機能リリース: Phase 5完了時点 (T041.5 E2Eテスト合格)
+- [ ] ユーザー満足度: Phase 6のPolish完了後 (T044.5 総合テスト合格)
 
 ### E2Eテストタイミング
 
 機能追加の疎通確認を確実に行うため、各Phase完了時に手動E2Eテストを実施:
 
-1. **T027.5**: MVP機能テスト (Phase 3完了後)
-2. **T038.5**: パラメータ設定機能テスト (Phase 4完了後)
-3. **T045.5**: ワークフロー実行テスト (Phase 5完了後)
-4. **T053.5**: 総合テスト (Phase 6完了後、リリース前)
+1. ✅ **T027.5**: MVP機能テスト (Phase 3完了後) - 完了
+2. ✅ **T038.5**: パラメータ設定機能テスト (Phase 4完了後) - 完了
+3. **T041.5**: ワークフロー統合テスト (Phase 5完了後) - エクスポート機能確認
+4. **T044.5**: 総合テスト (Phase 6完了後、リリース前) - 全機能確認
 
 ---
 
