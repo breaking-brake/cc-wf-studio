@@ -92,7 +92,7 @@
 - [x] T036 [US2] オブジェクト型パラメータ入力コンポーネントを実装 in src/webview/src/components/mcp/parameters/ObjectParameter.tsx
 - [x] T037 [US2] パラメータバリデーション機能を実装 in src/webview/src/utils/parameter-validator.ts
 - [x] T038 [US2] MCPノード編集ダイアログを実装 in src/webview/src/components/dialogs/McpNodeEditDialog.tsx
-- [ ] T038.5 [E2E] パラメータ設定機能テスト - 動的フォーム生成・バリデーションの疎通確認
+- [x] T038.5 [E2E] パラメータ設定機能テスト - 動的フォーム生成・バリデーションの疎通確認
   - ツールスキーマの取得
   - 各型パラメータの入力UI表示(string, number, boolean, array, object)
   - パラメータバリデーション

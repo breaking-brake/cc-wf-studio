@@ -383,7 +383,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.error.noToolSelected': 'ツールを選択してください',
 
   // MCP Property Panel
-  'property.nodeType.mcp': 'MCPツールノード',
+  'property.nodeType.mcp': 'MCP Tool',
   'property.mcp.serverId': 'サーバー',
   'property.mcp.toolName': 'ツール名',
   'property.mcp.toolDescription': '説明',

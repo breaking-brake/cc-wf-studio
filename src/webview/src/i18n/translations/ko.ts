@@ -382,7 +382,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.error.noToolSelected': '도구를 선택하세요',
 
   // MCP Property Panel
-  'property.nodeType.mcp': 'MCP 도구 노드',
+  'property.nodeType.mcp': 'MCP Tool',
   'property.mcp.serverId': '서버',
   'property.mcp.toolName': '도구 이름',
   'property.mcp.toolDescription': '설명',

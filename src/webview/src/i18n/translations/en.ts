@@ -385,7 +385,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.error.noToolSelected': 'Please select a tool',
 
   // MCP Property Panel
-  'property.nodeType.mcp': 'MCP Tool Node',
+  'property.nodeType.mcp': 'MCP Tool',
   'property.mcp.serverId': 'Server',
   'property.mcp.toolName': 'Tool Name',
   'property.mcp.toolDescription': 'Description',

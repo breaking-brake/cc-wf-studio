@@ -366,7 +366,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.error.noToolSelected': '请选择工具',
 
   // MCP Property Panel
-  'property.nodeType.mcp': 'MCP工具节点',
+  'property.nodeType.mcp': 'MCP Tool',
   'property.mcp.serverId': '服务器',
   'property.mcp.toolName': '工具名称',
   'property.mcp.toolDescription': '描述',
