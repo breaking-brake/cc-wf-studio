@@ -139,7 +139,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
           padding: '24px',
           maxWidth: '800px',
           width: '90%',
-          maxHeight: '80vh',
+          maxHeight: '90vh',
           overflow: 'auto',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -189,7 +189,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
             >
               {t('mcp.dialog.selectServer')}
             </h3>
-            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
               <McpServerList
                 onServerSelect={(server) => {
                   setSelectedServer(server);
@@ -222,7 +222,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
                   onChange={setSearchQuery}
                   disabled={!selectedServer}
                 />
-                <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
                   <McpToolList
                     serverId={selectedServer.id}
                     onToolSelect={(tool) => {
