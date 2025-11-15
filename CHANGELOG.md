@@ -1,9 +1,3 @@
-## [2.1.1](https://github.com/breaking-brake/cc-wf-studio/compare/v2.1.0...v2.1.1) (2025-11-15)
-
-### Bug Fixes
-
-* build and package vsix with correct version after semantic-release ([0ce6ca4](https://github.com/breaking-brake/cc-wf-studio/commit/0ce6ca4e39e7c8853fa969ac0ba71af545bc0661))
-
 ## [2.1.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.0.2...v2.1.0) (2025-11-15)
 
 ### Features
