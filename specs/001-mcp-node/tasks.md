@@ -22,14 +22,14 @@
 
 プロジェクトの基盤構造とビルド環境の準備
 
-- [ ] T001 [P] 機能ブランチ feature/001-mcp-node を作成
-- [ ] T002 [P] 型定義ファイル src/types/mcp-node.ts を作成
-- [ ] T003 [P] MCPノード用ディレクトリ src/extension/nodes/mcp/ を作成
-- [ ] T004 [P] Webview用MCPコンポーネントディレクトリ src/webview/src/components/nodes/McpNode/ を作成
-- [ ] T005 package.json に child_process 型定義を追加（既存の場合はスキップ）
-- [ ] T006 contracts/mcp-cli.schema.json をプロジェクトに配置
-- [ ] T007 contracts/workflow-mcp-node.schema.json をプロジェクトに配置
-- [ ] T008 contracts/extension-webview-messages.schema.json をプロジェクトに配置
+- [x] T001 [P] 機能ブランチ feature/001-mcp-node を作成
+- [x] T002 [P] 型定義ファイル src/types/mcp-node.ts を作成
+- [x] T003 [P] MCPノード用ディレクトリ src/extension/nodes/mcp/ を作成
+- [x] T004 [P] Webview用MCPコンポーネントディレクトリ src/webview/src/components/nodes/McpNode/ を作成
+- [x] T005 package.json に child_process 型定義を追加（既存の場合はスキップ）
+- [x] T006 contracts/mcp-cli.schema.json をプロジェクトに配置
+- [x] T007 contracts/workflow-mcp-node.schema.json をプロジェクトに配置
+- [x] T008 contracts/extension-webview-messages.schema.json をプロジェクトに配置
 
 ## Phase 2: 基盤実装 (Foundational) - 3日
 
