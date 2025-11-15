@@ -175,7 +175,8 @@ ${schemaJSON}
 }
 
 /**
- * Maximum timeout for workflow refinement (90 seconds)
+ * Default timeout for workflow refinement (90 seconds)
+ * Can be overridden by user configuration (cc-wf-studio.aiRefinement.timeout)
  * Aligned with AI generation timeout for consistency
  */
 const MAX_REFINEMENT_TIMEOUT_MS = 90000;
@@ -188,7 +189,7 @@ const MAX_REFINEMENT_TIMEOUT_MS = 90000;
  * @param userMessage - User's current refinement request
  * @param extensionPath - VSCode extension path for schema loading
  * @param useSkills - Whether to include skills in refinement (default: true)
- * @param timeoutMs - Timeout in milliseconds (default: 90000)
+ * @param timeoutMs - Timeout in milliseconds (default: 90000, can be configured via settings)
  * @param requestId - Optional request ID for cancellation support
  * @param workspaceRoot - The workspace root path for CLI execution
  * @returns Refinement result with success status and refined workflow or error

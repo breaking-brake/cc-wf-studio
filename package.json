@@ -44,6 +44,18 @@
           "group": "navigation"
         }
       ]
+    },
+    "configuration": {
+      "title": "Claude Code Workflow Studio",
+      "properties": {
+        "cc-wf-studio.aiRefinement.timeout": {
+          "type": "number",
+          "default": 90,
+          "minimum": 30,
+          "maximum": 300,
+          "description": "Timeout in seconds for AI workflow refinement requests (30-300 seconds)"
+        }
+      }
     }
   },
   "scripts": {
@@ -66,10 +78,14 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.4",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@types/node": "^24.10.0",
     "@types/vscode": "^1.80.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.3.8",
+    "conventional-changelog-conventionalcommits": "^8.0.0",
+    "semantic-release": "^24.2.0",
     "typescript": "^5.3.0"
   }
 }
