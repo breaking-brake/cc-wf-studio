@@ -1,0 +1,360 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Claude Code CLI MCP Command Contracts",
+  "description": "Contract definition for MCP-related Claude Code CLI commands and their outputs",
+  "type": "object",
+  "properties": {
+    "commands": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/McpListCommand"
+          },
+          {
+            "$ref": "#/definitions/McpGetCommand"
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "McpListCommand": {
+      "title": "claude mcp list",
+      "description": "Lists all configured MCP servers with their connection status",
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string",
+          "const": "claude mcp list"
+        },
+        "input": {
+          "type": "object",
+          "description": "Command has no parameters"
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "format": {
+              "type": "string",
+              "const": "text"
+            },
+            "rawText": {
+              "type": "string",
+              "description": "Raw CLI output (text format)"
+            },
+            "exampleOutput": {
+              "type": "string",
+              "const": "Checking MCP server health...\n\naws-knowledge-mcp: npx mcp-remote https://knowledge-mcp.global.api.aws - ✓ Connected\n"
+            },
+            "parsed": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/McpServerListEntry"
+              },
+              "description": "Parsed server list entries"
+            }
+          },
+          "required": ["format", "parsed"]
+        },
+        "exitCode": {
+          "type": "integer",
+          "enum": [0],
+          "description": "0 = success (always succeeds, even if no servers)"
+        },
+        "errorHandling": {
+          "type": "object",
+          "description": "Error conditions",
+          "properties": {
+            "CLI_NOT_FOUND": {
+              "type": "object",
+              "properties": {
+                "condition": "claude command not in PATH",
+                "exitCode": "ENOENT",
+                "handling": "Caught as process error, not CLI exit code"
+              }
+            }
+          }
+        }
+      },
+      "required": ["command", "output"]
+    },
+    "McpGetCommand": {
+      "title": "claude mcp get <server-name>",
+      "description": "Gets detailed information about a specific MCP server",
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string",
+          "const": "claude mcp get <server-name>"
+        },
+        "input": {
+          "type": "object",
+          "properties": {
+            "serverName": {
+              "type": "string",
+              "description": "Name of the MCP server from 'claude mcp list' output",
+              "example": "aws-knowledge-mcp"
+            }
+          },
+          "required": ["serverName"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "format": {
+              "type": "string",
+              "const": "text"
+            },
+            "rawText": {
+              "type": "string",
+              "description": "Raw CLI output (text format with key-value pairs)"
+            },
+            "exampleOutput": {
+              "type": "string",
+              "const": "aws-knowledge-mcp:\n  Scope: User config (available in all your projects)\n  Status: ✓ Connected\n  Type: stdio\n  Command: npx\n  Args: mcp-remote https://knowledge-mcp.global.api.aws\n  Environment:\n\nTo remove this server, run: claude mcp remove \"aws-knowledge-mcp\" -s user\n"
+            },
+            "parsed": {
+              "$ref": "#/definitions/McpServerDetail",
+              "description": "Parsed server details"
+            }
+          },
+          "required": ["format", "parsed"]
+        },
+        "exitCode": {
+          "type": "integer",
+          "enum": [0, 1],
+          "description": "0 = success, 1 = server not found or error"
+        },
+        "errorHandling": {
+          "type": "object",
+          "description": "Error conditions",
+          "properties": {
+            "SERVER_NOT_FOUND": {
+              "type": "object",
+              "properties": {
+                "condition": "Server name does not exist",
+                "exitCode": 1,
+                "stderrPattern": "No MCP server found with name:",
+                "example": "No MCP server found with name: nonexistent-server"
+              }
+            },
+            "CONNECTION_FAILED": {
+              "type": "object",
+              "properties": {
+                "condition": "Server configured but not running/accessible",
+                "exitCode": 1,
+                "statusIndicator": "Connection timeout (no ✓ check mark)",
+                "handling": "Detected from parsed status field"
+              }
+            },
+            "CLI_NOT_FOUND": {
+              "type": "object",
+              "properties": {
+                "condition": "claude command not in PATH",
+                "exitCode": "ENOENT",
+                "handling": "Caught as process error"
+              }
+            }
+          }
+        }
+      },
+      "required": ["command", "input", "output"]
+    },
+    "McpServerListEntry": {
+      "title": "McpServerListEntry",
+      "description": "Parsed entry from 'claude mcp list' output",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Server identifier (from list output)",
+          "example": "aws-knowledge-mcp"
+        },
+        "command": {
+          "type": "string",
+          "description": "Executable command",
+          "example": "npx"
+        },
+        "args": {
+          "type": "string",
+          "description": "Command arguments as single string",
+          "example": "mcp-remote https://knowledge-mcp.global.api.aws"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["connected", "disconnected"],
+          "description": "Connection status (from ✓ check mark presence)"
+        }
+      },
+      "required": ["name", "command", "args", "status"]
+    },
+    "McpServerDetail": {
+      "title": "McpServerDetail",
+      "description": "Parsed output from 'claude mcp get <server-name>'",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Server identifier",
+          "example": "aws-knowledge-mcp"
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["user", "project", "enterprise"],
+          "description": "Configuration scope (extracted from 'User config', 'Project config', etc.)",
+          "example": "user"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["connected", "disconnected"],
+          "description": "Connection status"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["stdio", "sse", "http"],
+          "description": "MCP transport type",
+          "example": "stdio"
+        },
+        "command": {
+          "type": "string",
+          "description": "Executable command",
+          "example": "npx"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Command arguments as array",
+          "example": ["mcp-remote", "https://knowledge-mcp.global.api.aws"]
+        },
+        "environment": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Environment variables (optional, may be empty)",
+          "example": {}
+        },
+        "removeCommand": {
+          "type": "string",
+          "description": "Suggested command to remove the server (for reference only)",
+          "example": "claude mcp remove \"aws-knowledge-mcp\" -s user"
+        }
+      },
+      "required": ["name", "scope", "status", "type", "command", "args"]
+    }
+  },
+  "parsingRules": {
+    "McpListOutput": {
+      "description": "How to parse 'claude mcp list' text output",
+      "steps": [
+        "Skip empty lines and 'Checking MCP server health...' header",
+        "For each non-empty line, apply regex: /^([^:]+):\\s+(.+?)\\s+-\\s+(.*)$/",
+        "Groups: (1) server name, (2) command+args, (3) status",
+        "Parse command+args by splitting on whitespace: first token = command, rest = args",
+        "Detect connection status from ✓ check mark presence in group (3)"
+      ]
+    },
+    "McpGetOutput": {
+      "description": "How to parse 'claude mcp get' text output",
+      "steps": [
+        "First non-indented line (before ':') is server name",
+        "For each indented line (2+ spaces), split on first ':'",
+        "Key (first part trimmed) and Value (second part trimmed)",
+        "Special handling for 'Scope' key: extract scope from parenthetical note",
+        "Special handling for 'Args' key: split on whitespace into array",
+        "Ignore 'To remove this server...' line",
+        "Detect status from ✓ check mark in 'Status' value"
+      ]
+    }
+  },
+  "examples": {
+    "successfulList": {
+      "command": "claude mcp list",
+      "exitCode": 0,
+      "stdout": "Checking MCP server health...\n\naws-knowledge-mcp: npx mcp-remote https://knowledge-mcp.global.api.aws - ✓ Connected\nlocal-tools: npx mcp-local /path/to/tools - ✗ Connection timeout\n",
+      "parsed": [
+        {
+          "name": "aws-knowledge-mcp",
+          "command": "npx",
+          "args": "mcp-remote https://knowledge-mcp.global.api.aws",
+          "status": "connected"
+        },
+        {
+          "name": "local-tools",
+          "command": "npx",
+          "args": "mcp-local /path/to/tools",
+          "status": "disconnected"
+        }
+      ]
+    },
+    "emptyList": {
+      "command": "claude mcp list",
+      "exitCode": 0,
+      "stdout": "Checking MCP server health...\n",
+      "parsed": [],
+      "note": "No servers configured (still succeeds)"
+    },
+    "successfulGet": {
+      "command": "claude mcp get aws-knowledge-mcp",
+      "exitCode": 0,
+      "stdout": "aws-knowledge-mcp:\n  Scope: User config (available in all your projects)\n  Status: ✓ Connected\n  Type: stdio\n  Command: npx\n  Args: mcp-remote https://knowledge-mcp.global.api.aws\n  Environment:\n\nTo remove this server, run: claude mcp remove \"aws-knowledge-mcp\" -s user\n",
+      "parsed": {
+        "name": "aws-knowledge-mcp",
+        "scope": "user",
+        "status": "connected",
+        "type": "stdio",
+        "command": "npx",
+        "args": ["mcp-remote", "https://knowledge-mcp.global.api.aws"],
+        "environment": {},
+        "removeCommand": "claude mcp remove \"aws-knowledge-mcp\" -s user"
+      }
+    },
+    "serverNotFound": {
+      "command": "claude mcp get nonexistent",
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "No MCP server found with name: nonexistent\n",
+      "errorCode": "SERVER_NOT_FOUND",
+      "handling": "Detect from exitCode=1 and stderr pattern"
+    },
+    "serverDisconnected": {
+      "command": "claude mcp get local-tools",
+      "exitCode": 0,
+      "stdout": "local-tools:\n  Scope: Project config (only available in this project)\n  Status: Connection timeout\n  Type: stdio\n  Command: npx\n  Args: mcp-local /path/to/tools\n  Environment:\n",
+      "parsed": {
+        "status": "disconnected"
+      },
+      "note": "No ✓ check mark indicates disconnected status"
+    }
+  },
+  "implementation": {
+    "timeout": {
+      "description": "MCP CLI command timeout",
+      "value": "5000 ms",
+      "rationale": "MCP servers may be slow or unreliable; 5 second timeout prevents UI hangs"
+    },
+    "errorCodes": {
+      "description": "Extension-defined error codes for i18n and error handling",
+      "codes": {
+        "MCP_CLI_NOT_FOUND": "Claude Code CLI is not installed or not in PATH",
+        "MCP_CLI_TIMEOUT": "MCP server query timed out",
+        "MCP_SERVER_NOT_FOUND": "MCP server is not configured",
+        "MCP_CONNECTION_FAILED": "Cannot connect to MCP server",
+        "MCP_PARSE_ERROR": "Failed to parse MCP server output"
+      }
+    },
+    "retryPolicy": {
+      "description": "When to retry failed MCP commands",
+      "policy": "No automatic retry; user must click 'Refresh' to retry",
+      "rationale": "MCP servers may be temporarily unavailable; user should decide whether to retry"
+    },
+    "caching": {
+      "description": "Caching strategy for MCP server list",
+      "strategy": "No caching; always fetch fresh data from CLI",
+      "rationale": "Users may add/remove servers in Claude Code settings; caching would hide changes"
+    }
+  }
+}
