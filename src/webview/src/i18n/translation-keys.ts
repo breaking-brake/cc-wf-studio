@@ -272,6 +272,11 @@ export interface WebviewTranslationKeys {
   'refinement.chat.clearButton': string;
   'refinement.chat.clearButton.tooltip': string;
   'refinement.chat.useSkillsCheckbox': string;
+
+  // Timeout selector
+  'refinement.timeout.label': string;
+  'refinement.timeout.ariaLabel': string;
+
   'refinement.chat.claudeMdTip': string;
   'refinement.chat.refining': string;
   'refinement.chat.progressTime': string;

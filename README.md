@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  <em>✨ AI Refinement #1: "Create a workflow that sends a greeting prompt" – Build workflows from scratch with AI</em>
+  <em>✨ AI Refinement (1): "Create a workflow that sends a greeting prompt" – Build workflows from scratch with AI</em>
 </p>
 
 ---
@@ -34,7 +34,7 @@
 </p>
 
 <p align="center">
-  <em>✨ AI Refinement #2: "Can you modify it to change the greeting based on the current time?" – Refine iteratively through conversation</em>
+  <em>✨ AI Refinement (2): "Can you modify it to change the greeting based on the current time?" – Refine iteratively through conversation</em>
 </p>
 
 ---
@@ -200,7 +200,7 @@ Change the AskUserQuestion node to have 3 options instead of 2: High, Medium, Lo
 ### Limitations
 
 - Maximum 50 nodes per workflow
-- AI processing timeout (default 90 seconds, configurable 30-300 seconds in settings)
+- AI processing timeout (default 90 seconds, configurable via UI selector: 30s-5min)
 - Request limited to 2000 characters
 - Conversation history stored only during active session
 - Requires active Claude Code CLI installation

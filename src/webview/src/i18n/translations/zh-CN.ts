@@ -289,6 +289,11 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.clearButton': '清除对话',
   'refinement.chat.clearButton.tooltip': '清除对话历史记录并重新开始',
   'refinement.chat.useSkillsCheckbox': '包含Skill',
+
+  // Timeout selector
+  'refinement.timeout.label': '超时',
+  'refinement.timeout.ariaLabel': '选择AI优化超时时间',
+
   'refinement.chat.claudeMdTip':
     '💡 提示：在 CLAUDE.md 中添加工作流特定的规则和约束，AI可以进行更准确的编辑',
   'refinement.chat.refining': 'AI正在优化工作流... 最多可能需要120秒。',
@@ -310,7 +315,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'refinement.error.emptyMessage': '请输入消息',
   'refinement.error.messageTooLong': '消息太长（最多{max}个字符）',
   'refinement.error.commandNotFound': '未找到Claude Code CLI。请安装Claude Code以使用AI优化功能。',
-  'refinement.error.timeout': 'AI优化超时。请重试或简化您的请求。',
+  'refinement.error.timeout': 'AI优化超时。请调整超时设定值后重试。建议您也可以考虑简化请求内容。',
   'refinement.error.parseError': '无法解析AI响应。请重试或重新表述您的请求。',
   'refinement.error.validationError': '优化后的工作流验证失败。请尝试不同的请求。',
   'refinement.error.iterationLimitReached':

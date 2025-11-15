@@ -20,11 +20,13 @@ interface RefinementStore {
   currentInput: string;
   currentRequestId: string | null;
   useSkills: boolean;
+  timeoutSeconds: number;
 
   // Actions
   openChat: () => void;
   closeChat: () => void;
   toggleUseSkills: () => void;
+  setTimeoutSeconds: (seconds: number) => void;
   initConversation: () => void;
   loadConversationHistory: (history: ConversationHistory | undefined) => void;
   setInput: (input: string) => void;
@@ -77,6 +79,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   currentInput: '',
   currentRequestId: null,
   useSkills: true,
+  timeoutSeconds: 90, // Default timeout: 90 seconds (matches VSCode settings default)
 
   // Actions
   openChat: () => {
@@ -89,6 +92,10 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
 
   toggleUseSkills: () => {
     set({ useSkills: !get().useSkills });
+  },
+
+  setTimeoutSeconds: (seconds: number) => {
+    set({ timeoutSeconds: seconds });
   },
 
   initConversation: () => {
