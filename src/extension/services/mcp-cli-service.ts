@@ -6,11 +6,7 @@
  */
 
 import { spawn } from 'node:child_process';
-import type {
-  McpServerReference,
-  McpToolReference,
-  ToolParameter,
-} from '../../shared/types/mcp-node';
+import type { McpServerReference, McpToolReference } from '../../shared/types/mcp-node';
 import { log } from '../extension';
 
 /**
@@ -22,7 +18,11 @@ export type McpErrorCode =
   | 'MCP_SERVER_NOT_FOUND'
   | 'MCP_CONNECTION_FAILED'
   | 'MCP_PARSE_ERROR'
-  | 'MCP_UNKNOWN_ERROR';
+  | 'MCP_UNKNOWN_ERROR'
+  | 'MCP_UNSUPPORTED_TRANSPORT'
+  | 'MCP_INVALID_CONFIG'
+  | 'MCP_CONNECTION_TIMEOUT'
+  | 'MCP_CONNECTION_ERROR';
 
 export interface McpExecutionError {
   code: McpErrorCode;
@@ -480,11 +480,8 @@ function parseMcpGetOutput(output: string, serverId: string): McpServerReference
 /**
  * List all tools available from a specific MCP server
  *
- * Executes: claude mcp list-tools <server-name>
- * Based on: contracts/mcp-cli.schema.json - McpListToolsCommand (T021)
- *
- * NOTE: The actual CLI command may vary. This implementation assumes
- * the command exists and returns a JSON list of tools.
+ * Uses @modelcontextprotocol/sdk to connect directly to MCP servers
+ * instead of using Claude Code CLI commands (which don't support tool listing).
  *
  * @param serverId - Server identifier
  * @returns List of available tools
@@ -492,94 +489,106 @@ function parseMcpGetOutput(output: string, serverId: string): McpServerReference
 export async function listTools(serverId: string): Promise<McpExecutionResult<McpToolReference[]>> {
   const startTime = Date.now();
 
-  const result = await executeClaudeMcpCommand(['mcp', 'list-tools', serverId]);
-  const executionTimeMs = Date.now() - startTime;
+  // Import MCP SDK services
+  const { getMcpServerConfig } = await import('./mcp-config-reader');
+  const { listToolsFromMcpServer } = await import('./mcp-sdk-client');
 
-  if (!result.success) {
-    // Check for ENOENT (command not found)
-    if (result.stderr.includes('ENOENT') || result.exitCode === null) {
-      return {
-        success: false,
-        error: {
-          code: 'MCP_CLI_NOT_FOUND',
-          message: 'Claude Code CLI is not installed or not in PATH',
-          details: result.stderr,
-        },
-        executionTimeMs,
-      };
-    }
+  // Get server configuration from .claude.json
+  const serverConfig = getMcpServerConfig(serverId);
 
-    // Check for server not found
-    if (result.exitCode === 1 && result.stderr.includes('No MCP server found')) {
-      return {
-        success: false,
-        error: {
-          code: 'MCP_SERVER_NOT_FOUND',
-          message: `MCP server '${serverId}' not found`,
-          details: result.stderr,
-        },
-        executionTimeMs,
-      };
-    }
-
-    // Check for timeout
-    if (result.stderr.includes('Timeout')) {
-      return {
-        success: false,
-        error: {
-          code: 'MCP_CLI_TIMEOUT',
-          message: 'MCP tool list query timed out',
-          details: result.stderr,
-        },
-        executionTimeMs,
-      };
-    }
-
-    log('ERROR', 'MCP list-tools command failed with unknown error', {
-      serverId,
-      exitCode: result.exitCode,
-      stderr: result.stderr,
-      stdout: result.stdout,
-    });
-
+  if (!serverConfig) {
     return {
       success: false,
       error: {
-        code: 'MCP_UNKNOWN_ERROR',
-        message: `Failed to list tools for MCP server '${serverId}'`,
-        details: result.stderr,
+        code: 'MCP_SERVER_NOT_FOUND',
+        message: `MCP server '${serverId}' not found in configuration`,
+        details: 'Check ~/.claude.json for available MCP servers',
       },
-      executionTimeMs,
+      executionTimeMs: Date.now() - startTime,
     };
   }
 
-  // Parse output
+  // Only stdio servers are supported for now
+  if (serverConfig.type !== 'stdio') {
+    return {
+      success: false,
+      error: {
+        code: 'MCP_UNSUPPORTED_TRANSPORT',
+        message: `MCP server '${serverId}' uses unsupported transport type: ${serverConfig.type}`,
+        details: 'Only stdio transport is currently supported',
+      },
+      executionTimeMs: Date.now() - startTime,
+    };
+  }
+
+  // Validate stdio configuration
+  if (!serverConfig.command || !serverConfig.args) {
+    return {
+      success: false,
+      error: {
+        code: 'MCP_INVALID_CONFIG',
+        message: `MCP server '${serverId}' has invalid stdio configuration`,
+        details: 'Missing command or args in server configuration',
+      },
+      executionTimeMs: Date.now() - startTime,
+    };
+  }
+
+  // Connect to MCP server and list tools
   try {
-    const tools = parseMcpListToolsOutput(result.stdout, serverId);
+    const tools = await listToolsFromMcpServer(
+      serverId,
+      serverConfig.command,
+      serverConfig.args,
+      serverConfig.env || {}
+    );
 
     log('INFO', 'Successfully listed MCP tools', {
       serverId,
       toolCount: tools.length,
-      executionTimeMs,
+      executionTimeMs: Date.now() - startTime,
     });
 
     return {
       success: true,
       data: tools,
-      executionTimeMs,
+      executionTimeMs: Date.now() - startTime,
     };
   } catch (error) {
-    log('ERROR', 'Failed to parse MCP list-tools output', {
+    const executionTimeMs = Date.now() - startTime;
+
+    // Check if it's a connection timeout
+    if (error instanceof Error && error.message.includes('timeout')) {
+      log('ERROR', 'MCP server connection timeout', {
+        serverId,
+        error: error.message,
+        executionTimeMs,
+      });
+
+      return {
+        success: false,
+        error: {
+          code: 'MCP_CONNECTION_TIMEOUT',
+          message: `Connection to MCP server '${serverId}' timed out`,
+          details: error.message,
+        },
+        executionTimeMs,
+      };
+    }
+
+    // General connection error
+    log('ERROR', 'Failed to connect to MCP server', {
       serverId,
       error: error instanceof Error ? error.message : String(error),
-      stdout: result.stdout.substring(0, 200),
+      stack: error instanceof Error ? error.stack : undefined,
+      executionTimeMs,
     });
 
     return {
       success: false,
       error: {
-        code: 'MCP_PARSE_ERROR',
-        message: 'Failed to parse MCP tool list',
+        code: 'MCP_CONNECTION_ERROR',
+        message: `Failed to connect to MCP server '${serverId}'`,
         details: error instanceof Error ? error.message : String(error),
       },
       executionTimeMs,
@@ -587,80 +596,7 @@ export async function listTools(serverId: string): Promise<McpExecutionResult<Mc
   }
 }
 
-/**
- * Parse 'claude mcp list-tools <server-name>' output
- *
- * Example output (expected JSON format):
- * ```json
- * [
- *   {
- *     "name": "list_regions",
- *     "description": "Retrieve a list of all AWS regions",
- *     "parameters": [
- *       {
- *         "name": "include_opt_in",
- *         "type": "boolean",
- *         "description": "Include opt-in regions",
- *         "required": false
- *       }
- *     ]
- *   }
- * ]
- * ```
- *
- * @param output - Raw output from 'claude mcp list-tools'
- * @param serverId - Server identifier
- * @returns Parsed tool list
- */
-function parseMcpListToolsOutput(output: string, serverId: string): McpToolReference[] {
-  // Try to parse as JSON first
-  try {
-    const jsonData = JSON.parse(output);
-
-    if (!Array.isArray(jsonData)) {
-      throw new Error('Expected JSON array of tools');
-    }
-
-    return jsonData.map(
-      (tool: { name?: string; description?: string; parameters?: unknown[] }) => ({
-        serverId,
-        name: tool.name || '',
-        description: tool.description || '',
-        parameters: (tool.parameters as ToolParameter[]) || [],
-      })
-    );
-  } catch (_jsonError) {
-    // Fallback: parse as plain text output
-    // Format: "tool_name - description"
-    const tools: McpToolReference[] = [];
-    const lines = output.split('\n');
-    const lineRegex = /^([^\s-]+)\s+-\s+(.+)$/;
-
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-
-      if (!trimmedLine || trimmedLine.startsWith('Available tools')) {
-        continue;
-      }
-
-      const match = lineRegex.exec(trimmedLine);
-      if (!match) {
-        continue;
-      }
-
-      const [, toolName, description] = match;
-
-      tools.push({
-        serverId,
-        name: toolName.trim(),
-        description: description.trim(),
-        parameters: [], // Will be populated by get-tool-schema later
-      });
-    }
-
-    return tools;
-  }
-}
+// parseMcpListToolsOutput function removed - now using MCP SDK directly
 
 /**
  * Get JSON schema for a specific tool's parameters

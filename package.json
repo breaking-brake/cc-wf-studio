@@ -87,5 +87,8 @@
     "conventional-changelog-conventionalcommits": "^8.0.0",
     "semantic-release": "^24.2.0",
     "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.22.0"
   }
 }

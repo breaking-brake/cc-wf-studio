@@ -341,7 +341,11 @@ export interface McpServersResultPayload {
       | 'MCP_SERVER_NOT_FOUND'
       | 'MCP_CONNECTION_FAILED'
       | 'MCP_PARSE_ERROR'
-      | 'MCP_UNKNOWN_ERROR';
+      | 'MCP_UNKNOWN_ERROR'
+      | 'MCP_UNSUPPORTED_TRANSPORT'
+      | 'MCP_INVALID_CONFIG'
+      | 'MCP_CONNECTION_TIMEOUT'
+      | 'MCP_CONNECTION_ERROR';
     message: string;
     details?: string;
   };
@@ -377,7 +381,11 @@ export interface McpToolsResultPayload {
       | 'MCP_SERVER_NOT_FOUND'
       | 'MCP_CONNECTION_FAILED'
       | 'MCP_PARSE_ERROR'
-      | 'MCP_UNKNOWN_ERROR';
+      | 'MCP_UNKNOWN_ERROR'
+      | 'MCP_UNSUPPORTED_TRANSPORT'
+      | 'MCP_INVALID_CONFIG'
+      | 'MCP_CONNECTION_TIMEOUT'
+      | 'MCP_CONNECTION_ERROR';
     message: string;
     details?: string;
   };
