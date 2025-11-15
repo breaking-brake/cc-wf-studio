@@ -81,9 +81,9 @@
 - 動的フォームが生成され、バリデーションが動作する
 - パラメータ値が保存・復元される
 
-- [ ] T028 [US2] MCP_GET_TOOL_SCHEMAメッセージハンドラを実装 in src/extension/commands/mcp-handlers.ts
-- [ ] T029 [US2] getToolSchema()メソッドを実装 in src/extension/services/mcp-cli-service.ts
-- [ ] T030 [US2] JSON Schemaパーサーを実装 in src/extension/utils/schema-parser.ts
+- [x] T028 [US2] MCP_GET_TOOL_SCHEMAメッセージハンドラを実装 in src/extension/commands/mcp-handlers.ts
+- [x] T029 [US2] getToolSchema()メソッドを実装 in src/extension/services/mcp-cli-service.ts
+- [x] T030 [US2] JSON Schemaパーサーを実装 in src/extension/utils/schema-parser.ts
 - [ ] T031 [US2] パラメータフォーム生成器を実装 in src/webview/src/components/mcp/ParameterFormGenerator.tsx
 - [ ] T032 [US2] 文字列型パラメータ入力コンポーネントを実装 in src/webview/src/components/mcp/parameters/StringParameter.tsx
 - [ ] T033 [US2] 数値型パラメータ入力コンポーネントを実装 in src/webview/src/components/mcp/parameters/NumberParameter.tsx

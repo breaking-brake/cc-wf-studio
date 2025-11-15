@@ -619,29 +619,156 @@ export async function listTools(
 /**
  * Get JSON schema for a specific tool's parameters
  *
- * NOTE: This is a placeholder - actual implementation depends on Claude Code CLI
- * supporting 'claude mcp get-tool-schema <server-name> <tool-name>' command.
+ * Uses MCP SDK to connect directly to the server and retrieve tool schema.
+ * This is more efficient than listing all tools when we only need one.
  *
  * @param serverId - Server identifier
  * @param toolName - Tool name
+ * @param workspacePath - Optional workspace path for project-scoped servers
  * @returns Tool parameter schema
  */
 export async function getToolSchema(
   serverId: string,
-  toolName: string
+  toolName: string,
+  workspacePath?: string
 ): Promise<McpExecutionResult<McpToolReference>> {
-  // TODO: Implement when 'claude mcp get-tool-schema' is available
-  log('WARN', 'getToolSchema() not yet implemented - placeholder', { serverId, toolName });
+  const startTime = Date.now();
 
-  return {
-    success: false,
-    error: {
-      code: 'MCP_UNKNOWN_ERROR',
-      message: 'Tool schema retrieval not yet implemented',
-      details: 'Waiting for Claude Code CLI support for retrieving tool schemas',
-    },
-    executionTimeMs: 0,
-  };
+  log('INFO', 'GET_TOOL_SCHEMA request started', {
+    serverId,
+    toolName,
+  });
+
+  // Import MCP SDK services
+  const { getMcpServerConfig } = await import('./mcp-config-reader');
+  const { listToolsFromMcpServer } = await import('./mcp-sdk-client');
+
+  // Get server configuration from .claude.json
+  const serverConfig = getMcpServerConfig(serverId, workspacePath);
+
+  if (!serverConfig) {
+    return {
+      success: false,
+      error: {
+        code: 'MCP_SERVER_NOT_FOUND',
+        message: `MCP server '${serverId}' not found in configuration`,
+        details: 'Check ~/.claude.json for available MCP servers',
+      },
+      executionTimeMs: Date.now() - startTime,
+    };
+  }
+
+  // Only stdio servers are supported for now
+  if (serverConfig.type !== 'stdio') {
+    return {
+      success: false,
+      error: {
+        code: 'MCP_UNSUPPORTED_TRANSPORT',
+        message: `MCP server '${serverId}' uses unsupported transport type: ${serverConfig.type}`,
+        details: 'Only stdio transport is currently supported',
+      },
+      executionTimeMs: Date.now() - startTime,
+    };
+  }
+
+  // Validate stdio configuration
+  if (!serverConfig.command || !serverConfig.args) {
+    return {
+      success: false,
+      error: {
+        code: 'MCP_INVALID_CONFIG',
+        message: `MCP server '${serverId}' has invalid stdio configuration`,
+        details: 'Missing command or args in server configuration',
+      },
+      executionTimeMs: Date.now() - startTime,
+    };
+  }
+
+  // Connect to MCP server and list tools
+  try {
+    const tools = await listToolsFromMcpServer(
+      serverId,
+      serverConfig.command,
+      serverConfig.args,
+      serverConfig.env || {}
+    );
+
+    // Find the specific tool
+    const tool = tools.find((t) => t.name === toolName);
+
+    if (!tool) {
+      log('ERROR', 'Tool not found in MCP server', {
+        serverId,
+        toolName,
+        availableTools: tools.map((t) => t.name),
+        executionTimeMs: Date.now() - startTime,
+      });
+
+      return {
+        success: false,
+        error: {
+          code: 'MCP_PARSE_ERROR',
+          message: `Tool '${toolName}' not found in server '${serverId}'`,
+          details: `Available tools: ${tools.map((t) => t.name).join(', ')}`,
+        },
+        executionTimeMs: Date.now() - startTime,
+      };
+    }
+
+    log('INFO', 'GET_TOOL_SCHEMA completed successfully', {
+      serverId,
+      toolName,
+      parameterCount: tool.parameters?.length || 0,
+      executionTimeMs: Date.now() - startTime,
+    });
+
+    return {
+      success: true,
+      data: tool,
+      executionTimeMs: Date.now() - startTime,
+    };
+  } catch (error) {
+    const executionTimeMs = Date.now() - startTime;
+
+    // Check if it's a connection timeout
+    if (error instanceof Error && error.message.includes('timeout')) {
+      log('ERROR', 'MCP server connection timeout', {
+        serverId,
+        toolName,
+        error: error.message,
+        executionTimeMs,
+      });
+
+      return {
+        success: false,
+        error: {
+          code: 'MCP_CONNECTION_TIMEOUT',
+          message: `Connection to MCP server '${serverId}' timed out`,
+          details: error.message,
+        },
+        executionTimeMs,
+      };
+    }
+
+    // General connection error
+    log('ERROR', 'Failed to connect to MCP server for tool schema', {
+      serverId,
+      toolName,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      executionTimeMs,
+    });
+
+    return {
+      success: false,
+      error: {
+        code: 'MCP_CONNECTION_ERROR',
+        message: `Failed to connect to MCP server '${serverId}'`,
+        details: error instanceof Error ? error.message : String(error),
+      },
+      executionTimeMs,
+    };
+  }
 }
 
 /**

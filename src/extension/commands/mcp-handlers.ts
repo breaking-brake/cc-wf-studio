@@ -10,9 +10,11 @@
 import * as vscode from 'vscode';
 import type {
   GetMcpToolsPayload,
+  GetMcpToolSchemaPayload,
   ListMcpServersPayload,
   McpServersResultPayload,
   McpToolsResultPayload,
+  McpToolSchemaResultPayload,
 } from '../../shared/types/messages';
 import { log } from '../extension';
 import {
@@ -21,7 +23,7 @@ import {
   setCachedServerList,
   setCachedTools,
 } from '../services/mcp-cache-service';
-import { listServers, listTools } from '../services/mcp-cli-service';
+import { getToolSchema, listServers, listTools } from '../services/mcp-cli-service';
 
 /**
  * Handle LIST_MCP_SERVERS request from Webview (T018)
@@ -293,6 +295,121 @@ export async function handleGetMcpTools(
 
     webview.postMessage({
       type: 'MCP_TOOLS_RESULT',
+      requestId,
+      payload: errorPayload,
+    });
+  }
+}
+
+/**
+ * Handle GET_MCP_TOOL_SCHEMA request from Webview (T028)
+ *
+ * Retrieves detailed schema for a specific MCP tool's parameters.
+ * Useful for dynamic form generation with validation.
+ *
+ * @param payload - Tool schema request payload
+ * @param webview - VSCode Webview instance
+ * @param requestId - Request ID for response matching
+ */
+export async function handleGetMcpToolSchema(
+  payload: GetMcpToolSchemaPayload,
+  webview: vscode.Webview,
+  requestId: string
+): Promise<void> {
+  const startTime = Date.now();
+
+  log('INFO', 'GET_MCP_TOOL_SCHEMA request started', {
+    requestId,
+    serverId: payload.serverId,
+    toolName: payload.toolName,
+  });
+
+  try {
+    // Get workspace folder for project-scoped MCP servers
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+
+    // Execute tool schema retrieval
+    const result = await getToolSchema(payload.serverId, payload.toolName, workspaceFolder);
+    const executionTimeMs = Date.now() - startTime;
+
+    if (!result.success || !result.data) {
+      log('ERROR', 'GET_MCP_TOOL_SCHEMA failed', {
+        requestId,
+        serverId: payload.serverId,
+        toolName: payload.toolName,
+        errorCode: result.error?.code,
+        errorMessage: result.error?.message,
+        errorDetails: result.error?.details,
+        executionTimeMs,
+      });
+
+      const errorPayload: McpToolSchemaResultPayload = {
+        success: false,
+        serverId: payload.serverId,
+        toolName: payload.toolName,
+        error: result.error,
+        timestamp: new Date().toISOString(),
+        executionTimeMs,
+      };
+
+      webview.postMessage({
+        type: 'MCP_TOOL_SCHEMA_RESULT',
+        requestId,
+        payload: errorPayload,
+      });
+      return;
+    }
+
+    // Success - return schema
+    log('INFO', 'GET_MCP_TOOL_SCHEMA completed successfully', {
+      requestId,
+      serverId: payload.serverId,
+      toolName: payload.toolName,
+      parameterCount: result.data.parameters?.length || 0,
+      executionTimeMs,
+    });
+
+    const successPayload: McpToolSchemaResultPayload = {
+      success: true,
+      serverId: payload.serverId,
+      toolName: payload.toolName,
+      schema: result.data,
+      timestamp: new Date().toISOString(),
+      executionTimeMs,
+    };
+
+    webview.postMessage({
+      type: 'MCP_TOOL_SCHEMA_RESULT',
+      requestId,
+      payload: successPayload,
+    });
+  } catch (error) {
+    const executionTimeMs = Date.now() - startTime;
+
+    log('ERROR', 'GET_MCP_TOOL_SCHEMA unexpected error', {
+      requestId,
+      serverId: payload.serverId,
+      toolName: payload.toolName,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      executionTimeMs,
+    });
+
+    const errorPayload: McpToolSchemaResultPayload = {
+      success: false,
+      serverId: payload.serverId,
+      toolName: payload.toolName,
+      error: {
+        code: 'MCP_UNKNOWN_ERROR',
+        message: error instanceof Error ? error.message : 'Unknown error occurred',
+        details: error instanceof Error ? error.stack : undefined,
+      },
+      timestamp: new Date().toISOString(),
+      executionTimeMs,
+    };
+
+    webview.postMessage({
+      type: 'MCP_TOOL_SCHEMA_RESULT',
       requestId,
       payload: errorPayload,
     });
