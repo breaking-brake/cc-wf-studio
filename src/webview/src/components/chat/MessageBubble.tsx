@@ -10,6 +10,7 @@
 import type { ConversationMessage } from '@shared/types/workflow-definition';
 import { useTranslation } from '../../i18n/i18n-context';
 import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
+import { useRefinementStore } from '../../stores/refinement-store';
 import { getErrorMessageInfo } from '../../utils/error-messages';
 import { ProgressBar } from './ProgressBar';
 
@@ -20,6 +21,7 @@ interface MessageBubbleProps {
 
 export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
   const { t } = useTranslation();
+  const { timeoutSeconds } = useRefinementStore();
   const isUser = message.sender === 'user';
   const isError = message.isError ?? false;
   const errorCode = message.errorCode;
@@ -122,7 +124,13 @@ export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
         )}
 
         {/* Loading state */}
-        {isLoading && <ProgressBar isProcessing={true} label={t('refinement.aiProcessing')} />}
+        {isLoading && (
+          <ProgressBar
+            isProcessing={true}
+            label={t('refinement.aiProcessing')}
+            maxSeconds={timeoutSeconds}
+          />
+        )}
 
         {/* Timestamp (hide when loading or error) */}
         {!isLoading && !isError && (

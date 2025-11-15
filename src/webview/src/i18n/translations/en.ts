@@ -300,6 +300,11 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.clearButton': 'Clear Conversation',
   'refinement.chat.clearButton.tooltip': 'Clear conversation history and start fresh',
   'refinement.chat.useSkillsCheckbox': 'Include Skills',
+
+  // Timeout selector
+  'refinement.timeout.label': 'Timeout',
+  'refinement.timeout.ariaLabel': 'Select AI refinement timeout duration',
+
   'refinement.chat.claudeMdTip':
     '💡 Tip: Add workflow-specific rules and constraints to CLAUDE.md for more accurate AI edits',
   'refinement.chat.refining': 'AI is refining workflow... This may take up to 120 seconds.',
@@ -324,7 +329,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'refinement.error.commandNotFound':
     'Claude Code CLI not found. Please install Claude Code to use AI refinement.',
   'refinement.error.timeout':
-    'AI refinement timed out. Please try again with a simpler request, or increase timeout.',
+    'AI refinement timed out. Please adjust the timeout value and try again. Simplifying the request is also recommended.',
   'refinement.error.parseError':
     'Failed to parse AI response. Please try again or rephrase your request.',
   'refinement.error.validationError':

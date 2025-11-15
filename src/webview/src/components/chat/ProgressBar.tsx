@@ -8,16 +8,16 @@
 
 import { useEffect, useState } from 'react';
 
-const MAX_PROCESSING_TIME_SECONDS = 90;
-
 interface ProgressBarProps {
   /** Show progress bar */
   isProcessing: boolean;
   /** Label text above progress bar (optional) */
   label?: string;
+  /** Maximum processing time in seconds (from timeout setting) */
+  maxSeconds: number;
 }
 
-export function ProgressBar({ isProcessing, label }: ProgressBarProps) {
+export function ProgressBar({ isProcessing, label, maxSeconds }: ProgressBarProps) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   // Progress timer - same logic as MessageInput
@@ -29,22 +29,22 @@ export function ProgressBar({ isProcessing, label }: ProgressBarProps) {
 
     const interval = setInterval(() => {
       setElapsedSeconds((prev) => {
-        if (prev >= MAX_PROCESSING_TIME_SECONDS) {
-          return MAX_PROCESSING_TIME_SECONDS;
+        if (prev >= maxSeconds) {
+          return maxSeconds;
         }
         return prev + 1;
       });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isProcessing]);
+  }, [isProcessing, maxSeconds]);
 
   if (!isProcessing) {
     return null;
   }
 
   // Calculate progress percentage with ease-out function (max 95%)
-  const normalizedTime = elapsedSeconds / MAX_PROCESSING_TIME_SECONDS;
+  const normalizedTime = elapsedSeconds / maxSeconds;
   const easedProgress = 1 - (1 - normalizedTime) ** 2;
   const progressPercentage = Math.min(Math.round(easedProgress * 95), 95);
 
@@ -101,7 +101,7 @@ export function ProgressBar({ isProcessing, label }: ProgressBarProps) {
       >
         <span>{progressPercentage}%</span>
         <span>
-          {elapsedSeconds}s / {MAX_PROCESSING_TIME_SECONDS}s
+          {elapsedSeconds}s / {maxSeconds}s
         </span>
       </div>
     </div>

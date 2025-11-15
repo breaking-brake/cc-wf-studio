@@ -200,7 +200,7 @@ Change the AskUserQuestion node to have 3 options instead of 2: High, Medium, Lo
 ### Limitations
 
 - Maximum 50 nodes per workflow
-- AI processing timeout (default 90 seconds, configurable 30-300 seconds in settings)
+- AI processing timeout (default 90 seconds, configurable via UI selector: 30s-5min)
 - Request limited to 2000 characters
 - Conversation history stored only during active session
 - Requires active Claude Code CLI installation

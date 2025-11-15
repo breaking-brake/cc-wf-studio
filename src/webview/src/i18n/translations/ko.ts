@@ -300,6 +300,11 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.clearButton': '대화 지우기',
   'refinement.chat.clearButton.tooltip': '대화 기록을 지우고 처음부터 시작합니다',
   'refinement.chat.useSkillsCheckbox': 'Skill 포함',
+
+  // Timeout selector
+  'refinement.timeout.label': '타임아웃',
+  'refinement.timeout.ariaLabel': 'AI 리파인먼트 타임아웃 시간 선택',
+
   'refinement.chat.claudeMdTip':
     '💡 팁: CLAUDE.md 에 워크플로별 규칙과 제약을 추가하면AI가 더 정확한 편집을 수행합니다',
   'refinement.chat.refining': 'AI가 워크플로를 개선하는 중... 최대 120초가 소요될 수 있습니다.',
@@ -323,7 +328,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.error.messageTooLong': '메시지가 너무 깁니다 (최대 {max}자)',
   'refinement.error.commandNotFound':
     'Claude Code CLI를 찾을 수 없습니다. AI 개선 기능을 사용하려면 Claude Code를 설치하세요.',
-  'refinement.error.timeout': 'AI 개선 시간이 초과되었습니다. 다시 시도하거나 요청을 단순화하세요.',
+  'refinement.error.timeout':
+    'AI 개선 시간이 초과되었습니다. 타임아웃 설정값을 조정하고 다시 시도해 보세요. 요청 내용을 단순화하는 것도 권장됩니다.',
   'refinement.error.parseError':
     'AI 응답 파싱에 실패했습니다. 다시 시도하거나 요청을 다시 표현하세요.',
   'refinement.error.validationError':

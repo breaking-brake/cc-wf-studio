@@ -48,6 +48,7 @@ export function RefinementChatPanel() {
     isProcessing,
     useSkills,
     toggleUseSkills,
+    timeoutSeconds,
   } = useRefinementStore();
   const { activeWorkflow, updateWorkflow } = useWorkflowStore();
   const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
@@ -107,7 +108,8 @@ export function RefinementChatPanel() {
         activeWorkflow,
         conversationHistory,
         requestId,
-        useSkills
+        useSkills,
+        timeoutSeconds * 1000 // Convert seconds to milliseconds
       );
 
       // Handle different result types
@@ -236,7 +238,8 @@ export function RefinementChatPanel() {
         activeWorkflow,
         conversationHistory,
         requestId,
-        useSkills
+        useSkills,
+        timeoutSeconds * 1000 // Convert seconds to milliseconds
       );
 
       // Handle different result types

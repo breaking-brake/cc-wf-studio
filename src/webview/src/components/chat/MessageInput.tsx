@@ -12,6 +12,7 @@ import { useId } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { cancelWorkflowRefinement } from '../../services/refinement-service';
 import { useRefinementStore } from '../../stores/refinement-store';
+import { TimeoutSelector } from './TimeoutSelector';
 
 const MAX_MESSAGE_LENGTH = 5000;
 const MIN_MESSAGE_LENGTH = 1;
@@ -90,13 +91,23 @@ export function MessageInput({ onSend }: MessageInputProps) {
       >
         <div
           style={{
-            fontSize: '12px',
-            color: isTooLong
-              ? 'var(--vscode-errorForeground)'
-              : 'var(--vscode-descriptionForeground)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
           }}
         >
-          {t('refinement.charactersRemaining', { count: remainingChars })}
+          <div
+            style={{
+              fontSize: '12px',
+              color: isTooLong
+                ? 'var(--vscode-errorForeground)'
+                : 'var(--vscode-descriptionForeground)',
+            }}
+          >
+            {t('refinement.charactersRemaining', { count: remainingChars })}
+          </div>
+
+          <TimeoutSelector />
         </div>
 
         {isProcessing ? (
