@@ -54,17 +54,17 @@
 - ツール検索・フィルタリングが動作する
 - 選択したツールでMCPノードが作成される
 
-- [ ] T018 [US1] MCP_LIST_SERVERSメッセージハンドラを実装 in src/extension/commands/mcp-handlers.ts
-- [ ] T019 [US1] MCP_LIST_TOOLSメッセージハンドラを実装 in src/extension/commands/mcp-handlers.ts
-- [ ] T020 [US1] listServers()メソッドを実装（claude mcp list実行） in src/extension/services/mcp-cli-service.ts
-- [ ] T021 [US1] listTools()メソッドを実装（claude mcp list-tools実行） in src/extension/services/mcp-cli-service.ts
-- [ ] T022 [US1] MCPサーバーリストUIコンポーネントを実装 in src/webview/src/components/mcp/McpServerList.tsx
-- [ ] T023 [US1] MCPツールリストUIコンポーネントを実装 in src/webview/src/components/mcp/McpToolList.tsx
-- [ ] T024 [US1] ツール検索・フィルタリング機能を実装 in src/webview/src/components/mcp/McpToolSearch.tsx
-- [ ] T025 [US1] MCPノード作成ダイアログを実装 in src/webview/src/components/dialogs/McpNodeDialog.tsx
-- [ ] T026 [US1] workflow-storeにMCPノード追加アクションを実装 in src/webview/src/stores/workflow-store.ts
-- [ ] T027 [US1] MCPノードのReact Flowカスタムノードを実装 in src/webview/src/components/nodes/McpNode/McpNode.tsx
-- [ ] T027.5 [E2E] MVP機能テスト - MCPツール検索・選択・ノード作成の疎通確認
+- [x] T018 [US1] MCP_LIST_SERVERSメッセージハンドラを実装 in src/extension/commands/mcp-handlers.ts
+- [x] T019 [US1] MCP_LIST_TOOLSメッセージハンドラを実装 in src/extension/commands/mcp-handlers.ts
+- [x] T020 [US1] listServers()メソッドを実装（claude mcp list実行） in src/extension/services/mcp-cli-service.ts
+- [x] T021 [US1] listTools()メソッドを実装（MCP SDK直接接続で実装） in src/extension/services/mcp-cli-service.ts
+- [x] T022 [US1] MCPサーバーリストUIコンポーネントを実装 in src/webview/src/components/mcp/McpServerList.tsx
+- [x] T023 [US1] MCPツールリストUIコンポーネントを実装 in src/webview/src/components/mcp/McpToolList.tsx
+- [x] T024 [US1] ツール検索・フィルタリング機能を実装 in src/webview/src/components/mcp/McpToolSearch.tsx
+- [x] T025 [US1] MCPノード作成ダイアログを実装 in src/webview/src/components/dialogs/McpNodeDialog.tsx
+- [x] T026 [US1] workflow-storeにMCPノード追加アクションを実装 in src/webview/src/stores/workflow-store.ts
+- [x] T027 [US1] MCPノードのReact Flowカスタムノードを実装 in src/webview/src/components/nodes/McpNode/McpNode.tsx
+- [x] T027.5 [E2E] MVP機能テスト - MCPツール検索・選択・ノード作成の疎通確認
   - MCPサーバーリストの取得と表示
   - ツールリストの取得と表示
   - ツール検索・フィルタリング
