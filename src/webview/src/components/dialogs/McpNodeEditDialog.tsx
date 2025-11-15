@@ -15,6 +15,7 @@ import { getMcpToolSchema } from '../../services/mcp-service';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import type { ExtendedToolParameter } from '../../utils/parameter-validator';
 import { validateAllParameters } from '../../utils/parameter-validator';
+import { IndeterminateProgressBar } from '../common/IndeterminateProgressBar';
 import { ParameterFormGenerator } from '../mcp/ParameterFormGenerator';
 
 interface McpNodeEditDialogProps {
@@ -194,17 +195,7 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
         </div>
 
         {/* Loading State */}
-        {loading && (
-          <div
-            style={{
-              padding: '32px',
-              textAlign: 'center',
-              color: 'var(--vscode-descriptionForeground)',
-            }}
-          >
-            {t('mcp.editDialog.loading')}
-          </div>
-        )}
+        {loading && <IndeterminateProgressBar label={t('mcp.editDialog.loading')} />}
 
         {/* Error State */}
         {error && !loading && (
