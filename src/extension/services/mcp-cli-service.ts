@@ -190,6 +190,12 @@ export async function listServers(): Promise<McpExecutionResult<McpServerReferen
       };
     }
 
+    log('ERROR', 'MCP list command failed with unknown error', {
+      exitCode: result.exitCode,
+      stderr: result.stderr,
+      stdout: result.stdout,
+    });
+
     return {
       success: false,
       error: {
@@ -528,6 +534,13 @@ export async function listTools(serverId: string): Promise<McpExecutionResult<Mc
         executionTimeMs,
       };
     }
+
+    log('ERROR', 'MCP list-tools command failed with unknown error', {
+      serverId,
+      exitCode: result.exitCode,
+      stderr: result.stderr,
+      stdout: result.stdout,
+    });
 
     return {
       success: false,

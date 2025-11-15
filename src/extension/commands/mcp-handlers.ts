@@ -85,6 +85,7 @@ export async function handleListMcpServers(
         requestId,
         errorCode: result.error?.code,
         errorMessage: result.error?.message,
+        errorDetails: result.error?.details,
         executionTimeMs,
       });
 
@@ -218,6 +219,7 @@ export async function handleGetMcpTools(
         serverId: payload.serverId,
         errorCode: result.error?.code,
         errorMessage: result.error?.message,
+        errorDetails: result.error?.details,
         executionTimeMs,
       });
 
