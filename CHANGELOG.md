@@ -1,3 +1,17 @@
+## [2.3.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.2.1...v2.3.0) (2025-11-15)
+
+### Features
+
+* add indeterminate progress bar for MCP server loading ([7a4c47b](https://github.com/breaking-brake/cc-wf-studio/commit/7a4c47b40d0f4c6abbd0e7da856ac7d42cd4c690))
+
+### Bug Fixes
+
+* improve MCP tool dialog visibility and F5 debug configuration ([41a1ab8](https://github.com/breaking-brake/cc-wf-studio/commit/41a1ab88244aaf502d04649f4bbefa9700d80a6a))
+
+### Documentation
+
+* clarify MCP network connectivity requirements ([376cc44](https://github.com/breaking-brake/cc-wf-studio/commit/376cc44589a1bd74d5cd000f458bdeba634200d9))
+
 ## [2.2.1](https://github.com/breaking-brake/cc-wf-studio/compare/v2.2.0...v2.2.1) (2025-11-15)
 
 ### Bug Fixes
