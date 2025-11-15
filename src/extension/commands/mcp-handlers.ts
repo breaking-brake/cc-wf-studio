@@ -7,7 +7,7 @@
  * Based on: specs/001-mcp-node/contracts/extension-webview-messages.schema.json
  */
 
-import type * as vscode from 'vscode';
+import * as vscode from 'vscode';
 import type {
   GetMcpToolsPayload,
   ListMcpServersPayload,
@@ -46,6 +46,9 @@ export async function handleListMcpServers(
   });
 
   try {
+    // Get workspace folder for project-scoped MCP servers
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+
     // Check cache first
     const cached = getCachedServerList();
     if (cached) {
@@ -76,8 +79,8 @@ export async function handleListMcpServers(
       return;
     }
 
-    // Cache miss - execute CLI command
-    const result = await listServers();
+    // Cache miss - execute CLI command with workspace folder
+    const result = await listServers(workspaceFolder);
     const executionTimeMs = Date.now() - startTime;
 
     if (!result.success || !result.data) {
@@ -182,6 +185,9 @@ export async function handleGetMcpTools(
   });
 
   try {
+    // Get workspace folder for project-scoped MCP servers
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+
     // Check cache first
     const cached = getCachedTools(payload.serverId);
     if (cached) {
@@ -209,8 +215,8 @@ export async function handleGetMcpTools(
       return;
     }
 
-    // Cache miss - execute CLI command
-    const result = await listTools(payload.serverId);
+    // Cache miss - execute with workspace folder
+    const result = await listTools(payload.serverId, workspaceFolder);
     const executionTimeMs = Date.now() - startTime;
 
     if (!result.success || !result.data) {

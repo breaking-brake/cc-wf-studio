@@ -25,37 +25,77 @@ export interface McpServerConfig {
 }
 
 /**
- * Get the path to .claude.json
+ * Get the path to legacy .claude.json
  *
  * @returns Absolute path to .claude.json
  */
-function getClaudeConfigPath(): string {
+function getLegacyClaudeConfigPath(): string {
   return path.join(os.homedir(), '.claude.json');
 }
 
 /**
- * Read .claude.json file
+ * Get the path to project-scope .mcp.json
  *
- * @returns Parsed configuration object
+ * @param workspacePath - Workspace directory path
+ * @returns Absolute path to <workspace>/.mcp.json
  */
-function readClaudeConfig(): {
+function getProjectMcpConfigPath(workspacePath: string): string {
+  return path.join(workspacePath, '.mcp.json');
+}
+
+/**
+ * Read legacy .claude.json file
+ *
+ * @returns Parsed configuration object or null if not found
+ */
+function readLegacyClaudeConfig(): {
   mcpServers?: Record<string, McpServerConfig>;
   [key: string]: unknown;
-} {
-  const configPath = getClaudeConfigPath();
+} | null {
+  const configPath = getLegacyClaudeConfigPath();
 
   try {
     const content = fs.readFileSync(configPath, 'utf-8');
     return JSON.parse(content);
   } catch (error) {
-    log('ERROR', 'Failed to read .claude.json', {
+    log('WARN', 'Failed to read legacy .claude.json', {
       configPath,
       error: error instanceof Error ? error.message : String(error),
     });
+    return null;
+  }
+}
 
-    throw new Error(
-      `Failed to read Claude Code configuration: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
+/**
+ * Read mcp.json file
+ *
+ * @param configPath - Path to mcp.json
+ * @returns MCP servers configuration or null if not found
+ */
+function readMcpConfig(configPath: string): {
+  mcpServers?: Record<string, McpServerConfig>;
+} | null {
+  try {
+    const content = fs.readFileSync(configPath, 'utf-8');
+    const parsed = JSON.parse(content);
+
+    log('INFO', 'Successfully read .mcp.json', {
+      configPath,
+      serverCount: parsed.mcpServers ? Object.keys(parsed.mcpServers).length : 0,
+    });
+
+    return parsed;
+  } catch (error) {
+    // File not found is expected (not all projects have .mcp.json)
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return null;
+    }
+
+    log('WARN', 'Failed to read .mcp.json', {
+      configPath,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
   }
 }
 
@@ -63,34 +103,84 @@ function readClaudeConfig(): {
  * Get MCP server configuration by server ID
  *
  * @param serverId - Server identifier from 'claude mcp list'
+ * @param workspacePath - Optional workspace path for project-scoped servers
  * @returns Server configuration or null if not found
  */
-export function getMcpServerConfig(serverId: string): McpServerConfig | null {
+export function getMcpServerConfig(
+  serverId: string,
+  workspacePath?: string
+): McpServerConfig | null {
   try {
-    const config = readClaudeConfig();
+    const legacyConfig = readLegacyClaudeConfig();
 
-    if (!config.mcpServers || !config.mcpServers[serverId]) {
-      log('WARN', 'MCP server not found in configuration', {
-        serverId,
-        availableServers: config.mcpServers ? Object.keys(config.mcpServers) : [],
-      });
+    // Priority 1: Project-scope .mcp.json (<workspace>/.mcp.json)
+    if (workspacePath) {
+      const projectMcpConfigPath = getProjectMcpConfigPath(workspacePath);
+      const projectMcpConfig = readMcpConfig(projectMcpConfigPath);
 
-      return null;
+      if (projectMcpConfig?.mcpServers?.[serverId]) {
+        const serverConfig = projectMcpConfig.mcpServers[serverId];
+
+        log('INFO', 'Retrieved MCP server configuration from project scope', {
+          serverId,
+          scope: 'project',
+          configPath: projectMcpConfigPath,
+          type: serverConfig.type,
+          hasCommand: !!serverConfig.command,
+          hasUrl: !!serverConfig.url,
+        });
+
+        return serverConfig;
+      }
     }
 
-    const serverConfig = config.mcpServers[serverId];
+    // Priority 2: Local scope - .claude.json[<workspace>].mcpServers
+    if (legacyConfig && workspacePath) {
+      const localConfig = legacyConfig[workspacePath] as
+        | { mcpServers?: Record<string, McpServerConfig> }
+        | undefined;
+      if (localConfig?.mcpServers?.[serverId]) {
+        const serverConfig = localConfig.mcpServers[serverId];
 
-    log('INFO', 'Retrieved MCP server configuration', {
+        log('INFO', 'Retrieved MCP server configuration from local scope', {
+          serverId,
+          scope: 'local',
+          workspacePath,
+          type: serverConfig.type,
+          hasCommand: !!serverConfig.command,
+          hasUrl: !!serverConfig.url,
+        });
+
+        return serverConfig;
+      }
+    }
+
+    // Priority 3: User scope - .claude.json.mcpServers (top-level)
+    if (legacyConfig?.mcpServers?.[serverId]) {
+      const serverConfig = legacyConfig.mcpServers[serverId];
+
+      log('INFO', 'Retrieved MCP server configuration from user scope', {
+        serverId,
+        scope: 'user',
+        type: serverConfig.type,
+        hasCommand: !!serverConfig.command,
+        hasUrl: !!serverConfig.url,
+      });
+
+      return serverConfig;
+    }
+
+    // Server not found in any configuration
+    log('WARN', 'MCP server not found in any configuration', {
       serverId,
-      type: serverConfig.type,
-      hasCommand: !!serverConfig.command,
-      hasUrl: !!serverConfig.url,
+      workspacePath,
     });
 
-    return serverConfig;
+    return null;
   } catch (error) {
     log('ERROR', 'Failed to get MCP server configuration', {
       serverId,
+      workspacePath,
       error: error instanceof Error ? error.message : String(error),
     });
 
@@ -99,19 +189,49 @@ export function getMcpServerConfig(serverId: string): McpServerConfig | null {
 }
 
 /**
- * Get all MCP server IDs from configuration
+ * Get all MCP server IDs from all configuration sources
  *
- * @returns Array of server IDs
+ * @param workspacePath - Optional workspace path for project-scoped servers
+ * @returns Array of unique server IDs
  */
-export function getAllMcpServerIds(): string[] {
+export function getAllMcpServerIds(workspacePath?: string): string[] {
   try {
-    const config = readClaudeConfig();
+    const serverIds = new Set<string>();
 
-    if (!config.mcpServers) {
-      return [];
+    // Collect from project-scope .mcp.json (<workspace>/.mcp.json)
+    if (workspacePath) {
+      const projectMcpConfig = readMcpConfig(getProjectMcpConfigPath(workspacePath));
+      if (projectMcpConfig?.mcpServers) {
+        for (const id of Object.keys(projectMcpConfig.mcpServers)) {
+          serverIds.add(id);
+        }
+      }
     }
 
-    return Object.keys(config.mcpServers);
+    // Collect from .claude.json
+    const legacyConfig = readLegacyClaudeConfig();
+    if (legacyConfig) {
+      // Local scope (project-specific)
+      if (workspacePath) {
+        const localConfig = legacyConfig[workspacePath] as
+          | { mcpServers?: Record<string, McpServerConfig> }
+          | undefined;
+        if (localConfig?.mcpServers) {
+          for (const id of Object.keys(localConfig.mcpServers)) {
+            serverIds.add(id);
+          }
+        }
+      }
+
+      // User scope (top-level)
+      if (legacyConfig.mcpServers) {
+        for (const id of Object.keys(legacyConfig.mcpServers)) {
+          serverIds.add(id);
+        }
+      }
+    }
+
+    return Array.from(serverIds);
   } catch (error) {
     log('ERROR', 'Failed to get MCP server list', {
       error: error instanceof Error ? error.message : String(error),

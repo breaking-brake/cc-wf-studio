@@ -43,21 +43,30 @@ export interface McpExecutionResult<T> {
 const DEFAULT_TIMEOUT_MS = 5000;
 
 /**
+ * Timeout for 'claude mcp list' command
+ * This command needs more time as it performs health checks on all servers sequentially
+ */
+const LIST_SERVERS_TIMEOUT_MS = 30000;
+
+/**
  * Execute a Claude Code MCP CLI command
  *
  * @param args - CLI arguments (e.g., ['mcp', 'list'])
  * @param timeoutMs - Timeout in milliseconds
+ * @param cwd - Working directory (optional, defaults to user's home directory)
  * @returns Execution result with stdout/stderr
  */
 async function executeClaudeMcpCommand(
   args: string[],
-  timeoutMs = DEFAULT_TIMEOUT_MS
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+  cwd?: string
 ): Promise<{ success: boolean; stdout: string; stderr: string; exitCode: number | null }> {
   const startTime = Date.now();
 
   log('INFO', 'Executing claude mcp command', {
     args,
     timeoutMs,
+    cwd,
   });
 
   return new Promise((resolve) => {
@@ -68,6 +77,7 @@ async function executeClaudeMcpCommand(
     // Spawn 'claude' CLI process
     const childProcess = spawn('claude', args, {
       stdio: ['ignore', 'pipe', 'pipe'],
+      cwd,
     });
 
     // Set timeout
@@ -155,12 +165,13 @@ async function executeClaudeMcpCommand(
  * Executes: claude mcp list
  * Based on: contracts/mcp-cli.schema.json - McpListCommand
  *
+ * @param cwd - Working directory (optional, for project-scoped MCP servers)
  * @returns List of MCP servers with connection status
  */
-export async function listServers(): Promise<McpExecutionResult<McpServerReference[]>> {
+export async function listServers(cwd?: string): Promise<McpExecutionResult<McpServerReference[]>> {
   const startTime = Date.now();
 
-  const result = await executeClaudeMcpCommand(['mcp', 'list']);
+  const result = await executeClaudeMcpCommand(['mcp', 'list'], LIST_SERVERS_TIMEOUT_MS, cwd);
   const executionTimeMs = Date.now() - startTime;
 
   if (!result.success) {
@@ -271,6 +282,7 @@ function parseMcpListOutput(output: string): McpServerReference[] {
 
     const match = lineRegex.exec(trimmedLine);
     if (!match) {
+      log('WARN', 'parseMcpListOutput - line did not match regex', { line: trimmedLine });
       continue;
     }
 
@@ -294,6 +306,8 @@ function parseMcpListOutput(output: string): McpServerReference[] {
       type: 'stdio', // Will be determined by 'claude mcp get'
     });
   }
+
+  log('INFO', 'parseMcpListOutput - completed', { serverCount: servers.length });
 
   return servers;
 }
@@ -484,9 +498,13 @@ function parseMcpGetOutput(output: string, serverId: string): McpServerReference
  * instead of using Claude Code CLI commands (which don't support tool listing).
  *
  * @param serverId - Server identifier
+ * @param workspacePath - Optional workspace path for project-scoped servers
  * @returns List of available tools
  */
-export async function listTools(serverId: string): Promise<McpExecutionResult<McpToolReference[]>> {
+export async function listTools(
+  serverId: string,
+  workspacePath?: string
+): Promise<McpExecutionResult<McpToolReference[]>> {
   const startTime = Date.now();
 
   // Import MCP SDK services
@@ -494,7 +512,7 @@ export async function listTools(serverId: string): Promise<McpExecutionResult<Mc
   const { listToolsFromMcpServer } = await import('./mcp-sdk-client');
 
   // Get server configuration from .claude.json
-  const serverConfig = getMcpServerConfig(serverId);
+  const serverConfig = getMcpServerConfig(serverId, workspacePath);
 
   if (!serverConfig) {
     return {
