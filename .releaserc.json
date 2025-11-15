@@ -70,15 +70,7 @@
       }
     ],
     [
-      "@semantic-release/github",
-      {
-        "assets": [
-          {
-            "path": "*.vsix",
-            "label": "VSCode Extension Package"
-          }
-        ]
-      }
+      "@semantic-release/github"
     ]
   ]
 }
