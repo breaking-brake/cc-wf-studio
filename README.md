@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  <em>✨ AI Refinement #1: "Create a workflow that sends a greeting prompt" – Build workflows from scratch with AI</em>
+  <em>✨ AI Refinement (1): "Create a workflow that sends a greeting prompt" – Build workflows from scratch with AI</em>
 </p>
 
 ---
@@ -34,7 +34,7 @@
 </p>
 
 <p align="center">
-  <em>✨ AI Refinement #2: "Can you modify it to change the greeting based on the current time?" – Refine iteratively through conversation</em>
+  <em>✨ AI Refinement (2): "Can you modify it to change the greeting based on the current time?" – Refine iteratively through conversation</em>
 </p>
 
 ---
