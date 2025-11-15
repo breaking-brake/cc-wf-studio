@@ -46,27 +46,6 @@ jobs:
           GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
         run: npx semantic-release
 
-      - name: Sync webview package.json version
-        if: steps.semantic_release.outcome == 'success'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Get the new version from semantic-release
-          NEW_VERSION=$(node -p "require('./package.json').version")
-
-          # Update webview package.json
-          cd src/webview
-          npm version $NEW_VERSION --no-git-tag-version --allow-same-version
-          npm install
-
-          # Commit the webview version sync
-          cd ../..
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/webview/package.json src/webview/package-lock.json
-          git commit --amend --no-edit
-          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:${{ github.ref }} --force
-
       - name: Build extension with new version
         if: steps.semantic_release.outcome == 'success'
         run: npm run build
