@@ -1,0 +1,543 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Workflow MCP Node Schema",
+  "description": "JSON Schema for MCP nodes in workflow definition files",
+  "type": "object",
+  "properties": {
+    "nodeDefinition": {
+      "$ref": "#/definitions/McpNodeDefinition"
+    },
+    "workflowExample": {
+      "$ref": "#/definitions/WorkflowWithMcpNode"
+    }
+  },
+  "definitions": {
+    "McpNodeDefinition": {
+      "title": "MCP Node",
+      "description": "Represents an MCP tool node in the workflow canvas",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-f0-9-]{36}$",
+          "description": "UUID v4 identifier for the node"
+        },
+        "type": {
+          "type": "string",
+          "const": "mcp",
+          "description": "Node type constant for MCP nodes"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Display name of the MCP node (lowercase, numbers, hyphens only)"
+        },
+        "position": {
+          "$ref": "#/definitions/Position",
+          "description": "Canvas coordinates for node rendering"
+        },
+        "data": {
+          "$ref": "#/definitions/McpNodeData",
+          "description": "MCP-specific configuration and tool information"
+        }
+      },
+      "required": ["id", "type", "name", "position", "data"],
+      "additionalProperties": false
+    },
+    "Position": {
+      "title": "Position",
+      "description": "2D coordinates on the workflow canvas",
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number",
+          "description": "Horizontal position (pixels)"
+        },
+        "y": {
+          "type": "number",
+          "description": "Vertical position (pixels)"
+        }
+      },
+      "required": ["x", "y"],
+      "additionalProperties": false
+    },
+    "McpNodeData": {
+      "title": "MCP Node Data",
+      "description": "Configuration and parameter data for an MCP tool node",
+      "type": "object",
+      "properties": {
+        "serverId": {
+          "type": "string",
+          "description": "MCP server identifier (from 'claude mcp list')",
+          "example": "aws-knowledge-mcp"
+        },
+        "toolName": {
+          "type": "string",
+          "description": "Tool function name from the MCP server",
+          "example": "aws___get_regional_availability"
+        },
+        "toolDescription": {
+          "type": "string",
+          "description": "Human-readable description of the tool's functionality",
+          "example": "Retrieve AWS regional availability information for products"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ToolParameter"
+          },
+          "description": "Array of parameter schemas for this tool (immutable, from MCP definition)"
+        },
+        "parameterValues": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "User-configured values for the tool's parameters",
+          "example": {
+            "region": "us-east-1",
+            "resource_type": "product",
+            "filters": ["EC2", "Lambda"]
+          }
+        },
+        "validationStatus": {
+          "type": "string",
+          "enum": ["valid", "missing", "invalid"],
+          "description": "Validation state (computed during workflow load)"
+        },
+        "outputPorts": {
+          "type": "integer",
+          "const": 1,
+          "description": "Number of output ports (fixed at 1 for MCP nodes)"
+        }
+      },
+      "required": [
+        "serverId",
+        "toolName",
+        "toolDescription",
+        "parameters",
+        "parameterValues",
+        "validationStatus",
+        "outputPorts"
+      ],
+      "additionalProperties": false
+    },
+    "ToolParameter": {
+      "title": "Tool Parameter",
+      "description": "Schema definition for a single tool parameter (from MCP tool definition)",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Parameter identifier (e.g., 'region')"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["string", "number", "boolean", "integer", "array", "object"],
+          "description": "Parameter data type"
+        },
+        "description": {
+          "type": ["string", "null"],
+          "description": "User-friendly description of the parameter"
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Whether this parameter is mandatory for tool execution"
+        },
+        "default": {
+          "description": "Default value if not provided by user"
+        },
+        "validation": {
+          "$ref": "#/definitions/ParameterValidation",
+          "description": "Constraints and validation rules"
+        },
+        "items": {
+          "$ref": "#/definitions/ToolParameter",
+          "description": "For array types: schema of array items"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/ToolParameter"
+          },
+          "description": "For object types: schema of nested properties"
+        }
+      },
+      "required": ["name", "type", "required"],
+      "additionalProperties": false
+    },
+    "ParameterValidation": {
+      "title": "Parameter Validation Rules",
+      "description": "Constraints for parameter value validation",
+      "type": "object",
+      "properties": {
+        "minLength": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minimum string length"
+        },
+        "maxLength": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum string length"
+        },
+        "pattern": {
+          "type": "string",
+          "description": "Regex pattern for string validation"
+        },
+        "minimum": {
+          "type": "number",
+          "description": "Minimum numeric value"
+        },
+        "maximum": {
+          "type": "number",
+          "description": "Maximum numeric value"
+        },
+        "enum": {
+          "type": "array",
+          "items": {
+            "oneOf": [{ "type": "string" }, { "type": "number" }]
+          },
+          "maxItems": 100,
+          "description": "Enumerated valid values"
+        }
+      },
+      "additionalProperties": false
+    },
+    "WorkflowWithMcpNode": {
+      "title": "Workflow Example with MCP Node",
+      "description": "Complete workflow definition including an MCP node",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-f0-9-]{36}$",
+          "description": "Workflow identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Workflow display name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Workflow description"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Semantic version (e.g., 1.0.0)"
+        },
+        "schemaVersion": {
+          "type": "string",
+          "const": "1.1.0",
+          "description": "Workflow schema version (1.1.0 supports new node types including MCP)"
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/definitions/StartNode" },
+              { "$ref": "#/definitions/McpNodeDefinition" },
+              { "$ref": "#/definitions/EndNode" }
+            ]
+          },
+          "description": "Array of workflow nodes"
+        },
+        "connections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Connection"
+          },
+          "description": "Array of connections between nodes"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of workflow creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of last update"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "version",
+        "schemaVersion",
+        "nodes",
+        "connections",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "StartNode": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "start" },
+        "name": { "type": "string" },
+        "position": { "$ref": "#/definitions/Position" },
+        "data": { "type": "object" }
+      },
+      "required": ["id", "type", "name", "position", "data"]
+    },
+    "EndNode": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "end" },
+        "name": { "type": "string" },
+        "position": { "$ref": "#/definitions/Position" },
+        "data": { "type": "object" }
+      },
+      "required": ["id", "type", "name", "position", "data"]
+    },
+    "Connection": {
+      "title": "Connection",
+      "description": "Connection between two workflow nodes",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Connection identifier"
+        },
+        "from": {
+          "type": "string",
+          "description": "Source node ID"
+        },
+        "to": {
+          "type": "string",
+          "description": "Destination node ID"
+        },
+        "fromPort": {
+          "type": "string",
+          "description": "Output port identifier on source node"
+        },
+        "toPort": {
+          "type": "string",
+          "description": "Input port identifier on destination node"
+        },
+        "condition": {
+          "type": ["string", "null"],
+          "description": "Optional condition label for branching nodes"
+        }
+      },
+      "required": ["id", "from", "to", "fromPort", "toPort"]
+    }
+  },
+  "validationRules": {
+    "nodeName": {
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Node names must be lowercase, contain only numbers, hyphens, no spaces"
+    },
+    "parameters": {
+      "description": "Parameters array must exactly match MCP tool definition",
+      "immutable": true,
+      "validation": "Cannot be edited in workflow JSON; derived from MCP server"
+    },
+    "parameterValues": {
+      "description": "Parameter values must validate against parameter type and constraints",
+      "required": "All parameters marked 'required: true' must have values",
+      "typeValidation": "Value type must match parameter.type",
+      "constraintValidation": "Value must satisfy min/max, pattern, enum, length constraints"
+    },
+    "validationStatus": {
+      "valid": "Server and tool found, all parameters valid",
+      "missing": "Server or tool not found during workflow load",
+      "invalid": "Server or tool schema has changed, parameters no longer match"
+    },
+    "outputPorts": {
+      "description": "MCP nodes always have exactly 1 output port",
+      "immutable": true,
+      "value": 1
+    }
+  },
+  "examples": {
+    "simpleMcpNode": {
+      "id": "node-mcp-1",
+      "type": "mcp",
+      "name": "aws-check-region",
+      "position": { "x": 300, "y": 200 },
+      "data": {
+        "serverId": "aws-knowledge-mcp",
+        "toolName": "aws___get_regional_availability",
+        "toolDescription": "Retrieve AWS regional availability information for products",
+        "parameters": [
+          {
+            "name": "region",
+            "type": "string",
+            "required": true,
+            "description": "Target AWS region code (e.g., us-east-1)"
+          },
+          {
+            "name": "resource_type",
+            "type": "string",
+            "required": true,
+            "description": "Type of AWS resource to check: 'product'|'api'|'cfn'"
+          },
+          {
+            "name": "filters",
+            "type": "array",
+            "required": false,
+            "description": "Optional list of specific resources to check",
+            "items": {
+              "name": "filter_item",
+              "type": "string",
+              "required": false
+            }
+          }
+        ],
+        "parameterValues": {
+          "region": "us-east-1",
+          "resource_type": "product",
+          "filters": ["EC2", "Lambda"]
+        },
+        "validationStatus": "valid",
+        "outputPorts": 1
+      }
+    },
+    "mcpNodeWithEnumParameter": {
+      "id": "node-mcp-2",
+      "type": "mcp",
+      "name": "model-selector",
+      "position": { "x": 300, "y": 400 },
+      "data": {
+        "serverId": "claude-models",
+        "toolName": "select_model",
+        "toolDescription": "Select a Claude model for the workflow",
+        "parameters": [
+          {
+            "name": "model",
+            "type": "string",
+            "required": true,
+            "description": "Claude model to use",
+            "validation": {
+              "enum": ["sonnet", "opus", "haiku"]
+            }
+          }
+        ],
+        "parameterValues": {
+          "model": "sonnet"
+        },
+        "validationStatus": "valid",
+        "outputPorts": 1
+      }
+    },
+    "mcpNodeDisconnected": {
+      "id": "node-mcp-3",
+      "type": "mcp",
+      "name": "aws-check-region",
+      "position": { "x": 300, "y": 600 },
+      "data": {
+        "serverId": "aws-knowledge-mcp",
+        "toolName": "aws___get_regional_availability",
+        "toolDescription": "Retrieve AWS regional availability information for products",
+        "parameters": [
+          {
+            "name": "region",
+            "type": "string",
+            "required": true,
+            "description": "Target AWS region code"
+          }
+        ],
+        "parameterValues": {
+          "region": "us-east-1"
+        },
+        "validationStatus": "missing",
+        "outputPorts": 1
+      }
+    },
+    "completeWorkflow": {
+      "id": "workflow-uuid-1",
+      "name": "AWS Availability Checker",
+      "description": "Check AWS service availability in different regions",
+      "version": "1.0.0",
+      "schemaVersion": "1.1.0",
+      "nodes": [
+        {
+          "id": "node-start",
+          "type": "start",
+          "name": "start",
+          "position": { "x": 50, "y": 100 },
+          "data": { "label": "Start" }
+        },
+        {
+          "id": "node-mcp-1",
+          "type": "mcp",
+          "name": "aws-check",
+          "position": { "x": 300, "y": 100 },
+          "data": {
+            "serverId": "aws-knowledge-mcp",
+            "toolName": "aws___get_regional_availability",
+            "toolDescription": "Retrieve AWS regional availability information for products",
+            "parameters": [
+              {
+                "name": "region",
+                "type": "string",
+                "required": true,
+                "description": "Target AWS region code"
+              },
+              {
+                "name": "resource_type",
+                "type": "string",
+                "required": true,
+                "description": "Type of AWS resource to check"
+              }
+            ],
+            "parameterValues": {
+              "region": "us-east-1",
+              "resource_type": "product"
+            },
+            "validationStatus": "valid",
+            "outputPorts": 1
+          }
+        },
+        {
+          "id": "node-end",
+          "type": "end",
+          "name": "end",
+          "position": { "x": 550, "y": 100 },
+          "data": { "label": "End" }
+        }
+      ],
+      "connections": [
+        {
+          "id": "conn-1",
+          "from": "node-start",
+          "to": "node-mcp-1",
+          "fromPort": "output",
+          "toPort": "input"
+        },
+        {
+          "id": "conn-2",
+          "from": "node-mcp-1",
+          "to": "node-end",
+          "fromPort": "output",
+          "toPort": "input"
+        }
+      ],
+      "createdAt": "2025-11-15T10:00:00Z",
+      "updatedAt": "2025-11-15T10:00:00Z"
+    }
+  },
+  "backwards_compatibility": {
+    "description": "How to handle workflows from older schema versions",
+    "schemaVersion_1_0_0": "Old workflows without MCP nodes (no MCP nodes present)",
+    "schemaVersion_1_1_0": "New schema supporting MCP nodes",
+    "migration": "Automatic; old workflows remain valid, can add MCP nodes to them",
+    "validation": "MCP nodes only validated if schemaVersion >= 1.1.0"
+  },
+  "migration_guide": {
+    "addMcpNodeToOldWorkflow": {
+      "step1": "Ensure workflow has schemaVersion: '1.1.0' (or update it)",
+      "step2": "Add NodeType.Mcp = 'mcp' to NodeType enum",
+      "step3": "Add McpNode and McpNodeData types to workflow-definition.ts",
+      "step4": "Create and add McpNode object to workflow.nodes array",
+      "step5": "Update connection to/from MCP node"
+    }
+  }
+}

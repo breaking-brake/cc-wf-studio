@@ -356,4 +356,71 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Describe the workflow you want to achieve in natural language.',
   'refinement.initialMessage.note':
     '※ This feature uses Claude Code installed in your environment.',
+
+  // MCP Node (Feature: 001-mcp-node)
+  'node.mcp.title': 'MCP Tool',
+  'node.mcp.description': 'Execute MCP tool',
+
+  // MCP Server List
+  'mcp.loading.servers': 'Loading MCP servers...',
+  'mcp.error.serverLoadFailed': 'Failed to load MCP servers',
+  'mcp.empty.servers': 'No MCP servers configured',
+
+  // MCP Tool List
+  'mcp.loading.tools': 'Loading tools...',
+  'mcp.error.toolLoadFailed': 'Failed to load tools from server',
+  'mcp.empty.tools': 'No tools available for this server',
+
+  // MCP Tool Search
+  'mcp.search.placeholder': 'Search tools by name or description...',
+  'mcp.search.noResults': 'No tools found matching "{query}"',
+
+  // MCP Node Dialog
+  'mcp.dialog.title': 'Browse Available MCP Tools',
+  'mcp.dialog.selectServer': 'Select MCP Server',
+  'mcp.dialog.selectTool': 'Select Tool',
+  'mcp.dialog.addButton': 'Add Tool',
+  'mcp.dialog.cancelButton': 'Cancel',
+  'mcp.dialog.error.noServerSelected': 'Please select an MCP server',
+  'mcp.dialog.error.noToolSelected': 'Please select a tool',
+
+  // MCP Property Panel
+  'property.nodeType.mcp': 'MCP Tool',
+  'property.mcp.serverId': 'Server',
+  'property.mcp.toolName': 'Tool Name',
+  'property.mcp.toolDescription': 'Description',
+  'property.mcp.parameters': 'Parameters',
+  'property.mcp.parameterValues': 'Parameter Values',
+  'property.mcp.parameterCount': 'Parameter Count',
+  'property.mcp.editParameters': 'Edit Parameters',
+  'property.mcp.infoNote':
+    'MCP tool properties are loaded from the server. Click "Edit Parameters" to configure parameter values.',
+
+  // MCP Parameter Form
+  'mcp.parameter.formTitle': 'Tool Parameters',
+  'mcp.parameter.noParameters': 'This tool has no parameters',
+  'mcp.parameter.selectOption': '-- Select an option --',
+  'mcp.parameter.enterValue': 'Enter value',
+  'mcp.parameter.minLength': 'Min length',
+  'mcp.parameter.maxLength': 'Max length',
+  'mcp.parameter.pattern': 'Pattern',
+  'mcp.parameter.minimum': 'Min',
+  'mcp.parameter.maximum': 'Max',
+  'mcp.parameter.default': 'Default',
+  'mcp.parameter.addItem': 'Add item',
+  'mcp.parameter.add': 'Add',
+  'mcp.parameter.remove': 'Remove',
+  'mcp.parameter.arrayCount': 'Items',
+  'mcp.parameter.jsonFormat': 'JSON format required',
+  'mcp.parameter.jsonInvalid': 'Invalid JSON format',
+  'mcp.parameter.objectInvalid': 'Value must be a JSON object',
+  'mcp.parameter.unsupportedType': 'Unsupported parameter type: {type} for {name}',
+  'mcp.parameter.validationErrors': 'Please fix the following validation errors:',
+
+  // MCP Edit Dialog
+  'mcp.editDialog.title': 'Configure MCP Tool Parameters',
+  'mcp.editDialog.saveButton': 'Save',
+  'mcp.editDialog.cancelButton': 'Cancel',
+  'mcp.editDialog.loading': 'Loading tool schema...',
+  'mcp.editDialog.error.schemaLoadFailed': 'Failed to load tool schema',
 };

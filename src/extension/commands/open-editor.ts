@@ -14,6 +14,7 @@ import { handleGenerateWorkflow } from './ai-generation';
 import { handleExportWorkflow } from './export-workflow';
 import { loadWorkflow } from './load-workflow';
 import { loadWorkflowList } from './load-workflow-list';
+import { handleGetMcpToolSchema, handleGetMcpTools, handleListMcpServers } from './mcp-handlers';
 import { saveWorkflow } from './save-workflow';
 import { handleBrowseSkills, handleCreateSkill, handleValidateSkillFile } from './skill-operations';
 import {
@@ -309,6 +310,43 @@ export function registerOpenEditorCommand(
                 payload: {
                   code: 'VALIDATION_ERROR',
                   message: 'Clear conversation payload is required',
+                },
+              });
+            }
+            break;
+
+          case 'LIST_MCP_SERVERS':
+            // List all configured MCP servers (T018)
+            await handleListMcpServers(message.payload || {}, webview, message.requestId || '');
+            break;
+
+          case 'GET_MCP_TOOLS':
+            // Get tools from a specific MCP server (T019)
+            if (message.payload?.serverId) {
+              await handleGetMcpTools(message.payload, webview, message.requestId || '');
+            } else {
+              webview.postMessage({
+                type: 'ERROR',
+                requestId: message.requestId,
+                payload: {
+                  code: 'VALIDATION_ERROR',
+                  message: 'Server ID is required',
+                },
+              });
+            }
+            break;
+
+          case 'GET_MCP_TOOL_SCHEMA':
+            // Get detailed schema for a specific tool (T028)
+            if (message.payload?.serverId && message.payload?.toolName) {
+              await handleGetMcpToolSchema(message.payload, webview, message.requestId || '');
+            } else {
+              webview.postMessage({
+                type: 'ERROR',
+                requestId: message.requestId,
+                payload: {
+                  code: 'VALIDATION_ERROR',
+                  message: 'Server ID and Tool Name are required',
                 },
               });
             }

@@ -9,6 +9,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
+import { McpNodeDialog } from './dialogs/McpNodeDialog';
 import { SkillBrowserDialog } from './dialogs/SkillBrowserDialog';
 
 /**
@@ -18,6 +19,7 @@ export const NodePalette: React.FC = () => {
   const { t } = useTranslation();
   const { addNode, nodes } = useWorkflowStore();
   const [isSkillBrowserOpen, setIsSkillBrowserOpen] = useState(false);
+  const [isMcpDialogOpen, setIsMcpDialogOpen] = useState(false);
 
   /**
    * 既存のノードと重ならない位置を計算する
@@ -333,6 +335,45 @@ export const NodePalette: React.FC = () => {
         </div>
       </button>
 
+      {/* MCP Tool Node Button (Feature: 001-mcp-node) */}
+      <button
+        type="button"
+        onClick={() => setIsMcpDialogOpen(true)}
+        data-tour="add-mcp-button"
+        style={{
+          width: '100%',
+          padding: '12px',
+          marginBottom: '12px',
+          backgroundColor: 'var(--vscode-button-background)',
+          color: 'var(--vscode-button-foreground)',
+          border: '1px solid var(--vscode-button-border)',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '13px',
+          fontWeight: 500,
+          textAlign: 'left',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+        }}
+      >
+        <div style={{ fontWeight: 600 }}>{t('node.mcp.title')}</div>
+        <div
+          style={{
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+          }}
+        >
+          {t('node.mcp.description')}
+        </div>
+      </button>
+
       {/* Section: Control Flow */}
       <div
         style={{
@@ -580,6 +621,9 @@ export const NodePalette: React.FC = () => {
         isOpen={isSkillBrowserOpen}
         onClose={() => setIsSkillBrowserOpen(false)}
       />
+
+      {/* MCP Node Dialog (Feature: 001-mcp-node) */}
+      <McpNodeDialog isOpen={isMcpDialogOpen} onClose={() => setIsMcpDialogOpen(false)} />
     </div>
   );
 };

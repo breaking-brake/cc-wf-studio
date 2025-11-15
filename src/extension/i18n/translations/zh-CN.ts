@@ -54,4 +54,18 @@ export const zhCNTranslations: TranslationKeys = {
   'switchNode.title': '### Switch节点详细信息',
   'switchNode.multiple': '多分支 (2-N)',
   'switchNode.evaluationTarget': '评估目标',
+
+  // MCP node details
+  'mcpNode.title': '## MCP工具节点',
+  'mcpNode.description': '**描述**',
+  'mcpNode.server': '**MCP服务器**',
+  'mcpNode.toolName': '**工具名称**',
+  'mcpNode.validationStatus': '**验证状态**',
+  'mcpNode.configuredParameters': '**已配置参数**',
+  'mcpNode.availableParameters': '**可用参数**',
+  'mcpNode.required': '必需',
+  'mcpNode.optional': '可选',
+  'mcpNode.noDescription': '无描述',
+  'mcpNode.executionMethod':
+    '此节点调用MCP（Model Context Protocol）工具。执行此工作流时，请使用已配置的参数通过MCP服务器调用该工具。',
 };

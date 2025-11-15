@@ -51,4 +51,17 @@ export interface TranslationKeys {
   'switchNode.title': string;
   'switchNode.multiple': string;
   'switchNode.evaluationTarget': string;
+
+  // MCP node details
+  'mcpNode.title': string;
+  'mcpNode.description': string;
+  'mcpNode.server': string;
+  'mcpNode.toolName': string;
+  'mcpNode.validationStatus': string;
+  'mcpNode.configuredParameters': string;
+  'mcpNode.availableParameters': string;
+  'mcpNode.required': string;
+  'mcpNode.optional': string;
+  'mcpNode.noDescription': string;
+  'mcpNode.executionMethod': string;
 }

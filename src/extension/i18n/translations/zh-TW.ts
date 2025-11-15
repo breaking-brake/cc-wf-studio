@@ -54,4 +54,18 @@ export const zhTWTranslations: TranslationKeys = {
   'switchNode.title': '### Switch節點詳細資訊',
   'switchNode.multiple': '多分支 (2-N)',
   'switchNode.evaluationTarget': '評估目標',
+
+  // MCP node details
+  'mcpNode.title': '## MCP工具節點',
+  'mcpNode.description': '**描述**',
+  'mcpNode.server': '**MCP伺服器**',
+  'mcpNode.toolName': '**工具名稱**',
+  'mcpNode.validationStatus': '**驗證狀態**',
+  'mcpNode.configuredParameters': '**已配置參數**',
+  'mcpNode.availableParameters': '**可用參數**',
+  'mcpNode.required': '必需',
+  'mcpNode.optional': '可選',
+  'mcpNode.noDescription': '無描述',
+  'mcpNode.executionMethod':
+    '此節點調用MCP（Model Context Protocol）工具。執行此工作流時，請使用已配置的參數通過MCP伺服器調用該工具。',
 };
