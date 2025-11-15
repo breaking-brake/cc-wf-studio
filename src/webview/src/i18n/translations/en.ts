@@ -356,4 +356,39 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Describe the workflow you want to achieve in natural language.',
   'refinement.initialMessage.note':
     '※ This feature uses Claude Code installed in your environment.',
+
+  // MCP Node (Feature: 001-mcp-node)
+  'node.mcp.title': 'MCP Tool',
+  'node.mcp.description': 'Execute MCP (Model Context Protocol) tool',
+
+  // MCP Server List
+  'mcp.loading.servers': 'Loading MCP servers...',
+  'mcp.error.serverLoadFailed': 'Failed to load MCP servers',
+  'mcp.empty.servers': 'No MCP servers configured',
+
+  // MCP Tool List
+  'mcp.loading.tools': 'Loading tools...',
+  'mcp.error.toolLoadFailed': 'Failed to load tools from server',
+  'mcp.empty.tools': 'No tools available for this server',
+
+  // MCP Tool Search
+  'mcp.search.placeholder': 'Search tools by name or description...',
+  'mcp.search.noResults': 'No tools found matching "{query}"',
+
+  // MCP Node Dialog
+  'mcp.dialog.title': 'Add MCP Tool Node',
+  'mcp.dialog.selectServer': 'Select MCP Server',
+  'mcp.dialog.selectTool': 'Select Tool',
+  'mcp.dialog.addButton': 'Add Tool',
+  'mcp.dialog.cancelButton': 'Cancel',
+  'mcp.dialog.error.noServerSelected': 'Please select an MCP server',
+  'mcp.dialog.error.noToolSelected': 'Please select a tool',
+
+  // MCP Property Panel
+  'property.nodeType.mcp': 'MCP Tool Node',
+  'property.mcp.serverId': 'Server',
+  'property.mcp.toolName': 'Tool Name',
+  'property.mcp.toolDescription': 'Description',
+  'property.mcp.parameters': 'Parameters',
+  'property.mcp.parameterValues': 'Parameter Values',
 };

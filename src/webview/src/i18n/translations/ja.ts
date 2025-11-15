@@ -354,4 +354,39 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.initialMessage.description': '実現したいワークフローを自然言語で説明してください。',
   'refinement.initialMessage.note':
     '※ この機能はお使いの環境にインストールされたClaude Codeを使用します。',
+
+  // MCP Node (Feature: 001-mcp-node)
+  'node.mcp.title': 'MCPツール',
+  'node.mcp.description': 'MCP (Model Context Protocol) ツールを実行',
+
+  // MCP Server List
+  'mcp.loading.servers': 'MCPサーバーを読み込み中...',
+  'mcp.error.serverLoadFailed': 'MCPサーバーの読み込みに失敗しました',
+  'mcp.empty.servers': '設定されたMCPサーバーがありません',
+
+  // MCP Tool List
+  'mcp.loading.tools': 'ツールを読み込み中...',
+  'mcp.error.toolLoadFailed': 'サーバーからツールの読み込みに失敗しました',
+  'mcp.empty.tools': 'このサーバーで利用可能なツールがありません',
+
+  // MCP Tool Search
+  'mcp.search.placeholder': 'ツール名または説明で検索...',
+  'mcp.search.noResults': '"{query}" に一致するツールが見つかりません',
+
+  // MCP Node Dialog
+  'mcp.dialog.title': 'MCPツールノードを追加',
+  'mcp.dialog.selectServer': 'MCPサーバーを選択',
+  'mcp.dialog.selectTool': 'ツールを選択',
+  'mcp.dialog.addButton': 'ツールを追加',
+  'mcp.dialog.cancelButton': 'キャンセル',
+  'mcp.dialog.error.noServerSelected': 'MCPサーバーを選択してください',
+  'mcp.dialog.error.noToolSelected': 'ツールを選択してください',
+
+  // MCP Property Panel
+  'property.nodeType.mcp': 'MCPツールノード',
+  'property.mcp.serverId': 'サーバー',
+  'property.mcp.toolName': 'ツール名',
+  'property.mcp.toolDescription': '説明',
+  'property.mcp.parameters': 'パラメータ',
+  'property.mcp.parameterValues': 'パラメータ値',
 };
