@@ -389,4 +389,32 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.toolDescription': '説明',
   'property.mcp.parameters': 'パラメータ',
   'property.mcp.parameterValues': 'パラメータ値',
+
+  // MCP Parameter Form
+  'mcp.parameter.formTitle': 'ツールパラメータ',
+  'mcp.parameter.noParameters': 'このツールにはパラメータがありません',
+  'mcp.parameter.selectOption': '-- オプションを選択 --',
+  'mcp.parameter.enterValue': '値を入力',
+  'mcp.parameter.minLength': '最小長',
+  'mcp.parameter.maxLength': '最大長',
+  'mcp.parameter.pattern': 'パターン',
+  'mcp.parameter.minimum': '最小値',
+  'mcp.parameter.maximum': '最大値',
+  'mcp.parameter.default': 'デフォルト',
+  'mcp.parameter.addItem': '項目を追加',
+  'mcp.parameter.add': '追加',
+  'mcp.parameter.remove': '削除',
+  'mcp.parameter.arrayCount': '項目数',
+  'mcp.parameter.jsonFormat': 'JSON形式が必要です',
+  'mcp.parameter.jsonInvalid': '無効なJSON形式です',
+  'mcp.parameter.objectInvalid': '値はJSONオブジェクトである必要があります',
+  'mcp.parameter.unsupportedType': 'サポートされていないパラメータ型: {name}の{type}',
+  'mcp.parameter.validationErrors': '以下の検証エラーを修正してください:',
+
+  // MCP Edit Dialog
+  'mcp.editDialog.title': 'MCPツールパラメータの設定',
+  'mcp.editDialog.saveButton': '保存',
+  'mcp.editDialog.cancelButton': 'キャンセル',
+  'mcp.editDialog.loading': 'ツールスキーマを読み込み中...',
+  'mcp.editDialog.error.schemaLoadFailed': 'ツールスキーマの読み込みに失敗しました',
 };

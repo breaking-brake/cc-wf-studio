@@ -84,14 +84,14 @@
 - [x] T028 [US2] MCP_GET_TOOL_SCHEMAメッセージハンドラを実装 in src/extension/commands/mcp-handlers.ts
 - [x] T029 [US2] getToolSchema()メソッドを実装 in src/extension/services/mcp-cli-service.ts
 - [x] T030 [US2] JSON Schemaパーサーを実装 in src/extension/utils/schema-parser.ts
-- [ ] T031 [US2] パラメータフォーム生成器を実装 in src/webview/src/components/mcp/ParameterFormGenerator.tsx
-- [ ] T032 [US2] 文字列型パラメータ入力コンポーネントを実装 in src/webview/src/components/mcp/parameters/StringParameter.tsx
-- [ ] T033 [US2] 数値型パラメータ入力コンポーネントを実装 in src/webview/src/components/mcp/parameters/NumberParameter.tsx
-- [ ] T034 [US2] ブール型パラメータ入力コンポーネントを実装 in src/webview/src/components/mcp/parameters/BooleanParameter.tsx
-- [ ] T035 [US2] 配列型パラメータ入力コンポーネントを実装 in src/webview/src/components/mcp/parameters/ArrayParameter.tsx
-- [ ] T036 [US2] オブジェクト型パラメータ入力コンポーネントを実装 in src/webview/src/components/mcp/parameters/ObjectParameter.tsx
-- [ ] T037 [US2] パラメータバリデーション機能を実装 in src/webview/src/utils/parameter-validator.ts
-- [ ] T038 [US2] MCPノード編集ダイアログを実装 in src/webview/src/components/dialogs/McpNodeEditDialog.tsx
+- [x] T031 [US2] パラメータフォーム生成器を実装 in src/webview/src/components/mcp/ParameterFormGenerator.tsx
+- [x] T032 [US2] 文字列型パラメータ入力コンポーネントを実装 in src/webview/src/components/mcp/parameters/StringParameter.tsx
+- [x] T033 [US2] 数値型パラメータ入力コンポーネントを実装 in src/webview/src/components/mcp/parameters/NumberParameter.tsx
+- [x] T034 [US2] ブール型パラメータ入力コンポーネントを実装 in src/webview/src/components/mcp/parameters/BooleanParameter.tsx
+- [x] T035 [US2] 配列型パラメータ入力コンポーネントを実装 in src/webview/src/components/mcp/parameters/ArrayParameter.tsx
+- [x] T036 [US2] オブジェクト型パラメータ入力コンポーネントを実装 in src/webview/src/components/mcp/parameters/ObjectParameter.tsx
+- [x] T037 [US2] パラメータバリデーション機能を実装 in src/webview/src/utils/parameter-validator.ts
+- [x] T038 [US2] MCPノード編集ダイアログを実装 in src/webview/src/components/dialogs/McpNodeEditDialog.tsx
 - [ ] T038.5 [E2E] パラメータ設定機能テスト - 動的フォーム生成・バリデーションの疎通確認
   - ツールスキーマの取得
   - 各型パラメータの入力UI表示(string, number, boolean, array, object)

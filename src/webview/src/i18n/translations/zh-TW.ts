@@ -372,4 +372,32 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.toolDescription': '描述',
   'property.mcp.parameters': '參數',
   'property.mcp.parameterValues': '參數值',
+
+  // MCP Parameter Form
+  'mcp.parameter.formTitle': '工具參數',
+  'mcp.parameter.noParameters': '此工具沒有參數',
+  'mcp.parameter.selectOption': '-- 選擇選項 --',
+  'mcp.parameter.enterValue': '輸入值',
+  'mcp.parameter.minLength': '最小長度',
+  'mcp.parameter.maxLength': '最大長度',
+  'mcp.parameter.pattern': '模式',
+  'mcp.parameter.minimum': '最小值',
+  'mcp.parameter.maximum': '最大值',
+  'mcp.parameter.default': '預設值',
+  'mcp.parameter.addItem': '新增項目',
+  'mcp.parameter.add': '新增',
+  'mcp.parameter.remove': '刪除',
+  'mcp.parameter.arrayCount': '項目',
+  'mcp.parameter.jsonFormat': '需要JSON格式',
+  'mcp.parameter.jsonInvalid': '無效的JSON格式',
+  'mcp.parameter.objectInvalid': '值必須是JSON物件',
+  'mcp.parameter.unsupportedType': '不支援的參數類型: {name}的{type}',
+  'mcp.parameter.validationErrors': '請修正以下驗證錯誤:',
+
+  // MCP Edit Dialog
+  'mcp.editDialog.title': '配置MCP工具參數',
+  'mcp.editDialog.saveButton': '儲存',
+  'mcp.editDialog.cancelButton': '取消',
+  'mcp.editDialog.loading': '正在載入工具架構...',
+  'mcp.editDialog.error.schemaLoadFailed': '載入工具架構失敗',
 };

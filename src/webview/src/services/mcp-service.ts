@@ -9,10 +9,12 @@
 
 import type {
   GetMcpToolsPayload,
+  GetMcpToolSchemaPayload,
   ListMcpServersPayload,
   McpServersResultPayload,
   McpToolReference,
   McpToolsResultPayload,
+  McpToolSchemaResultPayload,
 } from '../../../shared/types/messages';
 
 // VSCode API bridge (injected by Extension Host)
@@ -127,6 +129,60 @@ export async function getMcpTools(payload: GetMcpToolsPayload): Promise<McpTools
     setTimeout(() => {
       window.removeEventListener('message', handler);
       reject(new Error('Request timeout: GET_MCP_TOOLS took longer than 10 seconds'));
+    }, REQUEST_TIMEOUT);
+  });
+}
+
+/**
+ * Get detailed schema for a specific MCP tool
+ *
+ * Sends GET_MCP_TOOL_SCHEMA message to Extension Host and waits for MCP_TOOL_SCHEMA_RESULT response.
+ *
+ * @param payload - Tool schema request with server ID and tool name
+ * @returns Promise resolving to tool schema result
+ *
+ * @example
+ * ```typescript
+ * const result = await getMcpToolSchema({ serverId: 'aws-knowledge-mcp', toolName: 'get_regional_availability' });
+ * if (result.success && result.schema) {
+ *   console.log(`Tool has ${result.schema.parameters?.length || 0} parameters`);
+ * }
+ * ```
+ */
+export async function getMcpToolSchema(
+  payload: GetMcpToolSchemaPayload
+): Promise<McpToolSchemaResultPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `get-tool-schema-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message = event.data;
+      if (message.requestId !== requestId) {
+        return; // Not our response
+      }
+
+      if (message.type === 'MCP_TOOL_SCHEMA_RESULT') {
+        window.removeEventListener('message', handler);
+        resolve(message.payload);
+      } else if (message.type === 'ERROR') {
+        window.removeEventListener('message', handler);
+        reject(new Error(message.payload?.message || 'MCP tool schema request failed'));
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    // Send request to Extension Host
+    vscode.postMessage({
+      type: 'GET_MCP_TOOL_SCHEMA',
+      requestId,
+      payload,
+    });
+
+    // Timeout handling
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timeout: GET_MCP_TOOL_SCHEMA took longer than 10 seconds'));
     }, REQUEST_TIMEOUT);
   });
 }

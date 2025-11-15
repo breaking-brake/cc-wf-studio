@@ -388,4 +388,32 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.toolDescription': '설명',
   'property.mcp.parameters': '매개변수',
   'property.mcp.parameterValues': '매개변수 값',
+
+  // MCP Parameter Form
+  'mcp.parameter.formTitle': '도구 매개변수',
+  'mcp.parameter.noParameters': '이 도구에는 매개변수가 없습니다',
+  'mcp.parameter.selectOption': '-- 옵션 선택 --',
+  'mcp.parameter.enterValue': '값 입력',
+  'mcp.parameter.minLength': '최소 길이',
+  'mcp.parameter.maxLength': '최대 길이',
+  'mcp.parameter.pattern': '패턴',
+  'mcp.parameter.minimum': '최소값',
+  'mcp.parameter.maximum': '최대값',
+  'mcp.parameter.default': '기본값',
+  'mcp.parameter.addItem': '항목 추가',
+  'mcp.parameter.add': '추가',
+  'mcp.parameter.remove': '제거',
+  'mcp.parameter.arrayCount': '항목',
+  'mcp.parameter.jsonFormat': 'JSON 형식이 필요합니다',
+  'mcp.parameter.jsonInvalid': '잘못된 JSON 형식입니다',
+  'mcp.parameter.objectInvalid': '값은 JSON 객체여야 합니다',
+  'mcp.parameter.unsupportedType': '지원되지 않는 매개변수 유형: {name}의 {type}',
+  'mcp.parameter.validationErrors': '다음 검증 오류를 수정하세요:',
+
+  // MCP Edit Dialog
+  'mcp.editDialog.title': 'MCP 도구 매개변수 구성',
+  'mcp.editDialog.saveButton': '저장',
+  'mcp.editDialog.cancelButton': '취소',
+  'mcp.editDialog.loading': '도구 스키마 로드 중...',
+  'mcp.editDialog.error.schemaLoadFailed': '도구 스키마 로드 실패',
 };

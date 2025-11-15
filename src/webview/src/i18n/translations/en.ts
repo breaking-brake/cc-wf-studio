@@ -391,4 +391,32 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.toolDescription': 'Description',
   'property.mcp.parameters': 'Parameters',
   'property.mcp.parameterValues': 'Parameter Values',
+
+  // MCP Parameter Form
+  'mcp.parameter.formTitle': 'Tool Parameters',
+  'mcp.parameter.noParameters': 'This tool has no parameters',
+  'mcp.parameter.selectOption': '-- Select an option --',
+  'mcp.parameter.enterValue': 'Enter value',
+  'mcp.parameter.minLength': 'Min length',
+  'mcp.parameter.maxLength': 'Max length',
+  'mcp.parameter.pattern': 'Pattern',
+  'mcp.parameter.minimum': 'Min',
+  'mcp.parameter.maximum': 'Max',
+  'mcp.parameter.default': 'Default',
+  'mcp.parameter.addItem': 'Add item',
+  'mcp.parameter.add': 'Add',
+  'mcp.parameter.remove': 'Remove',
+  'mcp.parameter.arrayCount': 'Items',
+  'mcp.parameter.jsonFormat': 'JSON format required',
+  'mcp.parameter.jsonInvalid': 'Invalid JSON format',
+  'mcp.parameter.objectInvalid': 'Value must be a JSON object',
+  'mcp.parameter.unsupportedType': 'Unsupported parameter type: {type} for {name}',
+  'mcp.parameter.validationErrors': 'Please fix the following validation errors:',
+
+  // MCP Edit Dialog
+  'mcp.editDialog.title': 'Configure MCP Tool Parameters',
+  'mcp.editDialog.saveButton': 'Save',
+  'mcp.editDialog.cancelButton': 'Cancel',
+  'mcp.editDialog.loading': 'Loading tool schema...',
+  'mcp.editDialog.error.schemaLoadFailed': 'Failed to load tool schema',
 };

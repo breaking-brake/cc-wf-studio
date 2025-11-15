@@ -372,4 +372,32 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.toolDescription': '描述',
   'property.mcp.parameters': '参数',
   'property.mcp.parameterValues': '参数值',
+
+  // MCP Parameter Form
+  'mcp.parameter.formTitle': '工具参数',
+  'mcp.parameter.noParameters': '此工具没有参数',
+  'mcp.parameter.selectOption': '-- 选择选项 --',
+  'mcp.parameter.enterValue': '输入值',
+  'mcp.parameter.minLength': '最小长度',
+  'mcp.parameter.maxLength': '最大长度',
+  'mcp.parameter.pattern': '模式',
+  'mcp.parameter.minimum': '最小值',
+  'mcp.parameter.maximum': '最大值',
+  'mcp.parameter.default': '默认值',
+  'mcp.parameter.addItem': '添加项目',
+  'mcp.parameter.add': '添加',
+  'mcp.parameter.remove': '删除',
+  'mcp.parameter.arrayCount': '项目',
+  'mcp.parameter.jsonFormat': '需要JSON格式',
+  'mcp.parameter.jsonInvalid': '无效的JSON格式',
+  'mcp.parameter.objectInvalid': '值必须是JSON对象',
+  'mcp.parameter.unsupportedType': '不支持的参数类型: {name}的{type}',
+  'mcp.parameter.validationErrors': '请修复以下验证错误:',
+
+  // MCP Edit Dialog
+  'mcp.editDialog.title': '配置MCP工具参数',
+  'mcp.editDialog.saveButton': '保存',
+  'mcp.editDialog.cancelButton': '取消',
+  'mcp.editDialog.loading': '正在加载工具架构...',
+  'mcp.editDialog.error.schemaLoadFailed': '加载工具架构失败',
 };
