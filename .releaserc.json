@@ -55,6 +55,12 @@
       }
     ],
     [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "cd src/webview && npm version ${nextRelease.version} --no-git-tag-version --allow-same-version && npm install"
+      }
+    ],
+    [
       "@semantic-release/git",
       {
         "assets": [
