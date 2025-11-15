@@ -31,17 +31,81 @@ npm test && npm run lint
 
 ## Version Update Procedure
 
-When updating the version number, you must update the following files:
+**IMPORTANT: Version updates and releases are fully automated via Semantic Release and GitHub Actions.**
 
-1. **package.json** (root directory)
-   - Update `"version"` field
+### Automated Release Process
 
-2. **src/webview/package.json** (webview directory)
-   - Update `"version"` field
-   - **IMPORTANT**: After updating, run `npm install` in the webview directory to update `package-lock.json`
-   - Command: `cd src/webview && npm install`
+This project uses **Semantic Release** with **GitHub Actions** for fully automated versioning, changelog generation, and publishing.
 
-Both package.json files and the webview's package-lock.json must be committed together for a version update.
+#### Release Workflow (`.github/workflows/release.yml`)
+
+**Trigger**: Push to `production` branch
+
+**Automated Steps**:
+1. **Semantic Release** analyzes commit messages and determines version bump
+2. **Version Update**: Updates `package.json`, `src/webview/package.json`, `src/webview/package-lock.json`
+3. **Changelog Generation**: Automatically updates `CHANGELOG.md`
+4. **Git Commit**: Creates release commit with message `chore(release): ${version} [skip ci]`
+5. **GitHub Release**: Creates GitHub release with release notes
+6. **VSIX Build**: Builds and packages the extension
+7. **VSIX Upload**: Uploads `.vsix` file to GitHub release
+8. **Version Sync**: Merges version changes from `production` to `main` branch
+
+#### Commit Message Convention (Conventional Commits)
+
+The version bump is determined by commit message prefixes:
+
+- `feat:` → **Minor** version bump (e.g., 2.0.0 → 2.1.0)
+- `fix:` → **Patch** version bump (e.g., 2.1.0 → 2.1.1)
+- `perf:` → **Patch** version bump
+- `revert:` → **Patch** version bump
+- **BREAKING CHANGE** in commit body → **Major** version bump (e.g., 2.1.0 → 3.0.0)
+- `docs:`, `style:`, `chore:`, `refactor:`, `test:`, `build:`, `ci:` → No release
+
+**Example commit messages**:
+```bash
+feat: add MCP node integration
+fix: resolve parameter validation issue
+feat!: redesign workflow export format (BREAKING CHANGE)
+```
+
+#### Changelog Sections (`.releaserc.json`)
+
+Generated changelog groups commits by type:
+
+- **Features** (`feat:`)
+- **Bug Fixes** (`fix:`)
+- **Performance Improvements** (`perf:`)
+- **Reverts** (`revert:`)
+- **Code Refactoring** (`refactor:`) - visible
+- **Documentation** (`docs:`) - visible
+- **Styles** (`style:`) - hidden
+- **Tests** (`test:`) - hidden
+- **Build System** (`build:`) - hidden
+- **Continuous Integration** (`ci:`) - hidden
+- **Miscellaneous Chores** (`chore:`) - hidden
+
+#### Automated File Updates
+
+Semantic Release automatically updates:
+- `package.json` (root)
+- `src/webview/package.json`
+- `src/webview/package-lock.json`
+- `CHANGELOG.md`
+
+These files are committed with `[skip ci]` to prevent infinite loops.
+
+#### Manual Version Updates (NOT RECOMMENDED)
+
+**DO NOT manually update version numbers unless absolutely necessary.**
+
+If manual update is required:
+1. Update `package.json` (root directory) - `"version"` field
+2. Update `src/webview/package.json` - `"version"` field
+3. Run `cd src/webview && npm install` to update `package-lock.json`
+4. Commit all three files together
+
+Manual version updates will be overwritten by the next automated release.
 
 ## Code Style
 
