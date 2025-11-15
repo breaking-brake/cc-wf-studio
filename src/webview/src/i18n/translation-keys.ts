@@ -353,4 +353,32 @@ export interface WebviewTranslationKeys {
   'property.mcp.toolDescription': string;
   'property.mcp.parameters': string;
   'property.mcp.parameterValues': string;
+
+  // MCP Parameter Form
+  'mcp.parameter.formTitle': string;
+  'mcp.parameter.noParameters': string;
+  'mcp.parameter.selectOption': string;
+  'mcp.parameter.enterValue': string;
+  'mcp.parameter.minLength': string;
+  'mcp.parameter.maxLength': string;
+  'mcp.parameter.pattern': string;
+  'mcp.parameter.minimum': string;
+  'mcp.parameter.maximum': string;
+  'mcp.parameter.default': string;
+  'mcp.parameter.addItem': string;
+  'mcp.parameter.add': string;
+  'mcp.parameter.remove': string;
+  'mcp.parameter.arrayCount': string;
+  'mcp.parameter.jsonFormat': string;
+  'mcp.parameter.jsonInvalid': string;
+  'mcp.parameter.objectInvalid': string;
+  'mcp.parameter.unsupportedType': string;
+  'mcp.parameter.validationErrors': string;
+
+  // MCP Edit Dialog
+  'mcp.editDialog.title': string;
+  'mcp.editDialog.saveButton': string;
+  'mcp.editDialog.cancelButton': string;
+  'mcp.editDialog.loading': string;
+  'mcp.editDialog.error.schemaLoadFailed': string;
 }

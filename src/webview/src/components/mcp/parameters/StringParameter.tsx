@@ -147,7 +147,9 @@ export function StringParameter({ parameter, value, onChange, error }: StringPar
         onChange={(e) => handleChange(e.target.value)}
         onBlur={() => setTouched(true)}
         placeholder={
-          parameter.default !== undefined ? String(parameter.default) : t('mcp.parameter.enterValue')
+          parameter.default !== undefined
+            ? String(parameter.default)
+            : t('mcp.parameter.enterValue')
         }
         minLength={parameter.minLength}
         maxLength={parameter.maxLength}
@@ -188,8 +190,10 @@ export function StringParameter({ parameter, value, onChange, error }: StringPar
             color: 'var(--vscode-descriptionForeground)',
           }}
         >
-          {parameter.minLength !== undefined && `${t('mcp.parameter.minLength')}: ${parameter.minLength} `}
-          {parameter.maxLength !== undefined && `${t('mcp.parameter.maxLength')}: ${parameter.maxLength} `}
+          {parameter.minLength !== undefined &&
+            `${t('mcp.parameter.minLength')}: ${parameter.minLength} `}
+          {parameter.maxLength !== undefined &&
+            `${t('mcp.parameter.maxLength')}: ${parameter.maxLength} `}
           {parameter.pattern && `${t('mcp.parameter.pattern')}: ${parameter.pattern}`}
         </div>
       )}

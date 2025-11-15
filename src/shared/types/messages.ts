@@ -425,7 +425,12 @@ export interface McpToolSchemaResultPayload {
       | 'MCP_SERVER_NOT_FOUND'
       | 'MCP_TOOL_NOT_FOUND'
       | 'MCP_PARSE_ERROR'
-      | 'MCP_UNKNOWN_ERROR';
+      | 'MCP_UNKNOWN_ERROR'
+      | 'MCP_CONNECTION_FAILED'
+      | 'MCP_CONNECTION_TIMEOUT'
+      | 'MCP_CONNECTION_ERROR'
+      | 'MCP_UNSUPPORTED_TRANSPORT'
+      | 'MCP_INVALID_CONFIG';
     message: string;
     details?: string;
   };

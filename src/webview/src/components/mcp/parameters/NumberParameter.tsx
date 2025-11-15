@@ -76,7 +76,9 @@ export function NumberParameter({ parameter, value, onChange, error }: NumberPar
         onChange={(e) => handleChange(e.target.value)}
         onBlur={() => setTouched(true)}
         placeholder={
-          parameter.default !== undefined ? String(parameter.default) : t('mcp.parameter.enterValue')
+          parameter.default !== undefined
+            ? String(parameter.default)
+            : t('mcp.parameter.enterValue')
         }
         min={parameter.minimum}
         max={parameter.maximum}
@@ -114,7 +116,8 @@ export function NumberParameter({ parameter, value, onChange, error }: NumberPar
             color: 'var(--vscode-descriptionForeground)',
           }}
         >
-          {parameter.minimum !== undefined && `${t('mcp.parameter.minimum')}: ${parameter.minimum} `}
+          {parameter.minimum !== undefined &&
+            `${t('mcp.parameter.minimum')}: ${parameter.minimum} `}
           {parameter.maximum !== undefined && `${t('mcp.parameter.maximum')}: ${parameter.maximum}`}
         </div>
       )}

@@ -19,8 +19,6 @@ import type { ToolParameter } from '@shared/types/mcp-node';
 export interface ExtendedToolParameter extends ToolParameter {
   /** Allowed enum values (if defined) */
   enum?: unknown[];
-  /** Default value (if defined) */
-  default?: unknown;
   /** Minimum value for numbers */
   minimum?: number;
   /** Maximum value for numbers */
@@ -31,10 +29,6 @@ export interface ExtendedToolParameter extends ToolParameter {
   maxLength?: number;
   /** Regex pattern for string validation */
   pattern?: string;
-  /** Item schema for arrays */
-  items?: unknown;
-  /** Properties for objects */
-  properties?: Record<string, unknown>;
 }
 
 /**
@@ -94,10 +88,7 @@ export function validateParameterValue(
 /**
  * Validate string value
  */
-function validateStringValue(
-  value: unknown,
-  param: ExtendedToolParameter
-): ValidationResult {
+function validateStringValue(value: unknown, param: ExtendedToolParameter): ValidationResult {
   if (typeof value !== 'string') {
     return { valid: false, error: 'Value must be a string' };
   }
@@ -131,10 +122,7 @@ function validateStringValue(
 /**
  * Validate number value
  */
-function validateNumberValue(
-  value: unknown,
-  param: ExtendedToolParameter
-): ValidationResult {
+function validateNumberValue(value: unknown, param: ExtendedToolParameter): ValidationResult {
   const num = Number(value);
 
   if (Number.isNaN(num)) {

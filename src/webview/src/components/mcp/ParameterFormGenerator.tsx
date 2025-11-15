@@ -38,10 +38,7 @@ export function ParameterFormGenerator({
   // Validate all parameters when values change and validation is enabled
   useEffect(() => {
     if (showValidation) {
-      const errors = validateAllParameters(
-        parameterValues,
-        parameters as ExtendedToolParameter[]
-      );
+      const errors = validateAllParameters(parameterValues, parameters as ExtendedToolParameter[]);
       setValidationErrors(errors);
     } else {
       setValidationErrors({});
@@ -61,7 +58,7 @@ export function ParameterFormGenerator({
   /**
    * Initialize parameter value with default if available
    */
-  const getParameterValue = (param: ExtendedToolParameter): unknown => {
+  const getParameterValue = (param: ToolParameter): unknown => {
     if (parameterValues[param.name] !== undefined) {
       return parameterValues[param.name];
     }
@@ -117,8 +114,7 @@ export function ParameterFormGenerator({
       </div>
 
       {parameters.map((param) => {
-        const extendedParam = param as ExtendedToolParameter;
-        const value = getParameterValue(extendedParam);
+        const value = getParameterValue(param);
         const error = validationErrors[param.name];
 
         switch (param.type) {
@@ -126,7 +122,7 @@ export function ParameterFormGenerator({
             return (
               <StringParameter
                 key={param.name}
-                parameter={extendedParam}
+                parameter={param as ExtendedToolParameter}
                 value={String(value)}
                 onChange={(newValue) => handleParameterChange(param.name, newValue)}
                 error={error}
@@ -138,7 +134,7 @@ export function ParameterFormGenerator({
             return (
               <NumberParameter
                 key={param.name}
-                parameter={extendedParam}
+                parameter={param as ExtendedToolParameter}
                 value={value as number | string}
                 onChange={(newValue) => handleParameterChange(param.name, newValue)}
                 error={error}
@@ -149,7 +145,7 @@ export function ParameterFormGenerator({
             return (
               <BooleanParameter
                 key={param.name}
-                parameter={extendedParam}
+                parameter={param as ExtendedToolParameter}
                 value={Boolean(value)}
                 onChange={(newValue) => handleParameterChange(param.name, newValue)}
                 error={error}
@@ -160,7 +156,7 @@ export function ParameterFormGenerator({
             return (
               <ArrayParameter
                 key={param.name}
-                parameter={extendedParam}
+                parameter={param as ExtendedToolParameter}
                 value={Array.isArray(value) ? value : []}
                 onChange={(newValue) => handleParameterChange(param.name, newValue)}
                 error={error}
@@ -171,7 +167,7 @@ export function ParameterFormGenerator({
             return (
               <ObjectParameter
                 key={param.name}
-                parameter={extendedParam}
+                parameter={param as ExtendedToolParameter}
                 value={
                   typeof value === 'object' && value !== null && !Array.isArray(value)
                     ? (value as Record<string, unknown>)

@@ -45,8 +45,6 @@ export interface JsonSchema {
 export interface ExtendedToolParameter extends ToolParameter {
   /** Allowed enum values (if defined) */
   enum?: unknown[];
-  /** Default value (if defined) */
-  default?: unknown;
   /** Minimum value for numbers */
   minimum?: number;
   /** Maximum value for numbers */
@@ -57,10 +55,6 @@ export interface ExtendedToolParameter extends ToolParameter {
   maxLength?: number;
   /** Regex pattern for string validation */
   pattern?: string;
-  /** Item schema for arrays */
-  items?: JsonSchemaProperty;
-  /** Properties for objects */
-  properties?: Record<string, JsonSchemaProperty>;
 }
 
 /**
@@ -152,15 +146,9 @@ export function parseJsonSchema(schema: JsonSchema): ExtendedToolParameter[] {
       }
     }
 
-    // Add array item schema
-    if (paramType === 'array' && propSchema.items) {
-      param.items = propSchema.items;
-    }
-
-    // Add object properties schema
-    if (paramType === 'object' && propSchema.properties) {
-      param.properties = propSchema.properties;
-    }
+    // Note: Array items and object properties are not directly mapped
+    // because JsonSchemaProperty and ToolParameter have incompatible structures.
+    // These should be handled by the consumer if needed.
 
     return param;
   });

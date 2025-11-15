@@ -55,7 +55,7 @@ export function ArrayParameter({ parameter, value, onChange, error }: ArrayParam
 
   return (
     <div style={{ marginBottom: '12px' }}>
-      <label
+      <div
         style={{
           display: 'block',
           marginBottom: '4px',
@@ -67,7 +67,7 @@ export function ArrayParameter({ parameter, value, onChange, error }: ArrayParam
         {parameter.required && (
           <span style={{ color: 'var(--vscode-errorForeground)', marginLeft: '4px' }}>*</span>
         )}
-      </label>
+      </div>
 
       {parameter.description && (
         <div
@@ -142,7 +142,7 @@ export function ArrayParameter({ parameter, value, onChange, error }: ArrayParam
         >
           {value.map((item, index) => (
             <div
-              key={index}
+              key={`${String(item)}-${index}`}
               style={{
                 display: 'flex',
                 alignItems: 'center',

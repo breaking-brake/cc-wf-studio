@@ -9,12 +9,12 @@
 
 import * as vscode from 'vscode';
 import type {
-  GetMcpToolsPayload,
   GetMcpToolSchemaPayload,
+  GetMcpToolsPayload,
   ListMcpServersPayload,
   McpServersResultPayload,
-  McpToolsResultPayload,
   McpToolSchemaResultPayload,
+  McpToolsResultPayload,
 } from '../../shared/types/messages';
 import { log } from '../extension';
 import {

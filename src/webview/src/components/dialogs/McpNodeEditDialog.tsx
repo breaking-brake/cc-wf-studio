@@ -8,7 +8,7 @@
  * Task: T038
  */
 
-import type { McpNodeData } from '@shared/types/mcp-node';
+import type { McpNodeData, ToolParameter } from '@shared/types/mcp-node';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { getMcpToolSchema } from '../../services/mcp-service';
@@ -25,12 +25,12 @@ interface McpNodeEditDialogProps {
 
 export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialogProps) {
   const { t } = useTranslation();
-  const { nodes, updateNode } = useWorkflowStore();
+  const { nodes, updateNodeData } = useWorkflowStore();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [parameterValues, setParameterValues] = useState<Record<string, unknown>>({});
-  const [parameters, setParameters] = useState<ExtendedToolParameter[]>([]);
+  const [parameters, setParameters] = useState<ToolParameter[]>([]);
   const [showValidation, setShowValidation] = useState(false);
 
   // Find the node being edited
@@ -62,7 +62,7 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
         }
 
         // Set parameters from schema
-        setParameters((result.schema.parameters || []) as ExtendedToolParameter[]);
+        setParameters(result.schema.parameters || []);
 
         // Initialize parameter values from node data
         setParameterValues(nodeData.parameterValues || {});
@@ -89,7 +89,7 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
     setShowValidation(true);
 
     // Validate all parameters
-    const errors = validateAllParameters(parameterValues, parameters);
+    const errors = validateAllParameters(parameterValues, parameters as ExtendedToolParameter[]);
 
     // If validation fails, don't save
     if (Object.keys(errors).length > 0) {
@@ -97,12 +97,9 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
     }
 
     // Update node with new parameter values
-    updateNode(nodeId, {
-      ...node,
-      data: {
-        ...nodeData,
-        parameterValues,
-      },
+    updateNodeData(nodeId, {
+      ...nodeData,
+      parameterValues,
     });
 
     // Close dialog
@@ -180,9 +177,7 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
           <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)' }}>
             <strong>{t('property.mcp.serverId')}:</strong> {nodeData.serverId}
           </div>
-          <div
-            style={{ fontSize: '13px', color: 'var(--vscode-foreground)', marginTop: '4px' }}
-          >
+          <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)', marginTop: '4px' }}>
             <strong>{t('property.mcp.toolName')}:</strong> {nodeData.toolName}
           </div>
           {nodeData.toolDescription && (
@@ -268,8 +263,14 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
             style={{
               padding: '8px 16px',
               fontSize: '13px',
-              backgroundColor: loading || error ? 'var(--vscode-button-secondaryBackground)' : 'var(--vscode-button-background)',
-              color: loading || error ? 'var(--vscode-button-secondaryForeground)' : 'var(--vscode-button-foreground)',
+              backgroundColor:
+                loading || error
+                  ? 'var(--vscode-button-secondaryBackground)'
+                  : 'var(--vscode-button-background)',
+              color:
+                loading || error
+                  ? 'var(--vscode-button-secondaryForeground)'
+                  : 'var(--vscode-button-foreground)',
               border: 'none',
               borderRadius: '2px',
               cursor: loading || error ? 'not-allowed' : 'pointer',

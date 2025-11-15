@@ -8,13 +8,13 @@
  */
 
 import type {
-  GetMcpToolsPayload,
   GetMcpToolSchemaPayload,
+  GetMcpToolsPayload,
   ListMcpServersPayload,
   McpServersResultPayload,
   McpToolReference,
-  McpToolsResultPayload,
   McpToolSchemaResultPayload,
+  McpToolsResultPayload,
 } from '../../../shared/types/messages';
 
 // VSCode API bridge (injected by Extension Host)

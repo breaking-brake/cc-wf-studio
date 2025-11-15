@@ -40,7 +40,7 @@ export function ObjectParameter({ parameter, value, onChange, error }: ObjectPar
       } else {
         setJsonError(t('mcp.parameter.objectInvalid'));
       }
-    } catch (err) {
+    } catch (_err) {
       setJsonError(t('mcp.parameter.jsonInvalid'));
     }
   };
