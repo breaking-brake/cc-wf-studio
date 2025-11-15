@@ -126,17 +126,17 @@
 - エクスポートされたファイルでMCPツールが実行可能(Claude Code CLI経由)
 - バリデーションが正しく動作する
 
-- [ ] T039 [US3] MCPノードのエクスポート処理を実装 in src/extension/services/export-service.ts
+- [x] T039 [US3] MCPノードのエクスポート処理を実装 in src/extension/services/export-service.ts
   - generateMermaidFlowchart()にMCPノードのサポート追加
   - generateWorkflowExecutionLogic()にMCPノード実行指示追加
   - checkExistingFiles()は修正不要(MCPノード独自ファイル不要)
-- [ ] T040 [US3] MCPノードの国際化対応を実装 in src/extension/i18n/translations/*.ts
+- [x] T040 [US3] MCPノードの国際化対応を実装 in src/extension/i18n/translations/*.ts
   - Mermaidフローチャート用ラベル追加
   - 実行ガイド用テキスト追加(5言語: en, ja, ko, zh-CN, zh-TW)
-- [ ] T041 [US3] ワークフロー保存時のMCPノード検証を拡張 in src/extension/utils/validate-workflow.ts
+- [x] T041 [US3] ワークフロー保存時のMCPノード検証を拡張 in src/extension/utils/validate-workflow.ts
   - MCPノードの検証ルール確認・必要に応じて強化
   - エラーメッセージの国際化確認
-- [ ] T041.5 [E2E] ワークフロー統合テスト - MCPノード含むワークフローの疎通確認
+- [x] T041.5 [E2E] ワークフロー統合テスト - MCPノード含むワークフローの疎通確認
   - MCPノード含むワークフローの保存・読み込み
   - ワークフローのエクスポート
   - エクスポートされたSlash Commandファイルの内容確認
@@ -145,29 +145,37 @@
 
 ## Phase 6: 仕上げと横断的関心事 (Polish & Cross-Cutting) - 1日
 
-最終統合、ドキュメント化、スタイリング
+**🔄 Phase 6再計画実施日**: 2025-11-15
 
-- [ ] T042 [P] MCPノードのアイコンとスタイリングを改善 in src/webview/src/components/nodes/McpNode.tsx
-  - 現在のスタイリングを確認・必要に応じて改善
-  - アイコンの視認性向上
-- [ ] T043 README.mdにMCPノード機能の説明を追加 in README.md
+**再計画の理由**:
+1. CHANGELOG.mdはGitHub Actionsで自動更新されるため、手動更新は不要
+2. アイコンは諸刃の剣で逆に意味が分かりづらくなる可能性があり、慎重な検討が必要
+
+**変更内容**:
+- タスク数: 4個 → 2個に削減(T042, T044を削除)
+- 削除タスク:
+  - T042(アイコン・スタイリング改善) - 慎重な検討が必要なため今回は見送り
+  - T044(CHANGELOG.md更新) - GitHub Actionsで自動化
+
+最終統合、ドキュメント化
+- [x] T043 README.mdにMCPノード機能の説明を追加 in README.md
   - MCPノードの概要説明
   - 使用方法(検索・選択・パラメータ設定・エクスポート)
   - スクリーンショット(オプション)
-- [ ] T044 CHANGELOG.mdにMCPノード機能を記載 in CHANGELOG.md
-  - バージョン番号を確認
-  - 新機能としてMCPノード追加を記載
-- [ ] T044.5 [E2E] 総合テスト - 全機能の統合疎通確認
+  - package.jsonのdescriptionとkeywordsにMCP追加
+- [x] T044.5 [E2E] 総合テスト - 全機能の統合疎通確認
   - 全機能の統合動作確認(MVP + パラメータ設定 + エクスポート)
   - 国際化対応確認(5言語: en, ja, ko, zh-CN, zh-TW)
   - パフォーマンス確認(キャッシュ動作、CLI呼び出し時間)
   - エラーハンドリング網羅確認
-  - ドキュメント整合性確認(README, CHANGELOG)
+  - ドキュメント整合性確認(README)
   - リリース前最終チェック
 
-**削除されたタスク** (Phase 5再計画により不要):
-- T050 MCP実行ログ出力 → エクスポート時のログは不要
-- T051 ワークフローテンプレート → 基本機能実装後に検討
+**削除されたタスク**:
+- T042 アイコン・スタイリング改善 → 慎重な検討が必要なため今回は見送り (Phase 6再計画により削除)
+- T044 CHANGELOG.md更新 → GitHub Actionsで自動化 (Phase 6再計画により削除)
+- T050 MCP実行ログ出力 → エクスポート時のログは不要 (Phase 5再計画により削除)
+- T051 ワークフローテンプレート → 基本機能実装後に検討 (Phase 5再計画により削除)
 
 ## 依存関係 (Dependencies)
 
@@ -229,8 +237,8 @@ graph TD
 
 - [x] MVPリリース: Phase 3完了時点 (T027.5 E2Eテスト合格) ✅
 - [x] パラメータ設定リリース: Phase 4完了時点 (T038.5 E2Eテスト合格) ✅
-- [ ] フル機能リリース: Phase 5完了時点 (T041.5 E2Eテスト合格)
-- [ ] ユーザー満足度: Phase 6のPolish完了後 (T044.5 総合テスト合格)
+- [x] フル機能リリース: Phase 5完了時点 (T041.5 E2Eテスト合格) ✅
+- [x] ユーザー満足度: Phase 6のPolish完了後 (T044.5 総合テスト合格) ✅
 
 ### E2Eテストタイミング
 
@@ -238,8 +246,8 @@ graph TD
 
 1. ✅ **T027.5**: MVP機能テスト (Phase 3完了後) - 完了
 2. ✅ **T038.5**: パラメータ設定機能テスト (Phase 4完了後) - 完了
-3. **T041.5**: ワークフロー統合テスト (Phase 5完了後) - エクスポート機能確認
-4. **T044.5**: 総合テスト (Phase 6完了後、リリース前) - 全機能確認
+3. ✅ **T041.5**: ワークフロー統合テスト (Phase 5完了後) - エクスポート機能確認 - 完了
+4. ✅ **T044.5**: 総合テスト (Phase 6完了後、リリース前) - 全機能確認 - 完了
 
 ---
 
