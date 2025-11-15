@@ -8,9 +8,9 @@
  * .claude.json file instead of using 'claude mcp get' CLI command.
  */
 
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
 import { log } from '../extension';
 
 /**
@@ -53,7 +53,9 @@ function readClaudeConfig(): {
       error: error instanceof Error ? error.message : String(error),
     });
 
-    throw new Error(`Failed to read Claude Code configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to read Claude Code configuration: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 
