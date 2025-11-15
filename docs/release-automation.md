@@ -13,6 +13,7 @@
 3. **CHANGELOG生成**: コミット履歴から自動的に `CHANGELOG.md` を生成
 4. **GitHubリリース**: リリースノート付きのGitHubリリースを自動作成
 5. **VSIXパッケージ**: ビルドされた `.vsix` ファイルをリリースに添付
+6. **ブランチ同期**: productionブランチでリリース後、自動的にmainブランチへバージョンをマージ
 
 ## セットアップ
 
@@ -151,7 +152,7 @@ git commit -m "chore: 依存関係を更新"
    git push origin production
    ```
 
-4. **自動リリースが実行される**
+4. **自動リリースが実行される** (productionブランチ)
    - GitHub Actionsが起動
    - コミット履歴を分析
    - バージョンを決定
@@ -159,6 +160,7 @@ git commit -m "chore: 依存関係を更新"
    - `CHANGELOG.md` を生成
    - GitHubリリースを作成
    - `.vsix` ファイルを添付
+   - **自動的にmainブランチへバージョンをマージ** (`chore: sync version from production [skip ci]`)
 
 ## トラブルシューティング
 
@@ -210,6 +212,7 @@ GITHUB_TOKEN=<your-token> npx semantic-release
 5. **Package**: `.vsix` ファイルを生成
 6. **Sync version**: webview の `package.json` バージョンを同期
 7. **Semantic Release**: バージョン判定とリリース実行
+8. **Sync to main** (productionブランチのみ): リリース後、mainブランチへ自動マージ
 
 ### 更新されるファイル
 
@@ -229,6 +232,18 @@ chore(release): 2.1.0 [skip ci]
 ```
 
 `[skip ci]` により、このコミットで再度CIが起動することを防ぎます。
+
+### ブランチ同期の仕組み
+
+productionブランチでリリースが成功した後:
+
+1. mainブランチをフェッチ
+2. mainブランチにチェックアウト
+3. productionブランチの変更をマージ (`chore: sync version from production [skip ci]`)
+4. mainブランチにプッシュ
+
+これにより、**mainとproductionの両方が同じバージョン**になります。
+`[skip ci]` により、このマージコミットでCIが再実行されることを防ぎます。
 
 ## 参考資料
 

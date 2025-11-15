@@ -53,6 +53,7 @@ jobs:
           npm install
 
       - name: Semantic Release
+        id: semantic_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GIT_AUTHOR_NAME: github-actions[bot]
@@ -60,3 +61,21 @@ jobs:
           GIT_COMMITTER_NAME: github-actions[bot]
           GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
         run: npx semantic-release
+
+      - name: Sync version to main branch
+        if: github.ref == 'refs/heads/production' && steps.semantic_release.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Fetch latest main branch
+          git fetch origin main:main
+
+          # Checkout main and merge production
+          git checkout main
+          git merge origin/production --no-edit -m "chore: sync version from production [skip ci]"
+
+          # Push to main
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git main
