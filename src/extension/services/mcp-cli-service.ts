@@ -470,25 +470,177 @@ function parseMcpGetOutput(output: string, serverId: string): McpServerReference
 /**
  * List all tools available from a specific MCP server
  *
- * NOTE: This is a placeholder - actual implementation depends on Claude Code CLI
- * supporting 'claude mcp list-tools <server-name>' command.
+ * Executes: claude mcp list-tools <server-name>
+ * Based on: contracts/mcp-cli.schema.json - McpListToolsCommand (T021)
+ *
+ * NOTE: The actual CLI command may vary. This implementation assumes
+ * the command exists and returns a JSON list of tools.
  *
  * @param serverId - Server identifier
  * @returns List of available tools
  */
 export async function listTools(serverId: string): Promise<McpExecutionResult<McpToolReference[]>> {
-  // TODO: Implement when 'claude mcp list-tools' is available
-  log('WARN', 'listTools() not yet implemented - placeholder', { serverId });
+  const startTime = Date.now();
 
-  return {
-    success: false,
-    error: {
-      code: 'MCP_UNKNOWN_ERROR',
-      message: 'Tool listing not yet implemented',
-      details: 'Waiting for Claude Code CLI support for listing tools',
-    },
-    executionTimeMs: 0,
-  };
+  const result = await executeClaudeMcpCommand(['mcp', 'list-tools', serverId]);
+  const executionTimeMs = Date.now() - startTime;
+
+  if (!result.success) {
+    // Check for ENOENT (command not found)
+    if (result.stderr.includes('ENOENT') || result.exitCode === null) {
+      return {
+        success: false,
+        error: {
+          code: 'MCP_CLI_NOT_FOUND',
+          message: 'Claude Code CLI is not installed or not in PATH',
+          details: result.stderr,
+        },
+        executionTimeMs,
+      };
+    }
+
+    // Check for server not found
+    if (result.exitCode === 1 && result.stderr.includes('No MCP server found')) {
+      return {
+        success: false,
+        error: {
+          code: 'MCP_SERVER_NOT_FOUND',
+          message: `MCP server '${serverId}' not found`,
+          details: result.stderr,
+        },
+        executionTimeMs,
+      };
+    }
+
+    // Check for timeout
+    if (result.stderr.includes('Timeout')) {
+      return {
+        success: false,
+        error: {
+          code: 'MCP_CLI_TIMEOUT',
+          message: 'MCP tool list query timed out',
+          details: result.stderr,
+        },
+        executionTimeMs,
+      };
+    }
+
+    return {
+      success: false,
+      error: {
+        code: 'MCP_UNKNOWN_ERROR',
+        message: `Failed to list tools for MCP server '${serverId}'`,
+        details: result.stderr,
+      },
+      executionTimeMs,
+    };
+  }
+
+  // Parse output
+  try {
+    const tools = parseMcpListToolsOutput(result.stdout, serverId);
+
+    log('INFO', 'Successfully listed MCP tools', {
+      serverId,
+      toolCount: tools.length,
+      executionTimeMs,
+    });
+
+    return {
+      success: true,
+      data: tools,
+      executionTimeMs,
+    };
+  } catch (error) {
+    log('ERROR', 'Failed to parse MCP list-tools output', {
+      serverId,
+      error: error instanceof Error ? error.message : String(error),
+      stdout: result.stdout.substring(0, 200),
+    });
+
+    return {
+      success: false,
+      error: {
+        code: 'MCP_PARSE_ERROR',
+        message: 'Failed to parse MCP tool list',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      executionTimeMs,
+    };
+  }
+}
+
+/**
+ * Parse 'claude mcp list-tools <server-name>' output
+ *
+ * Example output (expected JSON format):
+ * ```json
+ * [
+ *   {
+ *     "name": "list_regions",
+ *     "description": "Retrieve a list of all AWS regions",
+ *     "parameters": [
+ *       {
+ *         "name": "include_opt_in",
+ *         "type": "boolean",
+ *         "description": "Include opt-in regions",
+ *         "required": false
+ *       }
+ *     ]
+ *   }
+ * ]
+ * ```
+ *
+ * @param output - Raw output from 'claude mcp list-tools'
+ * @param serverId - Server identifier
+ * @returns Parsed tool list
+ */
+function parseMcpListToolsOutput(output: string, serverId: string): McpToolReference[] {
+  // Try to parse as JSON first
+  try {
+    const jsonData = JSON.parse(output);
+
+    if (!Array.isArray(jsonData)) {
+      throw new Error('Expected JSON array of tools');
+    }
+
+    return jsonData.map((tool: any) => ({
+      serverId,
+      toolName: tool.name || '',
+      description: tool.description || '',
+      parameters: tool.parameters || [],
+    }));
+  } catch (jsonError) {
+    // Fallback: parse as plain text output
+    // Format: "tool_name - description"
+    const tools: McpToolReference[] = [];
+    const lines = output.split('\n');
+    const lineRegex = /^([^\s-]+)\s+-\s+(.+)$/;
+
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+
+      if (!trimmedLine || trimmedLine.startsWith('Available tools')) {
+        continue;
+      }
+
+      const match = lineRegex.exec(trimmedLine);
+      if (!match) {
+        continue;
+      }
+
+      const [, toolName, description] = match;
+
+      tools.push({
+        serverId,
+        toolName: toolName.trim(),
+        description: description.trim(),
+        parameters: [], // Will be populated by get-tool-schema later
+      });
+    }
+
+    return tools;
+  }
 }
 
 /**

@@ -21,6 +21,7 @@ import {
   handleClearConversation,
   handleRefineWorkflow,
 } from './workflow-refinement';
+import { handleGetMcpTools, handleListMcpServers } from './mcp-handlers';
 
 /**
  * Register the open editor command
@@ -309,6 +310,31 @@ export function registerOpenEditorCommand(
                 payload: {
                   code: 'VALIDATION_ERROR',
                   message: 'Clear conversation payload is required',
+                },
+              });
+            }
+            break;
+
+          case 'LIST_MCP_SERVERS':
+            // List all configured MCP servers (T018)
+            await handleListMcpServers(
+              message.payload || {},
+              webview,
+              message.requestId || ''
+            );
+            break;
+
+          case 'GET_MCP_TOOLS':
+            // Get tools from a specific MCP server (T019)
+            if (message.payload?.serverId) {
+              await handleGetMcpTools(message.payload, webview, message.requestId || '');
+            } else {
+              webview.postMessage({
+                type: 'ERROR',
+                requestId: message.requestId,
+                payload: {
+                  code: 'VALIDATION_ERROR',
+                  message: 'Server ID is required',
                 },
               });
             }
