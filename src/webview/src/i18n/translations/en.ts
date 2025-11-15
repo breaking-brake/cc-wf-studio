@@ -391,6 +391,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.toolDescription': 'Description',
   'property.mcp.parameters': 'Parameters',
   'property.mcp.parameterValues': 'Parameter Values',
+  'property.mcp.parameterCount': 'Parameter Count',
+  'property.mcp.editParameters': 'Edit Parameters',
+  'property.mcp.infoNote':
+    'MCP tool properties are loaded from the server. Click "Edit Parameters" to configure parameter values.',
 
   // MCP Parameter Form
   'mcp.parameter.formTitle': 'Tool Parameters',

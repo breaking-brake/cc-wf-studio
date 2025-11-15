@@ -388,6 +388,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.toolDescription': '설명',
   'property.mcp.parameters': '매개변수',
   'property.mcp.parameterValues': '매개변수 값',
+  'property.mcp.parameterCount': '매개변수 개수',
+  'property.mcp.editParameters': '매개변수 편집',
+  'property.mcp.infoNote':
+    'MCP 도구 속성은 서버에서 로드됩니다. "매개변수 편집"을 클릭하여 매개변수 값을 구성하세요.',
 
   // MCP Parameter Form
   'mcp.parameter.formTitle': '도구 매개변수',

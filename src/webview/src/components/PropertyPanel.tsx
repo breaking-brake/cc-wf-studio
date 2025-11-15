@@ -6,6 +6,7 @@
  * Updated: Phase 3.3 - Added resizable width functionality
  */
 
+import type { McpNodeData } from '@shared/types/mcp-node';
 import type {
   AskUserQuestionData,
   BranchNodeData,
@@ -15,6 +16,7 @@ import type {
   SwitchNodeData,
 } from '@shared/types/workflow-definition';
 import type React from 'react';
+import { useState } from 'react';
 import type { Node } from 'reactflow';
 import { useResizablePanel } from '../hooks/useResizablePanel';
 import { useTranslation } from '../i18n/i18n-context';
@@ -22,6 +24,7 @@ import { useWorkflowStore } from '../stores/workflow-store';
 import type { PromptNodeData } from '../types/node-types';
 import { extractVariables } from '../utils/template-utils';
 import { ResizeHandle } from './common/ResizeHandle';
+import { McpNodeEditDialog } from './dialogs/McpNodeEditDialog';
 
 /**
  * PropertyPanel Component
@@ -121,17 +124,20 @@ export const PropertyPanel: React.FC = () => {
                         ? t('property.nodeType.end')
                         : selectedNode.type === 'skill'
                           ? t('property.nodeType.skill')
-                          : t('property.nodeType.unknown')}
+                          : selectedNode.type === 'mcp'
+                            ? t('property.nodeType.mcp')
+                            : t('property.nodeType.unknown')}
       </div>
 
-      {/* Node Name (only for subAgent, askUserQuestion, branch, ifElse, switch, prompt, and skill types) */}
+      {/* Node Name (only for subAgent, askUserQuestion, branch, ifElse, switch, prompt, skill, and mcp types) */}
       {(selectedNode.type === 'subAgent' ||
         selectedNode.type === 'askUserQuestion' ||
         selectedNode.type === 'branch' ||
         selectedNode.type === 'ifElse' ||
         selectedNode.type === 'switch' ||
         selectedNode.type === 'prompt' ||
-        selectedNode.type === 'skill') && (
+        selectedNode.type === 'skill' ||
+        selectedNode.type === 'mcp') && (
         <div style={{ marginBottom: '16px' }}>
           <label
             htmlFor="node-name-input"
@@ -228,6 +234,8 @@ export const PropertyPanel: React.FC = () => {
           node={selectedNode as Node<SkillNodeData>}
           updateNodeData={updateNodeData}
         />
+      ) : selectedNode.type === 'mcp' ? (
+        <McpProperties node={selectedNode as Node<McpNodeData>} updateNodeData={updateNodeData} />
       ) : selectedNode.type === 'start' || selectedNode.type === 'end' ? (
         <div
           style={{
@@ -1867,5 +1875,262 @@ const SkillProperties: React.FC<{
         file directly.
       </div>
     </div>
+  );
+};
+
+/**
+ * MCP Properties Editor
+ *
+ * Feature: 001-mcp-node
+ * Displays MCP node properties and provides button to open parameter edit dialog
+ */
+const McpProperties: React.FC<{
+  node: Node<McpNodeData>;
+  updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
+}> = ({ node }) => {
+  const { t } = useTranslation();
+  const data = node.data;
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  // Get validation status icon and color
+  const getValidationIcon = (status: 'valid' | 'missing' | 'invalid'): string => {
+    switch (status) {
+      case 'valid':
+        return '✓';
+      case 'missing':
+        return '⚠';
+      case 'invalid':
+        return '✗';
+    }
+  };
+
+  const getValidationColor = (status: 'valid' | 'missing' | 'invalid'): string => {
+    switch (status) {
+      case 'valid':
+        return 'var(--vscode-testing-iconPassed)';
+      case 'missing':
+        return 'var(--vscode-editorWarning-foreground)';
+      case 'invalid':
+        return 'var(--vscode-errorForeground)';
+    }
+  };
+
+  return (
+    <>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {/* Server ID (Read-only) */}
+        <div>
+          <label
+            htmlFor="mcp-server-id"
+            style={{
+              display: 'block',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--vscode-foreground)',
+              marginBottom: '6px',
+            }}
+          >
+            {t('property.mcp.serverId')}
+          </label>
+          <div
+            id="mcp-server-id"
+            style={{
+              width: '100%',
+              padding: '6px 8px',
+              backgroundColor: 'var(--vscode-input-background)',
+              color: 'var(--vscode-descriptionForeground)',
+              border: '1px solid var(--vscode-input-border)',
+              borderRadius: '2px',
+              fontSize: '13px',
+              fontFamily: 'monospace',
+            }}
+          >
+            {data.serverId}
+          </div>
+        </div>
+
+        {/* Tool Name (Read-only) */}
+        <div>
+          <label
+            htmlFor="mcp-tool-name"
+            style={{
+              display: 'block',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--vscode-foreground)',
+              marginBottom: '6px',
+            }}
+          >
+            {t('property.mcp.toolName')}
+          </label>
+          <div
+            id="mcp-tool-name"
+            style={{
+              width: '100%',
+              padding: '6px 8px',
+              backgroundColor: 'var(--vscode-input-background)',
+              color: 'var(--vscode-descriptionForeground)',
+              border: '1px solid var(--vscode-input-border)',
+              borderRadius: '2px',
+              fontSize: '13px',
+              fontFamily: 'monospace',
+            }}
+          >
+            {data.toolName}
+          </div>
+        </div>
+
+        {/* Tool Description (Read-only) */}
+        <div>
+          <label
+            htmlFor="mcp-tool-description"
+            style={{
+              display: 'block',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--vscode-foreground)',
+              marginBottom: '6px',
+            }}
+          >
+            {t('property.description')}
+          </label>
+          <div
+            id="mcp-tool-description"
+            style={{
+              width: '100%',
+              padding: '6px 8px',
+              backgroundColor: 'var(--vscode-input-background)',
+              color: 'var(--vscode-descriptionForeground)',
+              border: '1px solid var(--vscode-input-border)',
+              borderRadius: '2px',
+              fontSize: '13px',
+              lineHeight: '1.4',
+            }}
+          >
+            {data.toolDescription}
+          </div>
+        </div>
+
+        {/* Validation Status (Read-only) */}
+        <div>
+          <label
+            htmlFor="mcp-validation-status"
+            style={{
+              display: 'block',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--vscode-foreground)',
+              marginBottom: '6px',
+            }}
+          >
+            {t('property.validationStatus')}
+          </label>
+          <div
+            id="mcp-validation-status"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '13px',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '16px',
+                color: getValidationColor(data.validationStatus),
+                fontWeight: 'bold',
+              }}
+            >
+              {getValidationIcon(data.validationStatus)}
+            </span>
+            <span style={{ color: 'var(--vscode-foreground)' }}>
+              {data.validationStatus === 'valid'
+                ? t('property.validationStatus.valid')
+                : data.validationStatus === 'missing'
+                  ? t('property.validationStatus.missing')
+                  : t('property.validationStatus.invalid')}
+            </span>
+          </div>
+        </div>
+
+        {/* Parameter Count (Read-only) */}
+        <div>
+          <label
+            htmlFor="mcp-parameter-count"
+            style={{
+              display: 'block',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--vscode-foreground)',
+              marginBottom: '6px',
+            }}
+          >
+            {t('property.mcp.parameterCount')}
+          </label>
+          <div
+            id="mcp-parameter-count"
+            style={{
+              fontSize: '13px',
+              color: 'var(--vscode-descriptionForeground)',
+              backgroundColor: 'var(--vscode-badge-background)',
+              padding: '4px 8px',
+              borderRadius: '3px',
+              display: 'inline-block',
+            }}
+          >
+            {data.parameters.length}
+          </div>
+        </div>
+
+        {/* Edit Parameters Button */}
+        <div>
+          <button
+            type="button"
+            onClick={() => setIsEditDialogOpen(true)}
+            className="nodrag"
+            style={{
+              width: '100%',
+              padding: '10px 16px',
+              fontSize: '13px',
+              fontWeight: 600,
+              backgroundColor: 'var(--vscode-button-background)',
+              color: 'var(--vscode-button-foreground)',
+              border: '1px solid var(--vscode-button-border)',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            <span>⚙️</span>
+            <span>{t('property.mcp.editParameters')}</span>
+          </button>
+        </div>
+
+        {/* Info Note */}
+        <div
+          style={{
+            padding: '12px',
+            backgroundColor: 'var(--vscode-textBlockQuote-background)',
+            border: '1px solid var(--vscode-textBlockQuote-border)',
+            borderRadius: '4px',
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+            lineHeight: '1.5',
+          }}
+        >
+          💡 {t('property.mcp.infoNote')}
+        </div>
+      </div>
+
+      {/* MCP Node Edit Dialog */}
+      <McpNodeEditDialog
+        isOpen={isEditDialogOpen}
+        nodeId={node.id}
+        onClose={() => setIsEditDialogOpen(false)}
+      />
+    </>
   );
 };

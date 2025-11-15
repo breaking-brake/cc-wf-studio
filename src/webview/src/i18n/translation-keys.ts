@@ -353,6 +353,9 @@ export interface WebviewTranslationKeys {
   'property.mcp.toolDescription': string;
   'property.mcp.parameters': string;
   'property.mcp.parameterValues': string;
+  'property.mcp.parameterCount': string;
+  'property.mcp.editParameters': string;
+  'property.mcp.infoNote': string;
 
   // MCP Parameter Form
   'mcp.parameter.formTitle': string;

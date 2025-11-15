@@ -389,6 +389,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.toolDescription': '説明',
   'property.mcp.parameters': 'パラメータ',
   'property.mcp.parameterValues': 'パラメータ値',
+  'property.mcp.parameterCount': 'パラメータ数',
+  'property.mcp.editParameters': 'パラメータを編集',
+  'property.mcp.infoNote':
+    'MCPツールのプロパティはサーバーから読み込まれます。「パラメータを編集」をクリックしてパラメータ値を設定してください。',
 
   // MCP Parameter Form
   'mcp.parameter.formTitle': 'ツールパラメータ',
