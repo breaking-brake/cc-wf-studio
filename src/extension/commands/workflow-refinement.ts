@@ -5,7 +5,7 @@
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 2.2
  */
 
-import * as vscode from 'vscode';
+import type * as vscode from 'vscode';
 import type {
   CancelRefinementPayload,
   ClearConversationPayload,
@@ -47,13 +47,8 @@ export async function handleRefineWorkflow(
   } = payload;
   const startTime = Date.now();
 
-  // Get timeout from settings if not provided in payload
-  let effectiveTimeoutMs = timeoutMs;
-  if (!effectiveTimeoutMs) {
-    const config = vscode.workspace.getConfiguration('cc-wf-studio');
-    const timeoutSeconds = config.get<number>('aiRefinement.timeout', 90);
-    effectiveTimeoutMs = timeoutSeconds * 1000;
-  }
+  // Use provided timeout or default to 90 seconds
+  const effectiveTimeoutMs = timeoutMs ?? 90000;
 
   log('INFO', 'Workflow refinement request received', {
     requestId,

@@ -299,6 +299,11 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.clearButton': '会話をクリア',
   'refinement.chat.clearButton.tooltip': '会話履歴をクリアして最初からやり直します',
   'refinement.chat.useSkillsCheckbox': 'Skillを含める',
+
+  // Timeout selector
+  'refinement.timeout.label': 'タイムアウト',
+  'refinement.timeout.ariaLabel': 'AIリファインメントのタイムアウト時間を選択',
+
   'refinement.chat.claudeMdTip':
     '💡 Tip: ワークフロー固有のルールや制約をCLAUDE.mdに記載すると、AIがより的確な編集を行えます',
   'refinement.chat.refining': 'AIがワークフローを改善中... 最大120秒かかる場合があります。',
@@ -323,7 +328,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.error.commandNotFound':
     'Claude Code CLIが見つかりません。AI改善機能を使用するにはClaude Codeをインストールしてください。',
   'refinement.error.timeout':
-    'AI改善がタイムアウトしました。もう一度試すか、リクエストを簡略化してください。',
+    'AI改善がタイムアウトしました。タイムアウト設定値を調整してもう一度試してみてください。リクエスト内容の簡略化もご検討ください。',
   'refinement.error.parseError':
     'AI応答の解析に失敗しました。もう一度試すか、リクエストを言い換えてください。',
   'refinement.error.validationError':
