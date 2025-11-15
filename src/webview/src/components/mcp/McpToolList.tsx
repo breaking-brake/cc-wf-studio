@@ -91,7 +91,7 @@ export function McpToolList({
   const filteredTools = searchQuery
     ? tools.filter(
         (tool) =>
-          tool.toolName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           tool.description?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : tools;
@@ -128,17 +128,17 @@ export function McpToolList({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {filteredTools.map((tool) => (
         <button
-          key={tool.toolName}
+          key={tool.name}
           type="button"
           onClick={() => onToolSelect(tool)}
           style={{
             padding: '12px',
             backgroundColor:
-              selectedToolName === tool.toolName
+              selectedToolName === tool.name
                 ? 'var(--vscode-list-activeSelectionBackground)'
                 : 'var(--vscode-list-inactiveSelectionBackground)',
             color:
-              selectedToolName === tool.toolName
+              selectedToolName === tool.name
                 ? 'var(--vscode-list-activeSelectionForeground)'
                 : 'var(--vscode-foreground)',
             border: '1px solid var(--vscode-panel-border)',
@@ -148,18 +148,18 @@ export function McpToolList({
             transition: 'all 0.15s ease',
           }}
           onMouseEnter={(e) => {
-            if (selectedToolName !== tool.toolName) {
+            if (selectedToolName !== tool.name) {
               e.currentTarget.style.backgroundColor = 'var(--vscode-list-hoverBackground)';
             }
           }}
           onMouseLeave={(e) => {
-            if (selectedToolName !== tool.toolName) {
+            if (selectedToolName !== tool.name) {
               e.currentTarget.style.backgroundColor =
                 'var(--vscode-list-inactiveSelectionBackground)';
             }
           }}
         >
-          <div style={{ fontWeight: 500, marginBottom: '4px' }}>{tool.toolName}</div>
+          <div style={{ fontWeight: 500, marginBottom: '4px' }}>{tool.name}</div>
           {tool.description && (
             <div
               style={{

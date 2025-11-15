@@ -89,7 +89,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
       position,
       data: {
         serverId: selectedServer.id,
-        toolName: selectedTool.toolName,
+        toolName: selectedTool.name,
         toolDescription: selectedTool.description || '',
         parameters: selectedTool.parameters || [],
         parameterValues: {},
@@ -229,7 +229,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
                       setSelectedTool(tool);
                       setError(null);
                     }}
-                    selectedToolName={selectedTool?.toolName}
+                    selectedToolName={selectedTool?.name}
                     searchQuery={searchQuery}
                   />
                 </div>

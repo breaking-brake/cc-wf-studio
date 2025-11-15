@@ -155,7 +155,7 @@ export function filterTools(tools: McpToolReference[], query: string): McpToolRe
 
   return tools.filter(
     (tool) =>
-      tool.toolName.toLowerCase().includes(lowerQuery) ||
+      tool.name.toLowerCase().includes(lowerQuery) ||
       tool.description?.toLowerCase().includes(lowerQuery)
   );
 }

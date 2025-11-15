@@ -35,7 +35,9 @@ export function McpServerList({
       setError(null);
 
       try {
-        const result = await listMcpServers({ filterByScope });
+        const result = await listMcpServers({
+          options: filterByScope ? { filterByScope } : undefined,
+        });
 
         if (!result.success) {
           setError(result.error?.message || t('mcp.error.serverLoadFailed'));
@@ -145,21 +147,10 @@ export function McpServerList({
               <div
                 style={{
                   fontWeight: 500,
-                  marginBottom: '4px',
                 }}
               >
                 {server.name}
               </div>
-              {server.description && (
-                <div
-                  style={{
-                    fontSize: '12px',
-                    color: 'var(--vscode-descriptionForeground)',
-                  }}
-                >
-                  {server.description}
-                </div>
-              )}
             </div>
             <div
               style={{

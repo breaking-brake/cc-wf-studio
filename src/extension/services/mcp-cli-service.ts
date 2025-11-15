@@ -6,7 +6,11 @@
  */
 
 import { spawn } from 'node:child_process';
-import type { McpServerReference, McpToolReference } from '../../shared/types/mcp-node';
+import type {
+  McpServerReference,
+  McpToolReference,
+  ToolParameter,
+} from '../../shared/types/mcp-node';
 import { log } from '../extension';
 
 /**
@@ -607,9 +611,9 @@ function parseMcpListToolsOutput(output: string, serverId: string): McpToolRefer
     return jsonData.map(
       (tool: { name?: string; description?: string; parameters?: unknown[] }) => ({
         serverId,
-        toolName: tool.name || '',
+        name: tool.name || '',
         description: tool.description || '',
-        parameters: tool.parameters || [],
+        parameters: (tool.parameters as ToolParameter[]) || [],
       })
     );
   } catch (_jsonError) {
@@ -635,7 +639,7 @@ function parseMcpListToolsOutput(output: string, serverId: string): McpToolRefer
 
       tools.push({
         serverId,
-        toolName: toolName.trim(),
+        name: toolName.trim(),
         description: description.trim(),
         parameters: [], // Will be populated by get-tool-schema later
       });

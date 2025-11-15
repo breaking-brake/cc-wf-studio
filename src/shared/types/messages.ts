@@ -306,6 +306,9 @@ export interface RefinementClarificationPayload {
 
 import type { McpServerReference, McpToolReference } from './mcp-node';
 
+// Re-export for Webview usage
+export type { McpServerReference, McpToolReference };
+
 /**
  * Options for filtering MCP servers
  */

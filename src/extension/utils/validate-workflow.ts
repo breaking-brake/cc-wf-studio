@@ -300,7 +300,8 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
   ];
 
   for (const field of requiredFields) {
-    if (!mcpData[field] && mcpData[field] !== 0 && mcpData[field] !== false) {
+    const value = mcpData[field as keyof typeof mcpData];
+    if (value === undefined || value === null || value === '') {
       errors.push({
         code: 'MCP_MISSING_FIELD',
         message: `MCP node missing required field: ${field}`,
