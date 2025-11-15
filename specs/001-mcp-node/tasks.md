@@ -64,6 +64,13 @@
 - [ ] T025 [US1] MCPノード作成ダイアログを実装 in src/webview/src/components/dialogs/McpNodeDialog.tsx
 - [ ] T026 [US1] workflow-storeにMCPノード追加アクションを実装 in src/webview/src/stores/workflow-store.ts
 - [ ] T027 [US1] MCPノードのReact Flowカスタムノードを実装 in src/webview/src/components/nodes/McpNode/McpNode.tsx
+- [ ] T027.5 [E2E] MVP機能テスト - MCPツール検索・選択・ノード作成の疎通確認
+  - MCPサーバーリストの取得と表示
+  - ツールリストの取得と表示
+  - ツール検索・フィルタリング
+  - MCPノード作成ダイアログの動作
+  - MCPノードのキャンバス配置
+  - エラーハンドリング(サーバー未接続時)
 
 ## Phase 4: ユーザーストーリー2実装 (US2: Parameter Configuration) - 4日
 
@@ -85,6 +92,12 @@
 - [ ] T036 [US2] オブジェクト型パラメータ入力コンポーネントを実装 in src/webview/src/components/mcp/parameters/ObjectParameter.tsx
 - [ ] T037 [US2] パラメータバリデーション機能を実装 in src/webview/src/utils/parameter-validator.ts
 - [ ] T038 [US2] MCPノード編集ダイアログを実装 in src/webview/src/components/dialogs/McpNodeEditDialog.tsx
+- [ ] T038.5 [E2E] パラメータ設定機能テスト - 動的フォーム生成・バリデーションの疎通確認
+  - ツールスキーマの取得
+  - 各型パラメータの入力UI表示(string, number, boolean, array, object)
+  - パラメータバリデーション
+  - MCPノード編集ダイアログの動作
+  - パラメータ値の保存・復元
 
 ## Phase 5: ユーザーストーリー3実装 (US3: Workflow Integration) - 3日
 
@@ -102,6 +115,11 @@
 - [ ] T043 [US3] MCP実行結果のパース処理を実装 in src/extension/utils/mcp-result-parser.ts
 - [ ] T044 [US3] MCPノードの実行状態表示を実装 in src/webview/src/components/nodes/McpNode/McpNodeStatus.tsx
 - [ ] T045 [US3] ワークフロー保存時のMCPノード検証を実装 in src/extension/utils/validate-mcp-workflow.ts
+- [ ] T045.5 [E2E] ワークフロー実行テスト - MCPノード含むワークフロー実行の疎通確認
+  - MCPノード含むワークフローの保存・読み込み
+  - ワークフロー実行時のMCPツール呼び出し
+  - 実行結果の表示
+  - エラー時の挙動確認(ツール実行失敗、タイムアウト等)
 
 ## Phase 6: 仕上げと横断的関心事 (Polish & Cross-Cutting) - 2日
 
@@ -115,6 +133,13 @@
 - [ ] T051 ワークフローテンプレートにMCPノード例を追加 in resources/workflow-templates/mcp-example.json
 - [ ] T052 README.mdにMCPノード機能の説明を追加 in README.md
 - [ ] T053 CHANGELOG.mdにMCPノード機能を記載 in CHANGELOG.md
+- [ ] T053.5 [E2E] 総合テスト - 全機能の統合疎通確認
+  - 全機能の統合動作確認(MVP + パラメータ設定 + ワークフロー実行)
+  - 国際化対応確認(5言語: en, ja, ko, zh-CN, zh-TW)
+  - パフォーマンス確認(キャッシュ動作、CLI呼び出し時間)
+  - エラーハンドリング網羅確認
+  - ドキュメント整合性確認(README, CHANGELOG)
+  - リリース前最終チェック
 
 ## 依存関係 (Dependencies)
 
@@ -174,9 +199,18 @@ graph TD
 
 ### 成功指標
 
-- [ ] MVPリリース: Phase 3完了時点
-- [ ] フル機能リリース: Phase 5完了時点
-- [ ] ユーザー満足度: Phase 6のPolish完了後
+- [ ] MVPリリース: Phase 3完了時点 (T027.5 E2Eテスト合格)
+- [ ] フル機能リリース: Phase 5完了時点 (T045.5 E2Eテスト合格)
+- [ ] ユーザー満足度: Phase 6のPolish完了後 (T053.5 総合テスト合格)
+
+### E2Eテストタイミング
+
+機能追加の疎通確認を確実に行うため、各Phase完了時に手動E2Eテストを実施:
+
+1. **T027.5**: MVP機能テスト (Phase 3完了後)
+2. **T038.5**: パラメータ設定機能テスト (Phase 4完了後)
+3. **T045.5**: ワークフロー実行テスト (Phase 5完了後)
+4. **T053.5**: 総合テスト (Phase 6完了後、リリース前)
 
 ---
 
