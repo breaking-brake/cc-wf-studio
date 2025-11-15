@@ -237,13 +237,16 @@ chore(release): 2.1.0 [skip ci]
 
 productionブランチでリリースが成功した後:
 
-1. mainブランチをフェッチ
-2. mainブランチにチェックアウト
-3. productionブランチの変更をマージ (`chore: sync version from production [skip ci]`)
-4. mainブランチにプッシュ
+1. **productionブランチをフェッチ** (semantic-releaseが作成したリリースコミットを取得)
+2. mainブランチをフェッチ
+3. mainブランチにチェックアウト
+4. productionブランチの変更をマージ (`chore: sync version from production [skip ci]`)
+5. mainブランチにプッシュ
 
 これにより、**mainとproductionの両方が同じバージョン**になります。
 `[skip ci]` により、このマージコミットでCIが再実行されることを防ぎます。
+
+**重要**: semantic-releaseがproductionブランチにリリースコミットを作成した後、必ず `git fetch origin production` を実行してから同期を行います。これにより、ワークフロー開始時にチェックアウトされた古い状態ではなく、最新のリリースコミットが含まれた状態でマージされます。
 
 ## 参考資料
 

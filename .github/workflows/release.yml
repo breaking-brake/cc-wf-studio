@@ -94,6 +94,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+          # Fetch latest production branch (after semantic-release created the release commit)
+          git fetch origin production
+
           # Fetch latest main branch
           git fetch origin main:main
 
