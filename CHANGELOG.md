@@ -1,3 +1,14 @@
+## [2.4.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.3.0...v2.4.0) (2025-11-15)
+
+### Features
+
+* add indeterminate progress bar for MCP tool loading ([7b43b5c](https://github.com/breaking-brake/cc-wf-studio/commit/7b43b5c6e414d09276e5e6d5b6834bbe6eb1713b))
+* add indeterminate progress bar for MCP tool schema loading ([9a52855](https://github.com/breaking-brake/cc-wf-studio/commit/9a528556d399dc399ec6864a91d3bfc573d7a044))
+
+### Code Refactoring
+
+* extract IndeterminateProgressBar as shared component ([c880d45](https://github.com/breaking-brake/cc-wf-studio/commit/c880d45290e207b7674d5e621ad2dd5c5d400872))
+
 ## [2.3.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.2.1...v2.3.0) (2025-11-15)
 
 ### Features
