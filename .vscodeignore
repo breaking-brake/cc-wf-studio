@@ -4,10 +4,11 @@
 .gitignore
 .git/**
 
-# Source files (use built files in out/ instead)
+# Source files (use built files in dist/ instead)
 src/extension/**/*.ts
 src/shared/**/*.ts
 tsconfig.json
+out/**
 
 # Webview source and build dependencies
 src/webview/src/**
@@ -50,3 +51,4 @@ resources/hero.png
 
 # Build config
 biome.json
+vite.extension.config.ts
