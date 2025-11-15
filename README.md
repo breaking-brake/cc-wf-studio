@@ -61,8 +61,8 @@ Designed workflows automatically export to `.claude/agents/` and `.claude/comman
 ### 🔄 Easy Iteration
 Save and load workflows as JSON. Experiment and refine your flows through trial and error.
 
-### 🔒 Fully Offline & Secure
-All operations run locally within VSCode. No network communication means zero risk of data leaks or privacy concerns.
+### 🔒 Fully Local & Secure
+All operations run locally within VSCode. **Note:** MCP Tool nodes may require network connectivity depending on the specific MCP server configuration (e.g., remote API servers). Non-MCP features operate entirely offline.
 
 ## Key Features
 
@@ -343,7 +343,11 @@ MCP (Model Context Protocol) is Claude Code's extensibility system that allows i
 **Prerequisites:**
 - Claude Code CLI must be installed and configured with MCP servers
 - MCP servers must be properly configured in Claude Code settings (user/project/enterprise scope)
-- Network connectivity may be required depending on the MCP server
+
+**Network Connectivity:**
+- **Local MCP servers** (e.g., file system tools): No external network required
+- **Remote MCP servers** (e.g., cloud APIs): External network connectivity required
+- The extension itself does not communicate externally - network usage depends entirely on your configured MCP servers
 
 ### Conditional Branching Nodes
 Implement conditional logic with specialized nodes:
