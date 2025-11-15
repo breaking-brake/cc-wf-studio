@@ -12,6 +12,7 @@ import type { McpToolReference } from '@shared/types/messages';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { getMcpTools } from '../../services/mcp-service';
+import { IndeterminateProgressBar } from '../common/IndeterminateProgressBar';
 
 interface McpToolListProps {
   serverId: string;
@@ -58,17 +59,7 @@ export function McpToolList({
   }, [serverId, t]);
 
   if (loading) {
-    return (
-      <div
-        style={{
-          padding: '16px',
-          textAlign: 'center',
-          color: 'var(--vscode-descriptionForeground)',
-        }}
-      >
-        {t('mcp.loading.tools')}
-      </div>
-    );
+    return <IndeterminateProgressBar label={t('mcp.loading.tools')} />;
   }
 
   if (error) {
