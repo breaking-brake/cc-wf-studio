@@ -1,8 +1,22 @@
-## [2.1.1](https://github.com/breaking-brake/cc-wf-studio/compare/v2.1.0...v2.1.1) (2025-11-15)
+## [2.2.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.0.3...v2.2.0) (2025-11-15)
+
+### Features
+
+* **MCP Tool Node Integration** - Complete implementation of Model Context Protocol tool nodes
+  * MCPサーバー自動検出とツール一覧表示
+  * ツール検索・フィルタリング機能
+  * JSON Schemaベースの動的パラメータフォーム生成（5種類の型対応）
+  * リアルタイムバリデーション
+  * Slash Commandへの完全なエクスポート対応
+  * 5言語対応（en, ja, ko, zh-CN, zh-TW）
 
 ### Bug Fixes
 
 * prevent tag conflict by using @semantic-release/exec for webview sync ([bfaf0cf](https://github.com/breaking-brake/cc-wf-studio/commit/bfaf0cfa66292fbeb760d7981d421b477bcd1302))
+
+### Documentation
+
+* add Semantic Release and GitHub Actions automation guide to CLAUDE.md
 
 ## [2.1.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.0.3...v2.1.0) (2025-11-15)
 
