@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - production
+      - main
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install webview dependencies
+        run: |
+          cd src/webview
+          npm ci
+
+      - name: Build extension
+        run: npm run build
+
+      - name: Package extension
+        run: |
+          npm install -g @vscode/vsce
+          vsce package
+
+      - name: Sync webview package.json version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          cd src/webview
+          npm version $VERSION --no-git-tag-version --allow-same-version
+          npm install
+
+      - name: Semantic Release
+        id: semantic_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+        run: npx semantic-release
+
+      - name: Sync version to main branch
+        if: github.ref == 'refs/heads/production' && steps.semantic_release.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Fetch latest main branch
+          git fetch origin main:main
+
+          # Checkout main and merge production
+          git checkout main
+          git merge origin/production --no-edit -m "chore: sync version from production [skip ci]"
+
+          # Push to main
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git main
