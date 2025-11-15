@@ -339,8 +339,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'refinement.initialMessage.note': '※ 此功能使用您环境中安装的Claude Code。',
 
   // MCP Node (Feature: 001-mcp-node)
-  'node.mcp.title': 'MCP工具',
-  'node.mcp.description': '执行MCP（模型上下文协议）工具',
+  'node.mcp.title': 'MCP Tool',
+  'node.mcp.description': '执行MCP工具',
 
   // MCP Server List
   'mcp.loading.servers': '正在加载MCP服务器...',
@@ -357,7 +357,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': '未找到与"{query}"匹配的工具',
 
   // MCP Node Dialog
-  'mcp.dialog.title': '添加MCP工具节点',
+  'mcp.dialog.title': '参考可用的MCP Tool',
   'mcp.dialog.selectServer': '选择MCP服务器',
   'mcp.dialog.selectTool': '选择工具',
   'mcp.dialog.addButton': '添加工具',

@@ -67,6 +67,39 @@ function readLegacyClaudeConfig(): {
 }
 
 /**
+ * Normalize MCP server configuration by inferring missing type field
+ *
+ * @param config - Raw server configuration from file
+ * @returns Normalized configuration with type field
+ */
+function normalizeServerConfig(config: Partial<McpServerConfig>): McpServerConfig | null {
+  // If type is already specified, use it as-is
+  if (config.type) {
+    return config as McpServerConfig;
+  }
+
+  // Infer type from available fields
+  // Rule 1: If command exists, assume stdio transport
+  if (config.command) {
+    return {
+      ...config,
+      type: 'stdio',
+    } as McpServerConfig;
+  }
+
+  // Rule 2: If url exists, cannot infer (http or sse?)
+  if (config.url) {
+    log('WARN', 'Cannot infer MCP server type from url field', {
+      url: config.url,
+    });
+    return null;
+  }
+
+  // No type and no command/url - invalid configuration
+  return null;
+}
+
+/**
  * Read mcp.json file
  *
  * @param configPath - Path to mcp.json
@@ -119,7 +152,18 @@ export function getMcpServerConfig(
       const projectMcpConfig = readMcpConfig(projectMcpConfigPath);
 
       if (projectMcpConfig?.mcpServers?.[serverId]) {
-        const serverConfig = projectMcpConfig.mcpServers[serverId];
+        const rawConfig = projectMcpConfig.mcpServers[serverId];
+        const serverConfig = normalizeServerConfig(rawConfig);
+
+        if (!serverConfig) {
+          log('WARN', 'Invalid MCP server configuration in project scope', {
+            serverId,
+            scope: 'project',
+            configPath: projectMcpConfigPath,
+            rawConfig,
+          });
+          return null;
+        }
 
         log('INFO', 'Retrieved MCP server configuration from project scope', {
           serverId,
@@ -140,7 +184,18 @@ export function getMcpServerConfig(
         | { mcpServers?: Record<string, McpServerConfig> }
         | undefined;
       if (localConfig?.mcpServers?.[serverId]) {
-        const serverConfig = localConfig.mcpServers[serverId];
+        const rawConfig = localConfig.mcpServers[serverId];
+        const serverConfig = normalizeServerConfig(rawConfig);
+
+        if (!serverConfig) {
+          log('WARN', 'Invalid MCP server configuration in local scope', {
+            serverId,
+            scope: 'local',
+            workspacePath,
+            rawConfig,
+          });
+          return null;
+        }
 
         log('INFO', 'Retrieved MCP server configuration from local scope', {
           serverId,
@@ -157,7 +212,17 @@ export function getMcpServerConfig(
 
     // Priority 3: User scope - .claude.json.mcpServers (top-level)
     if (legacyConfig?.mcpServers?.[serverId]) {
-      const serverConfig = legacyConfig.mcpServers[serverId];
+      const rawConfig = legacyConfig.mcpServers[serverId];
+      const serverConfig = normalizeServerConfig(rawConfig);
+
+      if (!serverConfig) {
+        log('WARN', 'Invalid MCP server configuration in user scope', {
+          serverId,
+          scope: 'user',
+          rawConfig,
+        });
+        return null;
+      }
 
       log('INFO', 'Retrieved MCP server configuration from user scope', {
         serverId,

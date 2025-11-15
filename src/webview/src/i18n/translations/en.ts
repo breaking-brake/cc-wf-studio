@@ -359,7 +359,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // MCP Node (Feature: 001-mcp-node)
   'node.mcp.title': 'MCP Tool',
-  'node.mcp.description': 'Execute MCP (Model Context Protocol) tool',
+  'node.mcp.description': 'Execute MCP tool',
 
   // MCP Server List
   'mcp.loading.servers': 'Loading MCP servers...',
@@ -376,7 +376,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': 'No tools found matching "{query}"',
 
   // MCP Node Dialog
-  'mcp.dialog.title': 'Add MCP Tool Node',
+  'mcp.dialog.title': 'Browse Available MCP Tools',
   'mcp.dialog.selectServer': 'Select MCP Server',
   'mcp.dialog.selectTool': 'Select Tool',
   'mcp.dialog.addButton': 'Add Tool',

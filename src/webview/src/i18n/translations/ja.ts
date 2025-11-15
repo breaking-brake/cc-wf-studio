@@ -356,8 +356,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     '※ この機能はお使いの環境にインストールされたClaude Codeを使用します。',
 
   // MCP Node (Feature: 001-mcp-node)
-  'node.mcp.title': 'MCPツール',
-  'node.mcp.description': 'MCP (Model Context Protocol) ツールを実行',
+  'node.mcp.title': 'MCP Tool',
+  'node.mcp.description': 'MCPツールを実行',
 
   // MCP Server List
   'mcp.loading.servers': 'MCPサーバーを読み込み中...',
@@ -374,7 +374,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': '"{query}" に一致するツールが見つかりません',
 
   // MCP Node Dialog
-  'mcp.dialog.title': 'MCPツールノードを追加',
+  'mcp.dialog.title': '使用可能なMCPツールを参照',
   'mcp.dialog.selectServer': 'MCPサーバーを選択',
   'mcp.dialog.selectTool': 'ツールを選択',
   'mcp.dialog.addButton': 'ツールを追加',

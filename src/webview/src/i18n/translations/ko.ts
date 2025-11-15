@@ -355,8 +355,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.initialMessage.note': '※ 이 기능은 환경에 설치된 Claude Code를 사용합니다.',
 
   // MCP Node (Feature: 001-mcp-node)
-  'node.mcp.title': 'MCP 도구',
-  'node.mcp.description': 'MCP (Model Context Protocol) 도구 실행',
+  'node.mcp.title': 'MCP Tool',
+  'node.mcp.description': 'MCP 도구 실행',
 
   // MCP Server List
   'mcp.loading.servers': 'MCP 서버 로드 중...',
@@ -373,7 +373,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': '"{query}"와 일치하는 도구를 찾을 수 없습니다',
 
   // MCP Node Dialog
-  'mcp.dialog.title': 'MCP 도구 노드 추가',
+  'mcp.dialog.title': '사용 가능한 MCP Tool 참조',
   'mcp.dialog.selectServer': 'MCP 서버 선택',
   'mcp.dialog.selectTool': '도구 선택',
   'mcp.dialog.addButton': '도구 추가',
