@@ -35,15 +35,15 @@
 
 全ユーザーストーリーの前提となる共通基盤の実装
 
-- [ ] T009 McpNode型定義を実装 in src/types/mcp-node.ts
-- [ ] T010 McpNodeData型定義を実装 in src/types/mcp-node.ts
-- [ ] T011 McpServerReference型定義を実装 in src/types/mcp-node.ts
-- [ ] T012 McpToolReference型定義を実装 in src/types/mcp-node.ts
-- [ ] T013 ToolParameter型定義を実装 in src/types/mcp-node.ts
-- [ ] T014 MCP CLIラッパークラスを実装 in src/extension/services/mcp-cli-service.ts
-- [ ] T015 MCPサーバー情報キャッシュ機構を実装 in src/extension/services/mcp-cache-service.ts
-- [ ] T016 Extension-Webview間メッセージ型を定義 in src/types/messages/mcp-messages.ts
-- [ ] T017 ワークフロー検証ルールを拡張（MCPノード対応） in src/extension/utils/validate-workflow.ts
+- [x] T009 McpNode型定義を実装 in src/types/mcp-node.ts
+- [x] T010 McpNodeData型定義を実装 in src/types/mcp-node.ts
+- [x] T011 McpServerReference型定義を実装 in src/types/mcp-node.ts
+- [x] T012 McpToolReference型定義を実装 in src/types/mcp-node.ts
+- [x] T013 ToolParameter型定義を実装 in src/types/mcp-node.ts
+- [x] T014 MCP CLIラッパークラスを実装 in src/extension/services/mcp-cli-service.ts
+- [x] T015 MCPサーバー情報キャッシュ機構を実装 in src/extension/services/mcp-cache-service.ts
+- [x] T016 Extension-Webview間メッセージ型を定義 in src/types/messages/mcp-messages.ts
+- [x] T017 ワークフロー検証ルールを拡張(MCPノード対応) in src/extension/utils/validate-workflow.ts
 
 ## Phase 3: ユーザーストーリー1実装 (US1: MCP Tool Discovery) - 5日
 
