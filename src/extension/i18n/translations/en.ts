@@ -58,4 +58,18 @@ export const enTranslations: TranslationKeys = {
   'switchNode.title': '### Switch Node Details',
   'switchNode.multiple': 'Multiple Branch (2-N)',
   'switchNode.evaluationTarget': 'Evaluation Target',
+
+  // MCP node details
+  'mcpNode.title': '## MCP Tool Nodes',
+  'mcpNode.description': '**Description**',
+  'mcpNode.server': '**MCP Server**',
+  'mcpNode.toolName': '**Tool Name**',
+  'mcpNode.validationStatus': '**Validation Status**',
+  'mcpNode.configuredParameters': '**Configured Parameters**',
+  'mcpNode.availableParameters': '**Available Parameters**',
+  'mcpNode.required': 'required',
+  'mcpNode.optional': 'optional',
+  'mcpNode.noDescription': 'No description available',
+  'mcpNode.executionMethod':
+    'This node invokes an MCP (Model Context Protocol) tool. When executing this workflow, use the configured parameters to call the tool via the MCP server.',
 };

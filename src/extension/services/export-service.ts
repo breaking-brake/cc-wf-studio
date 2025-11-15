@@ -10,6 +10,7 @@ import type {
   AskUserQuestionNode,
   BranchNode,
   IfElseNode,
+  McpNode,
   PromptNode,
   SkillNode,
   SubAgentNode,
@@ -256,6 +257,10 @@ function generateMermaidFlowchart(workflow: Workflow): string {
       const skillNode = node as SkillNode;
       const skillName = skillNode.data.name || 'Skill';
       lines.push(`    ${nodeId}[[${escapeLabel(`Skill: ${skillName}`)}]]`);
+    } else if (nodeType === 'mcp') {
+      const mcpNode = node as McpNode;
+      const toolName = mcpNode.data.toolName || 'MCP Tool';
+      lines.push(`    ${nodeId}[[${escapeLabel(`MCP: ${toolName}`)}]]`);
     }
   }
 
@@ -408,6 +413,7 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
   // Collect node details by type
   const promptNodes = nodes.filter((n) => (n.type as string) === 'prompt') as PromptNode[];
   const skillNodes = nodes.filter((n) => (n.type as string) === 'skill') as SkillNode[];
+  const mcpNodes = nodes.filter((n) => (n.type as string) === 'mcp') as McpNode[];
   const askUserQuestionNodes = nodes.filter(
     (n) => (n.type as string) === 'askUserQuestion'
   ) as AskUserQuestionNode[];
@@ -438,6 +444,56 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
       sections.push(
         'This node executes a Claude Code Skill. The Skill definition is stored in the SKILL.md file at the path shown above.'
       );
+      sections.push('');
+    }
+  }
+
+  // MCP node details
+  if (mcpNodes.length > 0) {
+    sections.push(translate('mcpNode.title'));
+    sections.push('');
+    for (const node of mcpNodes) {
+      const nodeId = sanitizeNodeId(node.id);
+      sections.push(`#### ${nodeId}(${node.data.toolName})`);
+      sections.push('');
+      sections.push(`${translate('mcpNode.description')}: ${node.data.toolDescription}`);
+      sections.push('');
+      sections.push(`${translate('mcpNode.server')}: ${node.data.serverId}`);
+      sections.push('');
+      sections.push(`${translate('mcpNode.toolName')}: ${node.data.toolName}`);
+      sections.push('');
+      sections.push(`${translate('mcpNode.validationStatus')}: ${node.data.validationStatus}`);
+      sections.push('');
+
+      // Show configured parameters
+      if (Object.keys(node.data.parameterValues).length > 0) {
+        sections.push(`${translate('mcpNode.configuredParameters')}:`);
+        sections.push('');
+        for (const [paramName, paramValue] of Object.entries(node.data.parameterValues)) {
+          const paramSchema = node.data.parameters.find((p) => p.name === paramName);
+          const paramType = paramSchema ? ` (${paramSchema.type})` : '';
+          const valueStr =
+            typeof paramValue === 'object' ? JSON.stringify(paramValue) : String(paramValue);
+          sections.push(`- \`${paramName}\`${paramType}: ${valueStr}`);
+        }
+        sections.push('');
+      }
+
+      // Show parameter schema
+      if (node.data.parameters.length > 0) {
+        sections.push(`${translate('mcpNode.availableParameters')}:`);
+        sections.push('');
+        for (const param of node.data.parameters) {
+          const requiredLabel = param.required
+            ? ` (${translate('mcpNode.required')})`
+            : ` (${translate('mcpNode.optional')})`;
+          const description = param.description || translate('mcpNode.noDescription');
+          sections.push(`- \`${param.name}\` (${param.type})${requiredLabel}: ${description}`);
+        }
+        sections.push('');
+      }
+
+      sections.push(translate('mcpNode.executionMethod'));
       sections.push('');
     }
   }
