@@ -5,8 +5,8 @@
  * Cache strategy: No automatic refresh - user must manually refresh (per contracts/mcp-cli.schema.json)
  */
 
-import { log } from '../extension';
 import type { McpServerReference, McpToolReference } from '../../shared/types/mcp-node';
+import { log } from '../extension';
 
 /**
  * Cache entry for MCP servers

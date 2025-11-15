@@ -14,6 +14,7 @@ import { handleGenerateWorkflow } from './ai-generation';
 import { handleExportWorkflow } from './export-workflow';
 import { loadWorkflow } from './load-workflow';
 import { loadWorkflowList } from './load-workflow-list';
+import { handleGetMcpTools, handleListMcpServers } from './mcp-handlers';
 import { saveWorkflow } from './save-workflow';
 import { handleBrowseSkills, handleCreateSkill, handleValidateSkillFile } from './skill-operations';
 import {
@@ -21,7 +22,6 @@ import {
   handleClearConversation,
   handleRefineWorkflow,
 } from './workflow-refinement';
-import { handleGetMcpTools, handleListMcpServers } from './mcp-handlers';
 
 /**
  * Register the open editor command
@@ -317,11 +317,7 @@ export function registerOpenEditorCommand(
 
           case 'LIST_MCP_SERVERS':
             // List all configured MCP servers (T018)
-            await handleListMcpServers(
-              message.payload || {},
-              webview,
-              message.requestId || ''
-            );
+            await handleListMcpServers(message.payload || {}, webview, message.requestId || '');
             break;
 
           case 'GET_MCP_TOOLS':

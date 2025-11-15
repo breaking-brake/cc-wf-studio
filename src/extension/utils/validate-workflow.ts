@@ -7,9 +7,9 @@
 
 import {
   type Connection,
+  type McpNodeData,
   NodeType,
   type SkillNodeData,
-  type McpNodeData,
   VALIDATION_RULES,
   type Workflow,
   type WorkflowNode,

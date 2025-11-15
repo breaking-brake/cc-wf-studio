@@ -6,8 +6,8 @@
  */
 
 import { spawn } from 'node:child_process';
-import { log } from '../extension';
 import type { McpServerReference, McpToolReference } from '../../shared/types/mcp-node';
+import { log } from '../extension';
 
 /**
  * Error codes for MCP CLI operations
@@ -604,13 +604,15 @@ function parseMcpListToolsOutput(output: string, serverId: string): McpToolRefer
       throw new Error('Expected JSON array of tools');
     }
 
-    return jsonData.map((tool: any) => ({
-      serverId,
-      toolName: tool.name || '',
-      description: tool.description || '',
-      parameters: tool.parameters || [],
-    }));
-  } catch (jsonError) {
+    return jsonData.map(
+      (tool: { name?: string; description?: string; parameters?: unknown[] }) => ({
+        serverId,
+        toolName: tool.name || '',
+        description: tool.description || '',
+        parameters: tool.parameters || [],
+      })
+    );
+  } catch (_jsonError) {
     // Fallback: parse as plain text output
     // Format: "tool_name - description"
     const tools: McpToolReference[] = [];

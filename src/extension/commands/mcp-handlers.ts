@@ -7,7 +7,7 @@
  * Based on: specs/001-mcp-node/contracts/extension-webview-messages.schema.json
  */
 
-import * as vscode from 'vscode';
+import type * as vscode from 'vscode';
 import type {
   GetMcpToolsPayload,
   ListMcpServersPayload,

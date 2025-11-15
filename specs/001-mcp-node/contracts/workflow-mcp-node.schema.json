@@ -196,10 +196,7 @@
         "enum": {
           "type": "array",
           "items": {
-            "oneOf": [
-              { "type": "string" },
-              { "type": "number" }
-            ]
+            "oneOf": [{ "type": "string" }, { "type": "number" }]
           },
           "maxItems": 100,
           "description": "Enumerated valid values"
