@@ -1,3 +1,9 @@
+## [2.1.1](https://github.com/breaking-brake/cc-wf-studio/compare/v2.1.0...v2.1.1) (2025-11-15)
+
+### Bug Fixes
+
+* prevent tag conflict by using @semantic-release/exec for webview sync ([bfaf0cf](https://github.com/breaking-brake/cc-wf-studio/commit/bfaf0cfa66292fbeb760d7981d421b477bcd1302))
+
 ## [2.1.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.0.3...v2.1.0) (2025-11-15)
 
 ### Features
