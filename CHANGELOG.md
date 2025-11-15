@@ -1,3 +1,9 @@
+## [2.2.1](https://github.com/breaking-brake/cc-wf-studio/compare/v2.2.0...v2.2.1) (2025-11-15)
+
+### Bug Fixes
+
+* bundle extension with Vite to include MCP SDK dependencies ([f3a2878](https://github.com/breaking-brake/cc-wf-studio/commit/f3a2878832fa8220e438e7c69befe4850a4a4a29))
+
 ## [2.2.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.0.3...v2.2.0) (2025-11-15)
 
 ### Features
