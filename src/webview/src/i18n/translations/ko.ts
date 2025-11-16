@@ -436,6 +436,26 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.modeSelection.fullNaturalLanguage.description':
     '서버만 선택하고 전체 작업을 자연어로 설명합니다. 가장 간단하지만 재현성은 낮습니다.',
 
+  // Tool Selection Mode (Step-by-step decision flow)
+  'mcp.toolSelectionMode.title': '도구 선택 방법',
+  'mcp.toolSelectionMode.subtitle': 'MCP 노드의 도구를 선택하는 방법을 선택하세요',
+  'mcp.toolSelectionMode.manual.title': '도구를 직접 선택',
+  'mcp.toolSelectionMode.manual.description':
+    '직접 도구를 찾아보고 선택합니다. 사용할 도구를 정확히 알고 있을 때 적합합니다.',
+  'mcp.toolSelectionMode.auto.title': 'AI가 도구 선택',
+  'mcp.toolSelectionMode.auto.description':
+    '작업 설명을 기반으로 AI가 자동으로 최적의 도구를 선택합니다. 탐색 중이거나 불확실할 때 적합합니다.',
+
+  // Parameter Config Mode (Step-by-step decision flow)
+  'mcp.parameterConfigMode.title': '매개변수 구성 방법',
+  'mcp.parameterConfigMode.subtitle': '이 도구의 매개변수를 구성하는 방법을 선택하세요',
+  'mcp.parameterConfigMode.manual.title': '수동으로 구성',
+  'mcp.parameterConfigMode.manual.description':
+    '직접 모든 매개변수를 입력합니다. 정밀한 제어와 재현성이 필요할 때 적합합니다.',
+  'mcp.parameterConfigMode.auto.title': 'AI가 구성',
+  'mcp.parameterConfigMode.auto.description':
+    '자연어 설명을 기반으로 AI가 매개변수를 구성합니다. 빠른 설정에 적합합니다.',
+
   // Natural Language Input
   'mcp.naturalLanguage.paramDescription.label': '매개변수 설명',
   'mcp.naturalLanguage.paramDescription.placeholder':

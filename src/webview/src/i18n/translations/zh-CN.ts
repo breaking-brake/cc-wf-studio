@@ -419,6 +419,25 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.modeSelection.fullNaturalLanguage.description':
     '仅选择服务器，用自然语言描述整个任务。最简单，但再现性最低。',
 
+  // Tool Selection Mode (Step-by-step decision flow)
+  'mcp.toolSelectionMode.title': '工具选择方式',
+  'mcp.toolSelectionMode.subtitle': '选择如何为此MCP节点选择工具',
+  'mcp.toolSelectionMode.manual.title': '手动选择工具',
+  'mcp.toolSelectionMode.manual.description':
+    '我将自己浏览并选择工具。适合明确知道要使用哪个工具时。',
+  'mcp.toolSelectionMode.auto.title': '让AI选择工具',
+  'mcp.toolSelectionMode.auto.description':
+    'AI将根据任务描述自动选择最佳工具。适合探索或不确定时。',
+
+  // Parameter Config Mode (Step-by-step decision flow)
+  'mcp.parameterConfigMode.title': '参数配置方式',
+  'mcp.parameterConfigMode.subtitle': '选择如何为此工具配置参数',
+  'mcp.parameterConfigMode.manual.title': '手动配置',
+  'mcp.parameterConfigMode.manual.description':
+    '我将自己填写所有参数。适合需要精确控制和可重现性时。',
+  'mcp.parameterConfigMode.auto.title': '让AI配置',
+  'mcp.parameterConfigMode.auto.description': 'AI将根据自然语言描述配置参数。适合快速设置时。',
+
   // Natural Language Input
   'mcp.naturalLanguage.paramDescription.label': '参数描述',
   'mcp.naturalLanguage.paramDescription.placeholder':

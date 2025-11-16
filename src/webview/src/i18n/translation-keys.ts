@@ -397,6 +397,22 @@ export interface WebviewTranslationKeys {
   'mcp.modeSelection.fullNaturalLanguage.title': string;
   'mcp.modeSelection.fullNaturalLanguage.description': string;
 
+  // Tool Selection Mode (Step-by-step decision flow)
+  'mcp.toolSelectionMode.title': string;
+  'mcp.toolSelectionMode.subtitle': string;
+  'mcp.toolSelectionMode.manual.title': string;
+  'mcp.toolSelectionMode.manual.description': string;
+  'mcp.toolSelectionMode.auto.title': string;
+  'mcp.toolSelectionMode.auto.description': string;
+
+  // Parameter Config Mode (Step-by-step decision flow)
+  'mcp.parameterConfigMode.title': string;
+  'mcp.parameterConfigMode.subtitle': string;
+  'mcp.parameterConfigMode.manual.title': string;
+  'mcp.parameterConfigMode.manual.description': string;
+  'mcp.parameterConfigMode.auto.title': string;
+  'mcp.parameterConfigMode.auto.description': string;
+
   // Natural Language Input
   'mcp.naturalLanguage.paramDescription.label': string;
   'mcp.naturalLanguage.paramDescription.placeholder': string;

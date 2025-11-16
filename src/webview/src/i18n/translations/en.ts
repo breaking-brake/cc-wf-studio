@@ -439,6 +439,27 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.modeSelection.fullNaturalLanguage.description':
     'Select server only, describe entire task in natural language. Simplest, lowest reproducibility.',
 
+  // Tool Selection Mode (Step-by-step decision flow)
+  'mcp.toolSelectionMode.title': 'How to Select Tool',
+  'mcp.toolSelectionMode.subtitle': 'Choose how you want to select the tool for this MCP node',
+  'mcp.toolSelectionMode.manual.title': 'Select Tool Manually',
+  'mcp.toolSelectionMode.manual.description':
+    'I will browse and select the tool myself. Good for when you know exactly which tool to use.',
+  'mcp.toolSelectionMode.auto.title': 'Let AI Select Tool',
+  'mcp.toolSelectionMode.auto.description':
+    'AI will automatically select the best tool based on my task description. Good for exploring or when unsure.',
+
+  // Parameter Config Mode (Step-by-step decision flow)
+  'mcp.parameterConfigMode.title': 'How to Configure Parameters',
+  'mcp.parameterConfigMode.subtitle':
+    'Choose how you want to configure the parameters for this tool',
+  'mcp.parameterConfigMode.manual.title': 'Configure Manually',
+  'mcp.parameterConfigMode.manual.description':
+    'I will fill in all parameters myself. Good for precise control and reproducibility.',
+  'mcp.parameterConfigMode.auto.title': 'Let AI Configure',
+  'mcp.parameterConfigMode.auto.description':
+    'AI will configure parameters based on my natural language description. Good for quick setup.',
+
   // Natural Language Input
   'mcp.naturalLanguage.paramDescription.label': 'Parameter Description',
   'mcp.naturalLanguage.paramDescription.placeholder':
