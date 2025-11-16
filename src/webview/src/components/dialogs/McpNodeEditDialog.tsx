@@ -109,10 +109,7 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
       setShowValidation(true);
 
       // Validate all parameters
-      const errors = validateAllParameters(
-        parameterValues,
-        parameters as ExtendedToolParameter[]
-      );
+      const errors = validateAllParameters(parameterValues, parameters as ExtendedToolParameter[]);
 
       // If validation fails, don't save
       if (Object.keys(errors).length > 0) {
@@ -191,9 +188,7 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
   const renderStepContent = () => {
     switch (currentStep) {
       case EditWizardStep.ModeSelection:
-        return (
-          <ModeSelectionStep selectedMode={selectedMode} onModeChange={setSelectedMode} />
-        );
+        return <ModeSelectionStep selectedMode={selectedMode} onModeChange={setSelectedMode} />;
 
       case EditWizardStep.Configuration:
         return renderConfigurationStep();
@@ -222,9 +217,7 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
             <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)' }}>
               <strong>{t('property.mcp.serverId')}:</strong> {nodeData.serverId}
             </div>
-            <div
-              style={{ fontSize: '13px', color: 'var(--vscode-foreground)', marginTop: '4px' }}
-            >
+            <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)', marginTop: '4px' }}>
               <strong>{t('property.mcp.toolName')}:</strong> {nodeData.toolName}
             </div>
             {nodeData.toolDescription && (
@@ -431,9 +424,7 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
               <button
                 type="button"
                 onClick={handleSave}
-                disabled={
-                  loading || !!error || (selectedMode === 'detailed' && !parameters.length)
-                }
+                disabled={loading || !!error || (selectedMode === 'detailed' && !parameters.length)}
                 style={{
                   padding: '8px 16px',
                   fontSize: '13px',

@@ -9,7 +9,7 @@
  */
 
 import type { McpNodeData, McpNodeMode } from '@shared/types/mcp-node';
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 export enum WizardStep {
   ModeSelection = 0,

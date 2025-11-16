@@ -443,8 +443,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'mcp.error.taskDescTooShort':
     '任務描述太短（{length}個字元）。請提供至少{min}個字元並包含明確的目標。',
   'mcp.error.noToolsAvailable': '所選MCP伺服器沒有可用工具',
-  'mcp.error.toolListOutdated':
-    '工具清單快照已超過7天。請重新編輯此節點以取得最新的可用工具。',
+  'mcp.error.toolListOutdated': '工具清單快照已超過7天。請重新編輯此節點以取得最新的可用工具。',
   'mcp.error.modeConfigMissing': '缺少模式配置。請重新配置此節點。',
   'mcp.error.invalidModeConfig': '模式配置無效。請檢查您的自然語言描述或切換到詳細模式。',
 

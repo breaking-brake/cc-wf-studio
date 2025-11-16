@@ -10,6 +10,7 @@
 
 import type { McpNodeMode } from '@shared/types/mcp-node';
 import { useTranslation } from '../../i18n/i18n-context';
+import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
 
 interface ModeSelectionStepProps {
   selectedMode: McpNodeMode;
@@ -19,8 +20,8 @@ interface ModeSelectionStepProps {
 interface ModeOption {
   mode: McpNodeMode;
   icon: string;
-  titleKey: string;
-  descriptionKey: string;
+  titleKey: keyof WebviewTranslationKeys;
+  descriptionKey: keyof WebviewTranslationKeys;
 }
 
 export function ModeSelectionStep({ selectedMode, onModeChange }: ModeSelectionStepProps) {
@@ -115,8 +116,7 @@ export function ModeSelectionStep({ selectedMode, onModeChange }: ModeSelectionS
               }}
               onMouseEnter={(e) => {
                 if (!isSelected) {
-                  e.currentTarget.style.backgroundColor =
-                    'var(--vscode-list-hoverBackground)';
+                  e.currentTarget.style.backgroundColor = 'var(--vscode-list-hoverBackground)';
                 }
               }}
               onMouseLeave={(e) => {

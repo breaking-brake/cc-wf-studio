@@ -471,7 +471,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Mode Indicator Tooltips
   'mcp.mode.detailed.tooltip': 'Detailed Mode: All parameters explicitly configured',
-  'mcp.mode.naturalLanguageParam.tooltip':
-    'Natural Language Parameter Mode: "{description}"',
+  'mcp.mode.naturalLanguageParam.tooltip': 'Natural Language Parameter Mode: "{description}"',
   'mcp.mode.fullNaturalLanguage.tooltip': 'Full Natural Language Mode: "{taskDescription}"',
 };
