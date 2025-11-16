@@ -1,14 +1,14 @@
 /**
  * MCP Node Edit Dialog Component
  *
- * Feature: 001-mcp-natural-language-mode
- * Purpose: Configure MCP nodes with mode selection wizard
+ * Feature: 001-mcp-node
+ * Purpose: Configure parameters for existing MCP nodes
  *
- * Based on: specs/001-mcp-natural-language-mode/extension-points.md Section 2
- * Tasks: T014, T016
+ * Based on: specs/001-mcp-node/plan.md Section 6.3
+ * Task: T038
  */
 
-import type { McpNodeData, McpNodeMode, ToolParameter } from '@shared/types/mcp-node';
+import type { McpNodeData, ToolParameter } from '@shared/types/mcp-node';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { getMcpToolSchema } from '../../services/mcp-service';
@@ -17,12 +17,6 @@ import type { ExtendedToolParameter } from '../../utils/parameter-validator';
 import { validateAllParameters } from '../../utils/parameter-validator';
 import { IndeterminateProgressBar } from '../common/IndeterminateProgressBar';
 import { ParameterFormGenerator } from '../mcp/ParameterFormGenerator';
-import { ModeSelectionStep } from '../mode-selection/ModeSelectionStep';
-
-enum EditWizardStep {
-  ModeSelection = 0,
-  Configuration = 1,
-}
 
 interface McpNodeEditDialogProps {
   isOpen: boolean;
@@ -34,33 +28,22 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
   const { t } = useTranslation();
   const { nodes, updateNodeData } = useWorkflowStore();
 
-  // Find the node being edited
-  const node = nodes.find((n) => n.id === nodeId);
-  const nodeData = node?.data as McpNodeData | undefined;
-
-  // Wizard state
-  const [currentStep, setCurrentStep] = useState<EditWizardStep>(EditWizardStep.ModeSelection);
-  const [selectedMode, setSelectedMode] = useState<McpNodeMode>(nodeData?.mode || 'detailed');
-
-  // Existing state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [parameterValues, setParameterValues] = useState<Record<string, unknown>>({});
   const [parameters, setParameters] = useState<ToolParameter[]>([]);
   const [showValidation, setShowValidation] = useState(false);
 
+  // Find the node being edited
+  const node = nodes.find((n) => n.id === nodeId);
+  const nodeData = node?.data as McpNodeData | undefined;
+
   /**
-   * Load tool schema from Extension Host (only for detailed mode)
+   * Load tool schema from Extension Host
    */
   useEffect(() => {
     const loadToolSchema = async () => {
-      // Only load schema for detailed mode in configuration step
-      if (
-        !isOpen ||
-        !nodeData ||
-        selectedMode !== 'detailed' ||
-        currentStep !== EditWizardStep.Configuration
-      ) {
+      if (!isOpen || !nodeData) {
         return;
       }
 
@@ -93,7 +76,7 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
     };
 
     loadToolSchema();
-  }, [isOpen, nodeData, selectedMode, currentStep, t]);
+  }, [isOpen, nodeData, t]);
 
   if (!isOpen || !node || !nodeData) {
     return null;
@@ -103,40 +86,22 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
    * Handle save button click
    */
   const handleSave = () => {
-    // Validation depends on selected mode
-    if (selectedMode === 'detailed') {
-      // Enable validation display
-      setShowValidation(true);
+    // Enable validation display
+    setShowValidation(true);
 
-      // Validate all parameters
-      const errors = validateAllParameters(parameterValues, parameters as ExtendedToolParameter[]);
+    // Validate all parameters
+    const errors = validateAllParameters(parameterValues, parameters as ExtendedToolParameter[]);
 
-      // If validation fails, don't save
-      if (Object.keys(errors).length > 0) {
-        return;
-      }
-
-      // Update node with mode and parameter values
-      updateNodeData(nodeId, {
-        ...nodeData,
-        mode: selectedMode,
-        parameterValues,
-      });
-    } else if (selectedMode === 'naturalLanguageParam') {
-      // TODO: Implement natural language parameter mode save (User Story 2)
-      // For now, just save the mode
-      updateNodeData(nodeId, {
-        ...nodeData,
-        mode: selectedMode,
-      });
-    } else if (selectedMode === 'fullNaturalLanguage') {
-      // TODO: Implement full natural language mode save (User Story 3)
-      // For now, just save the mode
-      updateNodeData(nodeId, {
-        ...nodeData,
-        mode: selectedMode,
-      });
+    // If validation fails, don't save
+    if (Object.keys(errors).length > 0) {
+      return;
     }
+
+    // Update node with new parameter values
+    updateNodeData(nodeId, {
+      ...nodeData,
+      parameterValues,
+    });
 
     // Close dialog
     handleClose();
@@ -146,145 +111,9 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
    * Handle cancel/close
    */
   const handleClose = () => {
-    // Reset wizard state
-    setCurrentStep(EditWizardStep.ModeSelection);
-    setSelectedMode(nodeData?.mode || 'detailed');
     setShowValidation(false);
     setError(null);
     onClose();
-  };
-
-  /**
-   * Navigate to next step
-   */
-  const handleNext = () => {
-    if (currentStep === EditWizardStep.ModeSelection) {
-      setCurrentStep(EditWizardStep.Configuration);
-    }
-  };
-
-  /**
-   * Navigate to previous step
-   */
-  const handlePrevious = () => {
-    if (currentStep === EditWizardStep.Configuration) {
-      setCurrentStep(EditWizardStep.ModeSelection);
-    }
-  };
-
-  /**
-   * Check if user can proceed to next step
-   */
-  const canProceedToNext = (): boolean => {
-    if (currentStep === EditWizardStep.ModeSelection) {
-      return true; // Mode is always selected
-    }
-    return false; // Configuration is the last step
-  };
-
-  /**
-   * Render current step content
-   */
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case EditWizardStep.ModeSelection:
-        return <ModeSelectionStep selectedMode={selectedMode} onModeChange={setSelectedMode} />;
-
-      case EditWizardStep.Configuration:
-        return renderConfigurationStep();
-
-      default:
-        return null;
-    }
-  };
-
-  /**
-   * Render configuration step based on selected mode
-   */
-  const renderConfigurationStep = () => {
-    if (selectedMode === 'detailed') {
-      return (
-        <>
-          {/* Tool Information */}
-          <div
-            style={{
-              marginBottom: '16px',
-              padding: '12px',
-              backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
-              borderRadius: '4px',
-            }}
-          >
-            <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)' }}>
-              <strong>{t('property.mcp.serverId')}:</strong> {nodeData.serverId}
-            </div>
-            <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)', marginTop: '4px' }}>
-              <strong>{t('property.mcp.toolName')}:</strong> {nodeData.toolName}
-            </div>
-            {nodeData.toolDescription && (
-              <div
-                style={{
-                  fontSize: '12px',
-                  color: 'var(--vscode-descriptionForeground)',
-                  marginTop: '8px',
-                }}
-              >
-                {nodeData.toolDescription}
-              </div>
-            )}
-          </div>
-
-          {/* Loading State */}
-          {loading && <IndeterminateProgressBar label={t('mcp.editDialog.loading')} />}
-
-          {/* Error State */}
-          {error && !loading && (
-            <div
-              style={{
-                padding: '16px',
-                marginBottom: '16px',
-                color: 'var(--vscode-errorForeground)',
-                backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
-                border: '1px solid var(--vscode-inputValidation-errorBorder)',
-                borderRadius: '4px',
-              }}
-            >
-              {error}
-            </div>
-          )}
-
-          {/* Parameter Form */}
-          {!loading && !error && (
-            <ParameterFormGenerator
-              parameters={parameters}
-              parameterValues={parameterValues}
-              onChange={setParameterValues}
-              showValidation={showValidation}
-            />
-          )}
-        </>
-      );
-    } else {
-      // Placeholder for other modes (User Story 2 and 3)
-      return (
-        <div
-          style={{
-            padding: '24px',
-            textAlign: 'center',
-            backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
-            borderRadius: '4px',
-          }}
-        >
-          <div style={{ fontSize: '14px', marginBottom: '8px', color: 'var(--vscode-foreground)' }}>
-            {selectedMode === 'naturalLanguageParam'
-              ? t('mcp.modeSelection.naturalLanguageParam.title')
-              : t('mcp.modeSelection.fullNaturalLanguage.title')}
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)' }}>
-            Coming soon in User Story {selectedMode === 'naturalLanguageParam' ? '2' : '3'}
-          </div>
-        </div>
-      );
-    }
   };
 
   return (
@@ -330,26 +159,69 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
           style={{
             fontSize: '16px',
             fontWeight: 'bold',
-            marginBottom: '8px',
+            marginBottom: '16px',
             color: 'var(--vscode-foreground)',
           }}
         >
           {t('mcp.editDialog.title')}
         </div>
 
-        {/* Step Indicator */}
+        {/* Tool Information */}
         <div
           style={{
-            fontSize: '12px',
-            color: 'var(--vscode-descriptionForeground)',
-            marginBottom: '24px',
+            marginBottom: '16px',
+            padding: '12px',
+            backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
+            borderRadius: '4px',
           }}
         >
-          Step {currentStep + 1} of 2
+          <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)' }}>
+            <strong>{t('property.mcp.serverId')}:</strong> {nodeData.serverId}
+          </div>
+          <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)', marginTop: '4px' }}>
+            <strong>{t('property.mcp.toolName')}:</strong> {nodeData.toolName}
+          </div>
+          {nodeData.toolDescription && (
+            <div
+              style={{
+                fontSize: '12px',
+                color: 'var(--vscode-descriptionForeground)',
+                marginTop: '8px',
+              }}
+            >
+              {nodeData.toolDescription}
+            </div>
+          )}
         </div>
 
-        {/* Step Content */}
-        <div style={{ marginBottom: '24px' }}>{renderStepContent()}</div>
+        {/* Loading State */}
+        {loading && <IndeterminateProgressBar label={t('mcp.editDialog.loading')} />}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div
+            style={{
+              padding: '16px',
+              marginBottom: '16px',
+              color: 'var(--vscode-errorForeground)',
+              backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
+              border: '1px solid var(--vscode-inputValidation-errorBorder)',
+              borderRadius: '4px',
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {/* Parameter Form */}
+        {!loading && !error && (
+          <ParameterFormGenerator
+            parameters={parameters}
+            parameterValues={parameterValues}
+            onChange={setParameterValues}
+            showValidation={showValidation}
+          />
+        )}
 
         {/* Dialog Actions */}
         <div
@@ -357,97 +229,46 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
             marginTop: '24px',
             display: 'flex',
             gap: '12px',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end',
           }}
         >
-          {/* Left side: Back button */}
-          <div>
-            {currentStep === EditWizardStep.Configuration && (
-              <button
-                type="button"
-                onClick={handlePrevious}
-                style={{
-                  padding: '8px 16px',
-                  fontSize: '13px',
-                  backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                  color: 'var(--vscode-button-secondaryForeground)',
-                  border: 'none',
-                  borderRadius: '2px',
-                  cursor: 'pointer',
-                }}
-              >
-                Back
-              </button>
-            )}
-          </div>
-
-          {/* Right side: Cancel + Next/Save buttons */}
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button
-              type="button"
-              onClick={handleClose}
-              style={{
-                padding: '8px 16px',
-                fontSize: '13px',
-                backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                color: 'var(--vscode-button-secondaryForeground)',
-                border: 'none',
-                borderRadius: '2px',
-                cursor: 'pointer',
-              }}
-            >
-              {t('mcp.editDialog.cancelButton')}
-            </button>
-
-            {currentStep === EditWizardStep.ModeSelection ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={!canProceedToNext()}
-                style={{
-                  padding: '8px 16px',
-                  fontSize: '13px',
-                  backgroundColor: canProceedToNext()
-                    ? 'var(--vscode-button-background)'
-                    : 'var(--vscode-button-secondaryBackground)',
-                  color: canProceedToNext()
-                    ? 'var(--vscode-button-foreground)'
-                    : 'var(--vscode-button-secondaryForeground)',
-                  border: 'none',
-                  borderRadius: '2px',
-                  cursor: canProceedToNext() ? 'pointer' : 'not-allowed',
-                }}
-              >
-                Next
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={loading || !!error || (selectedMode === 'detailed' && !parameters.length)}
-                style={{
-                  padding: '8px 16px',
-                  fontSize: '13px',
-                  backgroundColor:
-                    loading || error || (selectedMode === 'detailed' && !parameters.length)
-                      ? 'var(--vscode-button-secondaryBackground)'
-                      : 'var(--vscode-button-background)',
-                  color:
-                    loading || error || (selectedMode === 'detailed' && !parameters.length)
-                      ? 'var(--vscode-button-secondaryForeground)'
-                      : 'var(--vscode-button-foreground)',
-                  border: 'none',
-                  borderRadius: '2px',
-                  cursor:
-                    loading || error || (selectedMode === 'detailed' && !parameters.length)
-                      ? 'not-allowed'
-                      : 'pointer',
-                }}
-              >
-                {t('mcp.editDialog.saveButton')}
-              </button>
-            )}
-          </div>
+          <button
+            type="button"
+            onClick={handleClose}
+            style={{
+              padding: '8px 16px',
+              fontSize: '13px',
+              backgroundColor: 'var(--vscode-button-secondaryBackground)',
+              color: 'var(--vscode-button-secondaryForeground)',
+              border: 'none',
+              borderRadius: '2px',
+              cursor: 'pointer',
+            }}
+          >
+            {t('mcp.editDialog.cancelButton')}
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={loading || !!error}
+            style={{
+              padding: '8px 16px',
+              fontSize: '13px',
+              backgroundColor:
+                loading || error
+                  ? 'var(--vscode-button-secondaryBackground)'
+                  : 'var(--vscode-button-background)',
+              color:
+                loading || error
+                  ? 'var(--vscode-button-secondaryForeground)'
+                  : 'var(--vscode-button-foreground)',
+              border: 'none',
+              borderRadius: '2px',
+              cursor: loading || error ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {t('mcp.editDialog.saveButton')}
+          </button>
         </div>
       </div>
     </div>
