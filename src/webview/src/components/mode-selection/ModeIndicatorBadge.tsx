@@ -22,13 +22,13 @@ interface ModeInfo {
 }
 
 const MODE_INFO: Record<McpNodeMode, ModeInfo> = {
-  detailed: {
+  manualParameterConfig: {
     titleKey: 'mcp.modeSelection.detailed.title',
   },
-  naturalLanguageParam: {
+  aiParameterConfig: {
     titleKey: 'mcp.modeSelection.naturalLanguageParam.title',
   },
-  fullNaturalLanguage: {
+  aiToolSelection: {
     titleKey: 'mcp.modeSelection.fullNaturalLanguage.title',
   },
 };

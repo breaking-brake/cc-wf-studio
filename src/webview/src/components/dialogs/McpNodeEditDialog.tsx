@@ -37,9 +37,9 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
   const [parameterValues, setParameterValues] = useState<Record<string, unknown>>({});
   const [parameters, setParameters] = useState<ToolParameter[]>([]);
 
-  // Natural Language Mode state
+  // AI Mode state
   const [naturalLanguageTaskDescription, setNaturalLanguageTaskDescription] = useState('');
-  const [naturalLanguageParamDescription, setNaturalLanguageParamDescription] = useState('');
+  const [aiParameterConfigDescription, setAiParameterConfigDescription] = useState('');
 
   const [showValidation, setShowValidation] = useState(false);
 
@@ -47,8 +47,8 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
   const node = nodes.find((n) => n.id === nodeId);
   const nodeData = node?.data as McpNodeData | undefined;
 
-  // Get current mode (default to 'detailed' for backward compatibility)
-  const currentMode = nodeData?.mode || 'detailed';
+  // Get current mode (default to 'manualParameterConfig' for backward compatibility)
+  const currentMode = nodeData?.mode || 'manualParameterConfig';
 
   /**
    * Load tool schema and initialize state based on mode
@@ -64,18 +64,18 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
 
       try {
         // Initialize mode-specific state
-        if (currentMode === 'fullNaturalLanguage') {
-          // Full NL Mode: Initialize task description only (no schema loading needed)
+        if (currentMode === 'aiToolSelection') {
+          // AI Tool Selection Mode: Initialize task description only (no schema loading needed)
           setNaturalLanguageTaskDescription(
-            nodeData.fullNaturalLanguageConfig?.taskDescription || ''
+            nodeData.aiToolSelectionConfig?.taskDescription || ''
           );
-        } else if (currentMode === 'naturalLanguageParam') {
-          // NL Param Mode: Initialize param description only (no schema loading needed)
-          setNaturalLanguageParamDescription(
-            nodeData.naturalLanguageParamConfig?.description || ''
+        } else if (currentMode === 'aiParameterConfig') {
+          // AI Parameter Config Mode: Initialize param description only (no schema loading needed)
+          setAiParameterConfigDescription(
+            nodeData.aiParameterConfig?.description || ''
           );
         } else {
-          // Detailed Mode: Load schema and initialize parameter values
+          // Manual Parameter Config Mode: Load schema and initialize parameter values
           const result = await getMcpToolSchema({
             serverId: nodeData.serverId,
             toolName: nodeData.toolName || '',
@@ -114,7 +114,7 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
 
     // Mode-specific validation and save
     switch (currentMode) {
-      case 'detailed': {
+      case 'manualParameterConfig': {
         // Validate all parameters
         const errors = validateAllParameters(
           parameterValues,
@@ -134,24 +134,24 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
         break;
       }
 
-      case 'naturalLanguageParam': {
+      case 'aiParameterConfig': {
         // Validate required field
-        if (naturalLanguageParamDescription.length === 0) {
+        if (aiParameterConfigDescription.length === 0) {
           return;
         }
 
         // Update node with new natural language description
         updateNodeData(nodeId, {
           ...nodeData,
-          naturalLanguageParamConfig: {
-            description: naturalLanguageParamDescription,
+          aiParameterConfig: {
+            description: aiParameterConfigDescription,
             timestamp: new Date().toISOString(),
           },
         });
         break;
       }
 
-      case 'fullNaturalLanguage': {
+      case 'aiToolSelection': {
         // Validate required field
         if (naturalLanguageTaskDescription.length === 0) {
           return;
@@ -160,9 +160,9 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
         // Update node with new task description
         updateNodeData(nodeId, {
           ...nodeData,
-          fullNaturalLanguageConfig: {
+          aiToolSelectionConfig: {
             taskDescription: naturalLanguageTaskDescription,
-            availableTools: nodeData.fullNaturalLanguageConfig?.availableTools || [],
+            availableTools: nodeData.aiToolSelectionConfig?.availableTools || [],
             timestamp: new Date().toISOString(),
           },
         });
@@ -258,12 +258,12 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
           <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)' }}>
             <strong>{t('property.mcp.serverId')}:</strong> {nodeData.serverId}
           </div>
-          {(currentMode === 'detailed' || currentMode === 'naturalLanguageParam') && (
+          {(currentMode === 'manualParameterConfig' || currentMode === 'aiParameterConfig') && (
             <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)', marginTop: '4px' }}>
               <strong>{t('property.mcp.toolName')}:</strong> {nodeData.toolName}
             </div>
           )}
-          {nodeData.toolDescription && currentMode === 'detailed' && (
+          {nodeData.toolDescription && currentMode === 'manualParameterConfig' && (
             <div
               style={{
                 fontSize: '12px',
@@ -298,7 +298,7 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
         {/* Mode-specific Edit UI */}
         {!loading && !error && (
           <>
-            {currentMode === 'detailed' && (
+            {currentMode === 'manualParameterConfig' && (
               <ParameterFormGenerator
                 parameters={parameters}
                 parameterValues={parameterValues}
@@ -307,15 +307,15 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
               />
             )}
 
-            {currentMode === 'naturalLanguageParam' && (
+            {currentMode === 'aiParameterConfig' && (
               <NaturalLanguageParamInput
-                value={naturalLanguageParamDescription}
-                onChange={setNaturalLanguageParamDescription}
+                value={aiParameterConfigDescription}
+                onChange={setAiParameterConfigDescription}
                 showValidation={showValidation}
               />
             )}
 
-            {currentMode === 'fullNaturalLanguage' && (
+            {currentMode === 'aiToolSelection' && (
               <NaturalLanguageTaskInput
                 value={naturalLanguageTaskDescription}
                 onChange={setNaturalLanguageTaskDescription}

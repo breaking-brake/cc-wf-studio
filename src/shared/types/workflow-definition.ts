@@ -153,36 +153,36 @@ export interface ToolParameter {
 export interface McpNodeData {
   /** MCP server identifier (from 'claude mcp list') */
   serverId: string;
-  /** Tool function name from the MCP server (optional for fullNaturalLanguage mode) */
+  /** Tool function name from the MCP server (optional for aiToolSelection mode) */
   toolName?: string;
-  /** Human-readable description of the tool's functionality (optional for fullNaturalLanguage mode) */
+  /** Human-readable description of the tool's functionality (optional for aiToolSelection mode) */
   toolDescription?: string;
-  /** Array of parameter schemas for this tool (immutable, from MCP definition; optional for fullNaturalLanguage mode) */
+  /** Array of parameter schemas for this tool (immutable, from MCP definition; optional for aiToolSelection mode) */
   parameters?: ToolParameter[];
-  /** User-configured values for the tool's parameters (optional for fullNaturalLanguage mode) */
+  /** User-configured values for the tool's parameters (optional for aiToolSelection mode) */
   parameterValues?: Record<string, unknown>;
   /** Validation status (computed during workflow load) */
   validationStatus: 'valid' | 'missing' | 'invalid';
   /** Number of output ports (fixed at 1 for MCP nodes) */
   outputPorts: 1;
 
-  // Natural Language Mode fields (optional, for backwards compatibility)
+  // AI Mode fields (optional, for backwards compatibility)
 
-  /** Configuration mode (defaults to 'detailed' if undefined) */
-  mode?: 'detailed' | 'naturalLanguageParam' | 'fullNaturalLanguage';
-  /** Natural Language Parameter Mode configuration (only if mode === 'naturalLanguageParam') */
-  naturalLanguageParamConfig?: {
+  /** Configuration mode (defaults to 'manualParameterConfig' if undefined) */
+  mode?: 'manualParameterConfig' | 'aiParameterConfig' | 'aiToolSelection';
+  /** AI Parameter Configuration Mode configuration (only if mode === 'aiParameterConfig') */
+  aiParameterConfig?: {
     description: string;
     timestamp: string;
   };
-  /** Full Natural Language Mode configuration (only if mode === 'fullNaturalLanguage') */
-  fullNaturalLanguageConfig?: {
+  /** AI Tool Selection Mode configuration (only if mode === 'aiToolSelection') */
+  aiToolSelectionConfig?: {
     taskDescription: string;
     availableTools: string[];
     timestamp: string;
   };
-  /** Preserved detailed configuration (stores data when switching away from detailed mode) */
-  preservedDetailedConfig?: {
+  /** Preserved manual parameter configuration (stores data when switching away from manual parameter config mode) */
+  preservedManualParameterConfig?: {
     parameterValues: Record<string, unknown>;
   };
 }

@@ -98,7 +98,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
 
     // Build node data based on mode
     switch (wizard.finalMode) {
-      case 'detailed': {
+      case 'manualParameterConfig': {
         if (!wizard.state.selectedTool) {
           setError(t('mcp.dialog.error.noToolSelected'));
           return;
@@ -109,12 +109,12 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
           type: NodeType.Mcp,
           position,
           data: {
-            mode: 'detailed',
+            mode: 'manualParameterConfig',
             serverId: wizard.state.selectedServer.id,
             toolName: wizard.state.selectedTool.name,
             toolDescription: wizard.state.selectedTool.description || '',
             parameters: wizard.state.selectedTool.parameters || [],
-            parameterValues: wizard.state.detailedParameterValues,
+            parameterValues: wizard.state.manualParameterValues,
             validationStatus: 'valid',
             outputPorts: 1,
           },
@@ -122,7 +122,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
         break;
       }
 
-      case 'naturalLanguageParam': {
+      case 'aiParameterConfig': {
         if (!wizard.state.selectedTool) {
           setError(t('mcp.dialog.error.noToolSelected'));
           return;
@@ -133,13 +133,13 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
           type: NodeType.Mcp,
           position,
           data: {
-            mode: 'naturalLanguageParam',
+            mode: 'aiParameterConfig',
             serverId: wizard.state.selectedServer.id,
             toolName: wizard.state.selectedTool.name,
             toolDescription: wizard.state.selectedTool.description || '',
             parameters: wizard.state.selectedTool.parameters || [],
-            naturalLanguageParamConfig: {
-              description: wizard.state.naturalLanguageParamDescription,
+            aiParameterConfig: {
+              description: wizard.state.aiParameterConfigDescription,
               timestamp: new Date().toISOString(),
             },
             validationStatus: 'valid',
@@ -149,7 +149,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
         break;
       }
 
-      case 'fullNaturalLanguage': {
+      case 'aiToolSelection': {
         // TODO: T045-T046 - Get available tools from MCP server
         const availableTools: string[] = []; // Placeholder
 
@@ -158,9 +158,9 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
           type: NodeType.Mcp,
           position,
           data: {
-            mode: 'fullNaturalLanguage',
+            mode: 'aiToolSelection',
             serverId: wizard.state.selectedServer.id,
-            fullNaturalLanguageConfig: {
+            aiToolSelectionConfig: {
               taskDescription: wizard.state.naturalLanguageTaskDescription,
               availableTools,
               timestamp: new Date().toISOString(),
@@ -282,9 +282,9 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
       case WizardStep.NaturalLanguageParam:
         return (
           <NaturalLanguageParamInput
-            value={wizard.state.naturalLanguageParamDescription}
+            value={wizard.state.aiParameterConfigDescription}
             onChange={(value) => {
-              wizard.setNaturalLanguageParamDescription(value);
+              wizard.setAiParameterConfigDescription(value);
               setError(null);
             }}
             showValidation={showValidation}
@@ -296,9 +296,9 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
           <ParameterDetailedConfigStep
             serverId={wizard.state.selectedServer?.id || ''}
             toolName={wizard.state.selectedTool?.name || ''}
-            parameterValues={wizard.state.detailedParameterValues}
+            parameterValues={wizard.state.manualParameterValues}
             onChange={(values) => {
-              wizard.setDetailedParameterValues(values);
+              wizard.setManualParameterValues(values);
               setError(null);
             }}
             showValidation={showValidation}

@@ -106,19 +106,19 @@ export type ParameterConfigMode = 'manual' | 'auto';
  * MCP node configuration mode
  *
  * Determines how the MCP tool node is configured and executed:
- * - 'detailed': User explicitly configures server, tool, and all parameters
- * - 'naturalLanguageParam': User selects server/tool, describes parameters in natural language
- * - 'fullNaturalLanguage': User selects server only, describes entire task in natural language
+ * - 'manualParameterConfig': User explicitly configures server, tool, and all parameters
+ * - 'aiParameterConfig': User selects server/tool, describes parameters in natural language
+ * - 'aiToolSelection': User selects server only, describes entire task in natural language
  */
-export type McpNodeMode = 'detailed' | 'naturalLanguageParam' | 'fullNaturalLanguage';
+export type McpNodeMode = 'manualParameterConfig' | 'aiParameterConfig' | 'aiToolSelection';
 
 /**
- * Natural Language Parameter Mode configuration
+ * AI Parameter Configuration Mode configuration
  *
  * Used when user selects a specific tool but describes parameters in natural language.
  * Claude Code will interpret this description to set appropriate parameter values.
  */
-export interface NaturalLanguageParamConfig {
+export interface AiParameterConfig {
   /** Natural language description of desired parameter values */
   description: string;
   /** Timestamp when this description was created (ISO 8601 format) */
@@ -126,12 +126,12 @@ export interface NaturalLanguageParamConfig {
 }
 
 /**
- * Full Natural Language Mode configuration
+ * AI Tool Selection Mode configuration
  *
  * Used when user describes the entire task in natural language without selecting a tool.
  * Claude Code will choose the most appropriate tool from the available tools list.
  */
-export interface FullNaturalLanguageConfig {
+export interface AiToolSelectionConfig {
   /** Natural language description of the task to accomplish */
   taskDescription: string;
   /** Snapshot of available tools from the MCP server at configuration time */
@@ -141,12 +141,12 @@ export interface FullNaturalLanguageConfig {
 }
 
 /**
- * Preserved Detailed Mode configuration
+ * Preserved Manual Parameter Configuration Mode configuration
  *
- * Stores detailed mode configuration when user switches to a natural language mode.
- * This allows switching back to detailed mode without losing the explicit configuration.
+ * Stores manual parameter config mode configuration when user switches to an AI mode.
+ * This allows switching back to manual parameter config mode without losing the explicit configuration.
  */
-export interface PreservedDetailedConfig {
+export interface PreservedManualParameterConfig {
   /** Previously configured tool name */
   toolName: string;
   /** Previously configured parameter values */
@@ -159,7 +159,7 @@ export interface PreservedDetailedConfig {
  * MCP node data
  *
  * Contains MCP-specific configuration and tool information.
- * Supports three configuration modes: detailed, naturalLanguageParam, and fullNaturalLanguage.
+ * Supports three configuration modes: manualParameterConfig, aiParameterConfig, and aiToolSelection.
  */
 export interface McpNodeData {
   /** MCP server identifier (from 'claude mcp list') */
@@ -177,26 +177,26 @@ export interface McpNodeData {
   /** Number of output ports (fixed at 1 for MCP nodes) */
   outputPorts: 1;
 
-  // Natural Language Mode fields (optional, for backwards compatibility)
+  // AI Mode fields (optional, for backwards compatibility)
 
-  /** Configuration mode (defaults to 'detailed' if undefined) */
+  /** Configuration mode (defaults to 'manualParameterConfig' if undefined) */
   mode?: McpNodeMode;
-  /** Natural Language Parameter Mode configuration (only if mode === 'naturalLanguageParam') */
-  naturalLanguageParamConfig?: NaturalLanguageParamConfig;
-  /** Full Natural Language Mode configuration (only if mode === 'fullNaturalLanguage') */
-  fullNaturalLanguageConfig?: FullNaturalLanguageConfig;
-  /** Preserved detailed configuration (stores data when switching away from detailed mode) */
-  preservedDetailedConfig?: PreservedDetailedConfig;
+  /** AI Parameter Configuration Mode configuration (only if mode === 'aiParameterConfig') */
+  aiParameterConfig?: AiParameterConfig;
+  /** AI Tool Selection Mode configuration (only if mode === 'aiToolSelection') */
+  aiToolSelectionConfig?: AiToolSelectionConfig;
+  /** Preserved manual parameter configuration (stores data when switching away from manual parameter config mode) */
+  preservedManualParameterConfig?: PreservedManualParameterConfig;
 }
 
 /**
- * Export metadata for Detailed Mode
+ * Export metadata for Manual Parameter Configuration Mode
  *
  * Contains explicit parameter values for reproduction.
  */
-export interface DetailedModeMetadata {
+export interface ManualParameterConfigMetadata {
   /** Mode discriminator */
-  mode: 'detailed';
+  mode: 'manualParameterConfig';
   /** MCP server identifier */
   serverId: string;
   /** Tool function name */
@@ -206,13 +206,13 @@ export interface DetailedModeMetadata {
 }
 
 /**
- * Export metadata for Natural Language Parameter Mode
+ * Export metadata for AI Parameter Configuration Mode
  *
  * Contains natural language description and parameter schema for Claude Code interpretation.
  */
-export interface NaturalLanguageParamModeMetadata {
+export interface AiParameterConfigMetadata {
   /** Mode discriminator */
-  mode: 'naturalLanguageParam';
+  mode: 'aiParameterConfig';
   /** MCP server identifier */
   serverId: string;
   /** Tool function name */
@@ -224,13 +224,13 @@ export interface NaturalLanguageParamModeMetadata {
 }
 
 /**
- * Export metadata for Full Natural Language Mode
+ * Export metadata for AI Tool Selection Mode
  *
  * Contains task description and available tools list for Claude Code to select tool and parameters.
  */
-export interface FullNaturalLanguageModeMetadata {
+export interface AiToolSelectionMetadata {
   /** Mode discriminator */
-  mode: 'fullNaturalLanguage';
+  mode: 'aiToolSelection';
   /** MCP server identifier */
   serverId: string;
   /** Natural language description of the entire task */
@@ -251,14 +251,15 @@ export interface FullNaturalLanguageModeMetadata {
  * The specific metadata type is determined by the 'mode' discriminator.
  */
 export type ModeExportMetadata =
-  | DetailedModeMetadata
-  | NaturalLanguageParamModeMetadata
-  | FullNaturalLanguageModeMetadata;
+  | ManualParameterConfigMetadata
+  | AiParameterConfigMetadata
+  | AiToolSelectionMetadata;
 
 /**
  * Normalize MCP node data for backwards compatibility
  *
- * Ensures that mode field is set to 'detailed' if undefined (for v1.2.0 workflows).
+ * Ensures that mode field is set to 'manualParameterConfig' if undefined (for v1.2.0 workflows).
+ * Also migrates old mode values ('detailed', 'naturalLanguageParam', 'fullNaturalLanguage') to new values.
  * This function should be called when loading workflows from disk or receiving
  * AI-generated workflows.
  *
@@ -266,9 +267,19 @@ export type ModeExportMetadata =
  * @returns Normalized MCP node data with mode field set
  */
 export function normalizeMcpNodeData(data: McpNodeData): McpNodeData {
+  // Migrate old mode values to new values
+  let mode = data.mode ?? 'manualParameterConfig';
+  if (mode === 'detailed' as any) {
+    mode = 'manualParameterConfig';
+  } else if (mode === 'naturalLanguageParam' as any) {
+    mode = 'aiParameterConfig';
+  } else if (mode === 'fullNaturalLanguage' as any) {
+    mode = 'aiToolSelection';
+  }
+
   return {
     ...data,
-    mode: data.mode ?? 'detailed',
+    mode,
   };
 }
 

@@ -38,8 +38,8 @@ interface WizardState {
   selectedTool: McpToolReference | null;
   parameterConfigMode: ParameterConfigMode;
   naturalLanguageTaskDescription: string;
-  naturalLanguageParamDescription: string;
-  detailedParameterValues: Record<string, unknown>;
+  aiParameterConfigDescription: string;
+  manualParameterValues: Record<string, unknown>;
 }
 
 const initialState: WizardState = {
@@ -49,8 +49,8 @@ const initialState: WizardState = {
   selectedTool: null,
   parameterConfigMode: 'auto', // Default to AI-assisted configuration
   naturalLanguageTaskDescription: '',
-  naturalLanguageParamDescription: '',
-  detailedParameterValues: {},
+  aiParameterConfigDescription: '',
+  manualParameterValues: {},
 };
 
 export function useMcpCreationWizard() {
@@ -61,15 +61,15 @@ export function useMcpCreationWizard() {
    */
   const determineFinalMode = useCallback((): McpNodeMode | null => {
     if (state.toolSelectionMode === 'auto') {
-      return 'fullNaturalLanguage';
+      return 'aiToolSelection';
     }
 
     if (state.toolSelectionMode === 'manual' && state.parameterConfigMode === 'auto') {
-      return 'naturalLanguageParam';
+      return 'aiParameterConfig';
     }
 
     if (state.toolSelectionMode === 'manual' && state.parameterConfigMode === 'manual') {
-      return 'detailed';
+      return 'manualParameterConfig';
     }
 
     return null;
@@ -99,8 +99,8 @@ export function useMcpCreationWizard() {
         return state.naturalLanguageTaskDescription.length > 0;
 
       case WizardStep.NaturalLanguageParam:
-        // Required field for NL Param Mode
-        return state.naturalLanguageParamDescription.length > 0;
+        // Required field for AI Parameter Config Mode
+        return state.aiParameterConfigDescription.length > 0;
 
       case WizardStep.ParameterDetailedConfig:
         // Always allow proceeding (parameters can be empty or filled)
@@ -133,7 +133,7 @@ export function useMcpCreationWizard() {
 
       case WizardStep.ParameterConfigMethod:
         if (state.parameterConfigMode === 'manual') {
-          // Detailed Mode - go to parameter detailed config
+          // Manual Parameter Config Mode - go to parameter detailed config
           return WizardStep.ParameterDetailedConfig;
         }
         if (state.parameterConfigMode === 'auto') {
@@ -142,15 +142,15 @@ export function useMcpCreationWizard() {
         return null;
 
       case WizardStep.NaturalLanguageTask:
-        // Full NL Mode - no more steps, ready to save
+        // AI Tool Selection Mode - no more steps, ready to save
         return null;
 
       case WizardStep.NaturalLanguageParam:
-        // NL Param Mode - no more steps, ready to save
+        // AI Parameter Config Mode - no more steps, ready to save
         return null;
 
       case WizardStep.ParameterDetailedConfig:
-        // Detailed Mode - no more steps, ready to save
+        // Manual Parameter Config Mode - no more steps, ready to save
         return null;
 
       default:
@@ -225,7 +225,7 @@ export function useMcpCreationWizard() {
     if (!mode) return false;
 
     switch (mode) {
-      case 'detailed':
+      case 'manualParameterConfig':
         return (
           state.selectedServer !== null &&
           state.toolSelectionMode === 'manual' &&
@@ -233,16 +233,16 @@ export function useMcpCreationWizard() {
           state.parameterConfigMode === 'manual'
         );
 
-      case 'naturalLanguageParam':
+      case 'aiParameterConfig':
         return (
           state.selectedServer !== null &&
           state.toolSelectionMode === 'manual' &&
           state.selectedTool !== null &&
           state.parameterConfigMode === 'auto' &&
-          state.naturalLanguageParamDescription.length > 0
+          state.aiParameterConfigDescription.length > 0
         );
 
-      case 'fullNaturalLanguage':
+      case 'aiToolSelection':
         return (
           state.selectedServer !== null &&
           state.toolSelectionMode === 'auto' &&
@@ -282,12 +282,12 @@ export function useMcpCreationWizard() {
     setState((prev) => ({ ...prev, naturalLanguageTaskDescription: description }));
   }, []);
 
-  const setNaturalLanguageParamDescription = useCallback((description: string) => {
-    setState((prev) => ({ ...prev, naturalLanguageParamDescription: description }));
+  const setAiParameterConfigDescription = useCallback((description: string) => {
+    setState((prev) => ({ ...prev, aiParameterConfigDescription: description }));
   }, []);
 
-  const setDetailedParameterValues = useCallback((values: Record<string, unknown>) => {
-    setState((prev) => ({ ...prev, detailedParameterValues: values }));
+  const setManualParameterValues = useCallback((values: Record<string, unknown>) => {
+    setState((prev) => ({ ...prev, manualParameterValues: values }));
   }, []);
 
   return {
@@ -310,7 +310,7 @@ export function useMcpCreationWizard() {
     setTool,
     setParameterConfigMode,
     setNaturalLanguageTaskDescription,
-    setNaturalLanguageParamDescription,
-    setDetailedParameterValues,
+    setAiParameterConfigDescription,
+    setManualParameterValues,
   };
 }

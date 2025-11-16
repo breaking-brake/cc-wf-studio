@@ -1892,8 +1892,8 @@ const McpProperties: React.FC<{
   const data = node.data;
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  // Get current mode (default to 'detailed' for backward compatibility)
-  const currentMode = data.mode || 'detailed';
+  // Get current mode (default to 'manualParameterConfig' for backward compatibility)
+  const currentMode = data.mode || 'manualParameterConfig';
 
   // Get validation status icon and color
   const getValidationIcon = (status: 'valid' | 'missing' | 'invalid'): string => {
@@ -1952,8 +1952,8 @@ const McpProperties: React.FC<{
           </div>
         </div>
 
-        {/* Tool Name (Read-only) - Only for detailed and naturalLanguageParam modes */}
-        {(currentMode === 'detailed' || currentMode === 'naturalLanguageParam') &&
+        {/* Tool Name (Read-only) - Only for manualParameterConfig and aiParameterConfig modes */}
+        {(currentMode === 'manualParameterConfig' || currentMode === 'aiParameterConfig') &&
           data.toolName && (
             <div>
               <label
@@ -1986,8 +1986,8 @@ const McpProperties: React.FC<{
             </div>
           )}
 
-        {/* Tool Description (Read-only) - Only for detailed and naturalLanguageParam modes */}
-        {(currentMode === 'detailed' || currentMode === 'naturalLanguageParam') &&
+        {/* Tool Description (Read-only) - Only for manualParameterConfig and aiParameterConfig modes */}
+        {(currentMode === 'manualParameterConfig' || currentMode === 'aiParameterConfig') &&
           data.toolDescription && (
             <div>
               <label
@@ -2063,7 +2063,7 @@ const McpProperties: React.FC<{
         </div>
 
         {/* Parameter Count (Read-only) - Only for modes with parameters */}
-        {(currentMode === 'detailed' || currentMode === 'naturalLanguageParam') &&
+        {(currentMode === 'manualParameterConfig' || currentMode === 'aiParameterConfig') &&
           data.parameters && (
             <div>
               <label

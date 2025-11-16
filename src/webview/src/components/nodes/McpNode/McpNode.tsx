@@ -50,8 +50,8 @@ export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
   ({ id, data, selected }) => {
     const { t } = useTranslation();
 
-    // Get current mode (default to 'detailed' for backwards compatibility)
-    const currentMode = data.mode || 'detailed';
+    // Get current mode (default to 'manualParameterConfig' for backwards compatibility)
+    const currentMode = data.mode || 'manualParameterConfig';
 
     // Get tooltip message based on validation status
     const getTooltipMessage = (status: 'valid' | 'missing' | 'invalid'): string => {
