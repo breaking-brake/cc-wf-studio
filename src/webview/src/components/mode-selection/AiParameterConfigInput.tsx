@@ -10,8 +10,8 @@
 import { useTranslation } from '../../i18n/i18n-context';
 import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
 import {
-  validateParameterDescription,
   useDebouncedValidation,
+  validateParameterDescription,
 } from '../../utils/natural-language-validator';
 
 interface AiParameterConfigInputProps {

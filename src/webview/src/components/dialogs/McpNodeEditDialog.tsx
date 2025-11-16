@@ -16,9 +16,9 @@ import type { ExtendedToolParameter } from '../../utils/parameter-validator';
 import { validateAllParameters } from '../../utils/parameter-validator';
 import { IndeterminateProgressBar } from '../common/IndeterminateProgressBar';
 import { ParameterFormGenerator } from '../mcp/ParameterFormGenerator';
-import { ModeIndicatorBadge } from '../mode-selection/ModeIndicatorBadge';
 import { AiParameterConfigInput } from '../mode-selection/AiParameterConfigInput';
 import { AiToolSelectionInput } from '../mode-selection/AiToolSelectionInput';
+import { ModeIndicatorBadge } from '../mode-selection/ModeIndicatorBadge';
 
 interface McpNodeEditDialogProps {
   isOpen: boolean;
@@ -257,7 +257,13 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
             <strong>{t('property.mcp.serverId')}:</strong> {nodeData.serverId}
           </div>
           {(currentMode === 'manualParameterConfig' || currentMode === 'aiParameterConfig') && (
-            <div style={{ fontSize: '13px', color: 'var(--vscode-disabledForeground)', marginTop: '4px' }}>
+            <div
+              style={{
+                fontSize: '13px',
+                color: 'var(--vscode-disabledForeground)',
+                marginTop: '4px',
+              }}
+            >
               <strong>{t('property.mcp.toolName')}:</strong> {nodeData.toolName}
             </div>
           )}
