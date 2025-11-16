@@ -96,7 +96,7 @@
 - [x] T013 [P] [US1] ParameterConfigModeStepコンポーネントを作成（src/webview/src/components/mode-selection/ParameterConfigModeStep.tsx）- パラメータ手動/自動の2択カード
 - [x] T014 [P] [US1] NaturalLanguageTaskInputコンポーネントを作成（src/webview/src/components/mode-selection/NaturalLanguageTaskInput.tsx）- Full NL Mode用タスク説明入力（最小長20文字）
 - [x] T015 [P] [US1] NaturalLanguageParamInputコンポーネントを作成（src/webview/src/components/mode-selection/NaturalLanguageParamInput.tsx）- NL Param Mode用パラメータ説明入力（最小長10文字）
-- [x] T016 [P] [US1] ModeIndicatorBadgeコンポーネントを作成（src/webview/src/components/mode-selection/ModeIndicatorBadge.tsx）- モード表示バッジ（⚙️/◐/●）
+- [x] T016 [P] [US1] ModeIndicatorBadgeコンポーネントを作成（src/webview/src/components/mode-selection/ModeIndicatorBadge.tsx）- モード表示バッジ（テキスト + 色付きボーダー）
 
 #### 作成フロー統合（T017-T021）
 - [ ] T017 [US1] McpNodeDialogを拡張して段階的モード選択フローを追加（src/webview/src/components/dialogs/McpNodeDialog.tsx）
@@ -122,7 +122,7 @@
 - [ ] T030 [US1] **手動E2E**: パラメータ設定方法で「自分で設定」選択時、Detailed Modeでパラメータフォームが表示されることを確認
 - [ ] T031 [US1] **手動E2E**: パラメータ設定方法で「AIに設定してもらう」選択時、NL Param Modeで自然言語入力画面が表示されることを確認
 - [ ] T032 [US1] **手動E2E**: 既存ノード編集時、モードが表示され（変更不可）、モードに応じた編集UIが表示されることを確認
-- [ ] T033 [US1] **手動E2E**: キャンバス上のMCPノードにモードバッジ（⚙️/◐/●）が表示されることを確認
+- [ ] T033 [US1] **手動E2E**: キャンバス上のMCPノードにモードバッジ（テキスト表示）が表示されることを確認
 
 **チェックポイント**: この時点でUser Story 1が完全に機能し、独立してテスト可能であること
 
@@ -153,7 +153,7 @@
 - [ ] T041 [US2] **手動E2E**: 自然言語説明入力時に最小長検証（10文字）が機能し、エラーメッセージが表示されることを確認
 - [ ] T042 [US2] **手動E2E**: 有効な自然言語説明でノード保存時にmode、serverId、toolName、naturalLanguageParamConfigが正しく保存されることを確認
 - [ ] T043 [US2] **手動E2E**: 保存されたNL Param Modeノードを編集時、自然言語説明が表示され編集できることを確認
-- [ ] T044 [US2] **手動E2E**: キャンバス上のNL Param Modeノードにモードバッジ（◐）が表示されることを確認
+- [ ] T044 [US2] **手動E2E**: キャンバス上のNL Param Modeノードにモードバッジ（NL Paramモード表示）が表示されることを確認
 
 **チェックポイント**: この時点でUser Story 1とUser Story 2の両方が独立して機能すること
 
@@ -186,7 +186,7 @@
 - [ ] T054 [US3] **手動E2E**: タスク説明入力時に最小長検証（20文字）が機能し、エラーメッセージが表示されることを確認
 - [ ] T055 [US3] **手動E2E**: 有効なタスク説明でノード保存時にmode、serverId、fullNaturalLanguageConfig（taskDescription、availableTools、timestamp）が正しく保存されることを確認
 - [ ] T056 [US3] **手動E2E**: 保存されたFull NL Modeノードを編集時、タスク説明が表示され編集できることを確認
-- [ ] T057 [US3] **手動E2E**: キャンバス上のFull NL Modeノードにモードバッジ（●）が表示されることを確認
+- [ ] T057 [US3] **手動E2E**: キャンバス上のFull NL Modeノードにモードバッジ（Full NLモード表示）が表示されることを確認
 - [ ] T058 [US3] **手動E2E**: バッジにホバーしたときにモード説明とタスク説明プレビューが表示されることを確認
 
 **チェックポイント**: すべてのユーザーストーリー（US1、US2、US3）が独立して機能すること
