@@ -165,6 +165,26 @@ export interface McpNodeData {
   validationStatus: 'valid' | 'missing' | 'invalid';
   /** Number of output ports (fixed at 1 for MCP nodes) */
   outputPorts: 1;
+
+  // Natural Language Mode fields (optional, for backwards compatibility)
+
+  /** Configuration mode (defaults to 'detailed' if undefined) */
+  mode?: 'detailed' | 'naturalLanguageParam' | 'fullNaturalLanguage';
+  /** Natural Language Parameter Mode configuration (only if mode === 'naturalLanguageParam') */
+  naturalLanguageParamConfig?: {
+    description: string;
+    timestamp: string;
+  };
+  /** Full Natural Language Mode configuration (only if mode === 'fullNaturalLanguage') */
+  fullNaturalLanguageConfig?: {
+    taskDescription: string;
+    availableTools: string[];
+    timestamp: string;
+  };
+  /** Preserved detailed configuration (stores data when switching away from detailed mode) */
+  preservedDetailedConfig?: {
+    parameterValues: Record<string, unknown>;
+  };
 }
 
 // ============================================================================

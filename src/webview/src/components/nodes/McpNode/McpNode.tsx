@@ -12,6 +12,7 @@ import type { McpNodeData } from '@shared/types/workflow-definition';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import { useTranslation } from '../../../i18n/i18n-context';
+import { ModeIndicatorBadge } from '../../mode-selection/ModeIndicatorBadge';
 import { DeleteButton } from '../DeleteButton';
 
 /**
@@ -48,6 +49,9 @@ function getValidationColor(status: 'valid' | 'missing' | 'invalid'): string {
 export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
   ({ id, data, selected }) => {
     const { t } = useTranslation();
+
+    // Get current mode (default to 'detailed' for backwards compatibility)
+    const currentMode = data.mode || 'detailed';
 
     // Get tooltip message based on validation status
     const getTooltipMessage = (status: 'valid' | 'missing' | 'invalid'): string => {
@@ -129,19 +133,28 @@ export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
           {data.toolName || 'Untitled Tool'}
         </div>
 
-        {/* Server Badge */}
+        {/* Server Badge and Mode Badge */}
         <div
           style={{
-            fontSize: '10px',
-            color: 'var(--vscode-descriptionForeground)',
-            backgroundColor: 'var(--vscode-badge-background)',
-            padding: '2px 6px',
-            borderRadius: '3px',
-            display: 'inline-block',
+            display: 'flex',
+            gap: '6px',
+            alignItems: 'center',
             marginBottom: '8px',
           }}
         >
-          {data.serverId}
+          <div
+            style={{
+              fontSize: '10px',
+              color: 'var(--vscode-descriptionForeground)',
+              backgroundColor: 'var(--vscode-badge-background)',
+              padding: '2px 6px',
+              borderRadius: '3px',
+              display: 'inline-block',
+            }}
+          >
+            {data.serverId}
+          </div>
+          <ModeIndicatorBadge mode={currentMode} />
         </div>
 
         {/* Description */}
