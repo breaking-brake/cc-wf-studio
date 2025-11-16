@@ -153,14 +153,14 @@ export interface ToolParameter {
 export interface McpNodeData {
   /** MCP server identifier (from 'claude mcp list') */
   serverId: string;
-  /** Tool function name from the MCP server */
-  toolName: string;
-  /** Human-readable description of the tool's functionality */
-  toolDescription: string;
-  /** Array of parameter schemas for this tool (immutable, from MCP definition) */
-  parameters: ToolParameter[];
-  /** User-configured values for the tool's parameters */
-  parameterValues: Record<string, unknown>;
+  /** Tool function name from the MCP server (optional for fullNaturalLanguage mode) */
+  toolName?: string;
+  /** Human-readable description of the tool's functionality (optional for fullNaturalLanguage mode) */
+  toolDescription?: string;
+  /** Array of parameter schemas for this tool (immutable, from MCP definition; optional for fullNaturalLanguage mode) */
+  parameters?: ToolParameter[];
+  /** User-configured values for the tool's parameters (optional for fullNaturalLanguage mode) */
+  parameterValues?: Record<string, unknown>;
   /** Validation status (computed during workflow load) */
   validationStatus: 'valid' | 'missing' | 'invalid';
   /** Number of output ports (fixed at 1 for MCP nodes) */
