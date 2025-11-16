@@ -207,7 +207,7 @@
 - [x] T055 [US4] 既存のgenerateSlashCommandFile関数を拡張してMCPノードのモードを検出しモード別フォーマッターを呼び出す - generateWorkflowExecutionLogic()にswitch文追加、モード検出ロジック実装
 - [x] T056 [US4] AIパラメータ設定モード用のエクスポートメタデータHTMLコメント形式を実装 - JSON形式のHTMLコメントとして埋め込み
 - [x] T057 [US4] AIツール選択モード用のエクスポートメタデータHTMLコメント形式を実装 - JSON形式のHTMLコメントとして埋め込み
-- [x] T058 [US4] ワークフロー検証を拡張してモード別設定の整合性を確認（src/extension/utils/validate-workflow.ts） - モード別の必須フィールド検証を追加
+- [x] T058 [US4] ワークフロー検証を拡張してモード別設定の整合性を確認（src/extension/utils/validate-workflow.ts） - モード別の必須フィールド検証を追加（共通必須フィールドをserverId/validationStatus/outputPortsに制限、各モード固有の必須フィールドをモード別に検証。aiToolSelectionモードではtoolName/toolDescription/parameters/parameterValuesは全てオプショナル）
 - [x] T059 [P] [US4] エクスポートエラーメッセージを国際化（モード設定不一致、サーバー利用不可など） - ユーザー向けコンテンツは既にtranslate()使用、検証エラーは開発者向けのため英語維持
 
 ### User Story 4 の手動E2Eテスト

@@ -288,18 +288,14 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
   const errors: ValidationError[] = [];
   const mcpData = node.data as Partial<McpNodeData>;
 
-  // Required fields check
-  const requiredFields: (keyof McpNodeData)[] = [
+  // Common required fields (all modes)
+  const commonRequiredFields: (keyof McpNodeData)[] = [
     'serverId',
-    'toolName',
-    'toolDescription',
-    'parameters',
-    'parameterValues',
     'validationStatus',
     'outputPorts',
   ];
 
-  for (const field of requiredFields) {
+  for (const field of commonRequiredFields) {
     const value = mcpData[field as keyof typeof mcpData];
     if (value === undefined || value === null || value === '') {
       errors.push({
@@ -413,12 +409,26 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
 
   switch (mode) {
     case 'manualParameterConfig':
-      // Manual mode requires toolName and parameterValues
+      // Manual mode requires toolName, toolDescription, parameters, parameterValues
       if (!mcpData.toolName || mcpData.toolName.trim().length === 0) {
         errors.push({
           code: 'MCP_MODE_CONFIG_MISMATCH',
           message: 'Manual parameter config mode requires toolName to be set',
           field: `nodes[${node.id}].data.toolName`,
+        });
+      }
+      if (!mcpData.toolDescription || mcpData.toolDescription.trim().length === 0) {
+        errors.push({
+          code: 'MCP_MODE_CONFIG_MISMATCH',
+          message: 'Manual parameter config mode requires toolDescription to be set',
+          field: `nodes[${node.id}].data.toolDescription`,
+        });
+      }
+      if (!mcpData.parameters || mcpData.parameters.length === 0) {
+        errors.push({
+          code: 'MCP_MODE_CONFIG_MISMATCH',
+          message: 'Manual parameter config mode requires parameters array to be set',
+          field: `nodes[${node.id}].data.parameters`,
         });
       }
       if (!mcpData.parameterValues || Object.keys(mcpData.parameterValues).length === 0) {
@@ -431,12 +441,26 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
       break;
 
     case 'aiParameterConfig':
-      // AI parameter config mode requires toolName and aiParameterConfig
+      // AI parameter config mode requires toolName, toolDescription, parameters, aiParameterConfig
       if (!mcpData.toolName || mcpData.toolName.trim().length === 0) {
         errors.push({
           code: 'MCP_MODE_CONFIG_MISMATCH',
           message: 'AI parameter config mode requires toolName to be set',
           field: `nodes[${node.id}].data.toolName`,
+        });
+      }
+      if (!mcpData.toolDescription || mcpData.toolDescription.trim().length === 0) {
+        errors.push({
+          code: 'MCP_MODE_CONFIG_MISMATCH',
+          message: 'AI parameter config mode requires toolDescription to be set',
+          field: `nodes[${node.id}].data.toolDescription`,
+        });
+      }
+      if (!mcpData.parameters || mcpData.parameters.length === 0) {
+        errors.push({
+          code: 'MCP_MODE_CONFIG_MISMATCH',
+          message: 'AI parameter config mode requires parameters array to be set',
+          field: `nodes[${node.id}].data.parameters`,
         });
       }
       if (!mcpData.aiParameterConfig) {
@@ -456,6 +480,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
           field: `nodes[${node.id}].data.aiParameterConfig.description`,
         });
       }
+      // parameterValues is optional (AI will set values based on description)
       break;
 
     case 'aiToolSelection':
