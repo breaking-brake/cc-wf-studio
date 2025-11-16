@@ -23,6 +23,16 @@ interface ModeOption {
     | 'mcp.toolSelectionMode.auto.description';
 }
 
+/**
+ * Tool Selection Mode Step Component
+ *
+ * Displays two-choice card UI for selecting tool selection mode.
+ * User can choose between manual tool selection or AI-assisted tool selection.
+ *
+ * @param props - Component props
+ * @param props.selectedMode - Currently selected tool selection mode
+ * @param props.onModeChange - Callback when user selects a mode
+ */
 export function ToolSelectionModeStep({ selectedMode, onModeChange }: ToolSelectionModeStepProps) {
   const { t } = useTranslation();
 

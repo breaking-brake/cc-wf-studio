@@ -23,6 +23,16 @@ interface ModeOption {
     | 'mcp.parameterConfigMode.auto.description';
 }
 
+/**
+ * Parameter Config Mode Step Component
+ *
+ * Displays two-choice card UI for selecting parameter configuration mode.
+ * User can choose between manual parameter configuration or AI-assisted configuration.
+ *
+ * @param props - Component props
+ * @param props.selectedMode - Currently selected parameter config mode
+ * @param props.onModeChange - Callback when user selects a mode
+ */
 export function ParameterConfigModeStep({
   selectedMode,
   onModeChange,

@@ -20,6 +20,20 @@ interface AiParameterConfigInputProps {
   showValidation?: boolean;
 }
 
+/**
+ * AI Parameter Config Input Component
+ *
+ * Text area input for entering natural language parameter description
+ * when using AI Parameter Config Mode.
+ *
+ * Includes real-time validation with debouncing (300ms delay).
+ * Validation: Required input (≥1 character after trim).
+ *
+ * @param props - Component props
+ * @param props.value - Current parameter description value
+ * @param props.onChange - Callback when value changes
+ * @param props.showValidation - Whether to show validation errors (default: false)
+ */
 export function AiParameterConfigInput({
   value,
   onChange,

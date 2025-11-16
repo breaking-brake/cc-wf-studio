@@ -33,6 +33,15 @@ const MODE_INFO: Record<McpNodeMode, ModeInfo> = {
   },
 };
 
+/**
+ * Mode Indicator Badge Component
+ *
+ * Displays a read-only badge showing the current MCP node mode.
+ * Used in canvas nodes and edit dialogs to indicate the configuration mode.
+ *
+ * @param props - Component props
+ * @param props.mode - Current MCP node mode
+ */
 export function ModeIndicatorBadge({ mode }: ModeIndicatorBadgeProps) {
   const { t } = useTranslation();
   const info = MODE_INFO[mode];

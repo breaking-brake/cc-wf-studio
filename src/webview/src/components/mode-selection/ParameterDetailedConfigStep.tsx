@@ -22,6 +22,22 @@ interface ParameterDetailedConfigStepProps {
   showValidation?: boolean;
 }
 
+/**
+ * Parameter Detailed Config Step Component
+ *
+ * Displays a parameter configuration form for the selected MCP tool.
+ * Loads tool schema from MCP server and generates dynamic form fields
+ * using ParameterFormGenerator.
+ *
+ * Shows loading state while fetching schema and error message if schema load fails.
+ *
+ * @param props - Component props
+ * @param props.serverId - MCP server identifier
+ * @param props.toolName - Tool function name
+ * @param props.parameterValues - Current parameter values
+ * @param props.onChange - Callback when parameter values change
+ * @param props.showValidation - Whether to show validation errors (default: false)
+ */
 export function ParameterDetailedConfigStep({
   serverId,
   toolName,
