@@ -171,8 +171,8 @@
 
 **注**: T014（AiToolSelectionInputコンポーネント）とT021（ツール自動選択フロー）はPhase 3で実装済み。
 
-- [ ] T045 [P] [US3] MCP cache serviceを拡張して選択されたサーバーから利用可能ツールを取得・キャッシュ（src/extension/services/mcp-cache-service.ts）
-- [ ] T046 [P] [US3] MCPサーバーから利用可能ツールリストを取得するメッセージハンドラを追加（Extension Host）
+- [x] T045 [P] [US3] MCP cache serviceを拡張して選択されたサーバーから利用可能ツールを取得・キャッシュ（src/extension/services/mcp-cache-service.ts） - getTools()関数を追加（src/extension/services/mcp-cli-service.ts）、キャッシュロジックを統合
+- [x] T046 [P] [US3] MCPサーバーから利用可能ツールリストを取得するメッセージハンドラを追加（Extension Host） - handleGetMcpTools()をgetTools()使用に更新、キャッシュロジックを一元化
 - [x] T047 [US3] AiToolSelectionInputに検証ロジックを統合（必須入力（1文字以上）、リアルタイム検証、エラー表示）
 - [x] T048 [US3] McpNodeDialogでAI Tool Selection Mode選択時の保存ロジックを実装（mode、serverId、aiToolSelectionConfig保存、ツールリスト取得） - バリデーション追加、型修正、T045-T046未実装のため availableTools は空配列
 - [x] T049 [US3] McpNodeEditDialogでAIツール選択モード編集UIを実装（タスク説明の編集、検証、保存） - バリデーション改善
