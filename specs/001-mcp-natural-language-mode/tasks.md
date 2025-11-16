@@ -140,17 +140,17 @@
 
 **注**: T015（AiParameterConfigInputコンポーネント）はPhase 3で実装済み。
 
-- [ ] T034 [P] [US2] 自然言語バリデーター関数を作成（src/webview/src/services/validation/natural-language-validator.ts、最小長10文字、debounce 300ms）
+- [ ] T034 [P] [US2] 自然言語バリデーター関数を作成（src/webview/src/services/validation/natural-language-validator.ts、必須入力（1文字以上）、debounce 300ms）
 - [ ] T035 [US2] AiParameterConfigInputに検証ロジックを統合（リアルタイム検証、エラー表示）
 - [ ] T036 [US2] McpNodeDialogでAI Parameter Config Mode選択時の保存ロジックを実装（mode、serverId、toolName、aiParameterConfigを保存）
 - [ ] T037 [US2] McpNodeEditDialogでAIパラメータ設定モード編集UIを実装（説明の編集、検証、保存）
-- [ ] T038 [P] [US2] 自然言語説明が最小長未満の場合のエラーメッセージを国際化（MCP_NL_DESC_TOO_SHORT）
+- [ ] T038 [P] [US2] 自然言語説明が空の場合のエラーメッセージを国際化（MCP_NL_DESC_REQUIRED）
 - [ ] T039 [US2] ワークフローストアを拡張してAIパラメータ設定モードデータを処理（src/webview/src/stores/workflow-store.ts）
 
 ### User Story 2 の手動E2Eテスト
 
 - [ ] T040 [US2] **手動E2E**: パラメータ設定方法で「AIに設定してもらう」選択時、自然言語説明テキストエリアが表示されることを確認
-- [ ] T041 [US2] **手動E2E**: 自然言語説明入力時に最小長検証（10文字）が機能し、エラーメッセージが表示されることを確認
+- [ ] T041 [US2] **手動E2E**: 自然言語説明入力時に必須入力検証（1文字以上）が機能し、空の場合にエラーメッセージが表示されることを確認
 - [ ] T042 [US2] **手動E2E**: 有効な自然言語説明でノード保存時にmode、serverId、toolName、aiParameterConfigが正しく保存されることを確認
 - [ ] T043 [US2] **手動E2E**: 保存されたAIパラメータ設定モードノードを編集時、自然言語説明が表示され編集できることを確認
 - [ ] T044 [US2] **手動E2E**: キャンバス上のAIパラメータ設定モードノードにモードバッジ（AIパラメータ設定モード表示）が表示されることを確認
@@ -173,17 +173,17 @@
 
 - [ ] T045 [P] [US3] MCP cache serviceを拡張して選択されたサーバーから利用可能ツールを取得・キャッシュ（src/extension/services/mcp-cache-service.ts）
 - [ ] T046 [P] [US3] MCPサーバーから利用可能ツールリストを取得するメッセージハンドラを追加（Extension Host）
-- [ ] T047 [US3] AiToolSelectionInputに検証ロジックを統合（最小長20文字、リアルタイム検証、エラー表示）
+- [ ] T047 [US3] AiToolSelectionInputに検証ロジックを統合（必須入力（1文字以上）、リアルタイム検証、エラー表示）
 - [ ] T048 [US3] McpNodeDialogでAI Tool Selection Mode選択時の保存ロジックを実装（mode、serverId、aiToolSelectionConfig保存、ツールリスト取得）
 - [ ] T049 [US3] McpNodeEditDialogでAIツール選択モード編集UIを実装（タスク説明の編集、検証、保存）
-- [ ] T050 [P] [US3] タスク説明が最小長未満の場合のエラーメッセージを国際化（MCP_TASK_DESC_TOO_SHORT）
+- [ ] T050 [P] [US3] タスク説明が空の場合のエラーメッセージを国際化（MCP_TASK_DESC_REQUIRED）
 - [ ] T051 [US3] ワークフローストアを拡張してAIツール選択モードデータを処理（src/webview/src/stores/workflow-store.ts）
 - [ ] T052 [US3] 既存のMcpNodeComponentを拡張してモードバッジを表示（src/webview/src/components/nodes/McpNode/McpNode.tsx）
 
 ### User Story 3 の手動E2Eテスト
 
 - [ ] T053 [US3] **手動E2E**: ツール選択方法で「AIに選んでもらう」選択時、ツール選択がスキップされ、タスク説明フィールドが表示されることを確認
-- [ ] T054 [US3] **手動E2E**: タスク説明入力時に最小長検証（20文字）が機能し、エラーメッセージが表示されることを確認
+- [ ] T054 [US3] **手動E2E**: タスク説明入力時に必須入力検証（1文字以上）が機能し、空の場合にエラーメッセージが表示されることを確認
 - [ ] T055 [US3] **手動E2E**: 有効なタスク説明でノード保存時にmode、serverId、aiToolSelectionConfig（taskDescription、availableTools、timestamp）が正しく保存されることを確認
 - [ ] T056 [US3] **手動E2E**: 保存されたAIツール選択モードノードを編集時、タスク説明が表示され編集できることを確認
 - [ ] T057 [US3] **手動E2E**: キャンバス上のAIツール選択モードノードにモードバッジ（AIツール選択モード表示）が表示されることを確認
