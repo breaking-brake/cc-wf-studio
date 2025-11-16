@@ -65,25 +65,15 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
       try {
         // Initialize mode-specific state
         if (currentMode === 'fullNaturalLanguage') {
-          // Full NL Mode: Initialize task description
+          // Full NL Mode: Initialize task description only (no schema loading needed)
           setNaturalLanguageTaskDescription(
             nodeData.fullNaturalLanguageConfig?.taskDescription || ''
           );
         } else if (currentMode === 'naturalLanguageParam') {
-          // NL Param Mode: Initialize param description and load schema
+          // NL Param Mode: Initialize param description only (no schema loading needed)
           setNaturalLanguageParamDescription(
             nodeData.naturalLanguageParamConfig?.description || ''
           );
-
-          // Load schema for reference (optional, can show parameter list)
-          const result = await getMcpToolSchema({
-            serverId: nodeData.serverId,
-            toolName: nodeData.toolName || '',
-          });
-
-          if (result.success && result.schema) {
-            setParameters(result.schema.parameters || []);
-          }
         } else {
           // Detailed Mode: Load schema and initialize parameter values
           const result = await getMcpToolSchema({
