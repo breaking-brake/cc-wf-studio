@@ -343,8 +343,15 @@ export interface WebviewTranslationKeys {
   'mcp.dialog.selectTool': string;
   'mcp.dialog.addButton': string;
   'mcp.dialog.cancelButton': string;
+  'mcp.dialog.wizardStep': string;
+  'mcp.dialog.nextButton': string;
+  'mcp.dialog.backButton': string;
+  'mcp.dialog.saveButton': string;
   'mcp.dialog.error.noServerSelected': string;
   'mcp.dialog.error.noToolSelected': string;
+  'mcp.dialog.error.incompleteWizard': string;
+  'mcp.dialog.error.cannotProceed': string;
+  'mcp.dialog.error.invalidMode': string;
 
   // MCP Property Panel
   'property.nodeType.mcp': string;

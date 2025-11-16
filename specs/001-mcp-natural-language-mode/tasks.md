@@ -99,11 +99,11 @@
 - [x] T016 [P] [US1] ModeIndicatorBadgeコンポーネントを作成（src/webview/src/components/mode-selection/ModeIndicatorBadge.tsx）- モード表示バッジ（テキスト + 色付きボーダー）
 
 #### 作成フロー統合（T017-T021）
-- [ ] T017 [US1] McpNodeDialogを拡張して段階的モード選択フローを追加（src/webview/src/components/dialogs/McpNodeDialog.tsx）
-- [ ] T018 [US1] McpNodeDialog用のウィザード状態管理フックを作成（src/webview/src/hooks/useMcpCreationWizard.ts）
-- [ ] T019 [US1] サーバー選択後のツール選択方法ステップを実装
-- [ ] T020 [US1] ツール選択後のパラメータ設定方法ステップを実装
-- [ ] T021 [US1] Full NL Mode時のツール自動選択フロー実装（ツール選択ステップスキップ）
+- [x] T017 [US1] McpNodeDialogを拡張して段階的モード選択フローを追加（src/webview/src/components/dialogs/McpNodeDialog.tsx）
+- [x] T018 [US1] McpNodeDialog用のウィザード状態管理フックを作成（src/webview/src/hooks/useMcpCreationWizard.ts）
+- [x] T019 [US1] サーバー選択後のツール選択方法ステップを実装
+- [x] T020 [US1] ツール選択後のパラメータ設定方法ステップを実装
+- [x] T021 [US1] Full NL Mode時のツール自動選択フロー実装（ツール選択ステップスキップ）
 
 #### 編集フロー簡素化（T022-T024）
 - [ ] T022 [US1] McpNodeEditDialogを簡素化（モード選択削除、モード表示のみ）

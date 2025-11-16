@@ -7,9 +7,8 @@
  * Based on: specs/001-mcp-natural-language-mode/tasks.md T013
  */
 
+import type { ParameterConfigMode } from '@shared/types/mcp-node';
 import { useTranslation } from '../../i18n/i18n-context';
-
-export type ParameterConfigMode = 'manual' | 'auto';
 
 interface ParameterConfigModeStepProps {
   selectedMode: ParameterConfigMode;

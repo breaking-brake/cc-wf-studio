@@ -379,8 +379,15 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.selectTool': 'ツールを選択',
   'mcp.dialog.addButton': 'ツールを追加',
   'mcp.dialog.cancelButton': 'キャンセル',
+  'mcp.dialog.wizardStep': 'ステップ {{current}} / {{total}}',
+  'mcp.dialog.nextButton': '次へ',
+  'mcp.dialog.backButton': '戻る',
+  'mcp.dialog.saveButton': 'ノードを作成',
   'mcp.dialog.error.noServerSelected': 'MCPサーバーを選択してください',
   'mcp.dialog.error.noToolSelected': 'ツールを選択してください',
+  'mcp.dialog.error.incompleteWizard': '必要なステップをすべて完了してください',
+  'mcp.dialog.error.cannotProceed': '進むには必要なフィールドをすべて入力してください',
+  'mcp.dialog.error.invalidMode': '無効なモードが選択されました',
 
   // MCP Property Panel
   'property.nodeType.mcp': 'MCP Tool',

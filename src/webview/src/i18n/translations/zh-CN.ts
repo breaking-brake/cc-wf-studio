@@ -362,8 +362,15 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.selectTool': '选择工具',
   'mcp.dialog.addButton': '添加工具',
   'mcp.dialog.cancelButton': '取消',
+  'mcp.dialog.wizardStep': '第{{current}}步，共{{total}}步',
+  'mcp.dialog.nextButton': '下一步',
+  'mcp.dialog.backButton': '返回',
+  'mcp.dialog.saveButton': '创建节点',
   'mcp.dialog.error.noServerSelected': '请选择MCP服务器',
   'mcp.dialog.error.noToolSelected': '请选择工具',
+  'mcp.dialog.error.incompleteWizard': '请完成所有必需步骤',
+  'mcp.dialog.error.cannotProceed': '请填写所有必填字段以继续',
+  'mcp.dialog.error.invalidMode': '选择了无效的模式',
 
   // MCP Property Panel
   'property.nodeType.mcp': 'MCP Tool',

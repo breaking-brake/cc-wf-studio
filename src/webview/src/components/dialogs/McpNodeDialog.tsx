@@ -1,21 +1,24 @@
 /**
  * MCP Node Creation Dialog Component
  *
- * Feature: 001-mcp-node
- * Purpose: Browse MCP servers, select tools, and create MCP nodes
+ * Feature: 001-mcp-natural-language-mode
+ * Purpose: Step-by-step wizard for creating MCP nodes with mode selection
  *
- * Based on: specs/001-mcp-node/plan.md Section 6.2
- * Task: T025
+ * Based on: specs/001-mcp-natural-language-mode/tasks.md T017
  */
 
-import type { McpServerReference, McpToolReference } from '@shared/types/messages';
 import { NodeType } from '@shared/types/workflow-definition';
 import { useState } from 'react';
+import { useMcpCreationWizard, WizardStep } from '../../hooks/useMcpCreationWizard';
 import { useTranslation } from '../../i18n/i18n-context';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { McpServerList } from '../mcp/McpServerList';
 import { McpToolList } from '../mcp/McpToolList';
 import { McpToolSearch } from '../mcp/McpToolSearch';
+import { NaturalLanguageParamInput } from '../mode-selection/NaturalLanguageParamInput';
+import { NaturalLanguageTaskInput } from '../mode-selection/NaturalLanguageTaskInput';
+import { ParameterConfigModeStep } from '../mode-selection/ParameterConfigModeStep';
+import { ToolSelectionModeStep } from '../mode-selection/ToolSelectionModeStep';
 
 interface McpNodeDialogProps {
   isOpen: boolean;
@@ -24,11 +27,10 @@ interface McpNodeDialogProps {
 
 export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
   const { t } = useTranslation();
-  const [selectedServer, setSelectedServer] = useState<McpServerReference | null>(null);
-  const [selectedTool, setSelectedTool] = useState<McpToolReference | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  const wizard = useMcpCreationWizard();
   const { addNode, nodes } = useWorkflowStore();
 
   /**
@@ -69,44 +71,243 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
     return null;
   }
 
-  const handleAddTool = () => {
-    if (!selectedServer) {
+  const handleSaveNode = () => {
+    if (!wizard.isComplete) {
+      setError(t('mcp.dialog.error.incompleteWizard'));
+      return;
+    }
+
+    if (!wizard.state.selectedServer) {
       setError(t('mcp.dialog.error.noServerSelected'));
       return;
     }
 
-    if (!selectedTool) {
-      setError(t('mcp.dialog.error.noToolSelected'));
-      return;
-    }
-
-    // Add MCP node to canvas
     const position = calculateNonOverlappingPosition(300, 250);
+    const nodeId = `mcp-${Date.now()}`;
 
-    addNode({
-      id: `mcp-${Date.now()}`,
-      type: NodeType.Mcp,
-      position,
-      data: {
-        serverId: selectedServer.id,
-        toolName: selectedTool.name,
-        toolDescription: selectedTool.description || '',
-        parameters: selectedTool.parameters || [],
-        parameterValues: {},
-        validationStatus: 'valid',
-        outputPorts: 1,
-      },
-    });
+    // Build node data based on mode
+    switch (wizard.finalMode) {
+      case 'detailed': {
+        if (!wizard.state.selectedTool) {
+          setError(t('mcp.dialog.error.noToolSelected'));
+          return;
+        }
+
+        addNode({
+          id: nodeId,
+          type: NodeType.Mcp,
+          position,
+          data: {
+            mode: 'detailed',
+            serverId: wizard.state.selectedServer.id,
+            toolName: wizard.state.selectedTool.name,
+            toolDescription: wizard.state.selectedTool.description || '',
+            parameters: wizard.state.selectedTool.parameters || [],
+            parameterValues: {},
+            validationStatus: 'valid',
+            outputPorts: 1,
+          },
+        });
+        break;
+      }
+
+      case 'naturalLanguageParam': {
+        if (!wizard.state.selectedTool) {
+          setError(t('mcp.dialog.error.noToolSelected'));
+          return;
+        }
+
+        addNode({
+          id: nodeId,
+          type: NodeType.Mcp,
+          position,
+          data: {
+            mode: 'naturalLanguageParam',
+            serverId: wizard.state.selectedServer.id,
+            toolName: wizard.state.selectedTool.name,
+            toolDescription: wizard.state.selectedTool.description || '',
+            parameters: wizard.state.selectedTool.parameters || [],
+            naturalLanguageParamConfig: {
+              description: wizard.state.naturalLanguageParamDescription,
+              timestamp: new Date().toISOString(),
+            },
+            validationStatus: 'valid',
+            outputPorts: 1,
+          },
+        });
+        break;
+      }
+
+      case 'fullNaturalLanguage': {
+        // TODO: T045-T046 - Get available tools from MCP server
+        const availableTools: string[] = []; // Placeholder
+
+        addNode({
+          id: nodeId,
+          type: NodeType.Mcp,
+          position,
+          data: {
+            mode: 'fullNaturalLanguage',
+            serverId: wizard.state.selectedServer.id,
+            fullNaturalLanguageConfig: {
+              taskDescription: wizard.state.naturalLanguageTaskDescription,
+              availableTools,
+              timestamp: new Date().toISOString(),
+            },
+            validationStatus: 'valid',
+            outputPorts: 1,
+          },
+        });
+        break;
+      }
+
+      default:
+        setError(t('mcp.dialog.error.invalidMode'));
+        return;
+    }
 
     handleClose();
   };
 
   const handleClose = () => {
-    setSelectedServer(null);
-    setSelectedTool(null);
+    wizard.reset();
     setSearchQuery('');
     setError(null);
     onClose();
+  };
+
+  /**
+   * Render step content based on current wizard step
+   */
+  const renderStepContent = () => {
+    switch (wizard.state.currentStep) {
+      case WizardStep.ServerSelection:
+        return (
+          <div>
+            <h3
+              style={{
+                margin: '0 0 12px 0',
+                fontSize: '14px',
+                fontWeight: 600,
+                color: 'var(--vscode-foreground)',
+              }}
+            >
+              {t('mcp.dialog.selectServer')}
+            </h3>
+            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <McpServerList
+                onServerSelect={(server) => {
+                  wizard.setServer(server);
+                  setError(null);
+                }}
+                selectedServerId={wizard.state.selectedServer?.id}
+              />
+            </div>
+          </div>
+        );
+
+      case WizardStep.ToolSelectionMethod:
+        return (
+          <ToolSelectionModeStep
+            selectedMode={wizard.state.toolSelectionMode || 'manual'}
+            onModeChange={(mode) => {
+              wizard.setToolSelectionMode(mode);
+              setError(null);
+            }}
+          />
+        );
+
+      case WizardStep.ToolSelection:
+        return (
+          <div>
+            <h3
+              style={{
+                margin: '0 0 12px 0',
+                fontSize: '14px',
+                fontWeight: 600,
+                color: 'var(--vscode-foreground)',
+              }}
+            >
+              {t('mcp.dialog.selectTool')}
+            </h3>
+            <McpToolSearch value={searchQuery} onChange={setSearchQuery} disabled={false} />
+            <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+              <McpToolList
+                serverId={wizard.state.selectedServer?.id || ''}
+                onToolSelect={(tool) => {
+                  wizard.setTool(tool);
+                  setError(null);
+                }}
+                selectedToolName={wizard.state.selectedTool?.name}
+                searchQuery={searchQuery}
+              />
+            </div>
+          </div>
+        );
+
+      case WizardStep.ParameterConfigMethod:
+        return (
+          <ParameterConfigModeStep
+            selectedMode={wizard.state.parameterConfigMode || 'manual'}
+            onModeChange={(mode) => {
+              wizard.setParameterConfigMode(mode);
+              setError(null);
+            }}
+          />
+        );
+
+      case WizardStep.NaturalLanguageTask:
+        return (
+          <NaturalLanguageTaskInput
+            value={wizard.state.naturalLanguageTaskDescription}
+            onChange={(value) => {
+              wizard.setNaturalLanguageTaskDescription(value);
+              setError(null);
+            }}
+            showValidation={true}
+          />
+        );
+
+      case WizardStep.NaturalLanguageParam:
+        return (
+          <NaturalLanguageParamInput
+            value={wizard.state.naturalLanguageParamDescription}
+            onChange={(value) => {
+              wizard.setNaturalLanguageParamDescription(value);
+              setError(null);
+            }}
+            showValidation={true}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  /**
+   * Determine button label based on wizard state
+   */
+  const getActionButtonLabel = (): string => {
+    if (wizard.isComplete) {
+      return t('mcp.dialog.saveButton');
+    }
+    return t('mcp.dialog.nextButton');
+  };
+
+  /**
+   * Handle action button click (Next or Save)
+   */
+  const handleActionButton = () => {
+    if (wizard.isComplete) {
+      handleSaveNode();
+    } else {
+      if (wizard.canProceed) {
+        wizard.nextStep();
+      } else {
+        setError(t('mcp.dialog.error.cannotProceed'));
+      }
+    }
   };
 
   return (
@@ -137,7 +338,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
           border: '1px solid var(--vscode-panel-border)',
           borderRadius: '6px',
           padding: '24px',
-          maxWidth: '800px',
+          maxWidth: '600px',
           width: '90%',
           maxHeight: '90vh',
           overflow: 'auto',
@@ -150,7 +351,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
         {/* Dialog Header */}
         <h2
           style={{
-            margin: '0 0 20px 0',
+            margin: '0 0 8px 0',
             fontSize: '18px',
             fontWeight: 600,
             color: 'var(--vscode-foreground)',
@@ -158,6 +359,20 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
         >
           {t('mcp.dialog.title')}
         </h2>
+
+        {/* Step Indicator */}
+        <div
+          style={{
+            marginBottom: '20px',
+            fontSize: '12px',
+            color: 'var(--vscode-descriptionForeground)',
+          }}
+        >
+          {t('mcp.dialog.wizardStep', {
+            current: wizard.state.currentStep.toString(),
+            total: '6',
+          })}
+        </div>
 
         {/* Error Message */}
         {error && (
@@ -175,78 +390,8 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
           </div>
         )}
 
-        {/* Two-column layout: Server list on left, Tool list on right */}
-        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
-          {/* Left column: Server selection */}
-          <div style={{ flex: '1', minWidth: 0 }}>
-            <h3
-              style={{
-                margin: '0 0 12px 0',
-                fontSize: '14px',
-                fontWeight: 600,
-                color: 'var(--vscode-foreground)',
-              }}
-            >
-              {t('mcp.dialog.selectServer')}
-            </h3>
-            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-              <McpServerList
-                onServerSelect={(server) => {
-                  setSelectedServer(server);
-                  setSelectedTool(null);
-                  setSearchQuery('');
-                  setError(null);
-                }}
-                selectedServerId={selectedServer?.id}
-              />
-            </div>
-          </div>
-
-          {/* Right column: Tool selection */}
-          <div style={{ flex: '1', minWidth: 0 }}>
-            <h3
-              style={{
-                margin: '0 0 12px 0',
-                fontSize: '14px',
-                fontWeight: 600,
-                color: 'var(--vscode-foreground)',
-              }}
-            >
-              {t('mcp.dialog.selectTool')}
-            </h3>
-
-            {selectedServer ? (
-              <>
-                <McpToolSearch
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  disabled={!selectedServer}
-                />
-                <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
-                  <McpToolList
-                    serverId={selectedServer.id}
-                    onToolSelect={(tool) => {
-                      setSelectedTool(tool);
-                      setError(null);
-                    }}
-                    selectedToolName={selectedTool?.name}
-                    searchQuery={searchQuery}
-                  />
-                </div>
-              </>
-            ) : (
-              <div
-                style={{
-                  padding: '40px 16px',
-                  textAlign: 'center',
-                  color: 'var(--vscode-descriptionForeground)',
-                }}
-              >
-                {t('mcp.dialog.error.noServerSelected')}
-              </div>
-            )}
-          </div>
-        </div>
+        {/* Step Content */}
+        <div style={{ marginBottom: '20px', minHeight: '300px' }}>{renderStepContent()}</div>
 
         {/* Dialog Actions */}
         <div
@@ -273,28 +418,47 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
           >
             {t('mcp.dialog.cancelButton')}
           </button>
+
+          {/* Back Button */}
+          {wizard.state.currentStep !== WizardStep.ServerSelection && (
+            <button
+              type="button"
+              onClick={wizard.prevStep}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                color: 'var(--vscode-button-secondaryForeground)',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '13px',
+              }}
+            >
+              {t('mcp.dialog.backButton')}
+            </button>
+          )}
+
+          {/* Next/Save Button */}
           <button
             type="button"
-            onClick={handleAddTool}
-            disabled={!selectedServer || !selectedTool}
+            onClick={handleActionButton}
+            disabled={!wizard.canProceed}
             style={{
               padding: '8px 16px',
-              backgroundColor:
-                selectedServer && selectedTool
-                  ? 'var(--vscode-button-background)'
-                  : 'var(--vscode-button-secondaryBackground)',
-              color:
-                selectedServer && selectedTool
-                  ? 'var(--vscode-button-foreground)'
-                  : 'var(--vscode-descriptionForeground)',
+              backgroundColor: wizard.canProceed
+                ? 'var(--vscode-button-background)'
+                : 'var(--vscode-button-secondaryBackground)',
+              color: wizard.canProceed
+                ? 'var(--vscode-button-foreground)'
+                : 'var(--vscode-descriptionForeground)',
               border: 'none',
               borderRadius: '4px',
-              cursor: selectedServer && selectedTool ? 'pointer' : 'not-allowed',
+              cursor: wizard.canProceed ? 'pointer' : 'not-allowed',
               fontSize: '13px',
-              opacity: selectedServer && selectedTool ? 1 : 0.6,
+              opacity: wizard.canProceed ? 1 : 0.6,
             }}
           >
-            {t('mcp.dialog.addButton')}
+            {getActionButtonLabel()}
           </button>
         </div>
       </div>

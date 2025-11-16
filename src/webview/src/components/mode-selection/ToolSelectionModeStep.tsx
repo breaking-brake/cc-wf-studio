@@ -7,9 +7,8 @@
  * Based on: specs/001-mcp-natural-language-mode/tasks.md T012
  */
 
+import type { ToolSelectionMode } from '@shared/types/mcp-node';
 import { useTranslation } from '../../i18n/i18n-context';
-
-export type ToolSelectionMode = 'manual' | 'auto';
 
 interface ToolSelectionModeStepProps {
   selectedMode: ToolSelectionMode;

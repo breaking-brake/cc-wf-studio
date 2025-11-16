@@ -381,8 +381,15 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.selectTool': 'Select Tool',
   'mcp.dialog.addButton': 'Add Tool',
   'mcp.dialog.cancelButton': 'Cancel',
+  'mcp.dialog.wizardStep': 'Step {{current}} of {{total}}',
+  'mcp.dialog.nextButton': 'Next',
+  'mcp.dialog.backButton': 'Back',
+  'mcp.dialog.saveButton': 'Create Node',
   'mcp.dialog.error.noServerSelected': 'Please select an MCP server',
   'mcp.dialog.error.noToolSelected': 'Please select a tool',
+  'mcp.dialog.error.incompleteWizard': 'Please complete all required steps',
+  'mcp.dialog.error.cannotProceed': 'Please fill in all required fields to proceed',
+  'mcp.dialog.error.invalidMode': 'Invalid mode selected',
 
   // MCP Property Panel
   'property.nodeType.mcp': 'MCP Tool',

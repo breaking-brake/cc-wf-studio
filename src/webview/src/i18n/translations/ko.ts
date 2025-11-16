@@ -378,8 +378,15 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.selectTool': '도구 선택',
   'mcp.dialog.addButton': '도구 추가',
   'mcp.dialog.cancelButton': '취소',
+  'mcp.dialog.wizardStep': '{{total}}단계 중 {{current}}단계',
+  'mcp.dialog.nextButton': '다음',
+  'mcp.dialog.backButton': '뒤로',
+  'mcp.dialog.saveButton': '노드 생성',
   'mcp.dialog.error.noServerSelected': 'MCP 서버를 선택하세요',
   'mcp.dialog.error.noToolSelected': '도구를 선택하세요',
+  'mcp.dialog.error.incompleteWizard': '필수 단계를 모두 완료하세요',
+  'mcp.dialog.error.cannotProceed': '계속하려면 모든 필수 필드를 입력하세요',
+  'mcp.dialog.error.invalidMode': '잘못된 모드가 선택되었습니다',
 
   // MCP Property Panel
   'property.nodeType.mcp': 'MCP Tool',

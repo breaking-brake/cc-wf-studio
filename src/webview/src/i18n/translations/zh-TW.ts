@@ -362,8 +362,15 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.selectTool': '選擇工具',
   'mcp.dialog.addButton': '新增工具',
   'mcp.dialog.cancelButton': '取消',
+  'mcp.dialog.wizardStep': '第{{current}}步，共{{total}}步',
+  'mcp.dialog.nextButton': '下一步',
+  'mcp.dialog.backButton': '返回',
+  'mcp.dialog.saveButton': '建立節點',
   'mcp.dialog.error.noServerSelected': '請選擇MCP伺服器',
   'mcp.dialog.error.noToolSelected': '請選擇工具',
+  'mcp.dialog.error.incompleteWizard': '請完成所有必要步驟',
+  'mcp.dialog.error.cannotProceed': '請填寫所有必填欄位以繼續',
+  'mcp.dialog.error.invalidMode': '選擇了無效的模式',
 
   // MCP Property Panel
   'property.nodeType.mcp': 'MCP Tool',
