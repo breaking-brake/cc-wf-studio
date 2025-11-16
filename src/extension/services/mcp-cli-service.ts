@@ -6,12 +6,48 @@
  *
  * Feature: 001-mcp-natural-language-mode
  * Enhancement: T045 - Added getTools() function with caching support
+ *
+ * Updated to use nano-spawn for cross-platform compatibility (Windows/Unix)
+ * See: Issue #79 - Windows environment compatibility
  */
 
-import { spawn } from 'node:child_process';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const nanoSpawn = require('nano-spawn');
+
 import type { McpServerReference, McpToolReference } from '../../shared/types/mcp-node';
 import { log } from '../extension';
 import { getCachedTools, setCachedTools } from './mcp-cache-service';
+
+/**
+ * nano-spawn type definitions (manually defined for compatibility)
+ */
+interface SubprocessError extends Error {
+  stdout: string;
+  stderr: string;
+  output: string;
+  command: string;
+  durationMs: number;
+  exitCode?: number;
+  signalName?: string;
+  isTerminated?: boolean;
+  code?: string;
+}
+
+interface Result {
+  stdout: string;
+  stderr: string;
+  output: string;
+  command: string;
+  durationMs: number;
+}
+
+const spawn =
+  nanoSpawn.default ||
+  (nanoSpawn as (
+    file: string,
+    args?: readonly string[],
+    options?: Record<string, unknown>
+  ) => Promise<Result>);
 
 /**
  * Error codes for MCP CLI operations
@@ -53,6 +89,22 @@ const DEFAULT_TIMEOUT_MS = 5000;
 const LIST_SERVERS_TIMEOUT_MS = 30000;
 
 /**
+ * Type guard to check if an error is a SubprocessError from nano-spawn
+ *
+ * @param error - The error to check
+ * @returns True if error is a SubprocessError
+ */
+function isSubprocessError(error: unknown): error is SubprocessError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'exitCode' in error &&
+    'stderr' in error &&
+    'stdout' in error
+  );
+}
+
+/**
  * Execute a Claude Code MCP CLI command
  *
  * @param args - CLI arguments (e.g., ['mcp', 'list'])
@@ -73,94 +125,111 @@ async function executeClaudeMcpCommand(
     cwd,
   });
 
-  return new Promise((resolve) => {
-    let stdout = '';
-    let stderr = '';
-    let timedOut = false;
-
-    // Spawn 'claude' CLI process
-    const childProcess = spawn('claude', args, {
-      stdio: ['ignore', 'pipe', 'pipe'],
+  try {
+    // Spawn 'claude' CLI process using nano-spawn (cross-platform compatible)
+    // Use npx to ensure cross-platform compatibility (Windows PATH issues with global npm installs)
+    const result = await spawn('npx', ['claude', ...args], {
       cwd,
+      timeout: timeoutMs,
+      stdin: 'ignore',
+      stdout: 'pipe',
+      stderr: 'pipe',
     });
 
-    // Set timeout
-    const timeout = setTimeout(() => {
-      timedOut = true;
-      childProcess.kill();
+    const executionTimeMs = Date.now() - startTime;
 
-      const executionTimeMs = Date.now() - startTime;
-      log('WARN', 'MCP CLI command timed out', {
+    log('INFO', 'MCP CLI command completed', {
+      args,
+      exitCode: 0,
+      executionTimeMs,
+      stdoutLength: result.stdout.length,
+      stderrLength: result.stderr.length,
+    });
+
+    return {
+      success: true,
+      stdout: result.stdout,
+      stderr: result.stderr,
+      exitCode: 0,
+    };
+  } catch (error) {
+    const executionTimeMs = Date.now() - startTime;
+
+    // Log complete error object for debugging
+    log('ERROR', 'MCP CLI error caught', {
+      errorType: typeof error,
+      errorConstructor: error?.constructor?.name,
+      errorKeys: error && typeof error === 'object' ? Object.keys(error) : [],
+      error: error,
+      executionTimeMs,
+    });
+
+    // Handle SubprocessError from nano-spawn
+    if (isSubprocessError(error)) {
+      // Timeout error
+      if (error.isTerminated && error.signalName === 'SIGTERM') {
+        log('WARN', 'MCP CLI command timed out', {
+          args,
+          timeoutMs,
+          executionTimeMs,
+        });
+
+        return {
+          success: false,
+          stdout: '',
+          stderr: `Timeout after ${timeoutMs}ms`,
+          exitCode: null,
+        };
+      }
+
+      // Command not found (ENOENT)
+      if (error.code === 'ENOENT') {
+        log('ERROR', 'MCP CLI command error', {
+          args,
+          errorCode: error.code,
+          errorMessage: error.message,
+          executionTimeMs,
+        });
+
+        return {
+          success: false,
+          stdout: '',
+          stderr: error.message,
+          exitCode: null,
+        };
+      }
+
+      // Non-zero exit code
+      log('INFO', 'MCP CLI command completed with error', {
         args,
-        timeoutMs,
+        exitCode: error.exitCode,
         executionTimeMs,
+        stdoutLength: error.stdout?.length ?? 0,
+        stderrLength: error.stderr?.length ?? 0,
       });
 
-      resolve({
+      return {
         success: false,
-        stdout: '',
-        stderr: `Timeout after ${timeoutMs}ms`,
-        exitCode: null,
-      });
-    }, timeoutMs);
+        stdout: error.stdout,
+        stderr: error.stderr,
+        exitCode: error.exitCode ?? null,
+      };
+    }
 
-    // Collect stdout
-    childProcess.stdout?.on('data', (chunk: Buffer) => {
-      stdout += chunk.toString();
+    // Unknown error type
+    log('ERROR', 'Unexpected error during MCP CLI command execution', {
+      args,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      executionTimeMs,
     });
 
-    // Collect stderr
-    childProcess.stderr?.on('data', (chunk: Buffer) => {
-      stderr += chunk.toString();
-    });
-
-    // Handle process errors (e.g., ENOENT when command not found)
-    childProcess.on('error', (err: NodeJS.ErrnoException) => {
-      clearTimeout(timeout);
-
-      if (timedOut) return;
-
-      const executionTimeMs = Date.now() - startTime;
-
-      log('ERROR', 'MCP CLI command error', {
-        args,
-        errorCode: err.code,
-        errorMessage: err.message,
-        executionTimeMs,
-      });
-
-      resolve({
-        success: false,
-        stdout: '',
-        stderr: err.message,
-        exitCode: null,
-      });
-    });
-
-    // Handle process exit
-    childProcess.on('exit', (code) => {
-      clearTimeout(timeout);
-
-      if (timedOut) return;
-
-      const executionTimeMs = Date.now() - startTime;
-
-      log('INFO', 'MCP CLI command completed', {
-        args,
-        exitCode: code,
-        executionTimeMs,
-        stdoutLength: stdout.length,
-        stderrLength: stderr.length,
-      });
-
-      resolve({
-        success: code === 0,
-        stdout,
-        stderr,
-        exitCode: code,
-      });
-    });
-  });
+    return {
+      success: false,
+      stdout: '',
+      stderr: error instanceof Error ? error.message : String(error),
+      exitCode: null,
+    };
+  }
 }
 
 /**
