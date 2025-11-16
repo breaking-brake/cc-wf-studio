@@ -43,14 +43,14 @@
 
 **⚠️ 重要**: このフェーズが完了するまで、ユーザーストーリーの作業を開始できません
 
-- [ ] T004 McpNodeMode型定義をsrc/shared/types/mcp-node.tsに追加
-- [ ] T005 [P] NaturalLanguageParamConfig インターフェースをsrc/shared/types/mcp-node.tsに追加
-- [ ] T006 [P] FullNaturalLanguageConfig インターフェースをsrc/shared/types/mcp-node.tsに追加
-- [ ] T007 [P] PreservedDetailedConfig インターフェースをsrc/shared/types/mcp-node.tsに追加
-- [ ] T008 McpNodeData インターフェースを拡張（mode, naturalLanguageParamConfig, fullNaturalLanguageConfig, preservedDetailedConfigフィールド追加）
-- [ ] T009 [P] ModeExportMetadata型定義（discriminated union）をsrc/shared/types/mcp-node.tsに追加
-- [ ] T010 既存のMcpNodeData正規化関数を更新（mode未定義時に'detailed'をデフォルト設定）
-- [ ] T011 [P] 国際化リソースを5言語（en, ja, ko, zh-CN, zh-TW）に追加（モード名、説明、エラーメッセージ）
+- [x] T004 McpNodeMode型定義をsrc/shared/types/mcp-node.tsに追加
+- [x] T005 [P] NaturalLanguageParamConfig インターフェースをsrc/shared/types/mcp-node.tsに追加
+- [x] T006 [P] FullNaturalLanguageConfig インターフェースをsrc/shared/types/mcp-node.tsに追加
+- [x] T007 [P] PreservedDetailedConfig インターフェースをsrc/shared/types/mcp-node.tsに追加
+- [x] T008 McpNodeData インターフェースを拡張（mode, naturalLanguageParamConfig, fullNaturalLanguageConfig, preservedDetailedConfigフィールド追加）
+- [x] T009 [P] ModeExportMetadata型定義（discriminated union）をsrc/shared/types/mcp-node.tsに追加
+- [x] T010 既存のMcpNodeData正規化関数を更新（mode未定義時に'detailed'をデフォルト設定）
+- [x] T011 [P] 国際化リソースを5言語（en, ja, ko, zh-CN, zh-TW）に追加（モード名、説明、エラーメッセージ）
 
 **チェックポイント**: 基盤準備完了 - ユーザーストーリーの実装を並列開始可能
 

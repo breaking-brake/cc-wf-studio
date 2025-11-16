@@ -420,4 +420,54 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.editDialog.cancelButton': '취소',
   'mcp.editDialog.loading': '도구 스키마 로드 중...',
   'mcp.editDialog.error.schemaLoadFailed': '도구 스키마 로드 실패',
+
+  // MCP Natural Language Mode (Feature: 001-mcp-natural-language-mode)
+
+  // Mode Selection
+  'mcp.modeSelection.title': '구성 모드 선택',
+  'mcp.modeSelection.subtitle': 'MCP 도구 구성 방법을 선택하세요',
+  'mcp.modeSelection.detailed.title': '상세 모드',
+  'mcp.modeSelection.detailed.description':
+    '서버, 도구 및 모든 매개변수를 명시적으로 구성합니다. 재현성이 높으며 기술 사용자에게 적합합니다.',
+  'mcp.modeSelection.naturalLanguageParam.title': '자연어 매개변수 모드',
+  'mcp.modeSelection.naturalLanguageParam.description':
+    '서버와 도구를 선택하고 매개변수를 자연어로 설명합니다. 균형잡힌 접근 방식입니다.',
+  'mcp.modeSelection.fullNaturalLanguage.title': '완전 자연어 모드',
+  'mcp.modeSelection.fullNaturalLanguage.description':
+    '서버만 선택하고 전체 작업을 자연어로 설명합니다. 가장 간단하지만 재현성은 낮습니다.',
+
+  // Natural Language Input
+  'mcp.naturalLanguage.paramDescription.label': '매개변수 설명',
+  'mcp.naturalLanguage.paramDescription.placeholder':
+    '이 도구로 수행하려는 작업을 설명하세요(예: "us-east-1에서 Lambda를 사용할 수 있는지 확인")...',
+  'mcp.naturalLanguage.taskDescription.label': '작업 설명',
+  'mcp.naturalLanguage.taskDescription.placeholder':
+    '수행하려는 작업을 설명하세요(예: "S3 버킷 정책에 대한 문서 찾기")...',
+  'mcp.naturalLanguage.characterCount': '{count}자 (최소 {min}자)',
+
+  // Mode Switch Warnings
+  'mcp.modeSwitch.warning.title': '모드 전환 경고',
+  'mcp.modeSwitch.warning.message':
+    '{currentMode}에서 {newMode}로 전환하면 이 노드의 구성 방법이 변경됩니다. 현재 구성은 보존되지만 새 모드에서는 표시되지 않을 수 있습니다. 언제든지 {currentMode}로 돌아가 이전 구성을 복원할 수 있습니다.',
+  'mcp.modeSwitch.warning.continueButton': '계속',
+  'mcp.modeSwitch.warning.cancelButton': '취소',
+  'mcp.modeSwitch.dataPreserved': '데이터는 보존됩니다',
+  'mcp.modeSwitch.canRevert': '언제든지 되돌릴 수 있습니다',
+
+  // Validation Errors
+  'mcp.error.nlDescTooShort':
+    '자연어 설명이 너무 짧습니다({length}자). Claude Code가 의도를 이해할 수 있도록 최소 {min}자를 입력하세요.',
+  'mcp.error.taskDescTooShort':
+    '작업 설명이 너무 짧습니다({length}자). 명확한 목표를 포함하여 최소 {min}자를 입력하세요.',
+  'mcp.error.noToolsAvailable': '선택한 MCP 서버에서 사용 가능한 도구가 없습니다',
+  'mcp.error.toolListOutdated':
+    '도구 목록 스냅샷이 7일 이상 오래되었습니다. 최신 도구를 가져오려면 이 노드를 다시 편집하세요.',
+  'mcp.error.modeConfigMissing': '모드 구성이 누락되었습니다. 이 노드를 다시 구성하세요.',
+  'mcp.error.invalidModeConfig':
+    '모드 구성이 잘못되었습니다. 자연어 설명을 확인하거나 상세 모드로 전환하세요.',
+
+  // Mode Indicator Tooltips
+  'mcp.mode.detailed.tooltip': '상세 모드: 모든 매개변수가 명시적으로 구성됨',
+  'mcp.mode.naturalLanguageParam.tooltip': '자연어 매개변수 모드: "{description}"',
+  'mcp.mode.fullNaturalLanguage.tooltip': '완전 자연어 모드: "{taskDescription}"',
 };

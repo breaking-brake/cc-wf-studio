@@ -384,4 +384,44 @@ export interface WebviewTranslationKeys {
   'mcp.editDialog.cancelButton': string;
   'mcp.editDialog.loading': string;
   'mcp.editDialog.error.schemaLoadFailed': string;
+
+  // MCP Natural Language Mode (Feature: 001-mcp-natural-language-mode)
+
+  // Mode Selection
+  'mcp.modeSelection.title': string;
+  'mcp.modeSelection.subtitle': string;
+  'mcp.modeSelection.detailed.title': string;
+  'mcp.modeSelection.detailed.description': string;
+  'mcp.modeSelection.naturalLanguageParam.title': string;
+  'mcp.modeSelection.naturalLanguageParam.description': string;
+  'mcp.modeSelection.fullNaturalLanguage.title': string;
+  'mcp.modeSelection.fullNaturalLanguage.description': string;
+
+  // Natural Language Input
+  'mcp.naturalLanguage.paramDescription.label': string;
+  'mcp.naturalLanguage.paramDescription.placeholder': string;
+  'mcp.naturalLanguage.taskDescription.label': string;
+  'mcp.naturalLanguage.taskDescription.placeholder': string;
+  'mcp.naturalLanguage.characterCount': string;
+
+  // Mode Switch Warnings
+  'mcp.modeSwitch.warning.title': string;
+  'mcp.modeSwitch.warning.message': string;
+  'mcp.modeSwitch.warning.continueButton': string;
+  'mcp.modeSwitch.warning.cancelButton': string;
+  'mcp.modeSwitch.dataPreserved': string;
+  'mcp.modeSwitch.canRevert': string;
+
+  // Validation Errors
+  'mcp.error.nlDescTooShort': string;
+  'mcp.error.taskDescTooShort': string;
+  'mcp.error.noToolsAvailable': string;
+  'mcp.error.toolListOutdated': string;
+  'mcp.error.modeConfigMissing': string;
+  'mcp.error.invalidModeConfig': string;
+
+  // Mode Indicator Tooltips
+  'mcp.mode.detailed.tooltip': string;
+  'mcp.mode.naturalLanguageParam.tooltip': string;
+  'mcp.mode.fullNaturalLanguage.tooltip': string;
 }

@@ -403,4 +403,53 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'mcp.editDialog.cancelButton': '取消',
   'mcp.editDialog.loading': '正在載入工具架構...',
   'mcp.editDialog.error.schemaLoadFailed': '載入工具架構失敗',
+
+  // MCP Natural Language Mode (Feature: 001-mcp-natural-language-mode)
+
+  // Mode Selection
+  'mcp.modeSelection.title': '選擇配置模式',
+  'mcp.modeSelection.subtitle': '選擇MCP工具的配置方式',
+  'mcp.modeSelection.detailed.title': '詳細模式',
+  'mcp.modeSelection.detailed.description':
+    '明確配置伺服器、工具和所有參數。再現性高，最適合技術使用者。',
+  'mcp.modeSelection.naturalLanguageParam.title': '自然語言參數模式',
+  'mcp.modeSelection.naturalLanguageParam.description':
+    '選擇伺服器和工具，用自然語言描述參數。平衡的方法。',
+  'mcp.modeSelection.fullNaturalLanguage.title': '完全自然語言模式',
+  'mcp.modeSelection.fullNaturalLanguage.description':
+    '僅選擇伺服器，用自然語言描述整個任務。最簡單，但再現性最低。',
+
+  // Natural Language Input
+  'mcp.naturalLanguage.paramDescription.label': '參數描述',
+  'mcp.naturalLanguage.paramDescription.placeholder':
+    '描述您想用此工具做什麼（例如：「檢查Lambda在us-east-1中是否可用」）...',
+  'mcp.naturalLanguage.taskDescription.label': '任務描述',
+  'mcp.naturalLanguage.taskDescription.placeholder':
+    '描述您想完成的任務（例如：「查找有關S3儲存貯體原則的文件」）...',
+  'mcp.naturalLanguage.characterCount': '{count}個字元（最少{min}個字元）',
+
+  // Mode Switch Warnings
+  'mcp.modeSwitch.warning.title': '模式切換警告',
+  'mcp.modeSwitch.warning.message':
+    '從{currentMode}切換到{newMode}將改變此節點的配置方式。您目前的配置將被保留，但在新模式下可能不可見。您可以隨時切換回{currentMode}以恢復之前的配置。',
+  'mcp.modeSwitch.warning.continueButton': '繼續',
+  'mcp.modeSwitch.warning.cancelButton': '取消',
+  'mcp.modeSwitch.dataPreserved': '您的資料將被保留',
+  'mcp.modeSwitch.canRevert': '您可以隨時切換回來',
+
+  // Validation Errors
+  'mcp.error.nlDescTooShort':
+    '自然語言描述太短（{length}個字元）。請提供至少{min}個字元以幫助Claude Code理解您的意圖。',
+  'mcp.error.taskDescTooShort':
+    '任務描述太短（{length}個字元）。請提供至少{min}個字元並包含明確的目標。',
+  'mcp.error.noToolsAvailable': '所選MCP伺服器沒有可用工具',
+  'mcp.error.toolListOutdated':
+    '工具清單快照已超過7天。請重新編輯此節點以取得最新的可用工具。',
+  'mcp.error.modeConfigMissing': '缺少模式配置。請重新配置此節點。',
+  'mcp.error.invalidModeConfig': '模式配置無效。請檢查您的自然語言描述或切換到詳細模式。',
+
+  // Mode Indicator Tooltips
+  'mcp.mode.detailed.tooltip': '詳細模式: 所有參數都已明確配置',
+  'mcp.mode.naturalLanguageParam.tooltip': '自然語言參數模式: "{description}"',
+  'mcp.mode.fullNaturalLanguage.tooltip': '完全自然語言模式: "{taskDescription}"',
 };

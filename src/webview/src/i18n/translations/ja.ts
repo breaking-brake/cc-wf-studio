@@ -421,4 +421,54 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.editDialog.cancelButton': 'キャンセル',
   'mcp.editDialog.loading': 'ツールスキーマを読み込み中...',
   'mcp.editDialog.error.schemaLoadFailed': 'ツールスキーマの読み込みに失敗しました',
+
+  // MCP Natural Language Mode (Feature: 001-mcp-natural-language-mode)
+
+  // Mode Selection
+  'mcp.modeSelection.title': '設定モードを選択',
+  'mcp.modeSelection.subtitle': 'MCPツールの設定方法を選択してください',
+  'mcp.modeSelection.detailed.title': '詳細モード',
+  'mcp.modeSelection.detailed.description':
+    'サーバー、ツール、すべてのパラメータを明示的に設定します。再現性が高く、技術的なユーザーに最適です。',
+  'mcp.modeSelection.naturalLanguageParam.title': '自然言語パラメータモード',
+  'mcp.modeSelection.naturalLanguageParam.description':
+    'サーバーとツールを選択し、パラメータを自然言語で記述します。バランスの取れたアプローチです。',
+  'mcp.modeSelection.fullNaturalLanguage.title': '完全自然言語モード',
+  'mcp.modeSelection.fullNaturalLanguage.description':
+    'サーバーのみを選択し、タスク全体を自然言語で記述します。最もシンプルですが、再現性は低いです。',
+
+  // Natural Language Input
+  'mcp.naturalLanguage.paramDescription.label': 'パラメータの説明',
+  'mcp.naturalLanguage.paramDescription.placeholder':
+    'このツールで何をしたいか説明してください（例:「us-east-1でLambdaが利用可能か確認する」）...',
+  'mcp.naturalLanguage.taskDescription.label': 'タスクの説明',
+  'mcp.naturalLanguage.taskDescription.placeholder':
+    '実現したいタスクを説明してください（例:「S3バケットポリシーに関するドキュメントを検索する」）...',
+  'mcp.naturalLanguage.characterCount': '{count}文字（最低{min}文字）',
+
+  // Mode Switch Warnings
+  'mcp.modeSwitch.warning.title': 'モード切り替えの警告',
+  'mcp.modeSwitch.warning.message':
+    '{currentMode}から{newMode}に切り替えると、このノードの設定方法が変わります。現在の設定は保持されますが、新しいモードでは表示されない場合があります。いつでも{currentMode}に戻して以前の設定を復元できます。',
+  'mcp.modeSwitch.warning.continueButton': '続行',
+  'mcp.modeSwitch.warning.cancelButton': 'キャンセル',
+  'mcp.modeSwitch.dataPreserved': 'データは保持されます',
+  'mcp.modeSwitch.canRevert': 'いつでも元に戻せます',
+
+  // Validation Errors
+  'mcp.error.nlDescTooShort':
+    '自然言語の説明が短すぎます（{length}文字）。Claude Codeがあなたの意図を理解できるよう、最低{min}文字を入力してください。',
+  'mcp.error.taskDescTooShort':
+    'タスクの説明が短すぎます（{length}文字）。明確な目標を含む、最低{min}文字を入力してください。',
+  'mcp.error.noToolsAvailable': '選択したMCPサーバーから利用可能なツールがありません',
+  'mcp.error.toolListOutdated':
+    'ツールリストのスナップショットが7日以上古くなっています。最新の利用可能なツールを取得するため、このノードを再編集してください。',
+  'mcp.error.modeConfigMissing': 'モード設定が見つかりません。このノードを再設定してください。',
+  'mcp.error.invalidModeConfig':
+    'モード設定が無効です。自然言語の説明を確認するか、詳細モードに切り替えてください。',
+
+  // Mode Indicator Tooltips
+  'mcp.mode.detailed.tooltip': '詳細モード: すべてのパラメータを明示的に設定',
+  'mcp.mode.naturalLanguageParam.tooltip': '自然言語パラメータモード: 「{description}」',
+  'mcp.mode.fullNaturalLanguage.tooltip': '完全自然言語モード: 「{taskDescription}」',
 };

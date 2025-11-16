@@ -423,4 +423,55 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.editDialog.cancelButton': 'Cancel',
   'mcp.editDialog.loading': 'Loading tool schema...',
   'mcp.editDialog.error.schemaLoadFailed': 'Failed to load tool schema',
+
+  // MCP Natural Language Mode (Feature: 001-mcp-natural-language-mode)
+
+  // Mode Selection
+  'mcp.modeSelection.title': 'Select Configuration Mode',
+  'mcp.modeSelection.subtitle': 'Choose how you want to configure this MCP tool',
+  'mcp.modeSelection.detailed.title': 'Detailed Mode',
+  'mcp.modeSelection.detailed.description':
+    'Configure server, tool, and all parameters explicitly. High reproducibility, best for technical users.',
+  'mcp.modeSelection.naturalLanguageParam.title': 'Natural Language Parameter Mode',
+  'mcp.modeSelection.naturalLanguageParam.description':
+    'Select server and tool, describe parameters in natural language. Balanced approach.',
+  'mcp.modeSelection.fullNaturalLanguage.title': 'Full Natural Language Mode',
+  'mcp.modeSelection.fullNaturalLanguage.description':
+    'Select server only, describe entire task in natural language. Simplest, lowest reproducibility.',
+
+  // Natural Language Input
+  'mcp.naturalLanguage.paramDescription.label': 'Parameter Description',
+  'mcp.naturalLanguage.paramDescription.placeholder':
+    'Describe what you want to do with this tool (e.g., "Check if Lambda is available in us-east-1")...',
+  'mcp.naturalLanguage.taskDescription.label': 'Task Description',
+  'mcp.naturalLanguage.taskDescription.placeholder':
+    'Describe the task you want to accomplish (e.g., "Find documentation about S3 bucket policies")...',
+  'mcp.naturalLanguage.characterCount': '{count} characters ({min} minimum)',
+
+  // Mode Switch Warnings
+  'mcp.modeSwitch.warning.title': 'Mode Switch Warning',
+  'mcp.modeSwitch.warning.message':
+    'Switching from {currentMode} to {newMode} will change how this node is configured. Your current configuration will be preserved but may not be visible in the new mode. You can switch back to {currentMode} at any time to restore the previous configuration.',
+  'mcp.modeSwitch.warning.continueButton': 'Continue',
+  'mcp.modeSwitch.warning.cancelButton': 'Cancel',
+  'mcp.modeSwitch.dataPreserved': 'Your data will be preserved',
+  'mcp.modeSwitch.canRevert': 'You can switch back at any time',
+
+  // Validation Errors
+  'mcp.error.nlDescTooShort':
+    'Natural language description is too short ({length} characters). Please provide at least {min} characters to help Claude Code understand your intent.',
+  'mcp.error.taskDescTooShort':
+    'Task description is too short ({length} characters). Please provide at least {min} characters with a clear goal.',
+  'mcp.error.noToolsAvailable': 'No tools available from the selected MCP server',
+  'mcp.error.toolListOutdated':
+    'Tool list snapshot is more than 7 days old. Please re-edit this node to capture the latest available tools.',
+  'mcp.error.modeConfigMissing': 'Mode configuration is missing. Please reconfigure this node.',
+  'mcp.error.invalidModeConfig':
+    'Mode configuration is invalid. Please check your natural language description or switch to Detailed Mode.',
+
+  // Mode Indicator Tooltips
+  'mcp.mode.detailed.tooltip': 'Detailed Mode: All parameters explicitly configured',
+  'mcp.mode.naturalLanguageParam.tooltip':
+    'Natural Language Parameter Mode: "{description}"',
+  'mcp.mode.fullNaturalLanguage.tooltip': 'Full Natural Language Mode: "{taskDescription}"',
 };
