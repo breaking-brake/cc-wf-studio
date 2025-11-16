@@ -470,7 +470,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.naturalLanguage.taskDescription.label': '작업 설명',
   'mcp.naturalLanguage.taskDescription.placeholder':
     '수행하려는 작업을 설명하세요(예: "S3 버킷 정책에 대한 문서 찾기")...',
-  'mcp.naturalLanguage.characterCount': '{count}자 (최소 {min}자)',
+  'mcp.naturalLanguage.characters': '자',
 
   // Mode Switch Warnings
   'mcp.modeSwitch.warning.title': '모드 전환 경고',
@@ -482,10 +482,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.modeSwitch.canRevert': '언제든지 되돌릴 수 있습니다',
 
   // Validation Errors
-  'mcp.error.nlDescTooShort':
-    '자연어 설명이 너무 짧습니다({length}자). Claude Code가 의도를 이해할 수 있도록 최소 {min}자를 입력하세요.',
-  'mcp.error.taskDescTooShort':
-    '작업 설명이 너무 짧습니다({length}자). 명확한 목표를 포함하여 최소 {min}자를 입력하세요.',
+  'mcp.error.paramDescRequired': '매개변수 설명을 입력하세요.',
+  'mcp.error.taskDescRequired': '작업 설명을 입력하세요.',
   'mcp.error.noToolsAvailable': '선택한 MCP 서버에서 사용 가능한 도구가 없습니다',
   'mcp.error.toolListOutdated':
     '도구 목록 스냅샷이 7일 이상 오래되었습니다. 최신 도구를 가져오려면 이 노드를 다시 편집하세요.',

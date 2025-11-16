@@ -145,8 +145,8 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
       }
 
       case 'naturalLanguageParam': {
-        // Validate minimum length (10 characters)
-        if (naturalLanguageParamDescription.length < 10) {
+        // Validate required field
+        if (naturalLanguageParamDescription.length === 0) {
           return;
         }
 
@@ -162,8 +162,8 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
       }
 
       case 'fullNaturalLanguage': {
-        // Validate minimum length (20 characters)
-        if (naturalLanguageTaskDescription.length < 20) {
+        // Validate required field
+        if (naturalLanguageTaskDescription.length === 0) {
           return;
         }
 

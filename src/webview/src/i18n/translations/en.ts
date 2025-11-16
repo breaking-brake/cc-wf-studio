@@ -474,7 +474,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.naturalLanguage.taskDescription.label': 'Task Description',
   'mcp.naturalLanguage.taskDescription.placeholder':
     'Describe the task you want to accomplish (e.g., "Find documentation about S3 bucket policies")...',
-  'mcp.naturalLanguage.characterCount': '{count} characters ({min} minimum)',
+  'mcp.naturalLanguage.characters': 'characters',
 
   // Mode Switch Warnings
   'mcp.modeSwitch.warning.title': 'Mode Switch Warning',
@@ -486,10 +486,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.modeSwitch.canRevert': 'You can switch back at any time',
 
   // Validation Errors
-  'mcp.error.nlDescTooShort':
-    'Natural language description is too short ({length} characters). Please provide at least {min} characters to help Claude Code understand your intent.',
-  'mcp.error.taskDescTooShort':
-    'Task description is too short ({length} characters). Please provide at least {min} characters with a clear goal.',
+  'mcp.error.paramDescRequired':
+    'Please provide a parameter description to help Claude Code understand your intent.',
+  'mcp.error.taskDescRequired': 'Please provide a task description with a clear goal.',
   'mcp.error.noToolsAvailable': 'No tools available from the selected MCP server',
   'mcp.error.toolListOutdated':
     'Tool list snapshot is more than 7 days old. Please re-edit this node to capture the latest available tools.',

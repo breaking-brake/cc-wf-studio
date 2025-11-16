@@ -471,7 +471,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.naturalLanguage.taskDescription.label': 'タスクの説明',
   'mcp.naturalLanguage.taskDescription.placeholder':
     '実現したいタスクを説明してください（例:「S3バケットポリシーに関するドキュメントを検索する」）...',
-  'mcp.naturalLanguage.characterCount': '{count}文字（最低{min}文字）',
+  'mcp.naturalLanguage.characters': '文字',
 
   // Mode Switch Warnings
   'mcp.modeSwitch.warning.title': 'モード切り替えの警告',
@@ -483,10 +483,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.modeSwitch.canRevert': 'いつでも元に戻せます',
 
   // Validation Errors
-  'mcp.error.nlDescTooShort':
-    '自然言語の説明が短すぎます（{length}文字）。Claude Codeがあなたの意図を理解できるよう、最低{min}文字を入力してください。',
-  'mcp.error.taskDescTooShort':
-    'タスクの説明が短すぎます（{length}文字）。明確な目標を含む、最低{min}文字を入力してください。',
+  'mcp.error.paramDescRequired': 'パラメータの説明を入力してください。',
+  'mcp.error.taskDescRequired': 'タスクの説明を入力してください。',
   'mcp.error.noToolsAvailable': '選択したMCPサーバーから利用可能なツールがありません',
   'mcp.error.toolListOutdated':
     'ツールリストのスナップショットが7日以上古くなっています。最新の利用可能なツールを取得するため、このノードを再編集してください。',

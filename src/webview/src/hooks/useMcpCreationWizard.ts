@@ -90,12 +90,12 @@ export function useMcpCreationWizard() {
         return state.parameterConfigMode !== null;
 
       case WizardStep.NaturalLanguageTask:
-        // Minimum 20 characters for Full NL Mode
-        return state.naturalLanguageTaskDescription.length >= 20;
+        // Required field for Full NL Mode
+        return state.naturalLanguageTaskDescription.length > 0;
 
       case WizardStep.NaturalLanguageParam:
-        // Minimum 10 characters for NL Param Mode
-        return state.naturalLanguageParamDescription.length >= 10;
+        // Required field for NL Param Mode
+        return state.naturalLanguageParamDescription.length > 0;
 
       default:
         return false;
@@ -215,14 +215,14 @@ export function useMcpCreationWizard() {
           state.toolSelectionMode === 'manual' &&
           state.selectedTool !== null &&
           state.parameterConfigMode === 'auto' &&
-          state.naturalLanguageParamDescription.length >= 10
+          state.naturalLanguageParamDescription.length > 0
         );
 
       case 'fullNaturalLanguage':
         return (
           state.selectedServer !== null &&
           state.toolSelectionMode === 'auto' &&
-          state.naturalLanguageTaskDescription.length >= 20
+          state.naturalLanguageTaskDescription.length > 0
         );
 
       default:

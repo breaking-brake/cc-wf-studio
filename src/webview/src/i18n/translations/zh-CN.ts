@@ -452,7 +452,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.naturalLanguage.taskDescription.label': '任务描述',
   'mcp.naturalLanguage.taskDescription.placeholder':
     '描述您想完成的任务（例如："查找有关S3存储桶策略的文档"）...',
-  'mcp.naturalLanguage.characterCount': '{count}个字符（最少{min}个字符）',
+  'mcp.naturalLanguage.characters': '个字符',
 
   // Mode Switch Warnings
   'mcp.modeSwitch.warning.title': '模式切换警告',
@@ -464,10 +464,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.modeSwitch.canRevert': '您可以随时切换回来',
 
   // Validation Errors
-  'mcp.error.nlDescTooShort':
-    '自然语言描述太短（{length}个字符）。请提供至少{min}个字符以帮助Claude Code理解您的意图。',
-  'mcp.error.taskDescTooShort':
-    '任务描述太短（{length}个字符）。请提供至少{min}个字符并包含明确的目标。',
+  'mcp.error.paramDescRequired': '请提供参数描述。',
+  'mcp.error.taskDescRequired': '请提供任务描述。',
   'mcp.error.noToolsAvailable': '所选MCP服务器没有可用工具',
   'mcp.error.toolListOutdated': '工具列表快照已超过7天。请重新编辑此节点以获取最新的可用工具。',
   'mcp.error.modeConfigMissing': '缺少模式配置。请重新配置此节点。',

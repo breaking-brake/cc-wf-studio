@@ -425,7 +425,7 @@ export interface WebviewTranslationKeys {
   'mcp.naturalLanguage.paramDescription.placeholder': string;
   'mcp.naturalLanguage.taskDescription.label': string;
   'mcp.naturalLanguage.taskDescription.placeholder': string;
-  'mcp.naturalLanguage.characterCount': string;
+  'mcp.naturalLanguage.characters': string;
 
   // Mode Switch Warnings
   'mcp.modeSwitch.warning.title': string;
@@ -436,8 +436,8 @@ export interface WebviewTranslationKeys {
   'mcp.modeSwitch.canRevert': string;
 
   // Validation Errors
-  'mcp.error.nlDescTooShort': string;
-  'mcp.error.taskDescTooShort': string;
+  'mcp.error.paramDescRequired': string;
+  'mcp.error.taskDescRequired': string;
   'mcp.error.noToolsAvailable': string;
   'mcp.error.toolListOutdated': string;
   'mcp.error.modeConfigMissing': string;

@@ -15,8 +15,6 @@ interface NaturalLanguageParamInputProps {
   showValidation?: boolean;
 }
 
-const MIN_CHAR_COUNT = 10;
-
 export function NaturalLanguageParamInput({
   value,
   onChange,
@@ -25,7 +23,7 @@ export function NaturalLanguageParamInput({
   const { t } = useTranslation();
 
   const charCount = value.length;
-  const isValid = charCount >= MIN_CHAR_COUNT;
+  const isValid = charCount > 0;
   const showError = showValidation && !isValid;
 
   return (
@@ -77,7 +75,7 @@ export function NaturalLanguageParamInput({
         }}
       />
 
-      {/* Character Count and Validation */}
+      {/* Character Count */}
       <div
         style={{
           display: 'flex',
@@ -91,15 +89,10 @@ export function NaturalLanguageParamInput({
             fontSize: '12px',
             color: showError
               ? 'var(--vscode-errorForeground)'
-              : charCount >= MIN_CHAR_COUNT
-                ? 'var(--vscode-descriptionForeground)'
-                : 'var(--vscode-descriptionForeground)',
+              : 'var(--vscode-descriptionForeground)',
           }}
         >
-          {t('mcp.naturalLanguage.characterCount', {
-            count: charCount.toString(),
-            min: MIN_CHAR_COUNT.toString(),
-          })}
+          {charCount} {t('mcp.naturalLanguage.characters')}
         </div>
 
         {/* Validation Icon */}
@@ -127,10 +120,7 @@ export function NaturalLanguageParamInput({
             borderRadius: '4px',
           }}
         >
-          {t('mcp.error.nlDescTooShort', {
-            length: charCount.toString(),
-            min: MIN_CHAR_COUNT.toString(),
-          })}
+          {t('mcp.error.paramDescRequired')}
         </div>
       )}
     </div>
