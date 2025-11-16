@@ -322,6 +322,7 @@ export interface WebviewTranslationKeys {
   // MCP Node (Feature: 001-mcp-node)
   'node.mcp.title': string;
   'node.mcp.description': string;
+  'node.mcp.aiToolSelectionPlaceholder': string;
 
   // MCP Server List
   'mcp.loading.servers': string;

@@ -130,7 +130,9 @@ export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
             fontWeight: 500,
           }}
         >
-          {data.toolName || 'Untitled Tool'}
+          {currentMode === 'aiToolSelection'
+            ? t('node.mcp.aiToolSelectionPlaceholder')
+            : data.toolName || 'Untitled Tool'}
         </div>
 
         {/* Server Badge */}

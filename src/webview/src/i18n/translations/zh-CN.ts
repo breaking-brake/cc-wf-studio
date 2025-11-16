@@ -341,6 +341,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // MCP Node (Feature: 001-mcp-node)
   'node.mcp.title': 'MCP Tool',
   'node.mcp.description': '执行MCP工具',
+  'node.mcp.aiToolSelectionPlaceholder': 'AI将选择工具',
 
   // MCP Server List
   'mcp.loading.servers': '正在加载MCP服务器...',
