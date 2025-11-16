@@ -16,20 +16,20 @@ interface ModeIndicatorBadgeProps {
 
 interface ModeInfo {
   titleKey:
-    | 'mcp.modeSelection.detailed.title'
-    | 'mcp.modeSelection.naturalLanguageParam.title'
-    | 'mcp.modeSelection.fullNaturalLanguage.title';
+    | 'mcp.modeSelection.manualParameterConfig.title'
+    | 'mcp.modeSelection.aiParameterConfig.title'
+    | 'mcp.modeSelection.aiToolSelection.title';
 }
 
 const MODE_INFO: Record<McpNodeMode, ModeInfo> = {
   manualParameterConfig: {
-    titleKey: 'mcp.modeSelection.detailed.title',
+    titleKey: 'mcp.modeSelection.manualParameterConfig.title',
   },
   aiParameterConfig: {
-    titleKey: 'mcp.modeSelection.naturalLanguageParam.title',
+    titleKey: 'mcp.modeSelection.aiParameterConfig.title',
   },
   aiToolSelection: {
-    titleKey: 'mcp.modeSelection.fullNaturalLanguage.title',
+    titleKey: 'mcp.modeSelection.aiToolSelection.title',
   },
 };
 

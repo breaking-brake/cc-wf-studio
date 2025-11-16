@@ -433,14 +433,14 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Mode Selection
   'mcp.modeSelection.title': '구성 모드 선택',
   'mcp.modeSelection.subtitle': 'MCP 도구 구성 방법을 선택하세요',
-  'mcp.modeSelection.detailed.title': '수동 매개변수 설정',
-  'mcp.modeSelection.detailed.description':
+  'mcp.modeSelection.manualParameterConfig.title': '수동 매개변수 설정',
+  'mcp.modeSelection.manualParameterConfig.description':
     '서버, 도구 및 모든 매개변수를 명시적으로 구성합니다. 재현성이 높으며 기술 사용자에게 적합합니다.',
-  'mcp.modeSelection.naturalLanguageParam.title': 'AI 매개변수 설정',
-  'mcp.modeSelection.naturalLanguageParam.description':
+  'mcp.modeSelection.aiParameterConfig.title': 'AI 매개변수 설정',
+  'mcp.modeSelection.aiParameterConfig.description':
     '서버와 도구를 선택하고 매개변수를 자연어로 설명합니다. 균형잡힌 접근 방식입니다.',
-  'mcp.modeSelection.fullNaturalLanguage.title': 'AI 도구 선택',
-  'mcp.modeSelection.fullNaturalLanguage.description':
+  'mcp.modeSelection.aiToolSelection.title': 'AI 도구 선택',
+  'mcp.modeSelection.aiToolSelection.description':
     '서버만 선택하고 전체 작업을 자연어로 설명합니다. 가장 간단하지만 재현성은 낮습니다.',
 
   // Tool Selection Mode (Step-by-step decision flow)

@@ -434,14 +434,14 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Mode Selection
   'mcp.modeSelection.title': '設定モードを選択',
   'mcp.modeSelection.subtitle': 'MCPツールの設定方法を選択してください',
-  'mcp.modeSelection.detailed.title': '手動パラメータ設定',
-  'mcp.modeSelection.detailed.description':
+  'mcp.modeSelection.manualParameterConfig.title': '手動パラメータ設定',
+  'mcp.modeSelection.manualParameterConfig.description':
     'サーバー、ツール、すべてのパラメータを明示的に設定します。再現性が高く、技術的なユーザーに最適です。',
-  'mcp.modeSelection.naturalLanguageParam.title': 'AIパラメータ設定',
-  'mcp.modeSelection.naturalLanguageParam.description':
+  'mcp.modeSelection.aiParameterConfig.title': 'AIパラメータ設定',
+  'mcp.modeSelection.aiParameterConfig.description':
     'サーバーとツールを選択し、パラメータを自然言語で記述します。バランスの取れたアプローチです。',
-  'mcp.modeSelection.fullNaturalLanguage.title': 'AIツール選択',
-  'mcp.modeSelection.fullNaturalLanguage.description':
+  'mcp.modeSelection.aiToolSelection.title': 'AIツール選択',
+  'mcp.modeSelection.aiToolSelection.description':
     'サーバーのみを選択し、タスク全体を自然言語で記述します。最もシンプルですが、再現性は低いです。',
 
   // Tool Selection Mode (Step-by-step decision flow)

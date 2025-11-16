@@ -269,11 +269,11 @@ export type ModeExportMetadata =
 export function normalizeMcpNodeData(data: McpNodeData): McpNodeData {
   // Migrate old mode values to new values
   let mode = data.mode ?? 'manualParameterConfig';
-  if (mode === 'detailed' as any) {
+  if (mode === ('detailed' as any)) {
     mode = 'manualParameterConfig';
-  } else if (mode === 'naturalLanguageParam' as any) {
+  } else if (mode === ('naturalLanguageParam' as any)) {
     mode = 'aiParameterConfig';
-  } else if (mode === 'fullNaturalLanguage' as any) {
+  } else if (mode === ('fullNaturalLanguage' as any)) {
     mode = 'aiToolSelection';
   }
 

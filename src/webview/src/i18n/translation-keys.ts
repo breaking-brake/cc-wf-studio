@@ -397,12 +397,12 @@ export interface WebviewTranslationKeys {
   // Mode Selection
   'mcp.modeSelection.title': string;
   'mcp.modeSelection.subtitle': string;
-  'mcp.modeSelection.detailed.title': string;
-  'mcp.modeSelection.detailed.description': string;
-  'mcp.modeSelection.naturalLanguageParam.title': string;
-  'mcp.modeSelection.naturalLanguageParam.description': string;
-  'mcp.modeSelection.fullNaturalLanguage.title': string;
-  'mcp.modeSelection.fullNaturalLanguage.description': string;
+  'mcp.modeSelection.manualParameterConfig.title': string;
+  'mcp.modeSelection.manualParameterConfig.description': string;
+  'mcp.modeSelection.aiParameterConfig.title': string;
+  'mcp.modeSelection.aiParameterConfig.description': string;
+  'mcp.modeSelection.aiToolSelection.title': string;
+  'mcp.modeSelection.aiToolSelection.description': string;
 
   // Tool Selection Mode (Step-by-step decision flow)
   'mcp.toolSelectionMode.title': string;

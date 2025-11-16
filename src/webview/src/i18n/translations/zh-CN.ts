@@ -416,14 +416,14 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // Mode Selection
   'mcp.modeSelection.title': '选择配置模式',
   'mcp.modeSelection.subtitle': '选择MCP工具的配置方式',
-  'mcp.modeSelection.detailed.title': '手动参数设置',
-  'mcp.modeSelection.detailed.description':
+  'mcp.modeSelection.manualParameterConfig.title': '手动参数设置',
+  'mcp.modeSelection.manualParameterConfig.description':
     '明确配置服务器、工具和所有参数。再现性高，最适合技术用户。',
-  'mcp.modeSelection.naturalLanguageParam.title': 'AI参数设置',
-  'mcp.modeSelection.naturalLanguageParam.description':
+  'mcp.modeSelection.aiParameterConfig.title': 'AI参数设置',
+  'mcp.modeSelection.aiParameterConfig.description':
     '选择服务器和工具，用自然语言描述参数。平衡的方法。',
-  'mcp.modeSelection.fullNaturalLanguage.title': 'AI工具选择',
-  'mcp.modeSelection.fullNaturalLanguage.description':
+  'mcp.modeSelection.aiToolSelection.title': 'AI工具选择',
+  'mcp.modeSelection.aiToolSelection.description':
     '仅选择服务器，用自然语言描述整个任务。最简单，但再现性最低。',
 
   // Tool Selection Mode (Step-by-step decision flow)

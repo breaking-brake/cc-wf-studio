@@ -66,14 +66,10 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
         // Initialize mode-specific state
         if (currentMode === 'aiToolSelection') {
           // AI Tool Selection Mode: Initialize task description only (no schema loading needed)
-          setNaturalLanguageTaskDescription(
-            nodeData.aiToolSelectionConfig?.taskDescription || ''
-          );
+          setNaturalLanguageTaskDescription(nodeData.aiToolSelectionConfig?.taskDescription || '');
         } else if (currentMode === 'aiParameterConfig') {
           // AI Parameter Config Mode: Initialize param description only (no schema loading needed)
-          setAiParameterConfigDescription(
-            nodeData.aiParameterConfig?.description || ''
-          );
+          setAiParameterConfigDescription(nodeData.aiParameterConfig?.description || '');
         } else {
           // Manual Parameter Config Mode: Load schema and initialize parameter values
           const result = await getMcpToolSchema({
