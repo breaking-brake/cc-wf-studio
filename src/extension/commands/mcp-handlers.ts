@@ -21,7 +21,7 @@ import type {
 } from '../../shared/types/messages';
 import { log } from '../extension';
 import { getCachedServerList, setCachedServerList } from '../services/mcp-cache-service';
-import { getTools, getToolSchema, listServers } from '../services/mcp-cli-service';
+import { getToolSchema, getTools, listServers } from '../services/mcp-cli-service';
 
 /**
  * Handle LIST_MCP_SERVERS request from Webview (T018)
