@@ -31,14 +31,14 @@ export function ParameterConfigModeStep({
 
   const modeOptions: ModeOption[] = [
     {
-      mode: 'manual',
-      titleKey: 'mcp.parameterConfigMode.manual.title',
-      descriptionKey: 'mcp.parameterConfigMode.manual.description',
-    },
-    {
       mode: 'auto',
       titleKey: 'mcp.parameterConfigMode.auto.title',
       descriptionKey: 'mcp.parameterConfigMode.auto.description',
+    },
+    {
+      mode: 'manual',
+      titleKey: 'mcp.parameterConfigMode.manual.title',
+      descriptionKey: 'mcp.parameterConfigMode.manual.description',
     },
   ];
 

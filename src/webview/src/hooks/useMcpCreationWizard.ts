@@ -45,7 +45,7 @@ const initialState: WizardState = {
   selectedServer: null,
   toolSelectionMode: 'auto', // Default to AI-assisted selection
   selectedTool: null,
-  parameterConfigMode: 'manual', // Default to manual configuration
+  parameterConfigMode: 'auto', // Default to AI-assisted configuration
   naturalLanguageTaskDescription: '',
   naturalLanguageParamDescription: '',
 };
