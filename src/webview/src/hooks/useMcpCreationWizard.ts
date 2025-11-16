@@ -33,9 +33,9 @@ export enum WizardStep {
 interface WizardState {
   currentStep: WizardStep;
   selectedServer: McpServerReference | null;
-  toolSelectionMode: ToolSelectionMode | null;
+  toolSelectionMode: ToolSelectionMode;
   selectedTool: McpToolReference | null;
-  parameterConfigMode: ParameterConfigMode | null;
+  parameterConfigMode: ParameterConfigMode;
   naturalLanguageTaskDescription: string;
   naturalLanguageParamDescription: string;
 }
@@ -43,9 +43,9 @@ interface WizardState {
 const initialState: WizardState = {
   currentStep: WizardStep.ServerSelection,
   selectedServer: null,
-  toolSelectionMode: null,
+  toolSelectionMode: 'manual', // Default to manual selection
   selectedTool: null,
-  parameterConfigMode: null,
+  parameterConfigMode: 'manual', // Default to manual configuration
   naturalLanguageTaskDescription: '',
   naturalLanguageParamDescription: '',
 };
@@ -81,13 +81,15 @@ export function useMcpCreationWizard() {
         return state.selectedServer !== null;
 
       case WizardStep.ToolSelectionMethod:
-        return state.toolSelectionMode !== null;
+        // Always true since toolSelectionMode has default value
+        return true;
 
       case WizardStep.ToolSelection:
         return state.selectedTool !== null;
 
       case WizardStep.ParameterConfigMethod:
-        return state.parameterConfigMode !== null;
+        // Always true since parameterConfigMode has default value
+        return true;
 
       case WizardStep.NaturalLanguageTask:
         // Required field for Full NL Mode

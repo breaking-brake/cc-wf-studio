@@ -219,7 +219,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
       case WizardStep.ToolSelectionMethod:
         return (
           <ToolSelectionModeStep
-            selectedMode={wizard.state.toolSelectionMode || 'manual'}
+            selectedMode={wizard.state.toolSelectionMode}
             onModeChange={(mode) => {
               wizard.setToolSelectionMode(mode);
               setError(null);
@@ -258,7 +258,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
       case WizardStep.ParameterConfigMethod:
         return (
           <ParameterConfigModeStep
-            selectedMode={wizard.state.parameterConfigMode || 'manual'}
+            selectedMode={wizard.state.parameterConfigMode}
             onModeChange={(mode) => {
               wizard.setParameterConfigMode(mode);
               setError(null);
