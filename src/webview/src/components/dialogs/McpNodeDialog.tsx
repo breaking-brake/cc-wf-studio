@@ -8,7 +8,7 @@
  */
 
 import { NodeType } from '@shared/types/workflow-definition';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMcpCreationWizard, WizardStep } from '../../hooks/useMcpCreationWizard';
 import { useTranslation } from '../../i18n/i18n-context';
 import { useWorkflowStore } from '../../stores/workflow-store';
@@ -29,9 +29,19 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showValidation, setShowValidation] = useState(false);
 
   const wizard = useMcpCreationWizard();
   const { addNode, nodes } = useWorkflowStore();
+
+  /**
+   * Reset validation state when wizard step changes
+   */
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Need to reset validation when step changes
+  useEffect(() => {
+    setShowValidation(false);
+    setError(null);
+  }, [wizard.state.currentStep]);
 
   /**
    * Calculate non-overlapping position for new node
@@ -264,7 +274,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
               wizard.setNaturalLanguageTaskDescription(value);
               setError(null);
             }}
-            showValidation={true}
+            showValidation={showValidation}
           />
         );
 
@@ -276,7 +286,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
               wizard.setNaturalLanguageParamDescription(value);
               setError(null);
             }}
-            showValidation={true}
+            showValidation={showValidation}
           />
         );
 
@@ -299,6 +309,9 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
    * Handle action button click (Next or Save)
    */
   const handleActionButton = () => {
+    // Enable validation display
+    setShowValidation(true);
+
     if (wizard.isComplete) {
       handleSaveNode();
     } else {
