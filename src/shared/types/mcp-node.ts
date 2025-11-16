@@ -267,15 +267,18 @@ export type ModeExportMetadata =
  * @returns Normalized MCP node data with mode field set
  */
 export function normalizeMcpNodeData(data: McpNodeData): McpNodeData {
-  // Migrate old mode values to new values
-  let mode = data.mode ?? 'manualParameterConfig';
-  if (mode === ('detailed' as any)) {
-    mode = 'manualParameterConfig';
-  } else if (mode === ('naturalLanguageParam' as any)) {
-    mode = 'aiParameterConfig';
-  } else if (mode === ('fullNaturalLanguage' as any)) {
-    mode = 'aiToolSelection';
-  }
+  // Legacy mode mapping for backwards compatibility
+  const legacyModeMap: Record<string, McpNodeMode> = {
+    detailed: 'manualParameterConfig',
+    naturalLanguageParam: 'aiParameterConfig',
+    fullNaturalLanguage: 'aiToolSelection',
+  };
+
+  // Get raw mode value (may be undefined or legacy value)
+  const rawMode = (data.mode as string | undefined) ?? 'manualParameterConfig';
+
+  // Map legacy mode to new mode, or use raw mode if already valid
+  const mode = legacyModeMap[rawMode] ?? (rawMode as McpNodeMode);
 
   return {
     ...data,
