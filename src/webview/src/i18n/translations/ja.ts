@@ -464,6 +464,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameterConfigMode.auto.description':
     '自然言語の説明に基づいて、AIがパラメータを設定します。素早く設定したい場合に最適です。',
 
+  // Parameter Detailed Config Step
+  'mcp.parameterDetailedConfig.title': 'ツールパラメータの設定',
+
   // Natural Language Input
   'mcp.naturalLanguage.paramDescription.label': 'パラメータの説明',
   'mcp.naturalLanguage.paramDescription.placeholder':

@@ -18,6 +18,7 @@ import { McpToolSearch } from '../mcp/McpToolSearch';
 import { NaturalLanguageParamInput } from '../mode-selection/NaturalLanguageParamInput';
 import { NaturalLanguageTaskInput } from '../mode-selection/NaturalLanguageTaskInput';
 import { ParameterConfigModeStep } from '../mode-selection/ParameterConfigModeStep';
+import { ParameterDetailedConfigStep } from '../mode-selection/ParameterDetailedConfigStep';
 import { ToolSelectionModeStep } from '../mode-selection/ToolSelectionModeStep';
 
 interface McpNodeDialogProps {
@@ -113,7 +114,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
             toolName: wizard.state.selectedTool.name,
             toolDescription: wizard.state.selectedTool.description || '',
             parameters: wizard.state.selectedTool.parameters || [],
-            parameterValues: {},
+            parameterValues: wizard.state.detailedParameterValues,
             validationStatus: 'valid',
             outputPorts: 1,
           },
@@ -290,6 +291,20 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
           />
         );
 
+      case WizardStep.ParameterDetailedConfig:
+        return (
+          <ParameterDetailedConfigStep
+            serverId={wizard.state.selectedServer?.id || ''}
+            toolName={wizard.state.selectedTool?.name || ''}
+            parameterValues={wizard.state.detailedParameterValues}
+            onChange={(values) => {
+              wizard.setDetailedParameterValues(values);
+              setError(null);
+            }}
+            showValidation={showValidation}
+          />
+        );
+
       default:
         return null;
     }
@@ -383,7 +398,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
         >
           {t('mcp.dialog.wizardStep', {
             current: wizard.state.currentStep.toString(),
-            total: '6',
+            total: '7',
           })}
         </div>
 

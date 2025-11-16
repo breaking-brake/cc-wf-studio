@@ -19,7 +19,7 @@ import { useCallback, useMemo, useState } from 'react';
  * 2. Tool selection method choice
  * 3. (manual) Tool selection OR (auto) Natural language task input [Full NL Mode]
  * 4. (manual only) Parameter config method choice
- * 5. (manual) Detailed Mode OR (auto) Natural language param input [NL Param Mode]
+ * 5. (manual detailed) Parameter detailed config OR (auto) Natural language param input [NL Param Mode]
  */
 export enum WizardStep {
   ServerSelection = 1,
@@ -28,6 +28,7 @@ export enum WizardStep {
   ParameterConfigMethod = 4,
   NaturalLanguageTask = 5,
   NaturalLanguageParam = 6,
+  ParameterDetailedConfig = 7,
 }
 
 interface WizardState {
@@ -38,6 +39,7 @@ interface WizardState {
   parameterConfigMode: ParameterConfigMode;
   naturalLanguageTaskDescription: string;
   naturalLanguageParamDescription: string;
+  detailedParameterValues: Record<string, unknown>;
 }
 
 const initialState: WizardState = {
@@ -48,6 +50,7 @@ const initialState: WizardState = {
   parameterConfigMode: 'auto', // Default to AI-assisted configuration
   naturalLanguageTaskDescription: '',
   naturalLanguageParamDescription: '',
+  detailedParameterValues: {},
 };
 
 export function useMcpCreationWizard() {
@@ -99,6 +102,10 @@ export function useMcpCreationWizard() {
         // Required field for NL Param Mode
         return state.naturalLanguageParamDescription.length > 0;
 
+      case WizardStep.ParameterDetailedConfig:
+        // Always allow proceeding (parameters can be empty or filled)
+        return true;
+
       default:
         return false;
     }
@@ -126,8 +133,8 @@ export function useMcpCreationWizard() {
 
       case WizardStep.ParameterConfigMethod:
         if (state.parameterConfigMode === 'manual') {
-          // Detailed Mode - no more steps, ready to save
-          return null;
+          // Detailed Mode - go to parameter detailed config
+          return WizardStep.ParameterDetailedConfig;
         }
         if (state.parameterConfigMode === 'auto') {
           return WizardStep.NaturalLanguageParam;
@@ -140,6 +147,10 @@ export function useMcpCreationWizard() {
 
       case WizardStep.NaturalLanguageParam:
         // NL Param Mode - no more steps, ready to save
+        return null;
+
+      case WizardStep.ParameterDetailedConfig:
+        // Detailed Mode - no more steps, ready to save
         return null;
 
       default:
@@ -168,6 +179,9 @@ export function useMcpCreationWizard() {
         return WizardStep.ToolSelectionMethod;
 
       case WizardStep.NaturalLanguageParam:
+        return WizardStep.ParameterConfigMethod;
+
+      case WizardStep.ParameterDetailedConfig:
         return WizardStep.ParameterConfigMethod;
 
       default:
@@ -272,6 +286,10 @@ export function useMcpCreationWizard() {
     setState((prev) => ({ ...prev, naturalLanguageParamDescription: description }));
   }, []);
 
+  const setDetailedParameterValues = useCallback((values: Record<string, unknown>) => {
+    setState((prev) => ({ ...prev, detailedParameterValues: values }));
+  }, []);
+
   return {
     // State
     state,
@@ -293,5 +311,6 @@ export function useMcpCreationWizard() {
     setParameterConfigMode,
     setNaturalLanguageTaskDescription,
     setNaturalLanguageParamDescription,
+    setDetailedParameterValues,
   };
 }

@@ -467,6 +467,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameterConfigMode.auto.description':
     'AI will configure parameters based on my natural language description. Good for quick setup.',
 
+  // Parameter Detailed Config Step
+  'mcp.parameterDetailedConfig.title': 'Configure Tool Parameters',
+
   // Natural Language Input
   'mcp.naturalLanguage.paramDescription.label': 'Parameter Description',
   'mcp.naturalLanguage.paramDescription.placeholder':

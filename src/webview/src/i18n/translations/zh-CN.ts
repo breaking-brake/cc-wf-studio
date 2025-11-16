@@ -445,6 +445,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameterConfigMode.auto.title': '让AI配置',
   'mcp.parameterConfigMode.auto.description': 'AI将根据自然语言描述配置参数。适合快速设置时。',
 
+  // Parameter Detailed Config Step
+  'mcp.parameterDetailedConfig.title': '配置工具参数',
+
   // Natural Language Input
   'mcp.naturalLanguage.paramDescription.label': '参数描述',
   'mcp.naturalLanguage.paramDescription.placeholder':

@@ -463,6 +463,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameterConfigMode.auto.description':
     '자연어 설명을 기반으로 AI가 매개변수를 구성합니다. 빠른 설정에 적합합니다.',
 
+  // Parameter Detailed Config Step
+  'mcp.parameterDetailedConfig.title': '도구 매개변수 구성',
+
   // Natural Language Input
   'mcp.naturalLanguage.paramDescription.label': '매개변수 설명',
   'mcp.naturalLanguage.paramDescription.placeholder':

@@ -420,6 +420,9 @@ export interface WebviewTranslationKeys {
   'mcp.parameterConfigMode.auto.title': string;
   'mcp.parameterConfigMode.auto.description': string;
 
+  // Parameter Detailed Config Step
+  'mcp.parameterDetailedConfig.title': string;
+
   // Natural Language Input
   'mcp.naturalLanguage.paramDescription.label': string;
   'mcp.naturalLanguage.paramDescription.placeholder': string;
