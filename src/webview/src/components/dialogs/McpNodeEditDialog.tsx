@@ -247,15 +247,16 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
           style={{
             marginBottom: '16px',
             padding: '12px',
-            backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
+            backgroundColor: 'var(--vscode-list-inactiveSelectionBackground)',
+            border: '1px solid var(--vscode-panel-border)',
             borderRadius: '4px',
           }}
         >
-          <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)' }}>
+          <div style={{ fontSize: '13px', color: 'var(--vscode-disabledForeground)' }}>
             <strong>{t('property.mcp.serverId')}:</strong> {nodeData.serverId}
           </div>
           {(currentMode === 'manualParameterConfig' || currentMode === 'aiParameterConfig') && (
-            <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)', marginTop: '4px' }}>
+            <div style={{ fontSize: '13px', color: 'var(--vscode-disabledForeground)', marginTop: '4px' }}>
               <strong>{t('property.mcp.toolName')}:</strong> {nodeData.toolName}
             </div>
           )}
@@ -263,7 +264,7 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
             <div
               style={{
                 fontSize: '12px',
-                color: 'var(--vscode-descriptionForeground)',
+                color: 'var(--vscode-disabledForeground)',
                 marginTop: '8px',
               }}
             >
