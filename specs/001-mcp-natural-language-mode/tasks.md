@@ -64,10 +64,10 @@
 
 ### User Story 1 の実装
 
-- [ ] T012 [P] [US1] ModeSelectionStepコンポーネントを作成（src/webview/src/components/mode-selection/ModeSelectionStep.tsx）
-- [ ] T013 [P] [US1] モード選択カード用のスタイルを追加（Material Design風レイアウト）
-- [ ] T014 [US1] 既存のMcpNodeEditDialogを拡張してモード選択ステップを最初のステップとして追加（src/webview/src/components/dialogs/McpNodeEditDialog.tsx）
-- [ ] T015 [US1] useMcpNodeWizard カスタムフックを作成（ウィザード状態管理、ステップ検証、ナビゲーション）
+- [x] T012 [P] [US1] ModeSelectionStepコンポーネントを作成（src/webview/src/components/mode-selection/ModeSelectionStep.tsx）
+- [x] T013 [P] [US1] モード選択カード用のスタイルを追加（Material Design風レイアウト）
+- [x] T014 [US1] 既存のMcpNodeEditDialogを拡張してモード選択ステップを最初のステップとして追加（src/webview/src/components/dialogs/McpNodeEditDialog.tsx）
+- [x] T015 [US1] useMcpNodeWizard カスタムフックを作成（ウィザード状態管理、ステップ検証、ナビゲーション）
 - [ ] T016 [US1] モード選択に応じた条件付きUI表示ロジックを実装
 - [ ] T017 [P] [US1] 各モードのツールチップと説明テキストを国際化
 - [ ] T018 [US1] キーボードナビゲーションとARIA属性を実装（role="radiogroup", aria-describedby）
