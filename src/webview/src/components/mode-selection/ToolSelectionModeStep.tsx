@@ -28,14 +28,14 @@ export function ToolSelectionModeStep({ selectedMode, onModeChange }: ToolSelect
 
   const modeOptions: ModeOption[] = [
     {
-      mode: 'manual',
-      titleKey: 'mcp.toolSelectionMode.manual.title',
-      descriptionKey: 'mcp.toolSelectionMode.manual.description',
-    },
-    {
       mode: 'auto',
       titleKey: 'mcp.toolSelectionMode.auto.title',
       descriptionKey: 'mcp.toolSelectionMode.auto.description',
+    },
+    {
+      mode: 'manual',
+      titleKey: 'mcp.toolSelectionMode.manual.title',
+      descriptionKey: 'mcp.toolSelectionMode.manual.description',
     },
   ];
 

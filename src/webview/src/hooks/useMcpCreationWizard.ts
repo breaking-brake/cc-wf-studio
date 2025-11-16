@@ -43,7 +43,7 @@ interface WizardState {
 const initialState: WizardState = {
   currentStep: WizardStep.ServerSelection,
   selectedServer: null,
-  toolSelectionMode: 'manual', // Default to manual selection
+  toolSelectionMode: 'auto', // Default to AI-assisted selection
   selectedTool: null,
   parameterConfigMode: 'manual', // Default to manual configuration
   naturalLanguageTaskDescription: '',
@@ -199,6 +199,14 @@ export function useMcpCreationWizard() {
    * Check if wizard is complete and ready to save
    */
   const isComplete = useMemo((): boolean => {
+    // First check if there are more steps remaining
+    const nextStep = getNextStep();
+    if (nextStep !== null) {
+      // Still have more steps, not complete yet
+      return false;
+    }
+
+    // No more steps - check if all required data is collected
     const mode = determineFinalMode();
     if (!mode) return false;
 
@@ -230,7 +238,7 @@ export function useMcpCreationWizard() {
       default:
         return false;
     }
-  }, [state, determineFinalMode]);
+  }, [state, determineFinalMode, getNextStep]);
 
   /**
    * Reset wizard to initial state
