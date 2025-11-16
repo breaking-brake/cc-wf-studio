@@ -121,20 +121,6 @@ export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
           </span>
         </div>
 
-        {/* Tool Name */}
-        <div
-          style={{
-            fontSize: '13px',
-            color: 'var(--vscode-foreground)',
-            marginBottom: '4px',
-            fontWeight: 500,
-          }}
-        >
-          {currentMode === 'aiToolSelection'
-            ? 'Auto selected Tool'
-            : data.toolName || 'Untitled Tool'}
-        </div>
-
         {/* Server Badge */}
         <div style={{ marginBottom: '4px' }}>
           <div
@@ -149,6 +135,20 @@ export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
           >
             {data.serverId}
           </div>
+        </div>
+
+        {/* Tool Name */}
+        <div
+          style={{
+            fontSize: '13px',
+            color: 'var(--vscode-foreground)',
+            marginBottom: '4px',
+            fontWeight: 500,
+          }}
+        >
+          {currentMode === 'aiToolSelection'
+            ? 'Auto selected Tool'
+            : data.toolName || 'Untitled Tool'}
         </div>
 
         {/* Mode Badge */}
