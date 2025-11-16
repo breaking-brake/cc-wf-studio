@@ -1,3 +1,9 @@
+## [2.5.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.4.0...v2.5.0) (2025-11-16)
+
+### Features
+
+* add MCP natural language mode support ([#81](https://github.com/breaking-brake/cc-wf-studio/issues/81)) ([0135e36](https://github.com/breaking-brake/cc-wf-studio/commit/0135e3672ca9b16796043452d6affd5acc15476e))
+
 ## [2.4.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.3.0...v2.4.0) (2025-11-15)
 
 ### Features
