@@ -154,6 +154,15 @@ async function executeClaudeMcpCommand(
   } catch (error) {
     const executionTimeMs = Date.now() - startTime;
 
+    // Log complete error object for debugging
+    log('ERROR', 'MCP CLI error caught', {
+      errorType: typeof error,
+      errorConstructor: error?.constructor?.name,
+      errorKeys: error && typeof error === 'object' ? Object.keys(error) : [],
+      error: error,
+      executionTimeMs,
+    });
+
     // Handle SubprocessError from nano-spawn
     if (isSubprocessError(error)) {
       // Timeout error

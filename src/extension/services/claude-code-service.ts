@@ -93,10 +93,11 @@ export async function executeClaudeCodeCLI(
 
   try {
     // Spawn Claude Code CLI process using nano-spawn (cross-platform compatible)
-    const subprocess = spawn('claude', ['-p', prompt], {
+    // Use stdin for prompt instead of -p argument to avoid Windows command line length limits
+    const subprocess = spawn('claude', ['-p', '-'], {
       cwd: workingDirectory,
       timeout: timeoutMs,
-      stdin: 'ignore',
+      stdin: { string: prompt },
       stdout: 'pipe',
       stderr: 'pipe',
     });
@@ -139,6 +140,15 @@ export async function executeClaudeCodeCLI(
     }
 
     const executionTimeMs = Date.now() - startTime;
+
+    // Log complete error object for debugging
+    log('ERROR', 'Claude Code CLI error caught', {
+      errorType: typeof error,
+      errorConstructor: error?.constructor?.name,
+      errorKeys: error && typeof error === 'object' ? Object.keys(error) : [],
+      error: error,
+      executionTimeMs,
+    });
 
     // Handle SubprocessError from nano-spawn
     if (isSubprocessError(error)) {
