@@ -92,11 +92,11 @@
 **新規タスク**:
 
 #### 共通コンポーネント（T012-T016）
-- [ ] T012 [P] [US1] ToolSelectionModeStepコンポーネントを作成（src/webview/src/components/mode-selection/ToolSelectionModeStep.tsx）- ツール手動/自動の2択カード
-- [ ] T013 [P] [US1] ParameterConfigModeStepコンポーネントを作成（src/webview/src/components/mode-selection/ParameterConfigModeStep.tsx）- パラメータ手動/自動の2択カード
-- [ ] T014 [P] [US1] NaturalLanguageTaskInputコンポーネントを作成（src/webview/src/components/mode-selection/NaturalLanguageTaskInput.tsx）- Full NL Mode用タスク説明入力（最小長20文字）
-- [ ] T015 [P] [US1] NaturalLanguageParamInputコンポーネントを作成（src/webview/src/components/mode-selection/NaturalLanguageParamInput.tsx）- NL Param Mode用パラメータ説明入力（最小長10文字）
-- [ ] T016 [P] [US1] ModeIndicatorBadgeコンポーネントを作成（src/webview/src/components/mode-selection/ModeIndicatorBadge.tsx）- モード表示バッジ（⚙️/◐/●）
+- [x] T012 [P] [US1] ToolSelectionModeStepコンポーネントを作成（src/webview/src/components/mode-selection/ToolSelectionModeStep.tsx）- ツール手動/自動の2択カード
+- [x] T013 [P] [US1] ParameterConfigModeStepコンポーネントを作成（src/webview/src/components/mode-selection/ParameterConfigModeStep.tsx）- パラメータ手動/自動の2択カード
+- [x] T014 [P] [US1] NaturalLanguageTaskInputコンポーネントを作成（src/webview/src/components/mode-selection/NaturalLanguageTaskInput.tsx）- Full NL Mode用タスク説明入力（最小長20文字）
+- [x] T015 [P] [US1] NaturalLanguageParamInputコンポーネントを作成（src/webview/src/components/mode-selection/NaturalLanguageParamInput.tsx）- NL Param Mode用パラメータ説明入力（最小長10文字）
+- [x] T016 [P] [US1] ModeIndicatorBadgeコンポーネントを作成（src/webview/src/components/mode-selection/ModeIndicatorBadge.tsx）- モード表示バッジ（⚙️/◐/●）
 
 #### 作成フロー統合（T017-T021）
 - [ ] T017 [US1] McpNodeDialogを拡張して段階的モード選択フローを追加（src/webview/src/components/dialogs/McpNodeDialog.tsx）
@@ -108,11 +108,11 @@
 #### 編集フロー簡素化（T022-T024）
 - [ ] T022 [US1] McpNodeEditDialogを簡素化（モード選択削除、モード表示のみ）
 - [ ] T023 [US1] McpNodeEditDialogにモード別編集UIを実装（Detailed: パラメータフォーム、NL Param: 説明編集、Full NL: タスク編集）
-- [ ] T024 [US1] 既存の不要ファイルを削除（旧ModeSelectionStep.tsx, useMcpNodeWizard.ts）
+- [x] T024 [US1] 既存の不要ファイルを削除（旧ModeSelectionStep.tsx, useMcpNodeWizard.ts）
 
 #### 国際化とアクセシビリティ（T025-T026）
-- [ ] T025 [P] [US1] 国際化リソースを更新（ツール選択方法、パラメータ設定方法の文言）
-- [ ] T026 [US1] キーボードナビゲーションとARIA属性を実装（role="radiogroup", aria-describedby）
+- [x] T025 [P] [US1] 国際化リソースを更新（ツール選択方法、パラメータ設定方法の文言）
+- [x] T026 [US1] キーボードナビゲーションとARIA属性を実装（role="radiogroup", aria-describedby）
 
 ### User Story 1 の手動E2Eテスト
 
