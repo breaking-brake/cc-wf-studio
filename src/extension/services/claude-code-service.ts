@@ -94,7 +94,8 @@ export async function executeClaudeCodeCLI(
   try {
     // Spawn Claude Code CLI process using nano-spawn (cross-platform compatible)
     // Use stdin for prompt instead of -p argument to avoid Windows command line length limits
-    const subprocess = spawn('claude', ['-p', '-'], {
+    // Use npx to ensure cross-platform compatibility (Windows PATH issues with global npm installs)
+    const subprocess = spawn('npx', ['claude', '-p', '-'], {
       cwd: workingDirectory,
       timeout: timeoutMs,
       stdin: { string: prompt },

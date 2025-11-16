@@ -14,6 +14,11 @@ Windows環境でAI編集機能（Workflow生成機能）が動作しない問題
    - `SIGTERM`と`SIGKILL`はUnix系OSのシグナル
    - Windowsではこれらのシグナルがサポートされていない
 
+3. **Windowsコマンドライン引数の制限**
+   - 長いプロンプト（22KB）をコマンドライン引数で渡すと失敗
+   - Windowsではシングルクォート`'`がサポートされていない
+   - エスケープシーケンス`'\''`がWindows環境で動作しない
+
 ### 修正内容
 
 #### 1. nano-spawnライブラリの採用
@@ -57,6 +62,84 @@ interface SubprocessError extends Error { ... }
 interface Result { ... }
 interface Subprocess extends Promise<Result> { ... }
 ```
+
+#### 4. stdin経由でのプロンプト渡し
+
+**変更理由:**
+- Windowsコマンドライン引数の文字数制限とクォート処理の問題を回避
+- 長いプロンプト（22KB）でも確実に動作
+
+**変更前（コマンドライン引数）:**
+```typescript
+const subprocess = spawn('claude', ['-p', prompt], {
+  cwd: workingDirectory,
+  timeout: timeoutMs,
+  stdin: 'ignore',
+  stdout: 'pipe',
+  stderr: 'pipe',
+});
+```
+
+**変更後（stdin経由）:**
+```typescript
+const subprocess = spawn('claude', ['-p', '-'], {
+  cwd: workingDirectory,
+  timeout: timeoutMs,
+  stdin: { string: prompt },  // 標準入力経由でプロンプトを渡す
+  stdout: 'pipe',
+  stderr: 'pipe',
+});
+```
+
+#### 5. VSIXパッケージングの修正
+
+**変更理由:**
+- nano-spawnはESM専用パッケージのため、VSIXに明示的に含める必要がある
+- `require('nano-spawn')`は実行時に解決されるため、bundlerで自動検出されない
+
+**変更内容:**
+`.vscodeignore`に例外追加:
+```
+# Build tools
+node_modules/**
+# Include nano-spawn for cross-platform process spawning (Issue #79)
+!node_modules/nano-spawn/**
+*.vsix
+```
+
+#### 6. npx経由での実行
+
+**変更理由:**
+- Windowsでグローバルインストール時のPATH認識問題（Issue #3838）を回避
+- すべてのプラットフォームで確実に動作させる
+- シンプルで保守しやすいコード
+
+**変更前（直接実行）:**
+```typescript
+const subprocess = spawn('claude', ['-p', '-'], {
+  cwd: workingDirectory,
+  timeout: timeoutMs,
+  stdin: { string: prompt },
+  stdout: 'pipe',
+  stderr: 'pipe',
+});
+```
+
+**変更後（npx経由）:**
+```typescript
+const subprocess = spawn('npx', ['claude', '-p', '-'], {
+  cwd: workingDirectory,
+  timeout: timeoutMs,
+  stdin: { string: prompt },
+  stdout: 'pipe',
+  stderr: 'pipe',
+});
+```
+
+**性能への影響:**
+- npxオーバーヘッド: 約0.4秒
+- AI生成時間: 通常30〜90秒
+- 相対的な影響: 0.4〜1.3%（誤差範囲）
 
 ## テストシナリオ
 
@@ -120,12 +203,15 @@ interface Subprocess extends Promise<Result> { ... }
 ### 変更ファイル
 - `package.json` - nano-spawn依存追加
 - `package-lock.json` - 自動生成
-- `src/extension/services/claude-code-service.ts` - 全面改修
+- `src/extension/services/claude-code-service.ts` - 全面改修（nano-spawn移行、stdin対応、エラーログ強化）
+- `src/extension/services/mcp-cli-service.ts` - nano-spawn移行、エラーログ強化
+- `.vscodeignore` - nano-spawnをVSIXに含める設定追加
 
 ### 影響範囲
 - AI Workflow生成機能（Feature 001-ai-workflow-generation）
 - AI Workflow改良機能（Feature 001-ai-workflow-refinement）
 - AI Skill生成機能（Feature 001-ai-skill-generation）
+- MCP CLI操作機能（サーバー一覧取得、接続、切断）
 
 ### 非影響範囲
 - Webview UI
@@ -144,6 +230,16 @@ interface Subprocess extends Promise<Result> { ... }
 | Promise対応 | ❌ 手動ラップ必要 | ✅ ネイティブ対応 |
 | 依存関係 | 0（標準モジュール） | 0 |
 | パッケージサイズ | - | 極小（<10KB） |
+
+### stdin vs コマンドライン引数
+
+| 項目 | コマンドライン引数 (`-p 'prompt'`) | stdin (`-p -` + stdin) |
+|------|-----------------------------------|------------------------|
+| Windows互換性 | ❌ クォート処理問題 | ✅ 問題なし |
+| 長いプロンプト対応 | ❌ CLI制限あり | ✅ 制限なし |
+| エスケープ処理 | ❌ 複雑（`'\''`など） | ✅ 不要 |
+| 実装の複雑さ | 高い（クォート処理） | 低い（文字列渡すだけ） |
+| セキュリティ | ⚠️ プロセス一覧で見える | ✅ 見えない |
 
 ### エラーハンドリングの改善
 
@@ -165,22 +261,36 @@ try {
 }
 ```
 
+**エラーログの強化:**
+```typescript
+log('ERROR', 'Claude Code CLI error caught', {
+  errorType: typeof error,
+  errorConstructor: error?.constructor?.name,
+  errorKeys: error && typeof error === 'object' ? Object.keys(error) : [],
+  error: error,  // 完全なエラーオブジェクト
+  executionTimeMs,
+});
+```
+
 ## ビルド確認
 
 ```bash
 npm run compile  # ✅ 成功
 npm run lint     # ✅ 成功
+npm run build    # ✅ 成功
+npx vsce package # ✅ 成功（cc-wf-studio-2.5.0.vsix, 1.05 MB, nano-spawn含む）
 ```
 
 ## 次のステップ
 
-1. ✅ 修正実装完了
+1. ✅ 修正実装完了（nano-spawn移行、stdin対応、npx対応、VSIX修正）
 2. ✅ コンパイル確認完了
 3. ✅ Lint確認完了
-4. ⏳ Windows環境での動作テスト（Issue報告者に依頼）
-5. ⏳ macOS/Linux環境での退行テスト
-6. ⏳ PR作成・レビュー
-7. ⏳ マージ・リリース
+4. ✅ VSIX作成完了（cc-wf-studio-2.5.0.vsix）
+5. ✅ **Windows環境での動作テスト成功**
+6. ⏳ macOS/Linux環境での退行テスト ← 次はここ
+7. ⏳ PR作成・レビュー
+8. ⏳ マージ・リリース
 
 ## 関連リンク
 

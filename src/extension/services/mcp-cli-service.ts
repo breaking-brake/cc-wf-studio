@@ -127,7 +127,8 @@ async function executeClaudeMcpCommand(
 
   try {
     // Spawn 'claude' CLI process using nano-spawn (cross-platform compatible)
-    const result = await spawn('claude', args, {
+    // Use npx to ensure cross-platform compatibility (Windows PATH issues with global npm installs)
+    const result = await spawn('npx', ['claude', ...args], {
       cwd,
       timeout: timeoutMs,
       stdin: 'ignore',
