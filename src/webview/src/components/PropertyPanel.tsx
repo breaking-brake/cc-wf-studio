@@ -2116,8 +2116,13 @@ const McpProperties: React.FC<{
               gap: '8px',
             }}
           >
-            <span>⚙️</span>
-            <span>{t('property.mcp.editParameters')}</span>
+            <span>
+              {currentMode === 'manualParameterConfig'
+                ? t('property.mcp.edit.manualParameterConfig')
+                : currentMode === 'aiParameterConfig'
+                  ? t('property.mcp.edit.aiParameterConfig')
+                  : t('property.mcp.edit.aiToolSelection')}
+            </span>
           </button>
         </div>
 

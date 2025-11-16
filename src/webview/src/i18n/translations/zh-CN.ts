@@ -381,6 +381,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.parameterValues': '参数值',
   'property.mcp.parameterCount': '参数数量',
   'property.mcp.editParameters': '编辑参数',
+  'property.mcp.edit.manualParameterConfig': '编辑参数',
+  'property.mcp.edit.aiParameterConfig': '编辑说明',
+  'property.mcp.edit.aiToolSelection': '编辑任务',
   'property.mcp.infoNote': 'MCP工具属性从服务器加载。点击"编辑参数"以配置参数值。',
 
   // MCP Parameter Form

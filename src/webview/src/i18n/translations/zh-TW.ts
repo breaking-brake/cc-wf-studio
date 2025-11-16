@@ -381,6 +381,9 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.parameterValues': '參數值',
   'property.mcp.parameterCount': '參數數量',
   'property.mcp.editParameters': '編輯參數',
+  'property.mcp.edit.manualParameterConfig': '編輯參數',
+  'property.mcp.edit.aiParameterConfig': '編輯說明',
+  'property.mcp.edit.aiToolSelection': '編輯任務',
   'property.mcp.infoNote': 'MCP工具屬性從伺服器載入。點擊「編輯參數」以設定參數值。',
 
   // MCP Parameter Form
