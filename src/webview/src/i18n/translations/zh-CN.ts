@@ -452,7 +452,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.naturalLanguage.taskDescription.label': '任务描述',
   'mcp.naturalLanguage.taskDescription.placeholder':
     '描述您想完成的任务（例如："查找有关S3存储桶策略的文档"）...',
-  'mcp.naturalLanguage.characters': '个字符',
 
   // Mode Switch Warnings
   'mcp.modeSwitch.warning.title': '模式切换警告',

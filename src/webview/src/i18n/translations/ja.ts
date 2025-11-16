@@ -471,7 +471,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.naturalLanguage.taskDescription.label': 'タスクの説明',
   'mcp.naturalLanguage.taskDescription.placeholder':
     '実現したいタスクを説明してください（例:「S3バケットポリシーに関するドキュメントを検索する」）...',
-  'mcp.naturalLanguage.characters': '文字',
 
   // Mode Switch Warnings
   'mcp.modeSwitch.warning.title': 'モード切り替えの警告',

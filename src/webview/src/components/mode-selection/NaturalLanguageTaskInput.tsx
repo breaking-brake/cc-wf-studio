@@ -75,38 +75,6 @@ export function NaturalLanguageTaskInput({
         }}
       />
 
-      {/* Character Count */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginTop: '8px',
-        }}
-      >
-        <div
-          style={{
-            fontSize: '12px',
-            color: showError
-              ? 'var(--vscode-errorForeground)'
-              : 'var(--vscode-descriptionForeground)',
-          }}
-        >
-          {charCount} {t('mcp.naturalLanguage.characters')}
-        </div>
-
-        {/* Validation Icon */}
-        {showValidation && (
-          <div
-            style={{
-              fontSize: '16px',
-            }}
-          >
-            {isValid ? '✅' : '❌'}
-          </div>
-        )}
-      </div>
-
       {/* Error Message */}
       {showError && (
         <div

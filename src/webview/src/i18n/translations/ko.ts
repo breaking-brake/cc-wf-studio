@@ -470,7 +470,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.naturalLanguage.taskDescription.label': '작업 설명',
   'mcp.naturalLanguage.taskDescription.placeholder':
     '수행하려는 작업을 설명하세요(예: "S3 버킷 정책에 대한 문서 찾기")...',
-  'mcp.naturalLanguage.characters': '자',
 
   // Mode Switch Warnings
   'mcp.modeSwitch.warning.title': '모드 전환 경고',

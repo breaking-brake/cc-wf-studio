@@ -474,7 +474,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.naturalLanguage.taskDescription.label': 'Task Description',
   'mcp.naturalLanguage.taskDescription.placeholder':
     'Describe the task you want to accomplish (e.g., "Find documentation about S3 bucket policies")...',
-  'mcp.naturalLanguage.characters': 'characters',
 
   // Mode Switch Warnings
   'mcp.modeSwitch.warning.title': 'Mode Switch Warning',

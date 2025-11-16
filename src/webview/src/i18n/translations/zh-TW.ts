@@ -452,7 +452,6 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'mcp.naturalLanguage.taskDescription.label': '任務描述',
   'mcp.naturalLanguage.taskDescription.placeholder':
     '描述您想完成的任務（例如：「查找有關S3儲存貯體原則的文件」）...',
-  'mcp.naturalLanguage.characters': '個字元',
 
   // Mode Switch Warnings
   'mcp.modeSwitch.warning.title': '模式切換警告',

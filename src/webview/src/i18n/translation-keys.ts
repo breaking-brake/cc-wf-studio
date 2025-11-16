@@ -425,7 +425,6 @@ export interface WebviewTranslationKeys {
   'mcp.naturalLanguage.paramDescription.placeholder': string;
   'mcp.naturalLanguage.taskDescription.label': string;
   'mcp.naturalLanguage.taskDescription.placeholder': string;
-  'mcp.naturalLanguage.characters': string;
 
   // Mode Switch Warnings
   'mcp.modeSwitch.warning.title': string;
