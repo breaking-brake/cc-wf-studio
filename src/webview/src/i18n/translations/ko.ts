@@ -373,7 +373,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': '"{query}"와 일치하는 도구를 찾을 수 없습니다',
 
   // MCP Node Dialog
-  'mcp.dialog.title': '사용 가능한 MCP Tool 참조',
+  'mcp.dialog.title': 'MCP Tool 설정',
   'mcp.dialog.selectServer': 'MCP 서버 선택',
   'mcp.dialog.selectTool': '도구 선택',
   'mcp.dialog.addButton': '도구 추가',

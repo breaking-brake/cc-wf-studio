@@ -357,7 +357,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': '未找到与"{query}"匹配的工具',
 
   // MCP Node Dialog
-  'mcp.dialog.title': '参考可用的MCP Tool',
+  'mcp.dialog.title': 'MCP Tool配置',
   'mcp.dialog.selectServer': '选择MCP服务器',
   'mcp.dialog.selectTool': '选择工具',
   'mcp.dialog.addButton': '添加工具',

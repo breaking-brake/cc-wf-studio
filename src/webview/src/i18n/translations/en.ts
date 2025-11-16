@@ -376,7 +376,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': 'No tools found matching "{query}"',
 
   // MCP Node Dialog
-  'mcp.dialog.title': 'Browse Available MCP Tools',
+  'mcp.dialog.title': 'MCP Tool Configuration',
   'mcp.dialog.selectServer': 'Select MCP Server',
   'mcp.dialog.selectTool': 'Select Tool',
   'mcp.dialog.addButton': 'Add Tool',

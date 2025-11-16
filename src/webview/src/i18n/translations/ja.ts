@@ -374,7 +374,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': '"{query}" に一致するツールが見つかりません',
 
   // MCP Node Dialog
-  'mcp.dialog.title': '使用可能なMCPツールを参照',
+  'mcp.dialog.title': 'MCP Toolの設定',
   'mcp.dialog.selectServer': 'MCPサーバーを選択',
   'mcp.dialog.selectTool': 'ツールを選択',
   'mcp.dialog.addButton': 'ツールを追加',
