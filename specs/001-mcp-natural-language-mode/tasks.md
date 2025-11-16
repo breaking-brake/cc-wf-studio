@@ -140,11 +140,11 @@
 
 **注**: T015（AiParameterConfigInputコンポーネント）はPhase 3で実装済み。
 
-- [ ] T034 [P] [US2] 自然言語バリデーター関数を作成（src/webview/src/services/validation/natural-language-validator.ts、必須入力（1文字以上）、debounce 300ms）
-- [ ] T035 [US2] AiParameterConfigInputに検証ロジックを統合（リアルタイム検証、エラー表示）
+- [x] T034 [P] [US2] 自然言語バリデーター関数を作成（src/webview/src/utils/natural-language-validator.ts、必須入力（1文字以上）、debounce 300ms）
+- [x] T035 [US2] AiParameterConfigInputに検証ロジックを統合（リアルタイム検証、エラー表示）
 - [ ] T036 [US2] McpNodeDialogでAI Parameter Config Mode選択時の保存ロジックを実装（mode、serverId、toolName、aiParameterConfigを保存）
 - [ ] T037 [US2] McpNodeEditDialogでAIパラメータ設定モード編集UIを実装（説明の編集、検証、保存）
-- [ ] T038 [P] [US2] 自然言語説明が空の場合のエラーメッセージを国際化（MCP_NL_DESC_REQUIRED）
+- [x] T038 [P] [US2] 自然言語説明が空の場合のエラーメッセージを国際化（MCP_NL_DESC_REQUIRED）- Phase 3で実装済み
 - [ ] T039 [US2] ワークフローストアを拡張してAIパラメータ設定モードデータを処理（src/webview/src/stores/workflow-store.ts）
 
 ### User Story 2 の手動E2Eテスト

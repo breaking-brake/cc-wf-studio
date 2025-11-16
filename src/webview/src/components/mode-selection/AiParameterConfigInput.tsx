@@ -4,10 +4,15 @@
  * Feature: 001-mcp-natural-language-mode
  * Purpose: Text area for entering parameter description in AI Parameter Config Mode
  *
- * Based on: specs/001-mcp-natural-language-mode/tasks.md T015
+ * Based on: specs/001-mcp-natural-language-mode/tasks.md T015, T035
  */
 
 import { useTranslation } from '../../i18n/i18n-context';
+import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
+import {
+  validateParameterDescription,
+  useDebouncedValidation,
+} from '../../utils/natural-language-validator';
 
 interface AiParameterConfigInputProps {
   value: string;
@@ -22,9 +27,12 @@ export function AiParameterConfigInput({
 }: AiParameterConfigInputProps) {
   const { t } = useTranslation();
 
-  const charCount = value.length;
-  const isValid = charCount > 0;
-  const showError = showValidation && !isValid;
+  // Real-time debounced validation (300ms delay)
+  const debouncedError = useDebouncedValidation(value, validateParameterDescription, 300);
+
+  // Determine if error should be shown
+  const showError = showValidation && debouncedError !== null;
+  const errorMessage = debouncedError ? t(debouncedError as keyof WebviewTranslationKeys) : '';
 
   return (
     <div>
@@ -88,7 +96,7 @@ export function AiParameterConfigInput({
             borderRadius: '4px',
           }}
         >
-          {t('mcp.error.paramDescRequired')}
+          {errorMessage}
         </div>
       )}
     </div>
