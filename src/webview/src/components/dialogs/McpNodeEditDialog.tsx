@@ -131,8 +131,9 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
       }
 
       case 'aiParameterConfig': {
-        // Validate required field
-        if (aiParameterConfigDescription.length === 0) {
+        // Validate required field (T037)
+        if (!aiParameterConfigDescription || aiParameterConfigDescription.trim().length === 0) {
+          setShowValidation(true);
           return;
         }
 

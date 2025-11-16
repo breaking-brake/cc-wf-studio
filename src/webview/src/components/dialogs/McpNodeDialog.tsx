@@ -128,6 +128,12 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
           return;
         }
 
+        // Validate parameter description (T036)
+        if (!wizard.state.aiParameterConfigDescription || wizard.state.aiParameterConfigDescription.trim().length === 0) {
+          setError(t('mcp.error.paramDescRequired'));
+          return;
+        }
+
         addNode({
           id: nodeId,
           type: NodeType.Mcp,
