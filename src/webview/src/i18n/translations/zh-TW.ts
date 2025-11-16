@@ -382,7 +382,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.parameterCount': '參數數量',
   'property.mcp.editParameters': '編輯參數',
   'property.mcp.edit.manualParameterConfig': '編輯參數',
-  'property.mcp.edit.aiParameterConfig': '編輯說明',
+  'property.mcp.edit.aiParameterConfig': '編輯參數配置說明',
   'property.mcp.edit.aiToolSelection': '編輯任務',
   'property.mcp.infoNote': 'MCP工具屬性從伺服器載入。點擊「編輯參數」以設定參數值。',
 
@@ -452,7 +452,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameterDetailedConfig.title': '設定工具參數',
 
   // Natural Language Input
-  'mcp.naturalLanguage.paramDescription.label': '參數描述',
+  'mcp.naturalLanguage.paramDescription.label': '參數配置說明',
   'mcp.naturalLanguage.paramDescription.placeholder':
     '描述您想用此工具做什麼（例如：「檢查Lambda在us-east-1中是否可用」）...',
   'mcp.naturalLanguage.taskDescription.label': '任務描述',

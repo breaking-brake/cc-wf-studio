@@ -401,7 +401,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.parameterCount': 'Parameter Count',
   'property.mcp.editParameters': 'Edit Parameters',
   'property.mcp.edit.manualParameterConfig': 'Edit Parameters',
-  'property.mcp.edit.aiParameterConfig': 'Edit Description',
+  'property.mcp.edit.aiParameterConfig': 'Edit Parameter Config Description',
   'property.mcp.edit.aiToolSelection': 'Edit Task',
   'property.mcp.infoNote':
     'MCP tool properties are loaded from the server. Click "Edit Parameters" to configure parameter values.',
@@ -474,7 +474,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameterDetailedConfig.title': 'Configure Tool Parameters',
 
   // Natural Language Input
-  'mcp.naturalLanguage.paramDescription.label': 'Parameter Description',
+  'mcp.naturalLanguage.paramDescription.label': 'Parameter Configuration Description',
   'mcp.naturalLanguage.paramDescription.placeholder':
     'Describe what you want to do with this tool (e.g., "Check if Lambda is available in us-east-1")...',
   'mcp.naturalLanguage.taskDescription.label': 'Task Description',

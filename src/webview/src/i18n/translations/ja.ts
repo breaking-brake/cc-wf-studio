@@ -399,7 +399,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.parameterCount': 'パラメータ数',
   'property.mcp.editParameters': 'パラメータを編集',
   'property.mcp.edit.manualParameterConfig': 'パラメータを編集',
-  'property.mcp.edit.aiParameterConfig': '説明を編集',
+  'property.mcp.edit.aiParameterConfig': 'パラメータ設定の説明を編集',
   'property.mcp.edit.aiToolSelection': 'タスクを編集',
   'property.mcp.infoNote':
     'MCPツールのプロパティはサーバーから読み込まれます。「パラメータを編集」をクリックしてパラメータ値を設定してください。',
@@ -471,7 +471,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameterDetailedConfig.title': 'ツールパラメータの設定',
 
   // Natural Language Input
-  'mcp.naturalLanguage.paramDescription.label': 'パラメータの説明',
+  'mcp.naturalLanguage.paramDescription.label': 'パラメータ設定の説明',
   'mcp.naturalLanguage.paramDescription.placeholder':
     'このツールで何をしたいか説明してください（例:「us-east-1でLambdaが利用可能か確認する」）...',
   'mcp.naturalLanguage.taskDescription.label': 'タスクの説明',

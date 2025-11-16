@@ -398,7 +398,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.parameterCount': '매개변수 개수',
   'property.mcp.editParameters': '매개변수 편집',
   'property.mcp.edit.manualParameterConfig': '매개변수 편집',
-  'property.mcp.edit.aiParameterConfig': '설명 편집',
+  'property.mcp.edit.aiParameterConfig': '매개변수 설정 설명 편집',
   'property.mcp.edit.aiToolSelection': '작업 편집',
   'property.mcp.infoNote':
     'MCP 도구 속성은 서버에서 로드됩니다. "매개변수 편집"을 클릭하여 매개변수 값을 구성하세요.',
@@ -470,7 +470,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameterDetailedConfig.title': '도구 매개변수 구성',
 
   // Natural Language Input
-  'mcp.naturalLanguage.paramDescription.label': '매개변수 설명',
+  'mcp.naturalLanguage.paramDescription.label': '매개변수 설정 설명',
   'mcp.naturalLanguage.paramDescription.placeholder':
     '이 도구로 수행하려는 작업을 설명하세요(예: "us-east-1에서 Lambda를 사용할 수 있는지 확인")...',
   'mcp.naturalLanguage.taskDescription.label': '작업 설명',
