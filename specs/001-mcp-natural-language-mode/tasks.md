@@ -56,89 +56,138 @@
 
 ---
 
-## Phase 3: User Story 1 - モード選択機能 (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1 - 段階的モード選択機能（作成フロー） (Priority: P1) 🎯 MVP
 
-**ゴール**: ユーザーがMCPノード設定時に3つの構成モード（詳細、自然言語パラメータ、完全自然言語）から選択できるようにする
+**⚠️ 設計変更（2025-11-16）**: 当初の計画（編集ダイアログでのモード選択）を破棄し、段階的な意思決定フローに変更。
 
-**独立テスト**: MCPノード設定ダイアログを開き、3つのモードオプションが明確な説明付きで表示されることを確認。各モードを選択し、UIが選択されたモードの設定要件を反映して変更されることを確認。
+**新しいゴール**: MCPノード作成時に、段階的な質問（ツール選択方法 → パラメータ設定方法）を通じて、最適なモードを自然に決定できるようにする。
+
+**フロー設計**:
+```
+作成時（McpNodeDialog）:
+1. サーバー選択
+2. ツール選択方法を選択:
+   ├─ 「ツールを自分で選ぶ」 → 3へ
+   └─ 「AIにツールを選んでもらう」 → Full NL Mode確定 → 自然言語タスク入力
+3. （手動の場合）ツールを選択
+4. パラメータ設定方法を選択:
+   ├─ 「パラメータを自分で設定する」 → Detailed Mode確定
+   └─ 「AIにパラメータを設定してもらう」 → NL Param Mode確定 → 自然言語説明入力
+
+編集時（McpNodeEditDialog）:
+- モード表示（変更不可）
+- モードに応じた編集UI:
+  ├─ Detailed Mode: パラメータフォーム
+  ├─ NL Param Mode: 自然言語説明の編集
+  └─ Full NL Mode: 自然言語タスク説明の編集
+```
+
+**独立テスト**: MCPノード作成時に、段階的な選択を通じて3つのモード（Detailed, NL Param, Full NL）のいずれかに到達でき、選択したモードに応じた設定UIが表示されることを確認。
 
 ### User Story 1 の実装
 
-- [x] T012 [P] [US1] ModeSelectionStepコンポーネントを作成（src/webview/src/components/mode-selection/ModeSelectionStep.tsx）
-- [x] T013 [P] [US1] モード選択カード用のスタイルを追加（Material Design風レイアウト）
-- [x] T014 [US1] 既存のMcpNodeEditDialogを拡張してモード選択ステップを最初のステップとして追加（src/webview/src/components/dialogs/McpNodeEditDialog.tsx）
-- [x] T015 [US1] useMcpNodeWizard カスタムフックを作成（ウィザード状態管理、ステップ検証、ナビゲーション）
-- [ ] T016 [US1] モード選択に応じた条件付きUI表示ロジックを実装
-- [ ] T017 [P] [US1] 各モードのツールチップと説明テキストを国際化
-- [ ] T018 [US1] キーボードナビゲーションとARIA属性を実装（role="radiogroup", aria-describedby）
-- [ ] T019 [US1] 既存ノード編集時の現在モード表示とモード切り替え機能を実装
-- [ ] T020 [US1] モード切り替え時の警告ダイアログを実装（データ保存の説明）
+**破棄したタスク（参考）**:
+- ~~T012-T015: McpNodeEditDialogベースのモード選択（実装済みだが設計変更により破棄）~~
+
+**新規タスク**:
+
+#### 共通コンポーネント（T012-T016）
+- [ ] T012 [P] [US1] ToolSelectionModeStepコンポーネントを作成（src/webview/src/components/mode-selection/ToolSelectionModeStep.tsx）- ツール手動/自動の2択カード
+- [ ] T013 [P] [US1] ParameterConfigModeStepコンポーネントを作成（src/webview/src/components/mode-selection/ParameterConfigModeStep.tsx）- パラメータ手動/自動の2択カード
+- [ ] T014 [P] [US1] NaturalLanguageTaskInputコンポーネントを作成（src/webview/src/components/mode-selection/NaturalLanguageTaskInput.tsx）- Full NL Mode用タスク説明入力（最小長20文字）
+- [ ] T015 [P] [US1] NaturalLanguageParamInputコンポーネントを作成（src/webview/src/components/mode-selection/NaturalLanguageParamInput.tsx）- NL Param Mode用パラメータ説明入力（最小長10文字）
+- [ ] T016 [P] [US1] ModeIndicatorBadgeコンポーネントを作成（src/webview/src/components/mode-selection/ModeIndicatorBadge.tsx）- モード表示バッジ（⚙️/◐/●）
+
+#### 作成フロー統合（T017-T021）
+- [ ] T017 [US1] McpNodeDialogを拡張して段階的モード選択フローを追加（src/webview/src/components/dialogs/McpNodeDialog.tsx）
+- [ ] T018 [US1] McpNodeDialog用のウィザード状態管理フックを作成（src/webview/src/hooks/useMcpCreationWizard.ts）
+- [ ] T019 [US1] サーバー選択後のツール選択方法ステップを実装
+- [ ] T020 [US1] ツール選択後のパラメータ設定方法ステップを実装
+- [ ] T021 [US1] Full NL Mode時のツール自動選択フロー実装（ツール選択ステップスキップ）
+
+#### 編集フロー簡素化（T022-T024）
+- [ ] T022 [US1] McpNodeEditDialogを簡素化（モード選択削除、モード表示のみ）
+- [ ] T023 [US1] McpNodeEditDialogにモード別編集UIを実装（Detailed: パラメータフォーム、NL Param: 説明編集、Full NL: タスク編集）
+- [ ] T024 [US1] 既存の不要ファイルを削除（旧ModeSelectionStep.tsx, useMcpNodeWizard.ts）
+
+#### 国際化とアクセシビリティ（T025-T026）
+- [ ] T025 [P] [US1] 国際化リソースを更新（ツール選択方法、パラメータ設定方法の文言）
+- [ ] T026 [US1] キーボードナビゲーションとARIA属性を実装（role="radiogroup", aria-describedby）
 
 ### User Story 1 の手動E2Eテスト
 
-- [ ] T021 [US1] **手動E2E**: 新規MCPノード作成時にモード選択ダイアログが3つのオプション表示で開くことを確認
-- [ ] T022 [US1] **手動E2E**: 各モードオプションにホバーしたときにツールチップが表示されることを確認
-- [ ] T023 [US1] **手動E2E**: 詳細モード選択時に既存のサーバー選択→ツール選択→パラメータ設定UIに進むことを確認
-- [ ] T024 [US1] **手動E2E**: 自然言語パラメータモード選択時にサーバー選択→ツール選択→自然言語入力UIに進むことを確認
-- [ ] T025 [US1] **手動E2E**: 完全自然言語モード選択時にサーバー選択→自然言語入力UI（ツール選択スキップ）に進むことを確認
-- [ ] T026 [US1] **手動E2E**: 既存ノード編集時に現在のモードが表示され、モード切り替えが可能で設定データが保存されることを確認
+- [ ] T027 [US1] **手動E2E**: MCPノード作成時にサーバー選択後、ツール選択方法の2択が表示されることを確認
+- [ ] T028 [US1] **手動E2E**: 「ツールを自分で選ぶ」選択時、ツール選択→パラメータ設定方法選択に進むことを確認
+- [ ] T029 [US1] **手動E2E**: 「AIにツールを選んでもらう」選択時、タスク説明入力画面に進み、Full NL Modeで保存されることを確認
+- [ ] T030 [US1] **手動E2E**: パラメータ設定方法で「自分で設定」選択時、Detailed Modeでパラメータフォームが表示されることを確認
+- [ ] T031 [US1] **手動E2E**: パラメータ設定方法で「AIに設定してもらう」選択時、NL Param Modeで自然言語入力画面が表示されることを確認
+- [ ] T032 [US1] **手動E2E**: 既存ノード編集時、モードが表示され（変更不可）、モードに応じた編集UIが表示されることを確認
+- [ ] T033 [US1] **手動E2E**: キャンバス上のMCPノードにモードバッジ（⚙️/◐/●）が表示されることを確認
 
 **チェックポイント**: この時点でUser Story 1が完全に機能し、独立してテスト可能であること
 
 ---
 
-## Phase 4: User Story 2 - 自然言語パラメータモードでのMCPノード設定 (Priority: P2)
+## Phase 4: User Story 2 - 自然言語パラメータモード詳細実装 (Priority: P2)
 
-**ゴール**: ユーザーが個別のパラメータフィールドを埋める代わりに自然言語で達成したいことを記述できるようにする
+**⚠️ 設計変更（2025-11-16）**: User Story 1にNaturalLanguageParamInputコンポーネントの基本実装が含まれるため、このフェーズでは検証、保存、編集の詳細実装に集中。
 
-**独立テスト**: MCPサーバーとツールを選択し、タスクの自然言語説明を入力し、ノードを保存し、ワークフローをエクスポートして、エクスポートされたスラッシュコマンドに選択されたツールと自然言語説明の両方が含まれることを確認。
+**ゴール**: 自然言語パラメータモードの入力検証、データ保存、編集機能を完成させる。
+
+**前提条件**: User Story 1（Phase 3）でNaturalLanguageParamInputコンポーネントが作成済み。
 
 ### User Story 2 の実装
 
-- [ ] T027 [P] [US2] NaturalLanguageInputFieldコンポーネントを作成（src/webview/src/components/mode-selection/NaturalLanguageInputField.tsx）
-- [ ] T028 [P] [US2] 自然言語バリデーター関数を作成（src/webview/src/services/validation/natural-language-validator.ts、最小長10文字、debounce 300ms）
-- [ ] T029 [US2] McpNodeEditDialogに自然言語パラメータモード用の設定ステップを追加
-- [ ] T030 [US2] サーバー＋ツール選択後の自然言語説明フィールドを実装（プレースホルダー、検証、エラーメッセージ）
-- [ ] T031 [US2] 自然言語パラメータモードでノード保存時にmode、serverId、toolName、naturalLanguageParamConfigを保存
-- [ ] T032 [P] [US2] 自然言語説明が最小長未満の場合のエラーメッセージを国際化（MCP_NL_DESC_TOO_SHORT）
-- [ ] T033 [US2] ワークフローストアを拡張して自然言語パラメータモードデータを処理（src/webview/src/stores/workflow-store.ts）
+**注**: T015（NaturalLanguageParamInputコンポーネント）はPhase 3で実装済み。
+
+- [ ] T034 [P] [US2] 自然言語バリデーター関数を作成（src/webview/src/services/validation/natural-language-validator.ts、最小長10文字、debounce 300ms）
+- [ ] T035 [US2] NaturalLanguageParamInputに検証ロジックを統合（リアルタイム検証、エラー表示）
+- [ ] T036 [US2] McpNodeDialogでNL Param Mode選択時の保存ロジックを実装（mode、serverId、toolName、naturalLanguageParamConfigを保存）
+- [ ] T037 [US2] McpNodeEditDialogでNL Param Mode編集UIを実装（説明の編集、検証、保存）
+- [ ] T038 [P] [US2] 自然言語説明が最小長未満の場合のエラーメッセージを国際化（MCP_NL_DESC_TOO_SHORT）
+- [ ] T039 [US2] ワークフローストアを拡張して自然言語パラメータモードデータを処理（src/webview/src/stores/workflow-store.ts）
 
 ### User Story 2 の手動E2Eテスト
 
-- [ ] T034 [US2] **手動E2E**: 自然言語パラメータモード選択後、サーバー＋ツール選択時に「何をしたいか記述」テキストエリアが表示されることを確認
-- [ ] T035 [US2] **手動E2E**: 自然言語説明入力時に最小長検証（10文字）が機能し、エラーメッセージが表示されることを確認
-- [ ] T036 [US2] **手動E2E**: 有効な自然言語説明でノード保存時にmode、serverId、toolName、descriptionが正しく保存されることを確認
-- [ ] T037 [US2] **手動E2E**: 保存されたノードを再度開いたときに自然言語説明が表示されることを確認
+- [ ] T040 [US2] **手動E2E**: パラメータ設定方法で「AIに設定してもらう」選択時、自然言語説明テキストエリアが表示されることを確認
+- [ ] T041 [US2] **手動E2E**: 自然言語説明入力時に最小長検証（10文字）が機能し、エラーメッセージが表示されることを確認
+- [ ] T042 [US2] **手動E2E**: 有効な自然言語説明でノード保存時にmode、serverId、toolName、naturalLanguageParamConfigが正しく保存されることを確認
+- [ ] T043 [US2] **手動E2E**: 保存されたNL Param Modeノードを編集時、自然言語説明が表示され編集できることを確認
+- [ ] T044 [US2] **手動E2E**: キャンバス上のNL Param Modeノードにモードバッジ（◐）が表示されることを確認
 
 **チェックポイント**: この時点でUser Story 1とUser Story 2の両方が独立して機能すること
 
 ---
 
-## Phase 5: User Story 3 - 完全自然言語モードでのMCPノード設定 (Priority: P3)
+## Phase 5: User Story 3 - 完全自然言語モード詳細実装 (Priority: P3)
 
-**ゴール**: 初心者ユーザーが特定のツールを選択せずに達成したいことを記述するだけで済むようにする
+**⚠️ 設計変更（2025-11-16）**: User Story 1にNaturalLanguageTaskInputコンポーネントの基本実装が含まれるため、このフェーズでは利用可能ツール取得、検証、保存、編集の詳細実装に集中。
 
-**独立テスト**: MCPサーバーを選択し、ツールを選択せずに自然言語タスク説明を入力し、ノードを保存し、ワークフローをエクスポートして、エクスポートされたスラッシュコマンドにサーバーID、利用可能ツールリスト、自然言語タスク説明が含まれることを確認。
+**ゴール**: 完全自然言語モードの利用可能ツール取得、入力検証、データ保存、編集機能を完成させる。
+
+**前提条件**: User Story 1（Phase 3）でNaturalLanguageTaskInputコンポーネントとツール自動選択フローが作成済み。
 
 ### User Story 3 の実装
 
-- [ ] T038 [P] [US3] MCP cache serviceを拡張して選択されたサーバーから利用可能ツールを取得・キャッシュ（src/extension/services/mcp-cache-service.ts）
-- [ ] T039 [US3] McpNodeEditDialogに完全自然言語モード用の設定フローを追加（ツール選択ステップをスキップ）
-- [ ] T040 [US3] サーバー選択後のタスク説明フィールドを実装（最小長20文字検証）
-- [ ] T041 [US3] ノード保存時に選択されたサーバーから利用可能ツールリストを取得して保存
-- [ ] T042 [US3] 完全自然言語モードでノード保存時にmode、serverId、fullNaturalLanguageConfig（taskDescription、availableTools、timestamp）を保存
-- [ ] T043 [P] [US3] ModeIndicatorBadgeコンポーネントを作成（キャンバス上のビジュアルインジケーター、src/webview/src/components/mode-selection/ModeIndicatorBadge.tsx）
-- [ ] T044 [US3] 既存のMcpNodeComponentを拡張してモードバッジを表示（src/webview/src/components/nodes/McpNodeComponent.tsx）
-- [ ] T045 [P] [US3] モードアイコン定義（detailed=⚙️、naturalLanguageParam=◐、fullNaturalLanguage=●）
-- [ ] T046 [US3] ワークフローストアを拡張して完全自然言語モードデータを処理
+**注**: T014（NaturalLanguageTaskInputコンポーネント）とT021（ツール自動選択フロー）はPhase 3で実装済み。
+
+- [ ] T045 [P] [US3] MCP cache serviceを拡張して選択されたサーバーから利用可能ツールを取得・キャッシュ（src/extension/services/mcp-cache-service.ts）
+- [ ] T046 [P] [US3] MCPサーバーから利用可能ツールリストを取得するメッセージハンドラを追加（Extension Host）
+- [ ] T047 [US3] NaturalLanguageTaskInputに検証ロジックを統合（最小長20文字、リアルタイム検証、エラー表示）
+- [ ] T048 [US3] McpNodeDialogでFull NL Mode選択時の保存ロジックを実装（mode、serverId、fullNaturalLanguageConfig保存、ツールリスト取得）
+- [ ] T049 [US3] McpNodeEditDialogでFull NL Mode編集UIを実装（タスク説明の編集、検証、保存）
+- [ ] T050 [P] [US3] タスク説明が最小長未満の場合のエラーメッセージを国際化（MCP_TASK_DESC_TOO_SHORT）
+- [ ] T051 [US3] ワークフローストアを拡張して完全自然言語モードデータを処理（src/webview/src/stores/workflow-store.ts）
+- [ ] T052 [US3] 既存のMcpNodeComponentを拡張してモードバッジを表示（src/webview/src/components/nodes/McpNode/McpNode.tsx）
 
 ### User Story 3 の手動E2Eテスト
 
-- [ ] T047 [US3] **手動E2E**: 完全自然言語モード選択後、サーバー選択時にツール選択がスキップされ、タスク説明フィールドが表示されることを確認
-- [ ] T048 [US3] **手動E2E**: タスク説明入力時に最小長検証（20文字）が機能することを確認
-- [ ] T049 [US3] **手動E2E**: 有効なタスク説明でノード保存時にmode、serverId、taskDescription、availableToolsが正しく保存されることを確認
-- [ ] T050 [US3] **手動E2E**: キャンバス上の完全自然言語モードノードに動的ツール選択を示すビジュアルインジケーター（●バッジ）が表示されることを確認
-- [ ] T051 [US3] **手動E2E**: バッジにホバーしたときにモード説明が表示されることを確認
+- [ ] T053 [US3] **手動E2E**: ツール選択方法で「AIに選んでもらう」選択時、ツール選択がスキップされ、タスク説明フィールドが表示されることを確認
+- [ ] T054 [US3] **手動E2E**: タスク説明入力時に最小長検証（20文字）が機能し、エラーメッセージが表示されることを確認
+- [ ] T055 [US3] **手動E2E**: 有効なタスク説明でノード保存時にmode、serverId、fullNaturalLanguageConfig（taskDescription、availableTools、timestamp）が正しく保存されることを確認
+- [ ] T056 [US3] **手動E2E**: 保存されたFull NL Modeノードを編集時、タスク説明が表示され編集できることを確認
+- [ ] T057 [US3] **手動E2E**: キャンバス上のFull NL Modeノードにモードバッジ（●）が表示されることを確認
+- [ ] T058 [US3] **手動E2E**: バッジにホバーしたときにモード説明とタスク説明プレビューが表示されることを確認
 
 **チェックポイント**: すべてのユーザーストーリー（US1、US2、US3）が独立して機能すること
 
@@ -301,20 +350,30 @@ Task: "完全自然言語モード用のエクスポートフォーマッター�
 
 ---
 
-## タスクサマリー
+## タスクサマリー（2025-11-16更新）
 
-**総タスク数**: 81
+**⚠️ 設計変更による再計画**: 編集ダイアログから作成ダイアログへのモード選択移動に伴い、タスク構成を変更。
+
+**総タスク数**: 約85タスク（Phase 6以降は未集計）
+
 **ユーザーストーリー別タスク数**:
-- User Story 1 (P1): 15タスク（実装10 + 手動E2E 6）
-- User Story 2 (P2): 11タスク（実装7 + 手動E2E 4）
-- User Story 3 (P3): 14タスク（実装9 + 手動E2E 5）
-- User Story 4 (P2): 13タスク（実装8 + 手動E2E 5）
-- セットアップ: 3タスク
-- 基盤: 8タスク
-- 統合とポリッシュ: 17タスク（実装10 + 手動E2E 7）
+- **User Story 1 (P1)**: 22タスク（実装15 + 手動E2E 7）- 作成フローの段階的モード選択
+- **User Story 2 (P2)**: 11タスク（実装6 + 手動E2E 5）- NL Param Mode詳細実装
+- **User Story 3 (P3)**: 14タスク（実装8 + 手動E2E 6）- Full NL Mode詳細実装
+- **User Story 4 (P2)**: 13タスク（実装8 + 手動E2E 5）- エクスポート機能（変更なし）
+- **セットアップ**: 3タスク
+- **基盤**: 8タスク
+- **統合とポリッシュ**: 17タスク（実装10 + 手動E2E 7）
 
-**並列実行機会**: 42タスクが[P]マークで並列実行可能
+**主な変更点**:
+- User Story 1のタスク数増加（15→22）: 作成フローの複雑化により
+- User Story 2のタスク数減少（11→11）: コンポーネント作成がUS1に移動
+- User Story 3のタスク数維持（14→14）: 構成変更だが総数は同じ
+
+**並列実行機会**:
+- Phase 3: T012-T016（コンポーネント作成）が並列実行可能
+- Phase 4-5: バリデーター、国際化タスクが並列実行可能
 
 **独立テスト基準**: 各ユーザーストーリー（US1-US4）に独立テスト基準が定義され、手動E2Eテストタスクが含まれる
 
-**推奨MVPスコープ**: User Story 1（モード選択機能）のみ
+**推奨MVPスコープ**: User Story 1（段階的モード選択機能）のみ
