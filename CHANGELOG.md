@@ -1,3 +1,9 @@
+## [2.5.1](https://github.com/breaking-brake/cc-wf-studio/compare/v2.5.0...v2.5.1) (2025-11-16)
+
+### Bug Fixes
+
+* Windows compatibility for AI generation features ([#83](https://github.com/breaking-brake/cc-wf-studio/issues/83)) ([fd919bb](https://github.com/breaking-brake/cc-wf-studio/commit/fd919bb9e4a50c5482735d6b5718aeeb7e639baf)), closes [#79](https://github.com/breaking-brake/cc-wf-studio/issues/79) [#79](https://github.com/breaking-brake/cc-wf-studio/issues/79) [#79](https://github.com/breaking-brake/cc-wf-studio/issues/79) [#79](https://github.com/breaking-brake/cc-wf-studio/issues/79) [#3838](https://github.com/breaking-brake/cc-wf-studio/issues/3838) [#79](https://github.com/breaking-brake/cc-wf-studio/issues/79) [#79](https://github.com/breaking-brake/cc-wf-studio/issues/79)
+
 ## [2.5.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.4.0...v2.5.0) (2025-11-16)
 
 ### Features
