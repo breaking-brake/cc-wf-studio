@@ -106,8 +106,8 @@
 - [x] T021 [US1] Full NL Mode時のツール自動選択フロー実装（ツール選択ステップスキップ）
 
 #### 編集フロー簡素化（T022-T024）
-- [ ] T022 [US1] McpNodeEditDialogを簡素化（モード選択削除、モード表示のみ）
-- [ ] T023 [US1] McpNodeEditDialogにモード別編集UIを実装（Detailed: パラメータフォーム、NL Param: 説明編集、Full NL: タスク編集）
+- [x] T022 [US1] McpNodeEditDialogを簡素化（モード選択削除、モード表示のみ）
+- [x] T023 [US1] McpNodeEditDialogにモード別編集UIを実装（Detailed: パラメータフォーム、NL Param: 説明編集、Full NL: タスク編集）
 - [x] T024 [US1] 既存の不要ファイルを削除（旧ModeSelectionStep.tsx, useMcpNodeWizard.ts）
 
 #### 国際化とアクセシビリティ（T025-T026）

@@ -1,11 +1,10 @@
 /**
  * MCP Node Edit Dialog Component
  *
- * Feature: 001-mcp-node
- * Purpose: Configure parameters for existing MCP nodes
+ * Feature: 001-mcp-natural-language-mode
+ * Purpose: Edit MCP nodes with mode-specific UI
  *
- * Based on: specs/001-mcp-node/plan.md Section 6.3
- * Task: T038
+ * Based on: specs/001-mcp-natural-language-mode/tasks.md T022-T023
  */
 
 import type { McpNodeData, ToolParameter } from '@shared/types/mcp-node';
@@ -17,6 +16,9 @@ import type { ExtendedToolParameter } from '../../utils/parameter-validator';
 import { validateAllParameters } from '../../utils/parameter-validator';
 import { IndeterminateProgressBar } from '../common/IndeterminateProgressBar';
 import { ParameterFormGenerator } from '../mcp/ParameterFormGenerator';
+import { ModeIndicatorBadge } from '../mode-selection/ModeIndicatorBadge';
+import { NaturalLanguageParamInput } from '../mode-selection/NaturalLanguageParamInput';
+import { NaturalLanguageTaskInput } from '../mode-selection/NaturalLanguageTaskInput';
 
 interface McpNodeEditDialogProps {
   isOpen: boolean;
@@ -30,19 +32,29 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Detailed Mode state
   const [parameterValues, setParameterValues] = useState<Record<string, unknown>>({});
   const [parameters, setParameters] = useState<ToolParameter[]>([]);
+
+  // Natural Language Mode state
+  const [naturalLanguageTaskDescription, setNaturalLanguageTaskDescription] = useState('');
+  const [naturalLanguageParamDescription, setNaturalLanguageParamDescription] = useState('');
+
   const [showValidation, setShowValidation] = useState(false);
 
   // Find the node being edited
   const node = nodes.find((n) => n.id === nodeId);
   const nodeData = node?.data as McpNodeData | undefined;
 
+  // Get current mode (default to 'detailed' for backward compatibility)
+  const currentMode = nodeData?.mode || 'detailed';
+
   /**
-   * Load tool schema from Extension Host
+   * Load tool schema and initialize state based on mode
    */
   useEffect(() => {
-    const loadToolSchema = async () => {
+    const initializeDialog = async () => {
       if (!isOpen || !nodeData) {
         return;
       }
@@ -51,22 +63,43 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
       setError(null);
 
       try {
-        const result = await getMcpToolSchema({
-          serverId: nodeData.serverId,
-          toolName: nodeData.toolName,
-        });
+        // Initialize mode-specific state
+        if (currentMode === 'fullNaturalLanguage') {
+          // Full NL Mode: Initialize task description
+          setNaturalLanguageTaskDescription(
+            nodeData.fullNaturalLanguageConfig?.taskDescription || ''
+          );
+        } else if (currentMode === 'naturalLanguageParam') {
+          // NL Param Mode: Initialize param description and load schema
+          setNaturalLanguageParamDescription(
+            nodeData.naturalLanguageParamConfig?.description || ''
+          );
 
-        if (!result.success || !result.schema) {
-          setError(result.error?.message || t('mcp.editDialog.error.schemaLoadFailed'));
-          setParameters([]);
-          return;
+          // Load schema for reference (optional, can show parameter list)
+          const result = await getMcpToolSchema({
+            serverId: nodeData.serverId,
+            toolName: nodeData.toolName || '',
+          });
+
+          if (result.success && result.schema) {
+            setParameters(result.schema.parameters || []);
+          }
+        } else {
+          // Detailed Mode: Load schema and initialize parameter values
+          const result = await getMcpToolSchema({
+            serverId: nodeData.serverId,
+            toolName: nodeData.toolName || '',
+          });
+
+          if (!result.success || !result.schema) {
+            setError(result.error?.message || t('mcp.editDialog.error.schemaLoadFailed'));
+            setParameters([]);
+            return;
+          }
+
+          setParameters(result.schema.parameters || []);
+          setParameterValues(nodeData.parameterValues || {});
         }
-
-        // Set parameters from schema
-        setParameters(result.schema.parameters || []);
-
-        // Initialize parameter values from node data
-        setParameterValues(nodeData.parameterValues || {});
       } catch (err) {
         setError(err instanceof Error ? err.message : t('mcp.editDialog.error.schemaLoadFailed'));
         setParameters([]);
@@ -75,8 +108,8 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
       }
     };
 
-    loadToolSchema();
-  }, [isOpen, nodeData, t]);
+    initializeDialog();
+  }, [isOpen, nodeData, currentMode, t]);
 
   if (!isOpen || !node || !nodeData) {
     return null;
@@ -89,19 +122,66 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
     // Enable validation display
     setShowValidation(true);
 
-    // Validate all parameters
-    const errors = validateAllParameters(parameterValues, parameters as ExtendedToolParameter[]);
+    // Mode-specific validation and save
+    switch (currentMode) {
+      case 'detailed': {
+        // Validate all parameters
+        const errors = validateAllParameters(
+          parameterValues,
+          parameters as ExtendedToolParameter[]
+        );
 
-    // If validation fails, don't save
-    if (Object.keys(errors).length > 0) {
-      return;
+        // If validation fails, don't save
+        if (Object.keys(errors).length > 0) {
+          return;
+        }
+
+        // Update node with new parameter values
+        updateNodeData(nodeId, {
+          ...nodeData,
+          parameterValues,
+        });
+        break;
+      }
+
+      case 'naturalLanguageParam': {
+        // Validate minimum length (10 characters)
+        if (naturalLanguageParamDescription.length < 10) {
+          return;
+        }
+
+        // Update node with new natural language description
+        updateNodeData(nodeId, {
+          ...nodeData,
+          naturalLanguageParamConfig: {
+            description: naturalLanguageParamDescription,
+            timestamp: new Date().toISOString(),
+          },
+        });
+        break;
+      }
+
+      case 'fullNaturalLanguage': {
+        // Validate minimum length (20 characters)
+        if (naturalLanguageTaskDescription.length < 20) {
+          return;
+        }
+
+        // Update node with new task description
+        updateNodeData(nodeId, {
+          ...nodeData,
+          fullNaturalLanguageConfig: {
+            taskDescription: naturalLanguageTaskDescription,
+            availableTools: nodeData.fullNaturalLanguageConfig?.availableTools || [],
+            timestamp: new Date().toISOString(),
+          },
+        });
+        break;
+      }
+
+      default:
+        return;
     }
-
-    // Update node with new parameter values
-    updateNodeData(nodeId, {
-      ...nodeData,
-      parameterValues,
-    });
 
     // Close dialog
     handleClose();
@@ -157,13 +237,23 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
         {/* Dialog Header */}
         <div
           style={{
-            fontSize: '16px',
-            fontWeight: 'bold',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
             marginBottom: '16px',
-            color: 'var(--vscode-foreground)',
           }}
         >
-          {t('mcp.editDialog.title')}
+          <div
+            style={{
+              fontSize: '16px',
+              fontWeight: 'bold',
+              color: 'var(--vscode-foreground)',
+            }}
+          >
+            {t('mcp.editDialog.title')}
+          </div>
+          {/* Mode Badge */}
+          <ModeIndicatorBadge mode={currentMode} />
         </div>
 
         {/* Tool Information */}
@@ -178,10 +268,12 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
           <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)' }}>
             <strong>{t('property.mcp.serverId')}:</strong> {nodeData.serverId}
           </div>
-          <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)', marginTop: '4px' }}>
-            <strong>{t('property.mcp.toolName')}:</strong> {nodeData.toolName}
-          </div>
-          {nodeData.toolDescription && (
+          {(currentMode === 'detailed' || currentMode === 'naturalLanguageParam') && (
+            <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)', marginTop: '4px' }}>
+              <strong>{t('property.mcp.toolName')}:</strong> {nodeData.toolName}
+            </div>
+          )}
+          {nodeData.toolDescription && currentMode === 'detailed' && (
             <div
               style={{
                 fontSize: '12px',
@@ -213,14 +305,34 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
           </div>
         )}
 
-        {/* Parameter Form */}
+        {/* Mode-specific Edit UI */}
         {!loading && !error && (
-          <ParameterFormGenerator
-            parameters={parameters}
-            parameterValues={parameterValues}
-            onChange={setParameterValues}
-            showValidation={showValidation}
-          />
+          <>
+            {currentMode === 'detailed' && (
+              <ParameterFormGenerator
+                parameters={parameters}
+                parameterValues={parameterValues}
+                onChange={setParameterValues}
+                showValidation={showValidation}
+              />
+            )}
+
+            {currentMode === 'naturalLanguageParam' && (
+              <NaturalLanguageParamInput
+                value={naturalLanguageParamDescription}
+                onChange={setNaturalLanguageParamDescription}
+                showValidation={showValidation}
+              />
+            )}
+
+            {currentMode === 'fullNaturalLanguage' && (
+              <NaturalLanguageTaskInput
+                value={naturalLanguageTaskDescription}
+                onChange={setNaturalLanguageTaskDescription}
+                showValidation={showValidation}
+              />
+            )}
+          </>
         )}
 
         {/* Dialog Actions */}
