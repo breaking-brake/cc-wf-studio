@@ -19,21 +19,17 @@ interface ModeInfo {
     | 'mcp.modeSelection.detailed.title'
     | 'mcp.modeSelection.naturalLanguageParam.title'
     | 'mcp.modeSelection.fullNaturalLanguage.title';
-  borderColor: string;
 }
 
 const MODE_INFO: Record<McpNodeMode, ModeInfo> = {
   detailed: {
     titleKey: 'mcp.modeSelection.detailed.title',
-    borderColor: 'var(--vscode-charts-blue)',
   },
   naturalLanguageParam: {
     titleKey: 'mcp.modeSelection.naturalLanguageParam.title',
-    borderColor: 'var(--vscode-charts-orange)',
   },
   fullNaturalLanguage: {
     titleKey: 'mcp.modeSelection.fullNaturalLanguage.title',
-    borderColor: 'var(--vscode-charts-green)',
   },
 };
 
@@ -46,12 +42,11 @@ export function ModeIndicatorBadge({ mode }: ModeIndicatorBadgeProps) {
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        padding: '6px 12px',
+        padding: '2px 6px',
         backgroundColor: 'var(--vscode-badge-background)',
         color: 'var(--vscode-badge-foreground)',
         borderRadius: '3px',
-        borderLeft: `3px solid ${info.borderColor}`,
-        fontSize: '12px',
+        fontSize: '10px',
         fontWeight: 'bold',
       }}
     >

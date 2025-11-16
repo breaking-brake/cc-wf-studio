@@ -133,15 +133,8 @@ export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
           {data.toolName || 'Untitled Tool'}
         </div>
 
-        {/* Server Badge and Mode Badge */}
-        <div
-          style={{
-            display: 'flex',
-            gap: '6px',
-            alignItems: 'center',
-            marginBottom: '8px',
-          }}
-        >
+        {/* Server Badge */}
+        <div style={{ marginBottom: '4px' }}>
           <div
             style={{
               fontSize: '10px',
@@ -154,6 +147,10 @@ export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
           >
             {data.serverId}
           </div>
+        </div>
+
+        {/* Mode Badge */}
+        <div style={{ marginBottom: '8px' }}>
           <ModeIndicatorBadge mode={currentMode} />
         </div>
 
