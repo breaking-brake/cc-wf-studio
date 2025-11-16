@@ -4,10 +4,15 @@
  * Feature: 001-mcp-natural-language-mode
  * Purpose: Text area for entering task description in AI Tool Selection Mode
  *
- * Based on: specs/001-mcp-natural-language-mode/tasks.md T014
+ * Based on: specs/001-mcp-natural-language-mode/tasks.md T014, T047
  */
 
 import { useTranslation } from '../../i18n/i18n-context';
+import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
+import {
+  useDebouncedValidation,
+  validateTaskDescription,
+} from '../../utils/natural-language-validator';
 
 interface AiToolSelectionInputProps {
   value: string;
@@ -22,9 +27,12 @@ export function AiToolSelectionInput({
 }: AiToolSelectionInputProps) {
   const { t } = useTranslation();
 
-  const charCount = value.length;
-  const isValid = charCount > 0;
-  const showError = showValidation && !isValid;
+  // Real-time debounced validation (300ms delay)
+  const debouncedError = useDebouncedValidation(value, validateTaskDescription, 300);
+
+  // Determine if error should be shown
+  const showError = showValidation && debouncedError !== null;
+  const errorMessage = debouncedError ? t(debouncedError as keyof WebviewTranslationKeys) : '';
 
   return (
     <div>
@@ -88,7 +96,7 @@ export function AiToolSelectionInput({
             borderRadius: '4px',
           }}
         >
-          {t('mcp.error.taskDescRequired')}
+          {errorMessage}
         </div>
       )}
     </div>

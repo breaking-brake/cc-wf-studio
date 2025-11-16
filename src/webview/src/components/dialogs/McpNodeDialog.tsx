@@ -4,9 +4,10 @@
  * Feature: 001-mcp-natural-language-mode
  * Purpose: Step-by-step wizard for creating MCP nodes with mode selection
  *
- * Based on: specs/001-mcp-natural-language-mode/tasks.md T017
+ * Based on: specs/001-mcp-natural-language-mode/tasks.md T017, T048
  */
 
+import type { McpToolReference } from '@shared/types/mcp-node';
 import { NodeType } from '@shared/types/workflow-definition';
 import { useEffect, useState } from 'react';
 import { useMcpCreationWizard, WizardStep } from '../../hooks/useMcpCreationWizard';
@@ -159,8 +160,18 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
       }
 
       case 'aiToolSelection': {
+        // Validate task description (T048)
+        if (
+          !wizard.state.naturalLanguageTaskDescription ||
+          wizard.state.naturalLanguageTaskDescription.trim().length === 0
+        ) {
+          setError(t('mcp.error.taskDescRequired'));
+          return;
+        }
+
         // TODO: T045-T046 - Get available tools from MCP server
-        const availableTools: string[] = []; // Placeholder
+        // For now, using empty array as placeholder until T045-T046 are implemented
+        const availableTools: McpToolReference[] = [];
 
         addNode({
           id: nodeId,

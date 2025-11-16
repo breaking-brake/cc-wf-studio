@@ -173,12 +173,12 @@
 
 - [ ] T045 [P] [US3] MCP cache serviceを拡張して選択されたサーバーから利用可能ツールを取得・キャッシュ（src/extension/services/mcp-cache-service.ts）
 - [ ] T046 [P] [US3] MCPサーバーから利用可能ツールリストを取得するメッセージハンドラを追加（Extension Host）
-- [ ] T047 [US3] AiToolSelectionInputに検証ロジックを統合（必須入力（1文字以上）、リアルタイム検証、エラー表示）
-- [ ] T048 [US3] McpNodeDialogでAI Tool Selection Mode選択時の保存ロジックを実装（mode、serverId、aiToolSelectionConfig保存、ツールリスト取得）
-- [ ] T049 [US3] McpNodeEditDialogでAIツール選択モード編集UIを実装（タスク説明の編集、検証、保存）
-- [ ] T050 [P] [US3] タスク説明が空の場合のエラーメッセージを国際化（MCP_TASK_DESC_REQUIRED）
-- [ ] T051 [US3] ワークフローストアを拡張してAIツール選択モードデータを処理（src/webview/src/stores/workflow-store.ts）
-- [ ] T052 [US3] 既存のMcpNodeComponentを拡張してモードバッジを表示（src/webview/src/components/nodes/McpNode/McpNode.tsx）
+- [x] T047 [US3] AiToolSelectionInputに検証ロジックを統合（必須入力（1文字以上）、リアルタイム検証、エラー表示）
+- [x] T048 [US3] McpNodeDialogでAI Tool Selection Mode選択時の保存ロジックを実装（mode、serverId、aiToolSelectionConfig保存、ツールリスト取得） - バリデーション追加、型修正、T045-T046未実装のため availableTools は空配列
+- [x] T049 [US3] McpNodeEditDialogでAIツール選択モード編集UIを実装（タスク説明の編集、検証、保存） - バリデーション改善
+- [x] T050 [P] [US3] タスク説明が空の場合のエラーメッセージを国際化（MCP_TASK_DESC_REQUIRED） - Phase 3で実装済み
+- [x] T051 [US3] ワークフローストアを拡張してAIツール選択モードデータを処理（src/webview/src/stores/workflow-store.ts） - Phase 2の型定義により自動対応
+- [x] T052 [US3] 既存のMcpNodeComponentを拡張してモードバッジを表示（src/webview/src/components/nodes/McpNode/McpNode.tsx） - Phase 3で実装済み
 
 ### User Story 3 の手動E2Eテスト
 

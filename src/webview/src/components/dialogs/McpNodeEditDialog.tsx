@@ -149,8 +149,9 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
       }
 
       case 'aiToolSelection': {
-        // Validate required field
-        if (naturalLanguageTaskDescription.length === 0) {
+        // Validate required field (T049)
+        if (!naturalLanguageTaskDescription || naturalLanguageTaskDescription.trim().length === 0) {
+          setShowValidation(true);
           return;
         }
 
