@@ -18,7 +18,6 @@ interface ParameterConfigModeStepProps {
 
 interface ModeOption {
   mode: ParameterConfigMode;
-  icon: string;
   titleKey: 'mcp.parameterConfigMode.manual.title' | 'mcp.parameterConfigMode.auto.title';
   descriptionKey:
     | 'mcp.parameterConfigMode.manual.description'
@@ -34,13 +33,11 @@ export function ParameterConfigModeStep({
   const modeOptions: ModeOption[] = [
     {
       mode: 'manual',
-      icon: '⚙️',
       titleKey: 'mcp.parameterConfigMode.manual.title',
       descriptionKey: 'mcp.parameterConfigMode.manual.description',
     },
     {
       mode: 'auto',
-      icon: '🤖',
       titleKey: 'mcp.parameterConfigMode.auto.title',
       descriptionKey: 'mcp.parameterConfigMode.auto.description',
     },
@@ -114,9 +111,6 @@ export function ParameterConfigModeStep({
                 }
               }}
             >
-              {/* Icon */}
-              <div style={{ fontSize: '32px', lineHeight: 1 }}>{option.icon}</div>
-
               {/* Content */}
               <div style={{ flex: 1 }}>
                 <div

@@ -18,7 +18,6 @@ interface ToolSelectionModeStepProps {
 
 interface ModeOption {
   mode: ToolSelectionMode;
-  icon: string;
   titleKey: 'mcp.toolSelectionMode.manual.title' | 'mcp.toolSelectionMode.auto.title';
   descriptionKey:
     | 'mcp.toolSelectionMode.manual.description'
@@ -31,13 +30,11 @@ export function ToolSelectionModeStep({ selectedMode, onModeChange }: ToolSelect
   const modeOptions: ModeOption[] = [
     {
       mode: 'manual',
-      icon: '🔍',
       titleKey: 'mcp.toolSelectionMode.manual.title',
       descriptionKey: 'mcp.toolSelectionMode.manual.description',
     },
     {
       mode: 'auto',
-      icon: '🤖',
       titleKey: 'mcp.toolSelectionMode.auto.title',
       descriptionKey: 'mcp.toolSelectionMode.auto.description',
     },
@@ -111,9 +108,6 @@ export function ToolSelectionModeStep({ selectedMode, onModeChange }: ToolSelect
                 }
               }}
             >
-              {/* Icon */}
-              <div style={{ fontSize: '32px', lineHeight: 1 }}>{option.icon}</div>
-
               {/* Content */}
               <div style={{ flex: 1 }}>
                 <div

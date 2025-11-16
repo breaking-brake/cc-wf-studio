@@ -15,29 +15,25 @@ interface ModeIndicatorBadgeProps {
 }
 
 interface ModeInfo {
-  icon: string;
   titleKey:
     | 'mcp.modeSelection.detailed.title'
     | 'mcp.modeSelection.naturalLanguageParam.title'
     | 'mcp.modeSelection.fullNaturalLanguage.title';
-  color: string;
+  borderColor: string;
 }
 
 const MODE_INFO: Record<McpNodeMode, ModeInfo> = {
   detailed: {
-    icon: '⚙️',
     titleKey: 'mcp.modeSelection.detailed.title',
-    color: 'var(--vscode-charts-blue)',
+    borderColor: 'var(--vscode-charts-blue)',
   },
   naturalLanguageParam: {
-    icon: '◐',
     titleKey: 'mcp.modeSelection.naturalLanguageParam.title',
-    color: 'var(--vscode-charts-orange)',
+    borderColor: 'var(--vscode-charts-orange)',
   },
   fullNaturalLanguage: {
-    icon: '●',
     titleKey: 'mcp.modeSelection.fullNaturalLanguage.title',
-    color: 'var(--vscode-charts-green)',
+    borderColor: 'var(--vscode-charts-green)',
   },
 };
 
@@ -50,26 +46,15 @@ export function ModeIndicatorBadge({ mode }: ModeIndicatorBadgeProps) {
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: '8px',
         padding: '6px 12px',
         backgroundColor: 'var(--vscode-badge-background)',
         color: 'var(--vscode-badge-foreground)',
-        borderRadius: '12px',
+        borderRadius: '3px',
+        borderLeft: `3px solid ${info.borderColor}`,
         fontSize: '12px',
         fontWeight: 'bold',
       }}
     >
-      {/* Icon */}
-      <span
-        style={{
-          fontSize: '16px',
-          lineHeight: 1,
-          color: info.color,
-        }}
-      >
-        {info.icon}
-      </span>
-
       {/* Mode Name */}
       <span>{t(info.titleKey)}</span>
     </div>
