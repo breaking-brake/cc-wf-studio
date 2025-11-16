@@ -5,6 +5,8 @@
  * Based on: /specs/001-cc-wf-studio/research.md section 3.4
  */
 
+import type { McpNodeData } from '@shared/types/mcp-node';
+import { normalizeMcpNodeData } from '@shared/types/mcp-node';
 import type { Workflow } from '@shared/types/messages';
 import type { WorkflowNode } from '@shared/types/workflow-definition';
 import { NodeType } from '@shared/types/workflow-definition';
@@ -316,7 +318,8 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         x: node.position.x,
         y: node.position.y,
       },
-      data: node.data,
+      // Normalize MCP node data for backwards compatibility
+      data: node.type === 'mcp' ? normalizeMcpNodeData(node.data as McpNodeData) : node.data,
     }));
 
     // Convert workflow connections to ReactFlow edges
@@ -351,7 +354,8 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         x: node.position.x,
         y: node.position.y,
       },
-      data: node.data,
+      // Normalize MCP node data for backwards compatibility
+      data: node.type === 'mcp' ? normalizeMcpNodeData(node.data as McpNodeData) : node.data,
     }));
 
     // Convert workflow connections to ReactFlow edges

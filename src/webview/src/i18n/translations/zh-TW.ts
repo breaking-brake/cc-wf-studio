@@ -357,13 +357,20 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': '未找到與"{query}"匹配的工具',
 
   // MCP Node Dialog
-  'mcp.dialog.title': '參考可用的MCP Tool',
+  'mcp.dialog.title': 'MCP Tool配置',
   'mcp.dialog.selectServer': '選擇MCP伺服器',
   'mcp.dialog.selectTool': '選擇工具',
   'mcp.dialog.addButton': '新增工具',
   'mcp.dialog.cancelButton': '取消',
+  'mcp.dialog.wizardStep': '第{{current}}步，共{{total}}步',
+  'mcp.dialog.nextButton': '下一步',
+  'mcp.dialog.backButton': '返回',
+  'mcp.dialog.saveButton': '建立節點',
   'mcp.dialog.error.noServerSelected': '請選擇MCP伺服器',
   'mcp.dialog.error.noToolSelected': '請選擇工具',
+  'mcp.dialog.error.incompleteWizard': '請完成所有必要步驟',
+  'mcp.dialog.error.cannotProceed': '請填寫所有必填欄位以繼續',
+  'mcp.dialog.error.invalidMode': '選擇了無效的模式',
 
   // MCP Property Panel
   'property.nodeType.mcp': 'MCP Tool',
@@ -374,6 +381,9 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.parameterValues': '參數值',
   'property.mcp.parameterCount': '參數數量',
   'property.mcp.editParameters': '編輯參數',
+  'property.mcp.edit.manualParameterConfig': '編輯參數',
+  'property.mcp.edit.aiParameterConfig': '編輯參數配置說明',
+  'property.mcp.edit.aiToolSelection': '編輯任務',
   'property.mcp.infoNote': 'MCP工具屬性從伺服器載入。點擊「編輯參數」以設定參數值。',
 
   // MCP Parameter Form
@@ -403,4 +413,71 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'mcp.editDialog.cancelButton': '取消',
   'mcp.editDialog.loading': '正在載入工具架構...',
   'mcp.editDialog.error.schemaLoadFailed': '載入工具架構失敗',
+
+  // MCP Natural Language Mode (Feature: 001-mcp-natural-language-mode)
+
+  // Mode Selection
+  'mcp.modeSelection.title': '選擇配置模式',
+  'mcp.modeSelection.subtitle': '選擇MCP工具的配置方式',
+  'mcp.modeSelection.manualParameterConfig.title': '手動參數設定',
+  'mcp.modeSelection.manualParameterConfig.description':
+    '明確配置伺服器、工具和所有參數。再現性高，最適合技術使用者。',
+  'mcp.modeSelection.aiParameterConfig.title': 'AI參數設定',
+  'mcp.modeSelection.aiParameterConfig.description':
+    '選擇伺服器和工具，用自然語言描述參數。平衡的方法。',
+  'mcp.modeSelection.aiToolSelection.title': 'AI工具選擇',
+  'mcp.modeSelection.aiToolSelection.description':
+    '僅選擇伺服器，用自然語言描述整個任務。最簡單，但再現性最低。',
+
+  // Tool Selection Mode (Step-by-step decision flow)
+  'mcp.toolSelectionMode.title': '工具選擇方式',
+  'mcp.toolSelectionMode.subtitle': '選擇如何為此MCP節點選擇工具',
+  'mcp.toolSelectionMode.manual.title': '手動選擇工具',
+  'mcp.toolSelectionMode.manual.description':
+    '我將自己瀏覽並選擇工具。適合明確知道要使用哪個工具時。',
+  'mcp.toolSelectionMode.auto.title': '讓AI選擇工具',
+  'mcp.toolSelectionMode.auto.description':
+    'AI將根據任務描述自動選擇最佳工具。適合探索或不確定時。',
+
+  // Parameter Config Mode (Step-by-step decision flow)
+  'mcp.parameterConfigMode.title': '參數配置方式',
+  'mcp.parameterConfigMode.subtitle': '選擇如何為此工具配置參數',
+  'mcp.parameterConfigMode.manual.title': '手動配置',
+  'mcp.parameterConfigMode.manual.description':
+    '我將自己填寫所有參數。適合需要精確控制和可重現性時。',
+  'mcp.parameterConfigMode.auto.title': '讓AI配置',
+  'mcp.parameterConfigMode.auto.description': 'AI將根據自然語言描述配置參數。適合快速設定時。',
+
+  // Parameter Detailed Config Step
+  'mcp.parameterDetailedConfig.title': '設定工具參數',
+
+  // Natural Language Input
+  'mcp.naturalLanguage.paramDescription.label': '參數配置說明',
+  'mcp.naturalLanguage.paramDescription.placeholder':
+    '描述您想用此工具做什麼（例如：「檢查Lambda在us-east-1中是否可用」）...',
+  'mcp.naturalLanguage.taskDescription.label': '任務描述',
+  'mcp.naturalLanguage.taskDescription.placeholder':
+    '描述您想完成的任務（例如：「查找有關S3儲存貯體原則的文件」）...',
+
+  // Mode Switch Warnings
+  'mcp.modeSwitch.warning.title': '模式切換警告',
+  'mcp.modeSwitch.warning.message':
+    '從{currentMode}切換到{newMode}將改變此節點的配置方式。您目前的配置將被保留，但在新模式下可能不可見。您可以隨時切換回{currentMode}以恢復之前的配置。',
+  'mcp.modeSwitch.warning.continueButton': '繼續',
+  'mcp.modeSwitch.warning.cancelButton': '取消',
+  'mcp.modeSwitch.dataPreserved': '您的資料將被保留',
+  'mcp.modeSwitch.canRevert': '您可以隨時切換回來',
+
+  // Validation Errors
+  'mcp.error.paramDescRequired': '請提供參數描述。',
+  'mcp.error.taskDescRequired': '請提供任務描述。',
+  'mcp.error.noToolsAvailable': '所選MCP伺服器沒有可用工具',
+  'mcp.error.toolListOutdated': '工具清單快照已超過7天。請重新編輯此節點以取得最新的可用工具。',
+  'mcp.error.modeConfigMissing': '缺少模式配置。請重新配置此節點。',
+  'mcp.error.invalidModeConfig': '模式配置無效。請檢查您的自然語言描述或切換到詳細模式。',
+
+  // Mode Indicator Tooltips
+  'mcp.mode.detailed.tooltip': '詳細模式: 所有參數都已明確配置',
+  'mcp.mode.naturalLanguageParam.tooltip': '自然語言參數模式: "{description}"',
+  'mcp.mode.fullNaturalLanguage.tooltip': '完全自然語言模式: "{taskDescription}"',
 };

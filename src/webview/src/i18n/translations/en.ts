@@ -376,13 +376,20 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': 'No tools found matching "{query}"',
 
   // MCP Node Dialog
-  'mcp.dialog.title': 'Browse Available MCP Tools',
+  'mcp.dialog.title': 'MCP Tool Configuration',
   'mcp.dialog.selectServer': 'Select MCP Server',
   'mcp.dialog.selectTool': 'Select Tool',
   'mcp.dialog.addButton': 'Add Tool',
   'mcp.dialog.cancelButton': 'Cancel',
+  'mcp.dialog.wizardStep': 'Step {{current}} of {{total}}',
+  'mcp.dialog.nextButton': 'Next',
+  'mcp.dialog.backButton': 'Back',
+  'mcp.dialog.saveButton': 'Create Node',
   'mcp.dialog.error.noServerSelected': 'Please select an MCP server',
   'mcp.dialog.error.noToolSelected': 'Please select a tool',
+  'mcp.dialog.error.incompleteWizard': 'Please complete all required steps',
+  'mcp.dialog.error.cannotProceed': 'Please fill in all required fields to proceed',
+  'mcp.dialog.error.invalidMode': 'Invalid mode selected',
 
   // MCP Property Panel
   'property.nodeType.mcp': 'MCP Tool',
@@ -393,6 +400,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.parameterValues': 'Parameter Values',
   'property.mcp.parameterCount': 'Parameter Count',
   'property.mcp.editParameters': 'Edit Parameters',
+  'property.mcp.edit.manualParameterConfig': 'Edit Parameters',
+  'property.mcp.edit.aiParameterConfig': 'Edit Parameter Config Description',
+  'property.mcp.edit.aiToolSelection': 'Edit Task',
   'property.mcp.infoNote':
     'MCP tool properties are loaded from the server. Click "Edit Parameters" to configure parameter values.',
 
@@ -423,4 +433,76 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.editDialog.cancelButton': 'Cancel',
   'mcp.editDialog.loading': 'Loading tool schema...',
   'mcp.editDialog.error.schemaLoadFailed': 'Failed to load tool schema',
+
+  // MCP Natural Language Mode (Feature: 001-mcp-natural-language-mode)
+
+  // Mode Selection
+  'mcp.modeSelection.title': 'Select Configuration Mode',
+  'mcp.modeSelection.subtitle': 'Choose how you want to configure this MCP tool',
+  'mcp.modeSelection.manualParameterConfig.title': 'Manual Parameter Configuration',
+  'mcp.modeSelection.manualParameterConfig.description':
+    'Configure server, tool, and all parameters explicitly. High reproducibility, best for technical users.',
+  'mcp.modeSelection.aiParameterConfig.title': 'AI Parameter Configuration',
+  'mcp.modeSelection.aiParameterConfig.description':
+    'Select server and tool, describe parameters in natural language. Balanced approach.',
+  'mcp.modeSelection.aiToolSelection.title': 'AI Tool Selection',
+  'mcp.modeSelection.aiToolSelection.description':
+    'Select server only, describe entire task in natural language. Simplest, lowest reproducibility.',
+
+  // Tool Selection Mode (Step-by-step decision flow)
+  'mcp.toolSelectionMode.title': 'How to Select Tool',
+  'mcp.toolSelectionMode.subtitle': 'Choose how you want to select the tool for this MCP node',
+  'mcp.toolSelectionMode.manual.title': 'Select Tool Manually',
+  'mcp.toolSelectionMode.manual.description':
+    'I will browse and select the tool myself. Good for when you know exactly which tool to use.',
+  'mcp.toolSelectionMode.auto.title': 'Let AI Select Tool',
+  'mcp.toolSelectionMode.auto.description':
+    'AI will automatically select the best tool based on my task description. Good for exploring or when unsure.',
+
+  // Parameter Config Mode (Step-by-step decision flow)
+  'mcp.parameterConfigMode.title': 'How to Configure Parameters',
+  'mcp.parameterConfigMode.subtitle':
+    'Choose how you want to configure the parameters for this tool',
+  'mcp.parameterConfigMode.manual.title': 'Configure Manually',
+  'mcp.parameterConfigMode.manual.description':
+    'I will fill in all parameters myself. Good for precise control and reproducibility.',
+  'mcp.parameterConfigMode.auto.title': 'Let AI Configure',
+  'mcp.parameterConfigMode.auto.description':
+    'AI will configure parameters based on my natural language description. Good for quick setup.',
+
+  // Parameter Detailed Config Step
+  'mcp.parameterDetailedConfig.title': 'Configure Tool Parameters',
+
+  // Natural Language Input
+  'mcp.naturalLanguage.paramDescription.label': 'Parameter Configuration Description',
+  'mcp.naturalLanguage.paramDescription.placeholder':
+    'Describe what you want to do with this tool (e.g., "Check if Lambda is available in us-east-1")...',
+  'mcp.naturalLanguage.taskDescription.label': 'Task Description',
+  'mcp.naturalLanguage.taskDescription.placeholder':
+    'Describe the task you want to accomplish (e.g., "Find documentation about S3 bucket policies")...',
+
+  // Mode Switch Warnings
+  'mcp.modeSwitch.warning.title': 'Mode Switch Warning',
+  'mcp.modeSwitch.warning.message':
+    'Switching from {currentMode} to {newMode} will change how this node is configured. Your current configuration will be preserved but may not be visible in the new mode. You can switch back to {currentMode} at any time to restore the previous configuration.',
+  'mcp.modeSwitch.warning.continueButton': 'Continue',
+  'mcp.modeSwitch.warning.cancelButton': 'Cancel',
+  'mcp.modeSwitch.dataPreserved': 'Your data will be preserved',
+  'mcp.modeSwitch.canRevert': 'You can switch back at any time',
+
+  // Validation Errors
+  'mcp.error.paramDescRequired':
+    'Please provide a parameter description to help Claude Code understand your intent.',
+  'mcp.error.taskDescRequired': 'Please provide a task description with a clear goal.',
+  'mcp.error.noToolsAvailable': 'No tools available from the selected MCP server',
+  'mcp.error.toolListOutdated':
+    'Tool list snapshot is more than 7 days old. Please re-edit this node to capture the latest available tools.',
+  'mcp.error.modeConfigMissing': 'Mode configuration is missing. Please reconfigure this node.',
+  'mcp.error.invalidModeConfig':
+    'Mode configuration is invalid. Please check your natural language description or switch to Detailed Mode.',
+
+  // Mode Indicator Tooltips
+  'mcp.mode.detailed.tooltip': 'Detailed Mode: All parameters explicitly configured',
+  'mcp.mode.naturalLanguageParam.tooltip': 'Natural Language Parameter Mode: "{description}"',
+  'mcp.mode.fullNaturalLanguage.tooltip': 'Full Natural Language Mode: "{taskDescription}"',
 };

@@ -343,8 +343,15 @@ export interface WebviewTranslationKeys {
   'mcp.dialog.selectTool': string;
   'mcp.dialog.addButton': string;
   'mcp.dialog.cancelButton': string;
+  'mcp.dialog.wizardStep': string;
+  'mcp.dialog.nextButton': string;
+  'mcp.dialog.backButton': string;
+  'mcp.dialog.saveButton': string;
   'mcp.dialog.error.noServerSelected': string;
   'mcp.dialog.error.noToolSelected': string;
+  'mcp.dialog.error.incompleteWizard': string;
+  'mcp.dialog.error.cannotProceed': string;
+  'mcp.dialog.error.invalidMode': string;
 
   // MCP Property Panel
   'property.nodeType.mcp': string;
@@ -355,6 +362,9 @@ export interface WebviewTranslationKeys {
   'property.mcp.parameterValues': string;
   'property.mcp.parameterCount': string;
   'property.mcp.editParameters': string;
+  'property.mcp.edit.manualParameterConfig': string;
+  'property.mcp.edit.aiParameterConfig': string;
+  'property.mcp.edit.aiToolSelection': string;
   'property.mcp.infoNote': string;
 
   // MCP Parameter Form
@@ -384,4 +394,62 @@ export interface WebviewTranslationKeys {
   'mcp.editDialog.cancelButton': string;
   'mcp.editDialog.loading': string;
   'mcp.editDialog.error.schemaLoadFailed': string;
+
+  // MCP Natural Language Mode (Feature: 001-mcp-natural-language-mode)
+
+  // Mode Selection
+  'mcp.modeSelection.title': string;
+  'mcp.modeSelection.subtitle': string;
+  'mcp.modeSelection.manualParameterConfig.title': string;
+  'mcp.modeSelection.manualParameterConfig.description': string;
+  'mcp.modeSelection.aiParameterConfig.title': string;
+  'mcp.modeSelection.aiParameterConfig.description': string;
+  'mcp.modeSelection.aiToolSelection.title': string;
+  'mcp.modeSelection.aiToolSelection.description': string;
+
+  // Tool Selection Mode (Step-by-step decision flow)
+  'mcp.toolSelectionMode.title': string;
+  'mcp.toolSelectionMode.subtitle': string;
+  'mcp.toolSelectionMode.manual.title': string;
+  'mcp.toolSelectionMode.manual.description': string;
+  'mcp.toolSelectionMode.auto.title': string;
+  'mcp.toolSelectionMode.auto.description': string;
+
+  // Parameter Config Mode (Step-by-step decision flow)
+  'mcp.parameterConfigMode.title': string;
+  'mcp.parameterConfigMode.subtitle': string;
+  'mcp.parameterConfigMode.manual.title': string;
+  'mcp.parameterConfigMode.manual.description': string;
+  'mcp.parameterConfigMode.auto.title': string;
+  'mcp.parameterConfigMode.auto.description': string;
+
+  // Parameter Detailed Config Step
+  'mcp.parameterDetailedConfig.title': string;
+
+  // Natural Language Input
+  'mcp.naturalLanguage.paramDescription.label': string;
+  'mcp.naturalLanguage.paramDescription.placeholder': string;
+  'mcp.naturalLanguage.taskDescription.label': string;
+  'mcp.naturalLanguage.taskDescription.placeholder': string;
+
+  // Mode Switch Warnings
+  'mcp.modeSwitch.warning.title': string;
+  'mcp.modeSwitch.warning.message': string;
+  'mcp.modeSwitch.warning.continueButton': string;
+  'mcp.modeSwitch.warning.cancelButton': string;
+  'mcp.modeSwitch.dataPreserved': string;
+  'mcp.modeSwitch.canRevert': string;
+
+  // Validation Errors
+  'mcp.error.paramDescRequired': string;
+  'mcp.error.taskDescRequired': string;
+  'mcp.error.noToolsAvailable': string;
+  'mcp.error.toolListOutdated': string;
+  'mcp.error.modeConfigMissing': string;
+  'mcp.error.invalidModeConfig': string;
+
+  // Mode Indicator Tooltips
+  'mcp.mode.detailed.tooltip': string;
+  'mcp.mode.naturalLanguageParam.tooltip': string;
+  'mcp.mode.fullNaturalLanguage.tooltip': string;
 }

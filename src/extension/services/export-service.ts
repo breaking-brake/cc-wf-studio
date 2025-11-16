@@ -386,6 +386,256 @@ function generateSlashCommandFile(workflow: Workflow): string {
 }
 
 /**
+ * Format MCP node in Manual Parameter Config Mode
+ *
+ * User explicitly configures server, tool, and all parameters.
+ * Export shows explicit parameter values for reproduction.
+ *
+ * @param node - MCP node
+ * @returns Markdown sections for this node
+ */
+function formatManualParameterConfigMode(node: McpNode): string[] {
+  const sections: string[] = [];
+  const nodeId = sanitizeNodeId(node.id);
+
+  sections.push(`#### ${nodeId}(${node.data.toolName || 'MCP Tool'})`);
+  sections.push('');
+  sections.push(`${translate('mcpNode.description')}: ${node.data.toolDescription || ''}`);
+  sections.push('');
+  sections.push(`${translate('mcpNode.server')}: ${node.data.serverId}`);
+  sections.push('');
+  sections.push(`${translate('mcpNode.toolName')}: ${node.data.toolName || ''}`);
+  sections.push('');
+  sections.push(`${translate('mcpNode.validationStatus')}: ${node.data.validationStatus}`);
+  sections.push('');
+
+  // Show configured parameters
+  const parameterValues = node.data.parameterValues || {};
+  if (Object.keys(parameterValues).length > 0) {
+    sections.push(`${translate('mcpNode.configuredParameters')}:`);
+    sections.push('');
+    for (const [paramName, paramValue] of Object.entries(parameterValues)) {
+      const parameters = node.data.parameters || [];
+      const paramSchema = parameters.find((p) => p.name === paramName);
+      const paramType = paramSchema ? ` (${paramSchema.type})` : '';
+      const valueStr =
+        typeof paramValue === 'object' ? JSON.stringify(paramValue) : String(paramValue);
+      sections.push(`- \`${paramName}\`${paramType}: ${valueStr}`);
+    }
+    sections.push('');
+  }
+
+  // Show parameter schema
+  const parameters = node.data.parameters || [];
+  if (parameters.length > 0) {
+    sections.push(`${translate('mcpNode.availableParameters')}:`);
+    sections.push('');
+    for (const param of parameters) {
+      const requiredLabel = param.required
+        ? ` (${translate('mcpNode.required')})`
+        : ` (${translate('mcpNode.optional')})`;
+      const description = param.description || translate('mcpNode.noDescription');
+      sections.push(`- \`${param.name}\` (${param.type})${requiredLabel}: ${description}`);
+    }
+    sections.push('');
+  }
+
+  sections.push(translate('mcpNode.executionMethod'));
+  sections.push('');
+
+  return sections;
+}
+
+/**
+ * Format MCP node in AI Parameter Config Mode
+ *
+ * User selects server and tool, describes parameters in natural language.
+ * Export includes tool name, parameter schema, and natural language description
+ * for Claude Code to interpret and set appropriate parameter values.
+ *
+ * @param node - MCP node
+ * @returns Markdown sections for this node
+ */
+function formatAiParameterConfigMode(node: McpNode): string[] {
+  const sections: string[] = [];
+  const nodeId = sanitizeNodeId(node.id);
+
+  sections.push(`#### ${nodeId}(${node.data.toolName || 'MCP Tool'}) - AI Parameter Config Mode`);
+  sections.push('');
+
+  // Add metadata HTML comment for Claude Code (T056)
+  const metadata = {
+    mode: 'aiParameterConfig',
+    serverId: node.data.serverId,
+    toolName: node.data.toolName || '',
+    userIntent: node.data.aiParameterConfig?.description || '',
+    parameterSchema: (node.data.parameters || []).map((p) => ({
+      name: p.name,
+      type: p.type,
+      required: p.required,
+      description: p.description || '',
+      validation: p.validation,
+    })),
+  };
+  sections.push(`<!-- MCP_NODE_METADATA: ${JSON.stringify(metadata)} -->`);
+  sections.push('');
+
+  sections.push(`${translate('mcpNode.description')}: ${node.data.toolDescription || ''}`);
+  sections.push('');
+  sections.push(`${translate('mcpNode.server')}: ${node.data.serverId}`);
+  sections.push('');
+  sections.push(`${translate('mcpNode.toolName')}: ${node.data.toolName || ''}`);
+  sections.push('');
+  sections.push(`${translate('mcpNode.validationStatus')}: ${node.data.validationStatus}`);
+  sections.push('');
+
+  // Show natural language parameter description
+  if (node.data.aiParameterConfig?.description) {
+    sections.push('**User Intent (Natural Language Parameter Description)**:');
+    sections.push('');
+    sections.push('```');
+    sections.push(node.data.aiParameterConfig.description);
+    sections.push('```');
+    sections.push('');
+  }
+
+  // Show parameter schema for Claude Code interpretation
+  const parameters = node.data.parameters || [];
+  if (parameters.length > 0) {
+    sections.push('**Parameter Schema** (for AI interpretation):');
+    sections.push('');
+    for (const param of parameters) {
+      const requiredLabel = param.required
+        ? ` (${translate('mcpNode.required')})`
+        : ` (${translate('mcpNode.optional')})`;
+      const description = param.description || translate('mcpNode.noDescription');
+      sections.push(`- \`${param.name}\` (${param.type})${requiredLabel}: ${description}`);
+
+      // Show validation constraints if any
+      if (param.validation) {
+        const constraints: string[] = [];
+        if (param.validation.minLength !== undefined) {
+          constraints.push(`minLength: ${param.validation.minLength}`);
+        }
+        if (param.validation.maxLength !== undefined) {
+          constraints.push(`maxLength: ${param.validation.maxLength}`);
+        }
+        if (param.validation.minimum !== undefined) {
+          constraints.push(`minimum: ${param.validation.minimum}`);
+        }
+        if (param.validation.maximum !== undefined) {
+          constraints.push(`maximum: ${param.validation.maximum}`);
+        }
+        if (param.validation.pattern) {
+          constraints.push(`pattern: ${param.validation.pattern}`);
+        }
+        if (param.validation.enum) {
+          constraints.push(`enum: ${param.validation.enum.join(', ')}`);
+        }
+        if (constraints.length > 0) {
+          sections.push(`  - Constraints: ${constraints.join(', ')}`);
+        }
+      }
+    }
+    sections.push('');
+  }
+
+  // Instructions for Claude Code
+  sections.push('**Execution Method**:');
+  sections.push('');
+  sections.push(
+    'Claude Code should interpret the natural language description above and set appropriate parameter values based on the parameter schema. Use your best judgment to map the user intent to concrete parameter values that satisfy the constraints.'
+  );
+  sections.push('');
+
+  return sections;
+}
+
+/**
+ * Format MCP node in AI Tool Selection Mode
+ *
+ * User selects server only, describes entire task in natural language.
+ * Export includes server ID, task description, and available tools list
+ * for Claude Code to select the most appropriate tool and configure parameters.
+ *
+ * @param node - MCP node
+ * @returns Markdown sections for this node
+ */
+function formatAiToolSelectionMode(node: McpNode): string[] {
+  const sections: string[] = [];
+  const nodeId = sanitizeNodeId(node.id);
+
+  sections.push(`#### ${nodeId}(MCP Auto-Selection) - AI Tool Selection Mode`);
+  sections.push('');
+
+  // Add metadata HTML comment for Claude Code (T057)
+  const availableToolsRaw = node.data.aiToolSelectionConfig?.availableTools || [];
+  const availableTools = availableToolsRaw.map((tool: unknown) => {
+    // Handle both string format (legacy) and object format (current)
+    if (typeof tool === 'object' && tool !== null && 'name' in tool) {
+      const toolObj = tool as { name: string; description?: string };
+      return {
+        name: toolObj.name,
+        description: toolObj.description || '',
+      };
+    }
+    return {
+      name: String(tool),
+      description: '',
+    };
+  });
+
+  const metadata = {
+    mode: 'aiToolSelection',
+    serverId: node.data.serverId,
+    userIntent: node.data.aiToolSelectionConfig?.taskDescription || '',
+    availableTools,
+  };
+  sections.push(`<!-- MCP_NODE_METADATA: ${JSON.stringify(metadata)} -->`);
+  sections.push('');
+
+  sections.push(`${translate('mcpNode.server')}: ${node.data.serverId}`);
+  sections.push('');
+  sections.push(`${translate('mcpNode.validationStatus')}: ${node.data.validationStatus}`);
+  sections.push('');
+
+  // Show natural language task description
+  if (node.data.aiToolSelectionConfig?.taskDescription) {
+    sections.push('**User Intent (Natural Language Task Description)**:');
+    sections.push('');
+    sections.push('```');
+    sections.push(node.data.aiToolSelectionConfig.taskDescription);
+    sections.push('```');
+    sections.push('');
+  }
+
+  // Show available tools for Claude Code to choose from
+  if (availableTools.length > 0) {
+    sections.push(
+      `**Available Tools** (${availableTools.length} tools from ${node.data.serverId}):`
+    );
+    sections.push('');
+    for (const tool of availableTools) {
+      sections.push(`- **${tool.name}**: ${tool.description || 'No description'}`);
+    }
+    sections.push('');
+  } else {
+    sections.push('**Available Tools**: (snapshot not available, query server at runtime)');
+    sections.push('');
+  }
+
+  // Instructions for Claude Code
+  sections.push('**Execution Method**:');
+  sections.push('');
+  sections.push(
+    'Claude Code should analyze the task description above and select the most appropriate tool from the available tools list. Then, determine the appropriate parameter values for the selected tool based on the task requirements. If the available tools list is empty, query the MCP server at runtime to get the current list of tools.'
+  );
+  sections.push('');
+
+  return sections;
+}
+
+/**
  * Generate workflow execution logic
  *
  * @param workflow - Workflow definition
@@ -453,48 +703,26 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
     sections.push(translate('mcpNode.title'));
     sections.push('');
     for (const node of mcpNodes) {
-      const nodeId = sanitizeNodeId(node.id);
-      sections.push(`#### ${nodeId}(${node.data.toolName})`);
-      sections.push('');
-      sections.push(`${translate('mcpNode.description')}: ${node.data.toolDescription}`);
-      sections.push('');
-      sections.push(`${translate('mcpNode.server')}: ${node.data.serverId}`);
-      sections.push('');
-      sections.push(`${translate('mcpNode.toolName')}: ${node.data.toolName}`);
-      sections.push('');
-      sections.push(`${translate('mcpNode.validationStatus')}: ${node.data.validationStatus}`);
-      sections.push('');
+      // Detect mode and use appropriate formatter (T055)
+      const mode = node.data.mode || 'manualParameterConfig';
+      let nodeSections: string[] = [];
 
-      // Show configured parameters
-      if (Object.keys(node.data.parameterValues).length > 0) {
-        sections.push(`${translate('mcpNode.configuredParameters')}:`);
-        sections.push('');
-        for (const [paramName, paramValue] of Object.entries(node.data.parameterValues)) {
-          const paramSchema = node.data.parameters.find((p) => p.name === paramName);
-          const paramType = paramSchema ? ` (${paramSchema.type})` : '';
-          const valueStr =
-            typeof paramValue === 'object' ? JSON.stringify(paramValue) : String(paramValue);
-          sections.push(`- \`${paramName}\`${paramType}: ${valueStr}`);
-        }
-        sections.push('');
+      switch (mode) {
+        case 'manualParameterConfig':
+          nodeSections = formatManualParameterConfigMode(node);
+          break;
+        case 'aiParameterConfig':
+          nodeSections = formatAiParameterConfigMode(node);
+          break;
+        case 'aiToolSelection':
+          nodeSections = formatAiToolSelectionMode(node);
+          break;
+        default:
+          // Fallback to manual mode for unknown modes
+          nodeSections = formatManualParameterConfigMode(node);
       }
 
-      // Show parameter schema
-      if (node.data.parameters.length > 0) {
-        sections.push(`${translate('mcpNode.availableParameters')}:`);
-        sections.push('');
-        for (const param of node.data.parameters) {
-          const requiredLabel = param.required
-            ? ` (${translate('mcpNode.required')})`
-            : ` (${translate('mcpNode.optional')})`;
-          const description = param.description || translate('mcpNode.noDescription');
-          sections.push(`- \`${param.name}\` (${param.type})${requiredLabel}: ${description}`);
-        }
-        sections.push('');
-      }
-
-      sections.push(translate('mcpNode.executionMethod'));
-      sections.push('');
+      sections.push(...nodeSections);
     }
   }
 

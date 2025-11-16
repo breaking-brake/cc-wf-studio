@@ -1892,6 +1892,9 @@ const McpProperties: React.FC<{
   const data = node.data;
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
+  // Get current mode (default to 'manualParameterConfig' for backward compatibility)
+  const currentMode = data.mode || 'manualParameterConfig';
+
   // Get validation status icon and color
   const getValidationIcon = (status: 'valid' | 'missing' | 'invalid'): string => {
     switch (status) {
@@ -1949,67 +1952,73 @@ const McpProperties: React.FC<{
           </div>
         </div>
 
-        {/* Tool Name (Read-only) */}
-        <div>
-          <label
-            htmlFor="mcp-tool-name"
-            style={{
-              display: 'block',
-              fontSize: '12px',
-              fontWeight: 600,
-              color: 'var(--vscode-foreground)',
-              marginBottom: '6px',
-            }}
-          >
-            {t('property.mcp.toolName')}
-          </label>
-          <div
-            id="mcp-tool-name"
-            style={{
-              width: '100%',
-              padding: '6px 8px',
-              backgroundColor: 'var(--vscode-input-background)',
-              color: 'var(--vscode-descriptionForeground)',
-              border: '1px solid var(--vscode-input-border)',
-              borderRadius: '2px',
-              fontSize: '13px',
-              fontFamily: 'monospace',
-            }}
-          >
-            {data.toolName}
-          </div>
-        </div>
+        {/* Tool Name (Read-only) - Only for manualParameterConfig and aiParameterConfig modes */}
+        {(currentMode === 'manualParameterConfig' || currentMode === 'aiParameterConfig') &&
+          data.toolName && (
+            <div>
+              <label
+                htmlFor="mcp-tool-name"
+                style={{
+                  display: 'block',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                  marginBottom: '6px',
+                }}
+              >
+                {t('property.mcp.toolName')}
+              </label>
+              <div
+                id="mcp-tool-name"
+                style={{
+                  width: '100%',
+                  padding: '6px 8px',
+                  backgroundColor: 'var(--vscode-input-background)',
+                  color: 'var(--vscode-descriptionForeground)',
+                  border: '1px solid var(--vscode-input-border)',
+                  borderRadius: '2px',
+                  fontSize: '13px',
+                  fontFamily: 'monospace',
+                }}
+              >
+                {data.toolName}
+              </div>
+            </div>
+          )}
 
-        {/* Tool Description (Read-only) */}
-        <div>
-          <label
-            htmlFor="mcp-tool-description"
-            style={{
-              display: 'block',
-              fontSize: '12px',
-              fontWeight: 600,
-              color: 'var(--vscode-foreground)',
-              marginBottom: '6px',
-            }}
-          >
-            {t('property.description')}
-          </label>
-          <div
-            id="mcp-tool-description"
-            style={{
-              width: '100%',
-              padding: '6px 8px',
-              backgroundColor: 'var(--vscode-input-background)',
-              color: 'var(--vscode-descriptionForeground)',
-              border: '1px solid var(--vscode-input-border)',
-              borderRadius: '2px',
-              fontSize: '13px',
-              lineHeight: '1.4',
-            }}
-          >
-            {data.toolDescription}
-          </div>
-        </div>
+        {/* Tool Description (Read-only) - Only for manualParameterConfig and aiParameterConfig modes */}
+        {(currentMode === 'manualParameterConfig' || currentMode === 'aiParameterConfig') &&
+          data.toolDescription && (
+            <div>
+              <label
+                htmlFor="mcp-tool-description"
+                style={{
+                  display: 'block',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                  marginBottom: '6px',
+                }}
+              >
+                {t('property.description')}
+              </label>
+              <div
+                id="mcp-tool-description"
+                style={{
+                  width: '100%',
+                  padding: '6px 8px',
+                  backgroundColor: 'var(--vscode-input-background)',
+                  color: 'var(--vscode-descriptionForeground)',
+                  border: '1px solid var(--vscode-input-border)',
+                  borderRadius: '2px',
+                  fontSize: '13px',
+                  lineHeight: '1.4',
+                }}
+              >
+                {data.toolDescription}
+              </div>
+            </div>
+          )}
 
         {/* Validation Status (Read-only) */}
         <div>
@@ -2053,36 +2062,39 @@ const McpProperties: React.FC<{
           </div>
         </div>
 
-        {/* Parameter Count (Read-only) */}
-        <div>
-          <label
-            htmlFor="mcp-parameter-count"
-            style={{
-              display: 'block',
-              fontSize: '12px',
-              fontWeight: 600,
-              color: 'var(--vscode-foreground)',
-              marginBottom: '6px',
-            }}
-          >
-            {t('property.mcp.parameterCount')}
-          </label>
-          <div
-            id="mcp-parameter-count"
-            style={{
-              fontSize: '13px',
-              color: 'var(--vscode-descriptionForeground)',
-              backgroundColor: 'var(--vscode-badge-background)',
-              padding: '4px 8px',
-              borderRadius: '3px',
-              display: 'inline-block',
-            }}
-          >
-            {data.parameters.length}
-          </div>
-        </div>
+        {/* Parameter Count (Read-only) - Only for modes with parameters */}
+        {(currentMode === 'manualParameterConfig' || currentMode === 'aiParameterConfig') &&
+          data.parameters && (
+            <div>
+              <label
+                htmlFor="mcp-parameter-count"
+                style={{
+                  display: 'block',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                  marginBottom: '6px',
+                }}
+              >
+                {t('property.mcp.parameterCount')}
+              </label>
+              <div
+                id="mcp-parameter-count"
+                style={{
+                  fontSize: '13px',
+                  color: 'var(--vscode-descriptionForeground)',
+                  backgroundColor: 'var(--vscode-badge-background)',
+                  padding: '4px 8px',
+                  borderRadius: '3px',
+                  display: 'inline-block',
+                }}
+              >
+                {data.parameters.length}
+              </div>
+            </div>
+          )}
 
-        {/* Edit Parameters Button */}
+        {/* Edit Parameters Button - Show for all modes */}
         <div>
           <button
             type="button"
@@ -2104,8 +2116,13 @@ const McpProperties: React.FC<{
               gap: '8px',
             }}
           >
-            <span>⚙️</span>
-            <span>{t('property.mcp.editParameters')}</span>
+            <span>
+              {currentMode === 'manualParameterConfig'
+                ? t('property.mcp.edit.manualParameterConfig')
+                : currentMode === 'aiParameterConfig'
+                  ? t('property.mcp.edit.aiParameterConfig')
+                  : t('property.mcp.edit.aiToolSelection')}
+            </span>
           </button>
         </div>
 

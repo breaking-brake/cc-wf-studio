@@ -373,13 +373,20 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': '"{query}"와 일치하는 도구를 찾을 수 없습니다',
 
   // MCP Node Dialog
-  'mcp.dialog.title': '사용 가능한 MCP Tool 참조',
+  'mcp.dialog.title': 'MCP Tool 설정',
   'mcp.dialog.selectServer': 'MCP 서버 선택',
   'mcp.dialog.selectTool': '도구 선택',
   'mcp.dialog.addButton': '도구 추가',
   'mcp.dialog.cancelButton': '취소',
+  'mcp.dialog.wizardStep': '{{total}}단계 중 {{current}}단계',
+  'mcp.dialog.nextButton': '다음',
+  'mcp.dialog.backButton': '뒤로',
+  'mcp.dialog.saveButton': '노드 생성',
   'mcp.dialog.error.noServerSelected': 'MCP 서버를 선택하세요',
   'mcp.dialog.error.noToolSelected': '도구를 선택하세요',
+  'mcp.dialog.error.incompleteWizard': '필수 단계를 모두 완료하세요',
+  'mcp.dialog.error.cannotProceed': '계속하려면 모든 필수 필드를 입력하세요',
+  'mcp.dialog.error.invalidMode': '잘못된 모드가 선택되었습니다',
 
   // MCP Property Panel
   'property.nodeType.mcp': 'MCP Tool',
@@ -390,6 +397,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.parameterValues': '매개변수 값',
   'property.mcp.parameterCount': '매개변수 개수',
   'property.mcp.editParameters': '매개변수 편집',
+  'property.mcp.edit.manualParameterConfig': '매개변수 편집',
+  'property.mcp.edit.aiParameterConfig': '매개변수 설정 설명 편집',
+  'property.mcp.edit.aiToolSelection': '작업 편집',
   'property.mcp.infoNote':
     'MCP 도구 속성은 서버에서 로드됩니다. "매개변수 편집"을 클릭하여 매개변수 값을 구성하세요.',
 
@@ -420,4 +430,74 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.editDialog.cancelButton': '취소',
   'mcp.editDialog.loading': '도구 스키마 로드 중...',
   'mcp.editDialog.error.schemaLoadFailed': '도구 스키마 로드 실패',
+
+  // MCP Natural Language Mode (Feature: 001-mcp-natural-language-mode)
+
+  // Mode Selection
+  'mcp.modeSelection.title': '구성 모드 선택',
+  'mcp.modeSelection.subtitle': 'MCP 도구 구성 방법을 선택하세요',
+  'mcp.modeSelection.manualParameterConfig.title': '수동 매개변수 설정',
+  'mcp.modeSelection.manualParameterConfig.description':
+    '서버, 도구 및 모든 매개변수를 명시적으로 구성합니다. 재현성이 높으며 기술 사용자에게 적합합니다.',
+  'mcp.modeSelection.aiParameterConfig.title': 'AI 매개변수 설정',
+  'mcp.modeSelection.aiParameterConfig.description':
+    '서버와 도구를 선택하고 매개변수를 자연어로 설명합니다. 균형잡힌 접근 방식입니다.',
+  'mcp.modeSelection.aiToolSelection.title': 'AI 도구 선택',
+  'mcp.modeSelection.aiToolSelection.description':
+    '서버만 선택하고 전체 작업을 자연어로 설명합니다. 가장 간단하지만 재현성은 낮습니다.',
+
+  // Tool Selection Mode (Step-by-step decision flow)
+  'mcp.toolSelectionMode.title': '도구 선택 방법',
+  'mcp.toolSelectionMode.subtitle': 'MCP 노드의 도구를 선택하는 방법을 선택하세요',
+  'mcp.toolSelectionMode.manual.title': '도구를 직접 선택',
+  'mcp.toolSelectionMode.manual.description':
+    '직접 도구를 찾아보고 선택합니다. 사용할 도구를 정확히 알고 있을 때 적합합니다.',
+  'mcp.toolSelectionMode.auto.title': 'AI가 도구 선택',
+  'mcp.toolSelectionMode.auto.description':
+    '작업 설명을 기반으로 AI가 자동으로 최적의 도구를 선택합니다. 탐색 중이거나 불확실할 때 적합합니다.',
+
+  // Parameter Config Mode (Step-by-step decision flow)
+  'mcp.parameterConfigMode.title': '매개변수 구성 방법',
+  'mcp.parameterConfigMode.subtitle': '이 도구의 매개변수를 구성하는 방법을 선택하세요',
+  'mcp.parameterConfigMode.manual.title': '수동으로 구성',
+  'mcp.parameterConfigMode.manual.description':
+    '직접 모든 매개변수를 입력합니다. 정밀한 제어와 재현성이 필요할 때 적합합니다.',
+  'mcp.parameterConfigMode.auto.title': 'AI가 구성',
+  'mcp.parameterConfigMode.auto.description':
+    '자연어 설명을 기반으로 AI가 매개변수를 구성합니다. 빠른 설정에 적합합니다.',
+
+  // Parameter Detailed Config Step
+  'mcp.parameterDetailedConfig.title': '도구 매개변수 구성',
+
+  // Natural Language Input
+  'mcp.naturalLanguage.paramDescription.label': '매개변수 설정 설명',
+  'mcp.naturalLanguage.paramDescription.placeholder':
+    '이 도구로 수행하려는 작업을 설명하세요(예: "us-east-1에서 Lambda를 사용할 수 있는지 확인")...',
+  'mcp.naturalLanguage.taskDescription.label': '작업 설명',
+  'mcp.naturalLanguage.taskDescription.placeholder':
+    '수행하려는 작업을 설명하세요(예: "S3 버킷 정책에 대한 문서 찾기")...',
+
+  // Mode Switch Warnings
+  'mcp.modeSwitch.warning.title': '모드 전환 경고',
+  'mcp.modeSwitch.warning.message':
+    '{currentMode}에서 {newMode}로 전환하면 이 노드의 구성 방법이 변경됩니다. 현재 구성은 보존되지만 새 모드에서는 표시되지 않을 수 있습니다. 언제든지 {currentMode}로 돌아가 이전 구성을 복원할 수 있습니다.',
+  'mcp.modeSwitch.warning.continueButton': '계속',
+  'mcp.modeSwitch.warning.cancelButton': '취소',
+  'mcp.modeSwitch.dataPreserved': '데이터는 보존됩니다',
+  'mcp.modeSwitch.canRevert': '언제든지 되돌릴 수 있습니다',
+
+  // Validation Errors
+  'mcp.error.paramDescRequired': '매개변수 설명을 입력하세요.',
+  'mcp.error.taskDescRequired': '작업 설명을 입력하세요.',
+  'mcp.error.noToolsAvailable': '선택한 MCP 서버에서 사용 가능한 도구가 없습니다',
+  'mcp.error.toolListOutdated':
+    '도구 목록 스냅샷이 7일 이상 오래되었습니다. 최신 도구를 가져오려면 이 노드를 다시 편집하세요.',
+  'mcp.error.modeConfigMissing': '모드 구성이 누락되었습니다. 이 노드를 다시 구성하세요.',
+  'mcp.error.invalidModeConfig':
+    '모드 구성이 잘못되었습니다. 자연어 설명을 확인하거나 상세 모드로 전환하세요.',
+
+  // Mode Indicator Tooltips
+  'mcp.mode.detailed.tooltip': '상세 모드: 모든 매개변수가 명시적으로 구성됨',
+  'mcp.mode.naturalLanguageParam.tooltip': '자연어 매개변수 모드: "{description}"',
+  'mcp.mode.fullNaturalLanguage.tooltip': '완전 자연어 모드: "{taskDescription}"',
 };

@@ -5,6 +5,9 @@
  * Purpose: Handle Webview requests for MCP server and tool operations
  *
  * Based on: specs/001-mcp-node/contracts/extension-webview-messages.schema.json
+ *
+ * Feature: 001-mcp-natural-language-mode
+ * Enhancement: T046 - Updated handleGetMcpTools to use getTools() with built-in caching
  */
 
 import * as vscode from 'vscode';
@@ -17,13 +20,8 @@ import type {
   McpToolsResultPayload,
 } from '../../shared/types/messages';
 import { log } from '../extension';
-import {
-  getCachedServerList,
-  getCachedTools,
-  setCachedServerList,
-  setCachedTools,
-} from '../services/mcp-cache-service';
-import { getToolSchema, listServers, listTools } from '../services/mcp-cli-service';
+import { getCachedServerList, setCachedServerList } from '../services/mcp-cache-service';
+import { getToolSchema, getTools, listServers } from '../services/mcp-cli-service';
 
 /**
  * Handle LIST_MCP_SERVERS request from Webview (T018)
@@ -165,10 +163,9 @@ export async function handleListMcpServers(
 }
 
 /**
- * Handle GET_MCP_TOOLS request from Webview (T019)
+ * Handle GET_MCP_TOOLS request from Webview (T019, T046)
  *
- * Executes 'claude mcp list-tools <server-name>' CLI command to retrieve tools from a specific MCP server.
- * Supports cache optimization.
+ * Retrieves tools from a specific MCP server using getTools() with built-in caching.
  *
  * @param payload - Tool list request payload
  * @param webview - VSCode Webview instance
@@ -190,35 +187,8 @@ export async function handleGetMcpTools(
     // Get workspace folder for project-scoped MCP servers
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 
-    // Check cache first
-    const cached = getCachedTools(payload.serverId);
-    if (cached) {
-      const executionTimeMs = Date.now() - startTime;
-      log('INFO', 'GET_MCP_TOOLS cache hit', {
-        requestId,
-        serverId: payload.serverId,
-        toolCount: cached.length,
-        executionTimeMs,
-      });
-
-      const resultPayload: McpToolsResultPayload = {
-        success: true,
-        serverId: payload.serverId,
-        tools: cached,
-        timestamp: new Date().toISOString(),
-        executionTimeMs,
-      };
-
-      webview.postMessage({
-        type: 'MCP_TOOLS_RESULT',
-        requestId,
-        payload: resultPayload,
-      });
-      return;
-    }
-
-    // Cache miss - execute with workspace folder
-    const result = await listTools(payload.serverId, workspaceFolder);
+    // Use getTools() with built-in caching (T045, T046)
+    const result = await getTools(payload.serverId, workspaceFolder);
     const executionTimeMs = Date.now() - startTime;
 
     if (!result.success || !result.data) {
@@ -247,9 +217,7 @@ export async function handleGetMcpTools(
       return;
     }
 
-    // Success - cache and return
-    setCachedTools(payload.serverId, result.data);
-
+    // Success - return tools
     log('INFO', 'GET_MCP_TOOLS completed successfully', {
       requestId,
       serverId: payload.serverId,

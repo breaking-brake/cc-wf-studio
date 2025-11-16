@@ -25,7 +25,7 @@ declare const vscode: {
 /**
  * Request timeout in milliseconds
  */
-const REQUEST_TIMEOUT = 10000; // 10 seconds
+const REQUEST_TIMEOUT = 30000; // 30 seconds
 
 /**
  * List all configured MCP servers
@@ -76,7 +76,7 @@ export async function listMcpServers(
     // Timeout handling
     setTimeout(() => {
       window.removeEventListener('message', handler);
-      reject(new Error('Request timeout: LIST_MCP_SERVERS took longer than 10 seconds'));
+      reject(new Error('Request timeout: LIST_MCP_SERVERS took longer than 30 seconds'));
     }, REQUEST_TIMEOUT);
   });
 }
@@ -128,7 +128,7 @@ export async function getMcpTools(payload: GetMcpToolsPayload): Promise<McpTools
     // Timeout handling
     setTimeout(() => {
       window.removeEventListener('message', handler);
-      reject(new Error('Request timeout: GET_MCP_TOOLS took longer than 10 seconds'));
+      reject(new Error('Request timeout: GET_MCP_TOOLS took longer than 30 seconds'));
     }, REQUEST_TIMEOUT);
   });
 }
@@ -182,7 +182,7 @@ export async function getMcpToolSchema(
     // Timeout handling
     setTimeout(() => {
       window.removeEventListener('message', handler);
-      reject(new Error('Request timeout: GET_MCP_TOOL_SCHEMA took longer than 10 seconds'));
+      reject(new Error('Request timeout: GET_MCP_TOOL_SCHEMA took longer than 30 seconds'));
     }, REQUEST_TIMEOUT);
   });
 }
