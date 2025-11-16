@@ -416,13 +416,13 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   // Mode Selection
   'mcp.modeSelection.title': '選擇配置模式',
   'mcp.modeSelection.subtitle': '選擇MCP工具的配置方式',
-  'mcp.modeSelection.detailed.title': '詳細模式',
+  'mcp.modeSelection.detailed.title': '手動參數設定',
   'mcp.modeSelection.detailed.description':
     '明確配置伺服器、工具和所有參數。再現性高，最適合技術使用者。',
-  'mcp.modeSelection.naturalLanguageParam.title': '自然語言參數模式',
+  'mcp.modeSelection.naturalLanguageParam.title': 'AI參數設定',
   'mcp.modeSelection.naturalLanguageParam.description':
     '選擇伺服器和工具，用自然語言描述參數。平衡的方法。',
-  'mcp.modeSelection.fullNaturalLanguage.title': '完全自然語言模式',
+  'mcp.modeSelection.fullNaturalLanguage.title': 'AI工具選擇',
   'mcp.modeSelection.fullNaturalLanguage.description':
     '僅選擇伺服器，用自然語言描述整個任務。最簡單，但再現性最低。',
 

@@ -1953,37 +1953,38 @@ const McpProperties: React.FC<{
         </div>
 
         {/* Tool Name (Read-only) - Only for detailed and naturalLanguageParam modes */}
-        {(currentMode === 'detailed' || currentMode === 'naturalLanguageParam') && data.toolName && (
-          <div>
-            <label
-              htmlFor="mcp-tool-name"
-              style={{
-                display: 'block',
-                fontSize: '12px',
-                fontWeight: 600,
-                color: 'var(--vscode-foreground)',
-                marginBottom: '6px',
-              }}
-            >
-              {t('property.mcp.toolName')}
-            </label>
-            <div
-              id="mcp-tool-name"
-              style={{
-                width: '100%',
-                padding: '6px 8px',
-                backgroundColor: 'var(--vscode-input-background)',
-                color: 'var(--vscode-descriptionForeground)',
-                border: '1px solid var(--vscode-input-border)',
-                borderRadius: '2px',
-                fontSize: '13px',
-                fontFamily: 'monospace',
-              }}
-            >
-              {data.toolName}
+        {(currentMode === 'detailed' || currentMode === 'naturalLanguageParam') &&
+          data.toolName && (
+            <div>
+              <label
+                htmlFor="mcp-tool-name"
+                style={{
+                  display: 'block',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                  marginBottom: '6px',
+                }}
+              >
+                {t('property.mcp.toolName')}
+              </label>
+              <div
+                id="mcp-tool-name"
+                style={{
+                  width: '100%',
+                  padding: '6px 8px',
+                  backgroundColor: 'var(--vscode-input-background)',
+                  color: 'var(--vscode-descriptionForeground)',
+                  border: '1px solid var(--vscode-input-border)',
+                  borderRadius: '2px',
+                  fontSize: '13px',
+                  fontFamily: 'monospace',
+                }}
+              >
+                {data.toolName}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Tool Description (Read-only) - Only for detailed and naturalLanguageParam modes */}
         {(currentMode === 'detailed' || currentMode === 'naturalLanguageParam') &&

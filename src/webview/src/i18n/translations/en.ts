@@ -436,13 +436,13 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Mode Selection
   'mcp.modeSelection.title': 'Select Configuration Mode',
   'mcp.modeSelection.subtitle': 'Choose how you want to configure this MCP tool',
-  'mcp.modeSelection.detailed.title': 'Detailed Mode',
+  'mcp.modeSelection.detailed.title': 'Manual Parameter Configuration',
   'mcp.modeSelection.detailed.description':
     'Configure server, tool, and all parameters explicitly. High reproducibility, best for technical users.',
-  'mcp.modeSelection.naturalLanguageParam.title': 'Natural Language Parameter Mode',
+  'mcp.modeSelection.naturalLanguageParam.title': 'AI Parameter Configuration',
   'mcp.modeSelection.naturalLanguageParam.description':
     'Select server and tool, describe parameters in natural language. Balanced approach.',
-  'mcp.modeSelection.fullNaturalLanguage.title': 'Full Natural Language Mode',
+  'mcp.modeSelection.fullNaturalLanguage.title': 'AI Tool Selection',
   'mcp.modeSelection.fullNaturalLanguage.description':
     'Select server only, describe entire task in natural language. Simplest, lowest reproducibility.',
 
