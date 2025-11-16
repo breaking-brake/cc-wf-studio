@@ -17,8 +17,8 @@ import { validateAllParameters } from '../../utils/parameter-validator';
 import { IndeterminateProgressBar } from '../common/IndeterminateProgressBar';
 import { ParameterFormGenerator } from '../mcp/ParameterFormGenerator';
 import { ModeIndicatorBadge } from '../mode-selection/ModeIndicatorBadge';
-import { NaturalLanguageParamInput } from '../mode-selection/NaturalLanguageParamInput';
-import { NaturalLanguageTaskInput } from '../mode-selection/NaturalLanguageTaskInput';
+import { AiParameterConfigInput } from '../mode-selection/AiParameterConfigInput';
+import { AiToolSelectionInput } from '../mode-selection/AiToolSelectionInput';
 
 interface McpNodeEditDialogProps {
   isOpen: boolean;
@@ -305,7 +305,7 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
             )}
 
             {currentMode === 'aiParameterConfig' && (
-              <NaturalLanguageParamInput
+              <AiParameterConfigInput
                 value={aiParameterConfigDescription}
                 onChange={setAiParameterConfigDescription}
                 showValidation={showValidation}
@@ -313,7 +313,7 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
             )}
 
             {currentMode === 'aiToolSelection' && (
-              <NaturalLanguageTaskInput
+              <AiToolSelectionInput
                 value={naturalLanguageTaskDescription}
                 onChange={setNaturalLanguageTaskDescription}
                 showValidation={showValidation}

@@ -15,8 +15,8 @@ import { useWorkflowStore } from '../../stores/workflow-store';
 import { McpServerList } from '../mcp/McpServerList';
 import { McpToolList } from '../mcp/McpToolList';
 import { McpToolSearch } from '../mcp/McpToolSearch';
-import { NaturalLanguageParamInput } from '../mode-selection/NaturalLanguageParamInput';
-import { NaturalLanguageTaskInput } from '../mode-selection/NaturalLanguageTaskInput';
+import { AiParameterConfigInput } from '../mode-selection/AiParameterConfigInput';
+import { AiToolSelectionInput } from '../mode-selection/AiToolSelectionInput';
 import { ParameterConfigModeStep } from '../mode-selection/ParameterConfigModeStep';
 import { ParameterDetailedConfigStep } from '../mode-selection/ParameterDetailedConfigStep';
 import { ToolSelectionModeStep } from '../mode-selection/ToolSelectionModeStep';
@@ -269,7 +269,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
 
       case WizardStep.NaturalLanguageTask:
         return (
-          <NaturalLanguageTaskInput
+          <AiToolSelectionInput
             value={wizard.state.naturalLanguageTaskDescription}
             onChange={(value) => {
               wizard.setNaturalLanguageTaskDescription(value);
@@ -281,7 +281,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
 
       case WizardStep.NaturalLanguageParam:
         return (
-          <NaturalLanguageParamInput
+          <AiParameterConfigInput
             value={wizard.state.aiParameterConfigDescription}
             onChange={(value) => {
               wizard.setAiParameterConfigDescription(value);

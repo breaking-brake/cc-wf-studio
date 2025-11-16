@@ -94,8 +94,8 @@
 #### 共通コンポーネント（T012-T016）
 - [x] T012 [P] [US1] ToolSelectionModeStepコンポーネントを作成（src/webview/src/components/mode-selection/ToolSelectionModeStep.tsx）- ツール手動/自動の2択カード
 - [x] T013 [P] [US1] ParameterConfigModeStepコンポーネントを作成（src/webview/src/components/mode-selection/ParameterConfigModeStep.tsx）- パラメータ手動/自動の2択カード
-- [x] T014 [P] [US1] NaturalLanguageTaskInputコンポーネントを作成（src/webview/src/components/mode-selection/NaturalLanguageTaskInput.tsx）- AIツール選択モード用タスク説明入力（最小長20文字）
-- [x] T015 [P] [US1] NaturalLanguageParamInputコンポーネントを作成（src/webview/src/components/mode-selection/NaturalLanguageParamInput.tsx）- AIパラメータ設定モード用パラメータ説明入力（最小長10文字）
+- [x] T014 [P] [US1] AiToolSelectionInputコンポーネントを作成（src/webview/src/components/mode-selection/AiToolSelectionInput.tsx）- AIツール選択モード用タスク説明入力（最小長20文字）
+- [x] T015 [P] [US1] AiParameterConfigInputコンポーネントを作成（src/webview/src/components/mode-selection/AiParameterConfigInput.tsx）- AIパラメータ設定モード用パラメータ説明入力（最小長10文字）
 - [x] T016 [P] [US1] ModeIndicatorBadgeコンポーネントを作成（src/webview/src/components/mode-selection/ModeIndicatorBadge.tsx）- モード表示バッジ（テキスト + 色付きボーダー）
 
 #### 作成フロー統合（T017-T021）
@@ -130,18 +130,18 @@
 
 ## Phase 4: User Story 2 - AIパラメータ設定モード詳細実装 (Priority: P2)
 
-**⚠️ 設計変更（2025-11-16）**: User Story 1にNaturalLanguageParamInputコンポーネントの基本実装が含まれるため、このフェーズでは検証、保存、編集の詳細実装に集中。
+**⚠️ 設計変更（2025-11-16）**: User Story 1にAiParameterConfigInputコンポーネントの基本実装が含まれるため、このフェーズでは検証、保存、編集の詳細実装に集中。
 
 **ゴール**: AIパラメータ設定モードの入力検証、データ保存、編集機能を完成させる。
 
-**前提条件**: User Story 1（Phase 3）でNaturalLanguageParamInputコンポーネントが作成済み。
+**前提条件**: User Story 1（Phase 3）でAiParameterConfigInputコンポーネントが作成済み。
 
 ### User Story 2 の実装
 
-**注**: T015（NaturalLanguageParamInputコンポーネント）はPhase 3で実装済み。
+**注**: T015（AiParameterConfigInputコンポーネント）はPhase 3で実装済み。
 
 - [ ] T034 [P] [US2] 自然言語バリデーター関数を作成（src/webview/src/services/validation/natural-language-validator.ts、最小長10文字、debounce 300ms）
-- [ ] T035 [US2] NaturalLanguageParamInputに検証ロジックを統合（リアルタイム検証、エラー表示）
+- [ ] T035 [US2] AiParameterConfigInputに検証ロジックを統合（リアルタイム検証、エラー表示）
 - [ ] T036 [US2] McpNodeDialogでAI Parameter Config Mode選択時の保存ロジックを実装（mode、serverId、toolName、aiParameterConfigを保存）
 - [ ] T037 [US2] McpNodeEditDialogでAIパラメータ設定モード編集UIを実装（説明の編集、検証、保存）
 - [ ] T038 [P] [US2] 自然言語説明が最小長未満の場合のエラーメッセージを国際化（MCP_NL_DESC_TOO_SHORT）
@@ -161,19 +161,19 @@
 
 ## Phase 5: User Story 3 - AIツール選択モード詳細実装 (Priority: P3)
 
-**⚠️ 設計変更（2025-11-16）**: User Story 1にNaturalLanguageTaskInputコンポーネントの基本実装が含まれるため、このフェーズでは利用可能ツール取得、検証、保存、編集の詳細実装に集中。
+**⚠️ 設計変更（2025-11-16）**: User Story 1にAiToolSelectionInputコンポーネントの基本実装が含まれるため、このフェーズでは利用可能ツール取得、検証、保存、編集の詳細実装に集中。
 
 **ゴール**: AIツール選択モードの利用可能ツール取得、入力検証、データ保存、編集機能を完成させる。
 
-**前提条件**: User Story 1（Phase 3）でNaturalLanguageTaskInputコンポーネントとツール自動選択フローが作成済み。
+**前提条件**: User Story 1（Phase 3）でAiToolSelectionInputコンポーネントとツール自動選択フローが作成済み。
 
 ### User Story 3 の実装
 
-**注**: T014（NaturalLanguageTaskInputコンポーネント）とT021（ツール自動選択フロー）はPhase 3で実装済み。
+**注**: T014（AiToolSelectionInputコンポーネント）とT021（ツール自動選択フロー）はPhase 3で実装済み。
 
 - [ ] T045 [P] [US3] MCP cache serviceを拡張して選択されたサーバーから利用可能ツールを取得・キャッシュ（src/extension/services/mcp-cache-service.ts）
 - [ ] T046 [P] [US3] MCPサーバーから利用可能ツールリストを取得するメッセージハンドラを追加（Extension Host）
-- [ ] T047 [US3] NaturalLanguageTaskInputに検証ロジックを統合（最小長20文字、リアルタイム検証、エラー表示）
+- [ ] T047 [US3] AiToolSelectionInputに検証ロジックを統合（最小長20文字、リアルタイム検証、エラー表示）
 - [ ] T048 [US3] McpNodeDialogでAI Tool Selection Mode選択時の保存ロジックを実装（mode、serverId、aiToolSelectionConfig保存、ツールリスト取得）
 - [ ] T049 [US3] McpNodeEditDialogでAIツール選択モード編集UIを実装（タスク説明の編集、検証、保存）
 - [ ] T050 [P] [US3] タスク説明が最小長未満の場合のエラーメッセージを国際化（MCP_TASK_DESC_TOO_SHORT）

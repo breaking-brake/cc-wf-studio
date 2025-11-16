@@ -1,25 +1,25 @@
 /**
- * Natural Language Parameter Input Component
+ * AI Parameter Config Input Component
  *
  * Feature: 001-mcp-natural-language-mode
- * Purpose: Text area for entering parameter description in Natural Language Parameter Mode
+ * Purpose: Text area for entering parameter description in AI Parameter Config Mode
  *
  * Based on: specs/001-mcp-natural-language-mode/tasks.md T015
  */
 
 import { useTranslation } from '../../i18n/i18n-context';
 
-interface NaturalLanguageParamInputProps {
+interface AiParameterConfigInputProps {
   value: string;
   onChange: (value: string) => void;
   showValidation?: boolean;
 }
 
-export function NaturalLanguageParamInput({
+export function AiParameterConfigInput({
   value,
   onChange,
   showValidation = false,
-}: NaturalLanguageParamInputProps) {
+}: AiParameterConfigInputProps) {
   const { t } = useTranslation();
 
   const charCount = value.length;

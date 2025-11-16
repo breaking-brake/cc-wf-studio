@@ -1,25 +1,25 @@
 /**
- * Natural Language Task Input Component
+ * AI Tool Selection Input Component
  *
  * Feature: 001-mcp-natural-language-mode
- * Purpose: Text area for entering task description in Full Natural Language Mode
+ * Purpose: Text area for entering task description in AI Tool Selection Mode
  *
  * Based on: specs/001-mcp-natural-language-mode/tasks.md T014
  */
 
 import { useTranslation } from '../../i18n/i18n-context';
 
-interface NaturalLanguageTaskInputProps {
+interface AiToolSelectionInputProps {
   value: string;
   onChange: (value: string) => void;
   showValidation?: boolean;
 }
 
-export function NaturalLanguageTaskInput({
+export function AiToolSelectionInput({
   value,
   onChange,
   showValidation = false,
-}: NaturalLanguageTaskInputProps) {
+}: AiToolSelectionInputProps) {
   const { t } = useTranslation();
 
   const charCount = value.length;
