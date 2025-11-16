@@ -93,6 +93,7 @@
     "vite": "^7.2.2"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.22.0"
+    "@modelcontextprotocol/sdk": "^1.22.0",
+    "nano-spawn": "^2.0.0"
   }
 }
