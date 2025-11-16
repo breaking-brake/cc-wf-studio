@@ -1,0 +1,219 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://claudecode.ai/schemas/workflow/mcp-node-extended.schema.json",
+  "title": "Extended MCP Node Data Schema",
+  "description": "Extended McpNodeData schema for MCP Node Natural Language Mode feature. Backwards compatible with v1.2.0 schema.",
+  "type": "object",
+  "required": [
+    "serverId",
+    "toolName",
+    "toolDescription",
+    "parameters",
+    "parameterValues",
+    "validationStatus",
+    "outputPorts"
+  ],
+  "properties": {
+    "serverId": {
+      "type": "string",
+      "description": "MCP server identifier (from 'claude mcp list')",
+      "minLength": 1
+    },
+    "toolName": {
+      "type": "string",
+      "description": "Tool function name from the MCP server. Empty string for fullNaturalLanguage mode.",
+      "minLength": 0
+    },
+    "toolDescription": {
+      "type": "string",
+      "description": "Human-readable description of the tool's functionality. Empty string for fullNaturalLanguage mode.",
+      "minLength": 0
+    },
+    "parameters": {
+      "type": "array",
+      "description": "Array of parameter schemas for this tool (immutable, from MCP definition)",
+      "items": {
+        "type": "object",
+        "required": ["name", "type", "required"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["string", "number", "boolean", "integer", "array", "object"]
+          },
+          "description": {
+            "type": ["string", "null"]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "default": {},
+          "validation": {
+            "type": "object"
+          },
+          "items": {
+            "type": "object"
+          },
+          "properties": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "parameterValues": {
+      "type": "object",
+      "description": "User-configured values for the tool's parameters",
+      "additionalProperties": true
+    },
+    "validationStatus": {
+      "type": "string",
+      "enum": ["valid", "missing", "invalid"],
+      "description": "Validation state (computed during workflow load)"
+    },
+    "outputPorts": {
+      "type": "number",
+      "const": 1,
+      "description": "Number of output ports (fixed at 1 for MCP nodes)"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["detailed", "naturalLanguageParam", "fullNaturalLanguage"],
+      "description": "Configuration mode (defaults to 'detailed' if undefined)",
+      "default": "detailed"
+    },
+    "naturalLanguageParamConfig": {
+      "type": "object",
+      "description": "Natural Language Parameter Mode configuration (only when mode = 'naturalLanguageParam')",
+      "required": ["description", "timestamp"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 10000,
+          "description": "User's natural language description of desired parameter values"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of when this configuration was created"
+        }
+      }
+    },
+    "fullNaturalLanguageConfig": {
+      "type": "object",
+      "description": "Full Natural Language Mode configuration (only when mode = 'fullNaturalLanguage')",
+      "required": ["taskDescription", "availableTools", "timestamp"],
+      "properties": {
+        "taskDescription": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 10000,
+          "description": "User's natural language description of the entire task"
+        },
+        "availableTools": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "description": "Snapshot of available tools from the selected server at configuration time",
+          "items": {
+            "type": "object",
+            "required": ["serverId", "name", "description", "parameters"],
+            "properties": {
+              "serverId": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "parameters": {
+                "type": "array"
+              }
+            }
+          }
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of when this configuration was created"
+        }
+      }
+    },
+    "preservedDetailedConfig": {
+      "type": "object",
+      "description": "Preserved detailed mode configuration (when switching from detailed mode)",
+      "required": ["parameterValues", "timestamp"],
+      "properties": {
+        "parameterValues": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Parameter values from Detailed Mode configuration"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of the original detailed configuration"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "detailed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "naturalLanguageParamConfig": {
+            "not": {}
+          },
+          "fullNaturalLanguageConfig": {
+            "not": {}
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "naturalLanguageParam"
+          }
+        }
+      },
+      "then": {
+        "required": ["naturalLanguageParamConfig"],
+        "properties": {
+          "fullNaturalLanguageConfig": {
+            "not": {}
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "fullNaturalLanguage"
+          }
+        }
+      },
+      "then": {
+        "required": ["fullNaturalLanguageConfig"],
+        "properties": {
+          "naturalLanguageParamConfig": {
+            "not": {}
+          }
+        }
+      }
+    }
+  ]
+}

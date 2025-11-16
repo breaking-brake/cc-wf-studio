@@ -374,13 +374,20 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': '"{query}" に一致するツールが見つかりません',
 
   // MCP Node Dialog
-  'mcp.dialog.title': '使用可能なMCPツールを参照',
+  'mcp.dialog.title': 'MCP Toolの設定',
   'mcp.dialog.selectServer': 'MCPサーバーを選択',
   'mcp.dialog.selectTool': 'ツールを選択',
   'mcp.dialog.addButton': 'ツールを追加',
   'mcp.dialog.cancelButton': 'キャンセル',
+  'mcp.dialog.wizardStep': 'ステップ {{current}} / {{total}}',
+  'mcp.dialog.nextButton': '次へ',
+  'mcp.dialog.backButton': '戻る',
+  'mcp.dialog.saveButton': 'ノードを作成',
   'mcp.dialog.error.noServerSelected': 'MCPサーバーを選択してください',
   'mcp.dialog.error.noToolSelected': 'ツールを選択してください',
+  'mcp.dialog.error.incompleteWizard': '必要なステップをすべて完了してください',
+  'mcp.dialog.error.cannotProceed': '進むには必要なフィールドをすべて入力してください',
+  'mcp.dialog.error.invalidMode': '無効なモードが選択されました',
 
   // MCP Property Panel
   'property.nodeType.mcp': 'MCP Tool',
@@ -391,6 +398,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.parameterValues': 'パラメータ値',
   'property.mcp.parameterCount': 'パラメータ数',
   'property.mcp.editParameters': 'パラメータを編集',
+  'property.mcp.edit.manualParameterConfig': 'パラメータを編集',
+  'property.mcp.edit.aiParameterConfig': 'パラメータ設定の説明を編集',
+  'property.mcp.edit.aiToolSelection': 'タスクを編集',
   'property.mcp.infoNote':
     'MCPツールのプロパティはサーバーから読み込まれます。「パラメータを編集」をクリックしてパラメータ値を設定してください。',
 
@@ -421,4 +431,74 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.editDialog.cancelButton': 'キャンセル',
   'mcp.editDialog.loading': 'ツールスキーマを読み込み中...',
   'mcp.editDialog.error.schemaLoadFailed': 'ツールスキーマの読み込みに失敗しました',
+
+  // MCP Natural Language Mode (Feature: 001-mcp-natural-language-mode)
+
+  // Mode Selection
+  'mcp.modeSelection.title': '設定モードを選択',
+  'mcp.modeSelection.subtitle': 'MCPツールの設定方法を選択してください',
+  'mcp.modeSelection.manualParameterConfig.title': '手動パラメータ設定',
+  'mcp.modeSelection.manualParameterConfig.description':
+    'サーバー、ツール、すべてのパラメータを明示的に設定します。再現性が高く、技術的なユーザーに最適です。',
+  'mcp.modeSelection.aiParameterConfig.title': 'AIパラメータ設定',
+  'mcp.modeSelection.aiParameterConfig.description':
+    'サーバーとツールを選択し、パラメータを自然言語で記述します。バランスの取れたアプローチです。',
+  'mcp.modeSelection.aiToolSelection.title': 'AIツール選択',
+  'mcp.modeSelection.aiToolSelection.description':
+    'サーバーのみを選択し、タスク全体を自然言語で記述します。最もシンプルですが、再現性は低いです。',
+
+  // Tool Selection Mode (Step-by-step decision flow)
+  'mcp.toolSelectionMode.title': 'ツール選択方法',
+  'mcp.toolSelectionMode.subtitle': 'MCPノードのツールをどのように選択するか選んでください',
+  'mcp.toolSelectionMode.manual.title': 'ツールを自分で選ぶ',
+  'mcp.toolSelectionMode.manual.description':
+    '自分でツールを参照して選択します。使用したいツールが明確な場合に最適です。',
+  'mcp.toolSelectionMode.auto.title': 'AIにツールを選んでもらう',
+  'mcp.toolSelectionMode.auto.description':
+    'タスクの説明に基づいて、AIが自動的に最適なツールを選択します。探索中や不確実な場合に最適です。',
+
+  // Parameter Config Mode (Step-by-step decision flow)
+  'mcp.parameterConfigMode.title': 'パラメータ設定方法',
+  'mcp.parameterConfigMode.subtitle': 'このツールのパラメータをどのように設定するか選んでください',
+  'mcp.parameterConfigMode.manual.title': 'パラメータを自分で設定する',
+  'mcp.parameterConfigMode.manual.description':
+    '自分ですべてのパラメータを入力します。正確な制御と再現性が必要な場合に最適です。',
+  'mcp.parameterConfigMode.auto.title': 'AIにパラメータを設定してもらう',
+  'mcp.parameterConfigMode.auto.description':
+    '自然言語の説明に基づいて、AIがパラメータを設定します。素早く設定したい場合に最適です。',
+
+  // Parameter Detailed Config Step
+  'mcp.parameterDetailedConfig.title': 'ツールパラメータの設定',
+
+  // Natural Language Input
+  'mcp.naturalLanguage.paramDescription.label': 'パラメータ設定の説明',
+  'mcp.naturalLanguage.paramDescription.placeholder':
+    'このツールで何をしたいか説明してください（例:「us-east-1でLambdaが利用可能か確認する」）...',
+  'mcp.naturalLanguage.taskDescription.label': 'タスクの説明',
+  'mcp.naturalLanguage.taskDescription.placeholder':
+    '実現したいタスクを説明してください（例:「S3バケットポリシーに関するドキュメントを検索する」）...',
+
+  // Mode Switch Warnings
+  'mcp.modeSwitch.warning.title': 'モード切り替えの警告',
+  'mcp.modeSwitch.warning.message':
+    '{currentMode}から{newMode}に切り替えると、このノードの設定方法が変わります。現在の設定は保持されますが、新しいモードでは表示されない場合があります。いつでも{currentMode}に戻して以前の設定を復元できます。',
+  'mcp.modeSwitch.warning.continueButton': '続行',
+  'mcp.modeSwitch.warning.cancelButton': 'キャンセル',
+  'mcp.modeSwitch.dataPreserved': 'データは保持されます',
+  'mcp.modeSwitch.canRevert': 'いつでも元に戻せます',
+
+  // Validation Errors
+  'mcp.error.paramDescRequired': 'パラメータの説明を入力してください。',
+  'mcp.error.taskDescRequired': 'タスクの説明を入力してください。',
+  'mcp.error.noToolsAvailable': '選択したMCPサーバーから利用可能なツールがありません',
+  'mcp.error.toolListOutdated':
+    'ツールリストのスナップショットが7日以上古くなっています。最新の利用可能なツールを取得するため、このノードを再編集してください。',
+  'mcp.error.modeConfigMissing': 'モード設定が見つかりません。このノードを再設定してください。',
+  'mcp.error.invalidModeConfig':
+    'モード設定が無効です。自然言語の説明を確認するか、詳細モードに切り替えてください。',
+
+  // Mode Indicator Tooltips
+  'mcp.mode.detailed.tooltip': '詳細モード: すべてのパラメータを明示的に設定',
+  'mcp.mode.naturalLanguageParam.tooltip': '自然言語パラメータモード: 「{description}」',
+  'mcp.mode.fullNaturalLanguage.tooltip': '完全自然言語モード: 「{taskDescription}」',
 };

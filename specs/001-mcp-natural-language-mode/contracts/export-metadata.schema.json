@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://claudecode.ai/schemas/workflow/export-metadata.schema.json",
+  "title": "MCP Node Export Metadata Schema",
+  "description": "Metadata embedded in exported slash commands to guide Claude Code interpretation of natural language configurations",
+  "oneOf": [
+    {
+      "title": "Detailed Mode Metadata",
+      "type": "object",
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "const": "detailed",
+          "description": "Indicates detailed mode (no additional metadata needed)"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "title": "Natural Language Parameter Mode Metadata",
+      "type": "object",
+      "required": ["mode", "toolName", "parameterSchema", "userIntent", "instructions"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "const": "naturalLanguageParam",
+          "description": "Indicates natural language parameter mode"
+        },
+        "toolName": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Tool name for explicit invocation"
+        },
+        "parameterSchema": {
+          "type": "object",
+          "description": "JSON Schema definition of the tool's parameters"
+        },
+        "userIntent": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 10000,
+          "description": "User's natural language description"
+        },
+        "instructions": {
+          "type": "string",
+          "description": "Interpretation instructions for Claude Code"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "title": "Full Natural Language Mode Metadata",
+      "type": "object",
+      "required": ["mode", "serverId", "availableTools", "userIntent", "instructions"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "const": "fullNaturalLanguage",
+          "description": "Indicates full natural language mode"
+        },
+        "serverId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "MCP server identifier"
+        },
+        "availableTools": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "description": "List of available tools with their schemas",
+          "items": {
+            "type": "object",
+            "required": ["name", "description", "parameterSchema"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Tool name"
+              },
+              "description": {
+                "type": "string",
+                "description": "Tool description"
+              },
+              "parameterSchema": {
+                "type": "object",
+                "description": "JSON Schema definition of the tool's parameters"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "userIntent": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 10000,
+          "description": "User's natural language task description"
+        },
+        "instructions": {
+          "type": "string",
+          "description": "Interpretation instructions for Claude Code"
+        }
+      },
+      "additionalProperties": false
+    }
+  ]
+}

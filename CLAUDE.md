@@ -15,6 +15,8 @@ Auto-generated from all feature plans. Last updated: 2025-11-01
 - Workflow JSON files in `.vscode/workflows/` directory (conversation history embedded in workflow metadata) (001-ai-workflow-refinement)
 - TypeScript 5.3.0 (VSCode Extension Host), TypeScript/React 18.2 (Webview UI) + VSCode Extension API 1.80.0+, React 18.2, React Flow (visual canvas), Zustand (state management), child_process (Claude Code CLI execution) (001-mcp-node)
 - Workflow JSON files in `.vscode/workflows/` directory, Claude Code MCP configuration (user/project/enterprise scopes) (001-mcp-node)
+- TypeScript 5.3.0 (VSCode Extension Host), TypeScript/React 18.2 (Webview UI) + VSCode Extension API 1.80.0+, React 18.2, React Flow (visual canvas), Zustand (state management), existing MCP SDK client services (001-mcp-natural-language-mode)
+- Workflow JSON files in `.vscode/workflows/` directory (extends existing McpNodeData structure) (001-mcp-natural-language-mode)
 
 - TypeScript 5.x (VSCode Extension Host), React 18.x (Webview UI) (001-cc-wf-studio)
 
@@ -112,9 +114,9 @@ Manual version updates will be overwritten by the next automated release.
 TypeScript 5.x (VSCode Extension Host), React 18.x (Webview UI): Follow standard conventions
 
 ## Recent Changes
+- 001-mcp-natural-language-mode: Added TypeScript 5.3.0 (VSCode Extension Host), TypeScript/React 18.2 (Webview UI) + VSCode Extension API 1.80.0+, React 18.2, React Flow (visual canvas), Zustand (state management), existing MCP SDK client services
 - 001-mcp-node: Added TypeScript 5.3.0 (VSCode Extension Host), TypeScript/React 18.2 (Webview UI) + VSCode Extension API 1.80.0+, React 18.2, React Flow (visual canvas), Zustand (state management), child_process (Claude Code CLI execution)
 - 001-ai-workflow-refinement: Added TypeScript 5.3 (VSCode Extension Host), React 18.2 (Webview UI)
-- 001-ai-skill-generation: Added TypeScript 5.3 (Extension Host), React 18.2 (Webview UI)
 
 
 <!-- MANUAL ADDITIONS START -->

@@ -3,11 +3,15 @@
  *
  * Wrapper service for executing 'claude mcp' CLI commands.
  * Based on: contracts/mcp-cli.schema.json
+ *
+ * Feature: 001-mcp-natural-language-mode
+ * Enhancement: T045 - Added getTools() function with caching support
  */
 
 import { spawn } from 'node:child_process';
 import type { McpServerReference, McpToolReference } from '../../shared/types/mcp-node';
 import { log } from '../extension';
+import { getCachedTools, setCachedTools } from './mcp-cache-service';
 
 /**
  * Error codes for MCP CLI operations
@@ -612,6 +616,49 @@ export async function listTools(
       executionTimeMs,
     };
   }
+}
+
+/**
+ * Get tools for a server (with caching)
+ *
+ * This function wraps listTools() and adds caching support per T045.
+ * Cache strategy: 30 seconds TTL (defined in mcp-cache-service.ts)
+ *
+ * @param serverId - Server identifier
+ * @param workspacePath - Optional workspace path for project-scoped servers
+ * @returns List of available tools (from cache or fresh from server)
+ */
+export async function getTools(
+  serverId: string,
+  workspacePath?: string
+): Promise<McpExecutionResult<McpToolReference[]>> {
+  // Check cache first
+  const cachedTools = getCachedTools(serverId);
+
+  if (cachedTools) {
+    log('INFO', 'getTools - cache hit', {
+      serverId,
+      toolCount: cachedTools.length,
+    });
+
+    return {
+      success: true,
+      data: cachedTools,
+      executionTimeMs: 0, // Cache hit, no execution time
+    };
+  }
+
+  // Cache miss - fetch from MCP server
+  log('INFO', 'getTools - cache miss, fetching from server', { serverId });
+
+  const result = await listTools(serverId, workspacePath);
+
+  // Cache successful results
+  if (result.success && result.data) {
+    setCachedTools(serverId, result.data);
+  }
+
+  return result;
 }
 
 // parseMcpListToolsOutput function removed - now using MCP SDK directly

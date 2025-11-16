@@ -12,6 +12,7 @@ import type { McpNodeData } from '@shared/types/workflow-definition';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import { useTranslation } from '../../../i18n/i18n-context';
+import { ModeIndicatorBadge } from '../../mode-selection/ModeIndicatorBadge';
 import { DeleteButton } from '../DeleteButton';
 
 /**
@@ -48,6 +49,9 @@ function getValidationColor(status: 'valid' | 'missing' | 'invalid'): string {
 export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
   ({ id, data, selected }) => {
     const { t } = useTranslation();
+
+    // Get current mode (default to 'manualParameterConfig' for backwards compatibility)
+    const currentMode = data.mode || 'manualParameterConfig';
 
     // Get tooltip message based on validation status
     const getTooltipMessage = (status: 'valid' | 'missing' | 'invalid'): string => {
@@ -117,31 +121,26 @@ export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
           </span>
         </div>
 
-        {/* Tool Name */}
+        {/* Server Name : Tool Name */}
         <div
           style={{
             fontSize: '13px',
             color: 'var(--vscode-foreground)',
             marginBottom: '4px',
-            fontWeight: 500,
           }}
         >
-          {data.toolName || 'Untitled Tool'}
+          <span style={{ fontWeight: 600 }}>{data.serverId}</span>
+          <span style={{ fontWeight: 400 }}>
+            :{' '}
+            {currentMode === 'aiToolSelection'
+              ? 'Auto selected Tool'
+              : data.toolName || 'Untitled Tool'}
+          </span>
         </div>
 
-        {/* Server Badge */}
-        <div
-          style={{
-            fontSize: '10px',
-            color: 'var(--vscode-descriptionForeground)',
-            backgroundColor: 'var(--vscode-badge-background)',
-            padding: '2px 6px',
-            borderRadius: '3px',
-            display: 'inline-block',
-            marginBottom: '8px',
-          }}
-        >
-          {data.serverId}
+        {/* Mode Badge */}
+        <div style={{ marginBottom: '8px' }}>
+          <ModeIndicatorBadge mode={currentMode} />
         </div>
 
         {/* Description */}

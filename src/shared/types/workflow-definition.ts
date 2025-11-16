@@ -153,18 +153,38 @@ export interface ToolParameter {
 export interface McpNodeData {
   /** MCP server identifier (from 'claude mcp list') */
   serverId: string;
-  /** Tool function name from the MCP server */
-  toolName: string;
-  /** Human-readable description of the tool's functionality */
-  toolDescription: string;
-  /** Array of parameter schemas for this tool (immutable, from MCP definition) */
-  parameters: ToolParameter[];
-  /** User-configured values for the tool's parameters */
-  parameterValues: Record<string, unknown>;
+  /** Tool function name from the MCP server (optional for aiToolSelection mode) */
+  toolName?: string;
+  /** Human-readable description of the tool's functionality (optional for aiToolSelection mode) */
+  toolDescription?: string;
+  /** Array of parameter schemas for this tool (immutable, from MCP definition; optional for aiToolSelection mode) */
+  parameters?: ToolParameter[];
+  /** User-configured values for the tool's parameters (optional for aiToolSelection mode) */
+  parameterValues?: Record<string, unknown>;
   /** Validation status (computed during workflow load) */
   validationStatus: 'valid' | 'missing' | 'invalid';
   /** Number of output ports (fixed at 1 for MCP nodes) */
   outputPorts: 1;
+
+  // AI Mode fields (optional, for backwards compatibility)
+
+  /** Configuration mode (defaults to 'manualParameterConfig' if undefined) */
+  mode?: 'manualParameterConfig' | 'aiParameterConfig' | 'aiToolSelection';
+  /** AI Parameter Configuration Mode configuration (only if mode === 'aiParameterConfig') */
+  aiParameterConfig?: {
+    description: string;
+    timestamp: string;
+  };
+  /** AI Tool Selection Mode configuration (only if mode === 'aiToolSelection') */
+  aiToolSelectionConfig?: {
+    taskDescription: string;
+    availableTools: string[];
+    timestamp: string;
+  };
+  /** Preserved manual parameter configuration (stores data when switching away from manual parameter config mode) */
+  preservedManualParameterConfig?: {
+    parameterValues: Record<string, unknown>;
+  };
 }
 
 // ============================================================================
