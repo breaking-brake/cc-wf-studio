@@ -357,7 +357,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // MCP Node (Feature: 001-mcp-node)
   'node.mcp.title': 'MCP Tool',
   'node.mcp.description': 'MCP 도구 실행',
-  'node.mcp.aiToolSelectionPlaceholder': 'AI가 도구를 선택',
 
   // MCP Server List
   'mcp.loading.servers': 'MCP 서버 로드 중...',

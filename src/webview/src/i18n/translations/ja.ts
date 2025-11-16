@@ -358,7 +358,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // MCP Node (Feature: 001-mcp-node)
   'node.mcp.title': 'MCP Tool',
   'node.mcp.description': 'MCPツールを実行',
-  'node.mcp.aiToolSelectionPlaceholder': 'AIがツールを選択',
 
   // MCP Server List
   'mcp.loading.servers': 'MCPサーバーを読み込み中...',

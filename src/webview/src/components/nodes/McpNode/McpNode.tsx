@@ -131,7 +131,7 @@ export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
           }}
         >
           {currentMode === 'aiToolSelection'
-            ? t('node.mcp.aiToolSelectionPlaceholder')
+            ? 'Auto selected Tool'
             : data.toolName || 'Untitled Tool'}
         </div>
 

@@ -360,7 +360,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // MCP Node (Feature: 001-mcp-node)
   'node.mcp.title': 'MCP Tool',
   'node.mcp.description': 'Execute MCP tool',
-  'node.mcp.aiToolSelectionPlaceholder': 'AI will select tool',
 
   // MCP Server List
   'mcp.loading.servers': 'Loading MCP servers...',
