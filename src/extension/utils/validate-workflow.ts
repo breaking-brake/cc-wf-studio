@@ -408,6 +408,87 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
     });
   }
 
+  // Mode-specific configuration validation (T058)
+  const mode = mcpData.mode || 'manualParameterConfig';
+
+  switch (mode) {
+    case 'manualParameterConfig':
+      // Manual mode requires toolName and parameterValues
+      if (!mcpData.toolName || mcpData.toolName.trim().length === 0) {
+        errors.push({
+          code: 'MCP_MODE_CONFIG_MISMATCH',
+          message: 'Manual parameter config mode requires toolName to be set',
+          field: `nodes[${node.id}].data.toolName`,
+        });
+      }
+      if (!mcpData.parameterValues || Object.keys(mcpData.parameterValues).length === 0) {
+        errors.push({
+          code: 'MCP_MODE_CONFIG_MISMATCH',
+          message: 'Manual parameter config mode requires parameterValues to be configured',
+          field: `nodes[${node.id}].data.parameterValues`,
+        });
+      }
+      break;
+
+    case 'aiParameterConfig':
+      // AI parameter config mode requires toolName and aiParameterConfig
+      if (!mcpData.toolName || mcpData.toolName.trim().length === 0) {
+        errors.push({
+          code: 'MCP_MODE_CONFIG_MISMATCH',
+          message: 'AI parameter config mode requires toolName to be set',
+          field: `nodes[${node.id}].data.toolName`,
+        });
+      }
+      if (!mcpData.aiParameterConfig) {
+        errors.push({
+          code: 'MCP_MODE_CONFIG_MISMATCH',
+          message: 'AI parameter config mode requires aiParameterConfig to be set',
+          field: `nodes[${node.id}].data.aiParameterConfig`,
+        });
+      } else if (
+        !mcpData.aiParameterConfig.description ||
+        mcpData.aiParameterConfig.description.trim().length === 0
+      ) {
+        errors.push({
+          code: 'MCP_MODE_CONFIG_MISMATCH',
+          message:
+            'AI parameter config mode requires aiParameterConfig.description to be non-empty',
+          field: `nodes[${node.id}].data.aiParameterConfig.description`,
+        });
+      }
+      break;
+
+    case 'aiToolSelection':
+      // AI tool selection mode requires aiToolSelectionConfig
+      if (!mcpData.aiToolSelectionConfig) {
+        errors.push({
+          code: 'MCP_MODE_CONFIG_MISMATCH',
+          message: 'AI tool selection mode requires aiToolSelectionConfig to be set',
+          field: `nodes[${node.id}].data.aiToolSelectionConfig`,
+        });
+      } else if (
+        !mcpData.aiToolSelectionConfig.taskDescription ||
+        mcpData.aiToolSelectionConfig.taskDescription.trim().length === 0
+      ) {
+        errors.push({
+          code: 'MCP_MODE_CONFIG_MISMATCH',
+          message:
+            'AI tool selection mode requires aiToolSelectionConfig.taskDescription to be non-empty',
+          field: `nodes[${node.id}].data.aiToolSelectionConfig.taskDescription`,
+        });
+      }
+      // toolName is optional for AI tool selection mode (AI will select the tool)
+      break;
+
+    default:
+      // Unknown mode
+      errors.push({
+        code: 'MCP_INVALID_MODE',
+        message: `Invalid MCP mode: ${mode}. Must be one of: manualParameterConfig, aiParameterConfig, aiToolSelection`,
+        field: `nodes[${node.id}].data.mode`,
+      });
+  }
+
   return errors;
 }
 
