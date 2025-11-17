@@ -1,6 +1,10 @@
 # Claude Code Workflow Studio
 
 <p align="center">
+  <a href="https://snyk.io/test/github/breaking-brake/cc-wf-studio"><img src="https://snyk.io/test/github/breaking-brake/cc-wf-studio/badge.svg" alt="Known Vulnerabilities" /></a>
+</p>
+
+<p align="center">
   <img src="./resources/hero.png" alt="Claude Code Workflow Studio" width="800">
 </p>
 

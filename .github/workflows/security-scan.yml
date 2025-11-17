@@ -1,0 +1,84 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main, production]
+  pull_request:
+    branches: [main, production]
+  schedule:
+    # 毎週月曜日 9:00 JST (00:00 UTC) に実行
+    - cron: '0 0 * * 1'
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  snyk-security-scan:
+    name: Snyk Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install webview dependencies
+        run: |
+          cd src/webview
+          npm ci
+
+      # ルートプロジェクトのスキャン
+      - name: Run Snyk to check root project
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: --severity-threshold=high --file=package.json --project-name=cc-wf-studio-root
+
+      # Webviewプロジェクトのスキャン
+      - name: Run Snyk to check webview project
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: --severity-threshold=high --file=src/webview/package.json --project-name=cc-wf-studio-webview
+
+      # SARIF形式でのスキャン（GitHub Code Scanning用）
+      - name: Run Snyk to generate SARIF file
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: --all-projects --severity-threshold=low --sarif-file-output=snyk.sarif
+
+      # すべてのプロジェクトのモニタリング（継続的な監視）
+      - name: Monitor all projects with Snyk
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          args: --all-projects
+
+      # GitHub Code Scanningへのアップロード
+      - name: Upload Snyk results to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: snyk.sarif
