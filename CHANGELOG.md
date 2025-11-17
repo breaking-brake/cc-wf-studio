@@ -1,3 +1,13 @@
+## [2.6.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.5.1...v2.6.0) (2025-11-17)
+
+### Features
+
+* integrate Snyk security scanning for dependency vulnerability detection ([ce75878](https://github.com/breaking-brake/cc-wf-studio/commit/ce7587817cb1c5211aafb8160e48373b81e15c70)), closes [#80](https://github.com/breaking-brake/cc-wf-studio/issues/80) [#80](https://github.com/breaking-brake/cc-wf-studio/issues/80)
+
+### Bug Fixes
+
+* update CodeQL Action from v3 to v4 to avoid deprecation warning ([c1c969c](https://github.com/breaking-brake/cc-wf-studio/commit/c1c969c963e3ac618b2978762d2b3c10e21a7f18))
+
 ## [2.5.1](https://github.com/breaking-brake/cc-wf-studio/compare/v2.5.0...v2.5.1) (2025-11-16)
 
 ### Bug Fixes
