@@ -1,3 +1,9 @@
+## [2.7.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.6.0...v2.7.0) (2025-11-18)
+
+### Features
+
+* improve MCP Tool node UI text clarity and add documentation hint ([#97](https://github.com/breaking-brake/cc-wf-studio/issues/97)) ([7bcf669](https://github.com/breaking-brake/cc-wf-studio/commit/7bcf6694ba5c90e32565921b916dd7fe14506276)), closes [#88](https://github.com/breaking-brake/cc-wf-studio/issues/88)
+
 ## [2.6.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.5.1...v2.6.0) (2025-11-17)
 
 ### Features
