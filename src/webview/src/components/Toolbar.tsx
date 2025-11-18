@@ -110,6 +110,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
         }
       } else if (message.type === 'EXPORT_SUCCESS') {
         setIsExporting(false);
+      } else if (message.type === 'EXPORT_CANCELLED') {
+        // User cancelled export - reset exporting state
+        setIsExporting(false);
       } else if (message.type === 'ERROR') {
         // Reset exporting state on any error
         setIsExporting(false);
