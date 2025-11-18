@@ -1,3 +1,9 @@
+## [2.7.1](https://github.com/breaking-brake/cc-wf-studio/compare/v2.7.0...v2.7.1) (2025-11-18)
+
+### Bug Fixes
+
+* remove MCP documentation URL from empty state display ([#101](https://github.com/breaking-brake/cc-wf-studio/issues/101)) ([f949212](https://github.com/breaking-brake/cc-wf-studio/commit/f94921240731e99166ee017a3edb675bfcfba5c6))
+
 ## [2.7.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.6.0...v2.7.0) (2025-11-18)
 
 ### Features
