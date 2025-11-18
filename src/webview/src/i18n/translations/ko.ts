@@ -359,9 +359,11 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'node.mcp.description': 'MCP 도구 실행',
 
   // MCP Server List
-  'mcp.loading.servers': 'MCP 서버 로드 중...',
+  'mcp.loading.servers': '이 프로젝트에서 사용 가능한 MCP 서버 로드 중...',
   'mcp.error.serverLoadFailed': 'MCP 서버 로드 실패',
-  'mcp.empty.servers': '구성된 MCP 서버가 없습니다',
+  'mcp.empty.servers': '이 프로젝트에서 사용 가능한 MCP 서버가 없습니다.',
+  'mcp.empty.servers.hint': 'Claude Code용 MCP 서버를 설정하세요.',
+  'mcp.empty.servers.docUrl': 'https://code.claude.com/docs/ko/mcp',
 
   // MCP Tool List
   'mcp.loading.tools': '도구 로드 중...',
@@ -398,8 +400,11 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.parameterCount': '매개변수 개수',
   'property.mcp.editParameters': '매개변수 편집',
   'property.mcp.edit.manualParameterConfig': '매개변수 편집',
-  'property.mcp.edit.aiParameterConfig': '매개변수 설정 설명 편집',
-  'property.mcp.edit.aiToolSelection': '작업 편집',
+  'property.mcp.edit.aiParameterConfig': '매개변수 내용 편집',
+  'property.mcp.edit.aiToolSelection': '작업 내용 편집',
+  'property.mcp.taskDescription': '작업 내용',
+  'property.mcp.parameterDescription': '매개변수 내용',
+  'property.mcp.configuredValues': '구성된 값',
   'property.mcp.infoNote':
     'MCP 도구 속성은 서버에서 로드됩니다. "매개변수 편집"을 클릭하여 매개변수 값을 구성하세요.',
 
@@ -425,7 +430,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameter.validationErrors': '다음 검증 오류를 수정하세요:',
 
   // MCP Edit Dialog
-  'mcp.editDialog.title': 'MCP 도구 매개변수 구성',
+  'mcp.editDialog.title': 'MCP 도구 구성',
   'mcp.editDialog.saveButton': '저장',
   'mcp.editDialog.cancelButton': '취소',
   'mcp.editDialog.loading': '도구 스키마 로드 중...',
@@ -470,10 +475,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameterDetailedConfig.title': '도구 매개변수 구성',
 
   // Natural Language Input
-  'mcp.naturalLanguage.paramDescription.label': '매개변수 설정 설명',
+  'mcp.naturalLanguage.paramDescription.label': '매개변수 내용',
   'mcp.naturalLanguage.paramDescription.placeholder':
     '이 도구로 수행하려는 작업을 설명하세요(예: "us-east-1에서 Lambda를 사용할 수 있는지 확인")...',
-  'mcp.naturalLanguage.taskDescription.label': '작업 설명',
+  'mcp.naturalLanguage.taskDescription.label': '작업 내용',
   'mcp.naturalLanguage.taskDescription.placeholder':
     '수행하려는 작업을 설명하세요(예: "S3 버킷 정책에 대한 문서 찾기")...',
 

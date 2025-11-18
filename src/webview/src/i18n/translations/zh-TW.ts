@@ -343,9 +343,11 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'node.mcp.description': '執行MCP工具',
 
   // MCP Server List
-  'mcp.loading.servers': '正在載入MCP伺服器...',
+  'mcp.loading.servers': '正在載入此專案中可用的MCP伺服器...',
   'mcp.error.serverLoadFailed': '載入MCP伺服器失敗',
-  'mcp.empty.servers': '未設定MCP伺服器',
+  'mcp.empty.servers': '此專案中沒有可用的MCP伺服器。',
+  'mcp.empty.servers.hint': '請為Claude Code設定MCP伺服器。',
+  'mcp.empty.servers.docUrl': 'https://code.claude.com/docs/zh-TW/mcp',
 
   // MCP Tool List
   'mcp.loading.tools': '正在載入工具...',
@@ -382,8 +384,11 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.parameterCount': '參數數量',
   'property.mcp.editParameters': '編輯參數',
   'property.mcp.edit.manualParameterConfig': '編輯參數',
-  'property.mcp.edit.aiParameterConfig': '編輯參數配置說明',
-  'property.mcp.edit.aiToolSelection': '編輯任務',
+  'property.mcp.edit.aiParameterConfig': '編輯參數內容',
+  'property.mcp.edit.aiToolSelection': '編輯任務內容',
+  'property.mcp.taskDescription': '任務內容',
+  'property.mcp.parameterDescription': '參數內容',
+  'property.mcp.configuredValues': '配置值',
   'property.mcp.infoNote': 'MCP工具屬性從伺服器載入。點擊「編輯參數」以設定參數值。',
 
   // MCP Parameter Form
@@ -408,7 +413,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameter.validationErrors': '請修正以下驗證錯誤:',
 
   // MCP Edit Dialog
-  'mcp.editDialog.title': '配置MCP工具參數',
+  'mcp.editDialog.title': '配置MCP工具',
   'mcp.editDialog.saveButton': '儲存',
   'mcp.editDialog.cancelButton': '取消',
   'mcp.editDialog.loading': '正在載入工具架構...',
@@ -452,10 +457,10 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameterDetailedConfig.title': '設定工具參數',
 
   // Natural Language Input
-  'mcp.naturalLanguage.paramDescription.label': '參數配置說明',
+  'mcp.naturalLanguage.paramDescription.label': '參數內容',
   'mcp.naturalLanguage.paramDescription.placeholder':
     '描述您想用此工具做什麼（例如：「檢查Lambda在us-east-1中是否可用」）...',
-  'mcp.naturalLanguage.taskDescription.label': '任務描述',
+  'mcp.naturalLanguage.taskDescription.label': '任務內容',
   'mcp.naturalLanguage.taskDescription.placeholder':
     '描述您想完成的任務（例如：「查找有關S3儲存貯體原則的文件」）...',
 
