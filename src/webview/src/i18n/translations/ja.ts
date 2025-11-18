@@ -364,7 +364,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.error.serverLoadFailed': 'MCPサーバーの読み込みに失敗しました',
   'mcp.empty.servers': 'このプロジェクトで利用可能なMCPサーバーがありません。',
   'mcp.empty.servers.hint': 'Claude Codeで利用できるMCPサーバーを設定してください。',
-  'mcp.empty.servers.docUrl': 'https://code.claude.com/docs/ja/mcp',
 
   // MCP Tool List
   'mcp.loading.tools': 'ツールを読み込み中...',
