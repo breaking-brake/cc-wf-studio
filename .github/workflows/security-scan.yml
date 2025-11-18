@@ -18,6 +18,8 @@ jobs:
   snyk-security-scan:
     name: Snyk Security Scan
     runs-on: ubuntu-latest
+    # DependabotのPRではSNYK_TOKENシークレットにアクセスできないためスキップ
+    if: github.actor != 'dependabot[bot]'
 
     steps:
       - name: Checkout
