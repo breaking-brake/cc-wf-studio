@@ -347,7 +347,6 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'mcp.error.serverLoadFailed': '載入MCP伺服器失敗',
   'mcp.empty.servers': '此專案中沒有可用的MCP伺服器。',
   'mcp.empty.servers.hint': '請為Claude Code設定MCP伺服器。',
-  'mcp.empty.servers.docUrl': 'https://code.claude.com/docs/zh-TW/mcp',
 
   // MCP Tool List
   'mcp.loading.tools': '正在載入工具...',

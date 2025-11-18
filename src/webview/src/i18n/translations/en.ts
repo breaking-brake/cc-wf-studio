@@ -366,7 +366,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.error.serverLoadFailed': 'Failed to load MCP servers',
   'mcp.empty.servers': 'No available MCP servers in this project.',
   'mcp.empty.servers.hint': 'Please configure MCP servers for Claude Code.',
-  'mcp.empty.servers.docUrl': 'https://code.claude.com/docs/en/mcp',
 
   // MCP Tool List
   'mcp.loading.tools': 'Loading tools...',

@@ -100,16 +100,7 @@ export function McpServerList({
             color: 'var(--vscode-descriptionForeground)',
           }}
         >
-          <div>{t('mcp.empty.servers.hint')}</div>
-          <div
-            style={{
-              marginTop: '4px',
-              fontFamily: 'monospace',
-              fontSize: '11px',
-            }}
-          >
-            {t('mcp.empty.servers.docUrl')}
-          </div>
+          {t('mcp.empty.servers.hint')}
         </div>
       </div>
     );
