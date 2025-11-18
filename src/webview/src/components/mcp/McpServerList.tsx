@@ -84,10 +84,33 @@ export function McpServerList({
         style={{
           padding: '16px',
           textAlign: 'center',
-          color: 'var(--vscode-descriptionForeground)',
         }}
       >
-        {t('mcp.empty.servers')}
+        <div
+          style={{
+            color: 'var(--vscode-descriptionForeground)',
+            marginBottom: '8px',
+          }}
+        >
+          {t('mcp.empty.servers')}
+        </div>
+        <div
+          style={{
+            fontSize: '12px',
+            color: 'var(--vscode-descriptionForeground)',
+          }}
+        >
+          <div>{t('mcp.empty.servers.hint')}</div>
+          <div
+            style={{
+              marginTop: '4px',
+              fontFamily: 'monospace',
+              fontSize: '11px',
+            }}
+          >
+            {t('mcp.empty.servers.docUrl')}
+          </div>
+        </div>
       </div>
     );
   }

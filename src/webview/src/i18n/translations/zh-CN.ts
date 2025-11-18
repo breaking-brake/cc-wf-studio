@@ -343,9 +343,11 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'node.mcp.description': '执行MCP工具',
 
   // MCP Server List
-  'mcp.loading.servers': '正在加载MCP服务器...',
+  'mcp.loading.servers': '正在加载此项目中可用的MCP服务器...',
   'mcp.error.serverLoadFailed': '加载MCP服务器失败',
-  'mcp.empty.servers': '未配置MCP服务器',
+  'mcp.empty.servers': '此项目中没有可用的MCP服务器。',
+  'mcp.empty.servers.hint': '请为Claude Code配置MCP服务器。',
+  'mcp.empty.servers.docUrl': 'https://code.claude.com/docs/zh-CN/mcp',
 
   // MCP Tool List
   'mcp.loading.tools': '正在加载工具...',
@@ -382,8 +384,11 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.parameterCount': '参数数量',
   'property.mcp.editParameters': '编辑参数',
   'property.mcp.edit.manualParameterConfig': '编辑参数',
-  'property.mcp.edit.aiParameterConfig': '编辑参数配置说明',
-  'property.mcp.edit.aiToolSelection': '编辑任务',
+  'property.mcp.edit.aiParameterConfig': '编辑参数内容',
+  'property.mcp.edit.aiToolSelection': '编辑任务内容',
+  'property.mcp.taskDescription': '任务内容',
+  'property.mcp.parameterDescription': '参数内容',
+  'property.mcp.configuredValues': '配置值',
   'property.mcp.infoNote': 'MCP工具属性从服务器加载。点击"编辑参数"以配置参数值。',
 
   // MCP Parameter Form
@@ -408,7 +413,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameter.validationErrors': '请修复以下验证错误:',
 
   // MCP Edit Dialog
-  'mcp.editDialog.title': '配置MCP工具参数',
+  'mcp.editDialog.title': '配置MCP工具',
   'mcp.editDialog.saveButton': '保存',
   'mcp.editDialog.cancelButton': '取消',
   'mcp.editDialog.loading': '正在加载工具架构...',
@@ -452,10 +457,10 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameterDetailedConfig.title': '配置工具参数',
 
   // Natural Language Input
-  'mcp.naturalLanguage.paramDescription.label': '参数配置说明',
+  'mcp.naturalLanguage.paramDescription.label': '参数内容',
   'mcp.naturalLanguage.paramDescription.placeholder':
     '描述您想用此工具做什么（例如："检查Lambda在us-east-1中是否可用"）...',
-  'mcp.naturalLanguage.taskDescription.label': '任务描述',
+  'mcp.naturalLanguage.taskDescription.label': '任务内容',
   'mcp.naturalLanguage.taskDescription.placeholder':
     '描述您想完成的任务（例如："查找有关S3存储桶策略的文档"）...',
 

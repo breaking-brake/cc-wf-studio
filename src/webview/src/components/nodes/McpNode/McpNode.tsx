@@ -44,6 +44,29 @@ function getValidationColor(status: 'valid' | 'missing' | 'invalid'): string {
 }
 
 /**
+ * Truncate text with ellipsis
+ */
+function truncateText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  return `${text.substring(0, maxLength)}...`;
+}
+
+/**
+ * Get main parameter values for display (up to 2 parameters)
+ */
+function getMainParameterPreview(parameterValues: Record<string, unknown>): string {
+  const entries = Object.entries(parameterValues).slice(0, 2);
+  if (entries.length === 0) return 'No parameters configured';
+
+  return entries
+    .map(([key, value]) => {
+      const valueStr = typeof value === 'object' ? JSON.stringify(value) : String(value);
+      return `${key}: ${truncateText(valueStr, 30)}`;
+    })
+    .join(', ');
+}
+
+/**
  * McpNode Component
  */
 export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
@@ -143,8 +166,8 @@ export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
           <ModeIndicatorBadge mode={currentMode} />
         </div>
 
-        {/* Description */}
-        {data.toolDescription && (
+        {/* Mode-specific content display */}
+        {currentMode === 'aiToolSelection' && data.aiToolSelectionConfig?.taskDescription && (
           <div
             style={{
               fontSize: '11px',
@@ -158,23 +181,45 @@ export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
               WebkitBoxOrient: 'vertical',
             }}
           >
-            {data.toolDescription}
+            <strong>Task:</strong> {data.aiToolSelectionConfig.taskDescription}
           </div>
         )}
 
-        {/* Parameter Count */}
-        {data.parameters && data.parameters.length > 0 && (
+        {currentMode === 'aiParameterConfig' && data.aiParameterConfig?.description && (
           <div
             style={{
-              fontSize: '10px',
+              fontSize: '11px',
               color: 'var(--vscode-descriptionForeground)',
               marginTop: '8px',
-              fontStyle: 'italic',
+              lineHeight: '1.4',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
             }}
           >
-            {data.parameters.length} parameter{data.parameters.length !== 1 ? 's' : ''}
+            <strong>Params:</strong> {data.aiParameterConfig.description}
           </div>
         )}
+
+        {currentMode === 'manualParameterConfig' &&
+          data.parameterValues &&
+          Object.keys(data.parameterValues).length > 0 && (
+            <div
+              style={{
+                fontSize: '11px',
+                color: 'var(--vscode-descriptionForeground)',
+                marginTop: '8px',
+                lineHeight: '1.4',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {getMainParameterPreview(data.parameterValues)}
+            </div>
+          )}
 
         {/* Output Handle */}
         <Handle

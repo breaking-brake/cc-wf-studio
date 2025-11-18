@@ -2126,20 +2126,118 @@ const McpProperties: React.FC<{
           </button>
         </div>
 
-        {/* Info Note */}
-        <div
-          style={{
-            padding: '12px',
-            backgroundColor: 'var(--vscode-textBlockQuote-background)',
-            border: '1px solid var(--vscode-textBlockQuote-border)',
-            borderRadius: '4px',
-            fontSize: '11px',
-            color: 'var(--vscode-descriptionForeground)',
-            lineHeight: '1.5',
-          }}
-        >
-          💡 {t('property.mcp.infoNote')}
-        </div>
+        {/* Configuration Values Display - Mode-specific */}
+        {currentMode === 'aiToolSelection' && data.aiToolSelectionConfig?.taskDescription && (
+          <div>
+            <label
+              htmlFor="mcp-task-description"
+              style={{
+                display: 'block',
+                fontSize: '12px',
+                fontWeight: 600,
+                color: 'var(--vscode-foreground)',
+                marginBottom: '6px',
+              }}
+            >
+              {t('property.mcp.taskDescription')}
+            </label>
+            <div
+              id="mcp-task-description"
+              style={{
+                width: '100%',
+                padding: '8px',
+                backgroundColor: 'var(--vscode-input-background)',
+                color: 'var(--vscode-descriptionForeground)',
+                border: '1px solid var(--vscode-input-border)',
+                borderRadius: '2px',
+                fontSize: '12px',
+                lineHeight: '1.5',
+                maxHeight: '200px',
+                overflowY: 'auto',
+              }}
+            >
+              {data.aiToolSelectionConfig.taskDescription}
+            </div>
+          </div>
+        )}
+
+        {currentMode === 'aiParameterConfig' && data.aiParameterConfig?.description && (
+          <div>
+            <label
+              htmlFor="mcp-parameter-description"
+              style={{
+                display: 'block',
+                fontSize: '12px',
+                fontWeight: 600,
+                color: 'var(--vscode-foreground)',
+                marginBottom: '6px',
+              }}
+            >
+              {t('property.mcp.parameterDescription')}
+            </label>
+            <div
+              id="mcp-parameter-description"
+              style={{
+                width: '100%',
+                padding: '8px',
+                backgroundColor: 'var(--vscode-input-background)',
+                color: 'var(--vscode-descriptionForeground)',
+                border: '1px solid var(--vscode-input-border)',
+                borderRadius: '2px',
+                fontSize: '12px',
+                lineHeight: '1.5',
+                maxHeight: '200px',
+                overflowY: 'auto',
+              }}
+            >
+              {data.aiParameterConfig.description}
+            </div>
+          </div>
+        )}
+
+        {currentMode === 'manualParameterConfig' &&
+          data.parameterValues &&
+          Object.keys(data.parameterValues).length > 0 && (
+            <div>
+              <label
+                htmlFor="mcp-configured-values"
+                style={{
+                  display: 'block',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                  marginBottom: '6px',
+                }}
+              >
+                {t('property.mcp.configuredValues')}
+              </label>
+              <div
+                id="mcp-configured-values"
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  backgroundColor: 'var(--vscode-input-background)',
+                  color: 'var(--vscode-descriptionForeground)',
+                  border: '1px solid var(--vscode-input-border)',
+                  borderRadius: '2px',
+                  fontSize: '11px',
+                  fontFamily: 'monospace',
+                  lineHeight: '1.6',
+                  maxHeight: '200px',
+                  overflowY: 'auto',
+                }}
+              >
+                {Object.entries(data.parameterValues).map(([key, value]) => (
+                  <div key={key} style={{ marginBottom: '4px' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--vscode-foreground)' }}>
+                      {key}:
+                    </span>{' '}
+                    <span>{typeof value === 'object' ? JSON.stringify(value) : String(value)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
       </div>
 
       {/* MCP Node Edit Dialog */}

@@ -327,6 +327,8 @@ export interface WebviewTranslationKeys {
   'mcp.loading.servers': string;
   'mcp.error.serverLoadFailed': string;
   'mcp.empty.servers': string;
+  'mcp.empty.servers.hint': string;
+  'mcp.empty.servers.docUrl': string;
 
   // MCP Tool List
   'mcp.loading.tools': string;
@@ -365,6 +367,9 @@ export interface WebviewTranslationKeys {
   'property.mcp.edit.manualParameterConfig': string;
   'property.mcp.edit.aiParameterConfig': string;
   'property.mcp.edit.aiToolSelection': string;
+  'property.mcp.taskDescription': string;
+  'property.mcp.parameterDescription': string;
+  'property.mcp.configuredValues': string;
   'property.mcp.infoNote': string;
 
   // MCP Parameter Form
