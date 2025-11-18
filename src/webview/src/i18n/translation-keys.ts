@@ -328,7 +328,6 @@ export interface WebviewTranslationKeys {
   'mcp.error.serverLoadFailed': string;
   'mcp.empty.servers': string;
   'mcp.empty.servers.hint': string;
-  'mcp.empty.servers.docUrl': string;
 
   // MCP Tool List
   'mcp.loading.tools': string;

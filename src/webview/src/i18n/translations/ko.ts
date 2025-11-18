@@ -363,7 +363,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.error.serverLoadFailed': 'MCP 서버 로드 실패',
   'mcp.empty.servers': '이 프로젝트에서 사용 가능한 MCP 서버가 없습니다.',
   'mcp.empty.servers.hint': 'Claude Code용 MCP 서버를 설정하세요.',
-  'mcp.empty.servers.docUrl': 'https://code.claude.com/docs/ko/mcp',
 
   // MCP Tool List
   'mcp.loading.tools': '도구 로드 중...',
