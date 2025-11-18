@@ -360,9 +360,11 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'node.mcp.description': 'MCPツールを実行',
 
   // MCP Server List
-  'mcp.loading.servers': 'MCPサーバーを読み込み中...',
+  'mcp.loading.servers': 'このプロジェクトで利用可能なMCPサーバーを読み込み中...',
   'mcp.error.serverLoadFailed': 'MCPサーバーの読み込みに失敗しました',
-  'mcp.empty.servers': '設定されたMCPサーバーがありません',
+  'mcp.empty.servers': 'このプロジェクトで利用可能なMCPサーバーがありません。',
+  'mcp.empty.servers.hint': 'Claude Codeで利用できるMCPサーバーを設定してください。',
+  'mcp.empty.servers.docUrl': 'https://code.claude.com/docs/ja/mcp',
 
   // MCP Tool List
   'mcp.loading.tools': 'ツールを読み込み中...',
@@ -399,8 +401,11 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.parameterCount': 'パラメータ数',
   'property.mcp.editParameters': 'パラメータを編集',
   'property.mcp.edit.manualParameterConfig': 'パラメータを編集',
-  'property.mcp.edit.aiParameterConfig': 'パラメータ設定の説明を編集',
-  'property.mcp.edit.aiToolSelection': 'タスクを編集',
+  'property.mcp.edit.aiParameterConfig': 'パラメータ内容を編集',
+  'property.mcp.edit.aiToolSelection': 'タスク内容を編集',
+  'property.mcp.taskDescription': 'タスク内容',
+  'property.mcp.parameterDescription': 'パラメータ内容',
+  'property.mcp.configuredValues': '設定値',
   'property.mcp.infoNote':
     'MCPツールのプロパティはサーバーから読み込まれます。「パラメータを編集」をクリックしてパラメータ値を設定してください。',
 
@@ -426,7 +431,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameter.validationErrors': '以下の検証エラーを修正してください:',
 
   // MCP Edit Dialog
-  'mcp.editDialog.title': 'MCPツールパラメータの設定',
+  'mcp.editDialog.title': 'MCPツールの設定',
   'mcp.editDialog.saveButton': '保存',
   'mcp.editDialog.cancelButton': 'キャンセル',
   'mcp.editDialog.loading': 'ツールスキーマを読み込み中...',
@@ -471,10 +476,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameterDetailedConfig.title': 'ツールパラメータの設定',
 
   // Natural Language Input
-  'mcp.naturalLanguage.paramDescription.label': 'パラメータ設定の説明',
+  'mcp.naturalLanguage.paramDescription.label': 'パラメータ内容',
   'mcp.naturalLanguage.paramDescription.placeholder':
     'このツールで何をしたいか説明してください（例:「us-east-1でLambdaが利用可能か確認する」）...',
-  'mcp.naturalLanguage.taskDescription.label': 'タスクの説明',
+  'mcp.naturalLanguage.taskDescription.label': 'タスク内容',
   'mcp.naturalLanguage.taskDescription.placeholder':
     '実現したいタスクを説明してください（例:「S3バケットポリシーに関するドキュメントを検索する」）...',
 

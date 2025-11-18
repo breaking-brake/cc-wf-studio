@@ -362,9 +362,11 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'node.mcp.description': 'Execute MCP tool',
 
   // MCP Server List
-  'mcp.loading.servers': 'Loading MCP servers...',
+  'mcp.loading.servers': 'Loading available MCP servers in this project...',
   'mcp.error.serverLoadFailed': 'Failed to load MCP servers',
-  'mcp.empty.servers': 'No MCP servers configured',
+  'mcp.empty.servers': 'No available MCP servers in this project.',
+  'mcp.empty.servers.hint': 'Please configure MCP servers for Claude Code.',
+  'mcp.empty.servers.docUrl': 'https://code.claude.com/docs/en/mcp',
 
   // MCP Tool List
   'mcp.loading.tools': 'Loading tools...',
@@ -401,8 +403,11 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.mcp.parameterCount': 'Parameter Count',
   'property.mcp.editParameters': 'Edit Parameters',
   'property.mcp.edit.manualParameterConfig': 'Edit Parameters',
-  'property.mcp.edit.aiParameterConfig': 'Edit Parameter Config Description',
-  'property.mcp.edit.aiToolSelection': 'Edit Task',
+  'property.mcp.edit.aiParameterConfig': 'Edit Parameter Content',
+  'property.mcp.edit.aiToolSelection': 'Edit Task Content',
+  'property.mcp.taskDescription': 'Task Content',
+  'property.mcp.parameterDescription': 'Parameter Content',
+  'property.mcp.configuredValues': 'Configured Values',
   'property.mcp.infoNote':
     'MCP tool properties are loaded from the server. Click "Edit Parameters" to configure parameter values.',
 
@@ -428,7 +433,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameter.validationErrors': 'Please fix the following validation errors:',
 
   // MCP Edit Dialog
-  'mcp.editDialog.title': 'Configure MCP Tool Parameters',
+  'mcp.editDialog.title': 'Configure MCP Tool',
   'mcp.editDialog.saveButton': 'Save',
   'mcp.editDialog.cancelButton': 'Cancel',
   'mcp.editDialog.loading': 'Loading tool schema...',
@@ -474,10 +479,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.parameterDetailedConfig.title': 'Configure Tool Parameters',
 
   // Natural Language Input
-  'mcp.naturalLanguage.paramDescription.label': 'Parameter Configuration Description',
+  'mcp.naturalLanguage.paramDescription.label': 'Parameter Content',
   'mcp.naturalLanguage.paramDescription.placeholder':
     'Describe what you want to do with this tool (e.g., "Check if Lambda is available in us-east-1")...',
-  'mcp.naturalLanguage.taskDescription.label': 'Task Description',
+  'mcp.naturalLanguage.taskDescription.label': 'Task Content',
   'mcp.naturalLanguage.taskDescription.placeholder':
     'Describe the task you want to accomplish (e.g., "Find documentation about S3 bucket policies")...',
 

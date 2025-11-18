@@ -27,9 +27,49 @@ src/
 tests/
 ```
 
-## Commands
+## Development Workflow & Commands
 
-npm test && npm run lint
+### Code Quality Checks (Required Before Commit/PR)
+
+**Always run these commands in the following order after code modifications:**
+
+```bash
+npm run format  # Auto-format code with Biome
+npm run lint    # Check for linting issues
+npm run check   # Run all Biome checks (lint + format verification)
+npm run build   # Build extension and webview (verify compilation)
+```
+
+### Command Execution Timing
+
+#### During Development
+1. **After code modification**:
+   ```bash
+   npm run format && npm run lint && npm run check
+   ```
+   - Fixes formatting issues automatically
+   - Identifies linting problems
+   - Verifies code quality standards
+
+2. **Before manual E2E testing**:
+   ```bash
+   npm run build
+   ```
+   - Compiles TypeScript and builds extension
+   - Required for testing changes in VSCode
+
+3. **Before git commit**:
+   ```bash
+   npm run format && npm run lint && npm run check
+   ```
+   - Ensures all code quality standards are met
+   - Prevents committing code with linting/formatting issues
+
+#### Testing
+- **Unit/Integration tests**: Not required (manual E2E testing only)
+- **Manual E2E testing**: Required for all feature changes and bug fixes
+  - Run `npm run build` first
+  - Test in VSCode Extension Development Host
 
 ## Version Update Procedure
 
