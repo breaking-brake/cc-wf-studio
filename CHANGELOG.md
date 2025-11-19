@@ -1,3 +1,9 @@
+## [2.7.3](https://github.com/breaking-brake/cc-wf-studio/compare/v2.7.2...v2.7.3) (2025-11-19)
+
+### Bug Fixes
+
+* close AI refinement panel when node is clicked to show property panel ([#111](https://github.com/breaking-brake/cc-wf-studio/issues/111)) ([fda839e](https://github.com/breaking-brake/cc-wf-studio/commit/fda839ed03bbed59ba1a7efb260b6eddbc0072cb))
+
 ## [2.7.2](https://github.com/breaking-brake/cc-wf-studio/compare/v2.7.1...v2.7.2) (2025-11-19)
 
 ### Bug Fixes
