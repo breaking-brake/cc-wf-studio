@@ -17,6 +17,7 @@ import ReactFlow, {
   type Node,
   type NodeTypes,
 } from 'reactflow';
+import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { AskUserQuestionNodeComponent } from './nodes/AskUserQuestionNode';
 import { BranchNodeComponent } from './nodes/BranchNode';
@@ -70,6 +71,7 @@ export const WorkflowEditor: React.FC = () => {
   // Get state and handlers from Zustand store
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, setSelectedNodeId } =
     useWorkflowStore();
+  const { closeChat } = useRefinementStore();
 
   /**
    * 接続制約の検証
@@ -111,8 +113,10 @@ export const WorkflowEditor: React.FC = () => {
   const handleNodeClick = useCallback(
     (_event: React.MouseEvent, node: Node) => {
       setSelectedNodeId(node.id);
+      // Close AI refinement panel to show property panel
+      closeChat();
     },
-    [setSelectedNodeId]
+    [setSelectedNodeId, closeChat]
   );
 
   // Handle pane click (deselect)
