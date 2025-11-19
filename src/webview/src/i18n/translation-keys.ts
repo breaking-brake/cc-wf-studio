@@ -15,6 +15,12 @@ export interface WebviewTranslationKeys {
   'toolbar.load': string;
   'toolbar.refreshList': string;
 
+  // Toolbar interaction mode
+  'toolbar.interactionMode.panButton': string;
+  'toolbar.interactionMode.rangeSelectionButton': string;
+  'toolbar.interactionMode.switchToPan': string;
+  'toolbar.interactionMode.switchToSelection': string;
+
   // Toolbar errors
   'toolbar.error.workflowNameRequired': string;
   'toolbar.error.workflowNameRequiredForExport': string;

@@ -17,6 +17,12 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.load': '読み込み',
   'toolbar.refreshList': 'ワークフローリストを更新',
 
+  // Toolbar interaction mode
+  'toolbar.interactionMode.panButton': '手のひら',
+  'toolbar.interactionMode.rangeSelectionButton': '範囲選択',
+  'toolbar.interactionMode.switchToPan': '手のひらモードに切り替え',
+  'toolbar.interactionMode.switchToSelection': '選択モードに切り替え',
+
   // Toolbar errors
   'toolbar.error.workflowNameRequired': 'ワークフロー名は必須です',
   'toolbar.error.workflowNameRequiredForExport': 'エクスポートにはワークフロー名が必要です',

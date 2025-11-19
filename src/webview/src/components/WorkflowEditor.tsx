@@ -6,7 +6,7 @@
  */
 
 import type React from 'react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactFlow, {
   Background,
   type Connection,
@@ -69,8 +69,15 @@ const edgeTypes: EdgeTypes = {};
  */
 export const WorkflowEditor: React.FC = () => {
   // Get state and handlers from Zustand store
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, setSelectedNodeId } =
-    useWorkflowStore();
+  const {
+    nodes,
+    edges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    setSelectedNodeId,
+    interactionMode,
+  } = useWorkflowStore();
   const { closeChat } = useRefinementStore();
 
   /**
@@ -127,6 +134,45 @@ export const WorkflowEditor: React.FC = () => {
   // Memoize snap grid
   const snapGrid = useMemo<[number, number]>(() => [15, 15], []);
 
+  // Track Ctrl/Cmd key state for temporary mode switching
+  const [isModifierKeyPressed, setIsModifierKeyPressed] = useState(false);
+
+  // Keyboard event handlers for modifier key
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey || event.metaKey) {
+        setIsModifierKeyPressed(true);
+      }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (!event.ctrlKey && !event.metaKey) {
+        setIsModifierKeyPressed(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  // Calculate effective interaction mode based on base mode and modifier key
+  const effectiveMode = useMemo(() => {
+    if (isModifierKeyPressed) {
+      // Modifier key inverts the mode
+      return interactionMode === 'pan' ? 'selection' : 'pan';
+    }
+    return interactionMode;
+  }, [interactionMode, isModifierKeyPressed]);
+
+  // ReactFlow interaction props based on effective mode
+  const panOnDrag = effectiveMode === 'pan';
+  const selectionOnDrag = effectiveMode === 'selection';
+
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <ReactFlow
@@ -143,6 +189,8 @@ export const WorkflowEditor: React.FC = () => {
         isValidConnection={isValidConnection}
         snapToGrid={true}
         snapGrid={snapGrid}
+        panOnDrag={panOnDrag}
+        selectionOnDrag={selectionOnDrag}
         fitView
         attributionPosition="bottom-left"
       >

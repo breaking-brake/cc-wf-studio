@@ -4,7 +4,9 @@
  * Provides Save and Load functionality for workflows
  */
 
+import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import type { Workflow } from '@shared/types/messages';
+import { Hand, MousePointerClick } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../i18n/i18n-context';
@@ -33,8 +35,16 @@ interface WorkflowListItem {
 
 export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
   const { t } = useTranslation();
-  const { nodes, edges, setNodes, setEdges, activeWorkflow, setActiveWorkflow } =
-    useWorkflowStore();
+  const {
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    activeWorkflow,
+    setActiveWorkflow,
+    interactionMode,
+    toggleInteractionMode,
+  } = useWorkflowStore();
   const { openChat, initConversation, loadConversationHistory, isProcessing } =
     useRefinementStore();
   const [workflowName, setWorkflowName] = useState('my-workflow');
@@ -312,6 +322,91 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
       >
         {t('toolbar.refineWithAI')}
       </button>
+
+      {/* Divider */}
+      <div
+        style={{
+          width: '1px',
+          height: '20px',
+          backgroundColor: 'var(--vscode-panel-border)',
+        }}
+      />
+
+      {/* Interaction Mode Toggle Button */}
+      <ToggleGroup.Root
+        type="single"
+        value={interactionMode}
+        onValueChange={(value) => {
+          if (value) toggleInteractionMode();
+        }}
+        aria-label="Canvas interaction mode"
+        data-tour="interaction-mode-toggle"
+        style={{
+          display: 'inline-flex',
+          border: '1px solid var(--vscode-input-border)',
+          borderRadius: '2px',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Pan Mode Button */}
+        <ToggleGroup.Item
+          value="pan"
+          aria-label={t('toolbar.interactionMode.switchToPan')}
+          title={t('toolbar.interactionMode.switchToPan')}
+          style={{
+            all: 'unset',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '4px 8px',
+            backgroundColor:
+              interactionMode === 'pan'
+                ? 'var(--vscode-button-background)'
+                : 'var(--vscode-button-secondaryBackground)',
+            color:
+              interactionMode === 'pan'
+                ? 'var(--vscode-button-foreground)'
+                : 'var(--vscode-button-secondaryForeground)',
+            borderRight: '1px solid var(--vscode-input-border)',
+            cursor: 'pointer',
+            fontSize: '13px',
+            whiteSpace: 'nowrap',
+            opacity: interactionMode === 'pan' ? 1 : 0.7,
+          }}
+        >
+          <Hand size={14} />
+          <span>{t('toolbar.interactionMode.panButton')}</span>
+        </ToggleGroup.Item>
+
+        {/* Selection Mode Button */}
+        <ToggleGroup.Item
+          value="selection"
+          aria-label={t('toolbar.interactionMode.switchToSelection')}
+          title={t('toolbar.interactionMode.switchToSelection')}
+          style={{
+            all: 'unset',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '4px 8px',
+            backgroundColor:
+              interactionMode === 'selection'
+                ? 'var(--vscode-button-background)'
+                : 'var(--vscode-button-secondaryBackground)',
+            color:
+              interactionMode === 'selection'
+                ? 'var(--vscode-button-foreground)'
+                : 'var(--vscode-button-secondaryForeground)',
+            cursor: 'pointer',
+            fontSize: '13px',
+            whiteSpace: 'nowrap',
+            opacity: interactionMode === 'selection' ? 1 : 0.7,
+          }}
+        >
+          <MousePointerClick size={14} />
+          <span>{t('toolbar.interactionMode.rangeSelectionButton')}</span>
+        </ToggleGroup.Item>
+      </ToggleGroup.Root>
 
       {/* Divider */}
       <div
