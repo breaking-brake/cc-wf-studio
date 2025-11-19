@@ -1,3 +1,11 @@
+## [2.7.2](https://github.com/breaking-brake/cc-wf-studio/compare/v2.7.1...v2.7.2) (2025-11-19)
+
+### Bug Fixes
+
+* reset export button state when user cancels overwrite dialog ([#105](https://github.com/breaking-brake/cc-wf-studio/issues/105)) ([8b945c3](https://github.com/breaking-brake/cc-wf-studio/commit/8b945c3d6460036eac8bbefe4502ace49376a281))
+* skip Snyk scan for Dependabot PRs to prevent authentication errors ([#103](https://github.com/breaking-brake/cc-wf-studio/issues/103)) ([38fda5d](https://github.com/breaking-brake/cc-wf-studio/commit/38fda5dd8d0210001d5dd8dec7a9951d7653c8da))
+* update biome schema and package-lock version to match package.json ([#104](https://github.com/breaking-brake/cc-wf-studio/issues/104)) ([02d71bc](https://github.com/breaking-brake/cc-wf-studio/commit/02d71bcbbadd31f26f781ec7c84fa3b531d574bc)), closes [#93](https://github.com/breaking-brake/cc-wf-studio/issues/93) [#93](https://github.com/breaking-brake/cc-wf-studio/issues/93)
+
 ## [2.7.1](https://github.com/breaking-brake/cc-wf-studio/compare/v2.7.0...v2.7.1) (2025-11-18)
 
 ### Bug Fixes
