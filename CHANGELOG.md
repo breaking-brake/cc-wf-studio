@@ -1,3 +1,9 @@
+## [2.7.4](https://github.com/breaking-brake/cc-wf-studio/compare/v2.7.3...v2.7.4) (2025-11-19)
+
+### Bug Fixes
+
+* support MCP server config in .claude.json.projects scope ([#113](https://github.com/breaking-brake/cc-wf-studio/issues/113)) ([208b870](https://github.com/breaking-brake/cc-wf-studio/commit/208b870858626018707875ba03c72bcda05be528))
+
 ## [2.7.3](https://github.com/breaking-brake/cc-wf-studio/compare/v2.7.2...v2.7.3) (2025-11-19)
 
 ### Bug Fixes
