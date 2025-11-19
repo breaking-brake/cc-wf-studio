@@ -178,11 +178,12 @@ export function getMcpServerConfig(
       }
     }
 
-    // Priority 2: Local scope - .claude.json[<workspace>].mcpServers
+    // Priority 2: Local scope - .claude.json.projects[<workspace>].mcpServers
     if (legacyConfig && workspacePath) {
-      const localConfig = legacyConfig[workspacePath] as
-        | { mcpServers?: Record<string, McpServerConfig> }
+      const projectsConfig = legacyConfig.projects as
+        | Record<string, { mcpServers?: Record<string, McpServerConfig> }>
         | undefined;
+      const localConfig = projectsConfig?.[workspacePath];
       if (localConfig?.mcpServers?.[serverId]) {
         const rawConfig = localConfig.mcpServers[serverId];
         const serverConfig = normalizeServerConfig(rawConfig);
@@ -278,9 +279,10 @@ export function getAllMcpServerIds(workspacePath?: string): string[] {
     if (legacyConfig) {
       // Local scope (project-specific)
       if (workspacePath) {
-        const localConfig = legacyConfig[workspacePath] as
-          | { mcpServers?: Record<string, McpServerConfig> }
+        const projectsConfig = legacyConfig.projects as
+          | Record<string, { mcpServers?: Record<string, McpServerConfig> }>
           | undefined;
+        const localConfig = projectsConfig?.[workspacePath];
         if (localConfig?.mcpServers) {
           for (const id of Object.keys(localConfig.mcpServers)) {
             serverIds.add(id);
