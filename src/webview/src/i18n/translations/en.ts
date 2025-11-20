@@ -17,6 +17,12 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.load': 'Load',
   'toolbar.refreshList': 'Refresh workflow list',
 
+  // Toolbar interaction mode
+  'toolbar.interactionMode.panButton': 'Hand',
+  'toolbar.interactionMode.rangeSelectionButton': 'Select',
+  'toolbar.interactionMode.switchToPan': 'Switch to Hand Tool mode',
+  'toolbar.interactionMode.switchToSelection': 'Switch to Selection mode',
+
   // Toolbar errors
   'toolbar.error.workflowNameRequired': 'Workflow name is required',
   'toolbar.error.workflowNameRequiredForExport': 'Workflow name is required for export',

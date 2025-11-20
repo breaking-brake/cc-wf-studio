@@ -17,6 +17,12 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.load': '불러오기',
   'toolbar.refreshList': '워크플로 목록 새로고침',
 
+  // Toolbar interaction mode
+  'toolbar.interactionMode.panButton': '손바닥',
+  'toolbar.interactionMode.rangeSelectionButton': '범위 선택',
+  'toolbar.interactionMode.switchToPan': '손바닥 모드로 전환',
+  'toolbar.interactionMode.switchToSelection': '선택 모드로 전환',
+
   // Toolbar errors
   'toolbar.error.workflowNameRequired': '워크플로 이름이 필요합니다',
   'toolbar.error.workflowNameRequiredForExport': '내보내기에는 워크플로 이름이 필요합니다',

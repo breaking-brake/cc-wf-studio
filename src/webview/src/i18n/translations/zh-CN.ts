@@ -17,6 +17,12 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.load': '加载',
   'toolbar.refreshList': '刷新工作流列表',
 
+  // Toolbar interaction mode
+  'toolbar.interactionMode.panButton': '手掌',
+  'toolbar.interactionMode.rangeSelectionButton': '范围选择',
+  'toolbar.interactionMode.switchToPan': '切换到手掌模式',
+  'toolbar.interactionMode.switchToSelection': '切换到选择模式',
+
   // Toolbar errors
   'toolbar.error.workflowNameRequired': '工作流名称必填',
   'toolbar.error.workflowNameRequiredForExport': '导出需要工作流名称',
