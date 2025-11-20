@@ -134,9 +134,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.optionDescription.placeholder': '説明',
 
   // Prompt properties
-  'property.promptTemplate': 'プロンプトテンプレート',
-  'property.promptTemplate.placeholder': '{{variables}}を含むプロンプトテンプレートを入力',
-  'property.promptTemplate.help': '動的な値には{{variableName}}構文を使用',
+  'property.prompt.label': 'プロンプト',
+  'property.prompt.placeholder': '{{variables}}を含むプロンプトを入力',
+  'property.prompt.help': '動的な値には{{variableName}}構文を使用',
   'property.detectedVariables': '検出された変数（{count}）',
   'property.variablesSubstituted': '変数は実行時に置換されます',
 
@@ -165,8 +165,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'default.secondOption': '2番目の選択肢',
   'default.newOption': '新しい選択肢',
   'default.newPrompt': '新しいPrompt',
-  'default.promptTemplate':
-    'ここにプロンプトテンプレートを入力してください。\n\n{{variableName}}のように変数を使用できます。',
+  'default.prompt':
+    'ここにプロンプトを入力してください。\n\n{{variableName}}のように変数を使用できます。',
   'default.branchTrue': 'True',
   'default.branchTrueCondition': '条件が真の場合',
   'default.branchFalse': 'False',

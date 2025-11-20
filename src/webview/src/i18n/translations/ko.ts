@@ -136,9 +136,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.optionDescription.placeholder': '설명',
 
   // Prompt properties
-  'property.promptTemplate': '프롬프트 템플릿',
-  'property.promptTemplate.placeholder': '{{variables}}를 포함하는 프롬프트 템플릿 입력',
-  'property.promptTemplate.help': '동적 값에는 {{variableName}} 구문 사용',
+  'property.prompt.label': '프롬프트',
+  'property.prompt.placeholder': '{{variables}}를 포함하는 프롬프트 입력',
+  'property.prompt.help': '동적 값에는 {{variableName}} 구문 사용',
   'property.detectedVariables': '감지된 변수 ({count})',
   'property.variablesSubstituted': '변수는 런타임에 대체됩니다',
 
@@ -167,8 +167,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'default.secondOption': '두 번째 옵션',
   'default.newOption': '새 옵션',
   'default.newPrompt': '새 Prompt',
-  'default.promptTemplate':
-    '여기에 프롬프트 템플릿을 입력하세요.\n\n{{variableName}}과 같이 변수를 사용할 수 있습니다.',
+  'default.prompt':
+    '여기에 프롬프트를 입력하세요.\n\n{{variableName}}과 같이 변수를 사용할 수 있습니다.',
   'default.branchTrue': 'True',
   'default.branchTrueCondition': '조건이 참일 때',
   'default.branchFalse': 'False',

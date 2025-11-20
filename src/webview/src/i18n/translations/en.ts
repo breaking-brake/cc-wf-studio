@@ -134,9 +134,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.optionDescription.placeholder': 'Description',
 
   // Prompt properties
-  'property.promptTemplate': 'Prompt Template',
-  'property.promptTemplate.placeholder': 'Enter prompt template with {{variables}}',
-  'property.promptTemplate.help': 'Use {{variableName}} syntax for dynamic values',
+  'property.prompt.label': 'Prompt',
+  'property.prompt.placeholder': 'Enter prompt with {{variables}}',
+  'property.prompt.help': 'Use {{variableName}} syntax for dynamic values',
   'property.detectedVariables': 'Detected Variables ({count})',
   'property.variablesSubstituted': 'Variables will be substituted at runtime',
 
@@ -165,8 +165,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'default.secondOption': 'Second option',
   'default.newOption': 'New option',
   'default.newPrompt': 'New Prompt',
-  'default.promptTemplate':
-    'Enter your prompt template here.\n\nYou can use variables like {{variableName}}.',
+  'default.prompt': 'Enter your prompt here.\n\nYou can use variables like {{variableName}}.',
   'default.branchTrue': 'True',
   'default.branchTrueCondition': 'When condition is true',
   'default.branchFalse': 'False',

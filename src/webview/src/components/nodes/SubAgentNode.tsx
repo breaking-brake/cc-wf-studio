@@ -56,6 +56,25 @@ export const SubAgentNodeComponent: React.FC<NodeProps<SubAgentData>> = React.me
           {data.description || 'Untitled Sub-Agent'}
         </div>
 
+        {/* Prompt Preview */}
+        {data.prompt && (
+          <div
+            style={{
+              fontSize: '11px',
+              color: 'var(--vscode-descriptionForeground)',
+              marginBottom: '8px',
+              lineHeight: '1.4',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+            }}
+          >
+            {data.prompt}
+          </div>
+        )}
+
         {/* Model Badge */}
         {data.model && (
           <div
