@@ -81,16 +81,13 @@ export const PromptNode: React.FC<NodeProps<PromptNodeData>> = React.memo(
             style={{
               fontSize: '11px',
               color: 'var(--vscode-descriptionForeground)',
-              backgroundColor: 'var(--vscode-textBlockQuote-background)',
-              border: '1px solid var(--vscode-textBlockQuote-border)',
-              borderRadius: '4px',
-              padding: '8px',
               marginBottom: '8px',
-              fontFamily: 'monospace',
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-              maxHeight: '60px',
+              lineHeight: '1.4',
               overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
             }}
           >
             {previewText}
