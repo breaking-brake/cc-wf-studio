@@ -132,9 +132,9 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'property.optionDescription.placeholder': '描述',
 
   // Prompt properties
-  'property.promptTemplate': '提示範本',
-  'property.promptTemplate.placeholder': '輸入包含{{variables}}的提示範本',
-  'property.promptTemplate.help': '對動態值使用{{variableName}}語法',
+  'property.prompt.label': '提示詞',
+  'property.prompt.placeholder': '輸入包含{{variables}}的提示詞',
+  'property.prompt.help': '對動態值使用{{variableName}}語法',
   'property.detectedVariables': '偵測到的變數（{count}）',
   'property.variablesSubstituted': '變數將在執行時替換',
 
@@ -163,7 +163,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'default.secondOption': '第二個選項',
   'default.newOption': '新選項',
   'default.newPrompt': '新Prompt',
-  'default.promptTemplate': '在此輸入您的提示範本。\n\n您可以使用{{variableName}}這樣的變數。',
+  'default.prompt': '在此輸入您的提示詞。\n\n您可以使用{{variableName}}這樣的變數。',
   'default.branchTrue': 'True',
   'default.branchTrueCondition': '條件為真時',
   'default.branchFalse': 'False',

@@ -132,9 +132,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'property.optionDescription.placeholder': '描述',
 
   // Prompt properties
-  'property.promptTemplate': '提示模板',
-  'property.promptTemplate.placeholder': '输入包含{{variables}}的提示模板',
-  'property.promptTemplate.help': '对动态值使用{{variableName}}语法',
+  'property.prompt.label': '提示词',
+  'property.prompt.placeholder': '输入包含{{variables}}的提示词',
+  'property.prompt.help': '对动态值使用{{variableName}}语法',
   'property.detectedVariables': '检测到的变量（{count}）',
   'property.variablesSubstituted': '变量将在运行时替换',
 
@@ -163,7 +163,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'default.secondOption': '第二个选项',
   'default.newOption': '新选项',
   'default.newPrompt': '新Prompt',
-  'default.promptTemplate': '在此输入您的提示模板。\n\n您可以使用{{variableName}}这样的变量。',
+  'default.prompt': '在此输入您的提示词。\n\n您可以使用{{variableName}}这样的变量。',
   'default.branchTrue': 'True',
   'default.branchTrueCondition': '条件为真时',
   'default.branchFalse': 'False',

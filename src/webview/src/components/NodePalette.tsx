@@ -102,7 +102,7 @@ export const NodePalette: React.FC = () => {
       position,
       data: {
         label: t('default.newPrompt'),
-        prompt: t('default.promptTemplate'),
+        prompt: t('default.prompt'),
         variables: {},
       },
     };
