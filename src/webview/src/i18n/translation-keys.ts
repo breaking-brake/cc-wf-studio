@@ -130,9 +130,9 @@ export interface WebviewTranslationKeys {
   'property.optionDescription.placeholder': string;
 
   // Prompt properties
-  'property.promptTemplate': string;
-  'property.promptTemplate.placeholder': string;
-  'property.promptTemplate.help': string;
+  'property.prompt.label': string;
+  'property.prompt.placeholder': string;
+  'property.prompt.help': string;
   'property.detectedVariables': string;
   'property.variablesSubstituted': string;
 
@@ -161,7 +161,7 @@ export interface WebviewTranslationKeys {
   'default.secondOption': string;
   'default.newOption': string;
   'default.newPrompt': string;
-  'default.promptTemplate': string;
+  'default.prompt': string;
   'default.branchTrue': string;
   'default.branchTrueCondition': string;
   'default.branchFalse': string;

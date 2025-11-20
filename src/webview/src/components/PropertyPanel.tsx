@@ -779,7 +779,7 @@ const PromptProperties: React.FC<{
         />
       </div>
 
-      {/* Prompt Template */}
+      {/* Prompt */}
       <div>
         <label
           htmlFor="prompt-textarea"
@@ -791,7 +791,7 @@ const PromptProperties: React.FC<{
             marginBottom: '6px',
           }}
         >
-          {t('property.promptTemplate')}
+          {t('property.prompt.label')}
         </label>
         <textarea
           id="prompt-textarea"
@@ -799,7 +799,7 @@ const PromptProperties: React.FC<{
           onChange={(e) => updateNodeData(node.id, { prompt: e.target.value })}
           className="nodrag"
           rows={8}
-          placeholder={t('property.promptTemplate.placeholder')}
+          placeholder={t('property.prompt.placeholder')}
           style={{
             width: '100%',
             padding: '6px 8px',
@@ -819,7 +819,7 @@ const PromptProperties: React.FC<{
             marginTop: '4px',
           }}
         >
-          {t('property.promptTemplate.help')}
+          {t('property.prompt.help')}
         </div>
       </div>
 
