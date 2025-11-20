@@ -21,7 +21,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.panButton': '手のひら',
   'toolbar.interactionMode.rangeSelectionButton': '範囲選択',
   'toolbar.interactionMode.switchToPan': '手のひらモードに切り替え',
-  'toolbar.interactionMode.switchToSelection': '選択モードに切り替え',
+  'toolbar.interactionMode.switchToSelection': '範囲選択モードに切り替え',
 
   // Toolbar errors
   'toolbar.error.workflowNameRequired': 'ワークフロー名は必須です',

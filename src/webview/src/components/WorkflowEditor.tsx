@@ -16,9 +16,11 @@ import ReactFlow, {
   MiniMap,
   type Node,
   type NodeTypes,
+  Panel,
 } from 'reactflow';
 import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
+import { InteractionModeToggle } from './InteractionModeToggle';
 import { AskUserQuestionNodeComponent } from './nodes/AskUserQuestionNode';
 import { BranchNodeComponent } from './nodes/BranchNode';
 import { EndNode } from './nodes/EndNode';
@@ -232,6 +234,11 @@ export const WorkflowEditor: React.FC = () => {
             border: '1px solid var(--vscode-panel-border)',
           }}
         />
+
+        {/* Interaction Mode Toggle */}
+        <Panel position="top-left">
+          <InteractionModeToggle />
+        </Panel>
       </ReactFlow>
     </div>
   );

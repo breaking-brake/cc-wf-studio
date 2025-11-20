@@ -4,9 +4,7 @@
  * Provides Save and Load functionality for workflows
  */
 
-import * as Switch from '@radix-ui/react-switch';
 import type { Workflow } from '@shared/types/messages';
-import { Hand, MousePointerClick } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../i18n/i18n-context';
@@ -35,16 +33,8 @@ interface WorkflowListItem {
 
 export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
   const { t } = useTranslation();
-  const {
-    nodes,
-    edges,
-    setNodes,
-    setEdges,
-    activeWorkflow,
-    setActiveWorkflow,
-    interactionMode,
-    toggleInteractionMode,
-  } = useWorkflowStore();
+  const { nodes, edges, setNodes, setEdges, activeWorkflow, setActiveWorkflow } =
+    useWorkflowStore();
   const { openChat, initConversation, loadConversationHistory, isProcessing } =
     useRefinementStore();
   const [workflowName, setWorkflowName] = useState('my-workflow');
@@ -322,109 +312,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
       >
         {t('toolbar.refineWithAI')}
       </button>
-
-      {/* Divider */}
-      <div
-        style={{
-          width: '1px',
-          height: '20px',
-          backgroundColor: 'var(--vscode-panel-border)',
-        }}
-      />
-
-      {/* Interaction Mode Switch */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-        }}
-        data-tour="interaction-mode-toggle"
-      >
-        {/* Pan Mode Icon (Left) */}
-        <div
-          title={t('toolbar.interactionMode.switchToPan')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '24px',
-            height: '24px',
-            borderRadius: '50%',
-            backgroundColor:
-              interactionMode === 'pan' ? 'var(--vscode-badge-background)' : 'transparent',
-            transition: 'background-color 150ms',
-          }}
-        >
-          <Hand
-            size={14}
-            style={{
-              color:
-                interactionMode === 'pan'
-                  ? 'var(--vscode-badge-foreground)'
-                  : 'var(--vscode-disabledForeground)',
-            }}
-          />
-        </div>
-
-        {/* Switch */}
-        <Switch.Root
-          checked={interactionMode === 'selection'}
-          onCheckedChange={toggleInteractionMode}
-          aria-label="Canvas interaction mode"
-          style={{
-            all: 'unset',
-            width: '36px',
-            height: '20px',
-            backgroundColor: 'var(--vscode-input-background)',
-            borderRadius: '10px',
-            position: 'relative',
-            border: '1px solid var(--vscode-input-border)',
-            cursor: 'pointer',
-          }}
-        >
-          <Switch.Thumb
-            style={{
-              all: 'unset',
-              display: 'block',
-              width: '16px',
-              height: '16px',
-              backgroundColor: 'var(--vscode-button-background)',
-              borderRadius: '8px',
-              transition: 'transform 100ms',
-              transform: interactionMode === 'selection' ? 'translateX(18px)' : 'translateX(2px)',
-              willChange: 'transform',
-              margin: '1px',
-            }}
-          />
-        </Switch.Root>
-
-        {/* Selection Mode Icon (Right) */}
-        <div
-          title={t('toolbar.interactionMode.switchToSelection')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '24px',
-            height: '24px',
-            borderRadius: '50%',
-            backgroundColor:
-              interactionMode === 'selection' ? 'var(--vscode-badge-background)' : 'transparent',
-            transition: 'background-color 150ms',
-          }}
-        >
-          <MousePointerClick
-            size={14}
-            style={{
-              color:
-                interactionMode === 'selection'
-                  ? 'var(--vscode-badge-foreground)'
-                  : 'var(--vscode-disabledForeground)',
-            }}
-          />
-        </div>
-      </div>
 
       {/* Divider */}
       <div
