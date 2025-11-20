@@ -1,3 +1,9 @@
+## [2.8.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.7.4...v2.8.0) (2025-11-20)
+
+### Features
+
+* add canvas interaction mode toggle (pan/selection) ([#116](https://github.com/breaking-brake/cc-wf-studio/issues/116)) ([6d5f4be](https://github.com/breaking-brake/cc-wf-studio/commit/6d5f4be83803d4ce8839537f4d2a8a253e6e4ca8))
+
 ## [2.7.4](https://github.com/breaking-brake/cc-wf-studio/compare/v2.7.3...v2.7.4) (2025-11-19)
 
 ### Bug Fixes
