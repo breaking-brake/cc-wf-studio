@@ -4,7 +4,7 @@
  * Provides Save and Load functionality for workflows
  */
 
-import * as ToggleGroup from '@radix-ui/react-toggle-group';
+import * as Switch from '@radix-ui/react-switch';
 import type { Workflow } from '@shared/types/messages';
 import { Hand, MousePointerClick } from 'lucide-react';
 import type React from 'react';
@@ -332,81 +332,99 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
         }}
       />
 
-      {/* Interaction Mode Toggle Button */}
-      <ToggleGroup.Root
-        type="single"
-        value={interactionMode}
-        onValueChange={(value) => {
-          if (value) toggleInteractionMode();
-        }}
-        aria-label="Canvas interaction mode"
-        data-tour="interaction-mode-toggle"
+      {/* Interaction Mode Switch */}
+      <div
         style={{
-          display: 'inline-flex',
-          border: '1px solid var(--vscode-input-border)',
-          borderRadius: '2px',
-          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
         }}
+        data-tour="interaction-mode-toggle"
       >
-        {/* Pan Mode Button */}
-        <ToggleGroup.Item
-          value="pan"
-          aria-label={t('toolbar.interactionMode.switchToPan')}
+        {/* Pan Mode Icon (Left) */}
+        <div
           title={t('toolbar.interactionMode.switchToPan')}
           style={{
-            all: 'unset',
             display: 'flex',
             alignItems: 'center',
-            gap: '4px',
-            padding: '4px 8px',
+            justifyContent: 'center',
+            width: '24px',
+            height: '24px',
+            borderRadius: '50%',
             backgroundColor:
-              interactionMode === 'pan'
-                ? 'var(--vscode-button-background)'
-                : 'var(--vscode-button-secondaryBackground)',
-            color:
-              interactionMode === 'pan'
-                ? 'var(--vscode-button-foreground)'
-                : 'var(--vscode-button-secondaryForeground)',
-            borderRight: '1px solid var(--vscode-input-border)',
-            cursor: 'pointer',
-            fontSize: '13px',
-            whiteSpace: 'nowrap',
-            opacity: interactionMode === 'pan' ? 1 : 0.7,
+              interactionMode === 'pan' ? 'var(--vscode-badge-background)' : 'transparent',
+            transition: 'background-color 150ms',
           }}
         >
-          <Hand size={14} />
-          <span>{t('toolbar.interactionMode.panButton')}</span>
-        </ToggleGroup.Item>
+          <Hand
+            size={14}
+            style={{
+              color:
+                interactionMode === 'pan'
+                  ? 'var(--vscode-badge-foreground)'
+                  : 'var(--vscode-disabledForeground)',
+            }}
+          />
+        </div>
 
-        {/* Selection Mode Button */}
-        <ToggleGroup.Item
-          value="selection"
-          aria-label={t('toolbar.interactionMode.switchToSelection')}
-          title={t('toolbar.interactionMode.switchToSelection')}
+        {/* Switch */}
+        <Switch.Root
+          checked={interactionMode === 'selection'}
+          onCheckedChange={toggleInteractionMode}
+          aria-label="Canvas interaction mode"
           style={{
             all: 'unset',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            padding: '4px 8px',
-            backgroundColor:
-              interactionMode === 'selection'
-                ? 'var(--vscode-button-background)'
-                : 'var(--vscode-button-secondaryBackground)',
-            color:
-              interactionMode === 'selection'
-                ? 'var(--vscode-button-foreground)'
-                : 'var(--vscode-button-secondaryForeground)',
+            width: '36px',
+            height: '20px',
+            backgroundColor: 'var(--vscode-input-background)',
+            borderRadius: '10px',
+            position: 'relative',
+            border: '1px solid var(--vscode-input-border)',
             cursor: 'pointer',
-            fontSize: '13px',
-            whiteSpace: 'nowrap',
-            opacity: interactionMode === 'selection' ? 1 : 0.7,
           }}
         >
-          <MousePointerClick size={14} />
-          <span>{t('toolbar.interactionMode.rangeSelectionButton')}</span>
-        </ToggleGroup.Item>
-      </ToggleGroup.Root>
+          <Switch.Thumb
+            style={{
+              all: 'unset',
+              display: 'block',
+              width: '16px',
+              height: '16px',
+              backgroundColor: 'var(--vscode-button-background)',
+              borderRadius: '8px',
+              transition: 'transform 100ms',
+              transform: interactionMode === 'selection' ? 'translateX(18px)' : 'translateX(2px)',
+              willChange: 'transform',
+              margin: '1px',
+            }}
+          />
+        </Switch.Root>
+
+        {/* Selection Mode Icon (Right) */}
+        <div
+          title={t('toolbar.interactionMode.switchToSelection')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '24px',
+            height: '24px',
+            borderRadius: '50%',
+            backgroundColor:
+              interactionMode === 'selection' ? 'var(--vscode-badge-background)' : 'transparent',
+            transition: 'background-color 150ms',
+          }}
+        >
+          <MousePointerClick
+            size={14}
+            style={{
+              color:
+                interactionMode === 'selection'
+                  ? 'var(--vscode-badge-foreground)'
+                  : 'var(--vscode-disabledForeground)',
+            }}
+          />
+        </div>
+      </div>
 
       {/* Divider */}
       <div
