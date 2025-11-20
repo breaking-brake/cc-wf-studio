@@ -18,6 +18,13 @@ import { create } from 'zustand';
 // Store State Interface
 // ============================================================================
 
+/**
+ * Canvas interaction mode
+ * - pan: Hand tool mode (drag to pan canvas, Ctrl+drag to select)
+ * - selection: Selection mode (drag to select, Ctrl+drag to pan)
+ */
+export type InteractionMode = 'pan' | 'selection';
+
 interface WorkflowStore {
   // State
   nodes: Node[];
@@ -25,6 +32,7 @@ interface WorkflowStore {
   selectedNodeId: string | null;
   pendingDeleteNodeIds: string[];
   activeWorkflow: Workflow | null;
+  interactionMode: InteractionMode;
 
   // React Flow Change Handlers
   onNodesChange: OnNodesChange;
@@ -35,6 +43,8 @@ interface WorkflowStore {
   setNodes: (nodes: Node[]) => void;
   setEdges: (edges: Edge[]) => void;
   setSelectedNodeId: (id: string | null) => void;
+  setInteractionMode: (mode: InteractionMode) => void;
+  toggleInteractionMode: () => void;
 
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
@@ -181,6 +191,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   selectedNodeId: null,
   pendingDeleteNodeIds: [],
   activeWorkflow: null,
+  interactionMode: 'pan', // Default: pan mode
 
   // React Flow Change Handlers (integrates with React Flow's onChange events)
   onNodesChange: (changes) => {
@@ -238,6 +249,13 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   setEdges: (edges) => set({ edges }),
 
   setSelectedNodeId: (selectedNodeId) => set({ selectedNodeId }),
+
+  setInteractionMode: (interactionMode) => set({ interactionMode }),
+
+  toggleInteractionMode: () => {
+    const currentMode = get().interactionMode;
+    set({ interactionMode: currentMode === 'pan' ? 'selection' : 'pan' });
+  },
 
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => {
