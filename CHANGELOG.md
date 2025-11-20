@@ -1,3 +1,14 @@
+## [2.9.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.8.0...v2.9.0) (2025-11-20)
+
+### Features
+
+* add prompt preview to SubAgentNode canvas display ([#118](https://github.com/breaking-brake/cc-wf-studio/issues/118)) ([25f5ad6](https://github.com/breaking-brake/cc-wf-studio/commit/25f5ad600dc5ce3300940fe90485d374d28af011))
+
+### Bug Fixes
+
+* simplify PromptNode canvas display style ([#120](https://github.com/breaking-brake/cc-wf-studio/issues/120)) ([73d6a55](https://github.com/breaking-brake/cc-wf-studio/commit/73d6a55b0b71a7268d23282d9c32dcd5af1f1fb3))
+* unify prompt terminology and rename translation keys ([#119](https://github.com/breaking-brake/cc-wf-studio/issues/119)) ([c616374](https://github.com/breaking-brake/cc-wf-studio/commit/c61637454048f1978ed7ec25cc325aae80e19323))
+
 ## [2.8.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.7.4...v2.8.0) (2025-11-20)
 
 ### Features
