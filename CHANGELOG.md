@@ -1,3 +1,10 @@
+## [2.11.1](https://github.com/breaking-brake/cc-wf-studio/compare/v2.11.0...v2.11.1) (2025-11-21)
+
+### Bug Fixes
+
+* add missing MCP node definition to workflow schema ([#128](https://github.com/breaking-brake/cc-wf-studio/issues/128)) ([14f68ae](https://github.com/breaking-brake/cc-wf-studio/commit/14f68ae7aeb10af40f46367c826772a38ca14ee5))
+* allow empty parameters for MCP tools without parameters ([#130](https://github.com/breaking-brake/cc-wf-studio/issues/130)) ([f0e52cd](https://github.com/breaking-brake/cc-wf-studio/commit/f0e52cdd4061466c97e9d9f2e3eae1c170b8e441))
+
 ## [2.11.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.10.0...v2.11.0) (2025-11-21)
 
 ### Features
