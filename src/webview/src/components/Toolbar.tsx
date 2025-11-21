@@ -278,6 +278,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
         type="button"
         onClick={handleExport}
         disabled={isExporting}
+        title={t('toolbar.convert.tooltip')}
         data-tour="export-button"
         style={{
           padding: '4px 12px',
@@ -291,7 +292,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
           whiteSpace: 'nowrap',
         }}
       >
-        {isExporting ? t('toolbar.exporting') : t('toolbar.export')}
+        {isExporting ? t('toolbar.converting') : t('toolbar.convert')}
       </button>
 
       {/* Refine with AI Button - Phase 3.14: Unified AI generation/refinement */}
