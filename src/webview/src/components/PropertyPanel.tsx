@@ -446,10 +446,10 @@ const SubAgentProperties: React.FC<{
           {t('properties.subAgent.color')}
         </label>
         <Select.Root
-          value={data.color || ''}
+          value={data.color || 'none'}
           onValueChange={(value) =>
             updateNodeData(node.id, {
-              color: value === '' ? undefined : (value as SubAgentData['color']),
+              color: value === 'none' ? undefined : (value as SubAgentData['color']),
             })
           }
         >
@@ -500,7 +500,7 @@ const SubAgentProperties: React.FC<{
             >
               <Select.Viewport style={{ padding: '4px' }}>
                 <Select.Item
-                  value=""
+                  value="none"
                   style={{
                     padding: '6px 8px',
                     fontSize: '13px',
