@@ -100,6 +100,10 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'property.tools': '工具（逗號分隔）',
   'property.tools.placeholder': '例如：Read,Write,Bash',
   'property.tools.help': '留空表示所有工具',
+  'properties.subAgent.color': '顏色',
+  'properties.subAgent.colorPlaceholder': '選擇顏色...',
+  'properties.subAgent.colorNone': '無',
+  'properties.subAgent.colorHelp': '此子代理的視覺識別顏色',
 
   // Skill properties
   'property.skillPath': 'Skill路徑',

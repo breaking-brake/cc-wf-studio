@@ -103,6 +103,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.tools': '도구 (쉼표로 구분)',
   'property.tools.placeholder': '예: Read,Write,Bash',
   'property.tools.help': '모든 도구를 사용하려면 비워 두세요',
+  'properties.subAgent.color': '색상',
+  'properties.subAgent.colorPlaceholder': '색상 선택...',
+  'properties.subAgent.colorNone': '없음',
+  'properties.subAgent.colorHelp': '이 서브 에이전트의 시각적 식별 색상',
 
   // Skill properties
   'property.skillPath': 'Skill 경로',
