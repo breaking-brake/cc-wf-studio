@@ -2,7 +2,7 @@
   "name": "cc-wf-studio",
   "displayName": "Claude Code Workflow Studio",
   "description": "Visual workflow editor for Claude Code Slash Commands, Sub Agents, Agent Skills, and MCP Tools",
-  "version": "2.10.0",
+  "version": "2.11.0",
   "publisher": "breaking-brake",
   "icon": "resources/icon.png",
   "repository": {

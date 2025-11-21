@@ -1,3 +1,9 @@
+## [2.11.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.10.0...v2.11.0) (2025-11-21)
+
+### Features
+
+* improve Export button clarity by renaming to Convert ([#126](https://github.com/breaking-brake/cc-wf-studio/issues/126)) ([aa65d61](https://github.com/breaking-brake/cc-wf-studio/commit/aa65d61584481ea0fc00ab975b02b6f5422c2822))
+
 ## [2.10.0](https://github.com/breaking-brake/cc-wf-studio/compare/v2.9.0...v2.10.0) (2025-11-21)
 
 ### Features
