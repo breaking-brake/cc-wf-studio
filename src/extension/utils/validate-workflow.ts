@@ -424,19 +424,23 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
           field: `nodes[${node.id}].data.toolDescription`,
         });
       }
-      if (!mcpData.parameters || mcpData.parameters.length === 0) {
+      // parameters配列が定義されていない場合のみエラー（空配列はOK - パラメータなしツール用）
+      if (!mcpData.parameters) {
         errors.push({
           code: 'MCP_MODE_CONFIG_MISMATCH',
           message: 'Manual parameter config mode requires parameters array to be set',
           field: `nodes[${node.id}].data.parameters`,
         });
       }
-      if (!mcpData.parameterValues || Object.keys(mcpData.parameterValues).length === 0) {
-        errors.push({
-          code: 'MCP_MODE_CONFIG_MISMATCH',
-          message: 'Manual parameter config mode requires parameterValues to be configured',
-          field: `nodes[${node.id}].data.parameterValues`,
-        });
+      // parametersが空でない場合のみ、parameterValuesの存在をチェック
+      if (mcpData.parameters && mcpData.parameters.length > 0) {
+        if (!mcpData.parameterValues || Object.keys(mcpData.parameterValues).length === 0) {
+          errors.push({
+            code: 'MCP_MODE_CONFIG_MISMATCH',
+            message: 'Manual parameter config mode requires parameterValues to be configured',
+            field: `nodes[${node.id}].data.parameterValues`,
+          });
+        }
       }
       break;
 
