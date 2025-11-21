@@ -6,6 +6,7 @@
  */
 
 import type { SubAgentData } from '@shared/types/workflow-definition';
+import { SUB_AGENT_COLORS } from '@shared/types/workflow-definition';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import { DeleteButton } from './DeleteButton';
@@ -75,22 +76,41 @@ export const SubAgentNodeComponent: React.FC<NodeProps<SubAgentData>> = React.me
           </div>
         )}
 
-        {/* Model Badge */}
-        {data.model && (
-          <div
-            style={{
-              fontSize: '10px',
-              color: 'var(--vscode-descriptionForeground)',
-              backgroundColor: 'var(--vscode-badge-background)',
-              padding: '2px 6px',
-              borderRadius: '3px',
-              display: 'inline-block',
-              marginBottom: '4px',
-            }}
-          >
-            {data.model}
-          </div>
-        )}
+        {/* Badges */}
+        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+          {/* Model Badge */}
+          {data.model && (
+            <div
+              style={{
+                fontSize: '10px',
+                color: 'var(--vscode-descriptionForeground)',
+                backgroundColor: 'var(--vscode-badge-background)',
+                padding: '2px 6px',
+                borderRadius: '3px',
+                display: 'inline-block',
+              }}
+            >
+              {data.model}
+            </div>
+          )}
+
+          {/* Color Badge */}
+          {data.color && (
+            <div
+              style={{
+                fontSize: '10px',
+                color: '#ffffff',
+                backgroundColor: SUB_AGENT_COLORS[data.color],
+                padding: '2px 6px',
+                borderRadius: '3px',
+                display: 'inline-block',
+                textTransform: 'capitalize',
+              }}
+            >
+              {data.color}
+            </div>
+          )}
+        </div>
 
         {/* Input Handle */}
         <Handle

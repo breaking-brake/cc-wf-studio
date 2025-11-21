@@ -194,6 +194,10 @@ function generateSubAgentFile(node: SubAgentNode): string {
     frontmatter.push('model: sonnet');
   }
 
+  if (data.color) {
+    frontmatter.push(`color: ${data.color}`);
+  }
+
   frontmatter.push('---');
   frontmatter.push('');
 

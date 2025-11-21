@@ -45,8 +45,21 @@ export interface SubAgentData {
   prompt: string;
   tools?: string;
   model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
+  color?: 'red' | 'blue' | 'green' | 'yellow' | 'purple' | 'orange' | 'pink' | 'cyan';
   outputPorts: number;
 }
+
+// Color codes for SubAgent color property
+export const SUB_AGENT_COLORS = {
+  red: '#C33531',
+  blue: '#475DE3',
+  green: '#54A254',
+  yellow: '#BC8D2E',
+  purple: '#892CE2',
+  orange: '#D2602A',
+  pink: '#C33476',
+  cyan: '#4E8FAF',
+} as const;
 
 export interface QuestionOption {
   id?: string; // Unique identifier for the option (optional for backward compatibility)
