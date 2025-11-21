@@ -98,6 +98,10 @@ export interface WebviewTranslationKeys {
   'property.tools': string;
   'property.tools.placeholder': string;
   'property.tools.help': string;
+  'properties.subAgent.color': string;
+  'properties.subAgent.colorPlaceholder': string;
+  'properties.subAgent.colorNone': string;
+  'properties.subAgent.colorHelp': string;
 
   // Skill properties
   'property.skillPath': string;
