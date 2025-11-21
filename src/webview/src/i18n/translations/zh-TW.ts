@@ -102,7 +102,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'property.tools.help': '留空表示所有工具',
   'properties.subAgent.color': '顏色',
   'properties.subAgent.colorPlaceholder': '選擇顏色...',
-  'properties.subAgent.colorNone': '無（無顏色）',
+  'properties.subAgent.colorNone': '無',
   'properties.subAgent.colorHelp': '此子代理的視覺識別顏色',
 
   // Skill properties

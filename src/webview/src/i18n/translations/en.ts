@@ -104,7 +104,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.tools.help': 'Leave empty for all tools',
   'properties.subAgent.color': 'Color',
   'properties.subAgent.colorPlaceholder': 'Select color...',
-  'properties.subAgent.colorNone': 'None (No color)',
+  'properties.subAgent.colorNone': 'None',
   'properties.subAgent.colorHelp': 'Visual indicator color for this sub-agent',
 
   // Skill properties

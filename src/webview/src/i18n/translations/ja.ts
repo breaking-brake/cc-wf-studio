@@ -104,7 +104,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.tools.help': '空欄で全てのツールを使用',
   'properties.subAgent.color': '色',
   'properties.subAgent.colorPlaceholder': '色を選択...',
-  'properties.subAgent.colorNone': 'なし（色なし）',
+  'properties.subAgent.colorNone': 'なし',
   'properties.subAgent.colorHelp': 'このサブエージェントの視覚的な識別色',
 
   // Skill properties
