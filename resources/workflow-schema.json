@@ -53,6 +53,12 @@
           "enum": ["sonnet", "opus", "haiku", "inherit"],
           "default": "sonnet"
         },
+        "color": {
+          "type": "string",
+          "required": false,
+          "enum": ["red", "blue", "green", "yellow", "purple", "orange", "pink", "cyan"],
+          "description": "Visual indicator color for this sub-agent (optional)"
+        },
         "outputPorts": { "type": "number", "required": true, "value": 1 }
       },
       "inputPorts": 1,
