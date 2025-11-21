@@ -11,7 +11,8 @@
       "askUserQuestion",
       "ifElse",
       "switch",
-      "skill"
+      "skill",
+      "mcp"
     ]
   },
   "nodeTypes": {
@@ -171,6 +172,108 @@
       },
       "inputPorts": 1,
       "outputPorts": 1
+    },
+    "mcp": {
+      "description": "Execute an MCP (Model Context Protocol) tool from an external server. MCP enables integration with external services, databases, APIs, and tools. **Important: Always use 'manualParameterConfig' mode for AI-generated workflows. Parameters must be provided as an array of parameter definitions, NOT as key-value pairs.**",
+      "fields": {
+        "serverId": {
+          "type": "string",
+          "required": true,
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "MCP server identifier (e.g., 'playwright', 'github', 'filesystem')"
+        },
+        "toolName": {
+          "type": "string",
+          "required": true,
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Tool function name from the MCP server (e.g., 'playwright_navigate', 'get_file_contents')"
+        },
+        "toolDescription": {
+          "type": "string",
+          "required": false,
+          "maxLength": 1024,
+          "description": "Human-readable description of what the tool does"
+        },
+        "parameters": {
+          "type": "array",
+          "required": false,
+          "description": "Array of parameter schema definitions (NOT parameter values). Each parameter object must have: name (string), type (string), description (string), required (boolean). Example: [{\"name\": \"url\", \"type\": \"string\", \"description\": \"Target URL\", \"required\": true}]",
+          "items": {
+            "name": { "type": "string", "required": true },
+            "type": {
+              "type": "string",
+              "required": true,
+              "enum": ["string", "number", "boolean", "array", "object"]
+            },
+            "description": { "type": "string", "required": false },
+            "required": { "type": "boolean", "required": true }
+          }
+        },
+        "parameterValues": {
+          "type": "object",
+          "required": false,
+          "description": "Key-value pairs of parameter values. Keys must match parameter names from the 'parameters' array. Example: {\"url\": \"https://example.com\"}"
+        },
+        "mode": {
+          "type": "string",
+          "required": false,
+          "enum": ["manualParameterConfig", "aiParameterConfig", "aiToolSelection"],
+          "default": "manualParameterConfig",
+          "description": "Configuration mode - ALWAYS use 'manualParameterConfig' for AI-generated workflows"
+        },
+        "validationStatus": {
+          "type": "string",
+          "enum": ["valid", "missing", "invalid"],
+          "required": true,
+          "default": "valid"
+        },
+        "outputPorts": {
+          "type": "number",
+          "required": true,
+          "value": 1
+        }
+      },
+      "inputPorts": 1,
+      "outputPorts": 1,
+      "aiGenerationGuidance": {
+        "mode": "ALWAYS set mode to 'manualParameterConfig'",
+        "parameters": "MUST be an array of parameter schema objects with {name, type, description, required} fields",
+        "parameterValues": "Optional object with key-value pairs matching parameter names",
+        "commonTools": {
+          "playwright": [
+            "playwright_navigate",
+            "playwright_click",
+            "playwright_screenshot",
+            "playwright_evaluate"
+          ],
+          "filesystem": ["read_file", "write_file", "list_directory"],
+          "github": ["get_issue", "create_pull_request", "list_repositories"]
+        },
+        "example": {
+          "type": "mcp",
+          "data": {
+            "serverId": "playwright",
+            "toolName": "playwright_navigate",
+            "toolDescription": "Navigate browser to URL",
+            "parameters": [
+              {
+                "name": "url",
+                "type": "string",
+                "description": "Target URL to navigate to",
+                "required": true
+              }
+            ],
+            "parameterValues": {
+              "url": "https://example.com"
+            },
+            "mode": "manualParameterConfig",
+            "validationStatus": "valid",
+            "outputPorts": 1
+          }
+        }
+      }
     }
   },
   "connectionRules": {

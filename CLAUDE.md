@@ -29,6 +29,46 @@ tests/
 
 ## Development Workflow & Commands
 
+### Commit Message Guidelines
+
+**IMPORTANT: Keep commit messages simple for squash merge workflow.**
+
+#### Format
+```
+<type>: <subject>
+
+<optional body with bullet points>
+```
+
+#### Example
+```
+fix: add missing MCP node definition to workflow schema
+
+- Added 'mcp' to supportedNodeTypes
+- Added complete MCP node type definition with field constraints
+- Fixes MCP_INVALID_PARAMETERS and MCP_INVALID_MODE validation errors
+```
+
+#### Rules
+- **Subject**: 50 characters max, imperative mood, no period
+- **Body**: 3-5 bullet points max, "what" changed only
+- **Details**: Put "why" and "how" in PR description, NOT commit message
+
+#### Types
+- `feat:` - New feature (minor version bump)
+- `fix:` - Bug fix (patch version bump)
+- `docs:` - Documentation only
+- `refactor:` - Code refactoring
+- `chore:` - Build/tooling changes
+
+#### What to Avoid
+❌ Long explanations (Problem/Solution/Impact sections)
+❌ Multiple paragraphs
+❌ Code blocks
+❌ Test results with checkboxes
+
+✅ Simple 3-5 line summary of changes
+
 ### Code Quality Checks (Required Before Commit/PR)
 
 **Always run these commands in the following order after code modifications:**
