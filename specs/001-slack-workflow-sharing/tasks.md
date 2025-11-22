@@ -44,14 +44,14 @@
 
 **⚠️ 重要**: このフェーズが完了するまで、ユーザーストーリーの作業は開始できません
 
-- [ ] T005 OAuth認証用ローカルHTTPサーバーの実装 in src/extension/utils/oauth-callback-server.ts
-- [ ] T006 VSCode Secret Storage連携のトークン管理実装 in src/extension/utils/slack-token-manager.ts
-- [ ] T007 Slack OAuth認証フローサービスの実装 in src/extension/services/slack-oauth-service.ts
-- [ ] T008 Slack Web API基本クライアント実装 in src/extension/services/slack-api-service.ts
-- [ ] T009 [P] 機密情報検出ユーティリティの実装 in src/extension/utils/sensitive-data-detector.ts
-- [ ] T010 [P] データモデル型定義の作成 in src/extension/types/slack-integration-types.ts
-- [ ] T011 [P] Webview ↔ Extension Host メッセージング型定義の作成 in src/extension/types/slack-messages.ts
-- [ ] T012 エラーハンドリングユーティリティの実装 in src/extension/utils/slack-error-handler.ts
+- [x] T005 OAuth認証用ローカルHTTPサーバーの実装 in src/extension/utils/oauth-callback-server.ts
+- [x] T006 VSCode Secret Storage連携のトークン管理実装 in src/extension/utils/slack-token-manager.ts
+- [x] T007 Slack OAuth認証フローサービスの実装 in src/extension/services/slack-oauth-service.ts
+- [x] T008 Slack Web API基本クライアント実装 in src/extension/services/slack-api-service.ts
+- [x] T009 [P] 機密情報検出ユーティリティの実装 in src/extension/utils/sensitive-data-detector.ts
+- [x] T010 [P] データモデル型定義の作成 in src/extension/types/slack-integration-types.ts
+- [x] T011 [P] Webview ↔ Extension Host メッセージング型定義の作成 in src/extension/types/slack-messages.ts
+- [x] T012 エラーハンドリングユーティリティの実装 in src/extension/utils/slack-error-handler.ts
 
 **Checkpoint**: 基盤準備完了 - ユーザーストーリー実装を並列開始可能
 
