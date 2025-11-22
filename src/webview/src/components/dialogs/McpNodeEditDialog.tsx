@@ -199,13 +199,9 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
         zIndex: 1000,
       }}
       onClick={handleClose}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') {
-          handleClose();
-        }
-      }}
       role="presentation"
     >
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: onClick is only used to stop event propagation, not for click actions */}
       <div
         style={{
           backgroundColor: 'var(--vscode-editor-background)',
@@ -218,7 +214,6 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
           overflow: 'auto',
         }}
         onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
       >
