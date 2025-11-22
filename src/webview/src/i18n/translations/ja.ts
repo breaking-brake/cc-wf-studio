@@ -5,6 +5,12 @@
 import type { WebviewTranslationKeys } from '../translation-keys';
 
 export const jaWebviewTranslations: WebviewTranslationKeys = {
+  // Common
+  loading: '読み込み中',
+  description: '説明',
+  optional: '任意',
+  cancel: 'キャンセル',
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': 'ワークフロー名',
   'toolbar.save': '保存',
@@ -531,6 +537,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.sharing': '共有中...',
   'slack.share.success': 'ワークフローを共有しました',
   'slack.share.failed': 'ワークフローの共有に失敗しました',
+  'slack.share.descriptionPlaceholder': '説明を追加（任意）...',
 
   // Slack Import
   'slack.import.title': 'Slackからインポート',
@@ -552,6 +559,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     'Botがこのチャンネルのメンバーではありません。先にBotを招待してください。',
   'slack.error.networkError': 'ネットワークエラー。接続を確認してください。',
   'slack.error.rateLimited': 'レート制限を超過しました。{seconds}秒後に再試行してください。',
+  'slack.error.noChannels': '利用可能なチャンネルがありません',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '機密情報が検出されました',

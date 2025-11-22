@@ -10,6 +10,10 @@
 import { WebClient } from '@slack/web-api';
 import type { SlackChannel } from '../types/slack-integration-types';
 import { handleSlackError } from '../utils/slack-error-handler';
+import {
+  buildWorkflowMessageBlocks,
+  type WorkflowMessageBlock,
+} from '../utils/slack-message-builder';
 import type { SlackTokenManager } from '../utils/slack-token-manager';
 
 /**
@@ -26,28 +30,6 @@ export interface WorkflowUploadOptions {
   channelId: string;
   /** Initial comment (optional) */
   initialComment?: string;
-}
-
-/**
- * Workflow message block (Block Kit format)
- */
-export interface WorkflowMessageBlock {
-  /** Workflow ID */
-  workflowId: string;
-  /** Workflow name */
-  name: string;
-  /** Workflow description */
-  description?: string;
-  /** Workflow version */
-  version: string;
-  /** Author name */
-  authorName: string;
-  /** Node count */
-  nodeCount: number;
-  /** Created timestamp (ISO 8601) */
-  createdAt: string;
-  /** File ID (after upload) */
-  fileId: string;
 }
 
 /**
@@ -227,11 +209,11 @@ export class SlackApiService {
         initial_comment: options.initialComment,
       });
 
-      if (!response.ok || !response.file) {
+      if (!response.ok || !(response as unknown as Record<string, unknown>).file) {
         throw new Error('ファイルのアップロードに失敗しました');
       }
 
-      const file = response.file;
+      const file = (response as unknown as Record<string, unknown>).file as Record<string, unknown>;
 
       return {
         fileId: file.id as string,
@@ -259,13 +241,14 @@ export class SlackApiService {
       const client = await this.ensureClient();
 
       // Build Block Kit blocks
-      const blocks = this.buildWorkflowMessageBlocks(block);
+      const blocks = buildWorkflowMessageBlocks(block);
 
       // Post message
       const response = await client.chat.postMessage({
         channel: channelId,
         text: `New workflow shared: ${block.name}`,
-        blocks,
+        // biome-ignore lint/suspicious/noExplicitAny: Slack Web API type definitions are incomplete
+        blocks: blocks as any,
       });
 
       if (!response.ok) {
@@ -358,75 +341,5 @@ export class SlackApiService {
     } catch (_error) {
       return false;
     }
-  }
-
-  /**
-   * Builds Block Kit blocks for workflow message
-   *
-   * @param block - Workflow message block
-   * @returns Block Kit blocks
-   */
-  private buildWorkflowMessageBlocks(block: WorkflowMessageBlock): Array<Record<string, unknown>> {
-    return [
-      // Header
-      {
-        type: 'header',
-        text: {
-          type: 'plain_text',
-          text: `🔧 Workflow: ${block.name}`,
-        },
-      },
-      // Metadata fields
-      {
-        type: 'section',
-        fields: [
-          {
-            type: 'mrkdwn',
-            text: `*Author:*\n${block.authorName}`,
-          },
-          {
-            type: 'mrkdwn',
-            text: `*Version:*\n${block.version}`,
-          },
-          {
-            type: 'mrkdwn',
-            text: `*Nodes:*\n${block.nodeCount}`,
-          },
-          {
-            type: 'mrkdwn',
-            text: `*Created:*\n${new Date(block.createdAt).toLocaleDateString()}`,
-          },
-        ],
-      },
-      // Description (if provided)
-      ...(block.description
-        ? [
-            {
-              type: 'section',
-              text: {
-                type: 'mrkdwn',
-                text: block.description,
-              },
-            },
-          ]
-        : []),
-      // Import button
-      {
-        type: 'actions',
-        elements: [
-          {
-            type: 'button',
-            text: {
-              type: 'plain_text',
-              text: '📥 Import to VS Code',
-            },
-            style: 'primary',
-            value: block.workflowId,
-            action_id: 'import_workflow',
-            url: `vscode://workflow-studio/import?workflowId=${block.workflowId}&fileId=${block.fileId}`,
-          },
-        ],
-      },
-    ];
   }
 }

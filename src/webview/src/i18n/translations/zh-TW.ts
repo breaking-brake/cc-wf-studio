@@ -5,6 +5,12 @@
 import type { WebviewTranslationKeys } from '../translation-keys';
 
 export const zhTWWebviewTranslations: WebviewTranslationKeys = {
+  // Common
+  loading: '載入中',
+  description: '描述',
+  optional: '選填',
+  cancel: '取消',
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': '工作流名稱',
   'toolbar.save': '儲存',
@@ -510,6 +516,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.sharing': '分享中...',
   'slack.share.success': '工作流分享成功',
   'slack.share.failed': '工作流分享失敗',
+  'slack.share.descriptionPlaceholder': '新增描述（選填）...',
 
   // Slack Import
   'slack.import.title': '從 Slack 匯入',
@@ -530,6 +537,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.notInChannel': '機器人不是此頻道的成員。請先邀請機器人。',
   'slack.error.networkError': '網路錯誤。請檢查您的連接。',
   'slack.error.rateLimited': '超出速率限制。請在 {seconds} 秒後重試。',
+  'slack.error.noChannels': '沒有可用的頻道',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '檢測到敏感資料',

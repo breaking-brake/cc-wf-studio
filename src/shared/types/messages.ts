@@ -533,7 +533,157 @@ export type ExtensionMessage =
   | Message<McpToolsResultPayload, 'MCP_TOOLS_RESULT'>
   | Message<McpToolSchemaResultPayload, 'MCP_TOOL_SCHEMA_RESULT'>
   | Message<McpNodeValidationResultPayload, 'MCP_NODE_VALIDATION_RESULT'>
-  | Message<McpErrorPayload, 'MCP_ERROR'>;
+  | Message<McpErrorPayload, 'MCP_ERROR'>
+  | Message<ShareWorkflowSuccessPayload, 'SHARE_WORKFLOW_SUCCESS'>
+  | Message<SensitiveDataWarningPayload, 'SENSITIVE_DATA_WARNING'>
+  | Message<ShareWorkflowFailedPayload, 'SHARE_WORKFLOW_FAILED'>
+  | Message<SlackConnectSuccessPayload, 'SLACK_CONNECT_SUCCESS'>
+  | Message<SlackErrorPayload, 'SLACK_CONNECT_FAILED'>
+  | Message<void, 'SLACK_DISCONNECT_SUCCESS'>
+  | Message<SlackErrorPayload, 'SLACK_DISCONNECT_FAILED'>
+  | Message<GetSlackChannelsSuccessPayload, 'GET_SLACK_CHANNELS_SUCCESS'>
+  | Message<SlackErrorPayload, 'GET_SLACK_CHANNELS_FAILED'>
+  | Message<ImportWorkflowSuccessPayload, 'IMPORT_WORKFLOW_SUCCESS'>
+  | Message<SlackErrorPayload, 'IMPORT_WORKFLOW_FAILED'>
+  | Message<SearchSlackWorkflowsSuccessPayload, 'SEARCH_SLACK_WORKFLOWS_SUCCESS'>
+  | Message<SlackErrorPayload, 'SEARCH_SLACK_WORKFLOWS_FAILED'>;
+
+// ============================================================================
+// Slack Integration Payloads (001-slack-workflow-sharing)
+// ============================================================================
+
+/**
+ * Slack channel information
+ */
+export interface SlackChannel {
+  id: string;
+  name: string;
+  isPrivate: boolean;
+  isMember: boolean;
+  memberCount?: number;
+  purpose?: string;
+  topic?: string;
+}
+
+/**
+ * Workflow search result
+ */
+export interface SearchResult {
+  messageTs: string;
+  channelId: string;
+  channelName: string;
+  text: string;
+  userId: string;
+  permalink: string;
+  fileId?: string;
+  fileName?: string;
+  timestamp: string;
+}
+
+/**
+ * Slack connection success payload
+ */
+export interface SlackConnectSuccessPayload {
+  workspaceName: string;
+}
+
+/**
+ * Slack error payload (for FAILED messages)
+ */
+export interface SlackErrorPayload {
+  message: string;
+}
+
+/**
+ * Get Slack channels success payload
+ */
+export interface GetSlackChannelsSuccessPayload {
+  channels: SlackChannel[];
+}
+
+/**
+ * Import workflow success payload
+ */
+export interface ImportWorkflowSuccessPayload {
+  filePath: string;
+}
+
+/**
+ * Search Slack workflows success payload
+ */
+export interface SearchSlackWorkflowsSuccessPayload {
+  results: SearchResult[];
+}
+
+/**
+ * Share workflow to Slack channel payload
+ */
+export interface ShareWorkflowToSlackPayload {
+  /** Workflow ID to share */
+  workflowId: string;
+  /** Workflow name */
+  workflowName: string;
+  /** Target Slack channel ID */
+  channelId: string;
+  /** Workflow description (optional) */
+  description?: string;
+  /** Override sensitive data warning (default: false) */
+  overrideSensitiveWarning?: boolean;
+}
+
+/**
+ * Sensitive data finding
+ */
+export interface SensitiveDataFinding {
+  type: string;
+  maskedValue: string;
+  position: number;
+  context?: string;
+  severity: 'low' | 'medium' | 'high';
+}
+
+/**
+ * Slack channel information
+ */
+export interface SlackChannelInfo {
+  id: string;
+  name: string;
+}
+
+/**
+ * Share workflow success payload
+ */
+export interface ShareWorkflowSuccessPayload {
+  workflowId: string;
+  channelId: string;
+  channelName: string;
+  messageTs: string;
+  fileId: string;
+  permalink: string;
+}
+
+/**
+ * Sensitive data warning payload
+ */
+export interface SensitiveDataWarningPayload {
+  workflowId: string;
+  findings: SensitiveDataFinding[];
+}
+
+/**
+ * Share workflow failed payload
+ */
+export interface ShareWorkflowFailedPayload {
+  workflowId: string;
+  errorCode:
+    | 'NOT_AUTHENTICATED'
+    | 'CHANNEL_NOT_FOUND'
+    | 'FILE_UPLOAD_FAILED'
+    | 'MESSAGE_POST_FAILED'
+    | 'NETWORK_ERROR'
+    | 'UNKNOWN_ERROR';
+  errorMessage: string;
+}
 
 // ============================================================================
 // Webview → Extension Messages
@@ -558,7 +708,8 @@ export type WebviewMessage =
   | Message<GetMcpToolsPayload, 'GET_MCP_TOOLS'>
   | Message<GetMcpToolSchemaPayload, 'GET_MCP_TOOL_SCHEMA'>
   | Message<ValidateMcpNodePayload, 'VALIDATE_MCP_NODE'>
-  | Message<UpdateMcpNodePayload, 'UPDATE_MCP_NODE'>;
+  | Message<UpdateMcpNodePayload, 'UPDATE_MCP_NODE'>
+  | Message<ShareWorkflowToSlackPayload, 'SHARE_WORKFLOW_TO_SLACK'>;
 
 // ============================================================================
 // Error Codes

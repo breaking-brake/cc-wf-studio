@@ -3,6 +3,12 @@
  */
 
 export interface WebviewTranslationKeys {
+  // Common
+  loading: string;
+  description: string;
+  optional: string;
+  cancel: string;
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': string;
   'toolbar.save': string;
@@ -479,6 +485,7 @@ export interface WebviewTranslationKeys {
   'slack.share.title': string;
   'slack.share.selectChannel': string;
   'slack.share.selectChannelPlaceholder': string;
+  'slack.share.descriptionPlaceholder': string;
   'slack.share.sharing': string;
   'slack.share.success': string;
   'slack.share.failed': string;
@@ -499,6 +506,7 @@ export interface WebviewTranslationKeys {
   // Slack Errors
   'slack.error.notAuthenticated': string;
   'slack.error.channelNotFound': string;
+  'slack.error.noChannels': string;
   'slack.error.notInChannel': string;
   'slack.error.networkError': string;
   'slack.error.rateLimited': string;

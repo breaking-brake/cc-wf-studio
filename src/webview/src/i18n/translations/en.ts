@@ -5,6 +5,12 @@
 import type { WebviewTranslationKeys } from '../translation-keys';
 
 export const enWebviewTranslations: WebviewTranslationKeys = {
+  // Common
+  loading: 'Loading',
+  description: 'Description',
+  optional: 'Optional',
+  cancel: 'Cancel',
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': 'Workflow name',
   'toolbar.save': 'Save',
@@ -531,6 +537,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.title': 'Share to Slack',
   'slack.share.selectChannel': 'Select channel',
   'slack.share.selectChannelPlaceholder': 'Choose a channel...',
+  'slack.share.descriptionPlaceholder': 'Add a description (optional)...',
   'slack.share.sharing': 'Sharing...',
   'slack.share.success': 'Workflow shared successfully',
   'slack.share.failed': 'Failed to share workflow',
@@ -551,6 +558,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Slack Errors
   'slack.error.notAuthenticated': 'Please connect to Slack first',
   'slack.error.channelNotFound': 'Channel not found',
+  'slack.error.noChannels': 'No channels available',
   'slack.error.notInChannel': 'Bot is not a member of this channel. Please invite the bot first.',
   'slack.error.networkError': 'Network error. Please check your connection.',
   'slack.error.rateLimited': 'Rate limit exceeded. Please try again in {seconds} seconds.',

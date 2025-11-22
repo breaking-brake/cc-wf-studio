@@ -87,17 +87,17 @@
 
 ### Implementation for User Story 1
 
-- [ ] T013 [P] [US1] Slackチャンネル一覧取得APIの実装 in src/extension/services/slack-api-service.ts
-- [ ] T014 [P] [US1] ワークフローファイルアップロードAPIの実装 in src/extension/services/slack-api-service.ts
-- [ ] T015 [P] [US1] リッチメッセージカード投稿APIの実装 in src/extension/services/slack-api-service.ts
-- [ ] T016 [P] [US1] Block Kit メッセージビルダー実装 in src/extension/utils/slack-message-builder.ts
-- [ ] T017 [US1] ワークフロー共有コマンドの実装 in src/extension/commands/slack-share-workflow.ts
-- [ ] T018 [US1] 機密情報検出とユーザー警告フローの統合 in src/extension/commands/slack-share-workflow.ts
-- [ ] T019 [P] [US1] Slackチャンネル選択ダイアログコンポーネントの実装 in src/webview/src/components/dialogs/SlackShareDialog.tsx
-- [ ] T020 [P] [US1] Webview側Slack統合サービスの実装 in src/webview/src/services/slack-integration-service.ts
-- [ ] T021 [US1] Extension HostとWebview間のメッセージハンドリング実装 in src/extension/extension.ts
-- [ ] T022 [US1] VS Code コマンド登録 (`Slack: Share Workflow`) in src/extension/extension.ts
-- [ ] T023 [P] [US1] i18n翻訳の追加 (ワークフロー共有関連メッセージ) in src/webview/src/i18n/translations/*.ts
+- [x] T013 [P] [US1] Slackチャンネル一覧取得APIの実装 in src/extension/services/slack-api-service.ts
+- [x] T014 [P] [US1] ワークフローファイルアップロードAPIの実装 in src/extension/services/slack-api-service.ts
+- [x] T015 [P] [US1] リッチメッセージカード投稿APIの実装 in src/extension/services/slack-api-service.ts
+- [x] T016 [P] [US1] Block Kit メッセージビルダー実装 in src/extension/utils/slack-message-builder.ts
+- [x] T017 [US1] ワークフロー共有コマンドの実装 in src/extension/commands/slack-share-workflow.ts
+- [x] T018 [US1] 機密情報検出とユーザー警告フローの統合 in src/extension/commands/slack-share-workflow.ts
+- [x] T019 [P] [US1] Slackチャンネル選択ダイアログコンポーネントの実装 in src/webview/src/components/dialogs/SlackShareDialog.tsx
+- [x] T020 [P] [US1] Webview側Slack統合サービスの実装 in src/webview/src/services/slack-integration-service.ts
+- [x] T021 [US1] Extension HostとWebview間のメッセージハンドリング実装 in src/extension/commands/open-editor.ts
+- [x] T022 [US1] VS Code コマンド登録 (`Slack: Share Workflow`) in src/extension/commands/open-editor.ts
+- [x] T023 [P] [US1] i18n翻訳の追加 (ワークフロー共有関連メッセージ) in src/webview/src/i18n/translations/*.ts
 
 **Checkpoint**: User Story 1完全実装完了 - 独立して機能確認可能
 

@@ -9,6 +9,8 @@ import * as vscode from 'vscode';
 import type { WebviewMessage } from '../../shared/types/messages';
 import { cancelGeneration } from '../services/claude-code-service';
 import { FileService } from '../services/file-service';
+import { SlackApiService } from '../services/slack-api-service';
+import { SlackTokenManager } from '../utils/slack-token-manager';
 import { getWebviewContent } from '../webview-content';
 import { handleGenerateWorkflow } from './ai-generation';
 import { handleExportWorkflow } from './export-workflow';
@@ -17,6 +19,7 @@ import { loadWorkflowList } from './load-workflow-list';
 import { handleGetMcpToolSchema, handleGetMcpTools, handleListMcpServers } from './mcp-handlers';
 import { saveWorkflow } from './save-workflow';
 import { handleBrowseSkills, handleCreateSkill, handleValidateSkillFile } from './skill-operations';
+import { handleShareWorkflowToSlack } from './slack-share-workflow';
 import {
   handleCancelRefinement,
   handleClearConversation,
@@ -33,6 +36,8 @@ export function registerOpenEditorCommand(
 ): vscode.WebviewPanel | null {
   let currentPanel: vscode.WebviewPanel | undefined;
   let fileService: FileService;
+  let slackTokenManager: SlackTokenManager;
+  let slackApiService: SlackApiService;
 
   const openEditorCommand = vscode.commands.registerCommand('cc-wf-studio.openEditor', () => {
     // Initialize file service
@@ -44,6 +49,10 @@ export function registerOpenEditorCommand(
       );
       return;
     }
+
+    // Initialize Slack services
+    slackTokenManager = new SlackTokenManager(context);
+    slackApiService = new SlackApiService(slackTokenManager);
     const columnToShowIn = vscode.window.activeTextEditor
       ? vscode.window.activeTextEditor.viewColumn
       : undefined;
@@ -347,6 +356,28 @@ export function registerOpenEditorCommand(
                 payload: {
                   code: 'VALIDATION_ERROR',
                   message: 'Server ID and Tool Name are required',
+                },
+              });
+            }
+            break;
+
+          case 'SHARE_WORKFLOW_TO_SLACK':
+            // Share workflow to Slack channel (T021)
+            if (message.payload) {
+              await handleShareWorkflowToSlack(
+                message.payload,
+                webview,
+                message.requestId || '',
+                fileService,
+                slackApiService
+              );
+            } else {
+              webview.postMessage({
+                type: 'ERROR',
+                requestId: message.requestId,
+                payload: {
+                  code: 'VALIDATION_ERROR',
+                  message: 'Share workflow payload is required',
                 },
               });
             }

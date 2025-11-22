@@ -5,6 +5,12 @@
 import type { WebviewTranslationKeys } from '../translation-keys';
 
 export const koWebviewTranslations: WebviewTranslationKeys = {
+  // Common
+  loading: '로딩 중',
+  description: '설명',
+  optional: '선택 사항',
+  cancel: '취소',
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': '워크플로 이름',
   'toolbar.save': '저장',
@@ -530,6 +536,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.sharing': '공유 중...',
   'slack.share.success': '워크플로우를 공유했습니다',
   'slack.share.failed': '워크플로우 공유에 실패했습니다',
+  'slack.share.descriptionPlaceholder': '설명을 추가하세요 (선택 사항)...',
 
   // Slack Import
   'slack.import.title': 'Slack에서 가져오기',
@@ -550,6 +557,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.notInChannel': '봇이 이 채널의 멤버가 아닙니다. 먼저 봇을 초대하세요.',
   'slack.error.networkError': '네트워크 오류가 발생했습니다. 연결을 확인하세요.',
   'slack.error.rateLimited': '요청 한도를 초과했습니다. {seconds}초 후에 다시 시도하세요.',
+  'slack.error.noChannels': '사용 가능한 채널이 없습니다',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '민감한 데이터 감지됨',
