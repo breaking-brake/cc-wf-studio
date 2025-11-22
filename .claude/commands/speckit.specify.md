@@ -10,6 +10,8 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+**重要: すべての成果物（spec.md、チェックリスト、ユーザーへの質問など）は日本語で作成してください。**
+
 ## Outline
 
 The text the user typed after `/speckit.specify` in the triggering message **is** the feature description. Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
@@ -91,43 +93,43 @@ Given that feature description, do this:
 
 6. **Specification Quality Validation**: After writing the initial spec, validate it against quality criteria:
 
-   a. **Create Spec Quality Checklist**: Generate a checklist file at `FEATURE_DIR/checklists/requirements.md` using the checklist template structure with these validation items:
+   a. **仕様品質チェックリストの作成**: `FEATURE_DIR/checklists/requirements.md` にチェックリストテンプレート構造を使用して以下の検証項目を含むチェックリストファイルを生成します：
 
       ```markdown
-      # Specification Quality Checklist: [FEATURE NAME]
-      
-      **Purpose**: Validate specification completeness and quality before proceeding to planning
-      **Created**: [DATE]
-      **Feature**: [Link to spec.md]
-      
-      ## Content Quality
-      
-      - [ ] No implementation details (languages, frameworks, APIs)
-      - [ ] Focused on user value and business needs
-      - [ ] Written for non-technical stakeholders
-      - [ ] All mandatory sections completed
-      
-      ## Requirement Completeness
-      
-      - [ ] No [NEEDS CLARIFICATION] markers remain
-      - [ ] Requirements are testable and unambiguous
-      - [ ] Success criteria are measurable
-      - [ ] Success criteria are technology-agnostic (no implementation details)
-      - [ ] All acceptance scenarios are defined
-      - [ ] Edge cases are identified
-      - [ ] Scope is clearly bounded
-      - [ ] Dependencies and assumptions identified
-      
-      ## Feature Readiness
-      
-      - [ ] All functional requirements have clear acceptance criteria
-      - [ ] User scenarios cover primary flows
-      - [ ] Feature meets measurable outcomes defined in Success Criteria
-      - [ ] No implementation details leak into specification
-      
-      ## Notes
-      
-      - Items marked incomplete require spec updates before `/speckit.clarify` or `/speckit.plan`
+      # 仕様品質チェックリスト: [機能名]
+
+      **目的**: 計画フェーズに進む前に仕様の完全性と品質を検証する
+      **作成日**: [日付]
+      **機能**: [spec.mdへのリンク]
+
+      ## 内容の品質
+
+      - [ ] 実装詳細（言語、フレームワーク、API）が含まれていない
+      - [ ] ユーザー価値とビジネスニーズに焦点が当てられている
+      - [ ] 非技術系ステークホルダー向けに書かれている
+      - [ ] すべての必須セクションが完了している
+
+      ## 要件の完全性
+
+      - [ ] [NEEDS CLARIFICATION]マーカーが残っていない
+      - [ ] 要件がテスト可能で曖昧さがない
+      - [ ] 成功基準が測定可能である
+      - [ ] 成功基準が技術に依存しない（実装詳細が含まれていない）
+      - [ ] すべての受け入れシナリオが定義されている
+      - [ ] エッジケースが特定されている
+      - [ ] スコープが明確に境界付けられている
+      - [ ] 依存関係と前提条件が特定されている
+
+      ## 機能の準備状況
+
+      - [ ] すべての機能要件に明確な受け入れ基準がある
+      - [ ] ユーザーシナリオが主要なフローをカバーしている
+      - [ ] 機能が成功基準で定義された測定可能な成果を満たしている
+      - [ ] 実装詳細が仕様に漏れ出していない
+
+      ## 備考
+
+      - 未完了とマークされた項目は `/speckit.clarify` または `/speckit.plan` の前に仕様の更新が必要です
       ```
 
    b. **Run Validation Check**: Review the spec against each checklist item:
