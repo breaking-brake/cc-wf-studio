@@ -515,4 +515,46 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.mode.detailed.tooltip': '상세 모드: 모든 매개변수가 명시적으로 구성됨',
   'mcp.mode.naturalLanguageParam.tooltip': '자연어 매개변수 모드: "{description}"',
   'mcp.mode.fullNaturalLanguage.tooltip': '완전 자연어 모드: "{taskDescription}"',
+
+  // Slack Integration
+  'slack.connect': 'Slack에 연결',
+  'slack.disconnect': '연결 해제',
+  'slack.connecting': '연결 중...',
+  'slack.connected': '{workspaceName}에 연결됨',
+  'slack.notConnected': 'Slack에 연결되지 않음',
+
+  // Slack Share
+  'slack.share.title': 'Slack에 공유',
+  'slack.share.selectChannel': '채널 선택',
+  'slack.share.selectChannelPlaceholder': '채널을 선택하세요...',
+  'slack.share.sharing': '공유 중...',
+  'slack.share.success': '워크플로우를 공유했습니다',
+  'slack.share.failed': '워크플로우 공유에 실패했습니다',
+
+  // Slack Import
+  'slack.import.title': 'Slack에서 가져오기',
+  'slack.import.importing': '가져오는 중...',
+  'slack.import.success': '워크플로우를 가져왔습니다',
+  'slack.import.failed': '워크플로우 가져오기에 실패했습니다',
+  'slack.import.confirmOverwrite': '같은 이름의 워크플로우가 이미 존재합니다. 덮어쓰시겠습니까?',
+
+  // Slack Search
+  'slack.search.title': '워크플로우 검색',
+  'slack.search.placeholder': '이름, 작성자 또는 채널로 검색...',
+  'slack.search.searching': '검색 중...',
+  'slack.search.noResults': '워크플로우를 찾을 수 없습니다',
+
+  // Slack Errors
+  'slack.error.notAuthenticated': '먼저 Slack에 연결하세요',
+  'slack.error.channelNotFound': '채널을 찾을 수 없습니다',
+  'slack.error.notInChannel': '봇이 이 채널의 멤버가 아닙니다. 먼저 봇을 초대하세요.',
+  'slack.error.networkError': '네트워크 오류가 발생했습니다. 연결을 확인하세요.',
+  'slack.error.rateLimited': '요청 한도를 초과했습니다. {seconds}초 후에 다시 시도하세요.',
+
+  // Sensitive Data Warning
+  'slack.sensitiveData.warning.title': '민감한 데이터 감지됨',
+  'slack.sensitiveData.warning.message':
+    '워크플로우에서 다음과 같은 민감한 데이터가 감지되었습니다:',
+  'slack.sensitiveData.warning.continue': '그래도 공유',
+  'slack.sensitiveData.warning.cancel': '취소',
 };

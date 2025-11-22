@@ -467,4 +467,45 @@ export interface WebviewTranslationKeys {
   'mcp.mode.detailed.tooltip': string;
   'mcp.mode.naturalLanguageParam.tooltip': string;
   'mcp.mode.fullNaturalLanguage.tooltip': string;
+
+  // Slack Integration
+  'slack.connect': string;
+  'slack.disconnect': string;
+  'slack.connecting': string;
+  'slack.connected': string;
+  'slack.notConnected': string;
+
+  // Slack Share
+  'slack.share.title': string;
+  'slack.share.selectChannel': string;
+  'slack.share.selectChannelPlaceholder': string;
+  'slack.share.sharing': string;
+  'slack.share.success': string;
+  'slack.share.failed': string;
+
+  // Slack Import
+  'slack.import.title': string;
+  'slack.import.importing': string;
+  'slack.import.success': string;
+  'slack.import.failed': string;
+  'slack.import.confirmOverwrite': string;
+
+  // Slack Search
+  'slack.search.title': string;
+  'slack.search.placeholder': string;
+  'slack.search.searching': string;
+  'slack.search.noResults': string;
+
+  // Slack Errors
+  'slack.error.notAuthenticated': string;
+  'slack.error.channelNotFound': string;
+  'slack.error.notInChannel': string;
+  'slack.error.networkError': string;
+  'slack.error.rateLimited': string;
+
+  // Sensitive Data Warning
+  'slack.sensitiveData.warning.title': string;
+  'slack.sensitiveData.warning.message': string;
+  'slack.sensitiveData.warning.continue': string;
+  'slack.sensitiveData.warning.cancel': string;
 }

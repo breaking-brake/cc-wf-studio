@@ -516,4 +516,46 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.mode.detailed.tooltip': '詳細モード: すべてのパラメータを明示的に設定',
   'mcp.mode.naturalLanguageParam.tooltip': '自然言語パラメータモード: 「{description}」',
   'mcp.mode.fullNaturalLanguage.tooltip': '完全自然言語モード: 「{taskDescription}」',
+
+  // Slack Integration
+  'slack.connect': 'Slackに接続',
+  'slack.disconnect': '切断',
+  'slack.connecting': '接続中...',
+  'slack.connected': '{workspaceName}に接続済み',
+  'slack.notConnected': 'Slackに未接続',
+
+  // Slack Share
+  'slack.share.title': 'Slackに共有',
+  'slack.share.selectChannel': 'チャンネル選択',
+  'slack.share.selectChannelPlaceholder': 'チャンネルを選択...',
+  'slack.share.sharing': '共有中...',
+  'slack.share.success': 'ワークフローを共有しました',
+  'slack.share.failed': 'ワークフローの共有に失敗しました',
+
+  // Slack Import
+  'slack.import.title': 'Slackからインポート',
+  'slack.import.importing': 'インポート中...',
+  'slack.import.success': 'ワークフローをインポートしました',
+  'slack.import.failed': 'ワークフローのインポートに失敗しました',
+  'slack.import.confirmOverwrite': '同名のワークフローが既に存在します。上書きしますか？',
+
+  // Slack Search
+  'slack.search.title': 'ワークフロー検索',
+  'slack.search.placeholder': '名前、作成者、チャンネルで検索...',
+  'slack.search.searching': '検索中...',
+  'slack.search.noResults': 'ワークフローが見つかりませんでした',
+
+  // Slack Errors
+  'slack.error.notAuthenticated': '先にSlackに接続してください',
+  'slack.error.channelNotFound': 'チャンネルが見つかりません',
+  'slack.error.notInChannel':
+    'Botがこのチャンネルのメンバーではありません。先にBotを招待してください。',
+  'slack.error.networkError': 'ネットワークエラー。接続を確認してください。',
+  'slack.error.rateLimited': 'レート制限を超過しました。{seconds}秒後に再試行してください。',
+
+  // Sensitive Data Warning
+  'slack.sensitiveData.warning.title': '機密情報が検出されました',
+  'slack.sensitiveData.warning.message': 'ワークフローに以下の機密情報が検出されました:',
+  'slack.sensitiveData.warning.continue': 'それでも共有',
+  'slack.sensitiveData.warning.cancel': 'キャンセル',
 };

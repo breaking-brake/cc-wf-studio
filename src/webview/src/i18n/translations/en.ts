@@ -519,4 +519,46 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.mode.detailed.tooltip': 'Detailed Mode: All parameters explicitly configured',
   'mcp.mode.naturalLanguageParam.tooltip': 'Natural Language Parameter Mode: "{description}"',
   'mcp.mode.fullNaturalLanguage.tooltip': 'Full Natural Language Mode: "{taskDescription}"',
+
+  // Slack Integration
+  'slack.connect': 'Connect to Slack',
+  'slack.disconnect': 'Disconnect',
+  'slack.connecting': 'Connecting...',
+  'slack.connected': 'Connected to {workspaceName}',
+  'slack.notConnected': 'Not connected to Slack',
+
+  // Slack Share
+  'slack.share.title': 'Share to Slack',
+  'slack.share.selectChannel': 'Select channel',
+  'slack.share.selectChannelPlaceholder': 'Choose a channel...',
+  'slack.share.sharing': 'Sharing...',
+  'slack.share.success': 'Workflow shared successfully',
+  'slack.share.failed': 'Failed to share workflow',
+
+  // Slack Import
+  'slack.import.title': 'Import from Slack',
+  'slack.import.importing': 'Importing...',
+  'slack.import.success': 'Workflow imported successfully',
+  'slack.import.failed': 'Failed to import workflow',
+  'slack.import.confirmOverwrite': 'A workflow with this name already exists. Overwrite?',
+
+  // Slack Search
+  'slack.search.title': 'Search Workflows',
+  'slack.search.placeholder': 'Search by name, author, or channel...',
+  'slack.search.searching': 'Searching...',
+  'slack.search.noResults': 'No workflows found',
+
+  // Slack Errors
+  'slack.error.notAuthenticated': 'Please connect to Slack first',
+  'slack.error.channelNotFound': 'Channel not found',
+  'slack.error.notInChannel': 'Bot is not a member of this channel. Please invite the bot first.',
+  'slack.error.networkError': 'Network error. Please check your connection.',
+  'slack.error.rateLimited': 'Rate limit exceeded. Please try again in {seconds} seconds.',
+
+  // Sensitive Data Warning
+  'slack.sensitiveData.warning.title': 'Sensitive Data Detected',
+  'slack.sensitiveData.warning.message':
+    'The following sensitive data was detected in your workflow:',
+  'slack.sensitiveData.warning.continue': 'Share Anyway',
+  'slack.sensitiveData.warning.cancel': 'Cancel',
 };

@@ -31,10 +31,10 @@
 
 **目的**: プロジェクト初期化と基本構造の構築
 
-- [ ] T001 プロジェクト構造の確認とディレクトリ準備
-- [ ] T002 @slack/web-api 7.x 依存関係のインストール
-- [ ] T003 [P] TypeScript型定義ファイルの準備 (@types/node)
-- [ ] T004 [P] i18n翻訳ファイルにSlack統合用キーのスケルトン追加 (5言語: en, ja, ko, zh-CN, zh-TW)
+- [x] T001 プロジェクト構造の確認とディレクトリ準備
+- [x] T002 @slack/web-api 7.x 依存関係のインストール
+- [x] T003 [P] TypeScript型定義ファイルの準備 (@types/node)
+- [x] T004 [P] i18n翻訳ファイルにSlack統合用キーのスケルトン追加 (5言語: en, ja, ko, zh-CN, zh-TW)
 
 ---
 

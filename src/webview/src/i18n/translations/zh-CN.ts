@@ -495,4 +495,45 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.mode.detailed.tooltip': '详细模式: 所有参数都已明确配置',
   'mcp.mode.naturalLanguageParam.tooltip': '自然语言参数模式: "{description}"',
   'mcp.mode.fullNaturalLanguage.tooltip': '完全自然语言模式: "{taskDescription}"',
+
+  // Slack Integration
+  'slack.connect': '连接到 Slack',
+  'slack.disconnect': '断开连接',
+  'slack.connecting': '连接中...',
+  'slack.connected': '已连接到 {workspaceName}',
+  'slack.notConnected': '未连接到 Slack',
+
+  // Slack Share
+  'slack.share.title': '分享到 Slack',
+  'slack.share.selectChannel': '选择频道',
+  'slack.share.selectChannelPlaceholder': '选择一个频道...',
+  'slack.share.sharing': '分享中...',
+  'slack.share.success': '工作流分享成功',
+  'slack.share.failed': '工作流分享失败',
+
+  // Slack Import
+  'slack.import.title': '从 Slack 导入',
+  'slack.import.importing': '导入中...',
+  'slack.import.success': '工作流导入成功',
+  'slack.import.failed': '工作流导入失败',
+  'slack.import.confirmOverwrite': '已存在同名工作流。是否覆盖？',
+
+  // Slack Search
+  'slack.search.title': '搜索工作流',
+  'slack.search.placeholder': '按名称、作者或频道搜索...',
+  'slack.search.searching': '搜索中...',
+  'slack.search.noResults': '未找到工作流',
+
+  // Slack Errors
+  'slack.error.notAuthenticated': '请先连接到 Slack',
+  'slack.error.channelNotFound': '未找到频道',
+  'slack.error.notInChannel': '机器人不是此频道的成员。请先邀请机器人。',
+  'slack.error.networkError': '网络错误。请检查您的连接。',
+  'slack.error.rateLimited': '超出速率限制。请在 {seconds} 秒后重试。',
+
+  // Sensitive Data Warning
+  'slack.sensitiveData.warning.title': '检测到敏感数据',
+  'slack.sensitiveData.warning.message': '在您的工作流中检测到以下敏感数据:',
+  'slack.sensitiveData.warning.continue': '仍然分享',
+  'slack.sensitiveData.warning.cancel': '取消',
 };
