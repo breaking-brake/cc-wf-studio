@@ -9,8 +9,16 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
-import type { SensitiveDataFinding, SlackChannel } from '../../services/slack-integration-service';
-import { getSlackChannels, shareWorkflowToSlack } from '../../services/slack-integration-service';
+import type {
+  SensitiveDataFinding,
+  SlackChannel,
+  SlackWorkspace,
+} from '../../services/slack-integration-service';
+import {
+  getSlackChannels,
+  listSlackWorkspaces,
+  shareWorkflowToSlack,
+} from '../../services/slack-integration-service';
 
 interface SlackShareDialogProps {
   isOpen: boolean;
@@ -31,8 +39,11 @@ export function SlackShareDialog({
 
   // State management
   const [loading, setLoading] = useState(false);
+  const [loadingWorkspaces, setLoadingWorkspaces] = useState(false);
   const [loadingChannels, setLoadingChannels] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [workspaces, setWorkspaces] = useState<SlackWorkspace[]>([]);
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>('');
   const [channels, setChannels] = useState<SlackChannel[]>([]);
   const [selectedChannelId, setSelectedChannelId] = useState<string>('');
   const [description, setDescription] = useState('');
@@ -40,9 +51,39 @@ export function SlackShareDialog({
     null
   );
 
-  // Load channels when dialog opens
+  // Load workspaces when dialog opens
   useEffect(() => {
     if (!isOpen) {
+      return;
+    }
+
+    const loadWorkspaces = async () => {
+      setLoadingWorkspaces(true);
+      setError(null);
+
+      try {
+        const workspaceList = await listSlackWorkspaces();
+        setWorkspaces(workspaceList);
+
+        // Auto-select first workspace if available
+        if (workspaceList.length > 0) {
+          setSelectedWorkspaceId(workspaceList[0].workspaceId);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : t('slack.error.networkError'));
+      } finally {
+        setLoadingWorkspaces(false);
+      }
+    };
+
+    loadWorkspaces();
+  }, [isOpen, t]);
+
+  // Load channels when workspace is selected
+  useEffect(() => {
+    if (!selectedWorkspaceId) {
+      setChannels([]);
+      setSelectedChannelId('');
       return;
     }
 
@@ -51,7 +92,7 @@ export function SlackShareDialog({
       setError(null);
 
       try {
-        const channelList = await getSlackChannels();
+        const channelList = await getSlackChannels(selectedWorkspaceId);
         setChannels(channelList);
 
         // Auto-select first channel if available
@@ -66,7 +107,7 @@ export function SlackShareDialog({
     };
 
     loadChannels();
-  }, [isOpen, t]);
+  }, [selectedWorkspaceId, t]);
 
   // Auto-focus dialog when opened
   useEffect(() => {
@@ -76,6 +117,11 @@ export function SlackShareDialog({
   }, [isOpen]);
 
   const handleShare = async () => {
+    if (!selectedWorkspaceId) {
+      setError(t('slack.share.selectWorkspacePlaceholder'));
+      return;
+    }
+
     if (!selectedChannelId) {
       setError(t('slack.share.selectChannelPlaceholder'));
       return;
@@ -87,6 +133,7 @@ export function SlackShareDialog({
 
     try {
       const result = await shareWorkflowToSlack({
+        workspaceId: selectedWorkspaceId,
         workflowId,
         workflowName,
         channelId: selectedChannelId,
@@ -110,7 +157,7 @@ export function SlackShareDialog({
   };
 
   const handleShareOverride = async () => {
-    if (!selectedChannelId) {
+    if (!selectedWorkspaceId || !selectedChannelId) {
       return;
     }
 
@@ -120,6 +167,7 @@ export function SlackShareDialog({
 
     try {
       const result = await shareWorkflowToSlack({
+        workspaceId: selectedWorkspaceId,
         workflowId,
         workflowName,
         channelId: selectedChannelId,
@@ -138,6 +186,7 @@ export function SlackShareDialog({
   };
 
   const handleClose = () => {
+    setSelectedWorkspaceId('');
     setSelectedChannelId('');
     setDescription('');
     setError(null);
@@ -364,6 +413,50 @@ export function SlackShareDialog({
           {workflowName}
         </div>
 
+        {/* Workspace Selection */}
+        <div style={{ marginBottom: '16px' }}>
+          <label
+            htmlFor="workspace-select"
+            style={{
+              display: 'block',
+              fontSize: '13px',
+              color: 'var(--vscode-foreground)',
+              marginBottom: '8px',
+              fontWeight: 500,
+            }}
+          >
+            {t('slack.share.selectWorkspace')}
+          </label>
+          <select
+            id="workspace-select"
+            value={selectedWorkspaceId}
+            onChange={(e) => setSelectedWorkspaceId(e.target.value)}
+            disabled={loadingWorkspaces || loading}
+            style={{
+              width: '100%',
+              padding: '6px 8px',
+              backgroundColor: 'var(--vscode-input-background)',
+              color: 'var(--vscode-input-foreground)',
+              border: '1px solid var(--vscode-input-border)',
+              borderRadius: '2px',
+              fontSize: '13px',
+              cursor: loadingWorkspaces || loading ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {loadingWorkspaces ? (
+              <option value="">{t('loading')}...</option>
+            ) : workspaces.length === 0 ? (
+              <option value="">{t('slack.error.noWorkspaces')}</option>
+            ) : (
+              workspaces.map((workspace) => (
+                <option key={workspace.workspaceId} value={workspace.workspaceId}>
+                  {workspace.workspaceName}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
+
         {/* Channel Selection */}
         <div style={{ marginBottom: '16px' }}>
           <label
@@ -499,17 +592,37 @@ export function SlackShareDialog({
           <button
             type="button"
             onClick={handleShare}
-            disabled={loading || loadingChannels || !selectedChannelId}
+            disabled={
+              loading ||
+              loadingWorkspaces ||
+              loadingChannels ||
+              !selectedWorkspaceId ||
+              !selectedChannelId
+            }
             style={{
               padding: '6px 16px',
               backgroundColor: 'var(--vscode-button-background)',
               color: 'var(--vscode-button-foreground)',
               border: 'none',
               borderRadius: '2px',
-              cursor: loading || loadingChannels || !selectedChannelId ? 'not-allowed' : 'pointer',
+              cursor:
+                loading ||
+                loadingWorkspaces ||
+                loadingChannels ||
+                !selectedWorkspaceId ||
+                !selectedChannelId
+                  ? 'not-allowed'
+                  : 'pointer',
               fontSize: '13px',
               fontWeight: 500,
-              opacity: loading || loadingChannels || !selectedChannelId ? 0.5 : 1,
+              opacity:
+                loading ||
+                loadingWorkspaces ||
+                loadingChannels ||
+                !selectedWorkspaceId ||
+                !selectedChannelId
+                  ? 0.5
+                  : 1,
             }}
           >
             {loading ? t('slack.share.sharing') : t('slack.share.title')}

@@ -541,6 +541,8 @@ export type ExtensionMessage =
   | Message<SlackErrorPayload, 'SLACK_CONNECT_FAILED'>
   | Message<void, 'SLACK_DISCONNECT_SUCCESS'>
   | Message<SlackErrorPayload, 'SLACK_DISCONNECT_FAILED'>
+  | Message<ListSlackWorkspacesSuccessPayload, 'LIST_SLACK_WORKSPACES_SUCCESS'>
+  | Message<SlackErrorPayload, 'LIST_SLACK_WORKSPACES_FAILED'>
   | Message<GetSlackChannelsSuccessPayload, 'GET_SLACK_CHANNELS_SUCCESS'>
   | Message<SlackErrorPayload, 'GET_SLACK_CHANNELS_FAILED'>
   | Message<ImportWorkflowSuccessPayload, 'IMPORT_WORKFLOW_SUCCESS'>
@@ -595,10 +597,45 @@ export interface SlackErrorPayload {
 }
 
 /**
+ * Get Slack channels request payload
+ */
+export interface GetSlackChannelsPayload {
+  /** Target workspace ID */
+  workspaceId: string;
+  /** Include private channels (default: true) */
+  includePrivate?: boolean;
+  /** Only show channels user is a member of (default: true) */
+  onlyMember?: boolean;
+}
+
+/**
  * Get Slack channels success payload
  */
 export interface GetSlackChannelsSuccessPayload {
   channels: SlackChannel[];
+}
+
+/**
+ * Slack workspace information (for workspace selection)
+ */
+export interface SlackWorkspace {
+  /** Workspace ID (Team ID) */
+  workspaceId: string;
+  /** Workspace name */
+  workspaceName: string;
+  /** Team ID */
+  teamId: string;
+  /** When the workspace was authorized */
+  authorizedAt: string;
+  /** Last validation timestamp (optional) */
+  lastValidatedAt?: string;
+}
+
+/**
+ * List Slack workspaces success payload
+ */
+export interface ListSlackWorkspacesSuccessPayload {
+  workspaces: SlackWorkspace[];
 }
 
 /**
@@ -619,6 +656,8 @@ export interface SearchSlackWorkflowsSuccessPayload {
  * Share workflow to Slack channel payload
  */
 export interface ShareWorkflowToSlackPayload {
+  /** Target workspace ID */
+  workspaceId: string;
   /** Workflow ID to share */
   workflowId: string;
   /** Workflow name */
@@ -709,6 +748,8 @@ export type WebviewMessage =
   | Message<GetMcpToolSchemaPayload, 'GET_MCP_TOOL_SCHEMA'>
   | Message<ValidateMcpNodePayload, 'VALIDATE_MCP_NODE'>
   | Message<UpdateMcpNodePayload, 'UPDATE_MCP_NODE'>
+  | Message<void, 'LIST_SLACK_WORKSPACES'>
+  | Message<GetSlackChannelsPayload, 'GET_SLACK_CHANNELS'>
   | Message<ShareWorkflowToSlackPayload, 'SHARE_WORKFLOW_TO_SLACK'>;
 
 // ============================================================================

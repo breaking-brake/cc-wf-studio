@@ -511,6 +511,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Share
   'slack.share.title': '分享到 Slack',
+  'slack.share.selectWorkspace': '選擇工作區',
+  'slack.share.selectWorkspacePlaceholder': '選擇一個工作區...',
   'slack.share.selectChannel': '選擇頻道',
   'slack.share.selectChannelPlaceholder': '選擇一個頻道...',
   'slack.share.sharing': '分享中...',
@@ -537,6 +539,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.notInChannel': '機器人不是此頻道的成員。請先邀請機器人。',
   'slack.error.networkError': '網路錯誤。請檢查您的連接。',
   'slack.error.rateLimited': '超出速率限制。請在 {seconds} 秒後重試。',
+  'slack.error.noWorkspaces': '沒有連接的工作區',
   'slack.error.noChannels': '沒有可用的頻道',
 
   // Sensitive Data Warning

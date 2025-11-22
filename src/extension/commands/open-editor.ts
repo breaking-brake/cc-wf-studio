@@ -19,12 +19,22 @@ import { loadWorkflowList } from './load-workflow-list';
 import { handleGetMcpToolSchema, handleGetMcpTools, handleListMcpServers } from './mcp-handlers';
 import { saveWorkflow } from './save-workflow';
 import { handleBrowseSkills, handleCreateSkill, handleValidateSkillFile } from './skill-operations';
-import { handleShareWorkflowToSlack } from './slack-share-workflow';
+import {
+  handleGetSlackChannels,
+  handleListSlackWorkspaces,
+  handleShareWorkflowToSlack,
+} from './slack-share-workflow';
 import {
   handleCancelRefinement,
   handleClearConversation,
   handleRefineWorkflow,
 } from './workflow-refinement';
+
+// Module-level variables to share state between commands
+let currentPanel: vscode.WebviewPanel | undefined;
+let fileService: FileService;
+let slackTokenManager: SlackTokenManager;
+let slackApiService: SlackApiService;
 
 /**
  * Register the open editor command
@@ -34,11 +44,6 @@ import {
 export function registerOpenEditorCommand(
   context: vscode.ExtensionContext
 ): vscode.WebviewPanel | null {
-  let currentPanel: vscode.WebviewPanel | undefined;
-  let fileService: FileService;
-  let slackTokenManager: SlackTokenManager;
-  let slackApiService: SlackApiService;
-
   const openEditorCommand = vscode.commands.registerCommand('cc-wf-studio.openEditor', () => {
     // Initialize file service
     try {
@@ -356,6 +361,32 @@ export function registerOpenEditorCommand(
                 payload: {
                   code: 'VALIDATION_ERROR',
                   message: 'Server ID and Tool Name are required',
+                },
+              });
+            }
+            break;
+
+          case 'LIST_SLACK_WORKSPACES':
+            // List connected Slack workspaces
+            await handleListSlackWorkspaces(webview, message.requestId || '', slackApiService);
+            break;
+
+          case 'GET_SLACK_CHANNELS':
+            // Get Slack channels for specific workspace
+            if (message.payload?.workspaceId) {
+              await handleGetSlackChannels(
+                message.payload,
+                webview,
+                message.requestId || '',
+                slackApiService
+              );
+            } else {
+              webview.postMessage({
+                type: 'ERROR',
+                requestId: message.requestId,
+                payload: {
+                  code: 'VALIDATION_ERROR',
+                  message: 'Workspace ID is required',
                 },
               });
             }

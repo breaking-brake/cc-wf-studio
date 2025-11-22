@@ -20,6 +20,8 @@ import type { SlackTokenManager } from '../utils/slack-token-manager';
  * Workflow file upload options
  */
 export interface WorkflowUploadOptions {
+  /** Target workspace ID */
+  workspaceId: string;
   /** Workflow JSON content */
   content: string;
   /** Filename */
@@ -60,6 +62,8 @@ export interface FileUploadResult {
  * Workflow search options
  */
 export interface WorkflowSearchOptions {
+  /** Target workspace ID */
+  workspaceId: string;
   /** Search query */
   query?: string;
   /** Filter by channel ID */
@@ -98,45 +102,68 @@ export interface SearchResult {
  * Slack API Service
  *
  * Wraps Slack Web API with authentication and error handling.
+ * Supports multiple workspace connections.
  */
 export class SlackApiService {
-  private client: WebClient | null = null;
+  /** Workspace-specific WebClient cache */
+  private clients: Map<string, WebClient> = new Map();
 
   constructor(private readonly tokenManager: SlackTokenManager) {}
 
   /**
-   * Initializes Slack client with access token
+   * Initializes Slack client for specific workspace with access token
    *
-   * @throws Error if not authenticated
+   * @param workspaceId - Target workspace ID
+   * @throws Error if workspace not authenticated
    */
-  private async ensureClient(): Promise<WebClient> {
-    if (!this.client) {
-      const accessToken = await this.tokenManager.getAccessToken();
-      if (!accessToken) {
-        throw new Error('Slackに接続されていません');
-      }
-      this.client = new WebClient(accessToken);
+  private async ensureClient(workspaceId: string): Promise<WebClient> {
+    // Return cached client if exists
+    let client = this.clients.get(workspaceId);
+    if (client) {
+      return client;
     }
-    return this.client;
+
+    // Get access token for this workspace
+    const accessToken = await this.tokenManager.getAccessTokenByWorkspaceId(workspaceId);
+    if (!accessToken) {
+      throw new Error(`ワークスペース ${workspaceId} に接続されていません`);
+    }
+
+    // Create and cache new client
+    client = new WebClient(accessToken);
+    this.clients.set(workspaceId, client);
+
+    return client;
   }
 
   /**
    * Invalidates cached client (forces re-authentication)
+   *
+   * @param workspaceId - Optional workspace ID. If not provided, clears all cached clients.
    */
-  invalidateClient(): void {
-    this.client = null;
+  invalidateClient(workspaceId?: string): void {
+    if (workspaceId) {
+      this.clients.delete(workspaceId);
+    } else {
+      this.clients.clear();
+    }
   }
 
   /**
    * Gets list of Slack channels
    *
+   * @param workspaceId - Target workspace ID
    * @param includePrivate - Include private channels (default: true)
    * @param onlyMember - Only channels user is a member of (default: true)
    * @returns Array of channels
    */
-  async getChannels(includePrivate = true, onlyMember = true): Promise<SlackChannel[]> {
+  async getChannels(
+    workspaceId: string,
+    includePrivate = true,
+    onlyMember = true
+  ): Promise<SlackChannel[]> {
     try {
-      const client = await this.ensureClient();
+      const client = await this.ensureClient(workspaceId);
 
       // Build channel types filter
       const types: string[] = ['public_channel'];
@@ -198,7 +225,7 @@ export class SlackApiService {
    */
   async uploadWorkflowFile(options: WorkflowUploadOptions): Promise<FileUploadResult> {
     try {
-      const client = await this.ensureClient();
+      const client = await this.ensureClient(options.workspaceId);
 
       // Upload file using files.uploadV2
       const response = await client.files.uploadV2({
@@ -229,16 +256,18 @@ export class SlackApiService {
   /**
    * Posts rich message card to channel
    *
+   * @param workspaceId - Target workspace ID
    * @param channelId - Target channel ID
    * @param block - Workflow message block
    * @returns Message post result
    */
   async postWorkflowMessage(
+    workspaceId: string,
     channelId: string,
     block: WorkflowMessageBlock
   ): Promise<MessagePostResult> {
     try {
-      const client = await this.ensureClient();
+      const client = await this.ensureClient(workspaceId);
 
       // Build Block Kit blocks
       const blocks = buildWorkflowMessageBlocks(block);
@@ -280,7 +309,7 @@ export class SlackApiService {
    */
   async searchWorkflows(options: WorkflowSearchOptions): Promise<SearchResult[]> {
     try {
-      const client = await this.ensureClient();
+      const client = await this.ensureClient(options.workspaceId);
 
       // Build search query
       let query = 'workflow filename:*.json';
@@ -329,17 +358,27 @@ export class SlackApiService {
   }
 
   /**
-   * Validates current token
+   * Validates token for specific workspace
    *
+   * @param workspaceId - Target workspace ID
    * @returns True if token is valid
    */
-  async validateToken(): Promise<boolean> {
+  async validateToken(workspaceId: string): Promise<boolean> {
     try {
-      const client = await this.ensureClient();
+      const client = await this.ensureClient(workspaceId);
       const response = await client.auth.test();
       return response.ok === true;
     } catch (_error) {
       return false;
     }
+  }
+
+  /**
+   * Gets list of connected workspaces
+   *
+   * @returns Array of workspace connections
+   */
+  async getWorkspaces() {
+    return this.tokenManager.getWorkspaces();
   }
 }

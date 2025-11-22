@@ -131,8 +131,8 @@ npm run watch
 
 1. VS Codeで `F5` を押す
 2. Extension Development Hostウィンドウが開く
-3. コマンドパレット (`Ctrl/Cmd+Shift+P`) で `Slack: Connect Workspace` を実行
-4. ブラウザでOAuth認証を完了
+3. ⚠️ **注意**: 現在User Story 1のみ実装している状態では、`Slack: Connect Workspace`コマンドは未実装です。Slack認証は初回共有時に自動的にトリガーされます。
+4. Workflow Studioを開き、ツールバーの「Share to Slack」ボタンをクリックすると、未認証の場合は自動的にOAuth認証フローが開始されます
 
 ### 3.3 ホットリロード
 
@@ -319,35 +319,41 @@ export class SensitiveDataDetector {
 ### 5.1 Manual E2E Testing
 
 **T001: Slack接続テスト**
-1. コマンドパレットで `Slack: Connect Workspace` を実行
-2. ブラウザでOAuth認証を完了
-3. VS Codeに戻り、接続成功通知を確認
+⚠️ **注意**: `Slack: Connect Workspace`コマンドはUser Story 4の機能です。User Story 1のみ実装している状態では、初回共有時に自動的にOAuth認証が開始されます。
+1. Workflow Studioを開く
+2. ツールバーの「Share to Slack」ボタンをクリック
+3. 未認証の場合、ブラウザでOAuth認証ページが自動的に開く
+4. ワークスペースを選択し、アクセスを許可
+5. VS Codeに戻り、接続成功後にチャンネル選択ダイアログが表示される
 
 **T002: ワークフロー共有テスト**
-1. ワークフローファイルを開く
-2. コマンドパレットで `Slack: Share Workflow` を実行
+1. Workflow Studioを開く
+2. ツールバー（上部）の「Share to Slack」ボタンをクリック
 3. チャンネル選択ダイアログで共有先を選択
 4. 機密情報警告が表示されないことを確認 (機密情報がない場合)
 5. Slackチャンネルでリッチメッセージカードを確認
 
 **T003: 機密情報検出テスト**
 1. ワークフローファイルにAWSキー (`AKIA1234567890ABCDEF`) を含める
-2. `Slack: Share Workflow` を実行
+2. ツールバー（上部）の「Share to Slack」ボタンをクリック
 3. 機密情報警告ダイアログが表示されることを確認
 4. マスク済みの値 (`AKIA...CDEF`) が表示されることを確認
 5. 「続行」を選択して共有完了
 
 **T004: ワークフローインポートテスト**
+⚠️ **注意**: ワークフローインポート機能はUser Story 2の機能です。User Story 1のみ実装している状態では、この機能は未実装です。
 1. Slackメッセージの「Import to VS Code」ボタンをクリック
 2. VS Codeに戻り、インポート成功通知を確認
 3. `.vscode/workflows/` にファイルが保存されていることを確認
 
 **T005: 上書き確認テスト**
+⚠️ **注意**: ワークフローインポート機能はUser Story 2の機能です。User Story 1のみ実装している状態では、この機能は未実装です。
 1. 既存ワークフローと同名のファイルをインポート
 2. 上書き確認ダイアログが表示されることを確認
 3. 「上書き」を選択してインポート完了
 
 **T006: 検索テスト**
+⚠️ **注意**: `Slack: Search Workflows`コマンドはUser Story 3の機能です。User Story 1のみ実装している状態では、この機能は未実装です。
 1. コマンドパレットで `Slack: Search Workflows` を実行
 2. 検索クエリを入力 (例: `data processing`)
 3. 過去に共有されたワークフローがリスト表示されることを確認
@@ -356,7 +362,7 @@ export class SensitiveDataDetector {
 ### 5.2 エラーケースのテスト
 
 **E001: 未認証エラー**
-1. Slack未接続の状態で `Share Workflow` を実行
+1. Slack未接続の状態でツールバーの「Share to Slack」ボタンをクリック
 2. 「Slackに接続してください」エラーが表示されることを確認
 
 **E002: チャンネルアクセスエラー**

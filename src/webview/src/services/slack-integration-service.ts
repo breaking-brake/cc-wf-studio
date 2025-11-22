@@ -24,9 +24,21 @@ export interface SlackChannel {
 }
 
 /**
+ * Slack workspace information
+ */
+export interface SlackWorkspace {
+  workspaceId: string;
+  workspaceName: string;
+  teamId: string;
+  authorizedAt: string;
+  lastValidatedAt?: string;
+}
+
+/**
  * Workflow share options
  */
 export interface ShareWorkflowOptions {
+  workspaceId: string;
   workflowId: string;
   workflowName: string;
   channelId: string;
@@ -166,13 +178,53 @@ export function disconnectFromSlack(): Promise<void> {
 }
 
 /**
- * Get list of Slack channels
+ * List connected Slack workspaces
  *
+ * @returns Promise that resolves with workspace list
+ */
+export function listSlackWorkspaces(): Promise<SlackWorkspace[]> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'LIST_SLACK_WORKSPACES_SUCCESS') {
+          resolve(message.payload?.workspaces || []);
+        } else if (message.type === 'LIST_SLACK_WORKSPACES_FAILED') {
+          reject(new Error(message.payload?.message || 'Failed to list Slack workspaces'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    vscode.postMessage({
+      type: 'LIST_SLACK_WORKSPACES',
+      requestId,
+      payload: {},
+    });
+
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timeout'));
+    }, 10000);
+  });
+}
+
+/**
+ * Get list of Slack channels for specific workspace
+ *
+ * @param workspaceId - Target workspace ID
  * @param includePrivate - Include private channels (default: true)
  * @param onlyMember - Only channels user is a member of (default: true)
  * @returns Promise that resolves with channel list
  */
 export function getSlackChannels(
+  workspaceId: string,
   includePrivate = true,
   onlyMember = true
 ): Promise<SlackChannel[]> {
@@ -199,6 +251,7 @@ export function getSlackChannels(
       type: 'GET_SLACK_CHANNELS',
       requestId,
       payload: {
+        workspaceId,
         includePrivate,
         onlyMember,
       },

@@ -22,6 +22,7 @@ import { ProcessingOverlay } from './common/ProcessingOverlay';
 interface ToolbarProps {
   onError: (error: { code: string; message: string; details?: unknown }) => void;
   onStartTour: () => void;
+  onShareToSlack: () => void;
 }
 
 interface WorkflowListItem {
@@ -31,7 +32,7 @@ interface WorkflowListItem {
   updatedAt: string;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareToSlack }) => {
   const { t } = useTranslation();
   const { nodes, edges, setNodes, setEdges, activeWorkflow, setActiveWorkflow } =
     useWorkflowStore();
@@ -312,6 +313,25 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
         }}
       >
         {t('toolbar.refineWithAI')}
+      </button>
+
+      {/* Share to Slack Button - Phase 3.1 */}
+      <button
+        type="button"
+        onClick={onShareToSlack}
+        title="Share workflow to Slack"
+        style={{
+          padding: '4px 12px',
+          backgroundColor: 'var(--vscode-button-secondaryBackground)',
+          color: 'var(--vscode-button-secondaryForeground)',
+          border: 'none',
+          borderRadius: '2px',
+          cursor: 'pointer',
+          fontSize: '13px',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        Share to Slack
       </button>
 
       {/* Divider */}

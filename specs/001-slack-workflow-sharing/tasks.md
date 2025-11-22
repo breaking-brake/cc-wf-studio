@@ -68,21 +68,21 @@
 以下のテストシナリオは、実装完了後に手動で実施します:
 
 **T001: 基本的なワークフロー共有**
-1. ワークフローファイルを開く
-2. コマンドパレットで `Slack: Share Workflow` を実行
+1. Workflow Studioを開く
+2. ツールバーの「Share to Slack」ボタンをクリック
 3. チャンネル選択ダイアログで共有先を選択
 4. 機密情報警告が表示されないことを確認 (機密情報がない場合)
 5. Slackチャンネルでリッチメッセージカードを確認
 
 **T002: 機密情報検出警告**
 1. ワークフローファイルにAWSキー (`AKIA1234567890ABCDEF`) を含める
-2. `Slack: Share Workflow` を実行
+2. ツールバーの「Share to Slack」ボタンをクリック
 3. 機密情報警告ダイアログが表示されることを確認
 4. マスク済みの値 (`AKIA...CDEF`) が表示されることを確認
 5. 「続行」を選択して共有完了
 
 **T003: 未認証エラー**
-1. Slack未接続の状態で `Share Workflow` を実行
+1. Slack未接続の状態でツールバーの「Share to Slack」ボタンをクリック
 2. 「Slackに接続してください」エラーが表示されることを確認
 
 ### Implementation for User Story 1
@@ -99,7 +99,23 @@
 - [x] T022 [US1] VS Code コマンド登録 (`Slack: Share Workflow`) in src/extension/commands/open-editor.ts
 - [x] T023 [P] [US1] i18n翻訳の追加 (ワークフロー共有関連メッセージ) in src/webview/src/i18n/translations/*.ts
 
-**Checkpoint**: User Story 1完全実装完了 - 独立して機能確認可能
+**Checkpoint**: User Story 1 バックエンド実装完了 - Webview経由でテスト可能
+
+---
+
+## Phase 3.1: User Story 1 - ツールバーUI統合 (優先度: P1)
+
+**ゴール**: Workflow Studio（Webview UI）内のツールバーに「Share to Slack」ボタンを表示し、クリックするとSlack共有ダイアログが表示される。
+
+**独立テスト**: Workflow Studioを開き、ツールバー（上部）の「Share to Slack」ボタンをクリックして、Slack共有ダイアログが開くことを確認できる。
+
+### Implementation for Phase 3.1
+
+- [x] T023-1 [P] [US1] Toolbar.tsxにonShareToSlackプロパティとボタンを追加 in src/webview/src/components/Toolbar.tsx
+- [x] T023-2 [P] [US1] App.tsxでhandleShareToSlackコールバック実装 in src/webview/src/App.tsx
+- [x] T023-3 [P] [US1] SlackShareDialogの状態管理とレンダリング in src/webview/src/App.tsx
+
+**Checkpoint**: User Story 1完全実装完了 - Workflow Studioツールバーから直接実行可能
 
 ---
 

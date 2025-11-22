@@ -483,6 +483,8 @@ export interface WebviewTranslationKeys {
 
   // Slack Share
   'slack.share.title': string;
+  'slack.share.selectWorkspace': string;
+  'slack.share.selectWorkspacePlaceholder': string;
   'slack.share.selectChannel': string;
   'slack.share.selectChannelPlaceholder': string;
   'slack.share.descriptionPlaceholder': string;
@@ -507,6 +509,7 @@ export interface WebviewTranslationKeys {
   'slack.error.notAuthenticated': string;
   'slack.error.channelNotFound': string;
   'slack.error.noChannels': string;
+  'slack.error.noWorkspaces': string;
   'slack.error.notInChannel': string;
   'slack.error.networkError': string;
   'slack.error.rateLimited': string;

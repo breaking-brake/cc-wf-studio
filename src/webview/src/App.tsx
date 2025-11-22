@@ -12,6 +12,7 @@ import { ProcessingOverlay } from './components/common/ProcessingOverlay';
 import { SimpleOverlay } from './components/common/SimpleOverlay';
 import { ConfirmDialog } from './components/dialogs/ConfirmDialog';
 import { RefinementChatPanel } from './components/dialogs/RefinementChatPanel';
+import { SlackShareDialog } from './components/dialogs/SlackShareDialog';
 import { ErrorNotification } from './components/ErrorNotification';
 import { NodePalette } from './components/NodePalette';
 import { PropertyPanel } from './components/PropertyPanel';
@@ -24,11 +25,13 @@ import { useWorkflowStore } from './stores/workflow-store';
 
 const App: React.FC = () => {
   const { t } = useTranslation();
-  const { pendingDeleteNodeIds, confirmDeleteNodes, cancelDeleteNodes } = useWorkflowStore();
+  const { pendingDeleteNodeIds, confirmDeleteNodes, cancelDeleteNodes, activeWorkflow } =
+    useWorkflowStore();
   const { isOpen: isRefinementPanelOpen, isProcessing } = useRefinementStore();
   const [error, setError] = useState<ErrorPayload | null>(null);
   const [runTour, setRunTour] = useState(false);
   const [tourKey, setTourKey] = useState(0); // Used to force Tour component remount
+  const [isSlackShareDialogOpen, setIsSlackShareDialogOpen] = useState(false);
 
   const handleError = (errorData: ErrorPayload) => {
     setError(errorData);
@@ -45,6 +48,10 @@ const App: React.FC = () => {
   const handleStartTour = () => {
     setRunTour(true);
     setTourKey((prev) => prev + 1); // Increment key to force remount and reset tour state
+  };
+
+  const handleShareToSlack = () => {
+    setIsSlackShareDialogOpen(true);
   };
 
   // Listen for messages from Extension
@@ -80,7 +87,11 @@ const App: React.FC = () => {
       }}
     >
       {/* Top: Toolbar */}
-      <Toolbar onError={handleError} onStartTour={handleStartTour} />
+      <Toolbar
+        onError={handleError}
+        onStartTour={handleStartTour}
+        onShareToSlack={handleShareToSlack}
+      />
 
       {/* Main Content: 3-column layout */}
       <div
@@ -124,6 +135,14 @@ const App: React.FC = () => {
         cancelLabel={t('dialog.deleteNode.cancel')}
         onConfirm={confirmDeleteNodes}
         onCancel={cancelDeleteNodes}
+      />
+
+      {/* Slack Share Dialog */}
+      <SlackShareDialog
+        isOpen={isSlackShareDialogOpen}
+        onClose={() => setIsSlackShareDialogOpen(false)}
+        workflowId={activeWorkflow?.id || ''}
+        workflowName={activeWorkflow?.name || 'Untitled Workflow'}
       />
     </div>
   );

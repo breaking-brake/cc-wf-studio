@@ -535,6 +535,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Share
   'slack.share.title': 'Share to Slack',
+  'slack.share.selectWorkspace': 'Select workspace',
+  'slack.share.selectWorkspacePlaceholder': 'Choose a workspace...',
   'slack.share.selectChannel': 'Select channel',
   'slack.share.selectChannelPlaceholder': 'Choose a channel...',
   'slack.share.descriptionPlaceholder': 'Add a description (optional)...',
@@ -558,6 +560,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Slack Errors
   'slack.error.notAuthenticated': 'Please connect to Slack first',
   'slack.error.channelNotFound': 'Channel not found',
+  'slack.error.noWorkspaces': 'No workspaces connected',
   'slack.error.noChannels': 'No channels available',
   'slack.error.notInChannel': 'Bot is not a member of this channel. Please invite the bot first.',
   'slack.error.networkError': 'Network error. Please check your connection.',

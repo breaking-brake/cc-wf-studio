@@ -531,6 +531,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Share
   'slack.share.title': 'Slack에 공유',
+  'slack.share.selectWorkspace': '워크스페이스 선택',
+  'slack.share.selectWorkspacePlaceholder': '워크스페이스를 선택하세요...',
   'slack.share.selectChannel': '채널 선택',
   'slack.share.selectChannelPlaceholder': '채널을 선택하세요...',
   'slack.share.sharing': '공유 중...',
@@ -557,6 +559,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.notInChannel': '봇이 이 채널의 멤버가 아닙니다. 먼저 봇을 초대하세요.',
   'slack.error.networkError': '네트워크 오류가 발생했습니다. 연결을 확인하세요.',
   'slack.error.rateLimited': '요청 한도를 초과했습니다. {seconds}초 후에 다시 시도하세요.',
+  'slack.error.noWorkspaces': '연결된 워크스페이스가 없습니다',
   'slack.error.noChannels': '사용 가능한 채널이 없습니다',
 
   // Sensitive Data Warning

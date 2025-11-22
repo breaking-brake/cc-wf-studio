@@ -125,6 +125,7 @@ export async function handleShareWorkflowToSlack(
 
     const filename = `${payload.workflowName.replace(/[^a-zA-Z0-9-_]/g, '_')}.json`;
     const uploadResult = await slackApiService.uploadWorkflowFile({
+      workspaceId: payload.workspaceId,
       content: workflowContent,
       filename,
       title: payload.workflowName,
@@ -152,6 +153,7 @@ export async function handleShareWorkflowToSlack(
     };
 
     const messageResult = await slackApiService.postWorkflowMessage(
+      payload.workspaceId,
       payload.channelId,
       messageBlock
     );
@@ -195,6 +197,120 @@ export async function handleShareWorkflowToSlack(
     });
 
     sendShareFailed(webview, requestId, payload.workflowId, errorInfo.code, errorInfo.message);
+  }
+}
+
+/**
+ * Handle list Slack workspaces request
+ *
+ * @param webview - Webview to send response to
+ * @param requestId - Request ID for correlation
+ * @param slackApiService - Slack API service instance
+ */
+export async function handleListSlackWorkspaces(
+  webview: vscode.Webview,
+  requestId: string,
+  slackApiService: SlackApiService
+): Promise<void> {
+  try {
+    log('INFO', 'Listing Slack workspaces', { requestId });
+
+    const workspaces = await slackApiService.getWorkspaces();
+
+    // Convert to message payload format
+    const workspaceList = workspaces.map((ws) => ({
+      workspaceId: ws.workspaceId,
+      workspaceName: ws.workspaceName,
+      teamId: ws.teamId,
+      authorizedAt: ws.authorizedAt.toISOString(),
+      lastValidatedAt: ws.lastValidatedAt?.toISOString(),
+    }));
+
+    webview.postMessage({
+      type: 'LIST_SLACK_WORKSPACES_SUCCESS',
+      requestId,
+      payload: {
+        workspaces: workspaceList,
+      },
+    });
+
+    log('INFO', 'Workspace list retrieved successfully', {
+      requestId,
+      count: workspaceList.length,
+    });
+  } catch (error) {
+    const errorInfo = handleSlackError(error);
+
+    log('ERROR', 'Failed to list workspaces', {
+      requestId,
+      errorCode: errorInfo.code,
+      errorMessage: errorInfo.message,
+    });
+
+    webview.postMessage({
+      type: 'LIST_SLACK_WORKSPACES_FAILED',
+      requestId,
+      payload: {
+        message: errorInfo.message,
+      },
+    });
+  }
+}
+
+/**
+ * Handle get Slack channels request
+ *
+ * @param payload - Get channels request payload
+ * @param webview - Webview to send response to
+ * @param requestId - Request ID for correlation
+ * @param slackApiService - Slack API service instance
+ */
+export async function handleGetSlackChannels(
+  payload: { workspaceId: string; includePrivate?: boolean; onlyMember?: boolean },
+  webview: vscode.Webview,
+  requestId: string,
+  slackApiService: SlackApiService
+): Promise<void> {
+  try {
+    log('INFO', 'Getting Slack channels', {
+      requestId,
+      workspaceId: payload.workspaceId,
+    });
+
+    const channels = await slackApiService.getChannels(
+      payload.workspaceId,
+      payload.includePrivate ?? true,
+      payload.onlyMember ?? true
+    );
+
+    webview.postMessage({
+      type: 'GET_SLACK_CHANNELS_SUCCESS',
+      requestId,
+      payload: {
+        channels,
+      },
+    });
+
+    log('INFO', 'Channel list retrieved successfully', {
+      requestId,
+      count: channels.length,
+    });
+  } catch (error) {
+    const errorInfo = handleSlackError(error);
+
+    log('ERROR', 'Failed to get channels', {
+      requestId,
+      errorCode: errorInfo.code,
+      errorMessage: errorInfo.message,
+    });
+
+    webview.postMessage({
+      type: 'GET_SLACK_CHANNELS_FAILED',
+      requestId,
+      payload: {
+        message: errorInfo.message,
+      },
+    });
   }
 }
 

@@ -532,6 +532,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Share
   'slack.share.title': 'Slackに共有',
+  'slack.share.selectWorkspace': 'ワークスペース選択',
+  'slack.share.selectWorkspacePlaceholder': 'ワークスペースを選択...',
   'slack.share.selectChannel': 'チャンネル選択',
   'slack.share.selectChannelPlaceholder': 'チャンネルを選択...',
   'slack.share.sharing': '共有中...',
@@ -559,6 +561,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     'Botがこのチャンネルのメンバーではありません。先にBotを招待してください。',
   'slack.error.networkError': 'ネットワークエラー。接続を確認してください。',
   'slack.error.rateLimited': 'レート制限を超過しました。{seconds}秒後に再試行してください。',
+  'slack.error.noWorkspaces': '接続されているワークスペースがありません',
   'slack.error.noChannels': '利用可能なチャンネルがありません',
 
   // Sensitive Data Warning
