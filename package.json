@@ -58,6 +58,26 @@
           "minimum": 30,
           "maximum": 300,
           "description": "Timeout in seconds for AI workflow refinement requests (30-300 seconds)"
+        },
+        "cc-wf-studio.slack.clientId": {
+          "type": "string",
+          "default": "",
+          "description": "Slack App Client ID for OAuth authentication"
+        },
+        "cc-wf-studio.slack.clientSecret": {
+          "type": "string",
+          "default": "",
+          "description": "Slack App Client Secret for OAuth authentication"
+        },
+        "cc-wf-studio.slack.redirectUri": {
+          "type": "string",
+          "default": "http://localhost:3000/oauth/callback",
+          "description": "OAuth redirect URI (default: http://localhost:3000/oauth/callback)"
+        },
+        "cc-wf-studio.slack.ngrokAuthtoken": {
+          "type": "string",
+          "default": "",
+          "description": "Ngrok authtoken for creating HTTPS tunnels (required for Slack OAuth)"
         }
       }
     }
@@ -83,7 +103,6 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.6",
-    "@ngrok/ngrok": "^1.4.1",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^10.0.1",
@@ -98,6 +117,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.22.0",
+    "@ngrok/ngrok": "^1.4.1",
     "@slack/web-api": "^7.12.0",
     "nano-spawn": "^2.0.0"
   }

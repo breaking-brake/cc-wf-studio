@@ -11,10 +11,8 @@
  * See: Issue #79 - Windows environment compatibility
  */
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const nanoSpawn = require('nano-spawn');
-
 import type { McpServerReference, McpToolReference } from '../../shared/types/mcp-node';
+import nanoSpawn from 'nano-spawn';
 import { log } from '../extension';
 import { getCachedTools, setCachedTools } from './mcp-cache-service';
 

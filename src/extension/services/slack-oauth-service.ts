@@ -29,6 +29,8 @@ export interface SlackOAuthConfig {
   clientSecret: string;
   /** Required OAuth scopes */
   scopes: string[];
+  /** Ngrok authtoken for creating HTTPS tunnels */
+  ngrokAuthtoken?: string;
 }
 
 /**
@@ -100,7 +102,7 @@ export class SlackOAuthService {
         const localUrl = new URL(callbackUrl);
         const localPort = Number.parseInt(localUrl.port, 10);
 
-        ngrokService = new NgrokService();
+        ngrokService = new NgrokService(this.config.ngrokAuthtoken);
         const ngrokTunnel = await ngrokService.createTunnel(localPort);
         httpsRedirectUri = `${ngrokTunnel.publicUrl}/oauth/callback`;
         shouldCleanupTunnel = true;

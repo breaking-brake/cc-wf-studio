@@ -25,6 +25,8 @@ export interface NgrokTunnel {
 export class NgrokService {
   private listener: ngrok.Listener | null = null;
 
+  constructor(private readonly authtoken?: string) {}
+
   /**
    * Creates an HTTPS tunnel to a local port
    *
@@ -44,7 +46,7 @@ export class NgrokService {
       // Create ngrok tunnel with timeout
       const tunnelPromise = ngrok.forward({
         addr: localPort,
-        authtoken_from_env: true, // Use NGROK_AUTHTOKEN env var if available
+        authtoken: this.authtoken, // Use authtoken from constructor
       });
 
       this.listener = await Promise.race([tunnelPromise, timeoutPromise]);

@@ -31,8 +31,6 @@ export default defineConfig({
         'vscode',
         // External dependencies with native binaries
         '@ngrok/ngrok',
-        // External dependencies with complex class hierarchies
-        '@slack/web-api',
         // Node.js built-in modules (with and without node: prefix)
         'node:assert',
         'node:child_process',
@@ -47,7 +45,9 @@ export default defineConfig({
         'node:path',
         'node:process',
         'node:querystring',
+        'node:readline/promises',
         'node:stream',
+        'node:stream/promises',
         'node:tty',
         'node:util',
         'node:url',

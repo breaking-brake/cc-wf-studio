@@ -39,8 +39,8 @@ specs/**
 
 # Build tools
 node_modules/**
-# Include nano-spawn for cross-platform process spawning (Issue #79)
-!node_modules/nano-spawn/**
+# Include ngrok for Slack OAuth (has native binaries, cannot be bundled)
+!node_modules/@ngrok/**
 *.vsix
 
 # Documentation

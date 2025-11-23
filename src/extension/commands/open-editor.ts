@@ -468,19 +468,28 @@ export function registerOpenEditorCommand(
                 console.log('[Extension Host] Existing connection deleted');
               }
 
-              // Get OAuth configuration from environment variables
-              const clientId = process.env.SLACK_CLIENT_ID || '';
-              const clientSecret = process.env.SLACK_CLIENT_SECRET || '';
+              // Get OAuth configuration from VSCode settings
+              const config = vscode.workspace.getConfiguration('cc-wf-studio.slack');
+              const clientId = config.get<string>('clientId') || '';
+              const clientSecret = config.get<string>('clientSecret') || '';
+              const ngrokAuthtoken = config.get<string>('ngrokAuthtoken') || '';
 
               if (!clientId || !clientSecret) {
                 throw new Error(
-                  'Slack App credentials not configured. Please set SLACK_CLIENT_ID and SLACK_CLIENT_SECRET environment variables.'
+                  'Slack App credentials not configured. Please set clientId and clientSecret in VSCode settings (cc-wf-studio.slack).'
+                );
+              }
+
+              if (!ngrokAuthtoken) {
+                throw new Error(
+                  'Ngrok authtoken not configured. Please set ngrokAuthtoken in VSCode settings (cc-wf-studio.slack).'
                 );
               }
 
               const oauthConfig = {
                 clientId,
                 clientSecret,
+                ngrokAuthtoken,
                 scopes: ['chat:write', 'files:write', 'channels:read', 'groups:read', 'users:read'],
               };
 
