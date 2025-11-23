@@ -220,10 +220,13 @@ export async function handleImportWorkflowFromSlack(
   } catch (error) {
     const errorInfo = handleSlackError(error);
 
-    log('ERROR', 'Workflow import failed', {
+    // Log detailed error for debugging
+    log('ERROR', 'Workflow import failed - detailed error', {
       requestId,
       errorCode: errorInfo.code,
       errorMessage: errorInfo.message,
+      originalError: error instanceof Error ? error.message : String(error),
+      errorStack: error instanceof Error ? error.stack : undefined,
       executionTimeMs: Date.now() - startTime,
     });
 

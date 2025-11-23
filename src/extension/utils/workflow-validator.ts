@@ -26,7 +26,7 @@ export interface ValidationResult {
  *
  * Checks:
  * 1. Valid JSON format
- * 2. Required fields exist (id, name, version, nodes, edges)
+ * 2. Required fields exist (id, name, version, nodes, connections)
  * 3. Basic structure validation
  *
  * @param content - Workflow JSON string
@@ -57,7 +57,7 @@ export function validateWorkflowFile(content: string): ValidationResult {
   const workflow = parsedData as Record<string, unknown>;
 
   // Step 3: Required field validation
-  const requiredFields: Array<keyof Workflow> = ['id', 'name', 'version', 'nodes', 'edges'];
+  const requiredFields: Array<keyof Workflow> = ['id', 'name', 'version', 'nodes', 'connections'];
 
   for (const field of requiredFields) {
     if (!(field in workflow)) {
@@ -82,8 +82,8 @@ export function validateWorkflowFile(content: string): ValidationResult {
     errors.push('Field "nodes" must be an array');
   }
 
-  if ('edges' in workflow && !Array.isArray(workflow.edges)) {
-    errors.push('Field "edges" must be an array');
+  if ('connections' in workflow && !Array.isArray(workflow.connections)) {
+    errors.push('Field "connections" must be an array');
   }
 
   // Step 5: Return validation result

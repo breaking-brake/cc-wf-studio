@@ -540,6 +540,7 @@ export class SlackApiService {
 
       return content;
     } catch (error) {
+      console.error('[SlackApiService] downloadWorkflowFile error:', error);
       const errorInfo = handleSlackError(error);
       throw new Error(errorInfo.message);
     }
