@@ -5,6 +5,15 @@
 import type { WebviewTranslationKeys } from '../translation-keys';
 
 export const zhCNWebviewTranslations: WebviewTranslationKeys = {
+  // Common
+  loading: '加载中',
+  description: '描述',
+  optional: '可选',
+  cancel: '取消',
+  'common.close': '关闭',
+  'common.cancel': '取消',
+  'loading.importWorkflow': '正在导入工作流...',
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': '工作流名称',
   'toolbar.save': '保存',
@@ -495,4 +504,94 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.mode.detailed.tooltip': '详细模式: 所有参数都已明确配置',
   'mcp.mode.naturalLanguageParam.tooltip': '自然语言参数模式: "{description}"',
   'mcp.mode.fullNaturalLanguage.tooltip': '完全自然语言模式: "{taskDescription}"',
+
+  // Slack Integration
+  'slack.connect': '连接到 Slack',
+  'slack.disconnect': '断开连接',
+  'slack.connecting': '连接中...',
+  'slack.connected': '已连接到 {workspaceName}',
+  'slack.notConnected': '未连接到 Slack',
+
+  // Slack Manual Token
+  'slack.manualToken.title': '连接到 Slack',
+  'slack.manualToken.description': '输入您的 Slack Bot Token 以连接工作区。',
+  'slack.manualToken.howToGet.title': '如何获取 Bot Token',
+  'slack.manualToken.howToGet.step1': '在 api.slack.com/apps 创建 Slack App',
+  'slack.manualToken.howToGet.step2':
+    '添加 Bot Token Scopes: channels:read, chat:write, files:write, groups:read',
+  'slack.manualToken.howToGet.step3': '将 App 安装到您的工作区',
+  'slack.manualToken.howToGet.step4': '将 App 添加到目标频道',
+  'slack.manualToken.howToGet.step5': '复制 Bot User OAuth Token (xoxb-...)',
+  'slack.manualToken.security.title': '安全和隐私',
+  'slack.manualToken.security.storage': '令牌安全存储在 VSCode Secret Storage (OS 密钥链)',
+  'slack.manualToken.security.transmission': '仅发送到 Slack API (api.slack.com) 用于验证',
+  'slack.manualToken.security.deletion': '可以随时删除',
+  'slack.manualToken.botToken.label': 'Bot User OAuth Token',
+  'slack.manualToken.botToken.hint': '以 xoxb- 开头',
+  'slack.manualToken.error.tokenRequired': 'Bot Token 为必填项',
+  'slack.manualToken.error.invalidTokenFormat': 'Bot Token 必须以 "xoxb-" 开头',
+  'slack.manualToken.connecting': '连接中...',
+  'slack.manualToken.connect': '连接',
+  'slack.manualToken.deleteButton': '删除已保存的令牌',
+  'slack.manualToken.deleteConfirm.title': '删除令牌',
+  'slack.manualToken.deleteConfirm.message': '确定要删除已保存的 Slack Bot Token 吗？',
+  'slack.manualToken.deleteConfirm.confirm': '删除',
+  'slack.manualToken.deleteConfirm.cancel': '取消',
+
+  // Slack Share
+  'slack.share.button': '分享',
+  'slack.share.title': '分享到 Slack β版',
+  'slack.share.selectWorkspace': '选择工作区',
+  'slack.share.selectWorkspacePlaceholder': '选择一个工作区...',
+  'slack.share.selectChannel': '选择频道',
+  'slack.share.selectChannelPlaceholder': '选择一个频道...',
+  'slack.share.sharing': '分享中...',
+  'slack.share.success': '工作流分享成功',
+  'slack.share.failed': '工作流分享失败',
+  'slack.share.descriptionPlaceholder': '添加描述（可选）...',
+
+  // Slack Connect
+  'slack.connect.button': '连接到 Slack',
+  'slack.connect.connecting': '连接中...',
+  'slack.connect.description': '连接您的 Slack 工作区以与团队共享工作流。',
+  'slack.connect.success': '已成功连接到 {workspaceName}',
+  'slack.connect.failed': '连接 Slack 失败',
+
+  // Slack Reconnect
+  'slack.reconnect.button': 'Reconnect to Slack',
+  'slack.reconnect.reconnecting': 'Reconnecting...',
+  'slack.reconnect.description':
+    'Re-authenticate with Slack to update permissions or refresh connection.',
+  'slack.reconnect.success': 'Successfully reconnected to {workspaceName}',
+  'slack.reconnect.failed': 'Failed to reconnect to Slack',
+
+  // Slack Import
+  'slack.import.title': '从 Slack 导入',
+  'slack.import.importing': '导入中...',
+  'slack.import.success': '工作流导入成功',
+  'slack.import.failed': '工作流导入失败',
+  'slack.import.confirmOverwrite': '已存在同名工作流。是否覆盖？',
+
+  // Slack Search
+  'slack.search.title': '搜索工作流',
+  'slack.search.placeholder': '按名称、作者或频道搜索...',
+  'slack.search.searching': '搜索中...',
+  'slack.search.noResults': '未找到工作流',
+
+  // Slack Errors
+  'slack.error.notAuthenticated': '请先连接到 Slack',
+  'slack.error.channelNotFound': '未找到频道',
+  'slack.error.notInChannel': '机器人不是此频道的成员。请先邀请机器人。',
+  'slack.error.networkError': '网络错误。请检查您的连接。',
+  'slack.error.rateLimited': '超出速率限制。请在 {seconds} 秒后重试。',
+  'slack.error.noWorkspaces': '没有连接的工作区',
+  'slack.error.noChannels': '没有可用的频道',
+  'slack.error.noChannelsHelp':
+    '机器人未加入任何频道。在 Slack 中使用 /invite @机器人名称 邀请机器人加入频道。',
+
+  // Sensitive Data Warning
+  'slack.sensitiveData.warning.title': '检测到敏感数据',
+  'slack.sensitiveData.warning.message': '在您的工作流中检测到以下敏感数据:',
+  'slack.sensitiveData.warning.continue': '仍然分享',
+  'slack.sensitiveData.warning.cancel': '取消',
 };

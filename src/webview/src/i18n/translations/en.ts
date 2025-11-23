@@ -5,6 +5,15 @@
 import type { WebviewTranslationKeys } from '../translation-keys';
 
 export const enWebviewTranslations: WebviewTranslationKeys = {
+  // Common
+  loading: 'Loading',
+  description: 'Description',
+  optional: 'Optional',
+  cancel: 'Cancel',
+  'common.close': 'Close',
+  'common.cancel': 'Cancel',
+  'loading.importWorkflow': 'Importing workflow...',
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': 'Workflow name',
   'toolbar.save': 'Save',
@@ -519,4 +528,97 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.mode.detailed.tooltip': 'Detailed Mode: All parameters explicitly configured',
   'mcp.mode.naturalLanguageParam.tooltip': 'Natural Language Parameter Mode: "{description}"',
   'mcp.mode.fullNaturalLanguage.tooltip': 'Full Natural Language Mode: "{taskDescription}"',
+
+  // Slack Integration
+  'slack.connect': 'Connect to Slack',
+  'slack.disconnect': 'Disconnect',
+  'slack.connecting': 'Connecting...',
+  'slack.connected': 'Connected to {workspaceName}',
+  'slack.notConnected': 'Not connected to Slack',
+
+  // Slack Manual Token
+  'slack.manualToken.title': 'Connect to Slack',
+  'slack.manualToken.description': 'Enter your Slack Bot Token to connect your workspace.',
+  'slack.manualToken.howToGet.title': 'How to get Bot Token',
+  'slack.manualToken.howToGet.step1': 'Create Slack App at api.slack.com/apps',
+  'slack.manualToken.howToGet.step2':
+    'Add Bot Token Scopes: channels:read, chat:write, files:write, groups:read',
+  'slack.manualToken.howToGet.step3': 'Install App to your workspace',
+  'slack.manualToken.howToGet.step4': 'Invite App to target channel',
+  'slack.manualToken.howToGet.step5': 'Copy Bot User OAuth Token (xoxb-...)',
+  'slack.manualToken.security.title': 'Security & Privacy',
+  'slack.manualToken.security.storage': 'Token stored in VSCode Secret Storage (OS Keychain)',
+  'slack.manualToken.security.transmission':
+    'Only sent to Slack API (api.slack.com) for validation',
+  'slack.manualToken.security.deletion': 'Can be deleted anytime',
+  'slack.manualToken.botToken.label': 'Bot User OAuth Token',
+  'slack.manualToken.botToken.hint': 'Starts with xoxb-...',
+  'slack.manualToken.error.tokenRequired': 'Bot Token is required',
+  'slack.manualToken.error.invalidTokenFormat': 'Bot Token must start with "xoxb-"',
+  'slack.manualToken.connecting': 'Connecting...',
+  'slack.manualToken.connect': 'Connect',
+  'slack.manualToken.deleteButton': 'Delete Saved Token',
+  'slack.manualToken.deleteConfirm.title': 'Delete Token',
+  'slack.manualToken.deleteConfirm.message':
+    'Are you sure you want to delete the saved Slack Bot Token?',
+  'slack.manualToken.deleteConfirm.confirm': 'Delete',
+  'slack.manualToken.deleteConfirm.cancel': 'Cancel',
+
+  // Slack Share
+  'slack.share.button': 'Share',
+  'slack.share.title': 'Share to Slack β',
+  'slack.share.selectWorkspace': 'Select workspace',
+  'slack.share.selectWorkspacePlaceholder': 'Choose a workspace...',
+  'slack.share.selectChannel': 'Select channel',
+  'slack.share.selectChannelPlaceholder': 'Choose a channel...',
+  'slack.share.descriptionPlaceholder': 'Add a description (optional)...',
+  'slack.share.sharing': 'Sharing...',
+  'slack.share.success': 'Workflow shared successfully',
+  'slack.share.failed': 'Failed to share workflow',
+
+  // Slack Connect
+  'slack.connect.button': 'Connect to Slack',
+  'slack.connect.connecting': 'Connecting...',
+  'slack.connect.description': 'Connect your Slack workspace to share workflows with your team.',
+  'slack.connect.success': 'Successfully connected to {workspaceName}',
+  'slack.connect.failed': 'Failed to connect to Slack',
+
+  // Slack Reconnect
+  'slack.reconnect.button': 'Reconnect to Slack',
+  'slack.reconnect.reconnecting': 'Reconnecting...',
+  'slack.reconnect.description':
+    'Re-authenticate with Slack to update permissions or refresh connection.',
+  'slack.reconnect.success': 'Successfully reconnected to {workspaceName}',
+  'slack.reconnect.failed': 'Failed to reconnect to Slack',
+
+  // Slack Import
+  'slack.import.title': 'Import from Slack',
+  'slack.import.importing': 'Importing...',
+  'slack.import.success': 'Workflow imported successfully',
+  'slack.import.failed': 'Failed to import workflow',
+  'slack.import.confirmOverwrite': 'A workflow with this name already exists. Overwrite?',
+
+  // Slack Search
+  'slack.search.title': 'Search Workflows',
+  'slack.search.placeholder': 'Search by name, author, or channel...',
+  'slack.search.searching': 'Searching...',
+  'slack.search.noResults': 'No workflows found',
+
+  // Slack Errors
+  'slack.error.notAuthenticated': 'Please connect to Slack first',
+  'slack.error.channelNotFound': 'Channel not found',
+  'slack.error.noWorkspaces': 'No workspaces connected',
+  'slack.error.noChannels': 'No channels available',
+  'slack.error.noChannelsHelp':
+    'The bot is not a member of any channels. Invite the bot to channels using /invite @BotName in Slack.',
+  'slack.error.notInChannel': 'Bot is not a member of this channel. Please invite the bot first.',
+  'slack.error.networkError': 'Network error. Please check your connection.',
+  'slack.error.rateLimited': 'Rate limit exceeded. Please try again in {seconds} seconds.',
+
+  // Sensitive Data Warning
+  'slack.sensitiveData.warning.title': 'Sensitive Data Detected',
+  'slack.sensitiveData.warning.message':
+    'The following sensitive data was detected in your workflow:',
+  'slack.sensitiveData.warning.continue': 'Share Anyway',
+  'slack.sensitiveData.warning.cancel': 'Cancel',
 };

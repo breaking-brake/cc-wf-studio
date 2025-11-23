@@ -96,6 +96,8 @@ All operations run locally within VSCode. **Note:** MCP Tool nodes may require n
 
 🔌 **MCP Tool Nodes** - Integrate Model Context Protocol (MCP) tools with automatic server discovery, tool browsing, dynamic parameter forms, and real-time validation
 
+💬 **Slack Workflow Sharing (β)** - Share workflows directly to Slack channels with rich preview cards and one-click import links for seamless team collaboration
+
 ## AI-Assisted Workflow Refinement
 
 ### Overview

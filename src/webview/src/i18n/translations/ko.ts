@@ -5,6 +5,15 @@
 import type { WebviewTranslationKeys } from '../translation-keys';
 
 export const koWebviewTranslations: WebviewTranslationKeys = {
+  // Common
+  loading: '로딩 중',
+  description: '설명',
+  optional: '선택 사항',
+  cancel: '취소',
+  'common.close': '닫기',
+  'common.cancel': '취소',
+  'loading.importWorkflow': '워크플로 가져오는 중...',
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': '워크플로 이름',
   'toolbar.save': '저장',
@@ -515,4 +524,96 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.mode.detailed.tooltip': '상세 모드: 모든 매개변수가 명시적으로 구성됨',
   'mcp.mode.naturalLanguageParam.tooltip': '자연어 매개변수 모드: "{description}"',
   'mcp.mode.fullNaturalLanguage.tooltip': '완전 자연어 모드: "{taskDescription}"',
+
+  // Slack Integration
+  'slack.connect': 'Slack에 연결',
+  'slack.disconnect': '연결 해제',
+  'slack.connecting': '연결 중...',
+  'slack.connected': '{workspaceName}에 연결됨',
+  'slack.notConnected': 'Slack에 연결되지 않음',
+
+  // Slack Manual Token
+  'slack.manualToken.title': 'Slack에 연결',
+  'slack.manualToken.description': 'Slack Bot Token을 입력하여 워크스페이스에 연결하세요.',
+  'slack.manualToken.howToGet.title': 'Bot Token 받는 방법',
+  'slack.manualToken.howToGet.step1': 'api.slack.com/apps에서 Slack App 생성',
+  'slack.manualToken.howToGet.step2':
+    'Bot Token Scopes 추가: channels:read, chat:write, files:write, groups:read',
+  'slack.manualToken.howToGet.step3': '워크스페이스에 App 설치',
+  'slack.manualToken.howToGet.step4': '대상 채널에 App 추가',
+  'slack.manualToken.howToGet.step5': 'Bot User OAuth Token (xoxb-...) 복사',
+  'slack.manualToken.security.title': '보안 및 개인정보',
+  'slack.manualToken.security.storage':
+    '토큰은 VSCode Secret Storage (OS 키체인)에 안전하게 저장됩니다',
+  'slack.manualToken.security.transmission': 'Slack API (api.slack.com)로만 검증을 위해 전송됩니다',
+  'slack.manualToken.security.deletion': '언제든지 삭제할 수 있습니다',
+  'slack.manualToken.botToken.label': 'Bot User OAuth Token',
+  'slack.manualToken.botToken.hint': 'xoxb-로 시작합니다',
+  'slack.manualToken.error.tokenRequired': 'Bot Token은 필수입니다',
+  'slack.manualToken.error.invalidTokenFormat': 'Bot Token은 "xoxb-"로 시작해야 합니다',
+  'slack.manualToken.connecting': '연결 중...',
+  'slack.manualToken.connect': '연결',
+  'slack.manualToken.deleteButton': '저장된 토큰 삭제',
+  'slack.manualToken.deleteConfirm.title': '토큰 삭제',
+  'slack.manualToken.deleteConfirm.message': '저장된 Slack Bot Token을 삭제하시겠습니까?',
+  'slack.manualToken.deleteConfirm.confirm': '삭제',
+  'slack.manualToken.deleteConfirm.cancel': '취소',
+
+  // Slack Share
+  'slack.share.button': '공유',
+  'slack.share.title': 'Slack에 공유 β 버전',
+  'slack.share.selectWorkspace': '워크스페이스 선택',
+  'slack.share.selectWorkspacePlaceholder': '워크스페이스를 선택하세요...',
+  'slack.share.selectChannel': '채널 선택',
+  'slack.share.selectChannelPlaceholder': '채널을 선택하세요...',
+  'slack.share.sharing': '공유 중...',
+  'slack.share.success': '워크플로우를 공유했습니다',
+  'slack.share.failed': '워크플로우 공유에 실패했습니다',
+  'slack.share.descriptionPlaceholder': '설명을 추가하세요 (선택 사항)...',
+
+  // Slack Connect
+  'slack.connect.button': 'Slack에 연결',
+  'slack.connect.connecting': '연결 중...',
+  'slack.connect.description': 'Slack 워크스페이스에 연결하여 팀과 워크플로우를 공유하세요.',
+  'slack.connect.success': '{workspaceName}에 연결되었습니다',
+  'slack.connect.failed': 'Slack 연결에 실패했습니다',
+
+  // Slack Reconnect
+  'slack.reconnect.button': 'Reconnect to Slack',
+  'slack.reconnect.reconnecting': 'Reconnecting...',
+  'slack.reconnect.description':
+    'Re-authenticate with Slack to update permissions or refresh connection.',
+  'slack.reconnect.success': 'Successfully reconnected to {workspaceName}',
+  'slack.reconnect.failed': 'Failed to reconnect to Slack',
+
+  // Slack Import
+  'slack.import.title': 'Slack에서 가져오기',
+  'slack.import.importing': '가져오는 중...',
+  'slack.import.success': '워크플로우를 가져왔습니다',
+  'slack.import.failed': '워크플로우 가져오기에 실패했습니다',
+  'slack.import.confirmOverwrite': '같은 이름의 워크플로우가 이미 존재합니다. 덮어쓰시겠습니까?',
+
+  // Slack Search
+  'slack.search.title': '워크플로우 검색',
+  'slack.search.placeholder': '이름, 작성자 또는 채널로 검색...',
+  'slack.search.searching': '검색 중...',
+  'slack.search.noResults': '워크플로우를 찾을 수 없습니다',
+
+  // Slack Errors
+  'slack.error.notAuthenticated': '먼저 Slack에 연결하세요',
+  'slack.error.channelNotFound': '채널을 찾을 수 없습니다',
+  'slack.error.notInChannel': '봇이 이 채널의 멤버가 아닙니다. 먼저 봇을 초대하세요.',
+  'slack.error.networkError': '네트워크 오류가 발생했습니다. 연결을 확인하세요.',
+  'slack.error.rateLimited': '요청 한도를 초과했습니다. {seconds}초 후에 다시 시도하세요.',
+  'slack.error.noWorkspaces': '연결된 워크스페이스가 없습니다',
+  'slack.error.noChannels': '사용 가능한 채널이 없습니다',
+  'slack.error.noChannelsHelp':
+    '봇이 어떤 채널에도 참여하지 않았습니다. Slack에서 /invite @봇이름을 실행하여 봇을 채널에 초대하세요.',
+
+  // Sensitive Data Warning
+  'slack.sensitiveData.warning.title': '민감한 데이터 감지됨',
+  'slack.sensitiveData.warning.message':
+    '워크플로우에서 다음과 같은 민감한 데이터가 감지되었습니다:',
+  'slack.sensitiveData.warning.continue': '그래도 공유',
+  'slack.sensitiveData.warning.cancel': '취소',
 };

@@ -3,6 +3,15 @@
  */
 
 export interface WebviewTranslationKeys {
+  // Common
+  loading: string;
+  description: string;
+  optional: string;
+  cancel: string;
+  'common.close': string;
+  'common.cancel': string;
+  'loading.importWorkflow': string;
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': string;
   'toolbar.save': string;
@@ -467,4 +476,91 @@ export interface WebviewTranslationKeys {
   'mcp.mode.detailed.tooltip': string;
   'mcp.mode.naturalLanguageParam.tooltip': string;
   'mcp.mode.fullNaturalLanguage.tooltip': string;
+
+  // Slack Integration
+  'slack.connect': string;
+  'slack.disconnect': string;
+  'slack.connecting': string;
+  'slack.connected': string;
+  'slack.notConnected': string;
+
+  // Slack Share
+  'slack.share.button': string;
+  'slack.share.title': string;
+  'slack.share.selectWorkspace': string;
+  'slack.share.selectWorkspacePlaceholder': string;
+  'slack.share.selectChannel': string;
+  'slack.share.selectChannelPlaceholder': string;
+  'slack.share.descriptionPlaceholder': string;
+  'slack.share.sharing': string;
+  'slack.share.success': string;
+  'slack.share.failed': string;
+
+  // Slack Connect
+  'slack.connect.button': string;
+  'slack.connect.connecting': string;
+  'slack.connect.description': string;
+  'slack.connect.success': string;
+  'slack.connect.failed': string;
+
+  // Slack Reconnect
+  'slack.reconnect.button': string;
+  'slack.reconnect.reconnecting': string;
+  'slack.reconnect.description': string;
+  'slack.reconnect.success': string;
+  'slack.reconnect.failed': string;
+
+  // Slack Import
+  'slack.import.title': string;
+  'slack.import.importing': string;
+  'slack.import.success': string;
+  'slack.import.failed': string;
+  'slack.import.confirmOverwrite': string;
+
+  // Slack Search
+  'slack.search.title': string;
+  'slack.search.placeholder': string;
+  'slack.search.searching': string;
+  'slack.search.noResults': string;
+
+  // Slack Errors
+  'slack.error.notAuthenticated': string;
+  'slack.error.channelNotFound': string;
+  'slack.error.noChannels': string;
+  'slack.error.noChannelsHelp': string;
+  'slack.error.noWorkspaces': string;
+  'slack.error.notInChannel': string;
+  'slack.error.networkError': string;
+  'slack.error.rateLimited': string;
+
+  // Slack Manual Token
+  'slack.manualToken.title': string;
+  'slack.manualToken.description': string;
+  'slack.manualToken.howToGet.title': string;
+  'slack.manualToken.howToGet.step1': string;
+  'slack.manualToken.howToGet.step2': string;
+  'slack.manualToken.howToGet.step3': string;
+  'slack.manualToken.howToGet.step4': string;
+  'slack.manualToken.howToGet.step5': string;
+  'slack.manualToken.security.title': string;
+  'slack.manualToken.security.storage': string;
+  'slack.manualToken.security.transmission': string;
+  'slack.manualToken.security.deletion': string;
+  'slack.manualToken.botToken.label': string;
+  'slack.manualToken.botToken.hint': string;
+  'slack.manualToken.error.tokenRequired': string;
+  'slack.manualToken.error.invalidTokenFormat': string;
+  'slack.manualToken.connecting': string;
+  'slack.manualToken.connect': string;
+  'slack.manualToken.deleteButton': string;
+  'slack.manualToken.deleteConfirm.title': string;
+  'slack.manualToken.deleteConfirm.message': string;
+  'slack.manualToken.deleteConfirm.confirm': string;
+  'slack.manualToken.deleteConfirm.cancel': string;
+
+  // Sensitive Data Warning
+  'slack.sensitiveData.warning.title': string;
+  'slack.sensitiveData.warning.message': string;
+  'slack.sensitiveData.warning.continue': string;
+  'slack.sensitiveData.warning.cancel': string;
 }

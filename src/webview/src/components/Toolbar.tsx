@@ -22,6 +22,7 @@ import { ProcessingOverlay } from './common/ProcessingOverlay';
 interface ToolbarProps {
   onError: (error: { code: string; message: string; details?: unknown }) => void;
   onStartTour: () => void;
+  onShareToSlack: () => void;
 }
 
 interface WorkflowListItem {
@@ -31,13 +32,20 @@ interface WorkflowListItem {
   updatedAt: string;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareToSlack }) => {
   const { t } = useTranslation();
-  const { nodes, edges, setNodes, setEdges, activeWorkflow, setActiveWorkflow } =
-    useWorkflowStore();
+  const {
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    activeWorkflow,
+    setActiveWorkflow,
+    workflowName,
+    setWorkflowName,
+  } = useWorkflowStore();
   const { openChat, initConversation, loadConversationHistory, isProcessing } =
     useRefinementStore();
-  const [workflowName, setWorkflowName] = useState('my-workflow');
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [workflows, setWorkflows] = useState<WorkflowListItem[]>([]);
@@ -121,7 +129,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
 
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, [setNodes, setEdges, setActiveWorkflow]);
+  }, [setNodes, setEdges, setActiveWorkflow, setWorkflowName]);
 
   // Load workflow list on mount
   useEffect(() => {
@@ -367,6 +375,34 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour }) => {
         }}
       >
         {t('toolbar.load')}
+      </button>
+
+      {/* Divider */}
+      <div
+        style={{
+          width: '1px',
+          height: '20px',
+          backgroundColor: 'var(--vscode-panel-border)',
+        }}
+      />
+
+      {/* Share to Slack Button - Phase 3.1 (Beta feature, placed before help button) */}
+      <button
+        type="button"
+        onClick={onShareToSlack}
+        title="Share workflow to Slack"
+        style={{
+          padding: '4px 12px',
+          backgroundColor: 'var(--vscode-button-secondaryBackground)',
+          color: 'var(--vscode-button-secondaryForeground)',
+          border: 'none',
+          borderRadius: '2px',
+          cursor: 'pointer',
+          fontSize: '13px',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {t('slack.share.title')}
       </button>
 
       {/* Divider */}

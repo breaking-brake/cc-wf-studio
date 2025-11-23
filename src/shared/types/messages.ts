@@ -533,7 +533,296 @@ export type ExtensionMessage =
   | Message<McpToolsResultPayload, 'MCP_TOOLS_RESULT'>
   | Message<McpToolSchemaResultPayload, 'MCP_TOOL_SCHEMA_RESULT'>
   | Message<McpNodeValidationResultPayload, 'MCP_NODE_VALIDATION_RESULT'>
-  | Message<McpErrorPayload, 'MCP_ERROR'>;
+  | Message<McpErrorPayload, 'MCP_ERROR'>
+  | Message<ShareWorkflowSuccessPayload, 'SHARE_WORKFLOW_SUCCESS'>
+  | Message<SensitiveDataWarningPayload, 'SENSITIVE_DATA_WARNING'>
+  | Message<ShareWorkflowFailedPayload, 'SHARE_WORKFLOW_FAILED'>
+  | Message<SlackConnectSuccessPayload, 'SLACK_CONNECT_SUCCESS'>
+  | Message<SlackErrorPayload, 'SLACK_CONNECT_FAILED'>
+  | Message<void, 'SLACK_DISCONNECT_SUCCESS'>
+  | Message<SlackErrorPayload, 'SLACK_DISCONNECT_FAILED'>
+  | Message<GetOAuthRedirectUriSuccessPayload, 'GET_OAUTH_REDIRECT_URI_SUCCESS'>
+  | Message<SlackErrorPayload, 'GET_OAUTH_REDIRECT_URI_FAILED'>
+  | Message<ConnectSlackManualSuccessPayload, 'CONNECT_SLACK_MANUAL_SUCCESS'>
+  | Message<SlackErrorPayload, 'CONNECT_SLACK_MANUAL_FAILED'>
+  | Message<ListSlackWorkspacesSuccessPayload, 'LIST_SLACK_WORKSPACES_SUCCESS'>
+  | Message<SlackErrorPayload, 'LIST_SLACK_WORKSPACES_FAILED'>
+  | Message<GetSlackChannelsSuccessPayload, 'GET_SLACK_CHANNELS_SUCCESS'>
+  | Message<SlackErrorPayload, 'GET_SLACK_CHANNELS_FAILED'>
+  | Message<ImportWorkflowSuccessPayload, 'IMPORT_WORKFLOW_SUCCESS'>
+  | Message<ImportWorkflowConfirmOverwritePayload, 'IMPORT_WORKFLOW_CONFIRM_OVERWRITE'>
+  | Message<ImportWorkflowFailedPayload, 'IMPORT_WORKFLOW_FAILED'>
+  | Message<SearchSlackWorkflowsSuccessPayload, 'SEARCH_SLACK_WORKFLOWS_SUCCESS'>
+  | Message<SlackErrorPayload, 'SEARCH_SLACK_WORKFLOWS_FAILED'>;
+
+// ============================================================================
+// Slack Integration Payloads (001-slack-workflow-sharing)
+// ============================================================================
+
+/**
+ * Slack channel information
+ */
+export interface SlackChannel {
+  id: string;
+  name: string;
+  isPrivate: boolean;
+  isMember: boolean;
+  memberCount?: number;
+  purpose?: string;
+  topic?: string;
+}
+
+/**
+ * Workflow search result
+ */
+export interface SearchResult {
+  messageTs: string;
+  channelId: string;
+  channelName: string;
+  text: string;
+  userId: string;
+  permalink: string;
+  fileId?: string;
+  fileName?: string;
+  timestamp: string;
+}
+
+/**
+ * Slack connection request payload
+ */
+export interface SlackConnectPayload {
+  /** Force reconnection (delete existing token and reconnect) */
+  forceReconnect?: boolean;
+}
+
+/**
+ * Slack connection success payload
+ */
+export interface SlackConnectSuccessPayload {
+  workspaceName: string;
+}
+
+/**
+ * Get OAuth redirect URI success payload
+ * @deprecated OAuth flow will be removed in favor of manual token input
+ */
+export interface GetOAuthRedirectUriSuccessPayload {
+  redirectUri: string;
+}
+
+/**
+ * Manual Slack connection request payload
+ */
+export interface ConnectSlackManualPayload {
+  /** Workspace name (e.g., "My Team") */
+  workspaceName: string;
+  /** Workspace ID / Team ID (e.g., "T1234567890") */
+  workspaceId: string;
+  /** Team ID (same as workspaceId) */
+  teamId: string;
+  /** Slack Bot User OAuth Token (xoxb-...) */
+  accessToken: string;
+  /** User ID who authorized this connection (e.g., "U1234567890") */
+  userId: string;
+}
+
+/**
+ * Manual Slack connection success payload
+ */
+export interface ConnectSlackManualSuccessPayload {
+  /** Workspace ID that was connected */
+  workspaceId: string;
+  /** Workspace name */
+  workspaceName: string;
+}
+
+/**
+ * Slack error payload (for FAILED messages)
+ */
+export interface SlackErrorPayload {
+  message: string;
+}
+
+/**
+ * Get Slack channels request payload
+ */
+export interface GetSlackChannelsPayload {
+  /** Target workspace ID */
+  workspaceId: string;
+  /** Include private channels (default: true) */
+  includePrivate?: boolean;
+  /** Only show channels user is a member of (default: true) */
+  onlyMember?: boolean;
+}
+
+/**
+ * Get Slack channels success payload
+ */
+export interface GetSlackChannelsSuccessPayload {
+  channels: SlackChannel[];
+}
+
+/**
+ * Slack workspace information (for workspace selection)
+ */
+export interface SlackWorkspace {
+  /** Workspace ID (Team ID) */
+  workspaceId: string;
+  /** Workspace name */
+  workspaceName: string;
+  /** Team ID */
+  teamId: string;
+  /** When the workspace was authorized */
+  authorizedAt: string;
+  /** Last validation timestamp (optional) */
+  lastValidatedAt?: string;
+}
+
+/**
+ * List Slack workspaces success payload
+ */
+export interface ListSlackWorkspacesSuccessPayload {
+  workspaces: SlackWorkspace[];
+}
+
+/**
+ * Import workflow from Slack request payload
+ */
+export interface ImportWorkflowFromSlackPayload {
+  /** Workflow ID to import */
+  workflowId: string;
+  /** Slack file ID */
+  fileId: string;
+  /** Slack message timestamp */
+  messageTs: string;
+  /** Slack channel ID */
+  channelId: string;
+  /** Target workspace ID */
+  workspaceId: string;
+  /** Override existing file without confirmation (default: false) */
+  overwriteExisting?: boolean;
+}
+
+/**
+ * Import workflow success payload
+ */
+export interface ImportWorkflowSuccessPayload {
+  /** Workflow ID that was imported */
+  workflowId: string;
+  /** Local file path where workflow was saved */
+  filePath: string;
+  /** Workflow name */
+  workflowName: string;
+}
+
+/**
+ * Import workflow confirm overwrite payload
+ */
+export interface ImportWorkflowConfirmOverwritePayload {
+  /** Workflow ID to import */
+  workflowId: string;
+  /** Existing file path that will be overwritten */
+  existingFilePath: string;
+}
+
+/**
+ * Import workflow failed payload
+ */
+export interface ImportWorkflowFailedPayload {
+  /** Workflow ID that failed to import */
+  workflowId: string;
+  /** Error code */
+  errorCode:
+    | 'NOT_AUTHENTICATED'
+    | 'FILE_DOWNLOAD_FAILED'
+    | 'INVALID_WORKFLOW_FILE'
+    | 'FILE_WRITE_ERROR'
+    | 'NETWORK_ERROR'
+    | 'UNKNOWN_ERROR';
+  /** Error message */
+  errorMessage: string;
+}
+
+/**
+ * Search Slack workflows success payload
+ */
+export interface SearchSlackWorkflowsSuccessPayload {
+  results: SearchResult[];
+}
+
+/**
+ * Share workflow to Slack channel payload
+ */
+export interface ShareWorkflowToSlackPayload {
+  /** Target workspace ID */
+  workspaceId: string;
+  /** Workflow ID to share (for identification purposes) */
+  workflowId: string;
+  /** Workflow name (for display purposes) */
+  workflowName: string;
+  /** Complete workflow object (current canvas state) */
+  workflow: Workflow;
+  /** Target Slack channel ID */
+  channelId: string;
+  /** Workflow description (optional) */
+  description?: string;
+  /** Override sensitive data warning (default: false) */
+  overrideSensitiveWarning?: boolean;
+}
+
+/**
+ * Sensitive data finding
+ */
+export interface SensitiveDataFinding {
+  type: string;
+  maskedValue: string;
+  position: number;
+  context?: string;
+  severity: 'low' | 'medium' | 'high';
+}
+
+/**
+ * Slack channel information
+ */
+export interface SlackChannelInfo {
+  id: string;
+  name: string;
+}
+
+/**
+ * Share workflow success payload
+ */
+export interface ShareWorkflowSuccessPayload {
+  workflowId: string;
+  channelId: string;
+  channelName: string;
+  messageTs: string;
+  fileId: string;
+  permalink: string;
+}
+
+/**
+ * Sensitive data warning payload
+ */
+export interface SensitiveDataWarningPayload {
+  workflowId: string;
+  findings: SensitiveDataFinding[];
+}
+
+/**
+ * Share workflow failed payload
+ */
+export interface ShareWorkflowFailedPayload {
+  workflowId: string;
+  errorCode:
+    | 'NOT_AUTHENTICATED'
+    | 'CHANNEL_NOT_FOUND'
+    | 'FILE_UPLOAD_FAILED'
+    | 'MESSAGE_POST_FAILED'
+    | 'NETWORK_ERROR'
+    | 'UNKNOWN_ERROR';
+  errorMessage: string;
+}
 
 // ============================================================================
 // Webview → Extension Messages
@@ -558,7 +847,15 @@ export type WebviewMessage =
   | Message<GetMcpToolsPayload, 'GET_MCP_TOOLS'>
   | Message<GetMcpToolSchemaPayload, 'GET_MCP_TOOL_SCHEMA'>
   | Message<ValidateMcpNodePayload, 'VALIDATE_MCP_NODE'>
-  | Message<UpdateMcpNodePayload, 'UPDATE_MCP_NODE'>;
+  | Message<UpdateMcpNodePayload, 'UPDATE_MCP_NODE'>
+  | Message<SlackConnectPayload, 'SLACK_CONNECT'>
+  | Message<void, 'SLACK_DISCONNECT'>
+  | Message<void, 'GET_OAUTH_REDIRECT_URI'> // @deprecated Will be removed in favor of CONNECT_SLACK_MANUAL
+  | Message<ConnectSlackManualPayload, 'CONNECT_SLACK_MANUAL'>
+  | Message<void, 'LIST_SLACK_WORKSPACES'>
+  | Message<GetSlackChannelsPayload, 'GET_SLACK_CHANNELS'>
+  | Message<ShareWorkflowToSlackPayload, 'SHARE_WORKFLOW_TO_SLACK'>
+  | Message<ImportWorkflowFromSlackPayload, 'IMPORT_WORKFLOW_FROM_SLACK'>;
 
 // ============================================================================
 // Error Codes

@@ -29,20 +29,45 @@ export default defineConfig({
       // Mark vscode module and Node.js built-ins as external
       external: [
         'vscode',
+        // Node.js built-in modules (with and without node: prefix)
+        'node:assert',
         'node:child_process',
+        'node:crypto',
+        'node:events',
         'node:fs',
         'node:fs/promises',
-        'node:path',
+        'node:http',
+        'node:http2',
+        'node:https',
         'node:os',
+        'node:path',
         'node:process',
+        'node:querystring',
+        'node:readline/promises',
         'node:stream',
+        'node:stream/promises',
+        'node:tty',
+        'node:util',
+        'node:url',
+        'node:zlib',
+        'assert',
         'child_process',
+        'crypto',
+        'events',
         'fs',
         'fs/promises',
-        'path',
+        'http',
+        'http2',
+        'https',
         'os',
+        'path',
         'process',
+        'querystring',
         'stream',
+        'tty',
+        'util',
+        'url',
+        'zlib',
       ],
 
       output: {
@@ -64,6 +89,10 @@ export default defineConfig({
 
   // Resolve configuration
   resolve: {
+    // Use Node.js builds for dependencies (prevents "window is not defined" errors)
+    conditions: ['node'],
+    // Ignore 'browser' field in package.json, use 'main' field instead
+    mainFields: ['module', 'jsnext:main', 'jsnext', 'main'],
     alias: {
       '@': resolve(__dirname, 'src'),
     },

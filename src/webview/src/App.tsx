@@ -5,13 +5,19 @@
  * Based on: /specs/001-cc-wf-studio/plan.md
  */
 
-import type { ErrorPayload, InitialStatePayload } from '@shared/types/messages';
+import type {
+  ErrorPayload,
+  ImportWorkflowFromSlackPayload,
+  InitialStatePayload,
+  Workflow,
+} from '@shared/types/messages';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { ProcessingOverlay } from './components/common/ProcessingOverlay';
 import { SimpleOverlay } from './components/common/SimpleOverlay';
 import { ConfirmDialog } from './components/dialogs/ConfirmDialog';
 import { RefinementChatPanel } from './components/dialogs/RefinementChatPanel';
+import { SlackShareDialog } from './components/dialogs/SlackShareDialog';
 import { ErrorNotification } from './components/ErrorNotification';
 import { NodePalette } from './components/NodePalette';
 import { PropertyPanel } from './components/PropertyPanel';
@@ -19,16 +25,29 @@ import { Toolbar } from './components/Toolbar';
 import { Tour } from './components/Tour';
 import { WorkflowEditor } from './components/WorkflowEditor';
 import { useTranslation } from './i18n/i18n-context';
+import { vscode } from './main';
+import { deserializeWorkflow } from './services/workflow-service';
 import { useRefinementStore } from './stores/refinement-store';
 import { useWorkflowStore } from './stores/workflow-store';
 
 const App: React.FC = () => {
   const { t } = useTranslation();
-  const { pendingDeleteNodeIds, confirmDeleteNodes, cancelDeleteNodes } = useWorkflowStore();
+  const {
+    pendingDeleteNodeIds,
+    confirmDeleteNodes,
+    cancelDeleteNodes,
+    activeWorkflow,
+    setNodes,
+    setEdges,
+    setWorkflowName,
+    setActiveWorkflow,
+  } = useWorkflowStore();
   const { isOpen: isRefinementPanelOpen, isProcessing } = useRefinementStore();
   const [error, setError] = useState<ErrorPayload | null>(null);
   const [runTour, setRunTour] = useState(false);
   const [tourKey, setTourKey] = useState(0); // Used to force Tour component remount
+  const [isSlackShareDialogOpen, setIsSlackShareDialogOpen] = useState(false);
+  const [isLoadingImportedWorkflow, setIsLoadingImportedWorkflow] = useState(false);
 
   const handleError = (errorData: ErrorPayload) => {
     setError(errorData);
@@ -47,6 +66,10 @@ const App: React.FC = () => {
     setTourKey((prev) => prev + 1); // Increment key to force remount and reset tour state
   };
 
+  const handleShareToSlack = () => {
+    setIsSlackShareDialogOpen(true);
+  };
+
   // Listen for messages from Extension
   useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
@@ -58,6 +81,48 @@ const App: React.FC = () => {
           // Start tour automatically on first launch
           setRunTour(true);
         }
+      } else if (message.type === 'IMPORT_WORKFLOW_FROM_SLACK') {
+        // Handle import workflow request from Extension Host
+        // Simply forward the message back to Extension Host to trigger the import process
+        const payload = message.payload as ImportWorkflowFromSlackPayload;
+
+        console.log('Forwarding import request to Extension Host:', payload);
+
+        // Show loading overlay
+        setIsLoadingImportedWorkflow(true);
+
+        // Send the import request back to Extension Host with a new requestId
+        const requestId = `req-${Date.now()}-${Math.random()}`;
+        vscode.postMessage({
+          type: 'IMPORT_WORKFLOW_FROM_SLACK',
+          requestId,
+          payload,
+        });
+
+        // The import process will be handled by Extension Host
+        // Success/failure notifications will be shown by Extension Host
+      } else if (message.type === 'IMPORT_WORKFLOW_SUCCESS') {
+        // Load imported workflow into canvas
+        const workflow = message.payload?.workflow as Workflow;
+        if (workflow) {
+          const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(workflow);
+          setNodes(loadedNodes);
+          setEdges(loadedEdges);
+          setWorkflowName(workflow.name);
+          // Set as active workflow to preserve conversation history
+          setActiveWorkflow(workflow);
+
+          // TODO: Select imported workflow in dropdown after fixing selection logic
+        }
+
+        // Hide loading overlay
+        setIsLoadingImportedWorkflow(false);
+      } else if (message.type === 'IMPORT_WORKFLOW_FAILED') {
+        // Hide loading overlay on failure
+        setIsLoadingImportedWorkflow(false);
+      } else if (message.type === 'IMPORT_WORKFLOW_CANCELLED') {
+        // Hide loading overlay when user cancels
+        setIsLoadingImportedWorkflow(false);
       }
     };
 
@@ -66,7 +131,7 @@ const App: React.FC = () => {
     return () => {
       window.removeEventListener('message', messageHandler);
     };
-  }, []);
+  }, [setNodes, setEdges, setWorkflowName, setActiveWorkflow]);
 
   return (
     <div
@@ -80,7 +145,11 @@ const App: React.FC = () => {
       }}
     >
       {/* Top: Toolbar */}
-      <Toolbar onError={handleError} onStartTour={handleStartTour} />
+      <Toolbar
+        onError={handleError}
+        onStartTour={handleStartTour}
+        onShareToSlack={handleShareToSlack}
+      />
 
       {/* Main Content: 3-column layout */}
       <div
@@ -125,6 +194,66 @@ const App: React.FC = () => {
         onConfirm={confirmDeleteNodes}
         onCancel={cancelDeleteNodes}
       />
+
+      {/* Slack Share Dialog */}
+      <SlackShareDialog
+        isOpen={isSlackShareDialogOpen}
+        onClose={() => setIsSlackShareDialogOpen(false)}
+        workflowId={activeWorkflow?.id || ''}
+      />
+
+      {/* Import Workflow Loading Overlay */}
+      {isLoadingImportedWorkflow && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              padding: '24px 32px',
+              backgroundColor: 'var(--vscode-editor-background)',
+              border: '1px solid var(--vscode-panel-border)',
+              borderRadius: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+            }}
+          >
+            <div
+              style={{
+                width: '16px',
+                height: '16px',
+                border: '2px solid var(--vscode-progressBar-background)',
+                borderTopColor: 'transparent',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+              }}
+            />
+            <span style={{ color: 'var(--vscode-foreground)', fontSize: '14px' }}>
+              {t('loading.importWorkflow')}
+            </span>
+          </div>
+        </div>
+      )}
+
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
     </div>
   );
 };

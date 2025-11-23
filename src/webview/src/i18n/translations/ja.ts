@@ -5,6 +5,15 @@
 import type { WebviewTranslationKeys } from '../translation-keys';
 
 export const jaWebviewTranslations: WebviewTranslationKeys = {
+  // Common
+  loading: '読み込み中',
+  description: '説明',
+  optional: '任意',
+  cancel: 'キャンセル',
+  'common.close': '閉じる',
+  'common.cancel': 'キャンセル',
+  'loading.importWorkflow': 'ワークフローをインポート中...',
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': 'ワークフロー名',
   'toolbar.save': '保存',
@@ -516,4 +525,96 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.mode.detailed.tooltip': '詳細モード: すべてのパラメータを明示的に設定',
   'mcp.mode.naturalLanguageParam.tooltip': '自然言語パラメータモード: 「{description}」',
   'mcp.mode.fullNaturalLanguage.tooltip': '完全自然言語モード: 「{taskDescription}」',
+
+  // Slack Integration
+  'slack.connect': 'Slackに接続',
+  'slack.disconnect': '切断',
+  'slack.connecting': '接続中...',
+  'slack.connected': '{workspaceName}に接続済み',
+  'slack.notConnected': 'Slackに未接続',
+
+  // Slack Manual Token
+  'slack.manualToken.title': 'Slackに接続',
+  'slack.manualToken.description': 'Slack Bot Tokenを入力してワークスペースに接続してください。',
+  'slack.manualToken.howToGet.title': 'Bot Tokenの取得方法',
+  'slack.manualToken.howToGet.step1': 'api.slack.com/appsでSlack Appを作成',
+  'slack.manualToken.howToGet.step2':
+    'Bot Token Scopesを追加: channels:read, chat:write, files:write, groups:read',
+  'slack.manualToken.howToGet.step3': 'Appをワークスペースにインストール',
+  'slack.manualToken.howToGet.step4': 'Appをワークフロー共有先のチャンネルに追加',
+  'slack.manualToken.howToGet.step5': 'Bot User OAuth Token（xoxb-...）をコピー',
+  'slack.manualToken.security.title': 'セキュリティーとプライバシー',
+  'slack.manualToken.security.storage':
+    'トークンはVSCode Secret Storage（OSのキーチェーン）に安全に保存されます',
+  'slack.manualToken.security.transmission': 'Slack API（api.slack.com）への検証時のみ送信されます',
+  'slack.manualToken.security.deletion': '保存したトークンはいつでも削除できます',
+  'slack.manualToken.botToken.label': 'Bot User OAuth Token',
+  'slack.manualToken.botToken.hint': 'xoxb-で始まります',
+  'slack.manualToken.error.tokenRequired': 'Bot Tokenは必須です',
+  'slack.manualToken.error.invalidTokenFormat': 'Bot Tokenは"xoxb-"で始まる必要があります',
+  'slack.manualToken.connecting': '接続中...',
+  'slack.manualToken.connect': '接続',
+  'slack.manualToken.deleteButton': '保存したトークンを削除',
+  'slack.manualToken.deleteConfirm.title': 'トークンの削除',
+  'slack.manualToken.deleteConfirm.message': '保存されているSlack Bot Tokenを削除しますか？',
+  'slack.manualToken.deleteConfirm.confirm': '削除',
+  'slack.manualToken.deleteConfirm.cancel': 'キャンセル',
+
+  // Slack Share
+  'slack.share.button': '共有',
+  'slack.share.title': 'Slack共有 β版',
+  'slack.share.selectWorkspace': 'ワークスペース選択',
+  'slack.share.selectWorkspacePlaceholder': 'ワークスペースを選択...',
+  'slack.share.selectChannel': 'チャンネル選択',
+  'slack.share.selectChannelPlaceholder': 'チャンネルを選択...',
+  'slack.share.sharing': '共有中...',
+  'slack.share.success': 'ワークフローを共有しました',
+  'slack.share.failed': 'ワークフローの共有に失敗しました',
+  'slack.share.descriptionPlaceholder': '説明を追加（任意）...',
+
+  // Slack Connect
+  'slack.connect.button': 'Slackに接続',
+  'slack.connect.connecting': '接続中...',
+  'slack.connect.description':
+    'Slackワークスペースに接続して、チームとワークフローを共有しましょう。',
+  'slack.connect.success': '{workspaceName}に接続しました',
+  'slack.connect.failed': 'Slackへの接続に失敗しました',
+
+  // Slack Reconnect
+  'slack.reconnect.button': 'Slackに再接続',
+  'slack.reconnect.reconnecting': '再接続中...',
+  'slack.reconnect.description': '権限を更新または接続を更新するために再認証します。',
+  'slack.reconnect.success': '{workspaceName}に再接続しました',
+  'slack.reconnect.failed': 'Slackへの再接続に失敗しました',
+
+  // Slack Import
+  'slack.import.title': 'Slackからインポート',
+  'slack.import.importing': 'インポート中...',
+  'slack.import.success': 'ワークフローをインポートしました',
+  'slack.import.failed': 'ワークフローのインポートに失敗しました',
+  'slack.import.confirmOverwrite': '同名のワークフローが既に存在します。上書きしますか？',
+
+  // Slack Search
+  'slack.search.title': 'ワークフロー検索',
+  'slack.search.placeholder': '名前、作成者、チャンネルで検索...',
+  'slack.search.searching': '検索中...',
+  'slack.search.noResults': 'ワークフローが見つかりませんでした',
+
+  // Slack Errors
+  'slack.error.notAuthenticated': '先にSlackに接続してください',
+  'slack.error.channelNotFound': 'チャンネルが見つかりません',
+  'slack.error.notInChannel':
+    'Botがこのチャンネルのメンバーではありません。先にBotを招待してください。',
+  'slack.error.networkError': 'ネットワークエラー。接続を確認してください。',
+  'slack.error.rateLimited': 'レート制限を超過しました。{seconds}秒後に再試行してください。',
+  'slack.error.noWorkspaces': '接続されているワークスペースがありません',
+  'slack.error.noChannels': '利用可能なチャンネルがありません',
+  'slack.error.noChannelsHelp':
+    'Botがどのチャンネルにも参加していません。Slackで /invite @Bot名 を実行してBotをチャンネルに招待してください。',
+
+  // Sensitive Data Warning
+  'slack.sensitiveData.warning.title': '機密情報が検出されました',
+  'slack.sensitiveData.warning.message': 'ワークフローに以下の機密情報が検出されました:',
+  'slack.sensitiveData.warning.continue': 'それでも共有',
+  'slack.sensitiveData.warning.cancel': 'キャンセル',
 };

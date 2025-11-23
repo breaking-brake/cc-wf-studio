@@ -33,6 +33,7 @@ interface WorkflowStore {
   pendingDeleteNodeIds: string[];
   activeWorkflow: Workflow | null;
   interactionMode: InteractionMode;
+  workflowName: string;
 
   // React Flow Change Handlers
   onNodesChange: OnNodesChange;
@@ -45,6 +46,7 @@ interface WorkflowStore {
   setSelectedNodeId: (id: string | null) => void;
   setInteractionMode: (mode: InteractionMode) => void;
   toggleInteractionMode: () => void;
+  setWorkflowName: (name: string) => void;
 
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
@@ -192,6 +194,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   pendingDeleteNodeIds: [],
   activeWorkflow: null,
   interactionMode: 'pan', // Default: pan mode
+  workflowName: 'my-workflow', // Default workflow name
 
   // React Flow Change Handlers (integrates with React Flow's onChange events)
   onNodesChange: (changes) => {
@@ -256,6 +259,8 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     const currentMode = get().interactionMode;
     set({ interactionMode: currentMode === 'pan' ? 'selection' : 'pan' });
   },
+
+  setWorkflowName: (workflowName) => set({ workflowName }),
 
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => {
