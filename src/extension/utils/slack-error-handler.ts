@@ -7,8 +7,6 @@
  * Based on specs/001-slack-workflow-sharing/contracts/slack-api-contracts.md
  */
 
-import { WebAPICallError } from '@slack/web-api';
-
 /**
  * Slack error information
  */
@@ -113,9 +111,18 @@ const ERROR_MAPPINGS: Record<string, Omit<SlackErrorInfo, 'code' | 'retryAfter'>
  * @returns Structured error information
  */
 export function handleSlackError(error: unknown): SlackErrorInfo {
-  // Check if it's a Slack Web API error
-  if (error instanceof WebAPICallError) {
-    const errorCode = error.data?.error || 'unknown_error';
+  // Check if it's a Slack Web API error (property-based check instead of instanceof)
+  // This works even when @slack/web-api is an external dependency
+  if (
+    error &&
+    typeof error === 'object' &&
+    'data' in error &&
+    error.data &&
+    typeof error.data === 'object'
+  ) {
+    // Type assertion for Slack Web API error structure
+    const slackError = error as { data: { error?: string; retryAfter?: number } };
+    const errorCode = slackError.data.error || 'unknown_error';
 
     // Get error mapping
     const mapping = ERROR_MAPPINGS[errorCode] || {
@@ -125,7 +132,7 @@ export function handleSlackError(error: unknown): SlackErrorInfo {
     };
 
     // Extract retry-after for rate limiting
-    const retryAfter = error.data?.retryAfter ? Number(error.data.retryAfter) : undefined;
+    const retryAfter = slackError.data.retryAfter ? Number(slackError.data.retryAfter) : undefined;
 
     return {
       code: errorCode,

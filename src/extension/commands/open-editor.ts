@@ -10,6 +10,9 @@ import type { WebviewMessage } from '../../shared/types/messages';
 import { cancelGeneration } from '../services/claude-code-service';
 import { FileService } from '../services/file-service';
 import { SlackApiService } from '../services/slack-api-service';
+import { SlackOAuthService } from '../services/slack-oauth-service';
+import { NgrokService } from '../utils/ngrok-service';
+import { OAuthCallbackServer } from '../utils/oauth-callback-server';
 import { SlackTokenManager } from '../utils/slack-token-manager';
 import { getWebviewContent } from '../webview-content';
 import { handleGenerateWorkflow } from './ai-generation';
@@ -35,6 +38,9 @@ let currentPanel: vscode.WebviewPanel | undefined;
 let fileService: FileService;
 let slackTokenManager: SlackTokenManager;
 let slackApiService: SlackApiService;
+let ngrokService: NgrokService | undefined;
+let currentNgrokTunnelUrl: string | undefined;
+let currentNgrokLocalPort: number | undefined;
 
 /**
  * Register the open editor command
@@ -409,6 +415,170 @@ export function registerOpenEditorCommand(
                 payload: {
                   code: 'VALIDATION_ERROR',
                   message: 'Share workflow payload is required',
+                },
+              });
+            }
+            break;
+
+          case 'SLACK_CONNECT':
+            // Slack OAuth authentication flow
+            try {
+              console.log('[Extension Host] SLACK_CONNECT received');
+              console.log('[Extension Host] Payload:', message.payload);
+              console.log('[Extension Host] Current ngrok tunnel URL:', currentNgrokTunnelUrl);
+              console.log('[Extension Host] Current ngrok local port:', currentNgrokLocalPort);
+
+              const forceReconnect = message.payload?.forceReconnect ?? false;
+
+              // If force reconnect, delete existing connection first
+              if (forceReconnect) {
+                console.log(
+                  '[Extension Host] Force reconnect requested - deleting existing connection'
+                );
+                const oauthConfig = {
+                  clientId: '',
+                  clientSecret: '',
+                  scopes: [],
+                };
+                const oauthService = new SlackOAuthService(context, oauthConfig);
+                await oauthService.disconnect();
+                console.log('[Extension Host] Existing connection deleted');
+              }
+
+              // Get OAuth configuration from environment variables
+              const clientId = process.env.SLACK_CLIENT_ID || '';
+              const clientSecret = process.env.SLACK_CLIENT_SECRET || '';
+
+              if (!clientId || !clientSecret) {
+                throw new Error(
+                  'Slack App credentials not configured. Please set SLACK_CLIENT_ID and SLACK_CLIENT_SECRET environment variables.'
+                );
+              }
+
+              const oauthConfig = {
+                clientId,
+                clientSecret,
+                scopes: ['chat:write', 'files:write', 'channels:read', 'groups:read'],
+              };
+
+              // Initialize OAuth service
+              const oauthService = new SlackOAuthService(context, oauthConfig);
+
+              // Execute OAuth flow with existing ngrok tunnel URL and local port (if available)
+              const connection = await oauthService.authenticate(
+                currentNgrokTunnelUrl,
+                currentNgrokLocalPort
+              );
+
+              // Send success response
+              webview.postMessage({
+                type: 'SLACK_CONNECT_SUCCESS',
+                requestId: message.requestId,
+                payload: {
+                  workspaceName: connection.workspaceName,
+                },
+              });
+            } catch (error) {
+              console.error('[Slack OAuth] Authentication failed:', error);
+              webview.postMessage({
+                type: 'SLACK_CONNECT_FAILED',
+                requestId: message.requestId,
+                payload: {
+                  message: error instanceof Error ? error.message : 'Failed to connect to Slack',
+                },
+              });
+            }
+            break;
+
+          case 'SLACK_DISCONNECT':
+            // Slack disconnection (clear tokens)
+            try {
+              // Get OAuth configuration (minimal for disconnect)
+              const oauthConfig = {
+                clientId: '',
+                clientSecret: '',
+                scopes: [],
+              };
+
+              const oauthService = new SlackOAuthService(context, oauthConfig);
+              await oauthService.disconnect();
+
+              webview.postMessage({
+                type: 'SLACK_DISCONNECT_SUCCESS',
+                requestId: message.requestId,
+                payload: {},
+              });
+            } catch (error) {
+              console.error('[Slack OAuth] Disconnection failed:', error);
+              webview.postMessage({
+                type: 'SLACK_DISCONNECT_FAILED',
+                requestId: message.requestId,
+                payload: {
+                  message:
+                    error instanceof Error ? error.message : 'Failed to disconnect from Slack',
+                },
+              });
+            }
+            break;
+
+          case 'GET_OAUTH_REDIRECT_URI':
+            // Get OAuth redirect URI for development/debugging
+            try {
+              console.log('[Extension Host] GET_OAUTH_REDIRECT_URI received');
+
+              // Reuse existing ngrok tunnel if available
+              if (currentNgrokTunnelUrl) {
+                console.log(
+                  '[Extension Host] Reusing existing ngrok tunnel:',
+                  currentNgrokTunnelUrl
+                );
+                webview.postMessage({
+                  type: 'GET_OAUTH_REDIRECT_URI_SUCCESS',
+                  requestId: message.requestId,
+                  payload: {
+                    redirectUri: currentNgrokTunnelUrl,
+                  },
+                });
+                console.log('[Extension Host] Sent GET_OAUTH_REDIRECT_URI_SUCCESS (reused)');
+                break;
+              }
+
+              // Initialize temporary callback server to get port
+              const callbackServer = new OAuthCallbackServer();
+              await callbackServer.initializeForUrl();
+              const localPort = callbackServer.getPort();
+              console.log('[Extension Host] Local server started on port:', localPort);
+
+              // Create ngrok tunnel to expose HTTPS URL (keep it open for OAuth)
+              ngrokService = new NgrokService();
+              const tunnel = await ngrokService.createTunnel(localPort);
+              console.log('[Extension Host] Ngrok tunnel created:', tunnel.publicUrl);
+
+              // Save port number and redirect URI for later use
+              currentNgrokLocalPort = localPort;
+              currentNgrokTunnelUrl = `${tunnel.publicUrl}/oauth/callback`;
+              console.log('[Extension Host] Saved local port:', currentNgrokLocalPort);
+              console.log('[Extension Host] OAuth redirect URI:', currentNgrokTunnelUrl);
+
+              // Clean up temporary server (but keep ngrok tunnel open)
+              callbackServer.stop();
+
+              webview.postMessage({
+                type: 'GET_OAUTH_REDIRECT_URI_SUCCESS',
+                requestId: message.requestId,
+                payload: {
+                  redirectUri: currentNgrokTunnelUrl,
+                },
+              });
+              console.log('[Extension Host] Sent GET_OAUTH_REDIRECT_URI_SUCCESS');
+            } catch (error) {
+              console.error('[Extension Host] Failed to get redirect URI:', error);
+              webview.postMessage({
+                type: 'GET_OAUTH_REDIRECT_URI_FAILED',
+                requestId: message.requestId,
+                payload: {
+                  message:
+                    error instanceof Error ? error.message : 'Failed to get OAuth redirect URI',
                 },
               });
             }

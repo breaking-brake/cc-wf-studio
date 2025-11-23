@@ -119,6 +119,50 @@
 
 ---
 
+## Phase 3.2: Multi-workspace Support (優先度: P1)
+
+**ゴール**: 複数のSlackワークスペースに対応し、ワークスペース選択UIを追加する。
+
+**独立テスト**: 複数のワークスペースに接続し、Share to Slackダイアログでワークスペースを切り替えてチャンネル一覧が更新されることを確認できる。
+
+### Implementation for Phase 3.2
+
+- [x] T023-7 [P] [US1] SlackTokenManagerをマルチワークスペース対応に拡張 in src/extension/utils/slack-token-manager.ts
+- [x] T023-8 [P] [US1] SlackApiServiceをワークスペースID指定対応に拡張 in src/extension/services/slack-api-service.ts
+- [x] T023-12 [US1] LIST_SLACK_WORKSPACESメッセージハンドラー実装 in src/extension/commands/open-editor.ts
+- [x] T023-13 [P] [US1] listSlackWorkspaces() Webviewサービス実装 in src/webview/src/services/slack-integration-service.ts
+- [x] T023-14 [P] [US1] SlackShareDialogにワークスペース選択UI追加 in src/webview/src/components/dialogs/SlackShareDialog.tsx
+- [x] T023-15 [P] [US1] i18n翻訳追加（ワークスペース選択関連） in src/webview/src/i18n/translations/*.ts
+
+**Checkpoint**: Multi-workspace対応完了 - 複数ワークスペース間でワークフロー共有可能
+
+---
+
+## Phase 3.3: OAuth Authentication UI Integration (優先度: P1)
+
+**ゴール**: SlackShareDialog内にOAuth認証開始ボタンを追加し、未接続状態からワンクリックで認証を開始できるようにする。
+
+**独立テスト**: Slack未接続の状態でShare to Slackダイアログを開き、「Connect to Slack」ボタンをクリックしてOAuth認証フローが開始されることを確認できる。
+
+### Implementation for Phase 3.3
+
+- [x] T024-1 [P] [US1] SlackShareDialogに「Connect to Slack」ボタン追加 in src/webview/src/components/dialogs/SlackShareDialog.tsx
+- [x] T024-2 [P] [US1] OAuth認証成功後のワークスペース一覧再取得処理 in src/webview/src/components/dialogs/SlackShareDialog.tsx
+- [x] T024-3 [P] [US1] i18n翻訳追加（Connect to Slackボタン関連） in src/webview/src/i18n/translations/*.ts
+- [x] T024-4 [P] [US1] GET_OAUTH_REDIRECT_URI message type追加 in src/shared/types/messages.ts
+- [x] T024-5 [P] [US1] Extension HostでのRedirect URI取得ハンドラー実装 in src/extension/commands/open-editor.ts
+- [x] T024-6 [P] [US1] WebviewでのRedirect URI表示UI実装 in src/webview/src/components/dialogs/SlackShareDialog.tsx
+- [x] T024-7 [US1] ngrok統合によるHTTPS URL取得 (以下のサブタスク)
+  - [x] T024-7-1 [P] [US1] ngrok依存関係の追加 in package.json (devDependencies)
+  - [x] T024-7-2 [P] [US1] ngrokサービスクラスの実装 in src/extension/utils/ngrok-service.ts
+  - [x] T024-7-3 [US1] Extension HostでngrokトンネルURL取得 in src/extension/commands/open-editor.ts
+  - [x] T024-7-4 [P] [US1] エラーハンドリング実装（ngrok未インストール等） in src/extension/utils/ngrok-service.ts
+  - [x] T024-7-5 [P] [US1] Vite設定でngrokを外部依存関係に追加 in vite.extension.config.ts
+
+**Checkpoint**: OAuth認証UI統合完了 - ユーザーはダイアログ内から直接Slack認証を開始可能、開発時にHTTPS Redirect URIを取得可能
+
+---
+
 ## Phase 4: User Story 2 - Slackからのワンクリックインポート (優先度: P1)
 
 **ゴール**: チームメンバーがSlack上で共有されたワークフローメッセージから、ワンクリックで自分のVS Codeにワークフローをインポートできるようにする。手動でのファイルダウンロード、ディレクトリ配置、エディタでの開く操作は不要。

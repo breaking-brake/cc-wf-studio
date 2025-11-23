@@ -138,6 +138,51 @@ export function connectToSlack(): Promise<{ workspaceName: string }> {
 }
 
 /**
+ * Reconnect to Slack workspace (force reconnection)
+ *
+ * Deletes existing OAuth token and re-authenticates with new scopes.
+ * Useful when scopes have been updated in Slack App configuration.
+ *
+ * @returns Promise that resolves with workspace connection info
+ */
+export function reconnectToSlack(): Promise<{ workspaceName: string }> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'SLACK_CONNECT_SUCCESS') {
+          resolve(message.payload || { workspaceName: '' });
+        } else if (message.type === 'SLACK_CONNECT_FAILED') {
+          reject(new Error(message.payload?.message || 'Failed to reconnect to Slack'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    vscode.postMessage({
+      type: 'SLACK_CONNECT',
+      requestId,
+      payload: { forceReconnect: true },
+    });
+
+    // Timeout after 5 minutes (OAuth flow can take time)
+    setTimeout(
+      () => {
+        window.removeEventListener('message', handler);
+        reject(new Error('Reconnection timeout'));
+      },
+      5 * 60 * 1000
+    );
+  });
+}
+
+/**
  * Disconnect from Slack workspace
  *
  * Clears stored OAuth token.
@@ -397,5 +442,43 @@ export function searchSlackWorkflows(options: SearchWorkflowOptions): Promise<Se
       window.removeEventListener('message', handler);
       reject(new Error('Request timeout'));
     }, 30000);
+  });
+}
+
+/**
+ * Get OAuth redirect URI for development/debugging
+ *
+ * @returns Promise that resolves with redirect URI
+ */
+export function getOAuthRedirectUri(): Promise<{ redirectUri: string }> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'GET_OAUTH_REDIRECT_URI_SUCCESS') {
+          resolve(message.payload || { redirectUri: '' });
+        } else if (message.type === 'GET_OAUTH_REDIRECT_URI_FAILED') {
+          reject(new Error(message.payload?.message || 'Failed to get OAuth redirect URI'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    vscode.postMessage({
+      type: 'GET_OAUTH_REDIRECT_URI',
+      requestId,
+      payload: {},
+    });
+
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timeout'));
+    }, 10000);
   });
 }

@@ -120,16 +120,26 @@ export class SlackApiService {
     // Return cached client if exists
     let client = this.clients.get(workspaceId);
     if (client) {
+      console.log('[SlackApiService] Using cached client for workspace:', workspaceId);
       return client;
     }
 
+    console.log('[SlackApiService] Getting access token for workspace:', workspaceId);
+
     // Get access token for this workspace
     const accessToken = await this.tokenManager.getAccessTokenByWorkspaceId(workspaceId);
+    console.log('[SlackApiService] Access token retrieved:', {
+      hasToken: !!accessToken,
+      tokenPrefix: accessToken?.substring(0, 10),
+    });
+
     if (!accessToken) {
+      console.error('[SlackApiService] No access token found for workspace:', workspaceId);
       throw new Error(`ワークスペース ${workspaceId} に接続されていません`);
     }
 
     // Create and cache new client
+    console.log('[SlackApiService] Creating new WebClient');
     client = new WebClient(accessToken);
     this.clients.set(workspaceId, client);
 
@@ -171,11 +181,17 @@ export class SlackApiService {
         types.push('private_channel');
       }
 
+      console.log('[SlackApiService] Fetching channels with options:', {
+        types: types.join(','),
+        onlyMember,
+      });
+
       // Fetch channels (with pagination)
       const channels: SlackChannel[] = [];
       let cursor: string | undefined;
 
       do {
+        console.log('[SlackApiService] Calling conversations.list...');
         const response = await client.conversations.list({
           types: types.join(','),
           exclude_archived: true,
@@ -212,7 +228,15 @@ export class SlackApiService {
 
       return channels;
     } catch (error) {
+      console.error('[SlackApiService] Error fetching channels:', error);
+      console.error('[SlackApiService] Error type:', typeof error);
+      console.error('[SlackApiService] Error details:', {
+        message: error instanceof Error ? error.message : 'unknown',
+        stack: error instanceof Error ? error.stack : 'no stack',
+        data: (error as any)?.data,
+      });
       const errorInfo = handleSlackError(error);
+      console.error('[SlackApiService] Handled error info:', errorInfo);
       throw new Error(errorInfo.message);
     }
   }

@@ -541,6 +541,8 @@ export type ExtensionMessage =
   | Message<SlackErrorPayload, 'SLACK_CONNECT_FAILED'>
   | Message<void, 'SLACK_DISCONNECT_SUCCESS'>
   | Message<SlackErrorPayload, 'SLACK_DISCONNECT_FAILED'>
+  | Message<GetOAuthRedirectUriSuccessPayload, 'GET_OAUTH_REDIRECT_URI_SUCCESS'>
+  | Message<SlackErrorPayload, 'GET_OAUTH_REDIRECT_URI_FAILED'>
   | Message<ListSlackWorkspacesSuccessPayload, 'LIST_SLACK_WORKSPACES_SUCCESS'>
   | Message<SlackErrorPayload, 'LIST_SLACK_WORKSPACES_FAILED'>
   | Message<GetSlackChannelsSuccessPayload, 'GET_SLACK_CHANNELS_SUCCESS'>
@@ -583,10 +585,25 @@ export interface SearchResult {
 }
 
 /**
+ * Slack connection request payload
+ */
+export interface SlackConnectPayload {
+  /** Force reconnection (delete existing token and reconnect) */
+  forceReconnect?: boolean;
+}
+
+/**
  * Slack connection success payload
  */
 export interface SlackConnectSuccessPayload {
   workspaceName: string;
+}
+
+/**
+ * Get OAuth redirect URI success payload
+ */
+export interface GetOAuthRedirectUriSuccessPayload {
+  redirectUri: string;
 }
 
 /**
@@ -748,6 +765,9 @@ export type WebviewMessage =
   | Message<GetMcpToolSchemaPayload, 'GET_MCP_TOOL_SCHEMA'>
   | Message<ValidateMcpNodePayload, 'VALIDATE_MCP_NODE'>
   | Message<UpdateMcpNodePayload, 'UPDATE_MCP_NODE'>
+  | Message<SlackConnectPayload, 'SLACK_CONNECT'>
+  | Message<void, 'SLACK_DISCONNECT'>
+  | Message<void, 'GET_OAUTH_REDIRECT_URI'>
   | Message<void, 'LIST_SLACK_WORKSPACES'>
   | Message<GetSlackChannelsPayload, 'GET_SLACK_CHANNELS'>
   | Message<ShareWorkflowToSlackPayload, 'SHARE_WORKFLOW_TO_SLACK'>;
