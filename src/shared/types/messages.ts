@@ -675,10 +675,12 @@ export interface SearchSlackWorkflowsSuccessPayload {
 export interface ShareWorkflowToSlackPayload {
   /** Target workspace ID */
   workspaceId: string;
-  /** Workflow ID to share */
+  /** Workflow ID to share (for identification purposes) */
   workflowId: string;
-  /** Workflow name */
+  /** Workflow name (for display purposes) */
   workflowName: string;
+  /** Complete workflow object (current canvas state) */
+  workflow: Workflow;
   /** Target Slack channel ID */
   channelId: string;
   /** Workflow description (optional) */

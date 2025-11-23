@@ -34,11 +34,18 @@ interface WorkflowListItem {
 
 export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareToSlack }) => {
   const { t } = useTranslation();
-  const { nodes, edges, setNodes, setEdges, activeWorkflow, setActiveWorkflow } =
-    useWorkflowStore();
+  const {
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    activeWorkflow,
+    setActiveWorkflow,
+    workflowName,
+    setWorkflowName,
+  } = useWorkflowStore();
   const { openChat, initConversation, loadConversationHistory, isProcessing } =
     useRefinementStore();
-  const [workflowName, setWorkflowName] = useState('my-workflow');
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [workflows, setWorkflows] = useState<WorkflowListItem[]>([]);
@@ -122,7 +129,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
 
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, [setNodes, setEdges, setActiveWorkflow]);
+  }, [setNodes, setEdges, setActiveWorkflow, setWorkflowName]);
 
   // Load workflow list on mount
   useEffect(() => {

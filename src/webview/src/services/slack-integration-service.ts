@@ -7,7 +7,7 @@
  * Based on: specs/001-slack-workflow-sharing/contracts/extension-host-api-contracts.md
  */
 
-import type { ExtensionMessage } from '@shared/types/messages';
+import type { ExtensionMessage, Workflow } from '@shared/types/messages';
 import { vscode } from '../main';
 
 /**
@@ -41,6 +41,7 @@ export interface ShareWorkflowOptions {
   workspaceId: string;
   workflowId: string;
   workflowName: string;
+  workflow: Workflow;
   channelId: string;
   description?: string;
   overrideSensitiveWarning?: boolean;

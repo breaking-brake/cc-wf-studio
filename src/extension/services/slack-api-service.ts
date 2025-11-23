@@ -260,18 +260,40 @@ export class SlackApiService {
         initial_comment: options.initialComment,
       });
 
-      if (!response.ok || !(response as unknown as Record<string, unknown>).file) {
+      if (!response.ok) {
         throw new Error('ファイルのアップロードに失敗しました');
       }
 
-      const file = (response as unknown as Record<string, unknown>).file as Record<string, unknown>;
+      const responseObj = response as unknown as Record<string, unknown>;
+
+      // files.uploadV2 returns nested structure: response.files[0].files[0]
+      const file = responseObj.file as Record<string, unknown> | undefined;
+      const filesWrapper = responseObj.files as Array<Record<string, unknown>> | undefined;
+
+      let fileData: Record<string, unknown> | undefined = file;
+
+      // If no direct file object, try to get from nested structure
+      if (!fileData && filesWrapper && filesWrapper.length > 0) {
+        const innerWrapper = filesWrapper[0];
+        const innerFiles = innerWrapper.files as Array<Record<string, unknown>> | undefined;
+
+        if (innerFiles && innerFiles.length > 0) {
+          fileData = innerFiles[0];
+        }
+      }
+
+      if (!fileData) {
+        console.error('[SlackApiService] No file data in response:', responseObj);
+        throw new Error('ファイルのアップロードに失敗しました');
+      }
 
       return {
-        fileId: file.id as string,
-        fileUrl: file.url_private as string,
-        permalink: file.permalink as string,
+        fileId: fileData.id as string,
+        fileUrl: fileData.url_private as string,
+        permalink: fileData.permalink as string,
       };
     } catch (error) {
+      console.error('[SlackApiService] uploadWorkflowFile error:', error);
       const errorInfo = handleSlackError(error);
       throw new Error(errorInfo.message);
     }

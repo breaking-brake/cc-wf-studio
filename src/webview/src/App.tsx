@@ -142,7 +142,6 @@ const App: React.FC = () => {
         isOpen={isSlackShareDialogOpen}
         onClose={() => setIsSlackShareDialogOpen(false)}
         workflowId={activeWorkflow?.id || ''}
-        workflowName={activeWorkflow?.name || 'Untitled Workflow'}
       />
     </div>
   );

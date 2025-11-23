@@ -163,6 +163,35 @@
 
 ---
 
+## Phase 3.4: Share未保存ワークフロー対応 (優先度: P1)
+
+**ゴール**: 現在のキャンバス状態（未保存または編集中）を直接Slackに共有できるようにし、Save操作を強制しない自然なUXを実現する。
+
+**独立テスト**: 未保存のワークフローまたは保存後に編集したワークフローをShare to Slackして、現在の画面状態が正しく共有されることを確認できる。
+
+### 背景
+
+**問題点：**
+- workflowIdを送信してExtension側でファイルから読み込むため、未保存ワークフローではファイルが存在せず失敗する
+- Save後に編集した場合、古いファイル内容が共有される
+- ユーザーは「今画面に見えているワークフロー」を共有したいが、それができない
+
+**解決方法：**
+- Webview側で現在のノード/エッジからWorkflowオブジェクトを動的に生成
+- payloadにworkflow全体を含めてExtensionに送信
+- Extension側でファイル読み込みをスキップし、受け取ったworkflowをそのまま使用
+
+### Implementation for Phase 3.4
+
+- [x] T024-8 [P] [US1] ShareWorkflowToSlackPayload型定義の拡張 in src/shared/types/messages.ts
+- [x] T024-9 [P] [US1] SlackShareDialogで動的Workflow生成 in src/webview/src/components/dialogs/SlackShareDialog.tsx
+- [x] T024-10 [P] [US1] ShareWorkflowOptions型定義の更新 in src/webview/src/services/slack-integration-service.ts
+- [x] T024-11 [US1] Extension側ハンドラーの修正（ファイル読み込み削除） in src/extension/commands/slack-share-workflow.ts
+
+**Checkpoint**: Share未保存ワークフロー対応完了 - 未保存/編集中のワークフローを直接Slackに共有可能
+
+---
+
 ## Phase 4: User Story 2 - Slackからのワンクリックインポート (優先度: P1)
 
 **ゴール**: チームメンバーがSlack上で共有されたワークフローメッセージから、ワンクリックで自分のVS Codeにワークフローをインポートできるようにする。手動でのファイルダウンロード、ディレクトリ配置、エディタでの開く操作は不要。

@@ -22,23 +22,22 @@ import {
   reconnectToSlack,
   shareWorkflowToSlack,
 } from '../../services/slack-integration-service';
+import { serializeWorkflow } from '../../services/workflow-service';
+import { useWorkflowStore } from '../../stores/workflow-store';
 
 interface SlackShareDialogProps {
   isOpen: boolean;
   onClose: () => void;
   workflowId: string;
-  workflowName: string;
 }
 
-export function SlackShareDialog({
-  isOpen,
-  onClose,
-  workflowId,
-  workflowName,
-}: SlackShareDialogProps) {
+export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDialogProps) {
   const { t } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
+
+  // Get current canvas state for workflow generation
+  const { nodes, edges, activeWorkflow, workflowName } = useWorkflowStore();
 
   // State management
   const [loading, setLoading] = useState(false);
@@ -208,10 +207,20 @@ export function SlackShareDialog({
     setSensitiveDataWarning(null);
 
     try {
+      // Generate workflow from current canvas state
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        'Created with Workflow Studio',
+        activeWorkflow?.conversationHistory
+      );
+
       const result = await shareWorkflowToSlack({
         workspaceId: selectedWorkspaceId,
         workflowId,
         workflowName,
+        workflow,
         channelId: selectedChannelId,
         description: description || undefined,
         overrideSensitiveWarning: false,
@@ -242,10 +251,20 @@ export function SlackShareDialog({
     setSensitiveDataWarning(null);
 
     try {
+      // Generate workflow from current canvas state
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        'Created with Workflow Studio',
+        activeWorkflow?.conversationHistory
+      );
+
       const result = await shareWorkflowToSlack({
         workspaceId: selectedWorkspaceId,
         workflowId,
         workflowName,
+        workflow,
         channelId: selectedChannelId,
         description: description || undefined,
         overrideSensitiveWarning: true,

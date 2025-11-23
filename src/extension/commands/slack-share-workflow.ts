@@ -8,7 +8,7 @@
  */
 
 import type * as vscode from 'vscode';
-import type { ShareWorkflowToSlackPayload, Workflow } from '../../shared/types/messages';
+import type { ShareWorkflowToSlackPayload } from '../../shared/types/messages';
 import { log } from '../extension';
 import type { FileService } from '../services/file-service';
 import type { SlackApiService } from '../services/slack-api-service';
@@ -34,7 +34,7 @@ export async function handleShareWorkflowToSlack(
   payload: ShareWorkflowToSlackPayload,
   webview: vscode.Webview,
   requestId: string,
-  fileService: FileService,
+  _fileService: FileService,
   slackApiService: SlackApiService
 ): Promise<void> {
   const startTime = Date.now();
@@ -46,41 +46,11 @@ export async function handleShareWorkflowToSlack(
   });
 
   try {
-    // Step 1: Load workflow file
-    const filePath = fileService.getWorkflowFilePath(payload.workflowId);
-    const exists = await fileService.fileExists(filePath);
+    // Use workflow object directly from payload (current canvas state)
+    const workflow = payload.workflow;
+    const workflowContent = JSON.stringify(workflow, null, 2);
 
-    if (!exists) {
-      log('ERROR', 'Workflow file not found', { requestId, workflowId: payload.workflowId });
-      sendShareFailed(
-        webview,
-        requestId,
-        payload.workflowId,
-        'UNKNOWN_ERROR',
-        `Workflow "${payload.workflowId}" not found`
-      );
-      return;
-    }
-
-    // Step 2: Read and parse workflow file
-    const workflowContent = await fileService.readFile(filePath);
-    let workflow: Workflow;
-
-    try {
-      workflow = JSON.parse(workflowContent);
-    } catch (parseError) {
-      log('ERROR', 'Failed to parse workflow JSON', { requestId, error: parseError });
-      sendShareFailed(
-        webview,
-        requestId,
-        payload.workflowId,
-        'UNKNOWN_ERROR',
-        'Invalid workflow file format'
-      );
-      return;
-    }
-
-    // Step 3: Detect sensitive data (if not overriding warning)
+    // Step 1: Detect sensitive data (if not overriding warning)
     if (!payload.overrideSensitiveWarning) {
       const findings = detectSensitiveData(workflowContent);
 
@@ -112,7 +82,7 @@ export async function handleShareWorkflowToSlack(
 
     log('INFO', 'No sensitive data detected or warning overridden', { requestId });
 
-    // Step 4: Extract workflow metadata
+    // Step 2: Extract workflow metadata
     const authorName = workflow.metadata?.author || 'Unknown';
     const nodeCount = workflow.nodes.length;
     const createdAt =
@@ -120,7 +90,7 @@ export async function handleShareWorkflowToSlack(
         ? workflow.createdAt
         : new Date(workflow.createdAt).toISOString();
 
-    // Step 5: Upload workflow file to Slack
+    // Step 3: Upload workflow file to Slack
     log('INFO', 'Uploading workflow file to Slack', { requestId });
 
     const filename = `${payload.workflowName.replace(/[^a-zA-Z0-9-_]/g, '_')}.json`;
@@ -138,7 +108,7 @@ export async function handleShareWorkflowToSlack(
       fileId: uploadResult.fileId,
     });
 
-    // Step 6: Post rich message card to channel
+    // Step 4: Post rich message card to channel
     log('INFO', 'Posting workflow message card to Slack', { requestId });
 
     const messageBlock: WorkflowMessageBlock = {
@@ -164,7 +134,7 @@ export async function handleShareWorkflowToSlack(
       permalink: messageResult.permalink,
     });
 
-    // Step 7: Send success response
+    // Step 5: Send success response
     const successEvent: ShareWorkflowSuccessEvent = {
       type: 'SHARE_WORKFLOW_SUCCESS',
       payload: {
@@ -176,6 +146,8 @@ export async function handleShareWorkflowToSlack(
         permalink: messageResult.permalink,
       },
     };
+
+    log('INFO', 'Sending success message to webview', { requestId });
 
     webview.postMessage({
       ...successEvent,
