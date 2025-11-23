@@ -8,6 +8,7 @@ export interface WebviewTranslationKeys {
   description: string;
   optional: string;
   cancel: string;
+  'loading.importWorkflow': string;
 
   // Toolbar
   'toolbar.workflowNamePlaceholder': string;

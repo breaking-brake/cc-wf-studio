@@ -14,7 +14,6 @@ import { log } from '../extension';
 import type { FileService } from '../services/file-service';
 import type { SlackApiService } from '../services/slack-api-service';
 import type {
-  ImportWorkflowConfirmOverwriteEvent,
   ImportWorkflowFailedEvent,
   ImportWorkflowSuccessEvent,
 } from '../types/slack-messages';
@@ -160,22 +159,26 @@ export async function handleImportWorkflowFromSlack(
           filePath,
         });
 
-        // Send overwrite confirmation request
-        const confirmEvent: ImportWorkflowConfirmOverwriteEvent = {
-          type: 'IMPORT_WORKFLOW_CONFIRM_OVERWRITE',
-          payload: {
-            workflowId: payload.workflowId,
-            existingFilePath: filePath,
-          },
-        };
+        // Show VSCode native confirmation dialog
+        const userChoice = await vscode.window.showWarningMessage(
+          `Workflow "${workflow.name}" already exists. Do you want to overwrite it?`,
+          { modal: true },
+          'Overwrite',
+          'Cancel'
+        );
 
-        webview.postMessage({
-          ...confirmEvent,
-          requestId,
-        });
+        if (userChoice !== 'Overwrite') {
+          log('INFO', 'User cancelled overwrite', { requestId });
+          // User cancelled - hide loading overlay in Webview
+          webview.postMessage({
+            type: 'IMPORT_WORKFLOW_CANCELLED',
+            requestId,
+          });
+          return;
+        }
 
-        log('INFO', 'Overwrite confirmation sent to user', { requestId });
-        return; // Wait for user confirmation
+        log('INFO', 'User confirmed overwrite', { requestId });
+        // Continue to save (fall through to Step 5)
       }
     }
 
@@ -186,20 +189,14 @@ export async function handleImportWorkflowFromSlack(
 
     log('INFO', 'Workflow file saved successfully', { requestId });
 
-    // Step 6: Open file in editor
-    const uri = vscode.Uri.file(filePath);
-    const document = await vscode.workspace.openTextDocument(uri);
-    await vscode.window.showTextDocument(document);
-
-    log('INFO', 'Workflow file opened in editor', { requestId });
-
-    // Step 7: Send success response
+    // Step 6: Send success response with workflow data
     const successEvent: ImportWorkflowSuccessEvent = {
       type: 'IMPORT_WORKFLOW_SUCCESS',
       payload: {
         workflowId: payload.workflowId,
         filePath,
         workflowName: workflow.name,
+        workflow,
       },
     };
 

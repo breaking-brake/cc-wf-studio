@@ -10,6 +10,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   description: '説明',
   optional: '任意',
   cancel: 'キャンセル',
+  'loading.importWorkflow': 'ワークフローをインポート中...',
 
   // Toolbar
   'toolbar.workflowNamePlaceholder': 'ワークフロー名',

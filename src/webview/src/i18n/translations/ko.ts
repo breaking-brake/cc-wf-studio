@@ -10,6 +10,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   description: '설명',
   optional: '선택 사항',
   cancel: '취소',
+  'loading.importWorkflow': '워크플로 가져오는 중...',
 
   // Toolbar
   'toolbar.workflowNamePlaceholder': '워크플로 이름',

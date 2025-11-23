@@ -293,6 +293,8 @@ export interface ImportWorkflowSuccessEvent {
     workflowId: string;
     filePath: string;
     workflowName: string;
+    /** Workflow data for loading into canvas */
+    workflow: import('../../shared/types/workflow-definition').Workflow;
   };
 }
 

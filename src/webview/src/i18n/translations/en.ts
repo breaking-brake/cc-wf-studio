@@ -10,6 +10,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   description: 'Description',
   optional: 'Optional',
   cancel: 'Cancel',
+  'loading.importWorkflow': 'Importing workflow...',
 
   // Toolbar
   'toolbar.workflowNamePlaceholder': 'Workflow name',

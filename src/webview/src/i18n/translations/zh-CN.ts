@@ -10,6 +10,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   description: '描述',
   optional: '可选',
   cancel: '取消',
+  'loading.importWorkflow': '正在导入工作流...',
 
   // Toolbar
   'toolbar.workflowNamePlaceholder': '工作流名称',
