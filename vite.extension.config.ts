@@ -29,6 +29,10 @@ export default defineConfig({
       // Mark vscode module and Node.js built-ins as external
       external: [
         'vscode',
+        // External dependencies with native binaries
+        '@ngrok/ngrok',
+        // External dependencies with complex class hierarchies
+        '@slack/web-api',
         // Node.js built-in modules (with and without node: prefix)
         'node:assert',
         'node:child_process',
