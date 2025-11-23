@@ -219,15 +219,15 @@
 
 ### Implementation for User Story 2
 
-- [ ] T024 [P] [US2] Slackファイルダウンロード実装 in src/extension/services/slack-api-service.ts
-- [ ] T025 [P] [US2] ワークフロー定義ファイルバリデーション実装 in src/extension/utils/workflow-validator.ts
-- [ ] T026 [US2] ワークフローインポートコマンドの実装 in src/extension/commands/slack-import-workflow.ts
-- [ ] T027 [US2] ファイル上書き確認ダイアログの実装 in src/extension/commands/slack-import-workflow.ts
-- [ ] T028 [US2] インポート後のファイル自動オープン機能 in src/extension/commands/slack-import-workflow.ts
-- [ ] T029 [P] [US2] Slackインポートボタンコンポーネントの実装 in src/webview/src/components/buttons/SlackImportButton.tsx
-- [ ] T030 [US2] deep link ハンドリング実装 (VS Code URI handler) in src/extension/extension.ts
-- [ ] T031 [US2] VS Code コマンド登録 (`Slack: Import Workflow`) in src/extension/extension.ts
-- [ ] T032 [P] [US2] i18n翻訳の追加 (ワークフローインポート関連メッセージ) in src/webview/src/i18n/translations/*.ts
+- [x] T024 [P] [US2] Slackファイルダウンロード実装 in src/extension/services/slack-api-service.ts
+- [x] T025 [P] [US2] ワークフロー定義ファイルバリデーション実装 in src/extension/utils/workflow-validator.ts
+- [x] T026 [US2] ワークフローインポートコマンドの実装 in src/extension/commands/slack-import-workflow.ts
+- [x] T027 [US2] ファイル上書き確認ダイアログの実装 in src/extension/commands/slack-import-workflow.ts
+- [x] T028 [US2] インポート後のファイル自動オープン機能 in src/extension/commands/slack-import-workflow.ts
+- [x] T029 [P] [US2] Slackインポートボタンコンポーネントの実装 in src/webview/src/components/buttons/SlackImportButton.tsx
+- [x] T030 [US2] deep link ハンドリング実装 (VS Code URI handler) in src/extension/extension.ts
+- [x] T031 [US2] VS Code コマンド登録 (`Slack: Import Workflow`) in src/extension/extension.ts
+- [x] T032 [P] [US2] i18n翻訳の追加 (ワークフローインポート関連メッセージ) in src/webview/src/i18n/translations/*.ts
 
 **Checkpoint**: User Story 1とUser Story 2が独立して動作することを確認
 
