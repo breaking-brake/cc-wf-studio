@@ -387,7 +387,7 @@ export function importWorkflowFromSlack(
         if (message.type === 'IMPORT_WORKFLOW_SUCCESS') {
           resolve({ filePath: message.payload?.filePath || '' });
         } else if (message.type === 'IMPORT_WORKFLOW_FAILED') {
-          reject(new Error(message.payload?.message || 'Failed to import workflow'));
+          reject(new Error(message.payload?.errorMessage || 'Failed to import workflow'));
         }
       }
     };

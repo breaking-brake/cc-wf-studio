@@ -27,6 +27,12 @@ export interface WorkflowMessageBlock {
   createdAt: string;
   /** File ID (after upload) */
   fileId: string;
+  /** Workspace ID (for deep link) */
+  workspaceId?: string;
+  /** Channel ID (for deep link) */
+  channelId?: string;
+  /** Message timestamp (for deep link) */
+  messageTs?: string;
 }
 
 /**
@@ -87,22 +93,16 @@ export function buildWorkflowMessageBlocks(
           },
         ]
       : []),
-    // Import button
+    // Import link (using section with markdown to avoid interactivity URL requirement)
     {
-      type: 'actions',
-      elements: [
-        {
-          type: 'button',
-          text: {
-            type: 'plain_text',
-            text: '📥 Import to VS Code',
-          },
-          style: 'primary',
-          value: block.workflowId,
-          action_id: 'import_workflow',
-          url: `vscode://workflow-studio/import?workflowId=${block.workflowId}&fileId=${block.fileId}`,
-        },
-      ],
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text:
+          block.workspaceId && block.channelId && block.messageTs && block.fileId
+            ? `📥 <vscode://cc-wf-studio/import?workflowId=${encodeURIComponent(block.workflowId)}&fileId=${encodeURIComponent(block.fileId)}&workspaceId=${encodeURIComponent(block.workspaceId)}&channelId=${encodeURIComponent(block.channelId)}&messageTs=${encodeURIComponent(block.messageTs)}|Import to VS Code>`
+            : '_Import link will be available after file upload_',
+      },
     },
   ];
 }

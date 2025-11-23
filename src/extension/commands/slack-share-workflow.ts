@@ -106,6 +106,8 @@ export async function handleShareWorkflowToSlack(
       nodeCount,
       createdAt,
       fileId: '', // Will be updated after file upload
+      workspaceId: payload.workspaceId,
+      channelId: payload.channelId,
     };
 
     const messageResult = await slackApiService.postWorkflowMessage(
@@ -137,6 +139,24 @@ export async function handleShareWorkflowToSlack(
       requestId,
       fileId: uploadResult.fileId,
     });
+
+    // Step 6: Update message with complete deep link
+    log('INFO', 'Updating message with complete deep link', { requestId });
+
+    const updatedMessageBlock: WorkflowMessageBlock = {
+      ...messageBlock,
+      fileId: uploadResult.fileId,
+      messageTs: messageResult.messageTs,
+    };
+
+    await slackApiService.updateWorkflowMessage(
+      payload.workspaceId,
+      payload.channelId,
+      messageResult.messageTs,
+      updatedMessageBlock
+    );
+
+    log('INFO', 'Message updated with complete deep link', { requestId });
 
     // Step 6: Send success response
     const successEvent: ShareWorkflowSuccessEvent = {

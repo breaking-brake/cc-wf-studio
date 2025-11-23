@@ -22,6 +22,7 @@ import { loadWorkflowList } from './load-workflow-list';
 import { handleGetMcpToolSchema, handleGetMcpTools, handleListMcpServers } from './mcp-handlers';
 import { saveWorkflow } from './save-workflow';
 import { handleBrowseSkills, handleCreateSkill, handleValidateSkillFile } from './skill-operations';
+import { handleImportWorkflowFromSlack } from './slack-import-workflow';
 import {
   handleGetSlackChannels,
   handleListSlackWorkspaces,
@@ -415,6 +416,28 @@ export function registerOpenEditorCommand(
                 payload: {
                   code: 'VALIDATION_ERROR',
                   message: 'Share workflow payload is required',
+                },
+              });
+            }
+            break;
+
+          case 'IMPORT_WORKFLOW_FROM_SLACK':
+            // Import workflow from Slack (T026)
+            if (message.payload) {
+              await handleImportWorkflowFromSlack(
+                message.payload,
+                webview,
+                message.requestId || '',
+                fileService,
+                slackApiService
+              );
+            } else {
+              webview.postMessage({
+                type: 'ERROR',
+                requestId: message.requestId,
+                payload: {
+                  code: 'VALIDATION_ERROR',
+                  message: 'Import workflow payload is required',
                 },
               });
             }

@@ -548,7 +548,8 @@ export type ExtensionMessage =
   | Message<GetSlackChannelsSuccessPayload, 'GET_SLACK_CHANNELS_SUCCESS'>
   | Message<SlackErrorPayload, 'GET_SLACK_CHANNELS_FAILED'>
   | Message<ImportWorkflowSuccessPayload, 'IMPORT_WORKFLOW_SUCCESS'>
-  | Message<SlackErrorPayload, 'IMPORT_WORKFLOW_FAILED'>
+  | Message<ImportWorkflowConfirmOverwritePayload, 'IMPORT_WORKFLOW_CONFIRM_OVERWRITE'>
+  | Message<ImportWorkflowFailedPayload, 'IMPORT_WORKFLOW_FAILED'>
   | Message<SearchSlackWorkflowsSuccessPayload, 'SEARCH_SLACK_WORKFLOWS_SUCCESS'>
   | Message<SlackErrorPayload, 'SEARCH_SLACK_WORKFLOWS_FAILED'>;
 
@@ -656,10 +657,61 @@ export interface ListSlackWorkspacesSuccessPayload {
 }
 
 /**
+ * Import workflow from Slack request payload
+ */
+export interface ImportWorkflowFromSlackPayload {
+  /** Workflow ID to import */
+  workflowId: string;
+  /** Slack file ID */
+  fileId: string;
+  /** Slack message timestamp */
+  messageTs: string;
+  /** Slack channel ID */
+  channelId: string;
+  /** Target workspace ID */
+  workspaceId: string;
+  /** Override existing file without confirmation (default: false) */
+  overwriteExisting?: boolean;
+}
+
+/**
  * Import workflow success payload
  */
 export interface ImportWorkflowSuccessPayload {
+  /** Workflow ID that was imported */
+  workflowId: string;
+  /** Local file path where workflow was saved */
   filePath: string;
+  /** Workflow name */
+  workflowName: string;
+}
+
+/**
+ * Import workflow confirm overwrite payload
+ */
+export interface ImportWorkflowConfirmOverwritePayload {
+  /** Workflow ID to import */
+  workflowId: string;
+  /** Existing file path that will be overwritten */
+  existingFilePath: string;
+}
+
+/**
+ * Import workflow failed payload
+ */
+export interface ImportWorkflowFailedPayload {
+  /** Workflow ID that failed to import */
+  workflowId: string;
+  /** Error code */
+  errorCode:
+    | 'NOT_AUTHENTICATED'
+    | 'FILE_DOWNLOAD_FAILED'
+    | 'INVALID_WORKFLOW_FILE'
+    | 'FILE_WRITE_ERROR'
+    | 'NETWORK_ERROR'
+    | 'UNKNOWN_ERROR';
+  /** Error message */
+  errorMessage: string;
 }
 
 /**
@@ -772,7 +824,8 @@ export type WebviewMessage =
   | Message<void, 'GET_OAUTH_REDIRECT_URI'>
   | Message<void, 'LIST_SLACK_WORKSPACES'>
   | Message<GetSlackChannelsPayload, 'GET_SLACK_CHANNELS'>
-  | Message<ShareWorkflowToSlackPayload, 'SHARE_WORKFLOW_TO_SLACK'>;
+  | Message<ShareWorkflowToSlackPayload, 'SHARE_WORKFLOW_TO_SLACK'>
+  | Message<ImportWorkflowFromSlackPayload, 'IMPORT_WORKFLOW_FROM_SLACK'>;
 
 // ============================================================================
 // Error Codes

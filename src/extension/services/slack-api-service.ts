@@ -453,4 +453,95 @@ export class SlackApiService {
       throw new Error(errorInfo.message);
     }
   }
+
+  /**
+   * Updates existing workflow message with new content
+   *
+   * @param workspaceId - Target workspace ID
+   * @param channelId - Target channel ID
+   * @param messageTs - Message timestamp to update
+   * @param block - Updated workflow message block
+   */
+  async updateWorkflowMessage(
+    workspaceId: string,
+    channelId: string,
+    messageTs: string,
+    block: WorkflowMessageBlock
+  ): Promise<void> {
+    try {
+      const client = await this.ensureClient(workspaceId);
+
+      // Build Block Kit blocks
+      const blocks = buildWorkflowMessageBlocks(block);
+
+      // Update message
+      const response = await client.chat.update({
+        channel: channelId,
+        ts: messageTs,
+        text: `Workflow shared: ${block.name}`,
+        // biome-ignore lint/suspicious/noExplicitAny: Slack Web API type definitions are incomplete
+        blocks: blocks as any,
+      });
+
+      if (!response.ok) {
+        throw new Error('メッセージの更新に失敗しました');
+      }
+    } catch (error) {
+      const errorInfo = handleSlackError(error);
+      throw new Error(errorInfo.message);
+    }
+  }
+
+  /**
+   * Downloads workflow file from Slack
+   *
+   * @param workspaceId - Target workspace ID
+   * @param fileId - Slack file ID to download
+   * @returns Workflow JSON content as string
+   */
+  async downloadWorkflowFile(workspaceId: string, fileId: string): Promise<string> {
+    try {
+      const client = await this.ensureClient(workspaceId);
+
+      // Get file info using files.info API
+      const response = await client.files.info({
+        file: fileId,
+      });
+
+      if (!response.ok || !response.file) {
+        throw new Error('ファイル情報の取得に失敗しました');
+      }
+
+      const file = response.file as Record<string, unknown>;
+      const urlPrivate = file.url_private as string | undefined;
+
+      if (!urlPrivate) {
+        throw new Error('ファイルのダウンロードURLが見つかりません');
+      }
+
+      // Download file content from url_private
+      const accessToken = await this.tokenManager.getAccessTokenByWorkspaceId(workspaceId);
+      if (!accessToken) {
+        throw new Error(`ワークスペース ${workspaceId} に接続されていません`);
+      }
+
+      // Fetch file content with Authorization header
+      const fileResponse = await fetch(urlPrivate, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!fileResponse.ok) {
+        throw new Error(`ファイルのダウンロードに失敗しました (HTTP ${fileResponse.status})`);
+      }
+
+      const content = await fileResponse.text();
+
+      return content;
+    } catch (error) {
+      const errorInfo = handleSlackError(error);
+      throw new Error(errorInfo.message);
+    }
+  }
 }
