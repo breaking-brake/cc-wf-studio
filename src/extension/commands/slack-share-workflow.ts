@@ -7,7 +7,7 @@
  * Based on specs/001-slack-workflow-sharing/contracts/extension-host-api-contracts.md
  */
 
-import type * as vscode from 'vscode';
+import * as vscode from 'vscode';
 import type { ShareWorkflowToSlackPayload } from '../../shared/types/messages';
 import { log } from '../extension';
 import type { FileService } from '../services/file-service';
@@ -153,6 +153,18 @@ export async function handleShareWorkflowToSlack(
       ...successEvent,
       requestId,
     });
+
+    // Show native notification
+    const viewInSlackButton = 'View in Slack';
+    const result = await vscode.window.showInformationMessage(
+      `Workflow "${payload.workflowName}" shared to Slack successfully!`,
+      viewInSlackButton
+    );
+
+    // Open Slack permalink if user clicks the button
+    if (result === viewInSlackButton) {
+      await vscode.env.openExternal(vscode.Uri.parse(messageResult.permalink));
+    }
 
     log('INFO', 'Workflow sharing completed successfully', {
       requestId,

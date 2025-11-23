@@ -187,6 +187,7 @@
 - [x] T024-9 [P] [US1] SlackShareDialogで動的Workflow生成 in src/webview/src/components/dialogs/SlackShareDialog.tsx
 - [x] T024-10 [P] [US1] ShareWorkflowOptions型定義の更新 in src/webview/src/services/slack-integration-service.ts
 - [x] T024-11 [US1] Extension側ハンドラーの修正（ファイル読み込み削除） in src/extension/commands/slack-share-workflow.ts
+- [x] T024-12 [US1] VSCodeネイティブ通知の追加（成功時に"View in Slack"ボタン付き） in src/extension/commands/slack-share-workflow.ts
 
 **Checkpoint**: Share未保存ワークフロー対応完了 - 未保存/編集中のワークフローを直接Slackに共有可能
 
