@@ -582,7 +582,17 @@ export function registerOpenEditorCommand(
               console.log('[Extension Host] Local server started on port:', localPort);
 
               // Create ngrok tunnel to expose HTTPS URL (keep it open for OAuth)
-              ngrokService = new NgrokService();
+              // Get ngrok authtoken from VSCode settings
+              const config = vscode.workspace.getConfiguration('cc-wf-studio.slack');
+              const ngrokAuthtoken = config.get<string>('ngrokAuthtoken') || '';
+
+              if (!ngrokAuthtoken) {
+                throw new Error(
+                  'Ngrok authtoken not configured. Please set ngrokAuthtoken in VSCode settings (cc-wf-studio.slack).'
+                );
+              }
+
+              ngrokService = new NgrokService(ngrokAuthtoken);
               const tunnel = await ngrokService.createTunnel(localPort);
               console.log('[Extension Host] Ngrok tunnel created:', tunnel.publicUrl);
 
