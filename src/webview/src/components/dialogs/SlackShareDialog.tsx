@@ -15,8 +15,11 @@ import type {
   SlackWorkspace,
 } from '../../services/slack-integration-service';
 import {
+  connectToSlack,
+  getOAuthRedirectUri,
   getSlackChannels,
   listSlackWorkspaces,
+  reconnectToSlack,
   shareWorkflowToSlack,
 } from '../../services/slack-integration-service';
 
@@ -41,17 +44,19 @@ export function SlackShareDialog({
   const [loading, setLoading] = useState(false);
   const [loadingWorkspaces, setLoadingWorkspaces] = useState(false);
   const [loadingChannels, setLoadingChannels] = useState(false);
+  const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [workspaces, setWorkspaces] = useState<SlackWorkspace[]>([]);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>('');
   const [channels, setChannels] = useState<SlackChannel[]>([]);
   const [selectedChannelId, setSelectedChannelId] = useState<string>('');
   const [description, setDescription] = useState('');
+  const [redirectUri, setRedirectUri] = useState<string | null>(null);
   const [sensitiveDataWarning, setSensitiveDataWarning] = useState<SensitiveDataFinding[] | null>(
     null
   );
 
-  // Load workspaces when dialog opens
+  // Load workspaces and redirect URI when dialog opens
   useEffect(() => {
     if (!isOpen) {
       return;
@@ -76,7 +81,20 @@ export function SlackShareDialog({
       }
     };
 
+    const loadRedirectUri = async () => {
+      try {
+        console.log('[SlackShareDialog] Fetching OAuth redirect URI...');
+        const result = await getOAuthRedirectUri();
+        console.log('[SlackShareDialog] Received redirect URI:', result.redirectUri);
+        setRedirectUri(result.redirectUri);
+      } catch (err) {
+        // Silently fail - redirect URI is optional for development
+        console.error('[SlackShareDialog] Failed to get redirect URI:', err);
+      }
+    };
+
     loadWorkspaces();
+    loadRedirectUri();
   }, [isOpen, t]);
 
   // Load channels when workspace is selected
@@ -115,6 +133,64 @@ export function SlackShareDialog({
       dialogRef.current.focus();
     }
   }, [isOpen]);
+
+  const handleConnectToSlack = async () => {
+    setConnecting(true);
+    setError(null);
+
+    try {
+      await connectToSlack();
+
+      // Reload workspaces
+      setLoadingWorkspaces(true);
+      const workspaceList = await listSlackWorkspaces();
+      setWorkspaces(workspaceList);
+
+      // Reset workspace selection to trigger channel reload
+      setSelectedWorkspaceId('');
+
+      // Auto-select first workspace after a brief delay to ensure state update
+      if (workspaceList.length > 0) {
+        setTimeout(() => {
+          setSelectedWorkspaceId(workspaceList[0].workspaceId);
+        }, 0);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('slack.connect.failed'));
+    } finally {
+      setConnecting(false);
+      setLoadingWorkspaces(false);
+    }
+  };
+
+  const handleReconnectToSlack = async () => {
+    setConnecting(true);
+    setError(null);
+
+    try {
+      await reconnectToSlack();
+
+      // Reload workspaces
+      setLoadingWorkspaces(true);
+      const workspaceList = await listSlackWorkspaces();
+      setWorkspaces(workspaceList);
+
+      // Reset workspace selection to trigger channel reload
+      setSelectedWorkspaceId('');
+
+      // Auto-select first workspace after a brief delay to ensure state update
+      if (workspaceList.length > 0) {
+        setTimeout(() => {
+          setSelectedWorkspaceId(workspaceList[0].workspaceId);
+        }, 0);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('slack.reconnect.failed'));
+    } finally {
+      setConnecting(false);
+      setLoadingWorkspaces(false);
+    }
+  };
 
   const handleShare = async () => {
     if (!selectedWorkspaceId) {
@@ -457,6 +533,174 @@ export function SlackShareDialog({
           </select>
         </div>
 
+        {/* Connect to Slack Button (shown when no workspaces) */}
+        {!loadingWorkspaces && workspaces.length === 0 && (
+          <div
+            style={{
+              marginBottom: '24px',
+              padding: '16px',
+              backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
+              border: '1px solid var(--vscode-panel-border)',
+              borderRadius: '4px',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '13px',
+                color: 'var(--vscode-descriptionForeground)',
+                marginBottom: '12px',
+              }}
+            >
+              {t('slack.connect.description')}
+            </div>
+            <button
+              type="button"
+              onClick={handleConnectToSlack}
+              disabled={connecting}
+              style={{
+                width: '100%',
+                padding: '8px 16px',
+                backgroundColor: 'var(--vscode-button-background)',
+                color: 'var(--vscode-button-foreground)',
+                border: 'none',
+                borderRadius: '2px',
+                cursor: connecting ? 'not-allowed' : 'pointer',
+                fontSize: '13px',
+                fontWeight: 500,
+                opacity: connecting ? 0.5 : 1,
+              }}
+            >
+              {connecting ? t('slack.connect.connecting') : t('slack.connect.button')}
+            </button>
+
+            {/* Redirect URI display (development only) */}
+            {redirectUri && (
+              <div style={{ marginTop: '12px' }}>
+                <div
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    color: 'var(--vscode-foreground)',
+                    marginBottom: '4px',
+                  }}
+                >
+                  OAuth Redirect URL (for Slack App settings):
+                </div>
+                <input
+                  type="text"
+                  readOnly
+                  value={redirectUri}
+                  onClick={(e) => e.currentTarget.select()}
+                  style={{
+                    width: '100%',
+                    padding: '6px 8px',
+                    backgroundColor: 'var(--vscode-input-background)',
+                    color: 'var(--vscode-input-foreground)',
+                    border: '1px solid var(--vscode-input-border)',
+                    borderRadius: '2px',
+                    fontSize: '11px',
+                    fontFamily: 'monospace',
+                    cursor: 'text',
+                  }}
+                />
+                <div
+                  style={{
+                    fontSize: '10px',
+                    color: 'var(--vscode-descriptionForeground)',
+                    marginTop: '4px',
+                  }}
+                >
+                  Click to select and copy this URL. Add it to Slack App → OAuth & Permissions →
+                  Redirect URLs
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Reconnect Button (shown when workspaces exist) */}
+        {!loadingWorkspaces && workspaces.length > 0 && (
+          <div
+            style={{
+              marginBottom: '24px',
+              padding: '12px',
+              backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
+              border: '1px solid var(--vscode-panel-border)',
+              borderRadius: '4px',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '12px',
+                color: 'var(--vscode-descriptionForeground)',
+                marginBottom: '8px',
+              }}
+            >
+              {t('slack.reconnect.description')}
+            </div>
+            <button
+              type="button"
+              onClick={handleReconnectToSlack}
+              disabled={connecting}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                color: 'var(--vscode-button-secondaryForeground)',
+                border: 'none',
+                borderRadius: '2px',
+                cursor: connecting ? 'not-allowed' : 'pointer',
+                fontSize: '12px',
+                opacity: connecting ? 0.5 : 1,
+              }}
+            >
+              {connecting ? t('slack.reconnect.reconnecting') : t('slack.reconnect.button')}
+            </button>
+
+            {/* Redirect URI display (development only) */}
+            {redirectUri && (
+              <div style={{ marginTop: '12px' }}>
+                <div
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    color: 'var(--vscode-foreground)',
+                    marginBottom: '4px',
+                  }}
+                >
+                  OAuth Redirect URL (for Slack App settings):
+                </div>
+                <input
+                  type="text"
+                  readOnly
+                  value={redirectUri}
+                  onClick={(e) => e.currentTarget.select()}
+                  style={{
+                    width: '100%',
+                    padding: '6px 8px',
+                    backgroundColor: 'var(--vscode-input-background)',
+                    color: 'var(--vscode-input-foreground)',
+                    border: '1px solid var(--vscode-input-border)',
+                    borderRadius: '2px',
+                    fontSize: '11px',
+                    fontFamily: 'monospace',
+                    cursor: 'text',
+                  }}
+                />
+                <div
+                  style={{
+                    fontSize: '10px',
+                    color: 'var(--vscode-descriptionForeground)',
+                    marginTop: '4px',
+                  }}
+                >
+                  Click to select and copy this URL. Add it to Slack App → OAuth & Permissions →
+                  Redirect URLs
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Channel Selection */}
         <div style={{ marginBottom: '16px' }}>
           <label
@@ -499,6 +743,23 @@ export function SlackShareDialog({
               ))
             )}
           </select>
+
+          {/* Help message when no channels available */}
+          {!loadingChannels && channels.length === 0 && selectedWorkspaceId && (
+            <div
+              style={{
+                marginTop: '8px',
+                padding: '8px 12px',
+                backgroundColor: 'var(--vscode-textBlockQuote-background)',
+                border: '1px solid var(--vscode-textBlockQuote-border)',
+                borderRadius: '2px',
+                fontSize: '12px',
+                color: 'var(--vscode-descriptionForeground)',
+              }}
+            >
+              💡 {t('slack.error.noChannelsHelp')}
+            </div>
+          )}
         </div>
 
         {/* Description Input */}

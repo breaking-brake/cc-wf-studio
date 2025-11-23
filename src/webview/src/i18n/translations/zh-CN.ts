@@ -520,6 +520,21 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.failed': '工作流分享失败',
   'slack.share.descriptionPlaceholder': '添加描述（可选）...',
 
+  // Slack Connect
+  'slack.connect.button': '连接到 Slack',
+  'slack.connect.connecting': '连接中...',
+  'slack.connect.description': '连接您的 Slack 工作区以与团队共享工作流。',
+  'slack.connect.success': '已成功连接到 {workspaceName}',
+  'slack.connect.failed': '连接 Slack 失败',
+
+  // Slack Reconnect
+  'slack.reconnect.button': 'Reconnect to Slack',
+  'slack.reconnect.reconnecting': 'Reconnecting...',
+  'slack.reconnect.description':
+    'Re-authenticate with Slack to update permissions or refresh connection.',
+  'slack.reconnect.success': 'Successfully reconnected to {workspaceName}',
+  'slack.reconnect.failed': 'Failed to reconnect to Slack',
+
   // Slack Import
   'slack.import.title': '从 Slack 导入',
   'slack.import.importing': '导入中...',
@@ -541,6 +556,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.rateLimited': '超出速率限制。请在 {seconds} 秒后重试。',
   'slack.error.noWorkspaces': '没有连接的工作区',
   'slack.error.noChannels': '没有可用的频道',
+  'slack.error.noChannelsHelp':
+    '机器人未加入任何频道。在 Slack 中使用 /invite @机器人名称 邀请机器人加入频道。',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '检测到敏感数据',

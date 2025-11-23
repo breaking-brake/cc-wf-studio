@@ -540,6 +540,21 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.failed': '워크플로우 공유에 실패했습니다',
   'slack.share.descriptionPlaceholder': '설명을 추가하세요 (선택 사항)...',
 
+  // Slack Connect
+  'slack.connect.button': 'Slack에 연결',
+  'slack.connect.connecting': '연결 중...',
+  'slack.connect.description': 'Slack 워크스페이스에 연결하여 팀과 워크플로우를 공유하세요.',
+  'slack.connect.success': '{workspaceName}에 연결되었습니다',
+  'slack.connect.failed': 'Slack 연결에 실패했습니다',
+
+  // Slack Reconnect
+  'slack.reconnect.button': 'Reconnect to Slack',
+  'slack.reconnect.reconnecting': 'Reconnecting...',
+  'slack.reconnect.description':
+    'Re-authenticate with Slack to update permissions or refresh connection.',
+  'slack.reconnect.success': 'Successfully reconnected to {workspaceName}',
+  'slack.reconnect.failed': 'Failed to reconnect to Slack',
+
   // Slack Import
   'slack.import.title': 'Slack에서 가져오기',
   'slack.import.importing': '가져오는 중...',
@@ -561,6 +576,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.rateLimited': '요청 한도를 초과했습니다. {seconds}초 후에 다시 시도하세요.',
   'slack.error.noWorkspaces': '연결된 워크스페이스가 없습니다',
   'slack.error.noChannels': '사용 가능한 채널이 없습니다',
+  'slack.error.noChannelsHelp':
+    '봇이 어떤 채널에도 참여하지 않았습니다. Slack에서 /invite @봇이름을 실행하여 봇을 채널에 초대하세요.',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '민감한 데이터 감지됨',

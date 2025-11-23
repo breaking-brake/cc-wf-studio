@@ -40,6 +40,8 @@ export interface OAuthCallbackServerOptions {
   successPage?: string;
   /** Error HTML page */
   errorPage?: string;
+  /** Port number (default: 0 for random port) */
+  port?: number;
 }
 
 /**
@@ -265,6 +267,170 @@ export class OAuthCallbackServer {
    */
   getPort(): number {
     return this.port;
+  }
+
+  /**
+   * Starts the OAuth callback server and returns URL immediately
+   *
+   * This starts the server with OAuth handling and returns the callback URL
+   * as soon as the server is listening (without waiting for OAuth callback).
+   *
+   * @param expectedState - Expected state value for CSRF protection
+   * @param options - Server options
+   * @returns Promise resolving to callback URL and callback promise
+   */
+  async startAndGetUrl(
+    expectedState: string,
+    options: OAuthCallbackServerOptions = {}
+  ): Promise<{ callbackUrl: string; callbackPromise: Promise<OAuthCallbackResult> }> {
+    const {
+      timeoutMs = 5 * 60 * 1000,
+      successPage = DEFAULT_SUCCESS_PAGE,
+      errorPage = DEFAULT_ERROR_PAGE,
+      port = 0, // 0 = random port
+    } = options;
+
+    return new Promise((resolve, reject) => {
+      // Timeout timer
+      const timeoutTimer = setTimeout(() => {
+        this.stop();
+        reject(new Error('OAuth callback timeout'));
+      }, timeoutMs);
+
+      // Request handler
+      const requestHandler = (req: http.IncomingMessage, res: http.ServerResponse) => {
+        const parsedUrl = url.parse(req.url || '', true);
+        const query = parsedUrl.query;
+
+        if (query.error) {
+          const error: OAuthCallbackError = {
+            error: query.error as string,
+            errorDescription: query.error_description as string | undefined,
+          };
+
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.end(errorPage.replace('{{ERROR_MESSAGE}}', error.errorDescription || error.error));
+
+          clearTimeout(timeoutTimer);
+          this.stop();
+          return;
+        }
+
+        if (query.code && query.state) {
+          const state = query.state as string;
+
+          if (state !== expectedState) {
+            res.writeHead(400, { 'Content-Type': 'text/html' });
+            res.end(
+              errorPage.replace('{{ERROR_MESSAGE}}', 'Invalid state parameter (CSRF protection)')
+            );
+
+            clearTimeout(timeoutTimer);
+            this.stop();
+            return;
+          }
+
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.end(successPage);
+
+          clearTimeout(timeoutTimer);
+          this.stop();
+          return;
+        }
+
+        res.writeHead(400, { 'Content-Type': 'text/html' });
+        res.end(errorPage.replace('{{ERROR_MESSAGE}}', 'Invalid OAuth callback'));
+      };
+
+      // Create callback promise (will resolve when OAuth callback arrives)
+      const callbackPromise = new Promise<OAuthCallbackResult>(
+        (resolveCallback, rejectCallback) => {
+          const originalHandler = requestHandler;
+          const wrappedHandler = (req: http.IncomingMessage, res: http.ServerResponse) => {
+            const parsedUrl = url.parse(req.url || '', true);
+            const query = parsedUrl.query;
+
+            if (query.error) {
+              rejectCallback(new Error(`OAuth error: ${query.error}`));
+            } else if (query.code && query.state) {
+              const code = query.code as string;
+              const state = query.state as string;
+
+              if (state !== expectedState) {
+                rejectCallback(new Error('OAuth state mismatch (CSRF protection)'));
+              } else {
+                resolveCallback({ code, state });
+              }
+            }
+
+            originalHandler(req, res);
+          };
+
+          this.server = http.createServer(wrappedHandler);
+        }
+      );
+
+      // Listen on specified port (0 = random port)
+      // Note: this.server is guaranteed to be non-null here as it's assigned in the Promise constructor above
+      if (!this.server) {
+        reject(new Error('Server initialization failed'));
+        return;
+      }
+
+      this.server.listen(port, 'localhost', () => {
+        const address = this.server?.address();
+        if (address && typeof address !== 'string') {
+          this.port = address.port;
+          resolve({
+            callbackUrl: this.getCallbackUrl(),
+            callbackPromise,
+          });
+        } else {
+          reject(new Error('Failed to get server address'));
+        }
+      });
+
+      this.server.on('error', (err) => {
+        clearTimeout(timeoutTimer);
+        this.stop();
+        reject(err);
+      });
+    });
+  }
+
+  /**
+   * Initializes server and returns callback URL without waiting for OAuth
+   *
+   * This is useful for getting the redirect URI for development/configuration purposes.
+   * Server is started to get a dynamic port, then immediately available for URL retrieval.
+   *
+   * @returns Promise resolving to callback URL
+   */
+  async initializeForUrl(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      // Create minimal server (no OAuth handling needed)
+      this.server = http.createServer((_req, res) => {
+        res.writeHead(200);
+        res.end('OK');
+      });
+
+      // Listen on random port
+      this.server.listen(0, 'localhost', () => {
+        const address = this.server?.address();
+        if (address && typeof address !== 'string') {
+          this.port = address.port;
+          resolve(this.getCallbackUrl());
+        } else {
+          reject(new Error('Failed to get server address'));
+        }
+      });
+
+      // Handle server errors
+      this.server.on('error', (err) => {
+        this.stop();
+        reject(err);
+      });
+    });
   }
 
   /**

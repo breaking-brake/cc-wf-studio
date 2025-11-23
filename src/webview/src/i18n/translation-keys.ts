@@ -492,6 +492,20 @@ export interface WebviewTranslationKeys {
   'slack.share.success': string;
   'slack.share.failed': string;
 
+  // Slack Connect
+  'slack.connect.button': string;
+  'slack.connect.connecting': string;
+  'slack.connect.description': string;
+  'slack.connect.success': string;
+  'slack.connect.failed': string;
+
+  // Slack Reconnect
+  'slack.reconnect.button': string;
+  'slack.reconnect.reconnecting': string;
+  'slack.reconnect.description': string;
+  'slack.reconnect.success': string;
+  'slack.reconnect.failed': string;
+
   // Slack Import
   'slack.import.title': string;
   'slack.import.importing': string;
@@ -509,6 +523,7 @@ export interface WebviewTranslationKeys {
   'slack.error.notAuthenticated': string;
   'slack.error.channelNotFound': string;
   'slack.error.noChannels': string;
+  'slack.error.noChannelsHelp': string;
   'slack.error.noWorkspaces': string;
   'slack.error.notInChannel': string;
   'slack.error.networkError': string;

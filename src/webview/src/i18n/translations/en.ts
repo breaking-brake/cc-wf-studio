@@ -544,6 +544,21 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.success': 'Workflow shared successfully',
   'slack.share.failed': 'Failed to share workflow',
 
+  // Slack Connect
+  'slack.connect.button': 'Connect to Slack',
+  'slack.connect.connecting': 'Connecting...',
+  'slack.connect.description': 'Connect your Slack workspace to share workflows with your team.',
+  'slack.connect.success': 'Successfully connected to {workspaceName}',
+  'slack.connect.failed': 'Failed to connect to Slack',
+
+  // Slack Reconnect
+  'slack.reconnect.button': 'Reconnect to Slack',
+  'slack.reconnect.reconnecting': 'Reconnecting...',
+  'slack.reconnect.description':
+    'Re-authenticate with Slack to update permissions or refresh connection.',
+  'slack.reconnect.success': 'Successfully reconnected to {workspaceName}',
+  'slack.reconnect.failed': 'Failed to reconnect to Slack',
+
   // Slack Import
   'slack.import.title': 'Import from Slack',
   'slack.import.importing': 'Importing...',
@@ -562,6 +577,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.channelNotFound': 'Channel not found',
   'slack.error.noWorkspaces': 'No workspaces connected',
   'slack.error.noChannels': 'No channels available',
+  'slack.error.noChannelsHelp':
+    'The bot is not a member of any channels. Invite the bot to channels using /invite @BotName in Slack.',
   'slack.error.notInChannel': 'Bot is not a member of this channel. Please invite the bot first.',
   'slack.error.networkError': 'Network error. Please check your connection.',
   'slack.error.rateLimited': 'Rate limit exceeded. Please try again in {seconds} seconds.',

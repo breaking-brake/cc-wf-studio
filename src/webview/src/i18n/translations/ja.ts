@@ -541,6 +541,21 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.failed': 'ワークフローの共有に失敗しました',
   'slack.share.descriptionPlaceholder': '説明を追加（任意）...',
 
+  // Slack Connect
+  'slack.connect.button': 'Slackに接続',
+  'slack.connect.connecting': '接続中...',
+  'slack.connect.description':
+    'Slackワークスペースに接続して、チームとワークフローを共有しましょう。',
+  'slack.connect.success': '{workspaceName}に接続しました',
+  'slack.connect.failed': 'Slackへの接続に失敗しました',
+
+  // Slack Reconnect
+  'slack.reconnect.button': 'Slackに再接続',
+  'slack.reconnect.reconnecting': '再接続中...',
+  'slack.reconnect.description': '権限を更新または接続を更新するために再認証します。',
+  'slack.reconnect.success': '{workspaceName}に再接続しました',
+  'slack.reconnect.failed': 'Slackへの再接続に失敗しました',
+
   // Slack Import
   'slack.import.title': 'Slackからインポート',
   'slack.import.importing': 'インポート中...',
@@ -563,6 +578,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.rateLimited': 'レート制限を超過しました。{seconds}秒後に再試行してください。',
   'slack.error.noWorkspaces': '接続されているワークスペースがありません',
   'slack.error.noChannels': '利用可能なチャンネルがありません',
+  'slack.error.noChannelsHelp':
+    'Botがどのチャンネルにも参加していません。Slackで /invite @Bot名 を実行してBotをチャンネルに招待してください。',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '機密情報が検出されました',
