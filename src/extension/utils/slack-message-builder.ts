@@ -100,7 +100,7 @@ export function buildWorkflowMessageBlocks(
         type: 'mrkdwn',
         text:
           block.workspaceId && block.channelId && block.messageTs && block.fileId
-            ? `📥 <vscode://cc-wf-studio/import?workflowId=${encodeURIComponent(block.workflowId)}&fileId=${encodeURIComponent(block.fileId)}&workspaceId=${encodeURIComponent(block.workspaceId)}&channelId=${encodeURIComponent(block.channelId)}&messageTs=${encodeURIComponent(block.messageTs)}|Import to VS Code>`
+            ? `📥 <vscode://breaking-brake.cc-wf-studio/import?workflowId=${encodeURIComponent(block.workflowId)}&fileId=${encodeURIComponent(block.fileId)}&workspaceId=${encodeURIComponent(block.workspaceId)}&channelId=${encodeURIComponent(block.channelId)}&messageTs=${encodeURIComponent(block.messageTs)}|Import to VS Code>`
             : '_Import link will be available after file upload_',
       },
     },

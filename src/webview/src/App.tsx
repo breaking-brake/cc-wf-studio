@@ -5,7 +5,11 @@
  * Based on: /specs/001-cc-wf-studio/plan.md
  */
 
-import type { ErrorPayload, InitialStatePayload } from '@shared/types/messages';
+import type {
+  ErrorPayload,
+  ImportWorkflowFromSlackPayload,
+  InitialStatePayload,
+} from '@shared/types/messages';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { ProcessingOverlay } from './components/common/ProcessingOverlay';
@@ -20,6 +24,7 @@ import { Toolbar } from './components/Toolbar';
 import { Tour } from './components/Tour';
 import { WorkflowEditor } from './components/WorkflowEditor';
 import { useTranslation } from './i18n/i18n-context';
+import { vscode } from './main';
 import { useRefinementStore } from './stores/refinement-store';
 import { useWorkflowStore } from './stores/workflow-store';
 
@@ -65,6 +70,23 @@ const App: React.FC = () => {
           // Start tour automatically on first launch
           setRunTour(true);
         }
+      } else if (message.type === 'IMPORT_WORKFLOW_FROM_SLACK') {
+        // Handle import workflow request from Extension Host
+        // Simply forward the message back to Extension Host to trigger the import process
+        const payload = message.payload as ImportWorkflowFromSlackPayload;
+
+        console.log('Forwarding import request to Extension Host:', payload);
+
+        // Send the import request back to Extension Host with a new requestId
+        const requestId = `req-${Date.now()}-${Math.random()}`;
+        vscode.postMessage({
+          type: 'IMPORT_WORKFLOW_FROM_SLACK',
+          requestId,
+          payload,
+        });
+
+        // The import process will be handled by Extension Host
+        // Success/failure notifications will be shown by Extension Host
       }
     };
 

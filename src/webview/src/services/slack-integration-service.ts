@@ -394,10 +394,20 @@ export function importWorkflowFromSlack(
 
     window.addEventListener('message', handler);
 
+    // Convert to ImportWorkflowFromSlackPayload format for Extension Host
+    // Note: workspaceId is not available in ImportWorkflowOptions
+    // Extension Host will use the currently active workspace
     vscode.postMessage({
       type: 'IMPORT_WORKFLOW_FROM_SLACK',
       requestId,
-      payload: options,
+      payload: {
+        workflowId: options.workflowId,
+        fileId: options.fileId,
+        channelId: options.sourceChannelId,
+        messageTs: options.sourceMessageTs,
+        workspaceId: '', // Will be determined by Extension Host
+        overwriteExisting: options.overwriteExisting,
+      },
     });
 
     setTimeout(() => {

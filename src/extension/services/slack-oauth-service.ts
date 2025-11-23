@@ -36,7 +36,14 @@ export interface SlackOAuthConfig {
 /**
  * Default required scopes for Slack integration
  */
-const _DEFAULT_SCOPES = ['chat:write', 'files:write', 'channels:read', 'groups:read', 'users:read'];
+const _DEFAULT_SCOPES = [
+  'chat:write',
+  'files:write',
+  'files:read',
+  'channels:read',
+  'groups:read',
+  'users:read',
+];
 
 /**
  * Slack OAuth Service

@@ -11,8 +11,8 @@
  * See: Issue #79 - Windows environment compatibility
  */
 
-import type { McpServerReference, McpToolReference } from '../../shared/types/mcp-node';
 import nanoSpawn from 'nano-spawn';
+import type { McpServerReference, McpToolReference } from '../../shared/types/mcp-node';
 import { log } from '../extension';
 import { getCachedTools, setCachedTools } from './mcp-cache-service';
 

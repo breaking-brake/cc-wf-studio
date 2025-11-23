@@ -122,12 +122,18 @@ export function activate(context: vscode.ExtensionContext): void {
             workflowId,
           });
 
-          // Open editor and trigger import via Webview
-          vscode.commands.executeCommand('claudeCodeWorkflowStudio.openEditor').then(() => {
-            // Import will be handled by Webview's importWorkflowFromSlack()
-            // which sends IMPORT_WORKFLOW_FROM_SLACK message to extension host
-            log('INFO', 'Editor opened for import workflow', { workflowId });
-          });
+          // Open editor with import parameters
+          vscode.commands
+            .executeCommand('cc-wf-studio.openEditor', {
+              fileId,
+              channelId,
+              messageTs,
+              workspaceId,
+              workflowId,
+            })
+            .then(() => {
+              log('INFO', 'Editor opened with import parameters', { workflowId });
+            });
         } else {
           log('WARN', 'Unknown URI path', { path });
           vscode.window.showErrorMessage(`Unknown deep link path: ${path}`);
