@@ -32,6 +32,8 @@ export interface WorkflowUploadOptions {
   channelId: string;
   /** Initial comment (optional) */
   initialComment?: string;
+  /** Thread timestamp to upload file as reply (optional) */
+  threadTs?: string;
 }
 
 /**
@@ -235,6 +237,7 @@ export class SlackApiService {
         filename: options.filename,
         title: options.title,
         initial_comment: options.initialComment,
+        thread_ts: options.threadTs,
       });
 
       if (!response.ok) {

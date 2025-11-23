@@ -94,36 +94,18 @@ export async function handleShareWorkflowToSlack(
         ? workflow.createdAt
         : new Date(workflow.createdAt).toISOString();
 
-    // Step 4: Upload workflow file to Slack
-    log('INFO', 'Uploading workflow file to Slack', { requestId });
-
-    const filename = `${payload.workflowName.replace(/[^a-zA-Z0-9-_]/g, '_')}.json`;
-    const uploadResult = await slackApiService.uploadWorkflowFile({
-      workspaceId: payload.workspaceId,
-      content: workflowContent,
-      filename,
-      title: payload.workflowName,
-      channelId: payload.channelId,
-      initialComment: payload.description,
-    });
-
-    log('INFO', 'Workflow file uploaded successfully', {
-      requestId,
-      fileId: uploadResult.fileId,
-    });
-
-    // Step 5: Post rich message card to channel
+    // Step 4: Post rich message card to channel (main message)
     log('INFO', 'Posting workflow message card to Slack', { requestId });
 
     const messageBlock: WorkflowMessageBlock = {
       workflowId: workflow.id,
       name: workflow.name,
-      description: workflow.description,
+      description: payload.description || workflow.description,
       version: workflow.version,
       authorName,
       nodeCount,
       createdAt,
-      fileId: uploadResult.fileId,
+      fileId: '', // Will be updated after file upload
     };
 
     const messageResult = await slackApiService.postWorkflowMessage(
@@ -136,6 +118,24 @@ export async function handleShareWorkflowToSlack(
       requestId,
       messageTs: messageResult.messageTs,
       permalink: messageResult.permalink,
+    });
+
+    // Step 5: Upload workflow file to thread as reply
+    log('INFO', 'Uploading workflow file to thread', { requestId });
+
+    const filename = `${payload.workflowName.replace(/[^a-zA-Z0-9-_]/g, '_')}.json`;
+    const uploadResult = await slackApiService.uploadWorkflowFile({
+      workspaceId: payload.workspaceId,
+      content: workflowContent,
+      filename,
+      title: payload.workflowName,
+      channelId: payload.channelId,
+      threadTs: messageResult.messageTs,
+    });
+
+    log('INFO', 'Workflow file uploaded to thread successfully', {
+      requestId,
+      fileId: uploadResult.fileId,
     });
 
     // Step 6: Send success response
