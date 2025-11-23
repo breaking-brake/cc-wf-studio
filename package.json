@@ -29,6 +29,9 @@
     "AI",
     "Visualization"
   ],
+  "activationEvents": [
+    "onUri"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
