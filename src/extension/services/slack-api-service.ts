@@ -120,26 +120,17 @@ export class SlackApiService {
     // Return cached client if exists
     let client = this.clients.get(workspaceId);
     if (client) {
-      console.log('[SlackApiService] Using cached client for workspace:', workspaceId);
       return client;
     }
 
-    console.log('[SlackApiService] Getting access token for workspace:', workspaceId);
-
     // Get access token for this workspace
     const accessToken = await this.tokenManager.getAccessTokenByWorkspaceId(workspaceId);
-    console.log('[SlackApiService] Access token retrieved:', {
-      hasToken: !!accessToken,
-      tokenPrefix: accessToken?.substring(0, 10),
-    });
 
     if (!accessToken) {
-      console.error('[SlackApiService] No access token found for workspace:', workspaceId);
       throw new Error(`ワークスペース ${workspaceId} に接続されていません`);
     }
 
     // Create and cache new client
-    console.log('[SlackApiService] Creating new WebClient');
     client = new WebClient(accessToken);
     this.clients.set(workspaceId, client);
 
@@ -181,17 +172,11 @@ export class SlackApiService {
         types.push('private_channel');
       }
 
-      console.log('[SlackApiService] Fetching channels with options:', {
-        types: types.join(','),
-        onlyMember,
-      });
-
       // Fetch channels (with pagination)
       const channels: SlackChannel[] = [];
       let cursor: string | undefined;
 
       do {
-        console.log('[SlackApiService] Calling conversations.list...');
         const response = await client.conversations.list({
           types: types.join(','),
           exclude_archived: true,
@@ -228,15 +213,7 @@ export class SlackApiService {
 
       return channels;
     } catch (error) {
-      console.error('[SlackApiService] Error fetching channels:', error);
-      console.error('[SlackApiService] Error type:', typeof error);
-      console.error('[SlackApiService] Error details:', {
-        message: error instanceof Error ? error.message : 'unknown',
-        stack: error instanceof Error ? error.stack : 'no stack',
-        data: (error as any)?.data,
-      });
       const errorInfo = handleSlackError(error);
-      console.error('[SlackApiService] Handled error info:', errorInfo);
       throw new Error(errorInfo.message);
     }
   }
@@ -283,7 +260,6 @@ export class SlackApiService {
       }
 
       if (!fileData) {
-        console.error('[SlackApiService] No file data in response:', responseObj);
         throw new Error('ファイルのアップロードに失敗しました');
       }
 
@@ -293,7 +269,6 @@ export class SlackApiService {
         permalink: fileData.permalink as string,
       };
     } catch (error) {
-      console.error('[SlackApiService] uploadWorkflowFile error:', error);
       const errorInfo = handleSlackError(error);
       throw new Error(errorInfo.message);
     }
@@ -426,5 +401,53 @@ export class SlackApiService {
    */
   async getWorkspaces() {
     return this.tokenManager.getWorkspaces();
+  }
+
+  /**
+   * Gets current user information (real name, not bot name)
+   *
+   * @param workspaceId - Target workspace ID
+   * @returns User information (user_id, real display name)
+   */
+  async getUserInfo(workspaceId: string): Promise<{
+    userId: string;
+    userName: string;
+  }> {
+    try {
+      const client = await this.ensureClient(workspaceId);
+
+      // Get workspace connection to retrieve userId
+      const workspaces = await this.tokenManager.getWorkspaces();
+      const workspace = workspaces.find((ws) => ws.workspaceId === workspaceId);
+
+      if (!workspace) {
+        throw new Error('ワークスペース情報が見つかりません');
+      }
+
+      // Get user profile using users.info API
+      const response = await client.users.info({
+        user: workspace.userId,
+      });
+
+      if (!response.ok || !response.user) {
+        throw new Error('ユーザー情報の取得に失敗しました');
+      }
+
+      const user = response.user as Record<string, unknown>;
+      const profile = user.profile as Record<string, unknown> | undefined;
+
+      // Use display_name if available, otherwise real_name
+      const displayName = (profile?.display_name as string) || '';
+      const realName = (profile?.real_name as string) || '';
+      const userName = displayName || realName || (user.name as string) || 'Unknown';
+
+      return {
+        userId: workspace.userId,
+        userName,
+      };
+    } catch (error) {
+      const errorInfo = handleSlackError(error);
+      throw new Error(errorInfo.message);
+    }
   }
 }

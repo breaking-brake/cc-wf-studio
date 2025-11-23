@@ -28,14 +28,14 @@
 
 **スコープ要件**:
 ```
-chat:write,files:write,channels:read,search:read
+chat:write,files:write,channels:read,groups:read,users:read
 ```
 
 **Example Request**:
 ```
 GET https://slack.com/oauth/v2/authorize?
     client_id=123456789.987654321&
-    scope=chat:write,files:write,channels:read,search:read&
+    scope=chat:write,files:write,channels:read,groups:read,users:read&
     redirect_uri=http://localhost:12345/oauth/callback&
     state=random_state_string
 ```
@@ -84,7 +84,7 @@ redirect_uri=http://localhost:12345/oauth/callback
   "ok": true,
   "access_token": "xoxb-EXAMPLE-TOKEN-REPLACE-WITH-REAL-TOKEN",
   "token_type": "bot",
-  "scope": "chat:write,files:write,channels:read,search:read",
+  "scope": "chat:write,files:write,channels:read,groups:read,users:read",
   "bot_user_id": "U01234ABCD",
   "app_id": "A01234EFGH",
   "team": {

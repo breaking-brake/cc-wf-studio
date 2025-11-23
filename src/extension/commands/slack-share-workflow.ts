@@ -82,15 +82,19 @@ export async function handleShareWorkflowToSlack(
 
     log('INFO', 'No sensitive data detected or warning overridden', { requestId });
 
-    // Step 2: Extract workflow metadata
-    const authorName = workflow.metadata?.author || 'Unknown';
+    // Step 2: Get Slack user information for author
+    log('INFO', 'Getting Slack user information', { requestId });
+    const userInfo = await slackApiService.getUserInfo(payload.workspaceId);
+    const authorName = userInfo.userName;
+
+    // Step 3: Extract workflow metadata
     const nodeCount = workflow.nodes.length;
     const createdAt =
       typeof workflow.createdAt === 'string'
         ? workflow.createdAt
         : new Date(workflow.createdAt).toISOString();
 
-    // Step 3: Upload workflow file to Slack
+    // Step 4: Upload workflow file to Slack
     log('INFO', 'Uploading workflow file to Slack', { requestId });
 
     const filename = `${payload.workflowName.replace(/[^a-zA-Z0-9-_]/g, '_')}.json`;
@@ -108,7 +112,7 @@ export async function handleShareWorkflowToSlack(
       fileId: uploadResult.fileId,
     });
 
-    // Step 4: Post rich message card to channel
+    // Step 5: Post rich message card to channel
     log('INFO', 'Posting workflow message card to Slack', { requestId });
 
     const messageBlock: WorkflowMessageBlock = {
@@ -134,7 +138,7 @@ export async function handleShareWorkflowToSlack(
       permalink: messageResult.permalink,
     });
 
-    // Step 5: Send success response
+    // Step 6: Send success response
     const successEvent: ShareWorkflowSuccessEvent = {
       type: 'SHARE_WORKFLOW_SUCCESS',
       payload: {

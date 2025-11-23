@@ -458,7 +458,7 @@ export function registerOpenEditorCommand(
               const oauthConfig = {
                 clientId,
                 clientSecret,
-                scopes: ['chat:write', 'files:write', 'channels:read', 'groups:read'],
+                scopes: ['chat:write', 'files:write', 'channels:read', 'groups:read', 'users:read'],
               };
 
               // Initialize OAuth service

@@ -59,19 +59,19 @@ export function buildWorkflowMessageBlocks(
       fields: [
         {
           type: 'mrkdwn',
-          text: `*Author:*\\n${block.authorName}`,
+          text: `*Author:*\n${block.authorName}`,
         },
         {
           type: 'mrkdwn',
-          text: `*Version:*\\n${block.version}`,
+          text: `*Version:*\n${block.version}`,
         },
         {
           type: 'mrkdwn',
-          text: `*Nodes:*\\n${block.nodeCount}`,
+          text: `*Nodes:*\n${block.nodeCount}`,
         },
         {
           type: 'mrkdwn',
-          text: `*Created:*\\n${new Date(block.createdAt).toLocaleDateString()}`,
+          text: `*Created:*\n${new Date(block.createdAt).toLocaleDateString()}`,
         },
       ],
     },
