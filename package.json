@@ -62,6 +62,9 @@
       }
     }
   },
+  "activationEvents": [
+    "onUri"
+  ],
   "scripts": {
     "vscode:prepublish": "npm run build",
     "build": "npm run build:webview && npm run build:extension",
