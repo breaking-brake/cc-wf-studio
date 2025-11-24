@@ -543,6 +543,7 @@ export interface WebviewTranslationKeys {
   'slack.manualToken.howToGet.step4': string;
   'slack.manualToken.howToGet.step5': string;
   'slack.manualToken.security.title': string;
+  'slack.manualToken.security.notice': string;
   'slack.manualToken.security.storage': string;
   'slack.manualToken.security.transmission': string;
   'slack.manualToken.security.deletion': string;

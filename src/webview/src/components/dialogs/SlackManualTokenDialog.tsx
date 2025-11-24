@@ -254,6 +254,9 @@ export function SlackManualTokenDialog({
               lineHeight: '1.6',
             }}
           >
+            <div style={{ marginBottom: '8px', fontStyle: 'italic' }}>
+              {t('slack.manualToken.security.notice')}
+            </div>
             <div>• {t('slack.manualToken.security.storage')}</div>
             <div>• {t('slack.manualToken.security.transmission')}</div>
             <div>• {t('slack.manualToken.security.deletion')}</div>

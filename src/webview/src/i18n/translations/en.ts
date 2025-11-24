@@ -540,13 +540,16 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.title': 'Connect to Slack',
   'slack.manualToken.description': 'Enter your Slack Bot Token to connect your workspace.',
   'slack.manualToken.howToGet.title': 'How to get Bot Token',
-  'slack.manualToken.howToGet.step1': 'Create Slack App at api.slack.com/apps',
+  'slack.manualToken.howToGet.step1': 'Create Slack App (at api.slack.com/apps)',
   'slack.manualToken.howToGet.step2':
-    'Add Bot Token Scopes: channels:read, chat:write, files:read, files:write, groups:read',
-  'slack.manualToken.howToGet.step3': 'Install App to your workspace',
-  'slack.manualToken.howToGet.step4': 'Invite App to target channel',
-  'slack.manualToken.howToGet.step5': 'Copy Bot User OAuth Token (xoxb-...)',
+    'Add Bot Token Scopes (OAuth & Permissions): channels:read, chat:write, files:read, files:write, groups:read',
+  'slack.manualToken.howToGet.step3': 'Install App to your workspace (OAuth & Permissions)',
+  'slack.manualToken.howToGet.step4': 'Invite App to target channel (in Slack)',
+  'slack.manualToken.howToGet.step5':
+    'Copy and paste Bot User OAuth Token to the form below (OAuth & Permissions, xoxb-...)',
   'slack.manualToken.security.title': 'Security & Privacy',
+  'slack.manualToken.security.notice':
+    'Note: This feature communicates with Slack servers (not local-only operation)',
   'slack.manualToken.security.storage': 'Token stored in VSCode Secret Storage (OS Keychain)',
   'slack.manualToken.security.transmission':
     'Only sent to Slack API (api.slack.com) for validation',

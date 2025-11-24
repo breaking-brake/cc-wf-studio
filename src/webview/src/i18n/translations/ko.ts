@@ -536,13 +536,16 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.title': 'Slack에 연결',
   'slack.manualToken.description': 'Slack Bot Token을 입력하여 워크스페이스에 연결하세요.',
   'slack.manualToken.howToGet.title': 'Bot Token 받는 방법',
-  'slack.manualToken.howToGet.step1': 'api.slack.com/apps에서 Slack App 생성',
+  'slack.manualToken.howToGet.step1': 'Slack App 생성 (api.slack.com/apps)',
   'slack.manualToken.howToGet.step2':
-    'Bot Token Scopes 추가: channels:read, chat:write, files:read, files:write, groups:read',
-  'slack.manualToken.howToGet.step3': '워크스페이스에 App 설치',
-  'slack.manualToken.howToGet.step4': '대상 채널에 App 추가',
-  'slack.manualToken.howToGet.step5': 'Bot User OAuth Token (xoxb-...) 복사',
+    'Bot Token Scopes 추가 (OAuth & Permissions): channels:read, chat:write, files:read, files:write, groups:read',
+  'slack.manualToken.howToGet.step3': '워크스페이스에 App 설치 (OAuth & Permissions)',
+  'slack.manualToken.howToGet.step4': '대상 채널에 App 추가 (Slack 내)',
+  'slack.manualToken.howToGet.step5':
+    'Bot User OAuth Token을 복사하여 아래 양식에 붙여넣기 (OAuth & Permissions, xoxb-...)',
   'slack.manualToken.security.title': '보안 및 개인정보',
+  'slack.manualToken.security.notice':
+    '참고: 이 기능은 Slack 서버와 통신합니다 (로컬 전용 작업 아님)',
   'slack.manualToken.security.storage':
     '토큰은 VSCode Secret Storage (OS 키체인)에 안전하게 저장됩니다',
   'slack.manualToken.security.transmission': 'Slack API (api.slack.com)로만 검증을 위해 전송됩니다',

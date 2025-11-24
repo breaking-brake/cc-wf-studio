@@ -537,13 +537,16 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.title': 'Slackに接続',
   'slack.manualToken.description': 'Slack Bot Tokenを入力してワークスペースに接続してください。',
   'slack.manualToken.howToGet.title': 'Bot Tokenの取得方法',
-  'slack.manualToken.howToGet.step1': 'api.slack.com/appsでSlack Appを作成',
+  'slack.manualToken.howToGet.step1': 'Slack Appを作成（api.slack.com/apps）',
   'slack.manualToken.howToGet.step2':
-    'Bot Token Scopesを追加: channels:read, chat:write, files:read, files:write, groups:read',
-  'slack.manualToken.howToGet.step3': 'Appをワークスペースにインストール',
-  'slack.manualToken.howToGet.step4': 'Appをワークフロー共有先のチャンネルに追加',
-  'slack.manualToken.howToGet.step5': 'Bot User OAuth Token（xoxb-...）をコピー',
+    'Bot Token Scopesを追加（OAuth & Permissions）: channels:read, chat:write, files:read, files:write, groups:read',
+  'slack.manualToken.howToGet.step3': 'Appをワークスペースにインストール（OAuth & Permissions）',
+  'slack.manualToken.howToGet.step4': 'Appをワークフロー共有先のチャンネルに追加（Slack内）',
+  'slack.manualToken.howToGet.step5':
+    'Bot User OAuth Token（xoxb-...）をコピーして下部の入力欄に貼り付け（OAuth & Permissions）',
   'slack.manualToken.security.title': 'セキュリティーとプライバシー',
+  'slack.manualToken.security.notice':
+    '注意：この機能はSlackサーバーと通信します（ローカル動作ではありません）',
   'slack.manualToken.security.storage':
     'トークンはVSCode Secret Storage（OSのキーチェーン）に安全に保存されます',
   'slack.manualToken.security.transmission': 'Slack API（api.slack.com）への検証時のみ送信されます',
