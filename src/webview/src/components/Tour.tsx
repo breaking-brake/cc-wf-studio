@@ -1,13 +1,14 @@
 /**
  * Claude Code Workflow Studio - Interactive Tour Component
  *
- * Provides a guided tour for first-time users using react-joyride
+ * Provides a guided tour for first-time users using Driver.js
  */
 
+import { type Driver, driver } from 'driver.js';
 import type React from 'react';
-import { useCallback } from 'react';
-import Joyride, { ACTIONS, type CallBackProps, EVENTS, STATUS } from 'react-joyride';
-import { getTourLocale, getTourSteps, tourStyles } from '../constants/tour-steps';
+import { useEffect, useRef } from 'react';
+import 'driver.js/dist/driver.css';
+import { getDriverConfig, getTourSteps } from '../constants/tour-steps';
 import { useTranslation } from '../i18n/i18n-context';
 
 interface TourProps {
@@ -22,44 +23,57 @@ interface TourProps {
  */
 export const Tour: React.FC<TourProps> = ({ run, onFinish }) => {
   const { t } = useTranslation();
+  const driverRef = useRef<Driver | null>(null);
+  const onFinishRef = useRef(onFinish);
 
-  const handleJoyrideCallback = useCallback(
-    (data: CallBackProps) => {
-      const { status, type, action } = data;
+  // Update onFinish ref when it changes
+  useEffect(() => {
+    onFinishRef.current = onFinish;
+  }, [onFinish]);
 
-      // Tour finished or skipped
-      if (([STATUS.FINISHED, STATUS.SKIPPED] as string[]).includes(status)) {
-        onFinish();
+  useEffect(() => {
+    // Initialize driver instance
+    if (!driverRef.current) {
+      const config = getDriverConfig((key) => t(key as keyof typeof t));
+      driverRef.current = driver({
+        ...config,
+        onCloseClick: () => {
+          // Called when close button (X) is clicked
+          if (driverRef.current) {
+            driverRef.current.destroy();
+          }
+        },
+        onDestroyStarted: () => {
+          // Called when tour is about to be destroyed (completed, skipped, or closed)
+          // Destroy the driver instance
+          if (driverRef.current) {
+            driverRef.current.destroy();
+            driverRef.current = null;
+          }
+          // Call onFinish callback
+          onFinishRef.current();
+        },
+      });
+    }
+
+    // Start or stop tour based on run prop
+    if (run && driverRef.current) {
+      const steps = getTourSteps((key) => t(key as keyof typeof t));
+      driverRef.current.setSteps(steps);
+      driverRef.current.drive();
+    } else if (!run && driverRef.current) {
+      driverRef.current.destroy();
+      driverRef.current = null;
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (driverRef.current) {
+        driverRef.current.destroy();
+        driverRef.current = null;
       }
+    };
+  }, [run, t]);
 
-      // Handle close button (X button) click - treat as skip
-      if (action === ACTIONS.CLOSE) {
-        onFinish();
-      }
-
-      // Handle tour close event
-      if (type === EVENTS.TOUR_END || type === EVENTS.STEP_AFTER) {
-        // Optional: Add analytics or state updates here
-      }
-    },
-    [onFinish]
-  );
-
-  return (
-    <Joyride
-      steps={getTourSteps((key) => t(key as keyof typeof t))}
-      run={run}
-      continuous
-      showProgress
-      showSkipButton
-      spotlightPadding={10}
-      disableOverlayClose
-      disableCloseOnEsc={false}
-      scrollToFirstStep
-      scrollOffset={100}
-      styles={tourStyles}
-      locale={getTourLocale((key) => t(key as keyof typeof t))}
-      callback={handleJoyrideCallback}
-    />
-  );
+  return null;
 };

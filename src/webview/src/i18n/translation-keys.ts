@@ -202,6 +202,7 @@ export interface WebviewTranslationKeys {
   'tour.loadWorkflow': string;
   'tour.exportWorkflow': string;
   'tour.refineWithAI': string;
+  'tour.slackShare': string;
   'tour.helpButton': string;
 
   // Tour buttons

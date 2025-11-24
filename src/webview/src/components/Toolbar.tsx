@@ -391,6 +391,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
         type="button"
         onClick={onShareToSlack}
         title="Share workflow to Slack"
+        data-tour="slack-share-button"
         style={{
           padding: '4px 12px',
           backgroundColor: 'var(--vscode-button-secondaryBackground)',

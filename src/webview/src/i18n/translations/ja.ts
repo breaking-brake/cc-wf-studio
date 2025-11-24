@@ -219,6 +219,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     '「エクスポート」ボタンをクリックすると、Claude Codeで実行可能な形式にエクスポートされます。\n\nSub-Agentは`.claude/agents/`に、SlashCommandは`.claude/commands/`に出力されます。',
   'tour.refineWithAI':
     '「AI編集」ボタンで、AIとチャットしながらワークフローを生成・改善できます。\n\n空のキャンバスから新規作成も、既存のワークフローの修正も対話的に行えます。',
+  'tour.slackShare':
+    '「Slackに共有」ボタンをクリックすると、チームとワークフローを共有できます。\n\nSlackチャンネルにワークフローを投稿して、簡単にコラボレーションできます。',
   'tour.helpButton':
     'このツアーをもう一度見たい場合は、ヘルプボタン(?)をクリックしてください。\n\nそれでは、ワークフロー作成を楽しんでください！',
 
@@ -226,7 +228,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.back': '戻る',
   'tour.button.close': '閉じる',
   'tour.button.finish': '完了',
-  'tour.button.next': '次へ ({step}/{steps})',
+  'tour.button.next': '次へ',
   'tour.button.skip': 'スキップ',
 
   // Delete Confirmation Dialog

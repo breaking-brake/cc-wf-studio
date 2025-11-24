@@ -212,13 +212,15 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
     '點擊「匯出」按鈕以Claude Code可執行的格式匯出。\n\nSub-Agent匯出到`.claude/agents/`，SlashCommand匯出到`.claude/commands/`。',
   'tour.refineWithAI':
     '使用「AI編輯」按鈕透過與AI對話建立或改善工作流程。\n\n可以從空白畫布開始或以對話方式編輯現有工作流程。',
+  'tour.slackShare':
+    '點擊「分享到Slack」按鈕與團隊分享您的工作流程。\n\n可以將工作流程發布到Slack頻道以便於協作。',
   'tour.helpButton': '要再次檢視此導覽，請點擊說明按鈕(?)。\n\n享受建立工作流程的樂趣！',
 
   // Tour buttons
   'tour.button.back': '返回',
   'tour.button.close': '關閉',
   'tour.button.finish': '完成',
-  'tour.button.next': '下一步 ({step}/{steps})',
+  'tour.button.next': '下一步',
   'tour.button.skip': '略過',
 
   // Delete Confirmation Dialog

@@ -221,6 +221,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     '"내보내기" 버튼을 클릭하면 Claude Code에서 실행 가능한 형식으로 내보내집니다.\n\nSub-Agent는 `.claude/agents/`로, SlashCommand는 `.claude/commands/`로 이동합니다.',
   'tour.refineWithAI':
     '"AI로 편집" 버튼을 사용하여 AI와 대화하며 워크플로우를 생성하거나 개선할 수 있습니다.\n\n빈 캔버스에서 시작하거나 기존 워크플로우를 대화형으로 수정할 수 있습니다.',
+  'tour.slackShare':
+    '"Slack에 공유" 버튼을 클릭하여 팀과 워크플로우를 공유하세요.\n\nSlack 채널에 워크플로우를 게시하여 쉽게 협업할 수 있습니다.',
   'tour.helpButton':
     '이 투어를 다시 보려면 도움말 버튼(?)을 클릭하세요.\n\n워크플로우 생성을 즐기세요!',
 
@@ -228,7 +230,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.back': '뒤로',
   'tour.button.close': '닫기',
   'tour.button.finish': '완료',
-  'tour.button.next': '다음 ({step}/{steps})',
+  'tour.button.next': '다음',
   'tour.button.skip': '건너뛰기',
 
   // Delete Confirmation Dialog

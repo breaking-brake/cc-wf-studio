@@ -218,6 +218,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Click the "Export" button to export in a format executable by Claude Code.\n\nSub-Agents go to `.claude/agents/` and SlashCommands to `.claude/commands/`.',
   'tour.refineWithAI':
     'Use the "Edit with AI" button to create or improve workflows through an interactive chat with AI.\n\nYou can start from an empty canvas or edit existing workflows conversationally.',
+  'tour.slackShare':
+    'Click the "Share to Slack" button to share your workflow with your team.\n\nYou can post workflows to Slack channels for easy collaboration.',
   'tour.helpButton':
     'To see this tour again, click the help button (?).\n\nEnjoy creating workflows!',
 
@@ -225,7 +227,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.back': 'Back',
   'tour.button.close': 'Close',
   'tour.button.finish': 'Finish',
-  'tour.button.next': 'Next ({step}/{steps})',
+  'tour.button.next': 'Next',
   'tour.button.skip': 'Skip',
 
   // Delete Confirmation Dialog

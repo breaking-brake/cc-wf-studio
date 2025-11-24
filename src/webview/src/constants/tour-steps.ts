@@ -1,136 +1,157 @@
 /**
  * Claude Code Workflow Studio - Tour Steps Definition
  *
- * Defines interactive tour steps for first-time users
+ * Defines interactive tour steps for first-time users using Driver.js
  */
 
-import type { Step } from 'react-joyride';
+import type { Config as DriverConfig, DriveStep } from 'driver.js';
 
 /**
  * Tour steps configuration
  * Each step guides users through creating their first workflow
  */
-export const getTourSteps = (t: (key: string) => string): Step[] => [
+export const getTourSteps = (t: (key: string) => string): DriveStep[] => [
   {
-    target: 'body',
-    content: t('tour.welcome'),
-    placement: 'center',
-    disableBeacon: true,
+    popover: {
+      title: '',
+      description: t('tour.welcome'),
+      side: 'over',
+      align: 'center',
+    },
   },
   {
-    target: '.node-palette',
-    content: t('tour.nodePalette'),
-    placement: 'right',
-    disableBeacon: true,
+    element: '.node-palette',
+    popover: {
+      title: '',
+      description: t('tour.nodePalette'),
+      side: 'right',
+      align: 'start',
+    },
   },
   {
-    target: '[data-tour="add-prompt-button"]',
-    content: t('tour.addPrompt'),
-    placement: 'right',
-    disableBeacon: true,
+    element: '[data-tour="add-prompt-button"]',
+    popover: {
+      title: '',
+      description: t('tour.addPrompt'),
+      side: 'right',
+      align: 'start',
+    },
   },
   {
-    target: '.react-flow',
-    content: t('tour.canvas'),
-    placement: 'center',
-    disableBeacon: true,
+    popover: {
+      title: '',
+      description: t('tour.canvas'),
+      side: 'over',
+      align: 'center',
+    },
   },
   {
-    target: '.property-panel',
-    content: t('tour.propertyPanel'),
-    placement: 'left',
-    disableBeacon: true,
+    element: '.property-panel',
+    popover: {
+      title: '',
+      description: t('tour.propertyPanel'),
+      side: 'left',
+      align: 'start',
+    },
   },
   {
-    target: '[data-tour="add-askuserquestion-button"]',
-    content: t('tour.addAskUserQuestion'),
-    placement: 'right',
-    disableBeacon: true,
+    element: '[data-tour="add-askuserquestion-button"]',
+    popover: {
+      title: '',
+      description: t('tour.addAskUserQuestion'),
+      side: 'right',
+      align: 'center',
+    },
   },
   {
-    target: '.react-flow',
-    content: t('tour.connectNodes'),
-    placement: 'center',
-    disableBeacon: true,
+    popover: {
+      title: '',
+      description: t('tour.connectNodes'),
+      side: 'over',
+      align: 'center',
+    },
   },
   {
-    target: '[data-tour="workflow-name-input"]',
-    content: t('tour.workflowName'),
-    placement: 'bottom',
-    disableBeacon: true,
+    element: '[data-tour="workflow-name-input"]',
+    popover: {
+      title: '',
+      description: t('tour.workflowName'),
+      side: 'bottom',
+      align: 'start',
+    },
   },
   {
-    target: '[data-tour="save-button"]',
-    content: t('tour.saveWorkflow'),
-    placement: 'bottom',
-    disableBeacon: true,
+    element: '[data-tour="save-button"]',
+    popover: {
+      title: '',
+      description: t('tour.saveWorkflow'),
+      side: 'bottom',
+      align: 'start',
+    },
   },
   {
-    target: '[data-tour="workflow-selector"]',
-    content: t('tour.loadWorkflow'),
-    placement: 'bottom',
-    disableBeacon: true,
+    element: '[data-tour="workflow-selector"]',
+    popover: {
+      title: '',
+      description: t('tour.loadWorkflow'),
+      side: 'bottom',
+      align: 'start',
+    },
   },
   {
-    target: '[data-tour="export-button"]',
-    content: t('tour.exportWorkflow'),
-    placement: 'bottom',
-    disableBeacon: true,
+    element: '[data-tour="export-button"]',
+    popover: {
+      title: '',
+      description: t('tour.exportWorkflow'),
+      side: 'bottom',
+      align: 'start',
+    },
   },
   {
-    target: '[data-tour="ai-refine-button"]',
-    content: t('tour.refineWithAI'),
-    placement: 'bottom',
-    disableBeacon: true,
+    element: '[data-tour="ai-refine-button"]',
+    popover: {
+      title: '',
+      description: t('tour.refineWithAI'),
+      side: 'bottom',
+      align: 'start',
+    },
   },
   {
-    target: '[data-tour="help-button"]',
-    content: t('tour.helpButton'),
-    placement: 'bottom',
-    disableBeacon: true,
+    element: '[data-tour="slack-share-button"]',
+    popover: {
+      title: '',
+      description: t('tour.slackShare'),
+      side: 'bottom',
+      align: 'start',
+    },
+  },
+  {
+    element: '[data-tour="help-button"]',
+    popover: {
+      title: '',
+      description: t('tour.helpButton'),
+      side: 'bottom',
+      align: 'start',
+    },
   },
 ];
 
 /**
- * Tour styles configuration
+ * Driver.js configuration
+ * Styles and behavior configuration for the tour
  */
-export const tourStyles = {
-  options: {
-    arrowColor: '#fff',
-    backgroundColor: '#fff',
-    overlayColor: 'rgba(0, 0, 0, 0.5)',
-    primaryColor: '#007acc',
-    textColor: '#333',
-    zIndex: 10000,
-  },
-  tooltip: {
-    fontSize: 14,
-    padding: 20,
-  },
-  buttonNext: {
-    backgroundColor: '#007acc',
-    fontSize: 14,
-    padding: '8px 16px',
-  },
-  buttonBack: {
-    color: '#007acc',
-    fontSize: 14,
-    marginRight: 10,
-  },
-  buttonSkip: {
-    color: '#999',
-    fontSize: 14,
-  },
-};
-
-/**
- * Tour locale configuration
- */
-export const getTourLocale = (t: (key: string) => string) => ({
-  back: t('tour.button.back'),
-  close: t('tour.button.close'),
-  last: t('tour.button.finish'),
-  next: t('tour.button.next'),
-  nextLabelWithProgress: t('tour.button.next'), // Used when showProgress is enabled
-  skip: t('tour.button.skip'),
+export const getDriverConfig = (t: (key: string) => string): DriverConfig => ({
+  animate: false,
+  showProgress: true,
+  progressText: 'Step {{current}}/{{total}}',
+  showButtons: ['next', 'previous', 'close'],
+  nextBtnText: t('tour.button.next'),
+  prevBtnText: t('tour.button.back'),
+  doneBtnText: t('tour.button.finish'),
+  allowClose: true,
+  allowKeyboardControl: true,
+  smoothScroll: false,
+  overlayColor: 'rgba(0, 0, 0, 0.5)',
+  overlayOpacity: 1,
+  popoverClass: 'cc-wf-tour-popover',
 });
