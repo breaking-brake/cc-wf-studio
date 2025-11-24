@@ -182,8 +182,3 @@ button {
 .driver-overlay {
   z-index: 10000;
 }
-
-/* Arrow - Hide all arrows for cleaner UI */
-.driver-popover.cc-wf-tour-popover .driver-popover-arrow {
-  display: none !important;
-}

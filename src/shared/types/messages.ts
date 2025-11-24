@@ -614,16 +614,8 @@ export interface GetOAuthRedirectUriSuccessPayload {
  * Manual Slack connection request payload
  */
 export interface ConnectSlackManualPayload {
-  /** Workspace name (e.g., "My Team") */
-  workspaceName: string;
-  /** Workspace ID / Team ID (e.g., "T1234567890") */
-  workspaceId: string;
-  /** Team ID (same as workspaceId) */
-  teamId: string;
   /** Slack Bot User OAuth Token (xoxb-...) */
-  accessToken: string;
-  /** User ID who authorized this connection (e.g., "U1234567890") */
-  userId: string;
+  botToken: string;
 }
 
 /**
