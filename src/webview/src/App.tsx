@@ -78,6 +78,8 @@ const App: React.FC = () => {
       type: 'ACCEPT_TERMS',
     });
     setShowTermsDialog(false);
+    // Start onboarding tour after accepting terms
+    handleStartTour();
   };
 
   const handleCancelTerms = () => {
