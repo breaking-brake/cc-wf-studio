@@ -539,7 +539,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.howToGet.title': 'Bot Tokenの取得方法',
   'slack.manualToken.howToGet.step1': 'api.slack.com/appsでSlack Appを作成',
   'slack.manualToken.howToGet.step2':
-    'Bot Token Scopesを追加: channels:read, chat:write, files:write, groups:read',
+    'Bot Token Scopesを追加: channels:read, chat:write, files:read, files:write, groups:read',
   'slack.manualToken.howToGet.step3': 'Appをワークスペースにインストール',
   'slack.manualToken.howToGet.step4': 'Appをワークフロー共有先のチャンネルに追加',
   'slack.manualToken.howToGet.step5': 'Bot User OAuth Token（xoxb-...）をコピー',

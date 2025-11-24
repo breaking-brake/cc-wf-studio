@@ -15,9 +15,10 @@
 本機能では、SlackワークスペースにインストールされたSlack Appから取得した**Bot User Token**を使用します。
 
 **必要なBot Token Scopes**:
-- `chat:write` - メッセージ投稿
-- `files:write` - ファイルアップロード
 - `channels:read` - チャンネル一覧取得
+- `chat:write` - メッセージ投稿
+- `files:read` - ファイル情報取得・ダウンロード
+- `files:write` - ファイルアップロード
 - `groups:read` - メッセージ検索
 
 **トークン形式**:

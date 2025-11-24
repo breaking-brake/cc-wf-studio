@@ -542,7 +542,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.howToGet.title': 'How to get Bot Token',
   'slack.manualToken.howToGet.step1': 'Create Slack App at api.slack.com/apps',
   'slack.manualToken.howToGet.step2':
-    'Add Bot Token Scopes: channels:read, chat:write, files:write, groups:read',
+    'Add Bot Token Scopes: channels:read, chat:write, files:read, files:write, groups:read',
   'slack.manualToken.howToGet.step3': 'Install App to your workspace',
   'slack.manualToken.howToGet.step4': 'Invite App to target channel',
   'slack.manualToken.howToGet.step5': 'Copy Bot User OAuth Token (xoxb-...)',

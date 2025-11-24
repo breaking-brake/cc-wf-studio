@@ -538,7 +538,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.howToGet.title': 'Bot Token 받는 방법',
   'slack.manualToken.howToGet.step1': 'api.slack.com/apps에서 Slack App 생성',
   'slack.manualToken.howToGet.step2':
-    'Bot Token Scopes 추가: channels:read, chat:write, files:write, groups:read',
+    'Bot Token Scopes 추가: channels:read, chat:write, files:read, files:write, groups:read',
   'slack.manualToken.howToGet.step3': '워크스페이스에 App 설치',
   'slack.manualToken.howToGet.step4': '대상 채널에 App 추가',
   'slack.manualToken.howToGet.step5': 'Bot User OAuth Token (xoxb-...) 복사',

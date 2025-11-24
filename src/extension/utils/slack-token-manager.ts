@@ -385,7 +385,13 @@ export class SlackTokenManager {
    * @returns True if all required scopes present, false otherwise
    */
   static validateTokenScopes(scopes: string[]): boolean {
-    const requiredScopes = ['channels:read', 'chat:write', 'files:write', 'groups:read'];
+    const requiredScopes = [
+      'channels:read',
+      'chat:write',
+      'files:read',
+      'files:write',
+      'groups:read',
+    ];
 
     return requiredScopes.every((required) => scopes.includes(required));
   }
@@ -397,7 +403,13 @@ export class SlackTokenManager {
    * @returns Array of missing required scopes
    */
   static getMissingScopes(scopes: string[]): string[] {
-    const requiredScopes = ['channels:read', 'chat:write', 'files:write', 'groups:read'];
+    const requiredScopes = [
+      'channels:read',
+      'chat:write',
+      'files:read',
+      'files:write',
+      'groups:read',
+    ];
 
     return requiredScopes.filter((required) => !scopes.includes(required));
   }

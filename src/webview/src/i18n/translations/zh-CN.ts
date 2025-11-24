@@ -518,7 +518,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.howToGet.title': '如何获取 Bot Token',
   'slack.manualToken.howToGet.step1': '在 api.slack.com/apps 创建 Slack App',
   'slack.manualToken.howToGet.step2':
-    '添加 Bot Token Scopes: channels:read, chat:write, files:write, groups:read',
+    '添加 Bot Token Scopes: channels:read, chat:write, files:read, files:write, groups:read',
   'slack.manualToken.howToGet.step3': '将 App 安装到您的工作区',
   'slack.manualToken.howToGet.step4': '将 App 添加到目标频道',
   'slack.manualToken.howToGet.step5': '复制 Bot User OAuth Token (xoxb-...)',
