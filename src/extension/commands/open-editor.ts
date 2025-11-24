@@ -540,6 +540,7 @@ export function registerOpenEditorCommand(
               // Disconnect from Slack workspace
               try {
                 await slackTokenManager.clearConnection();
+                slackApiService.invalidateClient();
                 vscode.window.showInformationMessage('Slack Bot Token deleted successfully');
                 webview.postMessage({
                   type: 'SLACK_DISCONNECT_SUCCESS',

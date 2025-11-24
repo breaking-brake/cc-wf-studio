@@ -85,7 +85,10 @@ export async function handleConnectSlackManual(
       workspaceName,
     });
 
-    // Step 3: Store connection in VSCode Secret Storage
+    // Step 3: Clear existing connections before storing new one (same as delete → create flow)
+    await tokenManager.clearConnection();
+
+    // Step 4: Store connection in VSCode Secret Storage
     await tokenManager.storeManualConnection(
       workspaceId,
       workspaceName,
@@ -115,7 +118,7 @@ export async function handleConnectSlackManual(
     }
 
     // Invalidate SlackApiService client cache to force re-initialization
-    slackApiService.invalidateClient(workspaceId);
+    slackApiService.invalidateClient();
 
     log('INFO', 'Manual Slack connection completed successfully');
 
