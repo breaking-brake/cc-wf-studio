@@ -54,6 +54,25 @@
 
 ---
 
+<!-- Slack Sharing Demo GIFs -->
+<p align="center">
+  <img src="./resources/slack-export-demo.gif" alt="Export Workflow to Slack" width="800">
+</p>
+
+<p align="center">
+  <em>📤 Export workflows to Slack with preview cards</em>
+</p>
+
+<p align="center">
+  <img src="./resources/slack-import-demo.gif" alt="Import Workflow from Slack" width="800">
+</p>
+
+<p align="center">
+  <em>📥 Import workflows from Slack with one-click import</em>
+</p>
+
+---
+
 ## Why Claude Code Workflow Studio?
 
 ### 🎯 No-Code Workflow Design
@@ -70,33 +89,15 @@ All operations run locally within VSCode. **Note:** MCP Tool nodes may require n
 
 ## Key Features
 
-✨ **Visual Workflow Editor** - Intuitive drag-and-drop canvas inspired by Dify
-
-🎓 **Interactive Onboarding Tour** - Step-by-step guided tutorial for first-time users, automatically launched on first use with ? button for anytime replay
+✨ **Visual Workflow Editor** - Intuitive drag-and-drop canvas for designing AI workflows without code
 
 🤖 **AI-Assisted Workflow Refinement** - Iteratively improve workflows through conversational AI - ask for changes, add features, or refine logic with natural language feedback
 
-🎯 **Smart Skill Integration** - AI automatically scans your personal and project Skills, filters by relevance, and includes appropriate Skill nodes in refined workflows (max 20 Skills to prevent timeout)
+📤 **One-Click Export** - Generate `.claude/agents/*.md` and `.claude/commands/*.md` files ready for immediate use with Claude Code
 
-🤖 **Sub-Agent Nodes** - Configure Claude Code Sub-Agents with custom prompts, tool permissions, and model selection (Sonnet/Opus/Haiku)
+💬 **Slack Workflow Sharing (β)** - Share workflows directly to Slack channels with preview cards and one-click import links for seamless team collaboration
 
-❓ **AskUserQuestion Nodes** - Create dynamic conditional branches with 2-4 user-selectable options
-
-💾 **Save & Load** - Persist workflows as JSON files in `.vscode/workflows/`
-
-📤 **One-Click Export** - Generate `.claude/agents/*.md` and `.claude/commands/*.md` files ready for immediate use
-
-🔒 **Safe File Handling** - Automatic conflict detection with confirmation dialogs before overwriting
-
-⚙️ **Intuitive Property Panel** - Configure all node settings in a dedicated right-side panel
-
-🌐 **Multilingual Support** - Both the Visual Editor UI and exported workflows automatically adapt to your VSCode language (English/Japanese/Korean/Simplified Chinese/Traditional Chinese supported)
-
-📚 **Skill Nodes** - Reference existing Claude Code Skills from personal (`~/.claude/skills/`) or project (`.claude/skills/`) directories, or create new Skills directly from the visual editor
-
-🔌 **MCP Tool Nodes** - Integrate Model Context Protocol (MCP) tools with automatic server discovery, tool browsing, dynamic parameter forms, and real-time validation
-
-💬 **Slack Workflow Sharing (β)** - Share workflows directly to Slack channels with rich preview cards and one-click import links for seamless team collaboration
+🧩 **Rich Node Types** - Build complex workflows with diverse node types: Prompt (templates), Sub-Agent (AI tasks), Skill (Claude Code Skills), MCP (external tools), IfElse/Switch (conditional branching), and AskUserQuestion (user decisions)
 
 ## AI-Assisted Workflow Refinement
 
