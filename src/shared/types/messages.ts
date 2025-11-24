@@ -53,7 +53,7 @@ export interface WorkflowListPayload {
 }
 
 export interface InitialStatePayload {
-  isFirstLaunch: boolean;
+  hasAcceptedTerms: boolean;
 }
 
 // ============================================================================
@@ -827,6 +827,8 @@ export type WebviewMessage =
   | Message<void, 'LOAD_WORKFLOW_LIST'>
   | Message<LoadWorkflowRequestPayload, 'LOAD_WORKFLOW'>
   | Message<StateUpdatePayload, 'STATE_UPDATE'>
+  | Message<void, 'ACCEPT_TERMS'>
+  | Message<void, 'CANCEL_TERMS'>
   | Message<GenerateWorkflowPayload, 'GENERATE_WORKFLOW'>
   | Message<CancelGenerationPayload, 'CANCEL_GENERATION'>
   | Message<void, 'BROWSE_SKILLS'>

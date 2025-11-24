@@ -127,12 +127,8 @@ export function registerOpenEditorCommand(
       // Set webview HTML content
       currentPanel.webview.html = getWebviewContent(currentPanel.webview, context.extensionUri);
 
-      // Check if this is the first launch and send initial state
-      const hasLaunchedBefore = context.globalState.get<boolean>('hasLaunchedBefore', false);
-      if (!hasLaunchedBefore) {
-        // Mark as launched
-        context.globalState.update('hasLaunchedBefore', true);
-      }
+      // Check if user has accepted terms of use
+      const hasAcceptedTerms = context.globalState.get<boolean>('hasAcceptedTerms', false);
 
       // Send initial state to webview after a short delay to ensure webview is ready
       setTimeout(() => {
@@ -140,7 +136,7 @@ export function registerOpenEditorCommand(
           currentPanel.webview.postMessage({
             type: 'INITIAL_STATE',
             payload: {
-              isFirstLaunch: !hasLaunchedBefore,
+              hasAcceptedTerms,
             },
           });
 
@@ -239,6 +235,23 @@ export function registerOpenEditorCommand(
             case 'STATE_UPDATE':
               // State update from webview (for persistence)
               console.log('STATE_UPDATE:', message.payload);
+              break;
+
+            case 'ACCEPT_TERMS':
+              // User accepted terms of use
+              await context.globalState.update('hasAcceptedTerms', true);
+              // Update webview with new state
+              webview.postMessage({
+                type: 'INITIAL_STATE',
+                payload: {
+                  hasAcceptedTerms: true,
+                },
+              });
+              break;
+
+            case 'CANCEL_TERMS':
+              // User cancelled terms of use - close the panel
+              currentPanel?.dispose();
               break;
 
             case 'GENERATE_WORKFLOW':

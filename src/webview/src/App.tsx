@@ -18,6 +18,7 @@ import { SimpleOverlay } from './components/common/SimpleOverlay';
 import { ConfirmDialog } from './components/dialogs/ConfirmDialog';
 import { RefinementChatPanel } from './components/dialogs/RefinementChatPanel';
 import { SlackShareDialog } from './components/dialogs/SlackShareDialog';
+import { TermsOfUseDialog } from './components/dialogs/TermsOfUseDialog';
 import { ErrorNotification } from './components/ErrorNotification';
 import { NodePalette } from './components/NodePalette';
 import { PropertyPanel } from './components/PropertyPanel';
@@ -48,6 +49,7 @@ const App: React.FC = () => {
   const [tourKey, setTourKey] = useState(0); // Used to force Tour component remount
   const [isSlackShareDialogOpen, setIsSlackShareDialogOpen] = useState(false);
   const [isLoadingImportedWorkflow, setIsLoadingImportedWorkflow] = useState(false);
+  const [showTermsDialog, setShowTermsDialog] = useState(false);
 
   const handleError = (errorData: ErrorPayload) => {
     setError(errorData);
@@ -70,6 +72,21 @@ const App: React.FC = () => {
     setIsSlackShareDialogOpen(true);
   };
 
+  const handleAcceptTerms = () => {
+    // Send accept message to Extension
+    vscode.postMessage({
+      type: 'ACCEPT_TERMS',
+    });
+    setShowTermsDialog(false);
+  };
+
+  const handleCancelTerms = () => {
+    // Send cancel message to Extension to close the panel
+    vscode.postMessage({
+      type: 'CANCEL_TERMS',
+    });
+  };
+
   // Listen for messages from Extension
   useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
@@ -77,9 +94,9 @@ const App: React.FC = () => {
 
       if (message.type === 'INITIAL_STATE') {
         const payload = message.payload as InitialStatePayload;
-        if (payload.isFirstLaunch) {
-          // Start tour automatically on first launch
-          setRunTour(true);
+        if (!payload.hasAcceptedTerms) {
+          // Show terms dialog if not accepted
+          setShowTermsDialog(true);
         }
       } else if (message.type === 'IMPORT_WORKFLOW_FROM_SLACK') {
         // Handle import workflow request from Extension Host
@@ -180,6 +197,13 @@ const App: React.FC = () => {
 
       {/* Error Notification Overlay */}
       <ErrorNotification error={error} onDismiss={handleDismissError} />
+
+      {/* Terms of Use Dialog */}
+      <TermsOfUseDialog
+        isOpen={showTermsDialog}
+        onAccept={handleAcceptTerms}
+        onCancel={handleCancelTerms}
+      />
 
       {/* Interactive Tour */}
       <Tour key={tourKey} run={runTour} onFinish={handleTourFinish} />

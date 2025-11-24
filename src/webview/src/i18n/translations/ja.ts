@@ -231,6 +231,21 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.next': '次へ',
   'tour.button.skip': 'スキップ',
 
+  // Terms of Use
+  'terms.title': 'Claude Code Workflow Studio - 利用規約',
+  'terms.introduction': '本ツールは正当な目的でのワークフロー作成を支援します。',
+  'terms.prohibitedUse': '以下の用途での使用を禁止します：',
+  'terms.cyberAttack': 'サイバー攻撃（DDoS攻撃、不正アクセス等）',
+  'terms.malware': 'マルウェア・ランサムウェアの作成',
+  'terms.personalDataTheft': '個人情報の不正取得・悪用',
+  'terms.otherIllegalActs': 'その他の違法行為や他者への損害行為',
+  'terms.liability': '違反した場合、利用者が全責任を負います。',
+  'terms.agree': '上記に同意します',
+  'terms.agreeButton': '同意して開始',
+  'terms.cancelButton': 'キャンセル',
+  'terms.warning.aiGeneration': '⚠️ 本機能の悪用は禁止されています',
+  'terms.warning.workflow': '⚠️ このワークフローは正当な目的でのみ使用してください',
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'ノードを削除',
   'dialog.deleteNode.message': 'このノードを削除してもよろしいですか？',

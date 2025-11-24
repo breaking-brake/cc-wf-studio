@@ -233,6 +233,21 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.next': '다음',
   'tour.button.skip': '건너뛰기',
 
+  // Terms of Use
+  'terms.title': 'Claude Code Workflow Studio - 이용 약관',
+  'terms.introduction': '이 도구는 정당한 목적의 워크플로우 생성을 지원합니다.',
+  'terms.prohibitedUse': '다음 용도로 사용을 금지합니다:',
+  'terms.cyberAttack': '사이버 공격 (DDoS 공격, 무단 접근 등)',
+  'terms.malware': '악성 코드 및 랜섬웨어 제작',
+  'terms.personalDataTheft': '개인 정보의 무단 수집 또는 오용',
+  'terms.otherIllegalActs': '기타 불법 행위 또는 타인에게 해를 끼치는 행위',
+  'terms.liability': '위반 시 사용자가 전적으로 책임을 집니다.',
+  'terms.agree': '위 내용에 동의합니다',
+  'terms.agreeButton': '동의하고 시작',
+  'terms.cancelButton': '취소',
+  'terms.warning.aiGeneration': '⚠️ 이 기능의 악용은 금지됩니다',
+  'terms.warning.workflow': '⚠️ 이 워크플로우는 정당한 목적으로만 사용해야 합니다',
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '노드 삭제',
   'dialog.deleteNode.message': '이 노드를 삭제하시겠습니까?',
