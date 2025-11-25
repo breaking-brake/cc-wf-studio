@@ -7,6 +7,7 @@
 
 import * as vscode from 'vscode';
 import type { WebviewMessage } from '../../shared/types/messages';
+import { translate } from '../i18n/i18n-service';
 import { cancelGeneration } from '../services/claude-code-service';
 import { FileService } from '../services/file-service';
 import { SlackApiService } from '../services/slack-api-service';
@@ -82,9 +83,13 @@ export function registerOpenEditorCommand(
       try {
         fileService = new FileService();
       } catch (error) {
-        vscode.window.showErrorMessage(
-          `Failed to initialize File Service: ${error instanceof Error ? error.message : 'Unknown error'}`
-        );
+        // Check if this is a "no workspace" error
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        if (errorMessage === 'No workspace folder is open') {
+          vscode.window.showErrorMessage(translate('error.noWorkspaceOpen'));
+        } else {
+          vscode.window.showErrorMessage(`Failed to initialize File Service: ${errorMessage}`);
+        }
         return;
       }
 

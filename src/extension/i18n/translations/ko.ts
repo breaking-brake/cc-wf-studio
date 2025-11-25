@@ -71,4 +71,7 @@ export const koTranslations: TranslationKeys = {
   'mcpNode.noDescription': '설명 없음',
   'mcpNode.executionMethod':
     '이 노드는 MCP(Model Context Protocol) 도구를 호출합니다. 워크플로를 실행할 때 구성된 매개변수를 사용하여 MCP 서버를 통해 도구를 호출하세요.',
+
+  // Error messages
+  'error.noWorkspaceOpen': '폴더 또는 워크스페이스를 먼저 열어주세요.',
 };

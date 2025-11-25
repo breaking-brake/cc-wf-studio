@@ -72,4 +72,7 @@ export const enTranslations: TranslationKeys = {
   'mcpNode.noDescription': 'No description available',
   'mcpNode.executionMethod':
     'This node invokes an MCP (Model Context Protocol) tool. When executing this workflow, use the configured parameters to call the tool via the MCP server.',
+
+  // Error messages
+  'error.noWorkspaceOpen': 'Please open a folder or workspace first.',
 };

@@ -64,4 +64,7 @@ export interface TranslationKeys {
   'mcpNode.optional': string;
   'mcpNode.noDescription': string;
   'mcpNode.executionMethod': string;
+
+  // Error messages
+  'error.noWorkspaceOpen': string;
 }

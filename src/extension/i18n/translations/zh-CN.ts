@@ -68,4 +68,7 @@ export const zhCNTranslations: TranslationKeys = {
   'mcpNode.noDescription': '无描述',
   'mcpNode.executionMethod':
     '此节点调用MCP（Model Context Protocol）工具。执行此工作流时，请使用已配置的参数通过MCP服务器调用该工具。',
+
+  // Error messages
+  'error.noWorkspaceOpen': '请先打开文件夹或工作区。',
 };

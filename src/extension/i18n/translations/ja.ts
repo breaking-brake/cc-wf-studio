@@ -71,4 +71,7 @@ export const jaTranslations: TranslationKeys = {
   'mcpNode.noDescription': '説明なし',
   'mcpNode.executionMethod':
     'このノードはMCP(Model Context Protocol)ツールを呼び出します。ワークフロー実行時は、設定されたパラメータを使用してMCPサーバー経由でツールを呼び出してください。',
+
+  // Error messages
+  'error.noWorkspaceOpen': 'フォルダまたはワークスペースを開いてから実行してください。',
 };
