@@ -250,7 +250,8 @@ export const NodePalette: React.FC = () => {
         <div
           style={{
             fontSize: '11px',
-            color: 'var(--vscode-descriptionForeground)',
+            color: 'var(--vscode-button-foreground)',
+            opacity: 0.8,
           }}
         >
           {t('node.prompt.description')}
@@ -289,7 +290,8 @@ export const NodePalette: React.FC = () => {
         <div
           style={{
             fontSize: '11px',
-            color: 'var(--vscode-descriptionForeground)',
+            color: 'var(--vscode-button-foreground)',
+            opacity: 0.8,
           }}
         >
           {t('node.subAgent.description')}
@@ -328,7 +330,8 @@ export const NodePalette: React.FC = () => {
         <div
           style={{
             fontSize: '11px',
-            color: 'var(--vscode-descriptionForeground)',
+            color: 'var(--vscode-button-foreground)',
+            opacity: 0.8,
           }}
         >
           {t('node.skill.description')}
@@ -367,7 +370,8 @@ export const NodePalette: React.FC = () => {
         <div
           style={{
             fontSize: '11px',
-            color: 'var(--vscode-descriptionForeground)',
+            color: 'var(--vscode-button-foreground)',
+            opacity: 0.8,
           }}
         >
           {t('node.mcp.description')}
@@ -420,7 +424,8 @@ export const NodePalette: React.FC = () => {
         <div
           style={{
             fontSize: '11px',
-            color: 'var(--vscode-descriptionForeground)',
+            color: 'var(--vscode-button-foreground)',
+            opacity: 0.8,
           }}
         >
           {t('node.ifElse.description')}
@@ -458,7 +463,8 @@ export const NodePalette: React.FC = () => {
         <div
           style={{
             fontSize: '11px',
-            color: 'var(--vscode-descriptionForeground)',
+            color: 'var(--vscode-button-foreground)',
+            opacity: 0.8,
           }}
         >
           {t('node.switch.description')}
@@ -497,7 +503,8 @@ export const NodePalette: React.FC = () => {
         <div
           style={{
             fontSize: '11px',
-            color: 'var(--vscode-descriptionForeground)',
+            color: 'var(--vscode-button-foreground)',
+            opacity: 0.8,
           }}
         >
           {t('node.askUserQuestion.description')}
@@ -536,7 +543,8 @@ export const NodePalette: React.FC = () => {
         <div
           style={{
             fontSize: '11px',
-            color: 'var(--vscode-descriptionForeground)',
+            color: 'var(--vscode-button-foreground)',
+            opacity: 0.8,
           }}
         >
           {t('node.end.description')}
@@ -577,7 +585,8 @@ export const NodePalette: React.FC = () => {
         <div
           style={{
             fontSize: '11px',
-            color: 'var(--vscode-descriptionForeground)',
+            color: 'var(--vscode-button-foreground)',
+            opacity: 0.8,
           }}
         >
           {t('node.branch.description')}
