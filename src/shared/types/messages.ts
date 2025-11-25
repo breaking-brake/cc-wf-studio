@@ -503,6 +503,24 @@ export interface McpErrorPayload {
   timestamp: string; // ISO 8601
 }
 
+/**
+ * Refresh MCP cache request payload
+ *
+ * Invalidates all in-memory MCP cache (server list, tools, schemas).
+ * Useful when MCP servers are added/removed after initial load.
+ */
+export type RefreshMcpCachePayload = Record<string, never>;
+
+/**
+ * MCP cache refreshed result payload
+ */
+export interface McpCacheRefreshedPayload {
+  /** Whether the cache refresh succeeded */
+  success: boolean;
+  /** Request timestamp */
+  timestamp: string; // ISO 8601
+}
+
 // ============================================================================
 // Extension → Webview Messages
 // ============================================================================
@@ -534,6 +552,7 @@ export type ExtensionMessage =
   | Message<McpToolSchemaResultPayload, 'MCP_TOOL_SCHEMA_RESULT'>
   | Message<McpNodeValidationResultPayload, 'MCP_NODE_VALIDATION_RESULT'>
   | Message<McpErrorPayload, 'MCP_ERROR'>
+  | Message<McpCacheRefreshedPayload, 'MCP_CACHE_REFRESHED'>
   | Message<ShareWorkflowSuccessPayload, 'SHARE_WORKFLOW_SUCCESS'>
   | Message<SensitiveDataWarningPayload, 'SENSITIVE_DATA_WARNING'>
   | Message<ShareWorkflowFailedPayload, 'SHARE_WORKFLOW_FAILED'>
@@ -842,6 +861,7 @@ export type WebviewMessage =
   | Message<GetMcpToolSchemaPayload, 'GET_MCP_TOOL_SCHEMA'>
   | Message<ValidateMcpNodePayload, 'VALIDATE_MCP_NODE'>
   | Message<UpdateMcpNodePayload, 'UPDATE_MCP_NODE'>
+  | Message<RefreshMcpCachePayload, 'REFRESH_MCP_CACHE'>
   | Message<SlackConnectPayload, 'SLACK_CONNECT'>
   | Message<void, 'SLACK_DISCONNECT'>
   | Message<void, 'GET_OAUTH_REDIRECT_URI'> // @deprecated Will be removed in favor of CONNECT_SLACK_MANUAL

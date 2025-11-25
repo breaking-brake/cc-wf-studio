@@ -16,7 +16,12 @@ import { handleGenerateWorkflow } from './ai-generation';
 import { handleExportWorkflow } from './export-workflow';
 import { loadWorkflow } from './load-workflow';
 import { loadWorkflowList } from './load-workflow-list';
-import { handleGetMcpToolSchema, handleGetMcpTools, handleListMcpServers } from './mcp-handlers';
+import {
+  handleGetMcpToolSchema,
+  handleGetMcpTools,
+  handleListMcpServers,
+  handleRefreshMcpCache,
+} from './mcp-handlers';
 import { saveWorkflow } from './save-workflow';
 import { handleBrowseSkills, handleCreateSkill, handleValidateSkillFile } from './skill-operations';
 import { handleConnectSlackManual } from './slack-connect-manual';
@@ -440,6 +445,11 @@ export function registerOpenEditorCommand(
                   },
                 });
               }
+              break;
+
+            case 'REFRESH_MCP_CACHE':
+              // Refresh MCP cache (invalidate all cached data)
+              await handleRefreshMcpCache(message.payload || {}, webview, message.requestId || '');
               break;
 
             case 'LIST_SLACK_WORKSPACES':

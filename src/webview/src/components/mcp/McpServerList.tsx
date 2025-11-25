@@ -11,7 +11,7 @@
 import type { McpServerReference } from '@shared/types/messages';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
-import { listMcpServers } from '../../services/mcp-service';
+import { listMcpServers, refreshMcpCache } from '../../services/mcp-service';
 import { IndeterminateProgressBar } from '../common/IndeterminateProgressBar';
 
 interface McpServerListProps {
@@ -27,36 +27,58 @@ export function McpServerList({
 }: McpServerListProps) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [servers, setServers] = useState<McpServerReference[]>([]);
 
-  useEffect(() => {
-    const loadServers = async () => {
-      setLoading(true);
-      setError(null);
+  const loadServers = async () => {
+    setLoading(true);
+    setError(null);
 
-      try {
-        const result = await listMcpServers({
-          options: filterByScope ? { filterByScope } : undefined,
-        });
+    try {
+      const result = await listMcpServers({
+        options: filterByScope ? { filterByScope } : undefined,
+      });
 
-        if (!result.success) {
-          setError(result.error?.message || t('mcp.error.serverLoadFailed'));
-          setServers([]);
-          return;
-        }
-
-        setServers(result.servers || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t('mcp.error.serverLoadFailed'));
+      if (!result.success) {
+        setError(result.error?.message || t('mcp.error.serverLoadFailed'));
         setServers([]);
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
 
+      setServers(result.servers || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('mcp.error.serverLoadFailed'));
+      setServers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: loadServers is stable and shouldn't trigger re-renders
+  useEffect(() => {
     loadServers();
   }, [filterByScope, t]);
+
+  /**
+   * Handle refresh button click
+   */
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    setError(null);
+
+    try {
+      // Invalidate cache first
+      await refreshMcpCache({});
+
+      // Reload server list
+      await loadServers();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('mcp.error.refreshFailed'));
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   if (loading) {
     return <IndeterminateProgressBar label={t('mcp.loading.servers')} />;
@@ -80,27 +102,54 @@ export function McpServerList({
 
   if (servers.length === 0) {
     return (
-      <div
-        style={{
-          padding: '16px',
-          textAlign: 'center',
-        }}
-      >
-        <div
-          style={{
-            color: 'var(--vscode-descriptionForeground)',
-            marginBottom: '8px',
-          }}
-        >
-          {t('mcp.empty.servers')}
+      <div>
+        {/* Refresh Button */}
+        <div style={{ marginBottom: '12px' }}>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              fontSize: '13px',
+              backgroundColor: 'var(--vscode-button-secondaryBackground)',
+              color: 'var(--vscode-button-secondaryForeground)',
+              border: '1px solid var(--vscode-panel-border)',
+              borderRadius: '4px',
+              cursor: refreshing ? 'wait' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+            }}
+          >
+            <span>{refreshing ? t('mcp.refreshing') : t('mcp.action.refresh')}</span>
+          </button>
         </div>
+
         <div
           style={{
-            fontSize: '12px',
-            color: 'var(--vscode-descriptionForeground)',
+            padding: '16px',
+            textAlign: 'center',
           }}
         >
-          {t('mcp.empty.servers.hint')}
+          <div
+            style={{
+              color: 'var(--vscode-descriptionForeground)',
+              marginBottom: '8px',
+            }}
+          >
+            {t('mcp.empty.servers')}
+          </div>
+          <div
+            style={{
+              fontSize: '12px',
+              color: 'var(--vscode-descriptionForeground)',
+            }}
+          >
+            {t('mcp.empty.servers.hint')}
+          </div>
         </div>
       </div>
     );
@@ -108,6 +157,29 @@ export function McpServerList({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {/* Refresh Button */}
+      <button
+        type="button"
+        onClick={handleRefresh}
+        disabled={refreshing}
+        style={{
+          padding: '8px 12px',
+          fontSize: '13px',
+          backgroundColor: 'var(--vscode-button-secondaryBackground)',
+          color: 'var(--vscode-button-secondaryForeground)',
+          border: '1px solid var(--vscode-panel-border)',
+          borderRadius: '4px',
+          cursor: refreshing ? 'wait' : 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '6px',
+        }}
+      >
+        <span>{refreshing ? t('mcp.refreshing') : t('mcp.action.refresh')}</span>
+      </button>
+
+      {/* Server List */}
       {servers.map((server) => (
         <button
           key={server.id}

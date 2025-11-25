@@ -15,12 +15,18 @@ import type {
   GetMcpToolSchemaPayload,
   GetMcpToolsPayload,
   ListMcpServersPayload,
+  McpCacheRefreshedPayload,
   McpServersResultPayload,
   McpToolSchemaResultPayload,
   McpToolsResultPayload,
+  RefreshMcpCachePayload,
 } from '../../shared/types/messages';
 import { log } from '../extension';
-import { getCachedServerList, setCachedServerList } from '../services/mcp-cache-service';
+import {
+  getCachedServerList,
+  invalidateAllCache,
+  setCachedServerList,
+} from '../services/mcp-cache-service';
 import { getToolSchema, getTools, listServers } from '../services/mcp-cli-service';
 
 /**
@@ -378,6 +384,71 @@ export async function handleGetMcpToolSchema(
 
     webview.postMessage({
       type: 'MCP_TOOL_SCHEMA_RESULT',
+      requestId,
+      payload: errorPayload,
+    });
+  }
+}
+
+/**
+ * Handle REFRESH_MCP_CACHE request from Webview
+ *
+ * Invalidates all in-memory MCP cache (server list, tools, schemas).
+ * Useful when MCP servers are added/removed after initial load.
+ *
+ * @param payload - Cache refresh request payload
+ * @param webview - VSCode Webview instance
+ * @param requestId - Request ID for response matching
+ */
+export async function handleRefreshMcpCache(
+  _payload: RefreshMcpCachePayload,
+  webview: vscode.Webview,
+  requestId: string
+): Promise<void> {
+  const startTime = Date.now();
+
+  log('INFO', 'REFRESH_MCP_CACHE request started', {
+    requestId,
+  });
+
+  try {
+    // Invalidate all MCP cache
+    invalidateAllCache();
+
+    const executionTimeMs = Date.now() - startTime;
+
+    log('INFO', 'REFRESH_MCP_CACHE completed successfully', {
+      requestId,
+      executionTimeMs,
+    });
+
+    const successPayload: McpCacheRefreshedPayload = {
+      success: true,
+      timestamp: new Date().toISOString(),
+    };
+
+    webview.postMessage({
+      type: 'MCP_CACHE_REFRESHED',
+      requestId,
+      payload: successPayload,
+    });
+  } catch (error) {
+    const executionTimeMs = Date.now() - startTime;
+
+    log('ERROR', 'REFRESH_MCP_CACHE unexpected error', {
+      requestId,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      executionTimeMs,
+    });
+
+    const errorPayload: McpCacheRefreshedPayload = {
+      success: false,
+      timestamp: new Date().toISOString(),
+    };
+
+    webview.postMessage({
+      type: 'MCP_CACHE_REFRESHED',
       requestId,
       payload: errorPayload,
     });

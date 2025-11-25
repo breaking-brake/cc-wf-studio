@@ -10,7 +10,7 @@
 import type { McpNodeData, ToolParameter } from '@shared/types/mcp-node';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
-import { getMcpToolSchema } from '../../services/mcp-service';
+import { getMcpToolSchema, refreshMcpCache } from '../../services/mcp-service';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import type { ExtendedToolParameter } from '../../utils/parameter-validator';
 import { validateAllParameters } from '../../utils/parameter-validator';
@@ -31,6 +31,7 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
   const { nodes, updateNodeData } = useWorkflowStore();
 
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Detailed Mode state
@@ -184,6 +185,45 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
     onClose();
   };
 
+  /**
+   * Handle refresh button click
+   * Refreshes MCP cache and reloads tool schema
+   */
+  const handleRefresh = async () => {
+    if (!nodeData || currentMode === 'aiToolSelection') {
+      return;
+    }
+
+    setRefreshing(true);
+    setError(null);
+
+    try {
+      // Invalidate cache first
+      await refreshMcpCache({});
+
+      // Reload tool schema if in manual parameter config mode
+      if (currentMode === 'manualParameterConfig') {
+        const result = await getMcpToolSchema({
+          serverId: nodeData.serverId,
+          toolName: nodeData.toolName || '',
+        });
+
+        if (!result.success || !result.schema) {
+          setError(result.error?.message || t('mcp.editDialog.error.schemaLoadFailed'));
+          setParameters([]);
+          return;
+        }
+
+        setParameters(result.schema.parameters || []);
+        setParameterValues(nodeData.parameterValues || {});
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('mcp.error.refreshFailed'));
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <div
       style={{
@@ -249,26 +289,60 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
             borderRadius: '4px',
           }}
         >
-          <div style={{ fontSize: '13px', color: 'var(--vscode-disabledForeground)' }}>
-            <strong>{t('property.mcp.serverId')}:</strong> {nodeData.serverId}
-          </div>
-          {(currentMode === 'manualParameterConfig' || currentMode === 'aiParameterConfig') && (
-            <div
-              style={{
-                fontSize: '13px',
-                color: 'var(--vscode-disabledForeground)',
-                marginTop: '4px',
-              }}
-            >
-              <strong>{t('property.mcp.toolName')}:</strong> {nodeData.toolName}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              marginBottom: '8px',
+            }}
+          >
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '13px', color: 'var(--vscode-disabledForeground)' }}>
+                <strong>{t('property.mcp.serverId')}:</strong> {nodeData.serverId}
+              </div>
+              {(currentMode === 'manualParameterConfig' || currentMode === 'aiParameterConfig') && (
+                <div
+                  style={{
+                    fontSize: '13px',
+                    color: 'var(--vscode-disabledForeground)',
+                    marginTop: '4px',
+                  }}
+                >
+                  <strong>{t('property.mcp.toolName')}:</strong> {nodeData.toolName}
+                </div>
+              )}
             </div>
-          )}
+            {/* Refresh Button */}
+            {currentMode !== 'aiToolSelection' && (
+              <button
+                type="button"
+                onClick={handleRefresh}
+                disabled={refreshing || loading}
+                style={{
+                  padding: '4px 8px',
+                  fontSize: '12px',
+                  backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                  color: 'var(--vscode-button-secondaryForeground)',
+                  border: '1px solid var(--vscode-panel-border)',
+                  borderRadius: '3px',
+                  cursor: refreshing || loading ? 'wait' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  flexShrink: 0,
+                }}
+                title={t('mcp.action.refresh')}
+              >
+                <span>{refreshing ? t('mcp.refreshing') : t('mcp.action.refresh')}</span>
+              </button>
+            )}
+          </div>
           {nodeData.toolDescription && currentMode === 'manualParameterConfig' && (
             <div
               style={{
                 fontSize: '12px',
                 color: 'var(--vscode-disabledForeground)',
-                marginTop: '8px',
               }}
             >
               {nodeData.toolDescription}

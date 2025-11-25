@@ -406,6 +406,11 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.error.toolLoadFailed': '서버에서 도구 로드 실패',
   'mcp.empty.tools': '이 서버에서 사용할 수 있는 도구가 없습니다',
 
+  // MCP Cache Actions
+  'mcp.action.refresh': '새로 고침',
+  'mcp.refreshing': '새로 고침 중...',
+  'mcp.error.refreshFailed': 'MCP 캐시 새로 고침에 실패했습니다',
+
   // MCP Tool Search
   'mcp.search.placeholder': '이름이나 설명으로 도구 검색...',
   'mcp.search.noResults': '"{query}"와 일치하는 도구를 찾을 수 없습니다',

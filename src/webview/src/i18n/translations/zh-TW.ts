@@ -390,6 +390,11 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'mcp.error.toolLoadFailed': '從伺服器載入工具失敗',
   'mcp.empty.tools': '此伺服器沒有可用工具',
 
+  // MCP Cache Actions
+  'mcp.action.refresh': '重新整理',
+  'mcp.refreshing': '正在重新整理...',
+  'mcp.error.refreshFailed': 'MCP 快取重新整理失敗',
+
   // MCP Tool Search
   'mcp.search.placeholder': '按名稱或描述搜尋工具...',
   'mcp.search.noResults': '未找到與"{query}"匹配的工具',

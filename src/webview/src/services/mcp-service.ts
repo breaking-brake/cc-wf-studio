@@ -11,10 +11,12 @@ import type {
   GetMcpToolSchemaPayload,
   GetMcpToolsPayload,
   ListMcpServersPayload,
+  McpCacheRefreshedPayload,
   McpServersResultPayload,
   McpToolReference,
   McpToolSchemaResultPayload,
   McpToolsResultPayload,
+  RefreshMcpCachePayload,
 } from '../../../shared/types/messages';
 
 // VSCode API bridge (injected by Extension Host)
@@ -214,4 +216,59 @@ export function filterTools(tools: McpToolReference[], query: string): McpToolRe
       tool.name.toLowerCase().includes(lowerQuery) ||
       tool.description?.toLowerCase().includes(lowerQuery)
   );
+}
+
+/**
+ * Refresh MCP cache
+ *
+ * Sends REFRESH_MCP_CACHE message to Extension Host to invalidate all cached data.
+ * Useful when MCP servers are added/removed after initial load.
+ *
+ * @param payload - Cache refresh request payload (empty)
+ * @returns Promise resolving to cache refresh result
+ *
+ * @example
+ * ```typescript
+ * const result = await refreshMcpCache({});
+ * if (result.success) {
+ *   console.log('MCP cache refreshed successfully');
+ * }
+ * ```
+ */
+export async function refreshMcpCache(
+  payload?: RefreshMcpCachePayload
+): Promise<McpCacheRefreshedPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `refresh-cache-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message = event.data;
+      if (message.requestId !== requestId) {
+        return; // Not our response
+      }
+
+      if (message.type === 'MCP_CACHE_REFRESHED') {
+        window.removeEventListener('message', handler);
+        resolve(message.payload);
+      } else if (message.type === 'ERROR') {
+        window.removeEventListener('message', handler);
+        reject(new Error(message.payload?.message || 'MCP cache refresh failed'));
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    // Send request to Extension Host
+    vscode.postMessage({
+      type: 'REFRESH_MCP_CACHE',
+      requestId,
+      payload: payload || {},
+    });
+
+    // Timeout handling
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timeout: REFRESH_MCP_CACHE took longer than 30 seconds'));
+    }, REQUEST_TIMEOUT);
+  });
 }

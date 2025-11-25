@@ -408,6 +408,11 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.error.toolLoadFailed': 'Failed to load tools from server',
   'mcp.empty.tools': 'No tools available for this server',
 
+  // MCP Cache Actions
+  'mcp.action.refresh': 'Refresh',
+  'mcp.refreshing': 'Refreshing...',
+  'mcp.error.refreshFailed': 'Failed to refresh MCP cache',
+
   // MCP Tool Search
   'mcp.search.placeholder': 'Search tools by name or description...',
   'mcp.search.noResults': 'No tools found matching "{query}"',

@@ -370,6 +370,11 @@ export interface WebviewTranslationKeys {
   'mcp.error.toolLoadFailed': string;
   'mcp.empty.tools': string;
 
+  // MCP Cache Actions
+  'mcp.action.refresh': string;
+  'mcp.refreshing': string;
+  'mcp.error.refreshFailed': string;
+
   // MCP Tool Search
   'mcp.search.placeholder': string;
   'mcp.search.noResults': string;

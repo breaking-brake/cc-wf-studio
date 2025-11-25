@@ -407,6 +407,11 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.error.toolLoadFailed': 'サーバーからツールの読み込みに失敗しました',
   'mcp.empty.tools': 'このサーバーで利用可能なツールがありません',
 
+  // MCP Cache Actions
+  'mcp.action.refresh': '再読み込み',
+  'mcp.refreshing': '再読み込み中...',
+  'mcp.error.refreshFailed': 'MCPキャッシュの再読み込みに失敗しました',
+
   // MCP Tool Search
   'mcp.search.placeholder': 'ツール名または説明で検索...',
   'mcp.search.noResults': '"{query}" に一致するツールが見つかりません',
