@@ -243,7 +243,7 @@ export function McpServerList({
                   padding: '2px 6px',
                   borderRadius: '3px',
                   backgroundColor: getScopeColor(server.scope),
-                  color: 'var(--vscode-badge-foreground)',
+                  color: getScopeForegroundColor(server.scope),
                 }}
               >
                 {server.scope}
@@ -255,7 +255,7 @@ export function McpServerList({
                     padding: '2px 6px',
                     borderRadius: '3px',
                     backgroundColor: getStatusColor(server.status),
-                    color: 'var(--vscode-badge-foreground)',
+                    color: getStatusForegroundColor(server.status),
                   }}
                 >
                   {server.status}
@@ -286,6 +286,22 @@ function getScopeColor(scope: 'user' | 'project' | 'enterprise'): string {
 }
 
 /**
+ * Get foreground color for scope badge
+ */
+function getScopeForegroundColor(scope: 'user' | 'project' | 'enterprise'): string {
+  switch (scope) {
+    case 'user':
+      return 'var(--vscode-button-foreground)';
+    case 'project':
+      return 'var(--vscode-button-secondaryForeground)';
+    case 'enterprise':
+      return 'var(--vscode-badge-foreground)';
+    default:
+      return 'var(--vscode-badge-foreground)';
+  }
+}
+
+/**
  * Get background color for status badge
  */
 function getStatusColor(status: 'connected' | 'disconnected' | 'error'): string {
@@ -298,5 +314,19 @@ function getStatusColor(status: 'connected' | 'disconnected' | 'error'): string 
       return 'var(--vscode-errorForeground)';
     default:
       return 'var(--vscode-badge-background)';
+  }
+}
+
+/**
+ * Get foreground color for status badge
+ */
+function getStatusForegroundColor(status: 'connected' | 'disconnected' | 'error'): string {
+  switch (status) {
+    case 'connected':
+    case 'disconnected':
+    case 'error':
+      return '#ffffff'; // White text for colored backgrounds
+    default:
+      return 'var(--vscode-badge-foreground)';
   }
 }

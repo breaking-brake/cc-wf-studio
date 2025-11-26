@@ -139,7 +139,7 @@ export const SkillNodeComponent: React.FC<NodeProps<SkillNodeData>> = React.memo
         <div
           style={{
             fontSize: '10px',
-            color: 'var(--vscode-descriptionForeground)',
+            color: 'var(--vscode-badge-foreground)',
             backgroundColor:
               data.scope === 'personal'
                 ? 'var(--vscode-badge-background)'

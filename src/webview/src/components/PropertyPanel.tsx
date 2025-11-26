@@ -100,7 +100,7 @@ export const PropertyPanel: React.FC = () => {
       <div
         style={{
           fontSize: '11px',
-          color: 'var(--vscode-descriptionForeground)',
+          color: 'var(--vscode-badge-foreground)',
           backgroundColor: 'var(--vscode-badge-background)',
           padding: '4px 8px',
           borderRadius: '3px',

@@ -99,7 +99,7 @@ export const PromptNode: React.FC<NodeProps<PromptNodeData>> = React.memo(
           <div
             style={{
               fontSize: '10px',
-              color: 'var(--vscode-descriptionForeground)',
+              color: 'var(--vscode-badge-foreground)',
               backgroundColor: 'var(--vscode-badge-background)',
               padding: '2px 6px',
               borderRadius: '3px',

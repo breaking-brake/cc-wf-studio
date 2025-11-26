@@ -109,7 +109,7 @@ export const AskUserQuestionNodeComponent: React.FC<NodeProps<AskUserQuestionDat
                 key={option.label}
                 style={{
                   fontSize: '11px',
-                  color: 'var(--vscode-descriptionForeground)',
+                  color: 'var(--vscode-badge-foreground)',
                   backgroundColor: 'var(--vscode-badge-background)',
                   padding: '4px 8px',
                   borderRadius: '3px',

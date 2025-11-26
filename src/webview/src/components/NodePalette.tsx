@@ -585,7 +585,7 @@ export const NodePalette: React.FC = () => {
         <div
           style={{
             fontSize: '11px',
-            color: 'var(--vscode-button-foreground)',
+            color: 'var(--vscode-button-secondaryForeground)',
             opacity: 0.8,
           }}
         >
