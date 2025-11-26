@@ -140,8 +140,8 @@ export async function handleShareWorkflowToSlack(
       fileId: uploadResult.fileId,
     });
 
-    // Step 6: Update message with complete deep link
-    log('INFO', 'Updating message with complete deep link', { requestId });
+    // Step 6: Update message with complete deep links
+    log('INFO', 'Updating message with complete deep links', { requestId });
 
     const updatedMessageBlock: WorkflowMessageBlock = {
       ...messageBlock,
@@ -156,7 +156,7 @@ export async function handleShareWorkflowToSlack(
       updatedMessageBlock
     );
 
-    log('INFO', 'Message updated with complete deep link', { requestId });
+    log('INFO', 'Message updated with complete deep links', { requestId });
 
     // Step 6: Send success response
     const successEvent: ShareWorkflowSuccessEvent = {

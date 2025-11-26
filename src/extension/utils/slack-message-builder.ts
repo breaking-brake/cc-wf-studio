@@ -8,6 +8,41 @@
  */
 
 /**
+ * Supported editors for workflow import
+ * Each editor uses a custom URI scheme for deep linking
+ */
+const SUPPORTED_EDITORS = [
+  { name: 'VS Code', scheme: 'vscode' },
+  { name: 'Cursor', scheme: 'cursor' },
+  { name: 'Windsurf', scheme: 'windsurf' },
+  { name: 'Kiro', scheme: 'kiro' },
+  { name: 'Antigravity', scheme: 'antigravity' },
+] as const;
+
+/**
+ * Extension ID for the workflow studio extension
+ */
+const EXTENSION_ID = 'breaking-brake.cc-wf-studio';
+
+/**
+ * Builds an import URI for a specific editor
+ *
+ * @param scheme - The URI scheme for the editor (e.g., 'vscode', 'cursor')
+ * @param block - The workflow message block containing import parameters
+ * @returns The complete import URI
+ */
+function buildImportUri(scheme: string, block: WorkflowMessageBlock): string {
+  const params = new URLSearchParams({
+    workflowId: block.workflowId,
+    fileId: block.fileId,
+    workspaceId: block.workspaceId || '',
+    channelId: block.channelId || '',
+    messageTs: block.messageTs || '',
+  });
+  return `${scheme}://${EXTENSION_ID}/import?${params.toString()}`;
+}
+
+/**
  * Workflow message block (Block Kit format)
  */
 export interface WorkflowMessageBlock {
@@ -86,18 +121,40 @@ export function buildWorkflowMessageBlocks(
         },
       ],
     },
-    // Import link footer
-    {
-      type: 'context',
-      elements: [
-        {
-          type: 'mrkdwn',
-          text:
-            block.workspaceId && block.channelId && block.messageTs && block.fileId
-              ? `📥 <vscode://breaking-brake.cc-wf-studio/import?workflowId=${encodeURIComponent(block.workflowId)}&fileId=${encodeURIComponent(block.fileId)}&workspaceId=${encodeURIComponent(block.workspaceId)}&channelId=${encodeURIComponent(block.channelId)}&messageTs=${encodeURIComponent(block.messageTs)}|Import to VS Code>\n_Note: Please open your target VS Code workspace before clicking the import link_`
-              : '_Import link will be available after file upload_',
-        },
-      ],
-    },
+    // Import links section
+    ...(block.workspaceId && block.channelId && block.messageTs && block.fileId
+      ? [
+          {
+            type: 'context',
+            elements: [
+              {
+                type: 'mrkdwn',
+                text: `📥 *Import to:*  ${SUPPORTED_EDITORS.map(
+                  (editor) => `<${buildImportUri(editor.scheme, block)}|${editor.name}>`
+                ).join(' · ')}`,
+              },
+            ],
+          },
+          {
+            type: 'context',
+            elements: [
+              {
+                type: 'mrkdwn',
+                text: '_Note: Please open your target workspace before clicking the import link_',
+              },
+            ],
+          },
+        ]
+      : [
+          {
+            type: 'context',
+            elements: [
+              {
+                type: 'mrkdwn',
+                text: '_Import link will be available after file upload_',
+              },
+            ],
+          },
+        ]),
   ];
 }
