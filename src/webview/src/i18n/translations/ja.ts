@@ -243,8 +243,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'terms.agree': '上記に同意します',
   'terms.agreeButton': '同意して開始',
   'terms.cancelButton': 'キャンセル',
-  'terms.warning.aiGeneration': '⚠️ 本機能の悪用は禁止されています',
-  'terms.warning.workflow': '⚠️ このワークフローは正当な目的でのみ使用してください',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'ノードを削除',

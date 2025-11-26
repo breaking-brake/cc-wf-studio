@@ -224,8 +224,6 @@ export interface WebviewTranslationKeys {
   'terms.agree': string;
   'terms.agreeButton': string;
   'terms.cancelButton': string;
-  'terms.warning.aiGeneration': string;
-  'terms.warning.workflow': string;
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': string;

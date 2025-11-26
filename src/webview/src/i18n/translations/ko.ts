@@ -245,8 +245,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'terms.agree': '위 내용에 동의합니다',
   'terms.agreeButton': '동의하고 시작',
   'terms.cancelButton': '취소',
-  'terms.warning.aiGeneration': '⚠️ 이 기능의 악용은 금지됩니다',
-  'terms.warning.workflow': '⚠️ 이 워크플로우는 정당한 목적으로만 사용해야 합니다',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '노드 삭제',

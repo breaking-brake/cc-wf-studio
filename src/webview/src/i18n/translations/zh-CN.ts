@@ -235,8 +235,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'terms.agree': '我同意以上内容',
   'terms.agreeButton': '同意并开始',
   'terms.cancelButton': '取消',
-  'terms.warning.aiGeneration': '⚠️ 禁止滥用此功能',
-  'terms.warning.workflow': '⚠️ 此工作流仅应用于合法目的',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '删除节点',

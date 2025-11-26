@@ -242,8 +242,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'terms.agree': 'I agree to the above',
   'terms.agreeButton': 'Agree and Start',
   'terms.cancelButton': 'Cancel',
-  'terms.warning.aiGeneration': '⚠️ Misuse of this feature is prohibited',
-  'terms.warning.workflow': '⚠️ This workflow should only be used for legitimate purposes',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'Delete Node',
