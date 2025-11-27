@@ -557,6 +557,22 @@ export interface WebviewTranslationKeys {
   'slack.error.networkError': string;
   'slack.error.rateLimited': string;
 
+  // Slack Connection Dialog
+  'slack.connect.title': string;
+  'slack.connect.tab.oauth': string;
+  'slack.connect.tab.manual': string;
+
+  // Slack OAuth
+  'slack.oauth.description': string;
+  'slack.oauth.privacyPolicy': string;
+  'slack.oauth.connectButton': string;
+  'slack.oauth.status.initiated': string;
+  'slack.oauth.status.polling': string;
+  'slack.oauth.status.waitingHint': string;
+  'slack.oauth.cancelled': string;
+  'slack.oauth.reviewNotice.title': string;
+  'slack.oauth.reviewNotice.message': string;
+
   // Slack Manual Token
   'slack.manualToken.title': string;
   'slack.manualToken.description': string;
@@ -571,6 +587,7 @@ export interface WebviewTranslationKeys {
   'slack.manualToken.security.storage': string;
   'slack.manualToken.security.transmission': string;
   'slack.manualToken.security.deletion': string;
+  'slack.manualToken.security.sharing': string;
   'slack.manualToken.botToken.label': string;
   'slack.manualToken.botToken.hint': string;
   'slack.manualToken.error.tokenRequired': string;

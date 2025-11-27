@@ -509,6 +509,93 @@ export function searchSlackWorkflows(options: SearchWorkflowOptions): Promise<Se
 }
 
 /**
+ * OAuth progress callback type
+ */
+export type OAuthProgressCallback = (
+  status: 'initiated' | 'polling' | 'success' | 'cancelled' | 'failed',
+  data?: { sessionId?: string; authorizationUrl?: string }
+) => void;
+
+/**
+ * Connect to Slack workspace via OAuth
+ *
+ * Opens OAuth authentication flow in browser.
+ * Polls for authorization code and exchanges it for access token.
+ *
+ * @param onProgress - Optional callback for progress updates
+ * @returns Promise that resolves with workspace connection info
+ */
+export function connectSlackOAuth(
+  onProgress?: OAuthProgressCallback
+): Promise<{ workspaceId: string; workspaceName: string }> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        if (message.type === 'SLACK_OAUTH_INITIATED') {
+          onProgress?.('initiated', {
+            sessionId: message.payload?.sessionId,
+            authorizationUrl: message.payload?.authorizationUrl,
+          });
+          onProgress?.('polling');
+          // Don't remove listener yet, wait for final result
+          return;
+        }
+
+        if (message.type === 'SLACK_OAUTH_SUCCESS') {
+          window.removeEventListener('message', handler);
+          onProgress?.('success');
+          resolve(
+            message.payload || {
+              workspaceId: '',
+              workspaceName: '',
+            }
+          );
+        } else if (message.type === 'SLACK_OAUTH_FAILED') {
+          window.removeEventListener('message', handler);
+          onProgress?.('failed');
+          reject(new Error(message.payload?.message || 'OAuth authentication failed'));
+        } else if (message.type === 'SLACK_OAUTH_CANCELLED') {
+          window.removeEventListener('message', handler);
+          onProgress?.('cancelled');
+          reject(new Error('OAuth authentication was cancelled'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    vscode.postMessage({
+      type: 'SLACK_CONNECT_OAUTH',
+      requestId,
+      payload: {},
+    });
+
+    // Timeout after 6 minutes (OAuth flow + polling can take time)
+    setTimeout(
+      () => {
+        window.removeEventListener('message', handler);
+        reject(new Error('OAuth timeout'));
+      },
+      6 * 60 * 1000
+    );
+  });
+}
+
+/**
+ * Cancel ongoing OAuth flow
+ */
+export function cancelSlackOAuth(): void {
+  vscode.postMessage({
+    type: 'SLACK_CANCEL_OAUTH',
+    payload: {},
+  });
+}
+
+/**
  * Get OAuth redirect URI for development/debugging
  *
  * @returns Promise that resolves with redirect URI
@@ -543,5 +630,17 @@ export function getOAuthRedirectUri(): Promise<{ redirectUri: string }> {
       window.removeEventListener('message', handler);
       reject(new Error('Request timeout'));
     }, 10000);
+  });
+}
+
+/**
+ * Open external URL in browser
+ *
+ * @param url - URL to open
+ */
+export function openExternalUrl(url: string): void {
+  vscode.postMessage({
+    type: 'OPEN_EXTERNAL_URL',
+    payload: { url },
   });
 }

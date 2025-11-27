@@ -572,7 +572,11 @@ export type ExtensionMessage =
   | Message<ImportWorkflowConfirmOverwritePayload, 'IMPORT_WORKFLOW_CONFIRM_OVERWRITE'>
   | Message<ImportWorkflowFailedPayload, 'IMPORT_WORKFLOW_FAILED'>
   | Message<SearchSlackWorkflowsSuccessPayload, 'SEARCH_SLACK_WORKFLOWS_SUCCESS'>
-  | Message<SlackErrorPayload, 'SEARCH_SLACK_WORKFLOWS_FAILED'>;
+  | Message<SlackErrorPayload, 'SEARCH_SLACK_WORKFLOWS_FAILED'>
+  | Message<SlackOAuthInitiatedPayload, 'SLACK_OAUTH_INITIATED'>
+  | Message<SlackOAuthSuccessPayload, 'SLACK_OAUTH_SUCCESS'>
+  | Message<SlackErrorPayload, 'SLACK_OAUTH_FAILED'>
+  | Message<void, 'SLACK_OAUTH_CANCELLED'>;
 
 // ============================================================================
 // Slack Integration Payloads (001-slack-workflow-sharing)
@@ -652,6 +656,31 @@ export interface ConnectSlackManualSuccessPayload {
  */
 export interface SlackErrorPayload {
   message: string;
+}
+
+/**
+ * Slack OAuth initiated payload
+ *
+ * Sent when OAuth flow is started, containing session ID for tracking
+ * and authorization URL for browser redirect.
+ */
+export interface SlackOAuthInitiatedPayload {
+  /** Session ID for tracking OAuth flow */
+  sessionId: string;
+  /** Slack authorization URL to open in browser */
+  authorizationUrl: string;
+}
+
+/**
+ * Slack OAuth success payload
+ *
+ * Sent when OAuth flow completes successfully.
+ */
+export interface SlackOAuthSuccessPayload {
+  /** Workspace ID (Team ID) */
+  workspaceId: string;
+  /** Workspace name */
+  workspaceName: string;
 }
 
 /**
@@ -836,6 +865,17 @@ export interface ShareWorkflowFailedPayload {
 }
 
 // ============================================================================
+// Utility Payloads
+// ============================================================================
+
+/**
+ * Open external URL payload
+ */
+export interface OpenExternalUrlPayload {
+  url: string;
+}
+
+// ============================================================================
 // Webview → Extension Messages
 // ============================================================================
 
@@ -866,10 +906,13 @@ export type WebviewMessage =
   | Message<void, 'SLACK_DISCONNECT'>
   | Message<void, 'GET_OAUTH_REDIRECT_URI'> // @deprecated Will be removed in favor of CONNECT_SLACK_MANUAL
   | Message<ConnectSlackManualPayload, 'CONNECT_SLACK_MANUAL'>
+  | Message<void, 'SLACK_CONNECT_OAUTH'>
+  | Message<void, 'SLACK_CANCEL_OAUTH'>
   | Message<void, 'LIST_SLACK_WORKSPACES'>
   | Message<GetSlackChannelsPayload, 'GET_SLACK_CHANNELS'>
   | Message<ShareWorkflowToSlackPayload, 'SHARE_WORKFLOW_TO_SLACK'>
-  | Message<ImportWorkflowFromSlackPayload, 'IMPORT_WORKFLOW_FROM_SLACK'>;
+  | Message<ImportWorkflowFromSlackPayload, 'IMPORT_WORKFLOW_FROM_SLACK'>
+  | Message<OpenExternalUrlPayload, 'OPEN_EXTERNAL_URL'>;
 
 // ============================================================================
 // Error Codes

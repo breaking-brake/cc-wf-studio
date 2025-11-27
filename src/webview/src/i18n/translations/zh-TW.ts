@@ -539,7 +539,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Manual Token
   'slack.manualToken.title': '連接到 Slack',
-  'slack.manualToken.description': '輸入您的 Slack Bot Token 以連接工作區。',
+  'slack.manualToken.description': '輸入您自己建立的 Slack 應用的 Bot Token 以連接工作區。',
   'slack.manualToken.howToGet.title': '如何取得 Bot Token',
   'slack.manualToken.howToGet.step1': '建立 Slack App (api.slack.com/apps)',
   'slack.manualToken.howToGet.step2':
@@ -553,6 +553,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.security.storage': '令牌安全儲存於 VSCode Secret Storage (OS 金鑰鏈)',
   'slack.manualToken.security.transmission': '僅傳送至 Slack API (api.slack.com) 用於驗證',
   'slack.manualToken.security.deletion': '可隨時刪除',
+  'slack.manualToken.security.sharing': 'Bot Token 具有頻道讀寫等權限。請僅在受信任的社群內分享。',
   'slack.manualToken.botToken.label': 'Bot User OAuth Token',
   'slack.manualToken.botToken.hint': '以 xoxb- 開頭',
   'slack.manualToken.error.tokenRequired': 'Bot Token 為必填',
@@ -583,6 +584,22 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'slack.connect.description': '連接您的 Slack 工作區以與團隊共享工作流。',
   'slack.connect.success': '已成功連接到 {workspaceName}',
   'slack.connect.failed': '連接 Slack 失敗',
+  'slack.connect.title': '連接到 Slack',
+  'slack.connect.tab.oauth': '透過 OAuth 連接',
+  'slack.connect.tab.manual': '使用自己的 Slack 應用連接',
+
+  // Slack OAuth
+  'slack.oauth.description':
+    '點擊下方按鈕將開啟瀏覽器顯示 Slack 授權頁面。\n授權完成後，Claude Code Workflow Studio App 將安裝到您的工作區。',
+  'slack.oauth.privacyPolicy': '隱私政策',
+  'slack.oauth.connectButton': '使用 Slack 連接',
+  'slack.oauth.status.initiated': '正在開啟瀏覽器進行身份驗證...',
+  'slack.oauth.status.polling': '等待身份驗證...',
+  'slack.oauth.status.waitingHint': '在瀏覽器中完成身份驗證後返回此處。',
+  'slack.oauth.cancelled': '身份驗證已取消',
+  'slack.oauth.reviewNotice.title': '⚠️ Slack 應用審核中',
+  'slack.oauth.reviewNotice.message':
+    '此 Slack 應用目前正在接受 Slack 審核。您可以使用 OAuth 身份驗證，但在審核完成之前某些功能可能會受到限制。',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Reconnect to Slack',
@@ -614,7 +631,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.noWorkspaces': '沒有連接的工作區',
   'slack.error.noChannels': '沒有可用的頻道',
   'slack.error.noChannelsHelp':
-    '機器人未加入任何頻道。在 Slack 中使用 /invite @機器人名稱 邀請機器人加入頻道。',
+    '機器人未加入任何頻道。在 Slack 中使用 /invite @Claude Code Workflow Studio 邀請機器人加入頻道。',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '檢測到敏感資料',

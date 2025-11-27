@@ -539,7 +539,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Manual Token
   'slack.manualToken.title': '连接到 Slack',
-  'slack.manualToken.description': '输入您的 Slack Bot Token 以连接工作区。',
+  'slack.manualToken.description': '输入您自己创建的 Slack 应用的 Bot Token 以连接工作区。',
   'slack.manualToken.howToGet.title': '如何获取 Bot Token',
   'slack.manualToken.howToGet.step1': '创建 Slack App (api.slack.com/apps)',
   'slack.manualToken.howToGet.step2':
@@ -553,6 +553,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.security.storage': '令牌安全存储在 VSCode Secret Storage (OS 密钥链)',
   'slack.manualToken.security.transmission': '仅发送到 Slack API (api.slack.com) 用于验证',
   'slack.manualToken.security.deletion': '可以随时删除',
+  'slack.manualToken.security.sharing': 'Bot Token 具有频道读写等权限。请仅在受信任的社区内共享。',
   'slack.manualToken.botToken.label': 'Bot User OAuth Token',
   'slack.manualToken.botToken.hint': '以 xoxb- 开头',
   'slack.manualToken.error.tokenRequired': 'Bot Token 为必填项',
@@ -583,6 +584,22 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.connect.description': '连接您的 Slack 工作区以与团队共享工作流。',
   'slack.connect.success': '已成功连接到 {workspaceName}',
   'slack.connect.failed': '连接 Slack 失败',
+  'slack.connect.title': '连接到 Slack',
+  'slack.connect.tab.oauth': '通过 OAuth 连接',
+  'slack.connect.tab.manual': '使用自己的 Slack 应用连接',
+
+  // Slack OAuth
+  'slack.oauth.description':
+    '点击下方按钮将打开浏览器显示 Slack 授权页面。\n授权完成后，Claude Code Workflow Studio App 将安装到您的工作区。',
+  'slack.oauth.privacyPolicy': '隐私政策',
+  'slack.oauth.connectButton': '使用 Slack 连接',
+  'slack.oauth.status.initiated': '正在打开浏览器进行身份验证...',
+  'slack.oauth.status.polling': '等待身份验证...',
+  'slack.oauth.status.waitingHint': '在浏览器中完成身份验证后返回此处。',
+  'slack.oauth.cancelled': '身份验证已取消',
+  'slack.oauth.reviewNotice.title': '⚠️ Slack 应用审核中',
+  'slack.oauth.reviewNotice.message':
+    '此 Slack 应用目前正在接受 Slack 审核。您可以使用 OAuth 身份验证，但在审核完成之前某些功能可能会受到限制。',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Reconnect to Slack',
@@ -614,7 +631,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.noWorkspaces': '没有连接的工作区',
   'slack.error.noChannels': '没有可用的频道',
   'slack.error.noChannelsHelp':
-    '机器人未加入任何频道。在 Slack 中使用 /invite @机器人名称 邀请机器人加入频道。',
+    '机器人未加入任何频道。在 Slack 中使用 /invite @Claude Code Workflow Studio 邀请机器人加入频道。',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '检测到敏感数据',

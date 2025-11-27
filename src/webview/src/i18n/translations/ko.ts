@@ -559,7 +559,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Manual Token
   'slack.manualToken.title': 'Slack에 연결',
-  'slack.manualToken.description': 'Slack Bot Token을 입력하여 워크스페이스에 연결하세요.',
+  'slack.manualToken.description':
+    '직접 만든 Slack 앱의 Bot Token을 입력하여 워크스페이스에 연결합니다.',
   'slack.manualToken.howToGet.title': 'Bot Token 받는 방법',
   'slack.manualToken.howToGet.step1': 'Slack App 생성 (api.slack.com/apps)',
   'slack.manualToken.howToGet.step2':
@@ -575,6 +576,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     '토큰은 VSCode Secret Storage (OS 키체인)에 안전하게 저장됩니다',
   'slack.manualToken.security.transmission': 'Slack API (api.slack.com)로만 검증을 위해 전송됩니다',
   'slack.manualToken.security.deletion': '언제든지 삭제할 수 있습니다',
+  'slack.manualToken.security.sharing':
+    'Bot Token에는 채널 읽기/쓰기 등의 권한이 있습니다. 신뢰할 수 있는 커뮤니티 내에서만 공유하세요.',
   'slack.manualToken.botToken.label': 'Bot User OAuth Token',
   'slack.manualToken.botToken.hint': 'xoxb-로 시작합니다',
   'slack.manualToken.error.tokenRequired': 'Bot Token은 필수입니다',
@@ -605,6 +608,22 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.connect.description': 'Slack 워크스페이스에 연결하여 팀과 워크플로우를 공유하세요.',
   'slack.connect.success': '{workspaceName}에 연결되었습니다',
   'slack.connect.failed': 'Slack 연결에 실패했습니다',
+  'slack.connect.title': 'Slack에 연결',
+  'slack.connect.tab.oauth': 'OAuth로 연결',
+  'slack.connect.tab.manual': '자체 Slack 앱으로 연결',
+
+  // Slack OAuth
+  'slack.oauth.description':
+    '아래 버튼을 클릭하면 브라우저가 열리고 Slack 인증 화면이 표시됩니다.\n인증이 완료되면 Claude Code Workflow Studio App이 워크스페이스에 설치됩니다.',
+  'slack.oauth.privacyPolicy': '개인정보처리방침',
+  'slack.oauth.connectButton': 'Slack으로 연결',
+  'slack.oauth.status.initiated': '브라우저를 열어 인증 중...',
+  'slack.oauth.status.polling': '인증 대기 중...',
+  'slack.oauth.status.waitingHint': '브라우저에서 인증을 완료한 후 여기로 돌아오세요.',
+  'slack.oauth.cancelled': '인증이 취소되었습니다',
+  'slack.oauth.reviewNotice.title': '⚠️ Slack 앱 심사 중',
+  'slack.oauth.reviewNotice.message':
+    '이 Slack 앱은 현재 Slack에서 심사 중입니다. OAuth 인증을 사용할 수 있지만 승인이 완료될 때까지 일부 기능이 제한될 수 있습니다.',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Reconnect to Slack',
@@ -636,7 +655,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.noWorkspaces': '연결된 워크스페이스가 없습니다',
   'slack.error.noChannels': '사용 가능한 채널이 없습니다',
   'slack.error.noChannelsHelp':
-    '봇이 어떤 채널에도 참여하지 않았습니다. Slack에서 /invite @봇이름을 실행하여 봇을 채널에 초대하세요.',
+    '봇이 어떤 채널에도 참여하지 않았습니다. Slack에서 /invite @Claude Code Workflow Studio를 실행하여 봇을 채널에 초대하세요.',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '민감한 데이터 감지됨',

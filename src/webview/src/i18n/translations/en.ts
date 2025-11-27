@@ -563,7 +563,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Manual Token
   'slack.manualToken.title': 'Connect to Slack',
-  'slack.manualToken.description': 'Enter your Slack Bot Token to connect your workspace.',
+  'slack.manualToken.description':
+    'Enter the Bot Token from your own Slack App to connect to your workspace.',
   'slack.manualToken.howToGet.title': 'How to get Bot Token',
   'slack.manualToken.howToGet.step1': 'Create Slack App (at api.slack.com/apps)',
   'slack.manualToken.howToGet.step2':
@@ -579,6 +580,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.security.transmission':
     'Only sent to Slack API (api.slack.com) for validation',
   'slack.manualToken.security.deletion': 'Can be deleted anytime',
+  'slack.manualToken.security.sharing':
+    'Bot Token has channel read/write and other permissions. Only share within trusted communities.',
   'slack.manualToken.botToken.label': 'Bot User OAuth Token',
   'slack.manualToken.botToken.hint': 'Starts with xoxb-...',
   'slack.manualToken.error.tokenRequired': 'Bot Token is required',
@@ -610,6 +613,23 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.connect.description': 'Connect your Slack workspace to share workflows with your team.',
   'slack.connect.success': 'Successfully connected to {workspaceName}',
   'slack.connect.failed': 'Failed to connect to Slack',
+  'slack.connect.title': 'Connect to Slack',
+  'slack.connect.tab.oauth': 'Connect via OAuth',
+  'slack.connect.tab.manual': 'Connect with Your Own Slack App',
+
+  // Slack OAuth
+  'slack.oauth.description':
+    'Click the button below to open Slack authorization.\nOnce authorized, the Claude Code Workflow Studio App will be installed to your workspace.',
+  'slack.oauth.privacyPolicy': 'Privacy Policy',
+  'slack.oauth.connectButton': 'Connect with Slack',
+  'slack.oauth.status.initiated': 'Opening browser for authentication...',
+  'slack.oauth.status.polling': 'Waiting for authentication...',
+  'slack.oauth.status.waitingHint':
+    'Complete the authentication in your browser, then return here.',
+  'slack.oauth.cancelled': 'Authentication was cancelled',
+  'slack.oauth.reviewNotice.title': '⚠️ Slack App Under Review',
+  'slack.oauth.reviewNotice.message':
+    'This Slack App is currently under review by Slack. You can use OAuth authentication, but some features may be limited until approval is complete.',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Reconnect to Slack',
@@ -638,7 +658,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.noWorkspaces': 'No workspaces connected',
   'slack.error.noChannels': 'No channels available',
   'slack.error.noChannelsHelp':
-    'The bot is not a member of any channels. Invite the bot to channels using /invite @BotName in Slack.',
+    'The bot is not a member of any channels. Invite the bot to channels using /invite @Claude Code Workflow Studio in Slack.',
   'slack.error.notInChannel': 'Bot is not a member of this channel. Please invite the bot first.',
   'slack.error.networkError': 'Network error. Please check your connection.',
   'slack.error.rateLimited': 'Rate limit exceeded. Please try again in {seconds} seconds.',
