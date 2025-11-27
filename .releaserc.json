@@ -65,6 +65,7 @@
       {
         "assets": [
           "package.json",
+          "package-lock.json",
           "src/webview/package.json",
           "src/webview/package-lock.json",
           "CHANGELOG.md"
