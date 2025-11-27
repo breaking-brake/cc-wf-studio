@@ -77,7 +77,11 @@ export const SwitchNodeComponent: React.FC<NodeProps<SwitchNodeData>> = React.me
                   marginBottom: '8px',
                   padding: '6px 8px',
                   backgroundColor: 'var(--vscode-textBlockQuote-background)',
-                  borderLeft: '3px solid var(--vscode-textLink-foreground)',
+                  borderLeft: `3px solid ${
+                    branch.isDefault
+                      ? 'var(--vscode-editorWarning-foreground)'
+                      : 'var(--vscode-textLink-foreground)'
+                  }`,
                   borderRadius: '3px',
                 }}
               >

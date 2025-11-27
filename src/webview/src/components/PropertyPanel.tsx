@@ -1516,17 +1516,32 @@ const SwitchProperties: React.FC<{
     updateNodeData(node.id, { branches: normalizedBranches });
   }
 
+  // Count regular cases (excluding default branch)
+  const regularCases = normalizedBranches.filter((b) => !b.isDefault);
+
   const handleAddBranch = () => {
-    if (normalizedBranches.length >= 10) return; // Maximum 10 branches
-    const branchNumber = normalizedBranches.length + 1;
-    const newBranches = [
-      ...normalizedBranches,
-      {
-        id: generateBranchId(),
-        label: `Case ${branchNumber}`,
-        condition: `${t('default.conditionPrefix')}${branchNumber}${t('default.conditionSuffix')}`,
-      },
-    ];
+    // Maximum 9 regular cases + 1 default = 10 branches total
+    if (regularCases.length >= 9) return;
+
+    const branchNumber = regularCases.length + 1;
+    const newCase = {
+      id: generateBranchId(),
+      label: `Case ${branchNumber}`,
+      condition: `${t('default.conditionPrefix')}${branchNumber}${t('default.conditionSuffix')}`,
+      isDefault: false,
+    };
+
+    // Insert new case before default branch (default is always last)
+    const defaultIndex = normalizedBranches.findIndex((b) => b.isDefault);
+    const newBranches =
+      defaultIndex >= 0
+        ? [
+            ...normalizedBranches.slice(0, defaultIndex),
+            newCase,
+            ...normalizedBranches.slice(defaultIndex),
+          ]
+        : [...normalizedBranches, newCase];
+
     updateNodeData(node.id, {
       branches: newBranches,
       outputPorts: newBranches.length,
@@ -1534,7 +1549,14 @@ const SwitchProperties: React.FC<{
   };
 
   const handleRemoveBranch = (index: number) => {
-    if (normalizedBranches.length <= 2) return; // Minimum 2 branches
+    const branchToRemove = normalizedBranches[index];
+
+    // Cannot remove default branch
+    if (branchToRemove.isDefault) return;
+
+    // Minimum 1 regular case required (+ default)
+    if (regularCases.length <= 1) return;
+
     const newBranches = normalizedBranches.filter((_, i) => i !== index);
     updateNodeData(node.id, {
       branches: newBranches,
@@ -1543,8 +1565,13 @@ const SwitchProperties: React.FC<{
   };
 
   const handleUpdateBranch = (index: number, field: 'label' | 'condition', value: string) => {
-    const newBranches = normalizedBranches.map((branch, i) =>
-      i === index ? { ...branch, [field]: value } : branch
+    const branch = normalizedBranches[index];
+
+    // Cannot edit default branch
+    if (branch.isDefault) return;
+
+    const newBranches = normalizedBranches.map((b, i) =>
+      i === index ? { ...b, [field]: value } : b
     );
     updateNodeData(node.id, { branches: newBranches });
   };
@@ -1626,7 +1653,7 @@ const SwitchProperties: React.FC<{
           >
             {t('property.branchesCount').replace('{count}', normalizedBranches.length.toString())}
           </div>
-          {normalizedBranches.length < 10 && (
+          {regularCases.length < 9 && (
             <button
               type="button"
               onClick={handleAddBranch}
@@ -1674,7 +1701,7 @@ const SwitchProperties: React.FC<{
               >
                 {t('property.branchNumber').replace('{number}', (index + 1).toString())}
               </span>
-              {normalizedBranches.length > 2 && (
+              {!branch.isDefault && regularCases.length > 1 && (
                 <button
                   type="button"
                   onClick={() => handleRemoveBranch(index)}
@@ -1715,6 +1742,7 @@ const SwitchProperties: React.FC<{
                 onChange={(e) => handleUpdateBranch(index, 'label', e.target.value)}
                 className="nodrag"
                 placeholder={t('property.branchLabel.placeholder')}
+                disabled={branch.isDefault}
                 style={{
                   width: '100%',
                   padding: '4px 6px',
@@ -1723,6 +1751,8 @@ const SwitchProperties: React.FC<{
                   border: '1px solid var(--vscode-input-border)',
                   borderRadius: '2px',
                   fontSize: '12px',
+                  opacity: branch.isDefault ? 0.6 : 1,
+                  cursor: branch.isDefault ? 'not-allowed' : 'text',
                 }}
               />
             </div>
@@ -1748,6 +1778,7 @@ const SwitchProperties: React.FC<{
                 className="nodrag"
                 rows={2}
                 placeholder={t('property.branchCondition.placeholder')}
+                disabled={branch.isDefault}
                 style={{
                   width: '100%',
                   padding: '4px 6px',
@@ -1756,7 +1787,9 @@ const SwitchProperties: React.FC<{
                   border: '1px solid var(--vscode-input-border)',
                   borderRadius: '2px',
                   fontSize: '12px',
-                  resize: 'vertical',
+                  resize: branch.isDefault ? 'none' : 'vertical',
+                  opacity: branch.isDefault ? 0.6 : 1,
+                  cursor: branch.isDefault ? 'not-allowed' : 'text',
                 }}
               />
             </div>

@@ -184,8 +184,8 @@ export interface WebviewTranslationKeys {
   'default.case1Condition': string;
   'default.case2': string;
   'default.case2Condition': string;
-  'default.case3': string;
-  'default.case3Condition': string;
+  'default.defaultBranch': string;
+  'default.defaultBranchCondition': string;
   'default.conditionPrefix': string;
   'default.conditionSuffix': string;
 

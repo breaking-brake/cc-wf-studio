@@ -191,8 +191,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'default.case1Condition': '조건 1이 충족될 때',
   'default.case2': 'Case 2',
   'default.case2Condition': '조건 2가 충족될 때',
-  'default.case3': 'Case 3',
-  'default.case3Condition': '조건 3이 충족될 때',
+  'default.defaultBranch': 'default',
+  'default.defaultBranchCondition': '기타',
   'default.conditionPrefix': '조건 ',
   'default.conditionSuffix': '이 충족될 때',
 

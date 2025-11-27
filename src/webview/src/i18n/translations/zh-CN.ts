@@ -186,8 +186,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'default.case1Condition': '满足条件 1 时',
   'default.case2': 'Case 2',
   'default.case2Condition': '满足条件 2 时',
-  'default.case3': 'Case 3',
-  'default.case3Condition': '满足条件 3 时',
+  'default.defaultBranch': 'default',
+  'default.defaultBranchCondition': '其他情况',
   'default.conditionPrefix': '满足条件 ',
   'default.conditionSuffix': ' 时',
 

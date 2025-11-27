@@ -167,9 +167,13 @@ export const NodePalette: React.FC = () => {
       data: {
         evaluationTarget: '',
         branches: [
-          { label: t('default.case1'), condition: t('default.case1Condition') },
-          { label: t('default.case2'), condition: t('default.case2Condition') },
-          { label: t('default.case3'), condition: t('default.case3Condition') },
+          { label: t('default.case1'), condition: t('default.case1Condition'), isDefault: false },
+          { label: t('default.case2'), condition: t('default.case2Condition'), isDefault: false },
+          {
+            label: t('default.defaultBranch'),
+            condition: t('default.defaultBranchCondition'),
+            isDefault: true,
+          },
         ],
         outputPorts: 3,
       },

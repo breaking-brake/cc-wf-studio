@@ -101,9 +101,14 @@ export interface BranchNodeData {
   outputPorts: number; // Number of output ports (2 for conditional, 2-N for switch)
 }
 
-// Condition type aliases for IfElse and Switch (same structure as BranchCondition)
+// Condition type alias for IfElse (same structure as BranchCondition)
 export type IfElseCondition = BranchCondition;
-export type SwitchCondition = BranchCondition;
+
+// Switch condition extends BranchCondition with isDefault flag
+export interface SwitchCondition extends BranchCondition {
+  /** If true, this is the default branch (must be last, cannot be deleted or edited) */
+  isDefault?: boolean;
+}
 
 export interface IfElseNodeData {
   evaluationTarget?: string; // Natural language description of what to evaluate (e.g., "前のステップの実行結果")

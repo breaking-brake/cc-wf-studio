@@ -107,7 +107,7 @@
       "outputPorts": 2
     },
     "switch": {
-      "description": "Multi-way branching (switch/case). Use for 3+ way branching - ideal for time-based, case-based, or multi-condition routing.",
+      "description": "Multi-way branching (switch/case). Use for 3+ way branching - ideal for time-based, case-based, or multi-condition routing. **Important: Always include a default branch as the last branch with isDefault: true.**",
       "fields": {
         "evaluationTarget": { "type": "string", "required": false },
         "branches": {
@@ -118,8 +118,15 @@
           "items": {
             "id": { "type": "string", "required": false },
             "label": { "type": "string", "required": true, "maxLength": 50 },
-            "condition": { "type": "string", "required": true, "maxLength": 500 }
-          }
+            "condition": { "type": "string", "required": true, "maxLength": 500 },
+            "isDefault": {
+              "type": "boolean",
+              "required": false,
+              "default": false,
+              "description": "If true, this is the default branch (must be last, exactly one per node)"
+            }
+          },
+          "constraint": "Last branch must have isDefault: true with label 'default' and condition 'Other cases'"
         },
         "outputPorts": { "type": "number", "required": true, "min": 2, "max": 10 }
       },

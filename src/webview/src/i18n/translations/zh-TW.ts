@@ -186,8 +186,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'default.case1Condition': '滿足條件 1 時',
   'default.case2': 'Case 2',
   'default.case2Condition': '滿足條件 2 時',
-  'default.case3': 'Case 3',
-  'default.case3Condition': '滿足條件 3 時',
+  'default.defaultBranch': 'default',
+  'default.defaultBranchCondition': '其他情況',
   'default.conditionPrefix': '滿足條件 ',
   'default.conditionSuffix': ' 時',
 

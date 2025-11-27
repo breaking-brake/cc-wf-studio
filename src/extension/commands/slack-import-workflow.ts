@@ -17,6 +17,7 @@ import type {
   ImportWorkflowFailedEvent,
   ImportWorkflowSuccessEvent,
 } from '../types/slack-messages';
+import { migrateWorkflow } from '../utils/migrate-workflow';
 import { handleSlackError } from '../utils/slack-error-handler';
 import { validateWorkflowFile } from '../utils/workflow-validator';
 
@@ -75,10 +76,13 @@ export async function handleImportWorkflowFromSlack(
       return;
     }
 
-    const workflow = validationResult.workflow;
-    if (!workflow) {
+    const parsedWorkflow = validationResult.workflow;
+    if (!parsedWorkflow) {
       throw new Error('Workflow validation succeeded but workflow object is missing');
     }
+
+    // Apply migrations for backward compatibility
+    const workflow = migrateWorkflow(parsedWorkflow);
 
     log('INFO', 'Workflow validation passed', {
       requestId,

@@ -10,6 +10,7 @@ import {
   type McpNodeData,
   NodeType,
   type SkillNodeData,
+  type SwitchNodeData,
   VALIDATION_RULES,
   type Workflow,
   type WorkflowNode,
@@ -195,6 +196,56 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
     if (node.type === NodeType.Mcp) {
       const mcpErrors = validateMcpNode(node);
       errors.push(...mcpErrors);
+    }
+
+    // Validate Switch nodes
+    if (node.type === NodeType.Switch) {
+      const switchErrors = validateSwitchNode(node);
+      errors.push(...switchErrors);
+    }
+  }
+
+  return errors;
+}
+
+/**
+ * Validate Switch node structure and default branch rules
+ *
+ * @param node - Switch node to validate
+ * @returns Array of validation errors
+ */
+function validateSwitchNode(node: WorkflowNode): ValidationError[] {
+  const errors: ValidationError[] = [];
+  const switchData = node.data as Partial<SwitchNodeData>;
+
+  if (!switchData.branches || !Array.isArray(switchData.branches)) {
+    errors.push({
+      code: 'SWITCH_MISSING_BRANCHES',
+      message: 'Switch node must have branches array',
+      field: `nodes[${node.id}].data.branches`,
+    });
+    return errors;
+  }
+
+  // Check for multiple default branches
+  const defaultBranches = switchData.branches.filter((b) => b.isDefault);
+  if (defaultBranches.length > 1) {
+    errors.push({
+      code: 'SWITCH_MULTIPLE_DEFAULT',
+      message: 'Switch node can only have one default branch',
+      field: `nodes[${node.id}].data.branches`,
+    });
+  }
+
+  // Check that default branch is last (if it exists)
+  if (defaultBranches.length === 1) {
+    const lastBranch = switchData.branches[switchData.branches.length - 1];
+    if (!lastBranch?.isDefault) {
+      errors.push({
+        code: 'SWITCH_DEFAULT_NOT_LAST',
+        message: 'Default branch must be the last branch in Switch node',
+        field: `nodes[${node.id}].data.branches`,
+      });
     }
   }
 
