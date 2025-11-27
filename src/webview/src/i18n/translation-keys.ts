@@ -245,10 +245,15 @@ export interface WebviewTranslationKeys {
   'skill.browser.skillPath': string;
   'skill.browser.validationStatus': string;
 
+  // Skill Browser Actions
+  'skill.action.refresh': string;
+  'skill.refreshing': string;
+
   // Skill Browser Errors
   'skill.error.loadFailed': string;
   'skill.error.noSelection': string;
   'skill.error.unknown': string;
+  'skill.error.refreshFailed': string;
 
   // Skill Creation Dialog
   'skill.creation.title': string;

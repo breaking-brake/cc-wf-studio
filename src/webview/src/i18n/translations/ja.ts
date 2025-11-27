@@ -265,10 +265,15 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.skillPath': 'パス',
   'skill.browser.validationStatus': 'ステータス',
 
+  // Skill Browser Actions
+  'skill.action.refresh': '再読み込み',
+  'skill.refreshing': '再読み込み中...',
+
   // Skill Browser Errors
   'skill.error.loadFailed': 'Skillの読み込みに失敗しました。Skillディレクトリを確認してください。',
   'skill.error.noSelection': 'Skillを選択してください',
   'skill.error.unknown': '予期しないエラーが発生しました',
+  'skill.error.refreshFailed': 'Skillの再読み込みに失敗しました',
 
   // Skill Creation Dialog
   'skill.creation.title': '新しいSkillを作成',

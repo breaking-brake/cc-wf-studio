@@ -25,6 +25,7 @@ type TabType = 'personal' | 'project';
 export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [personalSkills, setPersonalSkills] = useState<SkillReference[]>([]);
   const [projectSkills, setProjectSkills] = useState<SkillReference[]>([]);
@@ -100,6 +101,27 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
 
     loadSkills();
   }, [isOpen, t]);
+
+  /**
+   * Handle refresh button click
+   */
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    setError(null);
+
+    try {
+      const skills = await browseSkills();
+      const personal = skills.filter((s) => s.scope === 'personal');
+      const project = skills.filter((s) => s.scope === 'project');
+
+      setPersonalSkills(personal);
+      setProjectSkills(project);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('skill.error.refreshFailed'));
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   if (!isOpen) {
     return null;
@@ -270,6 +292,30 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
             {t('skill.browser.projectTab')} ({projectSkills.length})
           </button>
         </div>
+
+        {/* Refresh Button */}
+        <button
+          type="button"
+          onClick={handleRefresh}
+          disabled={refreshing || loading}
+          style={{
+            width: '100%',
+            padding: '8px 12px',
+            marginBottom: '16px',
+            fontSize: '13px',
+            backgroundColor: 'var(--vscode-button-secondaryBackground)',
+            color: 'var(--vscode-button-secondaryForeground)',
+            border: '1px solid var(--vscode-panel-border)',
+            borderRadius: '4px',
+            cursor: refreshing || loading ? 'wait' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+          }}
+        >
+          <span>{refreshing ? t('skill.refreshing') : t('skill.action.refresh')}</span>
+        </button>
 
         {/* Loading State */}
         {loading && (

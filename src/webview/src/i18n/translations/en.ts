@@ -264,10 +264,15 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.skillPath': 'Path',
   'skill.browser.validationStatus': 'Status',
 
+  // Skill Browser Actions
+  'skill.action.refresh': 'Refresh',
+  'skill.refreshing': 'Refreshing...',
+
   // Skill Browser Errors
   'skill.error.loadFailed': 'Failed to load Skills. Please check your Skill directories.',
   'skill.error.noSelection': 'Please select a Skill',
   'skill.error.unknown': 'An unexpected error occurred',
+  'skill.error.refreshFailed': 'Failed to refresh Skills',
 
   // Skill Creation Dialog
   'skill.creation.title': 'Create New Skill',
