@@ -18,13 +18,13 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "driver.js": "^1.4.0",
     "lucide-react": "^0.554.0",
-    "react": "^18.2.0",
+    "react": "^19.2.0",
     "react-dom": "^18.2.0",
     "reactflow": "^11.10.0",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@types/react": "^18.2.0",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^5.1.1",
     "@vitest/ui": "^4.0.10",
