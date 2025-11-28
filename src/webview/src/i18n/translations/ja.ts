@@ -611,21 +611,20 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.connect.success': '{workspaceName}に接続しました',
   'slack.connect.failed': 'Slackへの接続に失敗しました',
   'slack.connect.title': 'Slackに接続',
-  'slack.connect.tab.oauth': 'Slack Appをワークスペースに追加',
+  'slack.connect.tab.oauth': 'Slack Appをワークスペースに接続',
   'slack.connect.tab.manual': 'Slack Appを自分で用意して接続',
 
   // Slack OAuth
   'slack.oauth.description':
-    'ワークスペースに接続ボタンをクリックすると、ブラウザが開きSlackの認証画面が表示されます。\n認証完了と同時にClaude Code Workflow Studio Appがワークスペースにインストールされます。\nインストール後、ワークフロー共有を行いたいチャンネルにSlack Appを追加してください。',
+    'ワークスペースに接続ボタンをクリックすると、「Claude Code Workflow Studio」にSlackへのアクセスを許可する確認画面が表示されます。\n許可を行うとワークスペースに連携用のSlack Appがインストールされます。',
   'slack.oauth.privacyPolicy': 'プライバシーポリシー',
   'slack.oauth.connectButton': 'ワークスペースに接続',
   'slack.oauth.status.initiated': 'ブラウザを開いて認証中...',
   'slack.oauth.status.polling': '認証を待っています...',
   'slack.oauth.status.waitingHint': 'ブラウザで認証を完了し、こちらに戻ってください。',
   'slack.oauth.cancelled': '認証がキャンセルされました',
-  'slack.oauth.reviewNotice.title': 'Slack App 審査予定',
   'slack.oauth.reviewNotice.message':
-    'このSlack AppはSlackへの審査を予定しています。審査の承認が下りるまで、インストール時に警告が表示されます。',
+    '共有に使用するSlack AppはSlackへの審査を予定しています。審査の承認が下りるまで、許可画面で警告が表示されます。',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Slackに再接続',

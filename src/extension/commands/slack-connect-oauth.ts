@@ -40,7 +40,6 @@ export async function handleConnectSlackOAuth(
     status: 'initiated' | 'polling' | 'exchanging' | 'success' | 'cancelled' | 'failed'
   ) => void
 ): Promise<OAuthConnectionResult | undefined> {
-
   try {
     log('INFO', 'Slack OAuth connection started');
     onProgress?.('initiated');

@@ -585,21 +585,20 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'slack.connect.success': '已成功連接到 {workspaceName}',
   'slack.connect.failed': '連接 Slack 失敗',
   'slack.connect.title': '連接到 Slack',
-  'slack.connect.tab.oauth': '將 Slack 應用添加到工作區',
+  'slack.connect.tab.oauth': '將 Slack App 連接到工作區',
   'slack.connect.tab.manual': '使用自己的 Slack 應用連接',
 
   // Slack OAuth
   'slack.oauth.description':
-    '點擊連接到工作區按鈕將開啟瀏覽器顯示 Slack 授權頁面。\n授權完成後，Claude Code Workflow Studio App 將立即安裝到您的工作區。\n安裝後，請將 Slack App 添加到您想要共享工作流的頻道。',
+    '點擊連接到工作區按鈕將顯示允許「Claude Code Workflow Studio」訪問 Slack 的確認畫面。\n授權後，連接用的 Slack App 將安裝到您的工作區。',
   'slack.oauth.privacyPolicy': '隱私政策',
   'slack.oauth.connectButton': '連接到工作區',
   'slack.oauth.status.initiated': '正在開啟瀏覽器進行身份驗證...',
   'slack.oauth.status.polling': '等待身份驗證...',
   'slack.oauth.status.waitingHint': '在瀏覽器中完成身份驗證後返回此處。',
   'slack.oauth.cancelled': '身份驗證已取消',
-  'slack.oauth.reviewNotice.title': 'Slack 應用待審核',
   'slack.oauth.reviewNotice.message':
-    '此 Slack 應用計劃進行 Slack 審核。在審核通過之前，安裝時會顯示警告。',
+    '用於共享的 Slack 應用計劃進行 Slack 審核。在審核通過之前，權限畫面會顯示警告。',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Reconnect to Slack',

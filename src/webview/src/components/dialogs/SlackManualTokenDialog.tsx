@@ -319,27 +319,12 @@ export function SlackManualTokenDialog({
                 backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
                 border: '1px solid var(--vscode-panel-border)',
                 borderRadius: '4px',
+                fontSize: '11px',
+                color: 'var(--vscode-descriptionForeground)',
+                lineHeight: '1.6',
               }}
             >
-              <div
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: 'var(--vscode-foreground)',
-                  marginBottom: '8px',
-                }}
-              >
-                {t('slack.oauth.reviewNotice.title')}
-              </div>
-              <div
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--vscode-descriptionForeground)',
-                  lineHeight: '1.6',
-                }}
-              >
-                {t('slack.oauth.reviewNotice.message')}
-              </div>
+              {t('slack.oauth.reviewNotice.message')}
             </div>
 
             {/* Description */}

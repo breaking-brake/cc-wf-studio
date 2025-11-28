@@ -609,21 +609,20 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.connect.success': '{workspaceName}에 연결되었습니다',
   'slack.connect.failed': 'Slack 연결에 실패했습니다',
   'slack.connect.title': 'Slack에 연결',
-  'slack.connect.tab.oauth': 'Slack 앱을 워크스페이스에 추가',
+  'slack.connect.tab.oauth': 'Slack App을 워크스페이스에 연결',
   'slack.connect.tab.manual': '자체 Slack 앱으로 연결',
 
   // Slack OAuth
   'slack.oauth.description':
-    '워크스페이스에 연결 버튼을 클릭하면 브라우저가 열리고 Slack 인증 화면이 표시됩니다.\n인증 완료와 동시에 Claude Code Workflow Studio App이 워크스페이스에 설치됩니다.\n설치 후 워크플로우를 공유할 채널에 Slack App을 추가하세요.',
+    '워크스페이스에 연결 버튼을 클릭하면 "Claude Code Workflow Studio"가 Slack에 액세스할 수 있도록 허용하는 확인 화면이 표시됩니다.\n허용하면 워크스페이스에 연동용 Slack App이 설치됩니다.',
   'slack.oauth.privacyPolicy': '개인정보처리방침',
   'slack.oauth.connectButton': '워크스페이스에 연결',
   'slack.oauth.status.initiated': '브라우저를 열어 인증 중...',
   'slack.oauth.status.polling': '인증 대기 중...',
   'slack.oauth.status.waitingHint': '브라우저에서 인증을 완료한 후 여기로 돌아오세요.',
   'slack.oauth.cancelled': '인증이 취소되었습니다',
-  'slack.oauth.reviewNotice.title': 'Slack 앱 심사 예정',
   'slack.oauth.reviewNotice.message':
-    '이 Slack 앱은 Slack 심사 예정입니다. 심사 승인이 완료될 때까지 설치 시 경고가 표시됩니다.',
+    '공유에 사용되는 Slack 앱은 Slack 심사 예정입니다. 심사 승인이 완료될 때까지 권한 화면에 경고가 표시됩니다.',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Reconnect to Slack',
@@ -649,8 +648,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Slack Errors
   'slack.error.notAuthenticated': '먼저 Slack에 연결하세요',
   'slack.error.channelNotFound': '채널을 찾을 수 없습니다',
-  'slack.error.notInChannel':
-    'Slack 앱이 이 채널의 멤버가 아닙니다. 먼저 Slack 앱을 초대하세요.',
+  'slack.error.notInChannel': 'Slack 앱이 이 채널의 멤버가 아닙니다. 먼저 Slack 앱을 초대하세요.',
   'slack.error.networkError': '네트워크 오류가 발생했습니다. 연결을 확인하세요.',
   'slack.error.rateLimited': '요청 한도를 초과했습니다. {seconds}초 후에 다시 시도하세요.',
   'slack.error.noWorkspaces': '연결된 워크스페이스가 없습니다',

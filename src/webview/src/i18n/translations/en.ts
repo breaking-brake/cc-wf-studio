@@ -614,12 +614,12 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.connect.success': 'Successfully connected to {workspaceName}',
   'slack.connect.failed': 'Failed to connect to Slack',
   'slack.connect.title': 'Connect to Slack',
-  'slack.connect.tab.oauth': 'Add Slack App to Workspace',
+  'slack.connect.tab.oauth': 'Connect Slack App to Workspace',
   'slack.connect.tab.manual': 'Connect with Your Own Slack App',
 
   // Slack OAuth
   'slack.oauth.description':
-    'Click the Connect to Workspace button to open Slack authorization.\nUpon authorization, the Claude Code Workflow Studio App will be installed to your workspace.\nAfter installation, add the Slack App to the channels where you want to share workflows.',
+    'Click the Connect to Workspace button to display a confirmation screen for granting "Claude Code Workflow Studio" access to Slack.\nOnce you grant permission, the Slack App for integration will be installed to your workspace.',
   'slack.oauth.privacyPolicy': 'Privacy Policy',
   'slack.oauth.connectButton': 'Connect to Workspace',
   'slack.oauth.status.initiated': 'Opening browser for authentication...',
@@ -627,9 +627,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.oauth.status.waitingHint':
     'Complete the authentication in your browser, then return here.',
   'slack.oauth.cancelled': 'Authentication was cancelled',
-  'slack.oauth.reviewNotice.title': 'Slack App Pending Review',
   'slack.oauth.reviewNotice.message':
-    'This Slack App is pending Slack review. A warning will be displayed during installation until the review is approved.',
+    'The Slack App used for sharing is pending Slack review. A warning will be displayed on the permission screen until the review is approved.',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Reconnect to Slack',

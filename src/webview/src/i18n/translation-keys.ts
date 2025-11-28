@@ -570,7 +570,6 @@ export interface WebviewTranslationKeys {
   'slack.oauth.status.polling': string;
   'slack.oauth.status.waitingHint': string;
   'slack.oauth.cancelled': string;
-  'slack.oauth.reviewNotice.title': string;
   'slack.oauth.reviewNotice.message': string;
 
   // Slack Manual Token
