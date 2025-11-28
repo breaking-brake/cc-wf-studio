@@ -104,6 +104,13 @@ export function SlackManualTokenDialog({
     }
   }, [isOpen]);
 
+  // Cancel OAuth polling when dialog is closed (by any means)
+  useEffect(() => {
+    if (!isOpen && (oauthStatus === 'polling' || oauthStatus === 'initiated')) {
+      cancelSlackOAuth();
+    }
+  }, [isOpen, oauthStatus]);
+
   // OAuth authentication handler
   const handleOAuthConnect = async () => {
     setOauthError(null);

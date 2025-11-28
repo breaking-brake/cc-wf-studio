@@ -672,6 +672,11 @@ export function registerOpenEditorCommand(
       // Handle panel disposal
       currentPanel.onDidDispose(
         () => {
+          // Cancel any ongoing OAuth polling when panel is closed
+          if (activeOAuthService) {
+            activeOAuthService.cancelPolling();
+            activeOAuthService = null;
+          }
           currentPanel = undefined;
         },
         undefined,
