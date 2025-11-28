@@ -539,7 +539,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Manual Token
   'slack.manualToken.title': '連接到 Slack',
-  'slack.manualToken.description': '輸入您的 Slack Bot Token 以連接工作區。',
+  'slack.manualToken.description': '輸入您自己建立的 Slack 應用的 Bot Token 以連接工作區。',
   'slack.manualToken.howToGet.title': '如何取得 Bot Token',
   'slack.manualToken.howToGet.step1': '建立 Slack App (api.slack.com/apps)',
   'slack.manualToken.howToGet.step2':
@@ -553,6 +553,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.security.storage': '令牌安全儲存於 VSCode Secret Storage (OS 金鑰鏈)',
   'slack.manualToken.security.transmission': '僅傳送至 Slack API (api.slack.com) 用於驗證',
   'slack.manualToken.security.deletion': '可隨時刪除',
+  'slack.manualToken.security.sharing': 'Bot Token 具有頻道讀寫等權限。請僅在受信任的社群內分享。',
   'slack.manualToken.botToken.label': 'Bot User OAuth Token',
   'slack.manualToken.botToken.hint': '以 xoxb- 開頭',
   'slack.manualToken.error.tokenRequired': 'Bot Token 為必填',
@@ -583,6 +584,21 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'slack.connect.description': '連接您的 Slack 工作區以與團隊共享工作流。',
   'slack.connect.success': '已成功連接到 {workspaceName}',
   'slack.connect.failed': '連接 Slack 失敗',
+  'slack.connect.title': '連接到 Slack',
+  'slack.connect.tab.oauth': '將 Slack App 連接到工作區',
+  'slack.connect.tab.manual': '使用自己的 Slack 應用連接',
+
+  // Slack OAuth
+  'slack.oauth.description':
+    '點擊連接到工作區按鈕將顯示允許「Claude Code Workflow Studio」訪問 Slack 的確認畫面。\n授權後，連接用的 Slack App 將安裝到您的工作區。',
+  'slack.oauth.privacyPolicy': '隱私政策',
+  'slack.oauth.connectButton': '連接到工作區',
+  'slack.oauth.status.initiated': '正在開啟瀏覽器進行身份驗證...',
+  'slack.oauth.status.polling': '等待身份驗證...',
+  'slack.oauth.status.waitingHint': '在瀏覽器中完成身份驗證後返回此處。',
+  'slack.oauth.cancelled': '身份驗證已取消',
+  'slack.oauth.reviewNotice.message':
+    '用於共享的 Slack 應用計劃進行 Slack 審核。在審核通過之前，權限畫面會顯示警告。',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Reconnect to Slack',
@@ -608,13 +624,13 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   // Slack Errors
   'slack.error.notAuthenticated': '請先連接到 Slack',
   'slack.error.channelNotFound': '未找到頻道',
-  'slack.error.notInChannel': '機器人不是此頻道的成員。請先邀請機器人。',
+  'slack.error.notInChannel': 'Slack 應用不是此頻道的成員。請先邀請 Slack 應用。',
   'slack.error.networkError': '網路錯誤。請檢查您的連接。',
   'slack.error.rateLimited': '超出速率限制。請在 {seconds} 秒後重試。',
   'slack.error.noWorkspaces': '沒有連接的工作區',
   'slack.error.noChannels': '沒有可用的頻道',
   'slack.error.noChannelsHelp':
-    '機器人未加入任何頻道。在 Slack 中使用 /invite @機器人名稱 邀請機器人加入頻道。',
+    'Slack 應用未加入任何頻道。在 Slack 中使用 /invite @Claude Code Workflow Studio 邀請 Slack 應用加入頻道。',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '檢測到敏感資料',

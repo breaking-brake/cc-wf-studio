@@ -26,6 +26,7 @@ import {
 import { saveWorkflow } from './save-workflow';
 import { handleBrowseSkills, handleCreateSkill, handleValidateSkillFile } from './skill-operations';
 import { handleConnectSlackManual } from './slack-connect-manual';
+import { createOAuthService, handleConnectSlackOAuth } from './slack-connect-oauth';
 import { handleImportWorkflowFromSlack } from './slack-import-workflow';
 import {
   handleGetSlackChannels,
@@ -43,6 +44,7 @@ let currentPanel: vscode.WebviewPanel | undefined;
 let fileService: FileService;
 let slackTokenManager: SlackTokenManager;
 let slackApiService: SlackApiService;
+let activeOAuthService: ReturnType<typeof createOAuthService> | null = null;
 
 /**
  * Import parameters for workflow import from Slack
@@ -564,12 +566,77 @@ export function registerOpenEditorCommand(
               }
               break;
 
+            case 'SLACK_CONNECT_OAUTH':
+              // OAuth Slack connection flow
+              try {
+                // Create new OAuth service for this flow
+                activeOAuthService = createOAuthService();
+
+                const oauthResult = await handleConnectSlackOAuth(
+                  slackTokenManager,
+                  slackApiService,
+                  activeOAuthService,
+                  (status) => {
+                    // Send progress updates to webview
+                    if (status === 'initiated') {
+                      const initiation = activeOAuthService?.initiateOAuthFlow();
+                      if (initiation) {
+                        webview.postMessage({
+                          type: 'SLACK_OAUTH_INITIATED',
+                          requestId: message.requestId,
+                          payload: {
+                            sessionId: initiation.sessionId,
+                            authorizationUrl: initiation.authorizationUrl,
+                          },
+                        });
+                      }
+                    }
+                  }
+                );
+
+                activeOAuthService = null;
+
+                if (oauthResult) {
+                  webview.postMessage({
+                    type: 'SLACK_OAUTH_SUCCESS',
+                    requestId: message.requestId,
+                    payload: {
+                      workspaceId: oauthResult.workspaceId,
+                      workspaceName: oauthResult.workspaceName,
+                    },
+                  });
+                } else {
+                  webview.postMessage({
+                    type: 'SLACK_OAUTH_CANCELLED',
+                    requestId: message.requestId,
+                  });
+                }
+              } catch (error) {
+                activeOAuthService = null;
+                webview.postMessage({
+                  type: 'SLACK_OAUTH_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    message: error instanceof Error ? error.message : 'OAuth authentication failed',
+                  },
+                });
+              }
+              break;
+
+            case 'SLACK_CANCEL_OAUTH':
+              // Cancel ongoing OAuth flow
+              if (activeOAuthService) {
+                activeOAuthService.cancelPolling();
+                activeOAuthService = null;
+              }
+              break;
+
             case 'SLACK_DISCONNECT':
               // Disconnect from Slack workspace
               try {
                 await slackTokenManager.clearConnection();
                 slackApiService.invalidateClient();
-                vscode.window.showInformationMessage('Slack Bot Token deleted successfully');
+                vscode.window.showInformationMessage('Slack token deleted successfully');
                 webview.postMessage({
                   type: 'SLACK_DISCONNECT_SUCCESS',
                   requestId: message.requestId,
@@ -587,6 +654,13 @@ export function registerOpenEditorCommand(
               }
               break;
 
+            case 'OPEN_EXTERNAL_URL':
+              // Open external URL in browser
+              if (message.payload?.url) {
+                await vscode.env.openExternal(vscode.Uri.parse(message.payload.url));
+              }
+              break;
+
             default:
               console.warn('Unknown message type:', message);
           }
@@ -598,6 +672,11 @@ export function registerOpenEditorCommand(
       // Handle panel disposal
       currentPanel.onDidDispose(
         () => {
+          // Cancel any ongoing OAuth polling when panel is closed
+          if (activeOAuthService) {
+            activeOAuthService.cancelPolling();
+            activeOAuthService = null;
+          }
           currentPanel = undefined;
         },
         undefined,

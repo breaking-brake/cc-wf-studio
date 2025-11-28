@@ -560,7 +560,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Manual Token
   'slack.manualToken.title': 'Slackに接続',
-  'slack.manualToken.description': 'Slack Bot Tokenを入力してワークスペースに接続してください。',
+  'slack.manualToken.description':
+    '自分で作成したSlack AppのBot Tokenを入力してワークスペースに接続します。',
   'slack.manualToken.howToGet.title': 'Bot Tokenの取得方法',
   'slack.manualToken.howToGet.step1': 'Slack Appを作成（api.slack.com/apps）',
   'slack.manualToken.howToGet.step2':
@@ -576,6 +577,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     'トークンはVSCode Secret Storage（OSのキーチェーン）に安全に保存されます',
   'slack.manualToken.security.transmission': 'Slack API（api.slack.com）への検証時のみ送信されます',
   'slack.manualToken.security.deletion': '保存したトークンはいつでも削除できます',
+  'slack.manualToken.security.sharing':
+    'Bot Tokenにはチャンネルの読み取り・書き込み権限等があるため、信頼できるコミュニティ内でのみ共有してください',
   'slack.manualToken.botToken.label': 'Bot User OAuth Token',
   'slack.manualToken.botToken.hint': 'xoxb-で始まります',
   'slack.manualToken.error.tokenRequired': 'Bot Tokenは必須です',
@@ -607,6 +610,21 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     'Slackワークスペースに接続して、チームとワークフローを共有しましょう。',
   'slack.connect.success': '{workspaceName}に接続しました',
   'slack.connect.failed': 'Slackへの接続に失敗しました',
+  'slack.connect.title': 'Slackに接続',
+  'slack.connect.tab.oauth': 'Slack Appをワークスペースに接続',
+  'slack.connect.tab.manual': 'Slack Appを自分で用意して接続',
+
+  // Slack OAuth
+  'slack.oauth.description':
+    'ワークスペースに接続ボタンをクリックすると、「Claude Code Workflow Studio」にSlackへのアクセスを許可する確認画面が表示されます。\n許可を行うとワークスペースに連携用のSlack Appがインストールされます。',
+  'slack.oauth.privacyPolicy': 'プライバシーポリシー',
+  'slack.oauth.connectButton': 'ワークスペースに接続',
+  'slack.oauth.status.initiated': 'ブラウザを開いて認証中...',
+  'slack.oauth.status.polling': '認証を待っています...',
+  'slack.oauth.status.waitingHint': 'ブラウザで認証を完了し、こちらに戻ってください。',
+  'slack.oauth.cancelled': '認証がキャンセルされました',
+  'slack.oauth.reviewNotice.message':
+    '共有に使用するSlack AppはSlackへの審査を予定しています。審査の承認が下りるまで、許可画面で警告が表示されます。',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Slackに再接続',
@@ -632,13 +650,13 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.notAuthenticated': '先にSlackに接続してください',
   'slack.error.channelNotFound': 'チャンネルが見つかりません',
   'slack.error.notInChannel':
-    'Botがこのチャンネルのメンバーではありません。先にBotを招待してください。',
+    'Slack Appがこのチャンネルのメンバーではありません。先にSlack Appを招待してください。',
   'slack.error.networkError': 'ネットワークエラー。接続を確認してください。',
   'slack.error.rateLimited': 'レート制限を超過しました。{seconds}秒後に再試行してください。',
   'slack.error.noWorkspaces': '接続されているワークスペースがありません',
   'slack.error.noChannels': '利用可能なチャンネルがありません',
   'slack.error.noChannelsHelp':
-    'Botがどのチャンネルにも参加していません。Slackで /invite @Bot名 を実行してBotをチャンネルに招待してください。',
+    'Slack Appがどのチャンネルにも参加していません。Slackで /invite @Claude Code Workflow Studio を実行してSlack Appをチャンネルに招待してください。',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '機密情報が検出されました',
