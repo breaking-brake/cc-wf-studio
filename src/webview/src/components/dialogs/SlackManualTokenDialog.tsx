@@ -208,7 +208,13 @@ export function SlackManualTokenDialog({
         justifyContent: 'center',
         zIndex: 9999,
       }}
-      onClick={isOAuthLoading ? undefined : onClose}
+      onClick={() => {
+        if (isOAuthLoading) {
+          // Cancel OAuth and close dialog when clicking outside during loading
+          handleCancelOAuth();
+        }
+        onClose();
+      }}
       role="presentation"
     >
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: onClick is only used to stop event propagation, not for click actions */}
