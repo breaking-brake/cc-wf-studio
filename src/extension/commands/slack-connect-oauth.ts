@@ -35,11 +35,11 @@ export interface OAuthConnectionResult {
 export async function handleConnectSlackOAuth(
   tokenManager: SlackTokenManager,
   slackApiService: SlackApiService,
+  oauthService: SlackOAuthService,
   onProgress?: (
     status: 'initiated' | 'polling' | 'exchanging' | 'success' | 'cancelled' | 'failed'
   ) => void
 ): Promise<OAuthConnectionResult | undefined> {
-  const oauthService = new SlackOAuthService();
 
   try {
     log('INFO', 'Slack OAuth connection started');

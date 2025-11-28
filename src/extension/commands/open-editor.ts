@@ -575,6 +575,7 @@ export function registerOpenEditorCommand(
                 const oauthResult = await handleConnectSlackOAuth(
                   slackTokenManager,
                   slackApiService,
+                  activeOAuthService,
                   (status) => {
                     // Send progress updates to webview
                     if (status === 'initiated') {
