@@ -585,21 +585,21 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.connect.success': '已成功连接到 {workspaceName}',
   'slack.connect.failed': '连接 Slack 失败',
   'slack.connect.title': '连接到 Slack',
-  'slack.connect.tab.oauth': '通过 OAuth 连接',
+  'slack.connect.tab.oauth': '将 Slack 应用添加到工作区',
   'slack.connect.tab.manual': '使用自己的 Slack 应用连接',
 
   // Slack OAuth
   'slack.oauth.description':
-    '点击下方按钮将打开浏览器显示 Slack 授权页面。\n授权完成后，Claude Code Workflow Studio App 将安装到您的工作区。',
+    '点击连接到工作区按钮将打开浏览器显示 Slack 授权页面。\n授权完成后，Claude Code Workflow Studio App 将立即安装到您的工作区。\n安装后，请将 Slack App 添加到您想要共享工作流的频道。',
   'slack.oauth.privacyPolicy': '隐私政策',
-  'slack.oauth.connectButton': '使用 Slack 连接',
+  'slack.oauth.connectButton': '连接到工作区',
   'slack.oauth.status.initiated': '正在打开浏览器进行身份验证...',
   'slack.oauth.status.polling': '等待身份验证...',
   'slack.oauth.status.waitingHint': '在浏览器中完成身份验证后返回此处。',
   'slack.oauth.cancelled': '身份验证已取消',
-  'slack.oauth.reviewNotice.title': '⚠️ Slack 应用审核中',
+  'slack.oauth.reviewNotice.title': 'Slack 应用待审核',
   'slack.oauth.reviewNotice.message':
-    '此 Slack 应用目前正在接受 Slack 审核。您可以使用 OAuth 身份验证，但在审核完成之前某些功能可能会受到限制。',
+    '此 Slack 应用计划进行 Slack 审核。在审核通过之前，安装时会显示警告。',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Reconnect to Slack',
@@ -625,13 +625,13 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // Slack Errors
   'slack.error.notAuthenticated': '请先连接到 Slack',
   'slack.error.channelNotFound': '未找到频道',
-  'slack.error.notInChannel': '机器人不是此频道的成员。请先邀请机器人。',
+  'slack.error.notInChannel': 'Slack 应用不是此频道的成员。请先邀请 Slack 应用。',
   'slack.error.networkError': '网络错误。请检查您的连接。',
   'slack.error.rateLimited': '超出速率限制。请在 {seconds} 秒后重试。',
   'slack.error.noWorkspaces': '没有连接的工作区',
   'slack.error.noChannels': '没有可用的频道',
   'slack.error.noChannelsHelp':
-    '机器人未加入任何频道。在 Slack 中使用 /invite @Claude Code Workflow Studio 邀请机器人加入频道。',
+    'Slack 应用未加入任何频道。在 Slack 中使用 /invite @Claude Code Workflow Studio 邀请 Slack 应用加入频道。',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '检测到敏感数据',

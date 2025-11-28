@@ -609,21 +609,21 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.connect.success': '{workspaceName}에 연결되었습니다',
   'slack.connect.failed': 'Slack 연결에 실패했습니다',
   'slack.connect.title': 'Slack에 연결',
-  'slack.connect.tab.oauth': 'OAuth로 연결',
+  'slack.connect.tab.oauth': 'Slack 앱을 워크스페이스에 추가',
   'slack.connect.tab.manual': '자체 Slack 앱으로 연결',
 
   // Slack OAuth
   'slack.oauth.description':
-    '아래 버튼을 클릭하면 브라우저가 열리고 Slack 인증 화면이 표시됩니다.\n인증이 완료되면 Claude Code Workflow Studio App이 워크스페이스에 설치됩니다.',
+    '워크스페이스에 연결 버튼을 클릭하면 브라우저가 열리고 Slack 인증 화면이 표시됩니다.\n인증 완료와 동시에 Claude Code Workflow Studio App이 워크스페이스에 설치됩니다.\n설치 후 워크플로우를 공유할 채널에 Slack App을 추가하세요.',
   'slack.oauth.privacyPolicy': '개인정보처리방침',
-  'slack.oauth.connectButton': 'Slack으로 연결',
+  'slack.oauth.connectButton': '워크스페이스에 연결',
   'slack.oauth.status.initiated': '브라우저를 열어 인증 중...',
   'slack.oauth.status.polling': '인증 대기 중...',
   'slack.oauth.status.waitingHint': '브라우저에서 인증을 완료한 후 여기로 돌아오세요.',
   'slack.oauth.cancelled': '인증이 취소되었습니다',
-  'slack.oauth.reviewNotice.title': '⚠️ Slack 앱 심사 중',
+  'slack.oauth.reviewNotice.title': 'Slack 앱 심사 예정',
   'slack.oauth.reviewNotice.message':
-    '이 Slack 앱은 현재 Slack에서 심사 중입니다. OAuth 인증을 사용할 수 있지만 승인이 완료될 때까지 일부 기능이 제한될 수 있습니다.',
+    '이 Slack 앱은 Slack 심사 예정입니다. 심사 승인이 완료될 때까지 설치 시 경고가 표시됩니다.',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Reconnect to Slack',
@@ -649,13 +649,14 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Slack Errors
   'slack.error.notAuthenticated': '먼저 Slack에 연결하세요',
   'slack.error.channelNotFound': '채널을 찾을 수 없습니다',
-  'slack.error.notInChannel': '봇이 이 채널의 멤버가 아닙니다. 먼저 봇을 초대하세요.',
+  'slack.error.notInChannel':
+    'Slack 앱이 이 채널의 멤버가 아닙니다. 먼저 Slack 앱을 초대하세요.',
   'slack.error.networkError': '네트워크 오류가 발생했습니다. 연결을 확인하세요.',
   'slack.error.rateLimited': '요청 한도를 초과했습니다. {seconds}초 후에 다시 시도하세요.',
   'slack.error.noWorkspaces': '연결된 워크스페이스가 없습니다',
   'slack.error.noChannels': '사용 가능한 채널이 없습니다',
   'slack.error.noChannelsHelp':
-    '봇이 어떤 채널에도 참여하지 않았습니다. Slack에서 /invite @Claude Code Workflow Studio를 실행하여 봇을 채널에 초대하세요.',
+    'Slack 앱이 어떤 채널에도 참여하지 않았습니다. Slack에서 /invite @Claude Code Workflow Studio를 실행하여 Slack 앱을 채널에 초대하세요.',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '민감한 데이터 감지됨',

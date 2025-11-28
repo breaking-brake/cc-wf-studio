@@ -614,22 +614,22 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.connect.success': 'Successfully connected to {workspaceName}',
   'slack.connect.failed': 'Failed to connect to Slack',
   'slack.connect.title': 'Connect to Slack',
-  'slack.connect.tab.oauth': 'Connect via OAuth',
+  'slack.connect.tab.oauth': 'Add Slack App to Workspace',
   'slack.connect.tab.manual': 'Connect with Your Own Slack App',
 
   // Slack OAuth
   'slack.oauth.description':
-    'Click the button below to open Slack authorization.\nOnce authorized, the Claude Code Workflow Studio App will be installed to your workspace.',
+    'Click the Connect to Workspace button to open Slack authorization.\nUpon authorization, the Claude Code Workflow Studio App will be installed to your workspace.\nAfter installation, add the Slack App to the channels where you want to share workflows.',
   'slack.oauth.privacyPolicy': 'Privacy Policy',
-  'slack.oauth.connectButton': 'Connect with Slack',
+  'slack.oauth.connectButton': 'Connect to Workspace',
   'slack.oauth.status.initiated': 'Opening browser for authentication...',
   'slack.oauth.status.polling': 'Waiting for authentication...',
   'slack.oauth.status.waitingHint':
     'Complete the authentication in your browser, then return here.',
   'slack.oauth.cancelled': 'Authentication was cancelled',
-  'slack.oauth.reviewNotice.title': '⚠️ Slack App Under Review',
+  'slack.oauth.reviewNotice.title': 'Slack App Pending Review',
   'slack.oauth.reviewNotice.message':
-    'This Slack App is currently under review by Slack. You can use OAuth authentication, but some features may be limited until approval is complete.',
+    'This Slack App is pending Slack review. A warning will be displayed during installation until the review is approved.',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Reconnect to Slack',
@@ -658,8 +658,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.noWorkspaces': 'No workspaces connected',
   'slack.error.noChannels': 'No channels available',
   'slack.error.noChannelsHelp':
-    'The bot is not a member of any channels. Invite the bot to channels using /invite @Claude Code Workflow Studio in Slack.',
-  'slack.error.notInChannel': 'Bot is not a member of this channel. Please invite the bot first.',
+    'The Slack App is not a member of any channels. Invite the Slack App to channels using /invite @Claude Code Workflow Studio in Slack.',
+  'slack.error.notInChannel':
+    'Slack App is not a member of this channel. Please invite the Slack App first.',
   'slack.error.networkError': 'Network error. Please check your connection.',
   'slack.error.rateLimited': 'Rate limit exceeded. Please try again in {seconds} seconds.',
 

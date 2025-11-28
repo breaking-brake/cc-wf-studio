@@ -611,21 +611,21 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.connect.success': '{workspaceName}に接続しました',
   'slack.connect.failed': 'Slackへの接続に失敗しました',
   'slack.connect.title': 'Slackに接続',
-  'slack.connect.tab.oauth': 'OAuth認証で接続',
+  'slack.connect.tab.oauth': 'Slack Appをワークスペースに追加',
   'slack.connect.tab.manual': 'Slack Appを自分で用意して接続',
 
   // Slack OAuth
   'slack.oauth.description':
-    '下のボタンをクリックすると、ブラウザが開きSlackの認証画面が表示されます。\n認証を完了すると、Claude Code Workflow Studio Appがワークスペースにインストールされます。',
+    'ワークスペースに接続ボタンをクリックすると、ブラウザが開きSlackの認証画面が表示されます。\n認証完了と同時にClaude Code Workflow Studio Appがワークスペースにインストールされます。\nインストール後、ワークフロー共有を行いたいチャンネルにSlack Appを追加してください。',
   'slack.oauth.privacyPolicy': 'プライバシーポリシー',
-  'slack.oauth.connectButton': 'Slackで認証',
+  'slack.oauth.connectButton': 'ワークスペースに接続',
   'slack.oauth.status.initiated': 'ブラウザを開いて認証中...',
   'slack.oauth.status.polling': '認証を待っています...',
   'slack.oauth.status.waitingHint': 'ブラウザで認証を完了し、こちらに戻ってください。',
   'slack.oauth.cancelled': '認証がキャンセルされました',
-  'slack.oauth.reviewNotice.title': '⚠️ Slack App 審査中',
+  'slack.oauth.reviewNotice.title': 'Slack App 審査予定',
   'slack.oauth.reviewNotice.message':
-    'このSlack AppはSlackによる審査中です。OAuth認証は使用できますが、承認が完了するまで一部の機能が制限される場合があります。',
+    'このSlack AppはSlackへの審査を予定しています。審査の承認が下りるまで、インストール時に警告が表示されます。',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Slackに再接続',
@@ -651,13 +651,13 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.notAuthenticated': '先にSlackに接続してください',
   'slack.error.channelNotFound': 'チャンネルが見つかりません',
   'slack.error.notInChannel':
-    'Botがこのチャンネルのメンバーではありません。先にBotを招待してください。',
+    'Slack Appがこのチャンネルのメンバーではありません。先にSlack Appを招待してください。',
   'slack.error.networkError': 'ネットワークエラー。接続を確認してください。',
   'slack.error.rateLimited': 'レート制限を超過しました。{seconds}秒後に再試行してください。',
   'slack.error.noWorkspaces': '接続されているワークスペースがありません',
   'slack.error.noChannels': '利用可能なチャンネルがありません',
   'slack.error.noChannelsHelp':
-    'Botがどのチャンネルにも参加していません。Slackで /invite @Claude Code Workflow Studio を実行してBotをチャンネルに招待してください。',
+    'Slack Appがどのチャンネルにも参加していません。Slackで /invite @Claude Code Workflow Studio を実行してSlack Appをチャンネルに招待してください。',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '機密情報が検出されました',

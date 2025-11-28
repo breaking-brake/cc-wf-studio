@@ -27,8 +27,12 @@ const OAUTH_CONFIG = {
   slackClientId: '9964370319943.10022663519665',
   /** Required Slack scopes */
   scopes: 'chat:write,files:write,channels:read,groups:read',
-  /** Polling interval in milliseconds */
-  pollingIntervalMs: 2000,
+  /** Initial polling interval in milliseconds */
+  pollingIntervalInitialMs: 1000,
+  /** Maximum polling interval in milliseconds */
+  pollingIntervalMaxMs: 5000,
+  /** Polling interval multiplier for exponential backoff */
+  pollingIntervalMultiplier: 1.5,
   /** Polling timeout in milliseconds (5 minutes) */
   pollingTimeoutMs: 5 * 60 * 1000,
 } as const;
@@ -170,6 +174,7 @@ export class SlackOAuthService {
     const startTime = Date.now();
     this.abortController = new AbortController();
     const { signal } = this.abortController;
+    let currentInterval: number = OAUTH_CONFIG.pollingIntervalInitialMs;
 
     log('INFO', 'Starting OAuth code polling', { sessionId });
 
@@ -200,8 +205,12 @@ export class SlackOAuthService {
           return null;
         }
 
-        // Wait before next poll
-        await new Promise((resolve) => setTimeout(resolve, OAUTH_CONFIG.pollingIntervalMs));
+        // Wait before next poll with exponential backoff
+        await new Promise((resolve) => setTimeout(resolve, currentInterval));
+        currentInterval = Math.min(
+          currentInterval * OAUTH_CONFIG.pollingIntervalMultiplier,
+          OAUTH_CONFIG.pollingIntervalMaxMs
+        );
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
           log('INFO', 'OAuth polling aborted', { sessionId });
@@ -213,8 +222,12 @@ export class SlackOAuthService {
           error: error instanceof Error ? error.message : String(error),
         });
 
-        // Wait before retry
-        await new Promise((resolve) => setTimeout(resolve, OAUTH_CONFIG.pollingIntervalMs));
+        // Wait before retry with exponential backoff
+        await new Promise((resolve) => setTimeout(resolve, currentInterval));
+        currentInterval = Math.min(
+          currentInterval * OAUTH_CONFIG.pollingIntervalMultiplier,
+          OAUTH_CONFIG.pollingIntervalMaxMs
+        );
       }
     }
 
