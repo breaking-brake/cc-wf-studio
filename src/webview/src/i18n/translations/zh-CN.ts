@@ -568,7 +568,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Share
   'slack.share.button': '分享',
-  'slack.share.title': '分享到 Slack β版',
+  'slack.share.title': '分享到 Slack',
   'slack.share.selectWorkspace': '选择工作区',
   'slack.share.selectWorkspacePlaceholder': '选择一个工作区...',
   'slack.share.selectChannel': '选择频道',
@@ -598,7 +598,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.oauth.status.waitingHint': '在浏览器中完成身份验证后返回此处。',
   'slack.oauth.cancelled': '身份验证已取消',
   'slack.oauth.reviewNotice.message':
-    '用于共享的 Slack 应用计划进行 Slack 审核。在审核通过之前，权限画面会显示警告。',
+    '用于共享的 Slack 应用计划进行 Slack 审核。\n在审核通过之前，权限画面会显示警告。',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Reconnect to Slack',
