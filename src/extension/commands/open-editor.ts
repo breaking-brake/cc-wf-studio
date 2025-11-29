@@ -680,7 +680,37 @@ export function registerOpenEditorCommand(
             case 'SET_LAST_SHARED_CHANNEL':
               // Save last shared channel ID to global state
               if (message.payload?.channelId) {
-                await context.globalState.update('slack-last-shared-channel', message.payload.channelId);
+                await context.globalState.update(
+                  'slack-last-shared-channel',
+                  message.payload.channelId
+                );
+              }
+              break;
+
+            case 'CHECK_BOT_CHANNEL_MEMBERSHIP':
+              // Check if bot is a member of the specified channel
+              {
+                const { workspaceId, channelId } = message.payload || {};
+                if (workspaceId && channelId) {
+                  try {
+                    const isMember = await slackApiService.checkBotMembership(
+                      workspaceId,
+                      channelId
+                    );
+                    webview.postMessage({
+                      type: 'CHECK_BOT_CHANNEL_MEMBERSHIP_SUCCESS',
+                      requestId: message.requestId,
+                      payload: { isMember },
+                    });
+                  } catch (_error) {
+                    // On error, assume not a member to show warning
+                    webview.postMessage({
+                      type: 'CHECK_BOT_CHANNEL_MEMBERSHIP_SUCCESS',
+                      requestId: message.requestId,
+                      payload: { isMember: false },
+                    });
+                  }
+                }
               }
               break;
 

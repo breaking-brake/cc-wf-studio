@@ -602,12 +602,13 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.selectWorkspacePlaceholder': 'Choose a workspace...',
   'slack.share.selectChannel': 'Select channel',
   'slack.share.selectChannelPlaceholder': 'Choose a channel...',
-  'slack.share.channelHint':
-    'To share, the Slack App must be invited to the channel. Use /invite @Claude Code Workflow Studio in the target channel.',
   'slack.share.descriptionPlaceholder': 'Add a description (optional)...',
   'slack.share.sharing': 'Sharing...',
   'slack.share.success': 'Workflow shared successfully',
   'slack.share.failed': 'Failed to share workflow',
+  'slack.share.checkingBotMembership': 'Checking if Slack App is in the channel...',
+  'slack.share.botNotInChannelMessage':
+    'The Slack App has not been added to this channel yet.\nPlease add the Slack App before sharing.',
 
   // Slack Connect
   'slack.connect.button': 'Connect to Slack',

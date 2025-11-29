@@ -15,6 +15,7 @@ import type {
   SlackWorkspace,
 } from '../../services/slack-integration-service';
 import {
+  checkBotChannelMembership,
   getLastSharedChannel,
   getSlackChannels,
   listSlackWorkspaces,
@@ -53,6 +54,9 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
     null
   );
   const [isManualTokenDialogOpen, setIsManualTokenDialogOpen] = useState(false);
+  const [botMembershipStatus, setBotMembershipStatus] = useState<
+    'checking' | 'member' | 'not_member' | null
+  >(null);
 
   // Load workspace when dialog opens (single workspace only)
   useEffect(() => {
@@ -105,8 +109,15 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
 
         // Prefer last shared channel if it exists in the list
         if (channelList.length > 0) {
-          const lastChannelExists = lastChannelId && channelList.some((ch) => ch.id === lastChannelId);
-          setSelectedChannelId(lastChannelExists ? lastChannelId : channelList[0].id);
+          const lastChannelExists =
+            lastChannelId && channelList.some((ch) => ch.id === lastChannelId);
+          const initialChannelId = lastChannelExists ? lastChannelId : channelList[0].id;
+          setSelectedChannelId(initialChannelId);
+
+          // Check bot membership for the initial channel
+          setBotMembershipStatus('checking');
+          const isMember = await checkBotChannelMembership(workspace.workspaceId, initialChannelId);
+          setBotMembershipStatus(isMember ? 'member' : 'not_member');
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : t('slack.error.networkError'));
@@ -117,6 +128,20 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
 
     loadChannels();
   }, [workspace, t]);
+
+  // Check bot membership when channel selection changes
+  const handleChannelChange = async (channelId: string) => {
+    setSelectedChannelId(channelId);
+
+    if (!workspace || !channelId) {
+      setBotMembershipStatus(null);
+      return;
+    }
+
+    setBotMembershipStatus('checking');
+    const isMember = await checkBotChannelMembership(workspace.workspaceId, channelId);
+    setBotMembershipStatus(isMember ? 'member' : 'not_member');
+  };
 
   // Auto-focus dialog when opened
   useEffect(() => {
@@ -253,6 +278,7 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
     setError(null);
     setSensitiveDataWarning(null);
     setLoading(false);
+    setBotMembershipStatus(null);
     onClose();
   };
 
@@ -566,24 +592,10 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
           >
             {t('slack.share.selectChannel')}
           </label>
-          {/* Hint about Slack App invitation */}
-          <div
-            style={{
-              marginBottom: '8px',
-              padding: '8px 12px',
-              backgroundColor: 'var(--vscode-textBlockQuote-background)',
-              border: '1px solid var(--vscode-textBlockQuote-border)',
-              borderRadius: '2px',
-              fontSize: '12px',
-              color: 'var(--vscode-descriptionForeground)',
-            }}
-          >
-            💡 {t('slack.share.channelHint')}
-          </div>
           <select
             id="channel-select"
             value={selectedChannelId}
-            onChange={(e) => setSelectedChannelId(e.target.value)}
+            onChange={(e) => handleChannelChange(e.target.value)}
             disabled={loadingChannels || loading}
             style={{
               width: '100%',
@@ -608,6 +620,84 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
               ))
             )}
           </select>
+
+          {/* Bot membership status indicator */}
+          {botMembershipStatus === 'checking' && (
+            <div
+              style={{
+                marginTop: '8px',
+                fontSize: '12px',
+                color: 'var(--vscode-descriptionForeground)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <div
+                style={{
+                  width: '14px',
+                  height: '14px',
+                  border: '2px solid var(--vscode-progressBar-background)',
+                  borderTopColor: 'transparent',
+                  borderRadius: '50%',
+                  animation: 'bot-membership-spinner 1s linear infinite',
+                  flexShrink: 0,
+                }}
+              />
+              <span>{t('slack.share.checkingBotMembership')}</span>
+              <style>
+                {`
+                  @keyframes bot-membership-spinner {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                  }
+                `}
+              </style>
+            </div>
+          )}
+
+          {/* Bot not in channel warning */}
+          {botMembershipStatus === 'not_member' && (
+            <div
+              style={{
+                marginTop: '8px',
+                padding: '8px 12px',
+                backgroundColor:
+                  'var(--vscode-inputValidation-warningBackground, var(--vscode-editorWarning-background, rgba(255, 140, 0, 0.1)))',
+                border:
+                  '1px solid var(--vscode-inputValidation-warningBorder, var(--vscode-editorWarning-foreground, #ff8c00))',
+                borderRadius: '2px',
+                fontSize: '12px',
+                color: 'var(--vscode-inputValidation-warningForeground, var(--vscode-foreground))',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '8px',
+              }}
+            >
+              <span style={{ flexShrink: 0 }}>⚠️</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ whiteSpace: 'pre-line' }}>
+                  {t('slack.share.botNotInChannelMessage')}
+                </span>
+                <code
+                  style={{
+                    display: 'block',
+                    padding: '6px 8px',
+                    backgroundColor: 'var(--vscode-textCodeBlock-background)',
+                    border:
+                      '1px solid var(--vscode-widget-border, var(--vscode-contrastBorder, transparent))',
+                    borderRadius: '3px',
+                    fontFamily: 'var(--vscode-editor-font-family, monospace)',
+                    fontSize: '12px',
+                    userSelect: 'all',
+                    cursor: 'text',
+                  }}
+                >
+                  /invite @Claude Code Workflow Studio
+                </code>
+              </div>
+            </div>
+          )}
 
           {/* Help message when no channels available */}
           {!loadingChannels && channels.length === 0 && workspace && (

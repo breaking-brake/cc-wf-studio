@@ -442,6 +442,33 @@ export class SlackApiService {
   }
 
   /**
+   * Checks if the Bot is a member of the specified channel
+   *
+   * Uses conversations.info API which is available with existing Bot Token scopes.
+   * This helps users know if they need to invite the Bot before sharing.
+   *
+   * @param workspaceId - Target workspace ID
+   * @param channelId - Target channel ID
+   * @returns True if Bot is a member of the channel
+   */
+  async checkBotMembership(workspaceId: string, channelId: string): Promise<boolean> {
+    try {
+      const client = await this.ensureClient(workspaceId);
+      const response = await client.conversations.info({ channel: channelId });
+
+      if (!response.ok || !response.channel) {
+        return false;
+      }
+
+      return response.channel.is_member ?? false;
+    } catch (error) {
+      // If we can't check, assume not a member to show warning
+      console.error('[SlackApiService] checkBotMembership error:', error);
+      return false;
+    }
+  }
+
+  /**
    * Gets current user information (Git username, not Slack user)
    *
    * @param _workspaceId - Target workspace ID (not used, kept for compatibility)
