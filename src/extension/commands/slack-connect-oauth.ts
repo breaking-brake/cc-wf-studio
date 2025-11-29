@@ -80,13 +80,17 @@ export async function handleConnectSlackOAuth(
       // Step 6: Clear existing connections and store new one
       await tokenManager.clearConnection();
 
-      await tokenManager.storeManualConnection(
-        tokenResponse.team.id,
-        tokenResponse.team.name,
-        tokenResponse.team.id,
-        tokenResponse.access_token,
-        tokenResponse.authed_user?.id || ''
-      );
+      // Store connection with both Bot Token and User Token (if available)
+      await tokenManager.storeConnection({
+        workspaceId: tokenResponse.team.id,
+        workspaceName: tokenResponse.team.name,
+        teamId: tokenResponse.team.id,
+        accessToken: tokenResponse.access_token,
+        userAccessToken: tokenResponse.authed_user?.access_token,
+        tokenScope: tokenResponse.scope?.split(','),
+        userId: tokenResponse.authed_user?.id || '',
+        authorizedAt: new Date(),
+      });
 
       // Step 7: Invalidate Slack API client cache
       slackApiService.invalidateClient();

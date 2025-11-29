@@ -57,6 +57,7 @@ export interface SlackOAuthTokenResponse {
   };
   authed_user?: {
     id: string;
+    access_token?: string; // User Token (xoxp-...)
   };
   scope?: string;
   error?: string;

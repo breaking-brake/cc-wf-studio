@@ -107,8 +107,10 @@ export interface SearchResult {
  * Supports multiple workspace connections.
  */
 export class SlackApiService {
-  /** Workspace-specific WebClient cache */
+  /** Workspace-specific WebClient cache (Bot Token) */
   private clients: Map<string, WebClient> = new Map();
+  /** Workspace-specific WebClient cache (User Token) */
+  private userClients: Map<string, WebClient> = new Map();
 
   constructor(private readonly tokenManager: SlackTokenManager) {}
 
@@ -143,6 +145,37 @@ export class SlackApiService {
   }
 
   /**
+   * Initializes Slack client for specific workspace with User access token
+   *
+   * User Token is used for user-specific operations like listing channels
+   * the authenticated user is a member of.
+   *
+   * @param workspaceId - Target workspace ID
+   * @returns WebClient or null if User Token not available
+   */
+  private async ensureUserClient(workspaceId: string): Promise<WebClient | null> {
+    // Return cached client if exists
+    let client = this.userClients.get(workspaceId);
+    if (client) {
+      return client;
+    }
+
+    // Get User access token for this workspace
+    const userAccessToken = await this.tokenManager.getUserAccessTokenByWorkspaceId(workspaceId);
+
+    if (!userAccessToken) {
+      // User Token not available, will fallback to Bot Token
+      return null;
+    }
+
+    // Create and cache new client
+    client = new WebClient(userAccessToken);
+    this.userClients.set(workspaceId, client);
+
+    return client;
+  }
+
+  /**
    * Invalidates cached client (forces re-authentication)
    *
    * @param workspaceId - Optional workspace ID. If not provided, clears all cached clients.
@@ -150,13 +183,19 @@ export class SlackApiService {
   invalidateClient(workspaceId?: string): void {
     if (workspaceId) {
       this.clients.delete(workspaceId);
+      this.userClients.delete(workspaceId);
     } else {
       this.clients.clear();
+      this.userClients.clear();
     }
   }
 
   /**
    * Gets list of Slack channels
+   *
+   * Uses User Token (xoxp-...) if available for accurate channel listing based on
+   * authenticated user's membership. Falls back to Bot Token (xoxb-...) if User Token
+   * is not available (e.g., manual token input or legacy connections).
    *
    * @param workspaceId - Target workspace ID
    * @param includePrivate - Include private channels (default: true)
@@ -169,7 +208,10 @@ export class SlackApiService {
     onlyMember = true
   ): Promise<SlackChannel[]> {
     try {
-      const client = await this.ensureClient(workspaceId);
+      // Prefer User Token for channel listing (returns user's channels)
+      // Fall back to Bot Token (returns bot's channels - may include channels user is not in)
+      const userClient = await this.ensureUserClient(workspaceId);
+      const client = userClient ?? (await this.ensureClient(workspaceId));
 
       // Build channel types filter
       const types: string[] = ['public_channel'];
