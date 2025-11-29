@@ -322,6 +322,7 @@ export function SlackManualTokenDialog({
                 fontSize: '11px',
                 color: 'var(--vscode-descriptionForeground)',
                 lineHeight: '1.6',
+                whiteSpace: 'pre-line',
               }}
             >
               {t('slack.oauth.reviewNotice.message')}
@@ -379,28 +380,54 @@ export function SlackManualTokenDialog({
                   border: '1px solid var(--vscode-panel-border)',
                   borderRadius: '4px',
                   marginBottom: '16px',
-                  textAlign: 'center',
                 }}
               >
                 <div
                   style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
                     fontSize: '14px',
                     color: 'var(--vscode-foreground)',
                     marginBottom: '8px',
                   }}
                 >
-                  {oauthStatus === 'initiated'
-                    ? t('slack.oauth.status.initiated')
-                    : t('slack.oauth.status.polling')}
+                  {/* Spinner */}
+                  <div
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      border: '2px solid var(--vscode-progressBar-background)',
+                      borderTopColor: 'transparent',
+                      borderRadius: '50%',
+                      animation: 'oauth-spinner 1s linear infinite',
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span>
+                    {oauthStatus === 'initiated'
+                      ? t('slack.oauth.status.initiated')
+                      : t('slack.oauth.status.polling')}
+                  </span>
                 </div>
                 <div
                   style={{
                     fontSize: '12px',
                     color: 'var(--vscode-descriptionForeground)',
+                    textAlign: 'center',
                   }}
                 >
                   {t('slack.oauth.status.waitingHint')}
                 </div>
+                <style>
+                  {`
+                    @keyframes oauth-spinner {
+                      0% { transform: rotate(0deg); }
+                      100% { transform: rotate(360deg); }
+                    }
+                  `}
+                </style>
               </div>
             )}
 
@@ -558,41 +585,35 @@ export function SlackManualTokenDialog({
               </div>
             </div>
 
-            {/* Security & Privacy Box */}
+            {/* Privacy Policy Link */}
             <div
               style={{
                 marginBottom: '16px',
-                padding: '12px',
-                backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
-                border: '1px solid var(--vscode-panel-border)',
-                borderRadius: '4px',
               }}
             >
-              <div
+              <button
+                type="button"
+                onClick={() => openExternalUrl('https://cc-wf-studio.com/privacy')}
                 style={{
                   fontSize: '12px',
-                  fontWeight: 600,
-                  color: 'var(--vscode-foreground)',
-                  marginBottom: '8px',
+                  color: 'var(--vscode-textLink-foreground)',
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.textDecoration = 'underline';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.textDecoration = 'none';
                 }}
               >
-                {t('slack.manualToken.security.title')}
-              </div>
-              <div
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--vscode-descriptionForeground)',
-                  lineHeight: '1.6',
-                }}
-              >
-                <div style={{ marginBottom: '8px', fontStyle: 'italic' }}>
-                  {t('slack.manualToken.security.notice')}
-                </div>
-                <div>• {t('slack.manualToken.security.storage')}</div>
-                <div>• {t('slack.manualToken.security.transmission')}</div>
-                <div>• {t('slack.manualToken.security.deletion')}</div>
-                <div>• {t('slack.manualToken.security.sharing')}</div>
-              </div>
+                {t('slack.oauth.privacyPolicy')}
+              </button>
             </div>
 
             {/* Bot Token Input */}
