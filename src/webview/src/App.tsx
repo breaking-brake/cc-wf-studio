@@ -17,6 +17,8 @@ import { ProcessingOverlay } from './components/common/ProcessingOverlay';
 import { SimpleOverlay } from './components/common/SimpleOverlay';
 import { ConfirmDialog } from './components/dialogs/ConfirmDialog';
 import { RefinementChatPanel } from './components/dialogs/RefinementChatPanel';
+import { SlackConnectionRequiredDialog } from './components/dialogs/SlackConnectionRequiredDialog';
+import { SlackManualTokenDialog } from './components/dialogs/SlackManualTokenDialog';
 import { SlackShareDialog } from './components/dialogs/SlackShareDialog';
 import { TermsOfUseDialog } from './components/dialogs/TermsOfUseDialog';
 import { ErrorNotification } from './components/ErrorNotification';
@@ -50,6 +52,12 @@ const App: React.FC = () => {
   const [isSlackShareDialogOpen, setIsSlackShareDialogOpen] = useState(false);
   const [isLoadingImportedWorkflow, setIsLoadingImportedWorkflow] = useState(false);
   const [showTermsDialog, setShowTermsDialog] = useState(false);
+  const [isSlackConnectionRequiredDialogOpen, setIsSlackConnectionRequiredDialogOpen] =
+    useState(false);
+  const [isSlackManualTokenDialogOpen, setIsSlackManualTokenDialogOpen] = useState(false);
+  const [connectionRequiredWorkspaceName, setConnectionRequiredWorkspaceName] = useState<
+    string | undefined
+  >(undefined);
 
   const handleError = (errorData: ErrorPayload) => {
     setError(errorData);
@@ -139,6 +147,17 @@ const App: React.FC = () => {
       } else if (message.type === 'IMPORT_WORKFLOW_FAILED') {
         // Hide loading overlay on failure
         setIsLoadingImportedWorkflow(false);
+
+        // Check if error is WORKSPACE_NOT_CONNECTED
+        const payload = message.payload as {
+          errorCode?: string;
+          workspaceId?: string;
+          workspaceName?: string;
+        };
+        if (payload?.errorCode === 'WORKSPACE_NOT_CONNECTED') {
+          setConnectionRequiredWorkspaceName(payload.workspaceName);
+          setIsSlackConnectionRequiredDialogOpen(true);
+        }
       } else if (message.type === 'IMPORT_WORKFLOW_CANCELLED') {
         // Hide loading overlay when user cancels
         setIsLoadingImportedWorkflow(false);
@@ -226,6 +245,23 @@ const App: React.FC = () => {
         isOpen={isSlackShareDialogOpen}
         onClose={() => setIsSlackShareDialogOpen(false)}
         workflowId={activeWorkflow?.id || ''}
+      />
+
+      {/* Slack Connection Required Dialog */}
+      <SlackConnectionRequiredDialog
+        isOpen={isSlackConnectionRequiredDialogOpen}
+        onClose={() => {
+          setIsSlackConnectionRequiredDialogOpen(false);
+          setConnectionRequiredWorkspaceName(undefined);
+        }}
+        onConnectSlack={() => setIsSlackManualTokenDialogOpen(true)}
+        workspaceName={connectionRequiredWorkspaceName}
+      />
+
+      {/* Slack Manual Token Dialog */}
+      <SlackManualTokenDialog
+        isOpen={isSlackManualTokenDialogOpen}
+        onClose={() => setIsSlackManualTokenDialogOpen(false)}
       />
 
       {/* Import Workflow Loading Overlay */}

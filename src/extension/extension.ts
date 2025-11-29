@@ -116,6 +116,17 @@ export function activate(context: vscode.ExtensionContext): void {
           const messageTs = query.get('messageTs');
           const workspaceId = query.get('workspaceId');
           const workflowId = query.get('workflowId');
+          const workspaceNameBase64 = query.get('workspaceName');
+
+          // Decode workspace name from Base64 if present
+          let workspaceName: string | undefined;
+          if (workspaceNameBase64) {
+            try {
+              workspaceName = Buffer.from(workspaceNameBase64, 'base64').toString('utf-8');
+            } catch (_e) {
+              log('WARN', 'Failed to decode workspace name from Base64', { workspaceNameBase64 });
+            }
+          }
 
           if (!fileId || !channelId || !messageTs || !workspaceId || !workflowId) {
             log('ERROR', 'Missing required import parameters', {
@@ -135,6 +146,7 @@ export function activate(context: vscode.ExtensionContext): void {
             messageTs,
             workspaceId,
             workflowId,
+            workspaceName,
           });
 
           // Open editor with import parameters
@@ -145,6 +157,7 @@ export function activate(context: vscode.ExtensionContext): void {
               messageTs,
               workspaceId,
               workflowId,
+              workspaceName,
             })
             .then(() => {
               log('INFO', 'Editor opened with import parameters', { workflowId });

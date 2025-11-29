@@ -604,4 +604,10 @@ export interface WebviewTranslationKeys {
   'slack.sensitiveData.warning.message': string;
   'slack.sensitiveData.warning.continue': string;
   'slack.sensitiveData.warning.cancel': string;
+
+  // Slack Import Connection Required Dialog
+  'slack.import.connectionRequired.title': string;
+  'slack.import.connectionRequired.message': string;
+  'slack.import.connectionRequired.workspaceInfo': string;
+  'slack.import.connectionRequired.connectButton': string;
 }

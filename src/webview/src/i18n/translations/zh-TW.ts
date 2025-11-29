@@ -637,4 +637,11 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'slack.sensitiveData.warning.message': '在您的工作流中檢測到以下敏感資料:',
   'slack.sensitiveData.warning.continue': '仍然分享',
   'slack.sensitiveData.warning.cancel': '取消',
+
+  // Slack Import Connection Required Dialog
+  'slack.import.connectionRequired.title': '需要連接 Slack',
+  'slack.import.connectionRequired.message':
+    '要匯入此工作流程，請連接到來源 Slack 工作區。工作流程檔案位於目前未連接的工作區中。',
+  'slack.import.connectionRequired.workspaceInfo': '來源工作區:',
+  'slack.import.connectionRequired.connectButton': '連接到 Slack',
 };

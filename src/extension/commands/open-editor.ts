@@ -55,6 +55,8 @@ export interface ImportParameters {
   messageTs: string;
   workspaceId: string;
   workflowId: string;
+  /** Workspace name for display in error dialogs (decoded from Base64) */
+  workspaceName?: string;
 }
 
 /**
