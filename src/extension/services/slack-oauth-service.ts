@@ -26,7 +26,7 @@ const OAUTH_CONFIG = {
   /** Slack OAuth Client ID (public) */
   slackClientId: '9964370319943.10022663519665',
   /** Required Slack scopes */
-  scopes: 'chat:write,files:write,channels:read,groups:read',
+  scopes: 'chat:write,files:read,files:write,channels:read,groups:read',
   /** Initial polling interval in milliseconds */
   pollingIntervalInitialMs: 1000,
   /** Maximum polling interval in milliseconds */
