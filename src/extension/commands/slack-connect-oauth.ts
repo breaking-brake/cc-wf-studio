@@ -81,7 +81,7 @@ export async function handleConnectSlackOAuth(
       await tokenManager.clearConnection();
 
       // Store connection with both Bot Token and User Token (if available)
-      await tokenManager.storeConnection({
+      const connectionToStore = {
         workspaceId: tokenResponse.team.id,
         workspaceName: tokenResponse.team.name,
         teamId: tokenResponse.team.id,
@@ -90,7 +90,9 @@ export async function handleConnectSlackOAuth(
         tokenScope: tokenResponse.scope?.split(','),
         userId: tokenResponse.authed_user?.id || '',
         authorizedAt: new Date(),
-      });
+      };
+
+      await tokenManager.storeConnection(connectionToStore);
 
       // Step 7: Invalidate Slack API client cache
       slackApiService.invalidateClient();

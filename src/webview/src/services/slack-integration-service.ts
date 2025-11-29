@@ -644,3 +644,59 @@ export function openExternalUrl(url: string): void {
     payload: { url },
   });
 }
+
+/**
+ * Get last shared channel ID
+ *
+ * Retrieves the channel ID that was last used for sharing.
+ * Returns null if no channel has been shared to yet.
+ *
+ * @returns Promise that resolves with channel ID or null
+ */
+export function getLastSharedChannel(): Promise<string | null> {
+  return new Promise((resolve) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'GET_LAST_SHARED_CHANNEL_SUCCESS') {
+          resolve(message.payload?.channelId || null);
+        } else {
+          resolve(null);
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    vscode.postMessage({
+      type: 'GET_LAST_SHARED_CHANNEL',
+      requestId,
+      payload: {},
+    });
+
+    // Short timeout - this is a local operation
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      resolve(null);
+    }, 5000);
+  });
+}
+
+/**
+ * Set last shared channel ID
+ *
+ * Saves the channel ID to be used as default for next sharing.
+ *
+ * @param channelId - Channel ID to save
+ */
+export function setLastSharedChannel(channelId: string): void {
+  vscode.postMessage({
+    type: 'SET_LAST_SHARED_CHANNEL',
+    payload: { channelId },
+  });
+}

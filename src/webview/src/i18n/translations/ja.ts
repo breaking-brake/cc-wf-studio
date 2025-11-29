@@ -598,6 +598,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.selectWorkspacePlaceholder': 'ワークスペースを選択...',
   'slack.share.selectChannel': 'チャンネル選択',
   'slack.share.selectChannelPlaceholder': 'チャンネルを選択...',
+  'slack.share.channelHint':
+    '共有するには、Slack Appをチャンネルに招待する必要があります。共有先のチャンネルで /invite @Claude Code Workflow Studio を実行してください。',
   'slack.share.sharing': '共有中...',
   'slack.share.success': 'ワークフローを共有しました',
   'slack.share.failed': 'ワークフローの共有に失敗しました',

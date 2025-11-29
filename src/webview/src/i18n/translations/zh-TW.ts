@@ -573,6 +573,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.selectWorkspacePlaceholder': '選擇一個工作區...',
   'slack.share.selectChannel': '選擇頻道',
   'slack.share.selectChannelPlaceholder': '選擇一個頻道...',
+  'slack.share.channelHint':
+    '要分享，需要將 Slack 應用邀請到頻道。在目標頻道中使用 /invite @Claude Code Workflow Studio。',
   'slack.share.sharing': '分享中...',
   'slack.share.success': '工作流分享成功',
   'slack.share.failed': '工作流分享失敗',

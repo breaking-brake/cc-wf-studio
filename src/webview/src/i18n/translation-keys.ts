@@ -515,6 +515,7 @@ export interface WebviewTranslationKeys {
   'slack.share.selectWorkspacePlaceholder': string;
   'slack.share.selectChannel': string;
   'slack.share.selectChannelPlaceholder': string;
+  'slack.share.channelHint': string;
   'slack.share.descriptionPlaceholder': string;
   'slack.share.sharing': string;
   'slack.share.success': string;

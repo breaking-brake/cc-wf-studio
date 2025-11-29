@@ -602,6 +602,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.selectWorkspacePlaceholder': 'Choose a workspace...',
   'slack.share.selectChannel': 'Select channel',
   'slack.share.selectChannelPlaceholder': 'Choose a channel...',
+  'slack.share.channelHint':
+    'To share, the Slack App must be invited to the channel. Use /invite @Claude Code Workflow Studio in the target channel.',
   'slack.share.descriptionPlaceholder': 'Add a description (optional)...',
   'slack.share.sharing': 'Sharing...',
   'slack.share.success': 'Workflow shared successfully',

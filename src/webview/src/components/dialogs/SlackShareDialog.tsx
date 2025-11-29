@@ -15,8 +15,10 @@ import type {
   SlackWorkspace,
 } from '../../services/slack-integration-service';
 import {
+  getLastSharedChannel,
   getSlackChannels,
   listSlackWorkspaces,
+  setLastSharedChannel,
   shareWorkflowToSlack,
 } from '../../services/slack-integration-service';
 import { serializeWorkflow } from '../../services/workflow-service';
@@ -94,12 +96,17 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
       setError(null);
 
       try {
-        const channelList = await getSlackChannels(workspace.workspaceId);
+        // Load channels and last shared channel in parallel
+        const [channelList, lastChannelId] = await Promise.all([
+          getSlackChannels(workspace.workspaceId),
+          getLastSharedChannel(),
+        ]);
         setChannels(channelList);
 
-        // Auto-select first channel if available
+        // Prefer last shared channel if it exists in the list
         if (channelList.length > 0) {
-          setSelectedChannelId(channelList[0].id);
+          const lastChannelExists = lastChannelId && channelList.some((ch) => ch.id === lastChannelId);
+          setSelectedChannelId(lastChannelExists ? lastChannelId : channelList[0].id);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : t('slack.error.networkError'));
@@ -184,9 +191,10 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
       });
 
       if (result.success) {
+        // Save last shared channel for next time
+        setLastSharedChannel(selectedChannelId);
         // Success - close dialog
         handleClose();
-        // TODO: Show success notification
       } else if (result.sensitiveDataWarning) {
         // Show sensitive data warning
         setSensitiveDataWarning(result.sensitiveDataWarning);
@@ -228,6 +236,8 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
       });
 
       if (result.success) {
+        // Save last shared channel for next time
+        setLastSharedChannel(selectedChannelId);
         handleClose();
       }
     } catch (err) {
@@ -556,6 +566,20 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
           >
             {t('slack.share.selectChannel')}
           </label>
+          {/* Hint about Slack App invitation */}
+          <div
+            style={{
+              marginBottom: '8px',
+              padding: '8px 12px',
+              backgroundColor: 'var(--vscode-textBlockQuote-background)',
+              border: '1px solid var(--vscode-textBlockQuote-border)',
+              borderRadius: '2px',
+              fontSize: '12px',
+              color: 'var(--vscode-descriptionForeground)',
+            }}
+          >
+            💡 {t('slack.share.channelHint')}
+          </div>
           <select
             id="channel-select"
             value={selectedChannelId}
