@@ -107,8 +107,10 @@ export interface SearchResult {
  * Supports multiple workspace connections.
  */
 export class SlackApiService {
-  /** Workspace-specific WebClient cache */
+  /** Workspace-specific WebClient cache (Bot Token) */
   private clients: Map<string, WebClient> = new Map();
+  /** Workspace-specific WebClient cache (User Token) */
+  private userClients: Map<string, WebClient> = new Map();
 
   constructor(private readonly tokenManager: SlackTokenManager) {}
 
@@ -143,6 +145,37 @@ export class SlackApiService {
   }
 
   /**
+   * Initializes Slack client for specific workspace with User access token
+   *
+   * User Token is used for user-specific operations like listing channels
+   * the authenticated user is a member of.
+   *
+   * @param workspaceId - Target workspace ID
+   * @returns WebClient or null if User Token not available
+   */
+  private async ensureUserClient(workspaceId: string): Promise<WebClient | null> {
+    // Return cached client if exists
+    let client = this.userClients.get(workspaceId);
+    if (client) {
+      return client;
+    }
+
+    // Get User access token for this workspace
+    const userAccessToken = await this.tokenManager.getUserAccessTokenByWorkspaceId(workspaceId);
+
+    if (!userAccessToken) {
+      // User Token not available, will fallback to Bot Token
+      return null;
+    }
+
+    // Create and cache new client
+    client = new WebClient(userAccessToken);
+    this.userClients.set(workspaceId, client);
+
+    return client;
+  }
+
+  /**
    * Invalidates cached client (forces re-authentication)
    *
    * @param workspaceId - Optional workspace ID. If not provided, clears all cached clients.
@@ -150,13 +183,19 @@ export class SlackApiService {
   invalidateClient(workspaceId?: string): void {
     if (workspaceId) {
       this.clients.delete(workspaceId);
+      this.userClients.delete(workspaceId);
     } else {
       this.clients.clear();
+      this.userClients.clear();
     }
   }
 
   /**
    * Gets list of Slack channels
+   *
+   * Uses User Token (xoxp-...) if available for accurate channel listing based on
+   * authenticated user's membership. Falls back to Bot Token (xoxb-...) if User Token
+   * is not available (e.g., manual token input or legacy connections).
    *
    * @param workspaceId - Target workspace ID
    * @param includePrivate - Include private channels (default: true)
@@ -169,7 +208,10 @@ export class SlackApiService {
     onlyMember = true
   ): Promise<SlackChannel[]> {
     try {
-      const client = await this.ensureClient(workspaceId);
+      // Prefer User Token for channel listing (returns user's channels)
+      // Fall back to Bot Token (returns bot's channels - may include channels user is not in)
+      const userClient = await this.ensureUserClient(workspaceId);
+      const client = userClient ?? (await this.ensureClient(workspaceId));
 
       // Build channel types filter
       const types: string[] = ['public_channel'];
@@ -230,54 +272,49 @@ export class SlackApiService {
    * @returns File upload result
    */
   async uploadWorkflowFile(options: WorkflowUploadOptions): Promise<FileUploadResult> {
-    try {
-      const client = await this.ensureClient(options.workspaceId);
+    const client = await this.ensureClient(options.workspaceId);
 
-      // Upload file using files.uploadV2
-      const response = await client.files.uploadV2({
-        channel_id: options.channelId,
-        file: Buffer.from(options.content, 'utf-8'),
-        filename: options.filename,
-        title: options.title,
-        initial_comment: options.initialComment,
-        thread_ts: options.threadTs,
-      });
+    // Upload file using files.uploadV2
+    const response = await client.files.uploadV2({
+      channel_id: options.channelId,
+      file: Buffer.from(options.content, 'utf-8'),
+      filename: options.filename,
+      title: options.title,
+      initial_comment: options.initialComment,
+      thread_ts: options.threadTs,
+    });
 
-      if (!response.ok) {
-        throw new Error('ファイルのアップロードに失敗しました');
-      }
-
-      const responseObj = response as unknown as Record<string, unknown>;
-
-      // files.uploadV2 returns nested structure: response.files[0].files[0]
-      const file = responseObj.file as Record<string, unknown> | undefined;
-      const filesWrapper = responseObj.files as Array<Record<string, unknown>> | undefined;
-
-      let fileData: Record<string, unknown> | undefined = file;
-
-      // If no direct file object, try to get from nested structure
-      if (!fileData && filesWrapper && filesWrapper.length > 0) {
-        const innerWrapper = filesWrapper[0];
-        const innerFiles = innerWrapper.files as Array<Record<string, unknown>> | undefined;
-
-        if (innerFiles && innerFiles.length > 0) {
-          fileData = innerFiles[0];
-        }
-      }
-
-      if (!fileData) {
-        throw new Error('ファイルのアップロードに失敗しました');
-      }
-
-      return {
-        fileId: fileData.id as string,
-        fileUrl: fileData.url_private as string,
-        permalink: fileData.permalink as string,
-      };
-    } catch (error) {
-      const errorInfo = handleSlackError(error);
-      throw new Error(errorInfo.message);
+    if (!response.ok) {
+      throw new Error('ファイルのアップロードに失敗しました');
     }
+
+    const responseObj = response as unknown as Record<string, unknown>;
+
+    // files.uploadV2 returns nested structure: response.files[0].files[0]
+    const file = responseObj.file as Record<string, unknown> | undefined;
+    const filesWrapper = responseObj.files as Array<Record<string, unknown>> | undefined;
+
+    let fileData: Record<string, unknown> | undefined = file;
+
+    // If no direct file object, try to get from nested structure
+    if (!fileData && filesWrapper && filesWrapper.length > 0) {
+      const innerWrapper = filesWrapper[0];
+      const innerFiles = innerWrapper.files as Array<Record<string, unknown>> | undefined;
+
+      if (innerFiles && innerFiles.length > 0) {
+        fileData = innerFiles[0];
+      }
+    }
+
+    if (!fileData) {
+      throw new Error('ファイルのアップロードに失敗しました');
+    }
+
+    return {
+      fileId: fileData.id as string,
+      fileUrl: fileData.url_private as string,
+      permalink: fileData.permalink as string,
+    };
   }
 
   /**
@@ -293,39 +330,34 @@ export class SlackApiService {
     channelId: string,
     block: WorkflowMessageBlock
   ): Promise<MessagePostResult> {
-    try {
-      const client = await this.ensureClient(workspaceId);
+    const client = await this.ensureClient(workspaceId);
 
-      // Build Block Kit blocks
-      const blocks = buildWorkflowMessageBlocks(block);
+    // Build Block Kit blocks
+    const blocks = buildWorkflowMessageBlocks(block);
 
-      // Post message
-      const response = await client.chat.postMessage({
-        channel: channelId,
-        text: `New workflow shared: ${block.name}`,
-        // biome-ignore lint/suspicious/noExplicitAny: Slack Web API type definitions are incomplete
-        blocks: blocks as any,
-      });
+    // Post message
+    const response = await client.chat.postMessage({
+      channel: channelId,
+      text: `New workflow shared: ${block.name}`,
+      // biome-ignore lint/suspicious/noExplicitAny: Slack Web API type definitions are incomplete
+      blocks: blocks as any,
+    });
 
-      if (!response.ok) {
-        throw new Error('メッセージの投稿に失敗しました');
-      }
-
-      // Get permalink
-      const permalinkResponse = await client.chat.getPermalink({
-        channel: channelId,
-        message_ts: response.ts as string,
-      });
-
-      return {
-        channelId,
-        messageTs: response.ts as string,
-        permalink: (permalinkResponse.permalink as string) || '',
-      };
-    } catch (error) {
-      const errorInfo = handleSlackError(error);
-      throw new Error(errorInfo.message);
+    if (!response.ok) {
+      throw new Error('メッセージの投稿に失敗しました');
     }
+
+    // Get permalink
+    const permalinkResponse = await client.chat.getPermalink({
+      channel: channelId,
+      message_ts: response.ts as string,
+    });
+
+    return {
+      channelId,
+      messageTs: response.ts as string,
+      permalink: (permalinkResponse.permalink as string) || '',
+    };
   }
 
   /**
@@ -410,6 +442,33 @@ export class SlackApiService {
   }
 
   /**
+   * Checks if the Bot is a member of the specified channel
+   *
+   * Uses conversations.info API which is available with existing Bot Token scopes.
+   * This helps users know if they need to invite the Bot before sharing.
+   *
+   * @param workspaceId - Target workspace ID
+   * @param channelId - Target channel ID
+   * @returns True if Bot is a member of the channel
+   */
+  async checkBotMembership(workspaceId: string, channelId: string): Promise<boolean> {
+    try {
+      const client = await this.ensureClient(workspaceId);
+      const response = await client.conversations.info({ channel: channelId });
+
+      if (!response.ok || !response.channel) {
+        return false;
+      }
+
+      return response.channel.is_member ?? false;
+    } catch (error) {
+      // If we can't check, assume not a member to show warning
+      console.error('[SlackApiService] checkBotMembership error:', error);
+      return false;
+    }
+  }
+
+  /**
    * Gets current user information (Git username, not Slack user)
    *
    * @param _workspaceId - Target workspace ID (not used, kept for compatibility)
@@ -468,27 +527,22 @@ export class SlackApiService {
     messageTs: string,
     block: WorkflowMessageBlock
   ): Promise<void> {
-    try {
-      const client = await this.ensureClient(workspaceId);
+    const client = await this.ensureClient(workspaceId);
 
-      // Build Block Kit blocks
-      const blocks = buildWorkflowMessageBlocks(block);
+    // Build Block Kit blocks
+    const blocks = buildWorkflowMessageBlocks(block);
 
-      // Update message
-      const response = await client.chat.update({
-        channel: channelId,
-        ts: messageTs,
-        text: `Workflow shared: ${block.name}`,
-        // biome-ignore lint/suspicious/noExplicitAny: Slack Web API type definitions are incomplete
-        blocks: blocks as any,
-      });
+    // Update message
+    const response = await client.chat.update({
+      channel: channelId,
+      ts: messageTs,
+      text: `Workflow shared: ${block.name}`,
+      // biome-ignore lint/suspicious/noExplicitAny: Slack Web API type definitions are incomplete
+      blocks: blocks as any,
+    });
 
-      if (!response.ok) {
-        throw new Error('メッセージの更新に失敗しました');
-      }
-    } catch (error) {
-      const errorInfo = handleSlackError(error);
-      throw new Error(errorInfo.message);
+    if (!response.ok) {
+      throw new Error('メッセージの更新に失敗しました');
     }
   }
 

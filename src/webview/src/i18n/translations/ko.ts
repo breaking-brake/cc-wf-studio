@@ -601,6 +601,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.success': '워크플로우를 공유했습니다',
   'slack.share.failed': '워크플로우 공유에 실패했습니다',
   'slack.share.descriptionPlaceholder': '설명을 추가하세요 (선택 사항)...',
+  'slack.share.checkingBotMembership': 'Slack 앱이 채널에 있는지 확인 중...',
+  'slack.share.botNotInChannelMessage':
+    '이 채널에는 아직 Slack 앱이 추가되지 않았습니다.\n공유하기 전에 Slack 앱을 추가해 주세요.',
 
   // Slack Connect
   'slack.connect.button': 'Slack에 연결',

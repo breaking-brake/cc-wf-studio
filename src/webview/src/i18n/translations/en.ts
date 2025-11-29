@@ -606,6 +606,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.sharing': 'Sharing...',
   'slack.share.success': 'Workflow shared successfully',
   'slack.share.failed': 'Failed to share workflow',
+  'slack.share.checkingBotMembership': 'Checking if Slack App is in the channel...',
+  'slack.share.botNotInChannelMessage':
+    'The Slack App has not been added to this channel yet.\nPlease add the Slack App before sharing.',
 
   // Slack Connect
   'slack.connect.button': 'Connect to Slack',

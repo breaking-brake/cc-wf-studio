@@ -576,7 +576,9 @@ export type ExtensionMessage =
   | Message<SlackOAuthInitiatedPayload, 'SLACK_OAUTH_INITIATED'>
   | Message<SlackOAuthSuccessPayload, 'SLACK_OAUTH_SUCCESS'>
   | Message<SlackErrorPayload, 'SLACK_OAUTH_FAILED'>
-  | Message<void, 'SLACK_OAUTH_CANCELLED'>;
+  | Message<void, 'SLACK_OAUTH_CANCELLED'>
+  | Message<GetLastSharedChannelSuccessPayload, 'GET_LAST_SHARED_CHANNEL_SUCCESS'>
+  | Message<CheckBotChannelMembershipSuccessPayload, 'CHECK_BOT_CHANNEL_MEMBERSHIP_SUCCESS'>;
 
 // ============================================================================
 // Slack Integration Payloads (001-slack-workflow-sharing)
@@ -882,6 +884,40 @@ export interface OpenExternalUrlPayload {
   url: string;
 }
 
+/**
+ * Set last shared channel payload
+ */
+export interface SetLastSharedChannelPayload {
+  /** Channel ID that was last used for sharing */
+  channelId: string;
+}
+
+/**
+ * Get last shared channel success payload
+ */
+export interface GetLastSharedChannelSuccessPayload {
+  /** Channel ID that was last used for sharing (null if none) */
+  channelId: string | null;
+}
+
+/**
+ * Check bot channel membership payload
+ */
+export interface CheckBotChannelMembershipPayload {
+  /** Target workspace ID */
+  workspaceId: string;
+  /** Target channel ID to check */
+  channelId: string;
+}
+
+/**
+ * Check bot channel membership success payload
+ */
+export interface CheckBotChannelMembershipSuccessPayload {
+  /** Whether the bot is a member of the channel */
+  isMember: boolean;
+}
+
 // ============================================================================
 // Webview → Extension Messages
 // ============================================================================
@@ -919,7 +955,10 @@ export type WebviewMessage =
   | Message<GetSlackChannelsPayload, 'GET_SLACK_CHANNELS'>
   | Message<ShareWorkflowToSlackPayload, 'SHARE_WORKFLOW_TO_SLACK'>
   | Message<ImportWorkflowFromSlackPayload, 'IMPORT_WORKFLOW_FROM_SLACK'>
-  | Message<OpenExternalUrlPayload, 'OPEN_EXTERNAL_URL'>;
+  | Message<OpenExternalUrlPayload, 'OPEN_EXTERNAL_URL'>
+  | Message<void, 'GET_LAST_SHARED_CHANNEL'>
+  | Message<SetLastSharedChannelPayload, 'SET_LAST_SHARED_CHANNEL'>
+  | Message<CheckBotChannelMembershipPayload, 'CHECK_BOT_CHANNEL_MEMBERSHIP'>;
 
 // ============================================================================
 // Error Codes

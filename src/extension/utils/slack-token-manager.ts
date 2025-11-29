@@ -25,8 +25,15 @@ const SECRET_KEYS = {
 /**
  * Generates workspace-specific secret key
  */
-function getWorkspaceSecretKey(workspaceId: string, type: 'token' | 'data'): string {
-  return type === 'token' ? `slack-oauth-${workspaceId}` : `slack-workspace-${workspaceId}`;
+function getWorkspaceSecretKey(workspaceId: string, type: 'token' | 'data' | 'user-token'): string {
+  switch (type) {
+    case 'token':
+      return `slack-oauth-${workspaceId}`;
+    case 'user-token':
+      return `slack-user-oauth-${workspaceId}`;
+    case 'data':
+      return `slack-workspace-${workspaceId}`;
+  }
 }
 
 /**
@@ -45,11 +52,17 @@ export class SlackTokenManager {
   async storeConnection(connection: SlackWorkspaceConnection): Promise<void> {
     const { workspaceId } = connection;
 
-    // Store access token for this workspace
+    // Store Bot access token for this workspace
     const tokenKey = getWorkspaceSecretKey(workspaceId, 'token');
     await this.context.secrets.store(tokenKey, connection.accessToken);
 
-    // Store workspace metadata (without token)
+    // Store User access token if available (for channel listing)
+    if (connection.userAccessToken) {
+      const userTokenKey = getWorkspaceSecretKey(workspaceId, 'user-token');
+      await this.context.secrets.store(userTokenKey, connection.userAccessToken);
+    }
+
+    // Store workspace metadata (without tokens)
     const workspaceData = {
       workspaceId: connection.workspaceId,
       workspaceName: connection.workspaceName,
@@ -196,9 +209,11 @@ export class SlackTokenManager {
    */
   async getConnectionByWorkspaceId(workspaceId: string): Promise<SlackWorkspaceConnection | null> {
     const tokenKey = getWorkspaceSecretKey(workspaceId, 'token');
+    const userTokenKey = getWorkspaceSecretKey(workspaceId, 'user-token');
     const dataKey = getWorkspaceSecretKey(workspaceId, 'data');
 
     const accessToken = await this.context.secrets.get(tokenKey);
+    const userAccessToken = await this.context.secrets.get(userTokenKey);
     const workspaceDataJson = await this.context.secrets.get(dataKey);
 
     if (!accessToken || !workspaceDataJson) {
@@ -213,6 +228,7 @@ export class SlackTokenManager {
         workspaceName: workspaceData.workspaceName,
         teamId: workspaceData.teamId,
         accessToken,
+        userAccessToken: userAccessToken || undefined,
         tokenScope: workspaceData.tokenScope,
         userId: workspaceData.userId,
         authorizedAt: new Date(workspaceData.authorizedAt),
@@ -239,14 +255,28 @@ export class SlackTokenManager {
   }
 
   /**
-   * Gets access token for specific workspace
+   * Gets Bot access token for specific workspace
    *
    * @param workspaceId - Workspace ID
-   * @returns Access token if exists, null otherwise
+   * @returns Bot access token if exists, null otherwise
    */
   async getAccessTokenByWorkspaceId(workspaceId: string): Promise<string | null> {
     const tokenKey = getWorkspaceSecretKey(workspaceId, 'token');
     return (await this.context.secrets.get(tokenKey)) || null;
+  }
+
+  /**
+   * Gets User access token for specific workspace
+   *
+   * User Token is used for operations that require user-specific permissions,
+   * such as listing channels the authenticated user is a member of.
+   *
+   * @param workspaceId - Workspace ID
+   * @returns User access token if exists, null otherwise
+   */
+  async getUserAccessTokenByWorkspaceId(workspaceId: string): Promise<string | null> {
+    const userTokenKey = getWorkspaceSecretKey(workspaceId, 'user-token');
+    return (await this.context.secrets.get(userTokenKey)) || null;
   }
 
   /**
@@ -339,9 +369,11 @@ export class SlackTokenManager {
    */
   async clearConnectionByWorkspaceId(workspaceId: string): Promise<void> {
     const tokenKey = getWorkspaceSecretKey(workspaceId, 'token');
+    const userTokenKey = getWorkspaceSecretKey(workspaceId, 'user-token');
     const dataKey = getWorkspaceSecretKey(workspaceId, 'data');
 
     await this.context.secrets.delete(tokenKey);
+    await this.context.secrets.delete(userTokenKey);
     await this.context.secrets.delete(dataKey);
 
     // Remove from workspace list

@@ -644,3 +644,107 @@ export function openExternalUrl(url: string): void {
     payload: { url },
   });
 }
+
+/**
+ * Get last shared channel ID
+ *
+ * Retrieves the channel ID that was last used for sharing.
+ * Returns null if no channel has been shared to yet.
+ *
+ * @returns Promise that resolves with channel ID or null
+ */
+export function getLastSharedChannel(): Promise<string | null> {
+  return new Promise((resolve) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'GET_LAST_SHARED_CHANNEL_SUCCESS') {
+          resolve(message.payload?.channelId || null);
+        } else {
+          resolve(null);
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    vscode.postMessage({
+      type: 'GET_LAST_SHARED_CHANNEL',
+      requestId,
+      payload: {},
+    });
+
+    // Short timeout - this is a local operation
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      resolve(null);
+    }, 5000);
+  });
+}
+
+/**
+ * Set last shared channel ID
+ *
+ * Saves the channel ID to be used as default for next sharing.
+ *
+ * @param channelId - Channel ID to save
+ */
+export function setLastSharedChannel(channelId: string): void {
+  vscode.postMessage({
+    type: 'SET_LAST_SHARED_CHANNEL',
+    payload: { channelId },
+  });
+}
+
+/**
+ * Check if the Slack App (Bot) is a member of the specified channel
+ *
+ * Uses conversations.info API to check bot membership.
+ * This helps users know if they need to invite the Bot before sharing.
+ *
+ * @param workspaceId - Target workspace ID
+ * @param channelId - Target channel ID to check
+ * @returns Promise that resolves with true if bot is a member
+ */
+export function checkBotChannelMembership(
+  workspaceId: string,
+  channelId: string
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'CHECK_BOT_CHANNEL_MEMBERSHIP_SUCCESS') {
+          resolve(message.payload?.isMember ?? false);
+        } else {
+          // On error or unknown response, assume not a member
+          resolve(false);
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    vscode.postMessage({
+      type: 'CHECK_BOT_CHANNEL_MEMBERSHIP',
+      requestId,
+      payload: { workspaceId, channelId },
+    });
+
+    // Short timeout - this should be a fast API call
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      resolve(false); // On timeout, assume not a member to show warning
+    }, 5000);
+  });
+}

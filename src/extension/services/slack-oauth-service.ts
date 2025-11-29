@@ -25,8 +25,10 @@ const OAUTH_CONFIG = {
   serverUrl: 'https://cc-wf-studio.com',
   /** Slack OAuth Client ID (public) */
   slackClientId: '9964370319943.10022663519665',
-  /** Required Slack scopes */
-  scopes: 'chat:write,files:read,files:write,channels:read,groups:read',
+  /** Required Slack Bot Token scopes */
+  scopes: 'chat:write,files:read,files:write',
+  /** Required Slack User Token scopes (for channel listing) */
+  userScopes: 'channels:read,groups:read',
   /** Initial polling interval in milliseconds */
   pollingIntervalInitialMs: 1000,
   /** Maximum polling interval in milliseconds */
@@ -57,6 +59,7 @@ export interface SlackOAuthTokenResponse {
   };
   authed_user?: {
     id: string;
+    access_token?: string; // User Token (xoxp-...)
   };
   scope?: string;
   error?: string;
@@ -153,6 +156,7 @@ export class SlackOAuthService {
     const authorizationUrl = new URL('https://slack.com/oauth/v2/authorize');
     authorizationUrl.searchParams.set('client_id', OAUTH_CONFIG.slackClientId);
     authorizationUrl.searchParams.set('scope', OAUTH_CONFIG.scopes);
+    authorizationUrl.searchParams.set('user_scope', OAUTH_CONFIG.userScopes);
     authorizationUrl.searchParams.set('redirect_uri', redirectUri);
     authorizationUrl.searchParams.set('state', sessionId);
 

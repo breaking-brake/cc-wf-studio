@@ -28,6 +28,9 @@ export interface SlackWorkspaceConnection {
   /** Bot User OAuth Token (stored in VSCode Secret Storage only) */
   accessToken: string;
 
+  /** User OAuth Token for user-specific operations like channel listing (xoxp-...) */
+  userAccessToken?: string;
+
   /** Token scopes (e.g., ['chat:write', 'files:write']) - Optional for manual token input */
   tokenScope?: string[];
 

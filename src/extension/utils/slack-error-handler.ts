@@ -50,9 +50,10 @@ const ERROR_MAPPINGS: Record<string, Omit<SlackErrorInfo, 'code' | 'retryAfter'>
     suggestedAction: 'チャンネルIDを確認してください',
   },
   not_in_channel: {
-    message: 'Botがチャンネルに参加していません',
+    message: 'Slack Appがチャンネルに招待されていません',
     recoverable: true,
-    suggestedAction: 'Slackアプリをチャンネルに招待してください',
+    suggestedAction:
+      '共有先のチャンネルで /invite @Claude Code Workflow Studio を実行してSlack Appを招待してから、再度お試しください',
   },
   file_too_large: {
     message: 'ファイルサイズが大きすぎます',
