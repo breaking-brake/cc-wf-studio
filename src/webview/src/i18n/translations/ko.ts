@@ -662,4 +662,11 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     '워크플로우에서 다음과 같은 민감한 데이터가 감지되었습니다:',
   'slack.sensitiveData.warning.continue': '그래도 공유',
   'slack.sensitiveData.warning.cancel': '취소',
+
+  // Slack Import Connection Required Dialog
+  'slack.import.connectionRequired.title': 'Slack 연결이 필요합니다',
+  'slack.import.connectionRequired.message':
+    '이 워크플로우를 가져오려면 원본 Slack 워크스페이스에 연결해야 합니다. 워크플로우 파일이 현재 연결되지 않은 워크스페이스에 있습니다.',
+  'slack.import.connectionRequired.workspaceInfo': '원본 워크스페이스:',
+  'slack.import.connectionRequired.connectButton': 'Slack에 연결',
 };

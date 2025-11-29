@@ -21,6 +21,8 @@ export interface SlackErrorInfo {
   suggestedAction?: string;
   /** Retry after seconds (for rate limiting) */
   retryAfter?: number;
+  /** Workspace ID (for WORKSPACE_NOT_CONNECTED errors) */
+  workspaceId?: string;
 }
 
 /**
@@ -111,6 +113,23 @@ const ERROR_MAPPINGS: Record<string, Omit<SlackErrorInfo, 'code' | 'retryAfter'>
  * @returns Structured error information
  */
 export function handleSlackError(error: unknown): SlackErrorInfo {
+  // Check for WORKSPACE_NOT_CONNECTED custom error
+  if (
+    error &&
+    typeof error === 'object' &&
+    'code' in error &&
+    (error as { code: string }).code === 'WORKSPACE_NOT_CONNECTED'
+  ) {
+    const workspaceError = error as { code: string; workspaceId?: string; message?: string };
+    return {
+      code: 'WORKSPACE_NOT_CONNECTED',
+      message: 'インポート元のSlackワークスペースに接続されていません',
+      recoverable: true,
+      suggestedAction: 'Slackに接続してからワークフローをインポートしてください',
+      workspaceId: workspaceError.workspaceId,
+    };
+  }
+
   // Check if it's a Slack Web API error (property-based check instead of instanceof)
   // This works even when @slack/web-api is an external dependency
   if (

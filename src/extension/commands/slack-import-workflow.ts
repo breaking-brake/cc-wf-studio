@@ -226,12 +226,21 @@ export async function handleImportWorkflowFromSlack(
       requestId,
       errorCode: errorInfo.code,
       errorMessage: errorInfo.message,
+      workspaceId: errorInfo.workspaceId || payload.workspaceId,
       originalError: error instanceof Error ? error.message : String(error),
       errorStack: error instanceof Error ? error.stack : undefined,
       executionTimeMs: Date.now() - startTime,
     });
 
-    sendImportFailed(webview, requestId, payload.workflowId, errorInfo.code, errorInfo.message);
+    sendImportFailed(
+      webview,
+      requestId,
+      payload.workflowId,
+      errorInfo.code,
+      errorInfo.message,
+      errorInfo.workspaceId || payload.workspaceId,
+      payload.workspaceName
+    );
   }
 }
 
@@ -243,7 +252,9 @@ function sendImportFailed(
   requestId: string,
   workflowId: string,
   errorCode: string,
-  errorMessage: string
+  errorMessage: string,
+  workspaceId?: string,
+  workspaceName?: string
 ): void {
   const failedEvent: ImportWorkflowFailedEvent = {
     type: 'IMPORT_WORKFLOW_FAILED',
@@ -251,6 +262,8 @@ function sendImportFailed(
       workflowId,
       errorCode: errorCode as ImportWorkflowFailedEvent['payload']['errorCode'],
       errorMessage,
+      workspaceId,
+      workspaceName,
     },
   };
 

@@ -663,4 +663,11 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.sensitiveData.warning.message': 'ワークフローに以下の機密情報が検出されました:',
   'slack.sensitiveData.warning.continue': 'それでも共有',
   'slack.sensitiveData.warning.cancel': 'キャンセル',
+
+  // Slack Import Connection Required Dialog
+  'slack.import.connectionRequired.title': 'Slack接続が必要です',
+  'slack.import.connectionRequired.message':
+    'このワークフローをインポートするには、インポート元のSlackワークスペースに接続してください。ワークフローファイルは現在接続されていないワークスペースにあります。',
+  'slack.import.connectionRequired.workspaceInfo': 'インポート元ワークスペース:',
+  'slack.import.connectionRequired.connectButton': 'Slackに接続',
 };

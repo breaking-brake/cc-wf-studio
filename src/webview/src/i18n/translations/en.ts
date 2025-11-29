@@ -669,4 +669,11 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'The following sensitive data was detected in your workflow:',
   'slack.sensitiveData.warning.continue': 'Share Anyway',
   'slack.sensitiveData.warning.cancel': 'Cancel',
+
+  // Slack Import Connection Required Dialog
+  'slack.import.connectionRequired.title': 'Slack Connection Required',
+  'slack.import.connectionRequired.message':
+    'Please connect to the source Slack workspace to import this workflow. The workflow file is hosted in a workspace that you are not currently connected to.',
+  'slack.import.connectionRequired.workspaceInfo': 'Source Workspace:',
+  'slack.import.connectionRequired.connectButton': 'Connect to Slack',
 };

@@ -739,6 +739,8 @@ export interface ImportWorkflowFromSlackPayload {
   channelId: string;
   /** Target workspace ID */
   workspaceId: string;
+  /** Workspace name for display in error dialogs (decoded from Base64) */
+  workspaceName?: string;
   /** Override existing file without confirmation (default: false) */
   overwriteExisting?: boolean;
 }
@@ -778,9 +780,14 @@ export interface ImportWorkflowFailedPayload {
     | 'INVALID_WORKFLOW_FILE'
     | 'FILE_WRITE_ERROR'
     | 'NETWORK_ERROR'
+    | 'WORKSPACE_NOT_CONNECTED'
     | 'UNKNOWN_ERROR';
   /** Error message */
   errorMessage: string;
+  /** Workspace ID that is not connected (for WORKSPACE_NOT_CONNECTED error) */
+  workspaceId?: string;
+  /** Workspace name for display in error dialogs (decoded from Base64) */
+  workspaceName?: string;
 }
 
 /**

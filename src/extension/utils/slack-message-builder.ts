@@ -39,6 +39,12 @@ function buildImportUri(scheme: string, block: WorkflowMessageBlock): string {
     channelId: block.channelId || '',
     messageTs: block.messageTs || '',
   });
+
+  // Add workspace name as Base64-encoded parameter for display in error dialogs
+  if (block.workspaceName) {
+    params.set('workspaceName', Buffer.from(block.workspaceName, 'utf-8').toString('base64'));
+  }
+
   return `${scheme}://${EXTENSION_ID}/import?${params.toString()}`;
 }
 
@@ -64,6 +70,8 @@ export interface WorkflowMessageBlock {
   fileId: string;
   /** Workspace ID (for deep link) */
   workspaceId?: string;
+  /** Workspace name (for display in error dialogs, Base64 encoded in URI) */
+  workspaceName?: string;
   /** Channel ID (for deep link) */
   channelId?: string;
   /** Message timestamp (for deep link) */

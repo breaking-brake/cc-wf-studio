@@ -309,6 +309,10 @@ export interface ImportWorkflowFailedEvent {
     workflowId: string;
     errorCode: string;
     errorMessage: string;
+    /** Source workspace ID (for WORKSPACE_NOT_CONNECTED errors) */
+    workspaceId?: string;
+    /** Workspace name for display in error dialogs */
+    workspaceName?: string;
   };
 }
 

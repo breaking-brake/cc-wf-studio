@@ -94,7 +94,18 @@ export async function handleShareWorkflowToSlack(
         ? workflow.createdAt
         : new Date(workflow.createdAt).toISOString();
 
-    // Step 4: Post rich message card to channel (main message)
+    // Step 4: Get workspace name for deep link
+    log('INFO', 'Getting workspace name for deep link', { requestId });
+    let workspaceName: string | undefined;
+    try {
+      const workspaces = await slackApiService.getWorkspaces();
+      const workspace = workspaces.find((ws) => ws.workspaceId === payload.workspaceId);
+      workspaceName = workspace?.workspaceName;
+    } catch (_e) {
+      log('WARN', 'Failed to get workspace name, continuing without it', { requestId });
+    }
+
+    // Step 5: Post rich message card to channel (main message)
     log('INFO', 'Posting workflow message card to Slack', { requestId });
 
     const messageBlock: WorkflowMessageBlock = {
@@ -107,6 +118,7 @@ export async function handleShareWorkflowToSlack(
       createdAt,
       fileId: '', // Will be updated after file upload
       workspaceId: payload.workspaceId,
+      workspaceName,
       channelId: payload.channelId,
     };
 
@@ -122,7 +134,7 @@ export async function handleShareWorkflowToSlack(
       permalink: messageResult.permalink,
     });
 
-    // Step 5: Upload workflow file to thread as reply
+    // Step 6: Upload workflow file to thread as reply
     log('INFO', 'Uploading workflow file to thread', { requestId });
 
     const filename = `${payload.workflowName.replace(/[^a-zA-Z0-9-_]/g, '_')}.json`;
@@ -140,7 +152,7 @@ export async function handleShareWorkflowToSlack(
       fileId: uploadResult.fileId,
     });
 
-    // Step 6: Update message with complete deep links
+    // Step 7: Update message with complete deep links
     log('INFO', 'Updating message with complete deep links', { requestId });
 
     const updatedMessageBlock: WorkflowMessageBlock = {
@@ -158,7 +170,7 @@ export async function handleShareWorkflowToSlack(
 
     log('INFO', 'Message updated with complete deep links', { requestId });
 
-    // Step 6: Send success response
+    // Step 8: Send success response
     const successEvent: ShareWorkflowSuccessEvent = {
       type: 'SHARE_WORKFLOW_SUCCESS',
       payload: {

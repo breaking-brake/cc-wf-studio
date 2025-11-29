@@ -129,7 +129,10 @@ export class SlackApiService {
     const accessToken = await this.tokenManager.getAccessTokenByWorkspaceId(workspaceId);
 
     if (!accessToken) {
-      throw new Error(`ワークスペース ${workspaceId} に接続されていません`);
+      const error = new Error(`Workspace ${workspaceId} is not connected`);
+      (error as Error & { code: string; workspaceId: string }).code = 'WORKSPACE_NOT_CONNECTED';
+      (error as Error & { code: string; workspaceId: string }).workspaceId = workspaceId;
+      throw error;
     }
 
     // Create and cache new client
@@ -519,7 +522,10 @@ export class SlackApiService {
       // Download file content from url_private
       const accessToken = await this.tokenManager.getAccessTokenByWorkspaceId(workspaceId);
       if (!accessToken) {
-        throw new Error(`ワークスペース ${workspaceId} に接続されていません`);
+        const error = new Error(`Workspace ${workspaceId} is not connected`);
+        (error as Error & { code: string; workspaceId: string }).code = 'WORKSPACE_NOT_CONNECTED';
+        (error as Error & { code: string; workspaceId: string }).workspaceId = workspaceId;
+        throw error;
       }
 
       // Fetch file content with Authorization header
@@ -538,6 +544,15 @@ export class SlackApiService {
       return content;
     } catch (error) {
       console.error('[SlackApiService] downloadWorkflowFile error:', error);
+      // Re-throw WORKSPACE_NOT_CONNECTED errors directly to preserve error code
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        (error as { code: string }).code === 'WORKSPACE_NOT_CONNECTED'
+      ) {
+        throw error;
+      }
       const errorInfo = handleSlackError(error);
       throw new Error(errorInfo.message);
     }
