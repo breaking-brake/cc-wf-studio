@@ -89,6 +89,7 @@ export async function handleConnectSlackOAuth(
         userAccessToken: tokenResponse.authed_user?.access_token,
         tokenScope: tokenResponse.scope?.split(','),
         userId: tokenResponse.authed_user?.id || '',
+        botUserId: tokenResponse.bot_user_id,
         authorizedAt: new Date(),
       };
 

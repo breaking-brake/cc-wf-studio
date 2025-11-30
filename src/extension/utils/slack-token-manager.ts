@@ -69,6 +69,7 @@ export class SlackTokenManager {
       teamId: connection.teamId,
       tokenScope: connection.tokenScope,
       userId: connection.userId,
+      botUserId: connection.botUserId,
       authorizedAt: connection.authorizedAt.toISOString(),
       lastValidatedAt: connection.lastValidatedAt?.toISOString(),
     };
@@ -244,6 +245,7 @@ export class SlackTokenManager {
         userAccessToken: userAccessToken || undefined,
         tokenScope: workspaceData.tokenScope,
         userId: workspaceData.userId,
+        botUserId: workspaceData.botUserId,
         authorizedAt: new Date(workspaceData.authorizedAt),
         lastValidatedAt: workspaceData.lastValidatedAt
           ? new Date(workspaceData.lastValidatedAt)
@@ -290,6 +292,19 @@ export class SlackTokenManager {
   async getUserAccessTokenByWorkspaceId(workspaceId: string): Promise<string | null> {
     const userTokenKey = getWorkspaceSecretKey(workspaceId, 'user-token');
     return (await this.context.secrets.get(userTokenKey)) || null;
+  }
+
+  /**
+   * Gets Bot User ID for specific workspace
+   *
+   * Bot User ID is used for membership check with conversations.members API.
+   *
+   * @param workspaceId - Workspace ID
+   * @returns Bot User ID if exists, null otherwise
+   */
+  async getBotUserId(workspaceId: string): Promise<string | null> {
+    const connection = await this.getConnectionByWorkspaceId(workspaceId);
+    return connection?.botUserId || null;
   }
 
   /**

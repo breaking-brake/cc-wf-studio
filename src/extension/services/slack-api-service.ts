@@ -444,8 +444,12 @@ export class SlackApiService {
   /**
    * Checks if the Bot is a member of the specified channel
    *
-   * Uses conversations.info API which is available with existing Bot Token scopes.
-   * This helps users know if they need to invite the Bot before sharing.
+   * Uses User Token to call conversations.members API to get the member list,
+   * then checks if Bot User ID is in the list. This approach works because
+   * User Token has channels:read/groups:read scopes while Bot Token doesn't.
+   *
+   * For users who authenticated before bot_user_id was saved, this method
+   * falls back to auth.test API to get the Bot User ID dynamically.
    *
    * @param workspaceId - Target workspace ID
    * @param channelId - Target channel ID
@@ -453,18 +457,53 @@ export class SlackApiService {
    */
   async checkBotMembership(workspaceId: string, channelId: string): Promise<boolean> {
     try {
-      // Use Bot Token to check if the Bot is a member of the channel
-      const client = await this.ensureClient(workspaceId);
-      const response = await client.conversations.info({ channel: channelId });
+      // Step 1: Get Bot User ID (from stored data or auth.test)
+      let botUserId = await this.tokenManager.getBotUserId(workspaceId);
 
-      if (!response.ok || !response.channel) {
+      if (!botUserId) {
+        // Fallback for users who authenticated before bot_user_id was saved
+        const client = await this.ensureClient(workspaceId);
+        const authResponse = await client.auth.test();
+        botUserId = (authResponse.user_id as string) || null;
+      }
+
+      if (!botUserId) {
+        // Cannot determine Bot User ID
         return false;
       }
 
-      return response.channel.is_member ?? false;
+      // Step 2: Use User Token to get channel members
+      const userClient = await this.ensureUserClient(workspaceId);
+      if (!userClient) {
+        // User Token not available (e.g., manual token input)
+        return false;
+      }
+
+      // Step 3: Get channel members list (with pagination for large channels)
+      let cursor: string | undefined;
+      do {
+        const response = await userClient.conversations.members({
+          channel: channelId,
+          cursor,
+          limit: 200,
+        });
+
+        if (!response.ok || !response.members) {
+          return false;
+        }
+
+        // Check if Bot User ID is in this batch of members
+        if (response.members.includes(botUserId)) {
+          return true;
+        }
+
+        cursor = response.response_metadata?.next_cursor;
+      } while (cursor);
+
+      // Bot not found in member list
+      return false;
     } catch (_error) {
-      // If we can't check (e.g., missing scope), assume not a member to show warning
-      // This is expected behavior - Bot Token doesn't have channels:read scope
+      // If we can't check, assume not a member to show warning
       // The warning will prompt user to invite the bot
       return false;
     }

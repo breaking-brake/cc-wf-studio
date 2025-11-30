@@ -53,6 +53,7 @@ export interface OAuthInitiation {
 export interface SlackOAuthTokenResponse {
   ok: boolean;
   access_token?: string;
+  bot_user_id?: string; // Bot User ID (for membership check)
   team?: {
     id: string;
     name: string;

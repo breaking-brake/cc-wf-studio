@@ -37,6 +37,9 @@ export interface SlackWorkspaceConnection {
   /** Authenticated user's Slack User ID (e.g., U01234EFGH) */
   userId: string;
 
+  /** Bot User ID for membership check (e.g., U01234ABCD) */
+  botUserId?: string;
+
   /** Authorization timestamp (ISO 8601) */
   authorizedAt: Date;
 
