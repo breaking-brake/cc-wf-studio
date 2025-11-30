@@ -621,6 +621,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Slack OAuth
   'slack.oauth.description':
     '워크스페이스에 연결 버튼을 클릭하면 "Claude Code Workflow Studio"가 Slack에 액세스할 수 있도록 허용하는 확인 화면이 표시됩니다.\n허용하면 워크스페이스에 연동용 Slack App이 설치됩니다.',
+  'slack.oauth.termsOfService': '이용약관',
   'slack.oauth.privacyPolicy': '개인정보처리방침',
   'slack.oauth.supportPage': '지원 페이지',
   'slack.oauth.connectButton': '워크스페이스에 연결',
