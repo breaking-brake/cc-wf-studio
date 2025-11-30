@@ -18,7 +18,7 @@ import type {
   ShareWorkflowSuccessEvent,
 } from '../types/slack-messages';
 import { detectSensitiveData } from '../utils/sensitive-data-detector';
-import { handleSlackError } from '../utils/slack-error-handler';
+import { handleSlackError, type SlackErrorInfo } from '../utils/slack-error-handler';
 import type { WorkflowMessageBlock } from '../utils/slack-message-builder';
 
 /**
@@ -214,11 +214,11 @@ export async function handleShareWorkflowToSlack(
     log('ERROR', 'Workflow sharing failed', {
       requestId,
       errorCode: errorInfo.code,
-      errorMessage: errorInfo.message,
+      messageKey: errorInfo.messageKey,
       executionTimeMs: Date.now() - startTime,
     });
 
-    sendShareFailed(webview, requestId, payload.workflowId, errorInfo.code, errorInfo.message);
+    sendShareFailed(webview, requestId, payload.workflowId, errorInfo);
   }
 }
 
@@ -266,14 +266,16 @@ export async function handleListSlackWorkspaces(
     log('ERROR', 'Failed to list workspaces', {
       requestId,
       errorCode: errorInfo.code,
-      errorMessage: errorInfo.message,
+      messageKey: errorInfo.messageKey,
     });
 
     webview.postMessage({
       type: 'LIST_SLACK_WORKSPACES_FAILED',
       requestId,
       payload: {
-        message: errorInfo.message,
+        errorCode: errorInfo.code,
+        messageKey: errorInfo.messageKey,
+        suggestedActionKey: errorInfo.suggestedActionKey,
       },
     });
   }
@@ -323,14 +325,16 @@ export async function handleGetSlackChannels(
     log('ERROR', 'Failed to get channels', {
       requestId,
       errorCode: errorInfo.code,
-      errorMessage: errorInfo.message,
+      messageKey: errorInfo.messageKey,
     });
 
     webview.postMessage({
       type: 'GET_SLACK_CHANNELS_FAILED',
       requestId,
       payload: {
-        message: errorInfo.message,
+        errorCode: errorInfo.code,
+        messageKey: errorInfo.messageKey,
+        suggestedActionKey: errorInfo.suggestedActionKey,
       },
     });
   }
@@ -343,15 +347,16 @@ function sendShareFailed(
   webview: vscode.Webview,
   requestId: string,
   workflowId: string,
-  errorCode: string,
-  errorMessage: string
+  errorInfo: SlackErrorInfo
 ): void {
   const failedEvent: ShareWorkflowFailedEvent = {
     type: 'SHARE_WORKFLOW_FAILED',
     payload: {
       workflowId,
-      errorCode: errorCode as ShareWorkflowFailedEvent['payload']['errorCode'],
-      errorMessage,
+      errorCode: errorInfo.code as ShareWorkflowFailedEvent['payload']['errorCode'],
+      messageKey: errorInfo.messageKey,
+      suggestedActionKey: errorInfo.suggestedActionKey,
+      messageParams: errorInfo.retryAfter ? { seconds: errorInfo.retryAfter } : undefined,
     },
   };
 

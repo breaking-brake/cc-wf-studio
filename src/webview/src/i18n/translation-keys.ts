@@ -550,7 +550,6 @@ export interface WebviewTranslationKeys {
   'slack.search.noResults': string;
 
   // Slack Errors
-  'slack.error.notAuthenticated': string;
   'slack.error.channelNotFound': string;
   'slack.error.noChannels': string;
   'slack.error.noChannelsHelp': string;
@@ -558,6 +557,21 @@ export interface WebviewTranslationKeys {
   'slack.error.notInChannel': string;
   'slack.error.networkError': string;
   'slack.error.rateLimited': string;
+  'slack.error.invalidAuth': string;
+  'slack.error.missingScope': string;
+  'slack.error.fileTooLarge': string;
+  'slack.error.invalidFileType': string;
+  'slack.error.internalError': string;
+  'slack.error.notAuthed': string;
+  'slack.error.invalidCode': string;
+  'slack.error.badClientSecret': string;
+  'slack.error.invalidGrantType': string;
+  'slack.error.accountInactive': string;
+  'slack.error.invalidQuery': string;
+  'slack.error.msgTooLong': string;
+  'slack.error.workspaceNotConnected': string;
+  'slack.error.unknownError': string;
+  'slack.error.unknownApiError': string;
 
   // Slack Connection Dialog
   'slack.connect.title': string;

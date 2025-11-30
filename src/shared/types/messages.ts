@@ -786,8 +786,14 @@ export interface ImportWorkflowFailedPayload {
     | 'NETWORK_ERROR'
     | 'WORKSPACE_NOT_CONNECTED'
     | 'UNKNOWN_ERROR';
-  /** Error message */
-  errorMessage: string;
+  /** @deprecated Use messageKey for i18n */
+  errorMessage?: string;
+  /** i18n message key for translation */
+  messageKey: string;
+  /** i18n suggested action key for translation */
+  suggestedActionKey?: string;
+  /** Parameters for message interpolation (e.g., retryAfter seconds) */
+  messageParams?: Record<string, string | number>;
   /** Workspace ID that is not connected (for WORKSPACE_NOT_CONNECTED error) */
   workspaceId?: string;
   /** Workspace name for display in error dialogs (decoded from Base64) */
@@ -872,7 +878,14 @@ export interface ShareWorkflowFailedPayload {
     | 'MESSAGE_POST_FAILED'
     | 'NETWORK_ERROR'
     | 'UNKNOWN_ERROR';
-  errorMessage: string;
+  /** @deprecated Use messageKey for i18n */
+  errorMessage?: string;
+  /** i18n message key for translation */
+  messageKey: string;
+  /** i18n suggested action key for translation */
+  suggestedActionKey?: string;
+  /** Parameters for message interpolation (e.g., retryAfter seconds) */
+  messageParams?: Record<string, string | number>;
 }
 
 // ============================================================================

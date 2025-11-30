@@ -655,16 +655,29 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.search.noResults': 'ワークフローが見つかりませんでした',
 
   // Slack Errors
-  'slack.error.notAuthenticated': '先にSlackに接続してください',
   'slack.error.channelNotFound': 'チャンネルが見つかりません',
-  'slack.error.notInChannel':
-    'Slack Appがこのチャンネルのメンバーではありません。先にSlack Appを招待してください。',
+  'slack.error.notInChannel': '共有先のチャンネルにSlack Appが追加されていません。',
   'slack.error.networkError': 'ネットワークエラー。接続を確認してください。',
   'slack.error.rateLimited': 'レート制限を超過しました。{seconds}秒後に再試行してください。',
   'slack.error.noWorkspaces': '接続されているワークスペースがありません',
   'slack.error.noChannels': '利用可能なチャンネルがありません',
   'slack.error.noChannelsHelp':
     'Slack Appがどのチャンネルにも参加していません。Slackで /invite @Claude Code Workflow Studio を実行してSlack Appをチャンネルに招待してください。',
+  'slack.error.invalidAuth': 'Slackトークンが無効です。',
+  'slack.error.missingScope': '必要な権限がありません。',
+  'slack.error.fileTooLarge': 'ファイルサイズが大きすぎます。',
+  'slack.error.invalidFileType': 'サポートされていないファイルタイプです。',
+  'slack.error.internalError': 'Slack内部エラーが発生しました。',
+  'slack.error.notAuthed': '認証情報が提供されていません。',
+  'slack.error.invalidCode': '認証コードが無効または期限切れです。',
+  'slack.error.badClientSecret': 'クライアントシークレットが無効です。',
+  'slack.error.invalidGrantType': '無効な認証タイプです。',
+  'slack.error.accountInactive': 'アカウントが無効化されています。',
+  'slack.error.invalidQuery': '無効な検索クエリです。',
+  'slack.error.msgTooLong': 'メッセージが長すぎます。',
+  'slack.error.workspaceNotConnected': 'インポート元のSlackワークスペースに接続されていません。',
+  'slack.error.unknownError': '不明なエラーが発生しました。',
+  'slack.error.unknownApiError': 'Slack APIエラーが発生しました。',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '機密情報が検出されました',

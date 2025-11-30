@@ -2,23 +2,23 @@
  * Slack Error Handler Utility
  *
  * Provides unified error handling for Slack API operations.
- * Maps Slack API errors to user-friendly messages.
+ * Maps Slack API errors to i18n translation keys.
  *
  * Based on specs/001-slack-workflow-sharing/contracts/slack-api-contracts.md
  */
 
 /**
- * Slack error information
+ * Slack error information with i18n keys
  */
 export interface SlackErrorInfo {
   /** Error code (for programmatic handling) */
   code: string;
-  /** User-friendly error message */
-  message: string;
+  /** i18n message key for translation */
+  messageKey: string;
   /** Whether error is recoverable */
   recoverable: boolean;
-  /** Suggested action for user */
-  suggestedAction?: string;
+  /** i18n suggested action key for translation */
+  suggestedActionKey?: string;
   /** Retry after seconds (for rate limiting) */
   retryAfter?: number;
   /** Workspace ID (for WORKSPACE_NOT_CONNECTED errors) */
@@ -26,84 +26,83 @@ export interface SlackErrorInfo {
 }
 
 /**
- * Error code mappings
+ * Error code mappings with i18n keys
  */
 const ERROR_MAPPINGS: Record<string, Omit<SlackErrorInfo, 'code' | 'retryAfter'>> = {
   invalid_auth: {
-    message: 'Slackトークンが無効です',
+    messageKey: 'slack.error.invalidAuth',
     recoverable: true,
-    suggestedAction: '再度Slackに接続してください',
+    suggestedActionKey: 'slack.error.action.reconnect',
   },
   missing_scope: {
-    message: '必要な権限がありません',
+    messageKey: 'slack.error.missingScope',
     recoverable: true,
-    suggestedAction: 'Slackアプリに必要な権限を追加し、再度接続してください',
+    suggestedActionKey: 'slack.error.action.addPermission',
   },
   rate_limited: {
-    message: 'Slack APIのレート制限に達しました',
+    messageKey: 'slack.error.rateLimited',
     recoverable: true,
-    suggestedAction: 'しばらく待ってから再試行してください',
+    suggestedActionKey: 'slack.error.action.waitAndRetry',
   },
   channel_not_found: {
-    message: 'チャンネルが見つかりません',
+    messageKey: 'slack.error.channelNotFound',
     recoverable: false,
-    suggestedAction: 'チャンネルIDを確認してください',
+    suggestedActionKey: 'slack.error.action.checkChannelId',
   },
   not_in_channel: {
-    message: 'Slack Appがチャンネルに招待されていません',
+    messageKey: 'slack.error.notInChannel',
     recoverable: true,
-    suggestedAction:
-      '共有先のチャンネルで /invite @Claude Code Workflow Studio を実行してSlack Appを招待してから、再度お試しください',
+    suggestedActionKey: 'slack.error.action.inviteBot',
   },
   file_too_large: {
-    message: 'ファイルサイズが大きすぎます',
+    messageKey: 'slack.error.fileTooLarge',
     recoverable: false,
-    suggestedAction: 'ワークフローファイルのサイズを1MB未満に削減してください',
+    suggestedActionKey: 'slack.error.action.reduceFileSize',
   },
   invalid_file_type: {
-    message: 'サポートされていないファイルタイプです',
+    messageKey: 'slack.error.invalidFileType',
     recoverable: false,
-    suggestedAction: 'JSON形式のワークフローファイルのみサポートされています',
+    suggestedActionKey: 'slack.error.action.useJsonFormat',
   },
   internal_error: {
-    message: 'Slack内部エラーが発生しました',
+    messageKey: 'slack.error.internalError',
     recoverable: true,
-    suggestedAction: 'しばらく待ってから再試行してください',
+    suggestedActionKey: 'slack.error.action.waitAndRetry',
   },
   not_authed: {
-    message: '認証情報が提供されていません',
+    messageKey: 'slack.error.notAuthed',
     recoverable: true,
-    suggestedAction: 'Slackに接続してください',
+    suggestedActionKey: 'slack.error.action.connect',
   },
   invalid_code: {
-    message: '認証コードが無効または期限切れです',
+    messageKey: 'slack.error.invalidCode',
     recoverable: true,
-    suggestedAction: '再度認証を開始してください',
+    suggestedActionKey: 'slack.error.action.restartAuth',
   },
   bad_client_secret: {
-    message: 'クライアントシークレットが無効です',
+    messageKey: 'slack.error.badClientSecret',
     recoverable: false,
-    suggestedAction: 'Slackアプリの設定を確認してください',
+    suggestedActionKey: 'slack.error.action.checkAppSettings',
   },
   invalid_grant_type: {
-    message: '無効な認証タイプです',
+    messageKey: 'slack.error.invalidGrantType',
     recoverable: false,
-    suggestedAction: 'Slackアプリの設定を確認してください',
+    suggestedActionKey: 'slack.error.action.checkAppSettings',
   },
   account_inactive: {
-    message: 'アカウントが無効化されています',
+    messageKey: 'slack.error.accountInactive',
     recoverable: false,
-    suggestedAction: 'Slackアカウントの状態を確認してください',
+    suggestedActionKey: 'slack.error.action.checkAccountStatus',
   },
   invalid_query: {
-    message: '無効な検索クエリです',
+    messageKey: 'slack.error.invalidQuery',
     recoverable: false,
-    suggestedAction: '検索キーワードを確認してください',
+    suggestedActionKey: 'slack.error.action.checkSearchKeyword',
   },
   msg_too_long: {
-    message: 'メッセージが長すぎます',
+    messageKey: 'slack.error.msgTooLong',
     recoverable: false,
-    suggestedAction: 'ワークフローの説明を短くするか、ファイルサイズを削減してください',
+    suggestedActionKey: 'slack.error.action.reduceDescription',
   },
 };
 
@@ -111,7 +110,7 @@ const ERROR_MAPPINGS: Record<string, Omit<SlackErrorInfo, 'code' | 'retryAfter'>
  * Handles Slack API errors
  *
  * @param error - Error from Slack API call
- * @returns Structured error information
+ * @returns Structured error information with i18n keys
  */
 export function handleSlackError(error: unknown): SlackErrorInfo {
   // Check for WORKSPACE_NOT_CONNECTED custom error
@@ -124,9 +123,9 @@ export function handleSlackError(error: unknown): SlackErrorInfo {
     const workspaceError = error as { code: string; workspaceId?: string; message?: string };
     return {
       code: 'WORKSPACE_NOT_CONNECTED',
-      message: 'インポート元のSlackワークスペースに接続されていません',
+      messageKey: 'slack.error.workspaceNotConnected',
       recoverable: true,
-      suggestedAction: 'Slackに接続してからワークフローをインポートしてください',
+      suggestedActionKey: 'slack.error.action.connectAndImport',
       workspaceId: workspaceError.workspaceId,
     };
   }
@@ -146,9 +145,9 @@ export function handleSlackError(error: unknown): SlackErrorInfo {
 
     // Get error mapping
     const mapping = ERROR_MAPPINGS[errorCode] || {
-      message: `Slack APIエラー: ${errorCode}`,
+      messageKey: 'slack.error.unknownApiError',
       recoverable: false,
-      suggestedAction: 'エラーが継続する場合は、サポートにお問い合わせください',
+      suggestedActionKey: 'slack.error.action.contactSupport',
     };
 
     // Extract retry-after for rate limiting
@@ -165,36 +164,38 @@ export function handleSlackError(error: unknown): SlackErrorInfo {
   if (error instanceof Error) {
     return {
       code: 'NETWORK_ERROR',
-      message: 'ネットワークエラーが発生しました',
+      messageKey: 'slack.error.networkError',
       recoverable: true,
-      suggestedAction: 'インターネット接続を確認してください',
+      suggestedActionKey: 'slack.error.action.checkConnection',
     };
   }
 
   // Unknown error
   return {
     code: 'UNKNOWN_ERROR',
-    message: '不明なエラーが発生しました',
+    messageKey: 'slack.error.unknownError',
     recoverable: false,
-    suggestedAction: 'エラーが継続する場合は、サポートにお問い合わせください',
+    suggestedActionKey: 'slack.error.action.contactSupport',
   };
 }
 
 /**
- * Formats error for user display
+ * Formats error for user display (deprecated - use i18n on Webview side)
  *
  * @param errorInfo - Error information
- * @returns Formatted error message
+ * @returns Formatted error message key (for debugging purposes)
+ * @deprecated Use messageKey and suggestedActionKey for i18n translation on Webview side
  */
 export function formatErrorMessage(errorInfo: SlackErrorInfo): string {
-  let message = errorInfo.message;
+  // Return messageKey for debugging - actual translation happens on Webview side
+  let message = errorInfo.messageKey;
 
-  if (errorInfo.suggestedAction) {
-    message += `\n\n${errorInfo.suggestedAction}`;
+  if (errorInfo.suggestedActionKey) {
+    message += ` | ${errorInfo.suggestedActionKey}`;
   }
 
   if (errorInfo.retryAfter) {
-    message += `\n\n${errorInfo.retryAfter}秒後に再試行してください。`;
+    message += ` | retryAfter: ${errorInfo.retryAfter}`;
   }
 
   return message;

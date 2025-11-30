@@ -18,7 +18,7 @@ import type {
   ImportWorkflowSuccessEvent,
 } from '../types/slack-messages';
 import { migrateWorkflow } from '../utils/migrate-workflow';
-import { handleSlackError } from '../utils/slack-error-handler';
+import { handleSlackError, type SlackErrorInfo } from '../utils/slack-error-handler';
 import { validateWorkflowFile } from '../utils/workflow-validator';
 
 /**
@@ -225,7 +225,7 @@ export async function handleImportWorkflowFromSlack(
     log('ERROR', 'Workflow import failed - detailed error', {
       requestId,
       errorCode: errorInfo.code,
-      errorMessage: errorInfo.message,
+      messageKey: errorInfo.messageKey,
       workspaceId: errorInfo.workspaceId || payload.workspaceId,
       originalError: error instanceof Error ? error.message : String(error),
       errorStack: error instanceof Error ? error.stack : undefined,
@@ -236,8 +236,7 @@ export async function handleImportWorkflowFromSlack(
       webview,
       requestId,
       payload.workflowId,
-      errorInfo.code,
-      errorInfo.message,
+      errorInfo,
       errorInfo.workspaceId || payload.workspaceId,
       payload.workspaceName
     );
@@ -251,8 +250,7 @@ function sendImportFailed(
   webview: vscode.Webview,
   requestId: string,
   workflowId: string,
-  errorCode: string,
-  errorMessage: string,
+  errorInfo: SlackErrorInfo,
   workspaceId?: string,
   workspaceName?: string
 ): void {
@@ -260,8 +258,10 @@ function sendImportFailed(
     type: 'IMPORT_WORKFLOW_FAILED',
     payload: {
       workflowId,
-      errorCode: errorCode as ImportWorkflowFailedEvent['payload']['errorCode'],
-      errorMessage,
+      errorCode: errorInfo.code as ImportWorkflowFailedEvent['payload']['errorCode'],
+      messageKey: errorInfo.messageKey,
+      suggestedActionKey: errorInfo.suggestedActionKey,
+      messageParams: errorInfo.retryAfter ? { seconds: errorInfo.retryAfter } : undefined,
       workspaceId,
       workspaceName,
     },

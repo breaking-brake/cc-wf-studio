@@ -9,6 +9,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
+import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
 import type {
   SensitiveDataFinding,
   SlackChannel,
@@ -19,6 +20,7 @@ import {
   getLastSharedChannel,
   getSlackChannels,
   listSlackWorkspaces,
+  SlackError,
   setLastSharedChannel,
   shareWorkflowToSlack,
 } from '../../services/slack-integration-service';
@@ -37,6 +39,29 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
   const { t } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
+
+  /**
+   * Format error message from SlackError with i18n support
+   * Note: suggestedAction is intentionally not appended here since the UI
+   * already shows relevant warnings (e.g., bot not in channel warning)
+   */
+  const formatSlackError = (err: unknown): string => {
+    if (err instanceof SlackError) {
+      // Use type assertion since messageKey comes from Extension Host
+      let message = t(err.messageKey as keyof WebviewTranslationKeys);
+      // Interpolate parameters (e.g., {seconds} for rate limiting)
+      if (err.messageParams) {
+        for (const [key, value] of Object.entries(err.messageParams)) {
+          message = message.replace(`{${key}}`, String(value));
+        }
+      }
+      return message;
+    }
+    if (err instanceof Error) {
+      return err.message;
+    }
+    return t('slack.share.failed');
+  };
 
   // Get current canvas state for workflow generation
   const { nodes, edges, activeWorkflow, workflowName } = useWorkflowStore();
@@ -225,7 +250,7 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
         setSensitiveDataWarning(result.sensitiveDataWarning);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('slack.share.failed'));
+      setError(formatSlackError(err));
     } finally {
       setLoading(false);
     }
@@ -266,7 +291,7 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
         handleClose();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('slack.share.failed'));
+      setError(formatSlackError(err));
     } finally {
       setLoading(false);
     }

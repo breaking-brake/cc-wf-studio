@@ -654,15 +654,29 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.search.noResults': '워크플로우를 찾을 수 없습니다',
 
   // Slack Errors
-  'slack.error.notAuthenticated': '먼저 Slack에 연결하세요',
   'slack.error.channelNotFound': '채널을 찾을 수 없습니다',
-  'slack.error.notInChannel': 'Slack 앱이 이 채널의 멤버가 아닙니다. 먼저 Slack 앱을 초대하세요.',
+  'slack.error.notInChannel': '공유 대상 채널에 Slack 앱이 추가되지 않았습니다.',
   'slack.error.networkError': '네트워크 오류가 발생했습니다. 연결을 확인하세요.',
   'slack.error.rateLimited': '요청 한도를 초과했습니다. {seconds}초 후에 다시 시도하세요.',
   'slack.error.noWorkspaces': '연결된 워크스페이스가 없습니다',
   'slack.error.noChannels': '사용 가능한 채널이 없습니다',
   'slack.error.noChannelsHelp':
     'Slack 앱이 어떤 채널에도 참여하지 않았습니다. Slack에서 /invite @Claude Code Workflow Studio를 실행하여 Slack 앱을 채널에 초대하세요.',
+  'slack.error.invalidAuth': 'Slack 토큰이 유효하지 않습니다.',
+  'slack.error.missingScope': '필요한 권한이 없습니다.',
+  'slack.error.fileTooLarge': '파일 크기가 너무 큽니다.',
+  'slack.error.invalidFileType': '지원되지 않는 파일 형식입니다.',
+  'slack.error.internalError': 'Slack 내부 오류가 발생했습니다.',
+  'slack.error.notAuthed': '인증 정보가 제공되지 않았습니다.',
+  'slack.error.invalidCode': '인증 코드가 유효하지 않거나 만료되었습니다.',
+  'slack.error.badClientSecret': '클라이언트 시크릿이 유효하지 않습니다.',
+  'slack.error.invalidGrantType': '유효하지 않은 인증 유형입니다.',
+  'slack.error.accountInactive': '계정이 비활성화되었습니다.',
+  'slack.error.invalidQuery': '유효하지 않은 검색 쿼리입니다.',
+  'slack.error.msgTooLong': '메시지가 너무 깁니다.',
+  'slack.error.workspaceNotConnected': '원본 Slack 워크스페이스에 연결되어 있지 않습니다.',
+  'slack.error.unknownError': '알 수 없는 오류가 발생했습니다.',
+  'slack.error.unknownApiError': 'Slack API 오류가 발생했습니다.',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '민감한 데이터 감지됨',

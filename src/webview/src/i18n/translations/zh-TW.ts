@@ -630,15 +630,29 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'slack.search.noResults': '未找到工作流',
 
   // Slack Errors
-  'slack.error.notAuthenticated': '請先連接到 Slack',
   'slack.error.channelNotFound': '未找到頻道',
-  'slack.error.notInChannel': 'Slack 應用不是此頻道的成員。請先邀請 Slack 應用。',
+  'slack.error.notInChannel': '共享目標頻道未添加 Slack 應用。',
   'slack.error.networkError': '網路錯誤。請檢查您的連接。',
   'slack.error.rateLimited': '超出速率限制。請在 {seconds} 秒後重試。',
   'slack.error.noWorkspaces': '沒有連接的工作區',
   'slack.error.noChannels': '沒有可用的頻道',
   'slack.error.noChannelsHelp':
     'Slack 應用未加入任何頻道。在 Slack 中使用 /invite @Claude Code Workflow Studio 邀請 Slack 應用加入頻道。',
+  'slack.error.invalidAuth': 'Slack 令牌無效。',
+  'slack.error.missingScope': '缺少必要權限。',
+  'slack.error.fileTooLarge': '檔案大小過大。',
+  'slack.error.invalidFileType': '不支援的檔案類型。',
+  'slack.error.internalError': '發生 Slack 內部錯誤。',
+  'slack.error.notAuthed': '未提供認證資訊。',
+  'slack.error.invalidCode': '認證碼無效或已過期。',
+  'slack.error.badClientSecret': '用戶端密鑰無效。',
+  'slack.error.invalidGrantType': '無效的認證類型。',
+  'slack.error.accountInactive': '帳戶已停用。',
+  'slack.error.invalidQuery': '無效的搜尋查詢。',
+  'slack.error.msgTooLong': '訊息過長。',
+  'slack.error.workspaceNotConnected': '未連接到來源 Slack 工作區。',
+  'slack.error.unknownError': '發生未知錯誤。',
+  'slack.error.unknownApiError': '發生 Slack API 錯誤。',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': '檢測到敏感資料',

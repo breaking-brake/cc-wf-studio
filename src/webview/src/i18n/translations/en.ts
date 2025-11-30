@@ -660,16 +660,29 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.search.noResults': 'No workflows found',
 
   // Slack Errors
-  'slack.error.notAuthenticated': 'Please connect to Slack first',
   'slack.error.channelNotFound': 'Channel not found',
   'slack.error.noWorkspaces': 'No workspaces connected',
   'slack.error.noChannels': 'No channels available',
   'slack.error.noChannelsHelp':
     'The Slack App is not a member of any channels. Invite the Slack App to channels using /invite @Claude Code Workflow Studio in Slack.',
-  'slack.error.notInChannel':
-    'Slack App is not a member of this channel. Please invite the Slack App first.',
+  'slack.error.notInChannel': 'Slack App has not been added to the destination channel.',
   'slack.error.networkError': 'Network error. Please check your connection.',
   'slack.error.rateLimited': 'Rate limit exceeded. Please try again in {seconds} seconds.',
+  'slack.error.invalidAuth': 'Slack token is invalid.',
+  'slack.error.missingScope': 'Required permissions are missing.',
+  'slack.error.fileTooLarge': 'File size is too large.',
+  'slack.error.invalidFileType': 'Unsupported file type.',
+  'slack.error.internalError': 'Slack internal error occurred.',
+  'slack.error.notAuthed': 'Authentication credentials not provided.',
+  'slack.error.invalidCode': 'Authentication code is invalid or expired.',
+  'slack.error.badClientSecret': 'Client secret is invalid.',
+  'slack.error.invalidGrantType': 'Invalid authentication type.',
+  'slack.error.accountInactive': 'Account has been deactivated.',
+  'slack.error.invalidQuery': 'Invalid search query.',
+  'slack.error.msgTooLong': 'Message is too long.',
+  'slack.error.workspaceNotConnected': 'Not connected to the source Slack workspace.',
+  'slack.error.unknownError': 'An unknown error occurred.',
+  'slack.error.unknownApiError': 'Slack API error occurred.',
 
   // Sensitive Data Warning
   'slack.sensitiveData.warning.title': 'Sensitive Data Detected',

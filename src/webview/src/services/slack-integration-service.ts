@@ -11,6 +11,34 @@ import type { ExtensionMessage, Workflow } from '@shared/types/messages';
 import { vscode } from '../main';
 
 /**
+ * Custom error class for Slack errors with i18n support
+ */
+export class SlackError extends Error {
+  /** i18n message key for translation */
+  messageKey: string;
+  /** i18n suggested action key for translation */
+  suggestedActionKey?: string;
+  /** Parameters for message interpolation (e.g., retryAfter seconds) */
+  messageParams?: Record<string, string | number>;
+  /** Error code for programmatic handling */
+  errorCode?: string;
+
+  constructor(
+    messageKey: string,
+    suggestedActionKey?: string,
+    messageParams?: Record<string, string | number>,
+    errorCode?: string
+  ) {
+    super(messageKey); // Use messageKey as fallback message
+    this.name = 'SlackError';
+    this.messageKey = messageKey;
+    this.suggestedActionKey = suggestedActionKey;
+    this.messageParams = messageParams;
+    this.errorCode = errorCode;
+  }
+}
+
+/**
  * Slack channel information
  */
 export interface SlackChannel {
@@ -399,7 +427,14 @@ export function shareWorkflowToSlack(options: ShareWorkflowOptions): Promise<{
             sensitiveDataWarning: message.payload?.findings || [],
           });
         } else if (message.type === 'SHARE_WORKFLOW_FAILED') {
-          reject(new Error(message.payload?.errorMessage || 'Failed to share workflow'));
+          reject(
+            new SlackError(
+              message.payload?.messageKey || 'slack.error.unknownError',
+              message.payload?.suggestedActionKey,
+              message.payload?.messageParams,
+              message.payload?.errorCode
+            )
+          );
         }
       }
     };
@@ -442,7 +477,14 @@ export function importWorkflowFromSlack(
         if (message.type === 'IMPORT_WORKFLOW_SUCCESS') {
           resolve({ filePath: message.payload?.filePath || '' });
         } else if (message.type === 'IMPORT_WORKFLOW_FAILED') {
-          reject(new Error(message.payload?.errorMessage || 'Failed to import workflow'));
+          reject(
+            new SlackError(
+              message.payload?.messageKey || 'slack.error.unknownError',
+              message.payload?.suggestedActionKey,
+              message.payload?.messageParams,
+              message.payload?.errorCode
+            )
+          );
         }
       }
     };

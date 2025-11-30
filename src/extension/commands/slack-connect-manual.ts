@@ -183,9 +183,14 @@ export async function handleConnectSlackManual(
 
     log('ERROR', 'Manual Slack connection failed', {
       errorCode: errorInfo.code,
-      errorMessage: errorInfo.message,
+      messageKey: errorInfo.messageKey,
     });
 
-    await vscode.window.showErrorMessage(`Failed to connect to Slack: ${errorInfo.message}`, 'OK');
+    // Note: This error message is shown via VSCode native dialog, not Webview i18n
+    // The messageKey is logged for debugging, but we show a generic English message
+    await vscode.window.showErrorMessage(
+      `Failed to connect to Slack. Please check your token and try again.`,
+      'OK'
+    );
   }
 }

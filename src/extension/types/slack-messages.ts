@@ -166,7 +166,10 @@ export interface SlackConnectFailedEvent {
   type: 'SLACK_CONNECT_FAILED';
   payload: {
     errorCode: 'USER_CANCELLED' | 'OAUTH_FAILED' | 'NETWORK_ERROR' | 'UNKNOWN_ERROR';
-    errorMessage: string;
+    /** i18n message key for translation */
+    messageKey: string;
+    /** i18n suggested action key for translation */
+    suggestedActionKey?: string;
   };
 }
 
@@ -189,7 +192,10 @@ export interface SlackDisconnectFailedEvent {
   type: 'SLACK_DISCONNECT_FAILED';
   payload: {
     errorCode: string;
-    errorMessage: string;
+    /** i18n message key for translation */
+    messageKey: string;
+    /** i18n suggested action key for translation */
+    suggestedActionKey?: string;
   };
 }
 
@@ -214,7 +220,10 @@ export interface GetSlackChannelsFailedEvent {
   type: 'GET_SLACK_CHANNELS_FAILED';
   payload: {
     errorCode: string;
-    errorMessage: string;
+    /** i18n message key for translation */
+    messageKey: string;
+    /** i18n suggested action key for translation */
+    suggestedActionKey?: string;
   };
 }
 
@@ -265,7 +274,12 @@ export interface ShareWorkflowFailedEvent {
       | 'RATE_LIMITED'
       | 'NETWORK_ERROR'
       | 'UNKNOWN_ERROR';
-    errorMessage: string;
+    /** i18n message key for translation */
+    messageKey: string;
+    /** i18n suggested action key for translation */
+    suggestedActionKey?: string;
+    /** Parameters for message interpolation (e.g., retryAfter seconds) */
+    messageParams?: Record<string, string | number>;
   };
 }
 
@@ -308,7 +322,12 @@ export interface ImportWorkflowFailedEvent {
   payload: {
     workflowId: string;
     errorCode: string;
-    errorMessage: string;
+    /** i18n message key for translation */
+    messageKey: string;
+    /** i18n suggested action key for translation */
+    suggestedActionKey?: string;
+    /** Parameters for message interpolation (e.g., retryAfter seconds) */
+    messageParams?: Record<string, string | number>;
     /** Source workspace ID (for WORKSPACE_NOT_CONNECTED errors) */
     workspaceId?: string;
     /** Workspace name for display in error dialogs */
@@ -338,7 +357,10 @@ export interface SearchSlackWorkflowsFailedEvent {
   type: 'SEARCH_SLACK_WORKFLOWS_FAILED';
   payload: {
     errorCode: string;
-    errorMessage: string;
+    /** i18n message key for translation */
+    messageKey: string;
+    /** i18n suggested action key for translation */
+    suggestedActionKey?: string;
   };
 }
 
