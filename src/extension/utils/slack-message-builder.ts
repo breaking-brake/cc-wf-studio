@@ -60,8 +60,10 @@ export interface WorkflowMessageBlock {
   description?: string;
   /** Workflow version */
   version: string;
-  /** Author name */
+  /** Author name (fallback display) */
   authorName: string;
+  /** Author Slack user ID (for <@USER_ID> mention format) */
+  authorUserId?: string;
   /** Node count */
   nodeCount: number;
   /** Created timestamp (ISO 8601) */
@@ -121,7 +123,9 @@ export function buildWorkflowMessageBlocks(
       elements: [
         {
           type: 'mrkdwn',
-          text: `*Author:* ${block.authorName}`,
+          text: block.authorUserId
+            ? `*Author:* <@${block.authorUserId}>`
+            : `*Author:* ${block.authorName || 'Unknown'}`,
         },
         {
           type: 'mrkdwn',

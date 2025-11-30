@@ -86,6 +86,7 @@ export async function handleShareWorkflowToSlack(
     log('INFO', 'Getting Slack user information', { requestId });
     const userInfo = await slackApiService.getUserInfo(payload.workspaceId);
     const authorName = userInfo.userName;
+    const authorUserId = userInfo.userId || undefined;
 
     // Step 3: Extract workflow metadata
     const nodeCount = workflow.nodes.length;
@@ -114,6 +115,7 @@ export async function handleShareWorkflowToSlack(
       description: payload.description || workflow.description,
       version: workflow.version,
       authorName,
+      authorUserId,
       nodeCount,
       createdAt,
       fileId: '', // Will be updated after file upload

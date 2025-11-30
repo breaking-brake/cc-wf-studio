@@ -453,6 +453,7 @@ export class SlackApiService {
    */
   async checkBotMembership(workspaceId: string, channelId: string): Promise<boolean> {
     try {
+      // Use Bot Token to check if the Bot is a member of the channel
       const client = await this.ensureClient(workspaceId);
       const response = await client.conversations.info({ channel: channelId });
 
@@ -461,55 +462,60 @@ export class SlackApiService {
       }
 
       return response.channel.is_member ?? false;
-    } catch (error) {
-      // If we can't check, assume not a member to show warning
-      console.error('[SlackApiService] checkBotMembership error:', error);
+    } catch (_error) {
+      // If we can't check (e.g., missing scope), assume not a member to show warning
+      // This is expected behavior - Bot Token doesn't have channels:read scope
+      // The warning will prompt user to invite the bot
       return false;
     }
   }
 
   /**
-   * Gets current user information (Git username, not Slack user)
+   * Gets current Slack user information
    *
-   * @param _workspaceId - Target workspace ID (not used, kept for compatibility)
-   * @returns User information (user_id as empty string, Git username)
+   * Uses auth.test to get user ID, then users.info to get user details.
+   * Requires 'users:read' scope for users.info API.
+   *
+   * @param workspaceId - Target workspace ID
+   * @returns User information (Slack user ID and username)
    */
-  async getUserInfo(_workspaceId: string): Promise<{
+  async getUserInfo(workspaceId: string): Promise<{
     userId: string;
     userName: string;
   }> {
+    // User Tokenでauth.testを呼び出し（User IDを取得）
+    const userClient = await this.ensureUserClient(workspaceId);
+
+    if (!userClient) {
+      // User Tokenがない場合（手動トークン入力など）
+      return { userId: '', userName: '' };
+    }
+
     try {
-      // Get Git user name from git config
-      const { exec } = await import('node:child_process');
-      const { promisify } = await import('node:util');
-      const execAsync = promisify(exec);
+      const authResponse = await userClient.auth.test();
+      const userId = (authResponse.user_id as string) || '';
 
-      try {
-        const { stdout } = await execAsync('git config user.name');
-        const userName = stdout.trim();
-
-        if (userName) {
-          return {
-            userId: '', // No longer needed
-            userName,
-          };
-        }
-      } catch (_error) {
-        // Git command failed, use fallback
+      if (!userId) {
+        return { userId: '', userName: '' };
       }
 
-      // Fallback: Use environment username
-      const userName = process.env.USER || process.env.USERNAME || 'Unknown User';
+      // users.infoでユーザー情報を取得（users:readスコープ必要）
+      // User Tokenを使用する（Bot Tokenにはusers:readスコープがない）
+      const userResponse = await userClient.users.info({ user: userId });
 
-      return {
-        userId: '', // No longer needed
-        userName,
-      };
-    } catch (_error) {
-      return {
-        userId: '',
-        userName: 'Unknown User',
-      };
+      if (userResponse.ok && userResponse.user) {
+        return {
+          userId,
+          userName: userResponse.user.name || '',
+        };
+      }
+
+      // ユーザー名は取得できなくてもUser IDは返す
+      return { userId, userName: '' };
+    } catch (error) {
+      // スコープ不足またはAPIエラーの場合
+      console.error('[SlackApiService] getUserInfo failed:', error);
+      return { userId: '', userName: '' };
     }
   }
 
