@@ -583,6 +583,7 @@ export interface WebviewTranslationKeys {
   'slack.manualToken.howToGet.step3': string;
   'slack.manualToken.howToGet.step4': string;
   'slack.manualToken.howToGet.step5': string;
+  'slack.manualToken.howToGet.step6': string;
   'slack.manualToken.security.title': string;
   'slack.manualToken.security.notice': string;
   'slack.manualToken.security.storage': string;
@@ -590,9 +591,11 @@ export interface WebviewTranslationKeys {
   'slack.manualToken.security.deletion': string;
   'slack.manualToken.security.sharing': string;
   'slack.manualToken.botToken.label': string;
-  'slack.manualToken.botToken.hint': string;
+  'slack.manualToken.userToken.label': string;
   'slack.manualToken.error.tokenRequired': string;
   'slack.manualToken.error.invalidTokenFormat': string;
+  'slack.manualToken.error.userTokenRequired': string;
+  'slack.manualToken.error.invalidUserTokenFormat': string;
   'slack.manualToken.connecting': string;
   'slack.manualToken.connect': string;
   'slack.manualToken.deleteButton': string;

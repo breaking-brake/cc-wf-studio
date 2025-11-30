@@ -532,16 +532,20 @@ export function registerOpenEditorCommand(
               break;
 
             case 'CONNECT_SLACK_MANUAL':
-              // Manual Slack connection (Bot Token input)
+              // Manual Slack connection (Bot Token + User Token input)
               try {
                 if (!message.payload?.botToken) {
                   throw new Error('Bot Token is required');
+                }
+                if (!message.payload?.userToken) {
+                  throw new Error('User Token is required for secure channel listing');
                 }
 
                 const result = await handleConnectSlackManual(
                   slackTokenManager,
                   slackApiService,
-                  message.payload.botToken
+                  message.payload.botToken,
+                  message.payload.userToken
                 );
 
                 if (result) {

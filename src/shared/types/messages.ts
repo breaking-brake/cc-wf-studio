@@ -641,6 +641,8 @@ export interface GetOAuthRedirectUriSuccessPayload {
 export interface ConnectSlackManualPayload {
   /** Slack Bot User OAuth Token (xoxb-...) */
   botToken: string;
+  /** Slack User OAuth Token (xoxp-...) - Required for secure channel listing */
+  userToken: string;
 }
 
 /**

@@ -539,15 +539,17 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Manual Token
   'slack.manualToken.title': '連接到 Slack',
-  'slack.manualToken.description': '輸入您自己建立的 Slack 應用的 Bot Token 以連接工作區。',
-  'slack.manualToken.howToGet.title': '如何取得 Bot Token',
+  'slack.manualToken.description': '透過您自己建立的 Slack 應用連接到工作區。',
+  'slack.manualToken.howToGet.title': 'Slack App 設定方法',
   'slack.manualToken.howToGet.step1': '建立 Slack App (api.slack.com/apps)',
   'slack.manualToken.howToGet.step2':
-    '新增 Bot Token Scopes (OAuth & Permissions): channels:read, chat:write, files:read, files:write, groups:read',
-  'slack.manualToken.howToGet.step3': '將 App 安裝到您的工作區 (OAuth & Permissions)',
-  'slack.manualToken.howToGet.step4': '將 App 新增至目標頻道 (在 Slack 中)',
-  'slack.manualToken.howToGet.step5':
-    '複製 Bot User OAuth Token 並貼上至下方表單 (OAuth & Permissions, xoxb-...)',
+    '新增 Bot Token Scopes (OAuth & Permissions): chat:write, files:read, files:write',
+  'slack.manualToken.howToGet.step3':
+    '新增 User Token Scopes (OAuth & Permissions): channels:read, groups:read',
+  'slack.manualToken.howToGet.step4': '將 App 安裝到您的工作區 (OAuth & Permissions)',
+  'slack.manualToken.howToGet.step5': '將 App 新增至目標頻道 (在 Slack 中)',
+  'slack.manualToken.howToGet.step6':
+    '複製 Bot User OAuth Token (xoxb-...) 和 User OAuth Token (xoxp-...) 並貼上至下方表單',
   'slack.manualToken.security.title': '安全與隱私',
   'slack.manualToken.security.notice': '注意：此功能與 Slack 伺服器通信（非本地操作）',
   'slack.manualToken.security.storage': '令牌安全儲存於 VSCode Secret Storage (OS 金鑰鏈)',
@@ -555,9 +557,11 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.security.deletion': '可隨時刪除',
   'slack.manualToken.security.sharing': 'Bot Token 具有頻道讀寫等權限。請僅在受信任的社群內分享。',
   'slack.manualToken.botToken.label': 'Bot User OAuth Token',
-  'slack.manualToken.botToken.hint': '以 xoxb- 開頭',
+  'slack.manualToken.userToken.label': 'User OAuth Token',
   'slack.manualToken.error.tokenRequired': 'Bot Token 為必填',
   'slack.manualToken.error.invalidTokenFormat': 'Bot Token 必須以 "xoxb-" 開頭',
+  'slack.manualToken.error.userTokenRequired': 'User Token 為必填',
+  'slack.manualToken.error.invalidUserTokenFormat': 'User Token 必須以 "xoxp-" 開頭',
   'slack.manualToken.connecting': '連接中...',
   'slack.manualToken.connect': '連接',
   'slack.manualToken.deleteButton': '刪除已儲存的令牌',

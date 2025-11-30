@@ -91,22 +91,35 @@ export class SlackTokenManager {
    * @param teamId - Team ID (same as workspaceId)
    * @param accessToken - Bot User OAuth Token (xoxb-...)
    * @param userId - User ID who authorized this connection
+   * @param userAccessToken - User OAuth Token (xoxp-...) for secure channel listing
    */
   async storeManualConnection(
     workspaceId: string,
     workspaceName: string,
     teamId: string,
     accessToken: string,
-    userId: string
+    userId: string,
+    userAccessToken?: string
   ): Promise<void> {
     // Validate token format (Bot Token only)
     if (!SlackTokenManager.validateTokenFormat(accessToken)) {
       throw new Error('Invalid token format. Bot Token (xoxb-...) is required.');
     }
 
+    // Validate User Token format if provided
+    if (userAccessToken && !SlackTokenManager.validateUserTokenFormat(userAccessToken)) {
+      throw new Error('Invalid token format. User Token (xoxp-...) is required.');
+    }
+
     // Store access token for this workspace
     const tokenKey = getWorkspaceSecretKey(workspaceId, 'token');
     await this.context.secrets.store(tokenKey, accessToken);
+
+    // Store User access token if provided (for channel listing)
+    if (userAccessToken) {
+      const userTokenKey = getWorkspaceSecretKey(workspaceId, 'user-token');
+      await this.context.secrets.store(userTokenKey, userAccessToken);
+    }
 
     // Store workspace metadata (without token)
     const workspaceData = {
@@ -395,17 +408,31 @@ export class SlackTokenManager {
   }
 
   /**
-   * Validates token format
+   * Validates Bot token format
    *
-   * Checks if token follows Slack token format (xoxb- or xoxp- prefix).
+   * Checks if token follows Slack Bot token format (xoxb- prefix).
    *
    * @param token - Token to validate
    * @returns True if valid format, false otherwise
    */
   static validateTokenFormat(token: string): boolean {
-    // Slack tokens start with xoxb- (bot) or xoxp- (user)
+    // Slack Bot tokens start with xoxb-
     // Minimum length: 40 characters
-    return /^xox[bp]-[A-Za-z0-9-]{36,}$/.test(token);
+    return /^xoxb-[A-Za-z0-9-]{36,}$/.test(token);
+  }
+
+  /**
+   * Validates User token format
+   *
+   * Checks if token follows Slack User token format (xoxp- prefix).
+   *
+   * @param token - Token to validate
+   * @returns True if valid format, false otherwise
+   */
+  static validateUserTokenFormat(token: string): boolean {
+    // Slack User tokens start with xoxp-
+    // Minimum length: 40 characters
+    return /^xoxp-[A-Za-z0-9-]{36,}$/.test(token);
   }
 
   /**

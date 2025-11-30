@@ -224,16 +224,19 @@ export function disconnectFromSlack(): Promise<void> {
 }
 
 /**
- * Connect to Slack workspace manually with Bot Token
+ * Connect to Slack workspace manually with Bot Token and User Token
  *
- * Users only need to provide Bot Token (xoxb-...).
+ * Users need to provide both Bot Token (xoxb-...) and User Token (xoxp-...).
+ * User Token is required for secure channel listing (only shows channels user is a member of).
  * Workspace info is automatically retrieved via auth.test API.
  *
  * @param botToken - Slack Bot User OAuth Token (xoxb-...)
+ * @param userToken - Slack User OAuth Token (xoxp-...) for secure channel listing
  * @returns Promise that resolves with workspace info
  */
 export function connectSlackManual(
-  botToken: string
+  botToken: string,
+  userToken: string
 ): Promise<{ workspaceId: string; workspaceName: string }> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
@@ -262,7 +265,7 @@ export function connectSlackManual(
     vscode.postMessage({
       type: 'CONNECT_SLACK_MANUAL',
       requestId,
-      payload: { botToken },
+      payload: { botToken, userToken },
     });
 
     setTimeout(

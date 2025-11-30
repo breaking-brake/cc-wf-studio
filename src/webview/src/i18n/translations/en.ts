@@ -563,16 +563,17 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Manual Token
   'slack.manualToken.title': 'Connect to Slack',
-  'slack.manualToken.description':
-    'Enter the Bot Token from your own Slack App to connect to your workspace.',
-  'slack.manualToken.howToGet.title': 'How to get Bot Token',
+  'slack.manualToken.description': 'Connect to your workspace through your own Slack App.',
+  'slack.manualToken.howToGet.title': 'How to set up Slack App',
   'slack.manualToken.howToGet.step1': 'Create Slack App (at api.slack.com/apps)',
   'slack.manualToken.howToGet.step2':
-    'Add Bot Token Scopes (OAuth & Permissions): channels:read, chat:write, files:read, files:write, groups:read',
-  'slack.manualToken.howToGet.step3': 'Install App to your workspace (OAuth & Permissions)',
-  'slack.manualToken.howToGet.step4': 'Invite App to target channel (in Slack)',
-  'slack.manualToken.howToGet.step5':
-    'Copy and paste Bot User OAuth Token to the form below (OAuth & Permissions, xoxb-...)',
+    'Add Bot Token Scopes (OAuth & Permissions): chat:write, files:read, files:write',
+  'slack.manualToken.howToGet.step3':
+    'Add User Token Scopes (OAuth & Permissions): channels:read, groups:read',
+  'slack.manualToken.howToGet.step4': 'Install App to your workspace (OAuth & Permissions)',
+  'slack.manualToken.howToGet.step5': 'Invite App to target channel (in Slack)',
+  'slack.manualToken.howToGet.step6':
+    'Copy Bot Token (xoxb-...) and User Token (xoxp-...) from OAuth & Permissions page',
   'slack.manualToken.security.title': 'Security & Privacy',
   'slack.manualToken.security.notice':
     'Note: This feature communicates with Slack servers (not local-only operation)',
@@ -583,9 +584,11 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.security.sharing':
     'Bot Token has channel read/write and other permissions. Only share within trusted communities.',
   'slack.manualToken.botToken.label': 'Bot User OAuth Token',
-  'slack.manualToken.botToken.hint': 'Starts with xoxb-...',
+  'slack.manualToken.userToken.label': 'User OAuth Token',
   'slack.manualToken.error.tokenRequired': 'Bot Token is required',
   'slack.manualToken.error.invalidTokenFormat': 'Bot Token must start with "xoxb-"',
+  'slack.manualToken.error.userTokenRequired': 'User Token is required for secure channel listing',
+  'slack.manualToken.error.invalidUserTokenFormat': 'User Token must start with "xoxp-"',
   'slack.manualToken.connecting': 'Connecting...',
   'slack.manualToken.connect': 'Connect',
   'slack.manualToken.deleteButton': 'Delete Saved Token',
