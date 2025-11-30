@@ -627,6 +627,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.oauth.description':
     'Click the Connect to Workspace button to display a confirmation screen for granting "Claude Code Workflow Studio" access to Slack.\nOnce you grant permission, the Slack App for integration will be installed to your workspace.',
   'slack.oauth.privacyPolicy': 'Privacy Policy',
+  'slack.oauth.supportPage': 'Support Page',
   'slack.oauth.connectButton': 'Connect to Workspace',
   'slack.oauth.status.initiated': 'Opening browser for authentication...',
   'slack.oauth.status.polling': 'Waiting for authentication...',

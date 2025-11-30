@@ -624,6 +624,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.oauth.description':
     'ワークスペースに接続ボタンをクリックすると、「Claude Code Workflow Studio」にSlackへのアクセスを許可する確認画面が表示されます。\n許可を行うとワークスペースに連携用のSlack Appがインストールされます。',
   'slack.oauth.privacyPolicy': 'プライバシーポリシー',
+  'slack.oauth.supportPage': 'サポートページ',
   'slack.oauth.connectButton': 'ワークスペースに接続',
   'slack.oauth.status.initiated': 'ブラウザを開いて認証中...',
   'slack.oauth.status.polling': '認証を待っています...',

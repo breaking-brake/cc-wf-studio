@@ -383,6 +383,41 @@ export function SlackManualTokenDialog({
               </button>
             </div>
 
+            {/* Support Page Link */}
+            <div
+              style={{
+                marginBottom: '16px',
+              }}
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  openExternalUrl(
+                    'https://github.com/breaking-brake/cc-wf-studio/issues/new/choose'
+                  )
+                }
+                style={{
+                  fontSize: '12px',
+                  color: 'var(--vscode-textLink-foreground)',
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.textDecoration = 'underline';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.textDecoration = 'none';
+                }}
+              >
+                {t('slack.oauth.supportPage')}
+              </button>
+            </div>
+
             {/* OAuth Status Display */}
             {isOAuthLoading && (
               <div

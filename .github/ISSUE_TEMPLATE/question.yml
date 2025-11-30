@@ -1,0 +1,35 @@
+name: Question
+description: Ask a question about usage or behavior
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're happy to help!
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: What would you like to know?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Any background information that helps us understand your question
+      placeholder: I'm trying to...
+
+  - type: input
+    id: version
+    attributes:
+      label: Extension version (if relevant)
+      placeholder: e.g., 2.16.0
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your question

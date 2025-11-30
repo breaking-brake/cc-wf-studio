@@ -567,6 +567,7 @@ export interface WebviewTranslationKeys {
   // Slack OAuth
   'slack.oauth.description': string;
   'slack.oauth.privacyPolicy': string;
+  'slack.oauth.supportPage': string;
   'slack.oauth.connectButton': string;
   'slack.oauth.status.initiated': string;
   'slack.oauth.status.polling': string;

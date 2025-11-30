@@ -598,6 +598,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.oauth.description':
     '点击连接到工作区按钮将显示允许"Claude Code Workflow Studio"访问 Slack 的确认画面。\n授权后，连接用的 Slack App 将安装到您的工作区。',
   'slack.oauth.privacyPolicy': '隐私政策',
+  'slack.oauth.supportPage': '支持页面',
   'slack.oauth.connectButton': '连接到工作区',
   'slack.oauth.status.initiated': '正在打开浏览器进行身份验证...',
   'slack.oauth.status.polling': '等待身份验证...',
