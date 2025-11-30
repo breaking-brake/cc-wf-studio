@@ -588,9 +588,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.error.invalidUserTokenFormat': 'User Tokenは"xoxp-"で始まる必要があります',
   'slack.manualToken.connecting': '接続中...',
   'slack.manualToken.connect': '接続',
-  'slack.manualToken.deleteButton': '保存したトークンを削除',
+  'slack.manualToken.deleteButton': '保存した認証トークンを削除',
   'slack.manualToken.deleteConfirm.title': 'トークンの削除',
-  'slack.manualToken.deleteConfirm.message': '保存されているSlack Bot Tokenを削除しますか？',
+  'slack.manualToken.deleteConfirm.message': '保存した認証トークンを削除しますか？',
   'slack.manualToken.deleteConfirm.confirm': '削除',
   'slack.manualToken.deleteConfirm.cancel': 'キャンセル',
 

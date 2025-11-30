@@ -564,9 +564,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.error.invalidUserTokenFormat': 'User Token 必须以 "xoxp-" 开头',
   'slack.manualToken.connecting': '连接中...',
   'slack.manualToken.connect': '连接',
-  'slack.manualToken.deleteButton': '删除已保存的令牌',
+  'slack.manualToken.deleteButton': '删除已保存的认证令牌',
   'slack.manualToken.deleteConfirm.title': '删除令牌',
-  'slack.manualToken.deleteConfirm.message': '确定要删除已保存的 Slack Bot Token 吗？',
+  'slack.manualToken.deleteConfirm.message': '确定要删除已保存的认证令牌吗？',
   'slack.manualToken.deleteConfirm.confirm': '删除',
   'slack.manualToken.deleteConfirm.cancel': '取消',
 

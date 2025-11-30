@@ -587,9 +587,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.error.invalidUserTokenFormat': 'User Token은 "xoxp-"로 시작해야 합니다',
   'slack.manualToken.connecting': '연결 중...',
   'slack.manualToken.connect': '연결',
-  'slack.manualToken.deleteButton': '저장된 토큰 삭제',
+  'slack.manualToken.deleteButton': '저장된 인증 토큰 삭제',
   'slack.manualToken.deleteConfirm.title': '토큰 삭제',
-  'slack.manualToken.deleteConfirm.message': '저장된 Slack Bot Token을 삭제하시겠습니까?',
+  'slack.manualToken.deleteConfirm.message': '저장된 인증 토큰을 삭제하시겠습니까?',
   'slack.manualToken.deleteConfirm.confirm': '삭제',
   'slack.manualToken.deleteConfirm.cancel': '취소',
 
