@@ -416,48 +416,6 @@ export class SlackApiService {
   }
 
   /**
-   * Gets current Slack user information
-   *
-   * Uses auth.test to get user ID, then users.info to get user details.
-   * Requires 'users:read' scope for users.info API.
-   *
-   * @param workspaceId - Target workspace ID
-   * @returns User information (Slack user ID and username)
-   */
-  async getUserInfo(workspaceId: string): Promise<{
-    userId: string;
-    userName: string;
-  }> {
-    try {
-      const client = await this.ensureUserClient(workspaceId);
-
-      const authResponse = await client.auth.test();
-      const userId = (authResponse.user_id as string) || '';
-
-      if (!userId) {
-        return { userId: '', userName: '' };
-      }
-
-      // users.infoでユーザー情報を取得（users:readスコープ必要）
-      const userResponse = await client.users.info({ user: userId });
-
-      if (userResponse.ok && userResponse.user) {
-        return {
-          userId,
-          userName: userResponse.user.name || '',
-        };
-      }
-
-      // ユーザー名は取得できなくてもUser IDは返す
-      return { userId, userName: '' };
-    } catch (error) {
-      // スコープ不足またはAPIエラーの場合
-      console.error('[SlackApiService] getUserInfo failed:', error);
-      return { userId: '', userName: '' };
-    }
-  }
-
-  /**
    * Updates existing workflow message with new content
    *
    * Uses User Token to update messages posted by the authenticated user.

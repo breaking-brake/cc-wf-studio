@@ -28,7 +28,7 @@ const OAUTH_CONFIG = {
   /** Bot Token scopes (empty - all operations use User Token) */
   scopes: '',
   /** User Token scopes (all functionality including message posting and file operations) */
-  userScopes: 'channels:read,groups:read,users:read,chat:write,files:read,files:write',
+  userScopes: 'channels:read,groups:read,chat:write,files:read,files:write',
   /** Initial polling interval in milliseconds */
   pollingIntervalInitialMs: 1000,
   /** Maximum polling interval in milliseconds */

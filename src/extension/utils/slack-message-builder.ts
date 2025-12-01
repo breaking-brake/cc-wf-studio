@@ -60,14 +60,8 @@ export interface WorkflowMessageBlock {
   description?: string;
   /** Workflow version */
   version: string;
-  /** Author name (fallback display) */
-  authorName: string;
-  /** Author Slack user ID (for <@USER_ID> mention format) */
-  authorUserId?: string;
   /** Node count */
   nodeCount: number;
-  /** Created timestamp (ISO 8601) */
-  createdAt: string;
   /** File ID (after upload) */
   fileId: string;
   /** Workspace ID (for deep link) */
@@ -86,7 +80,7 @@ export interface WorkflowMessageBlock {
  * Creates a rich message card with:
  * - Header with workflow name
  * - Description section (if provided)
- * - Metadata fields (Author, Date)
+ * - Metadata fields (Date)
  * - Import link with deep link to VS Code
  *
  * @param block - Workflow message block
@@ -117,22 +111,6 @@ export function buildWorkflowMessageBlocks(
           { type: 'divider' },
         ]
       : [{ type: 'divider' }]),
-    // Metadata fields
-    {
-      type: 'context',
-      elements: [
-        {
-          type: 'mrkdwn',
-          text: block.authorUserId
-            ? `*Author:* <@${block.authorUserId}>`
-            : `*Author:* ${block.authorName || 'Unknown'}`,
-        },
-        {
-          type: 'mrkdwn',
-          text: `*Date:* ${new Date(block.createdAt).toLocaleDateString()}`,
-        },
-      ],
-    },
     // Import links section
     ...(block.workspaceId && block.channelId && block.messageTs && block.fileId
       ? [
@@ -144,15 +122,6 @@ export function buildWorkflowMessageBlocks(
                 text: `📥 *Import to:*  ${SUPPORTED_EDITORS.map(
                   (editor) => `<${buildImportUri(editor.scheme, block)}|${editor.name}>`
                 ).join(' · ')}`,
-              },
-            ],
-          },
-          {
-            type: 'context',
-            elements: [
-              {
-                type: 'mrkdwn',
-                text: '_Note: Please open your target workspace before clicking the import link_',
               },
             ],
           },

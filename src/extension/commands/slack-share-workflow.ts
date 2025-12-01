@@ -82,20 +82,10 @@ export async function handleShareWorkflowToSlack(
 
     log('INFO', 'No sensitive data detected or warning overridden', { requestId });
 
-    // Step 2: Get Slack user information for author
-    log('INFO', 'Getting Slack user information', { requestId });
-    const userInfo = await slackApiService.getUserInfo(payload.workspaceId);
-    const authorName = userInfo.userName;
-    const authorUserId = userInfo.userId || undefined;
-
-    // Step 3: Extract workflow metadata
+    // Step 2: Extract workflow metadata
     const nodeCount = workflow.nodes.length;
-    const createdAt =
-      typeof workflow.createdAt === 'string'
-        ? workflow.createdAt
-        : new Date(workflow.createdAt).toISOString();
 
-    // Step 4: Get workspace name for deep link
+    // Step 3: Get workspace name for deep link
     log('INFO', 'Getting workspace name for deep link', { requestId });
     let workspaceName: string | undefined;
     try {
@@ -106,7 +96,7 @@ export async function handleShareWorkflowToSlack(
       log('WARN', 'Failed to get workspace name, continuing without it', { requestId });
     }
 
-    // Step 5: Post rich message card to channel (main message)
+    // Step 4: Post rich message card to channel (main message)
     log('INFO', 'Posting workflow message card to Slack', { requestId });
 
     const messageBlock: WorkflowMessageBlock = {
@@ -114,10 +104,7 @@ export async function handleShareWorkflowToSlack(
       name: workflow.name,
       description: payload.description || workflow.description,
       version: workflow.version,
-      authorName,
-      authorUserId,
       nodeCount,
-      createdAt,
       fileId: '', // Will be updated after file upload
       workspaceId: payload.workspaceId,
       workspaceName,
@@ -136,7 +123,7 @@ export async function handleShareWorkflowToSlack(
       permalink: messageResult.permalink,
     });
 
-    // Step 6: Upload workflow file to thread as reply
+    // Step 5: Upload workflow file to thread as reply
     log('INFO', 'Uploading workflow file to thread', { requestId });
 
     const filename = `${payload.workflowName.replace(/[^a-zA-Z0-9-_]/g, '_')}.json`;
@@ -154,7 +141,7 @@ export async function handleShareWorkflowToSlack(
       fileId: uploadResult.fileId,
     });
 
-    // Step 7: Update message with complete deep links
+    // Step 6: Update message with complete deep links
     log('INFO', 'Updating message with complete deep links', { requestId });
 
     const updatedMessageBlock: WorkflowMessageBlock = {
@@ -172,7 +159,7 @@ export async function handleShareWorkflowToSlack(
 
     log('INFO', 'Message updated with complete deep links', { requestId });
 
-    // Step 8: Send success response
+    // Step 7: Send success response
     const successEvent: ShareWorkflowSuccessEvent = {
       type: 'SHARE_WORKFLOW_SUCCESS',
       payload: {
