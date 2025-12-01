@@ -17,7 +17,7 @@
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
     "driver.js": "^1.4.0",
-    "lucide-react": "^0.554.0",
+    "lucide-react": "^0.555.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "reactflow": "^11.10.0",
