@@ -85,42 +85,35 @@ export class SlackTokenManager {
    * Stores Slack workspace connection from manual token input
    *
    * This is a simplified version of storeConnection() for manual token input.
-   * It does not require full OAuth flow metadata.
+   * It does not require full OAuth flow metadata. Only User Token is required.
    *
    * @param workspaceId - Workspace ID (Team ID)
    * @param workspaceName - Workspace name
    * @param teamId - Team ID (same as workspaceId)
-   * @param accessToken - Bot User OAuth Token (xoxb-...)
-   * @param userId - User ID who authorized this connection
-   * @param userAccessToken - User OAuth Token (xoxp-...) for secure channel listing
+   * @param _accessToken - @deprecated Bot Token is no longer used, kept for backward compatibility
+   * @param userId - User ID (no longer used, kept for backward compatibility)
+   * @param userAccessToken - User OAuth Token (xoxp-...) - REQUIRED for all Slack operations
    */
   async storeManualConnection(
     workspaceId: string,
     workspaceName: string,
     teamId: string,
-    accessToken: string,
+    _accessToken: string, // @deprecated - Bot Token is no longer used
     userId: string,
     userAccessToken?: string
   ): Promise<void> {
-    // Validate token format (Bot Token only)
-    if (!SlackTokenManager.validateTokenFormat(accessToken)) {
-      throw new Error('Invalid token format. Bot Token (xoxb-...) is required.');
-    }
-
-    // Validate User Token format if provided
-    if (userAccessToken && !SlackTokenManager.validateUserTokenFormat(userAccessToken)) {
+    // Validate User Token format (required)
+    if (!userAccessToken || !SlackTokenManager.validateUserTokenFormat(userAccessToken)) {
       throw new Error('Invalid token format. User Token (xoxp-...) is required.');
     }
 
-    // Store access token for this workspace
-    const tokenKey = getWorkspaceSecretKey(workspaceId, 'token');
-    await this.context.secrets.store(tokenKey, accessToken);
+    // Store User access token (for all Slack operations)
+    const userTokenKey = getWorkspaceSecretKey(workspaceId, 'user-token');
+    await this.context.secrets.store(userTokenKey, userAccessToken);
 
-    // Store User access token if provided (for channel listing)
-    if (userAccessToken) {
-      const userTokenKey = getWorkspaceSecretKey(workspaceId, 'user-token');
-      await this.context.secrets.store(userTokenKey, userAccessToken);
-    }
+    // Store empty Bot token for backward compatibility
+    const tokenKey = getWorkspaceSecretKey(workspaceId, 'token');
+    await this.context.secrets.store(tokenKey, '');
 
     // Store workspace metadata (without token)
     const workspaceData = {
