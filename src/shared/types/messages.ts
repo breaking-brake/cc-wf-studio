@@ -577,8 +577,7 @@ export type ExtensionMessage =
   | Message<SlackOAuthSuccessPayload, 'SLACK_OAUTH_SUCCESS'>
   | Message<SlackErrorPayload, 'SLACK_OAUTH_FAILED'>
   | Message<void, 'SLACK_OAUTH_CANCELLED'>
-  | Message<GetLastSharedChannelSuccessPayload, 'GET_LAST_SHARED_CHANNEL_SUCCESS'>
-  | Message<CheckBotChannelMembershipSuccessPayload, 'CHECK_BOT_CHANNEL_MEMBERSHIP_SUCCESS'>;
+  | Message<GetLastSharedChannelSuccessPayload, 'GET_LAST_SHARED_CHANNEL_SUCCESS'>;
 
 // ============================================================================
 // Slack Integration Payloads (001-slack-workflow-sharing)
@@ -915,24 +914,6 @@ export interface GetLastSharedChannelSuccessPayload {
   channelId: string | null;
 }
 
-/**
- * Check bot channel membership payload
- */
-export interface CheckBotChannelMembershipPayload {
-  /** Target workspace ID */
-  workspaceId: string;
-  /** Target channel ID to check */
-  channelId: string;
-}
-
-/**
- * Check bot channel membership success payload
- */
-export interface CheckBotChannelMembershipSuccessPayload {
-  /** Whether the bot is a member of the channel */
-  isMember: boolean;
-}
-
 // ============================================================================
 // Webview → Extension Messages
 // ============================================================================
@@ -972,8 +953,7 @@ export type WebviewMessage =
   | Message<ImportWorkflowFromSlackPayload, 'IMPORT_WORKFLOW_FROM_SLACK'>
   | Message<OpenExternalUrlPayload, 'OPEN_EXTERNAL_URL'>
   | Message<void, 'GET_LAST_SHARED_CHANNEL'>
-  | Message<SetLastSharedChannelPayload, 'SET_LAST_SHARED_CHANNEL'>
-  | Message<CheckBotChannelMembershipPayload, 'CHECK_BOT_CHANNEL_MEMBERSHIP'>;
+  | Message<SetLastSharedChannelPayload, 'SET_LAST_SHARED_CHANNEL'>;
 
 // ============================================================================
 // Error Codes

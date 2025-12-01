@@ -3,7 +3,7 @@
  *
  * Dialog for connecting to Slack workspace with two options:
  * - OAuth: One-click authentication via browser
- * - Manual Token: Enter Bot Token manually
+ * - Manual Token: Enter User Token manually
  *
  * Based on specs/001-slack-workflow-sharing OAuth implementation plan
  */
@@ -45,7 +45,6 @@ export function SlackManualTokenDialog({
   const [oauthError, setOauthError] = useState<string | null>(null);
 
   // Manual token state
-  const [botToken, setBotToken] = useState('');
   const [userToken, setUserToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +60,6 @@ export function SlackManualTokenDialog({
   // Reset state and check token existence when dialog opens
   useEffect(() => {
     if (isOpen) {
-      setBotToken('');
       setUserToken('');
       setError(null);
       setOauthError(null);
@@ -141,16 +139,6 @@ export function SlackManualTokenDialog({
 
   // Manual token connection handler
   const handleConnect = async () => {
-    if (!botToken.trim()) {
-      setError(t('slack.manualToken.error.tokenRequired'));
-      return;
-    }
-
-    if (!botToken.startsWith('xoxb-')) {
-      setError(t('slack.manualToken.error.invalidTokenFormat'));
-      return;
-    }
-
     if (!userToken.trim()) {
       setError(t('slack.manualToken.error.userTokenRequired'));
       return;
@@ -165,7 +153,8 @@ export function SlackManualTokenDialog({
     setError(null);
 
     try {
-      await connectSlackManual(botToken, userToken);
+      // Bot Token is no longer required, pass empty string for backward compatibility
+      await connectSlackManual('', userToken);
 
       // Success - close dialog and notify parent
       if (onSuccess) {
@@ -612,7 +601,7 @@ export function SlackManualTokenDialog({
               {t('slack.manualToken.description')}
             </div>
 
-            {/* How to Get Bot Token Box */}
+            {/* How to Get User Token Box */}
             <div
               style={{
                 marginBottom: '12px',
@@ -729,40 +718,6 @@ export function SlackManualTokenDialog({
               </li>
             </ul>
 
-            {/* Bot Token Input */}
-            <div style={{ marginBottom: '16px' }}>
-              <label
-                htmlFor="bot-token"
-                style={{
-                  display: 'block',
-                  fontSize: '13px',
-                  color: 'var(--vscode-foreground)',
-                  marginBottom: '8px',
-                  fontWeight: 500,
-                }}
-              >
-                {t('slack.manualToken.botToken.label')}
-              </label>
-              <input
-                id="bot-token"
-                type="password"
-                value={botToken}
-                onChange={(e) => setBotToken(e.target.value)}
-                placeholder="xoxb-..."
-                disabled={loading}
-                style={{
-                  width: '100%',
-                  padding: '6px 8px',
-                  backgroundColor: 'var(--vscode-input-background)',
-                  color: 'var(--vscode-input-foreground)',
-                  border: '1px solid var(--vscode-input-border)',
-                  borderRadius: '2px',
-                  fontSize: '13px',
-                  fontFamily: 'monospace',
-                }}
-              />
-            </div>
-
             {/* User Token Input */}
             <div style={{ marginBottom: '16px' }}>
               <label
@@ -866,18 +821,17 @@ export function SlackManualTokenDialog({
                 <button
                   type="button"
                   onClick={handleConnect}
-                  disabled={loading || !botToken.trim() || !userToken.trim()}
+                  disabled={loading || !userToken.trim()}
                   style={{
                     padding: '6px 16px',
                     backgroundColor: 'var(--vscode-button-background)',
                     color: 'var(--vscode-button-foreground)',
                     border: 'none',
                     borderRadius: '2px',
-                    cursor:
-                      loading || !botToken.trim() || !userToken.trim() ? 'not-allowed' : 'pointer',
+                    cursor: loading || !userToken.trim() ? 'not-allowed' : 'pointer',
                     fontSize: '13px',
                     fontWeight: 500,
-                    opacity: loading || !botToken.trim() || !userToken.trim() ? 0.5 : 1,
+                    opacity: loading || !userToken.trim() ? 0.5 : 1,
                   }}
                 >
                   {loading ? t('slack.manualToken.connecting') : t('slack.manualToken.connect')}

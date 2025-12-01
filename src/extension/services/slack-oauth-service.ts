@@ -25,10 +25,10 @@ const OAUTH_CONFIG = {
   serverUrl: 'https://cc-wf-studio.com',
   /** Slack OAuth Client ID (public) */
   slackClientId: '9964370319943.10022663519665',
-  /** Required Slack Bot Token scopes */
-  scopes: 'chat:write,files:read,files:write',
-  /** Required Slack User Token scopes (for channel listing) */
-  userScopes: 'channels:read,groups:read,users:read',
+  /** Bot Token scopes (empty - all operations use User Token) */
+  scopes: '',
+  /** User Token scopes (all functionality including message posting and file operations) */
+  userScopes: 'channels:read,groups:read,users:read,chat:write,files:read,files:write',
   /** Initial polling interval in milliseconds */
   pollingIntervalInitialMs: 1000,
   /** Maximum polling interval in milliseconds */

@@ -691,33 +691,6 @@ export function registerOpenEditorCommand(
               }
               break;
 
-            case 'CHECK_BOT_CHANNEL_MEMBERSHIP':
-              // Check if bot is a member of the specified channel
-              {
-                const { workspaceId, channelId } = message.payload || {};
-                if (workspaceId && channelId) {
-                  try {
-                    const isMember = await slackApiService.checkBotMembership(
-                      workspaceId,
-                      channelId
-                    );
-                    webview.postMessage({
-                      type: 'CHECK_BOT_CHANNEL_MEMBERSHIP_SUCCESS',
-                      requestId: message.requestId,
-                      payload: { isMember },
-                    });
-                  } catch (_error) {
-                    // On error, assume not a member to show warning
-                    webview.postMessage({
-                      type: 'CHECK_BOT_CHANNEL_MEMBERSHIP_SUCCESS',
-                      requestId: message.requestId,
-                      payload: { isMember: false },
-                    });
-                  }
-                }
-              }
-              break;
-
             default:
               console.warn('Unknown message type:', message);
           }

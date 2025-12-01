@@ -581,8 +581,6 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.success': '工作流分享成功',
   'slack.share.failed': '工作流分享失敗',
   'slack.share.descriptionPlaceholder': '新增描述（選填）...',
-  'slack.share.checkingBotMembership': '正在檢查 Slack 應用是否在頻道中...',
-  'slack.share.botNotInChannelMessage': '此頻道尚未添加 Slack 應用。\n請在分享前添加 Slack 應用。',
 
   // Slack Connect
   'slack.connect.button': '連接到 Slack',

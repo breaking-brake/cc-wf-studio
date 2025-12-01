@@ -73,22 +73,23 @@ export async function handleConnectSlackOAuth(
       // Step 5: Exchange code for token
       const tokenResponse = await oauthService.exchangeCodeForToken(codeResult.code);
 
-      if (!tokenResponse.access_token || !tokenResponse.team) {
-        throw new Error('Invalid token response from OAuth server');
+      // User Token is required (Bot Token is no longer used)
+      if (!tokenResponse.authed_user?.access_token || !tokenResponse.team) {
+        throw new Error('Invalid token response from OAuth server: User Token is required');
       }
 
       // Step 6: Clear existing connections and store new one
       await tokenManager.clearConnection();
 
-      // Store connection with both Bot Token and User Token (if available)
+      // Store connection with User Token only (Bot Token is deprecated)
       const connectionToStore = {
         workspaceId: tokenResponse.team.id,
         workspaceName: tokenResponse.team.name,
         teamId: tokenResponse.team.id,
-        accessToken: tokenResponse.access_token,
-        userAccessToken: tokenResponse.authed_user?.access_token,
+        accessToken: '', // Bot Token is no longer used
+        userAccessToken: tokenResponse.authed_user.access_token,
         tokenScope: tokenResponse.scope?.split(','),
-        userId: tokenResponse.authed_user?.id || '',
+        userId: tokenResponse.authed_user.id || '',
         botUserId: tokenResponse.bot_user_id,
         authorizedAt: new Date(),
       };

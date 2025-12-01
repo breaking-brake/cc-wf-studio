@@ -605,9 +605,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.success': 'ワークフローを共有しました',
   'slack.share.failed': 'ワークフローの共有に失敗しました',
   'slack.share.descriptionPlaceholder': '説明を追加（任意）...',
-  'slack.share.checkingBotMembership': 'Slack Appがチャンネルにいるか確認中...',
-  'slack.share.botNotInChannelMessage':
-    'このチャンネルにはSlack Appがまだ追加されていません。\n共有する前にSlack Appを追加してください。',
 
   // Slack Connect
   'slack.connect.button': 'Slackに接続',

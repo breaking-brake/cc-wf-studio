@@ -107,53 +107,22 @@ export interface SearchResult {
  * Supports multiple workspace connections.
  */
 export class SlackApiService {
-  /** Workspace-specific WebClient cache (Bot Token) */
-  private clients: Map<string, WebClient> = new Map();
   /** Workspace-specific WebClient cache (User Token) */
   private userClients: Map<string, WebClient> = new Map();
 
   constructor(private readonly tokenManager: SlackTokenManager) {}
 
   /**
-   * Initializes Slack client for specific workspace with access token
-   *
-   * @param workspaceId - Target workspace ID
-   * @throws Error if workspace not authenticated
-   */
-  private async ensureClient(workspaceId: string): Promise<WebClient> {
-    // Return cached client if exists
-    let client = this.clients.get(workspaceId);
-    if (client) {
-      return client;
-    }
-
-    // Get access token for this workspace
-    const accessToken = await this.tokenManager.getAccessTokenByWorkspaceId(workspaceId);
-
-    if (!accessToken) {
-      const error = new Error(`Workspace ${workspaceId} is not connected`);
-      (error as Error & { code: string; workspaceId: string }).code = 'WORKSPACE_NOT_CONNECTED';
-      (error as Error & { code: string; workspaceId: string }).workspaceId = workspaceId;
-      throw error;
-    }
-
-    // Create and cache new client
-    client = new WebClient(accessToken);
-    this.clients.set(workspaceId, client);
-
-    return client;
-  }
-
-  /**
    * Initializes Slack client for specific workspace with User access token
    *
-   * User Token is used for user-specific operations like listing channels
-   * the authenticated user is a member of.
+   * All Slack API operations use User Token to ensure user can only
+   * access channels they are a member of.
    *
    * @param workspaceId - Target workspace ID
-   * @returns WebClient or null if User Token not available
+   * @returns WebClient
+   * @throws Error if User Token not available
    */
-  private async ensureUserClient(workspaceId: string): Promise<WebClient | null> {
+  private async ensureUserClient(workspaceId: string): Promise<WebClient> {
     // Return cached client if exists
     let client = this.userClients.get(workspaceId);
     if (client) {
@@ -164,8 +133,12 @@ export class SlackApiService {
     const userAccessToken = await this.tokenManager.getUserAccessTokenByWorkspaceId(workspaceId);
 
     if (!userAccessToken) {
-      // User Token not available, will fallback to Bot Token
-      return null;
+      const error = new Error(
+        `Workspace ${workspaceId} is not connected or User Token not available`
+      );
+      (error as Error & { code: string; workspaceId: string }).code = 'USER_TOKEN_REQUIRED';
+      (error as Error & { code: string; workspaceId: string }).workspaceId = workspaceId;
+      throw error;
     }
 
     // Create and cache new client
@@ -182,10 +155,8 @@ export class SlackApiService {
    */
   invalidateClient(workspaceId?: string): void {
     if (workspaceId) {
-      this.clients.delete(workspaceId);
       this.userClients.delete(workspaceId);
     } else {
-      this.clients.clear();
       this.userClients.clear();
     }
   }
@@ -193,9 +164,8 @@ export class SlackApiService {
   /**
    * Gets list of Slack channels
    *
-   * Uses User Token (xoxp-...) if available for accurate channel listing based on
-   * authenticated user's membership. Falls back to Bot Token (xoxb-...) if User Token
-   * is not available (e.g., manual token input or legacy connections).
+   * Uses User Token (xoxp-...) for accurate channel listing based on
+   * authenticated user's membership.
    *
    * @param workspaceId - Target workspace ID
    * @param includePrivate - Include private channels (default: true)
@@ -208,10 +178,7 @@ export class SlackApiService {
     onlyMember = true
   ): Promise<SlackChannel[]> {
     try {
-      // Prefer User Token for channel listing (returns user's channels)
-      // Fall back to Bot Token (returns bot's channels - may include channels user is not in)
-      const userClient = await this.ensureUserClient(workspaceId);
-      const client = userClient ?? (await this.ensureClient(workspaceId));
+      const client = await this.ensureUserClient(workspaceId);
 
       // Build channel types filter
       const types: string[] = ['public_channel'];
@@ -268,11 +235,13 @@ export class SlackApiService {
   /**
    * Uploads workflow file to Slack
    *
+   * Uses User Token to upload files as the authenticated user.
+   *
    * @param options - Upload options
    * @returns File upload result
    */
   async uploadWorkflowFile(options: WorkflowUploadOptions): Promise<FileUploadResult> {
-    const client = await this.ensureClient(options.workspaceId);
+    const client = await this.ensureUserClient(options.workspaceId);
 
     // Upload file using files.uploadV2
     const response = await client.files.uploadV2({
@@ -320,6 +289,9 @@ export class SlackApiService {
   /**
    * Posts rich message card to channel
    *
+   * Uses User Token to post messages as the authenticated user.
+   * This ensures the user can only post to channels they are a member of.
+   *
    * @param workspaceId - Target workspace ID
    * @param channelId - Target channel ID
    * @param block - Workflow message block
@@ -330,7 +302,7 @@ export class SlackApiService {
     channelId: string,
     block: WorkflowMessageBlock
   ): Promise<MessagePostResult> {
-    const client = await this.ensureClient(workspaceId);
+    const client = await this.ensureUserClient(workspaceId);
 
     // Build Block Kit blocks
     const blocks = buildWorkflowMessageBlocks(block);
@@ -363,12 +335,14 @@ export class SlackApiService {
   /**
    * Searches for workflow messages
    *
+   * Uses User Token to search messages accessible to the authenticated user.
+   *
    * @param options - Search options
    * @returns Array of search results
    */
   async searchWorkflows(options: WorkflowSearchOptions): Promise<SearchResult[]> {
     try {
-      const client = await this.ensureClient(options.workspaceId);
+      const client = await this.ensureUserClient(options.workspaceId);
 
       // Build search query
       let query = 'workflow filename:*.json';
@@ -417,14 +391,14 @@ export class SlackApiService {
   }
 
   /**
-   * Validates token for specific workspace
+   * Validates User Token for specific workspace
    *
    * @param workspaceId - Target workspace ID
-   * @returns True if token is valid
+   * @returns True if User Token is valid
    */
   async validateToken(workspaceId: string): Promise<boolean> {
     try {
-      const client = await this.ensureClient(workspaceId);
+      const client = await this.ensureUserClient(workspaceId);
       const response = await client.auth.test();
       return response.ok === true;
     } catch (_error) {
@@ -442,74 +416,6 @@ export class SlackApiService {
   }
 
   /**
-   * Checks if the Bot is a member of the specified channel
-   *
-   * Uses User Token to call conversations.members API to get the member list,
-   * then checks if Bot User ID is in the list. This approach works because
-   * User Token has channels:read/groups:read scopes while Bot Token doesn't.
-   *
-   * For users who authenticated before bot_user_id was saved, this method
-   * falls back to auth.test API to get the Bot User ID dynamically.
-   *
-   * @param workspaceId - Target workspace ID
-   * @param channelId - Target channel ID
-   * @returns True if Bot is a member of the channel
-   */
-  async checkBotMembership(workspaceId: string, channelId: string): Promise<boolean> {
-    try {
-      // Step 1: Get Bot User ID (from stored data or auth.test)
-      let botUserId = await this.tokenManager.getBotUserId(workspaceId);
-
-      if (!botUserId) {
-        // Fallback for users who authenticated before bot_user_id was saved
-        const client = await this.ensureClient(workspaceId);
-        const authResponse = await client.auth.test();
-        botUserId = (authResponse.user_id as string) || null;
-      }
-
-      if (!botUserId) {
-        // Cannot determine Bot User ID
-        return false;
-      }
-
-      // Step 2: Use User Token to get channel members
-      const userClient = await this.ensureUserClient(workspaceId);
-      if (!userClient) {
-        // User Token not available (e.g., manual token input)
-        return false;
-      }
-
-      // Step 3: Get channel members list (with pagination for large channels)
-      let cursor: string | undefined;
-      do {
-        const response = await userClient.conversations.members({
-          channel: channelId,
-          cursor,
-          limit: 200,
-        });
-
-        if (!response.ok || !response.members) {
-          return false;
-        }
-
-        // Check if Bot User ID is in this batch of members
-        if (response.members.includes(botUserId)) {
-          return true;
-        }
-
-        cursor = response.response_metadata?.next_cursor;
-      } while (cursor);
-
-      // Bot not found in member list
-      return false;
-    } catch (_error) {
-      // If we can't check, assume not a member to show warning
-      // The warning will prompt user to invite the bot
-      return false;
-    }
-  }
-
-  /**
    * Gets current Slack user information
    *
    * Uses auth.test to get user ID, then users.info to get user details.
@@ -522,16 +428,10 @@ export class SlackApiService {
     userId: string;
     userName: string;
   }> {
-    // User Tokenでauth.testを呼び出し（User IDを取得）
-    const userClient = await this.ensureUserClient(workspaceId);
-
-    if (!userClient) {
-      // User Tokenがない場合（手動トークン入力など）
-      return { userId: '', userName: '' };
-    }
-
     try {
-      const authResponse = await userClient.auth.test();
+      const client = await this.ensureUserClient(workspaceId);
+
+      const authResponse = await client.auth.test();
       const userId = (authResponse.user_id as string) || '';
 
       if (!userId) {
@@ -539,8 +439,7 @@ export class SlackApiService {
       }
 
       // users.infoでユーザー情報を取得（users:readスコープ必要）
-      // User Tokenを使用する（Bot Tokenにはusers:readスコープがない）
-      const userResponse = await userClient.users.info({ user: userId });
+      const userResponse = await client.users.info({ user: userId });
 
       if (userResponse.ok && userResponse.user) {
         return {
@@ -561,6 +460,8 @@ export class SlackApiService {
   /**
    * Updates existing workflow message with new content
    *
+   * Uses User Token to update messages posted by the authenticated user.
+   *
    * @param workspaceId - Target workspace ID
    * @param channelId - Target channel ID
    * @param messageTs - Message timestamp to update
@@ -572,7 +473,7 @@ export class SlackApiService {
     messageTs: string,
     block: WorkflowMessageBlock
   ): Promise<void> {
-    const client = await this.ensureClient(workspaceId);
+    const client = await this.ensureUserClient(workspaceId);
 
     // Build Block Kit blocks
     const blocks = buildWorkflowMessageBlocks(block);
@@ -594,13 +495,15 @@ export class SlackApiService {
   /**
    * Downloads workflow file from Slack
    *
+   * Uses User Token to download files accessible to the authenticated user.
+   *
    * @param workspaceId - Target workspace ID
    * @param fileId - Slack file ID to download
    * @returns Workflow JSON content as string
    */
   async downloadWorkflowFile(workspaceId: string, fileId: string): Promise<string> {
     try {
-      const client = await this.ensureClient(workspaceId);
+      const client = await this.ensureUserClient(workspaceId);
 
       // Get file info using files.info API
       const response = await client.files.info({
@@ -619,10 +522,12 @@ export class SlackApiService {
       }
 
       // Download file content from url_private
-      const accessToken = await this.tokenManager.getAccessTokenByWorkspaceId(workspaceId);
-      if (!accessToken) {
-        const error = new Error(`Workspace ${workspaceId} is not connected`);
-        (error as Error & { code: string; workspaceId: string }).code = 'WORKSPACE_NOT_CONNECTED';
+      const userAccessToken = await this.tokenManager.getUserAccessTokenByWorkspaceId(workspaceId);
+      if (!userAccessToken) {
+        const error = new Error(
+          `Workspace ${workspaceId} is not connected or User Token not available`
+        );
+        (error as Error & { code: string; workspaceId: string }).code = 'USER_TOKEN_REQUIRED';
         (error as Error & { code: string; workspaceId: string }).workspaceId = workspaceId;
         throw error;
       }
@@ -630,7 +535,7 @@ export class SlackApiService {
       // Fetch file content with Authorization header
       const fileResponse = await fetch(urlPrivate, {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${userAccessToken}`,
         },
       });
 
@@ -643,12 +548,12 @@ export class SlackApiService {
       return content;
     } catch (error) {
       console.error('[SlackApiService] downloadWorkflowFile error:', error);
-      // Re-throw WORKSPACE_NOT_CONNECTED errors directly to preserve error code
+      // Re-throw USER_TOKEN_REQUIRED errors directly to preserve error code
       if (
         error &&
         typeof error === 'object' &&
         'code' in error &&
-        (error as { code: string }).code === 'WORKSPACE_NOT_CONNECTED'
+        (error as { code: string }).code === 'USER_TOKEN_REQUIRED'
       ) {
         throw error;
       }

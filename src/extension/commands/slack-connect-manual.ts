@@ -1,8 +1,8 @@
 /**
  * Slack Manual Token Input Command Handler
  *
- * Handles manual Slack Bot Token input from users.
- * Users manually create Slack App and provide Bot Token only.
+ * Handles manual Slack User Token input from users.
+ * Users manually create Slack App and provide User Token only.
  * Workspace ID and Workspace Name are automatically retrieved via auth.test API.
  * Author name comes from git config (not Slack user).
  *
@@ -19,67 +19,36 @@ import type { SlackTokenManager } from '../utils/slack-token-manager';
 /**
  * Handle manual Slack connection command
  *
- * Prompts user for workspace information and Bot Token + User Token,
- * validates the tokens, and stores them in VSCode Secret Storage.
+ * Prompts user for User Token, validates the token, and stores it in VSCode Secret Storage.
+ * All Slack API operations use User Token to ensure user can only access channels
+ * they are a member of.
  *
  * @param tokenManager - Token manager instance
  * @param slackApiService - Slack API service instance
- * @param botToken - Optional Bot Token (if provided, skip Input Box prompt)
- * @param userToken - Optional User Token (required for secure channel listing)
+ * @param userToken - Optional User Token (if provided, skip Input Box prompt)
  * @returns Workspace info if successful
  */
 export async function handleConnectSlackManual(
   tokenManager: SlackTokenManager,
   slackApiService: SlackApiService,
-  botToken?: string,
+  _botToken?: string, // @deprecated - kept for backward compatibility, ignored
   userToken?: string
 ): Promise<{ workspaceId: string; workspaceName: string } | undefined> {
   try {
     log('INFO', 'Manual Slack connection started');
 
-    // Step 1: Get Bot Token (from parameter or Input Box)
-    let accessToken = botToken;
-
-    if (!accessToken) {
-      // Prompt for Bot Token via Input Box (VSCode command path)
-      accessToken = await vscode.window.showInputBox({
-        prompt: 'Enter Bot User OAuth Token (starts with "xoxb-")',
-        placeHolder: 'xoxb-...',
-        password: true, // Hide input
-        validateInput: (value) => {
-          if (!value || value.trim().length === 0) {
-            return 'Bot Token is required';
-          }
-          if (!value.startsWith('xoxb-')) {
-            return 'Bot Token must start with "xoxb-"';
-          }
-          return null;
-        },
-      });
-
-      if (!accessToken) {
-        log('INFO', 'Manual connection cancelled: No Bot Token provided');
-        return; // User cancelled
-      }
-    }
-
-    // Validate Bot token format (for Webview path)
-    if (!accessToken.startsWith('xoxb-')) {
-      throw new Error('Bot Token must start with "xoxb-"');
-    }
-
-    // Step 1.5: Get User Token (from parameter or Input Box)
+    // Step 1: Get User Token (from parameter or Input Box)
     let userAccessToken = userToken;
 
     if (!userAccessToken) {
       // Prompt for User Token via Input Box (VSCode command path)
       userAccessToken = await vscode.window.showInputBox({
-        prompt: 'Enter User OAuth Token (starts with "xoxp-") - Required for channel listing',
+        prompt: 'Enter User OAuth Token (starts with "xoxp-")',
         placeHolder: 'xoxp-...',
         password: true, // Hide input
         validateInput: (value) => {
           if (!value || value.trim().length === 0) {
-            return 'User Token is required for secure channel listing';
+            return 'User Token is required';
           }
           if (!value.startsWith('xoxp-')) {
             return 'User Token must start with "xoxp-"';
@@ -99,51 +68,34 @@ export async function handleConnectSlackManual(
       throw new Error('User Token must start with "xoxp-"');
     }
 
-    // Step 2: Validate Bot token and retrieve workspace info from Slack API (auth.test)
-    log('INFO', 'Validating Bot token with Slack API');
+    // Step 2: Validate User token and retrieve workspace info from Slack API (auth.test)
+    log('INFO', 'Validating User token with Slack API');
 
-    const client = new WebClient(accessToken);
+    const client = new WebClient(userAccessToken);
     const authResponse = await client.auth.test();
 
     if (!authResponse.ok) {
-      throw new Error('Bot Token validation failed: Invalid token');
+      throw new Error('User Token validation failed: Invalid token');
     }
 
     // Extract workspace information from auth.test response
     const workspaceId = authResponse.team_id as string;
     const workspaceName = authResponse.team as string;
 
-    log('INFO', 'Bot Token validation successful', {
+    log('INFO', 'User Token validation successful', {
       workspaceId,
       workspaceName,
     });
 
-    // Step 2.5: Validate User token with Slack API
-    log('INFO', 'Validating User token with Slack API');
-
-    const userClient = new WebClient(userAccessToken);
-    const userAuthResponse = await userClient.auth.test();
-
-    if (!userAuthResponse.ok) {
-      throw new Error('User Token validation failed: Invalid token');
-    }
-
-    // Verify User token belongs to the same workspace
-    if (userAuthResponse.team_id !== workspaceId) {
-      throw new Error('User Token must belong to the same workspace as Bot Token');
-    }
-
-    log('INFO', 'User Token validation successful');
-
     // Step 3: Clear existing connections before storing new one (same as delete → create flow)
     await tokenManager.clearConnection();
 
-    // Step 4: Store connection in VSCode Secret Storage (with User Token)
+    // Step 4: Store connection in VSCode Secret Storage (User Token only, no Bot Token)
     await tokenManager.storeManualConnection(
       workspaceId,
       workspaceName,
       workspaceId, // teamId is same as workspaceId
-      accessToken,
+      '', // Bot Token is no longer used
       '', // userId is no longer used (author name comes from git config)
       userAccessToken
     );
@@ -153,8 +105,8 @@ export async function handleConnectSlackManual(
       workspaceName,
     });
 
-    // Step 7: Show success message (only when called from VSCode command)
-    if (!botToken) {
+    // Step 5: Show success message (only when called from VSCode command)
+    if (!userToken) {
       const viewDocumentation = 'View Documentation';
       const result = await vscode.window.showInformationMessage(
         `Successfully connected to Slack workspace "${workspaceName}"!`,

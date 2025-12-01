@@ -230,7 +230,8 @@ export class SlackTokenManager {
     const userAccessToken = await this.context.secrets.get(userTokenKey);
     const workspaceDataJson = await this.context.secrets.get(dataKey);
 
-    if (!accessToken || !workspaceDataJson) {
+    // User Token is required (Bot Token is deprecated)
+    if (!userAccessToken || !workspaceDataJson) {
       return null;
     }
 

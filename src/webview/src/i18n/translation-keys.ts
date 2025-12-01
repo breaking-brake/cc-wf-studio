@@ -519,8 +519,6 @@ export interface WebviewTranslationKeys {
   'slack.share.sharing': string;
   'slack.share.success': string;
   'slack.share.failed': string;
-  'slack.share.checkingBotMembership': string;
-  'slack.share.botNotInChannelMessage': string;
 
   // Slack Connect
   'slack.connect.button': string;
