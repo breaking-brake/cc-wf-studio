@@ -567,13 +567,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.howToGet.title': 'How to set up Slack App',
   'slack.manualToken.howToGet.step1': 'Create Slack App (at api.slack.com/apps)',
   'slack.manualToken.howToGet.step2':
-    'Add Bot Token Scopes (OAuth & Permissions): chat:write, files:read, files:write',
-  'slack.manualToken.howToGet.step3':
-    'Add User Token Scopes (OAuth & Permissions): channels:read, groups:read',
-  'slack.manualToken.howToGet.step4': 'Install App to your workspace (OAuth & Permissions)',
-  'slack.manualToken.howToGet.step5': 'Invite App to target channel (in Slack)',
-  'slack.manualToken.howToGet.step6':
-    'Copy Bot Token (xoxb-...) and User Token (xoxp-...) from OAuth & Permissions page',
+    'Add User Token Scopes (OAuth & Permissions): chat:write, files:read, files:write, channels:read, groups:read',
+  'slack.manualToken.howToGet.step3': 'Install App to your workspace (OAuth & Permissions)',
+  'slack.manualToken.howToGet.step4': 'Copy User Token (xoxp-...) from OAuth & Permissions page',
   'slack.manualToken.security.title': 'Security & Privacy',
   'slack.manualToken.security.notice':
     'Note: This feature communicates with Slack servers (not local-only operation)',
@@ -582,11 +578,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Only sent to Slack API (api.slack.com) for validation',
   'slack.manualToken.security.deletion': 'Can be deleted anytime',
   'slack.manualToken.security.sharing':
-    'Bot Token has channel read/write and other permissions. Only share within trusted communities.',
-  'slack.manualToken.botToken.label': 'Bot User OAuth Token',
+    'User Token has channel read/write and other permissions. Only share within trusted communities.',
   'slack.manualToken.userToken.label': 'User OAuth Token',
-  'slack.manualToken.error.tokenRequired': 'Bot Token is required',
-  'slack.manualToken.error.invalidTokenFormat': 'Bot Token must start with "xoxb-"',
+  'slack.manualToken.error.tokenRequired': 'User Token is required',
+  'slack.manualToken.error.invalidTokenFormat': 'User Token must start with "xoxp-"',
   'slack.manualToken.error.userTokenRequired': 'User Token is required for secure channel listing',
   'slack.manualToken.error.invalidUserTokenFormat': 'User Token must start with "xoxp-"',
   'slack.manualToken.connecting': 'Connecting...',

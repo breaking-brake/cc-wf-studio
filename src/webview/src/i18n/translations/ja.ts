@@ -564,13 +564,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.howToGet.title': 'Slack Appの設定方法',
   'slack.manualToken.howToGet.step1': 'Slack Appを作成（api.slack.com/apps）',
   'slack.manualToken.howToGet.step2':
-    'Bot Token Scopesを追加（OAuth & Permissions）: chat:write, files:read, files:write',
-  'slack.manualToken.howToGet.step3':
-    'User Token Scopesを追加（OAuth & Permissions）: channels:read, groups:read',
-  'slack.manualToken.howToGet.step4': 'Appをワークスペースにインストール（OAuth & Permissions）',
-  'slack.manualToken.howToGet.step5': 'Appをワークフロー共有先のチャンネルに追加（Slack内）',
-  'slack.manualToken.howToGet.step6':
-    'Bot Token（xoxb-...）とUser Token（xoxp-...）をOAuth & Permissionsページからコピー',
+    'User Token Scopesを追加（OAuth & Permissions）: chat:write, files:read, files:write, channels:read, groups:read',
+  'slack.manualToken.howToGet.step3': 'Appをワークスペースにインストール（OAuth & Permissions）',
+  'slack.manualToken.howToGet.step4': 'User Token（xoxp-...）をOAuth & Permissionsページからコピー',
   'slack.manualToken.security.title': 'セキュリティーとプライバシー',
   'slack.manualToken.security.notice':
     '注意：この機能はSlackサーバーと通信します（ローカル動作ではありません）',
@@ -579,11 +575,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.security.transmission': 'Slack API（api.slack.com）への検証時のみ送信されます',
   'slack.manualToken.security.deletion': '保存したトークンはいつでも削除できます',
   'slack.manualToken.security.sharing':
-    'Bot Tokenにはチャンネルの読み取り・書き込み権限等があるため、信頼できるコミュニティ内でのみ共有してください',
-  'slack.manualToken.botToken.label': 'Bot User OAuth Token',
+    'User Tokenにはチャンネルの読み取り・書き込み権限等があるため、信頼できるコミュニティ内でのみ共有してください',
   'slack.manualToken.userToken.label': 'User OAuth Token',
-  'slack.manualToken.error.tokenRequired': 'Bot Tokenは必須です',
-  'slack.manualToken.error.invalidTokenFormat': 'Bot Tokenは"xoxb-"で始まる必要があります',
+  'slack.manualToken.error.tokenRequired': 'User Tokenは必須です',
+  'slack.manualToken.error.invalidTokenFormat': 'User Tokenは"xoxp-"で始まる必要があります',
   'slack.manualToken.error.userTokenRequired': 'セキュアなチャンネル一覧表示にUser Tokenが必要です',
   'slack.manualToken.error.invalidUserTokenFormat': 'User Tokenは"xoxp-"で始まる必要があります',
   'slack.manualToken.connecting': '接続中...',

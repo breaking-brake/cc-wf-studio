@@ -563,13 +563,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.howToGet.title': 'Slack App 설정 방법',
   'slack.manualToken.howToGet.step1': 'Slack App 생성 (api.slack.com/apps)',
   'slack.manualToken.howToGet.step2':
-    'Bot Token Scopes 추가 (OAuth & Permissions): chat:write, files:read, files:write',
-  'slack.manualToken.howToGet.step3':
-    'User Token Scopes 추가 (OAuth & Permissions): channels:read, groups:read',
-  'slack.manualToken.howToGet.step4': '워크스페이스에 App 설치 (OAuth & Permissions)',
-  'slack.manualToken.howToGet.step5': '대상 채널에 App 추가 (Slack 내)',
-  'slack.manualToken.howToGet.step6':
-    'OAuth & Permissions 페이지에서 Bot Token (xoxb-...)과 User Token (xoxp-...) 복사',
+    'User Token Scopes 추가 (OAuth & Permissions): chat:write, files:read, files:write, channels:read, groups:read',
+  'slack.manualToken.howToGet.step3': '워크스페이스에 App 설치 (OAuth & Permissions)',
+  'slack.manualToken.howToGet.step4': 'OAuth & Permissions 페이지에서 User Token (xoxp-...) 복사',
   'slack.manualToken.security.title': '보안 및 개인정보',
   'slack.manualToken.security.notice':
     '참고: 이 기능은 Slack 서버와 통신합니다 (로컬 전용 작업 아님)',
@@ -578,11 +574,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.security.transmission': 'Slack API (api.slack.com)로만 검증을 위해 전송됩니다',
   'slack.manualToken.security.deletion': '언제든지 삭제할 수 있습니다',
   'slack.manualToken.security.sharing':
-    'Bot Token에는 채널 읽기/쓰기 등의 권한이 있습니다. 신뢰할 수 있는 커뮤니티 내에서만 공유하세요.',
-  'slack.manualToken.botToken.label': 'Bot User OAuth Token',
+    'User Token에는 채널 읽기/쓰기 등의 권한이 있습니다. 신뢰할 수 있는 커뮤니티 내에서만 공유하세요.',
   'slack.manualToken.userToken.label': 'User OAuth Token',
-  'slack.manualToken.error.tokenRequired': 'Bot Token은 필수입니다',
-  'slack.manualToken.error.invalidTokenFormat': 'Bot Token은 "xoxb-"로 시작해야 합니다',
+  'slack.manualToken.error.tokenRequired': 'User Token은 필수입니다',
+  'slack.manualToken.error.invalidTokenFormat': 'User Token은 "xoxp-"로 시작해야 합니다',
   'slack.manualToken.error.userTokenRequired': '보안 채널 목록을 위해 User Token이 필요합니다',
   'slack.manualToken.error.invalidUserTokenFormat': 'User Token은 "xoxp-"로 시작해야 합니다',
   'slack.manualToken.connecting': '연결 중...',

@@ -632,8 +632,6 @@ export function SlackManualTokenDialog({
                 <div>2. {t('slack.manualToken.howToGet.step2')}</div>
                 <div>3. {t('slack.manualToken.howToGet.step3')}</div>
                 <div>4. {t('slack.manualToken.howToGet.step4')}</div>
-                <div>5. {t('slack.manualToken.howToGet.step5')}</div>
-                <div>6. {t('slack.manualToken.howToGet.step6')}</div>
               </div>
             </div>
 
