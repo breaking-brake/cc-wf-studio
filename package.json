@@ -10,6 +10,7 @@
     "url": "https://github.com/breaking-brake/cc-wf-studio"
   },
   "homepage": "https://breaking-brake.github.io/",
+  "license": "AGPL-3.0-or-later",
   "keywords": [
     "claude",
     "claude code",

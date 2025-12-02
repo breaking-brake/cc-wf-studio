@@ -2,6 +2,7 @@
   "name": "cc-wf-studio-webview",
   "version": "2.17.4",
   "private": true,
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -478,7 +478,17 @@ A: The visual editor will detect unavailable MCP servers when loading the tool l
 
 ## License
 
-MIT License - see [LICENSE](./LICENSE) file for details
+This project is licensed under the **GNU Affero General Public License v3.0** (AGPL-3.0-or-later).
+
+See the [LICENSE](./LICENSE) file for the full license text.
+
+### What this means
+
+- You can use, modify, and distribute this software
+- If you modify and deploy this software (including as a network service), you must:
+  - Make your modified source code available under AGPL-3.0
+  - Provide access to the source code for users interacting with the service
+- Commercial use is allowed, but proprietary modifications are not
 
 Copyright (c) 2025 breaking-brake
 
