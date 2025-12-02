@@ -562,8 +562,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.description': '직접 만든 Slack 앱을 통해 워크스페이스에 연결합니다.',
   'slack.manualToken.howToGet.title': 'Slack App 설정 방법',
   'slack.manualToken.howToGet.step1': 'Slack App 생성 (api.slack.com/apps)',
-  'slack.manualToken.howToGet.step2':
-    'User Token Scopes 추가 (OAuth & Permissions): chat:write, files:read, files:write, channels:read, groups:read',
+  'slack.manualToken.howToGet.step2': 'User Token Scopes 추가 (OAuth & Permissions):',
   'slack.manualToken.howToGet.step3': '워크스페이스에 App 설치 (OAuth & Permissions)',
   'slack.manualToken.howToGet.step4': 'OAuth & Permissions 페이지에서 User Token (xoxp-...) 복사',
   'slack.manualToken.security.title': '보안 및 개인정보',
@@ -644,6 +643,13 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.search.placeholder': '이름, 작성자 또는 채널로 검색...',
   'slack.search.searching': '검색 중...',
   'slack.search.noResults': '워크플로우를 찾을 수 없습니다',
+
+  // Slack Scopes - reasons why each scope is required
+  'slack.scopes.chatWrite.reason': '워크플로우 공유용',
+  'slack.scopes.filesRead.reason': '워크플로우 가져오기용',
+  'slack.scopes.filesWrite.reason': '워크플로우 파일 첨부용',
+  'slack.scopes.channelsRead.reason': '공유 대상 채널 선택용',
+  'slack.scopes.groupsRead.reason': '비공개 채널 선택용',
 
   // Slack Errors
   'slack.error.channelNotFound': '채널을 찾을 수 없습니다',
