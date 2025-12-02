@@ -443,42 +443,4 @@ export class SlackTokenManager {
     // Minimum length: 40 characters
     return /^xoxp-[A-Za-z0-9-]{36,}$/.test(token);
   }
-
-  /**
-   * Validates token scopes
-   *
-   * Checks if token has required scopes for Slack integration.
-   *
-   * @param scopes - Token scopes
-   * @returns True if all required scopes present, false otherwise
-   */
-  static validateTokenScopes(scopes: string[]): boolean {
-    const requiredScopes = [
-      'channels:read',
-      'chat:write',
-      'files:read',
-      'files:write',
-      'groups:read',
-    ];
-
-    return requiredScopes.every((required) => scopes.includes(required));
-  }
-
-  /**
-   * Gets missing scopes
-   *
-   * @param scopes - Current token scopes
-   * @returns Array of missing required scopes
-   */
-  static getMissingScopes(scopes: string[]): string[] {
-    const requiredScopes = [
-      'channels:read',
-      'chat:write',
-      'files:read',
-      'files:write',
-      'groups:read',
-    ];
-
-    return requiredScopes.filter((required) => !scopes.includes(required));
-  }
 }
