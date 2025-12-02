@@ -542,8 +542,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.description': '通过您自己创建的 Slack 应用连接到工作区。',
   'slack.manualToken.howToGet.title': 'Slack App 设置方法',
   'slack.manualToken.howToGet.step1': '创建 Slack App (api.slack.com/apps)',
-  'slack.manualToken.howToGet.step2':
-    '添加 User Token Scopes (OAuth & Permissions): chat:write, files:read, files:write, channels:read, groups:read',
+  'slack.manualToken.howToGet.step2': '添加 User Token Scopes (OAuth & Permissions):',
   'slack.manualToken.howToGet.step3': '将 App 安装到您的工作区 (OAuth & Permissions)',
   'slack.manualToken.howToGet.step4': '从 OAuth & Permissions 页面复制 User Token (xoxp-...)',
   'slack.manualToken.security.title': '安全和隐私',
@@ -622,6 +621,13 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.search.searching': '搜索中...',
   'slack.search.noResults': '未找到工作流',
 
+  // Slack Scopes - reasons why each scope is required
+  'slack.scopes.chatWrite.reason': '用于共享工作流',
+  'slack.scopes.filesRead.reason': '用于导入工作流',
+  'slack.scopes.filesWrite.reason': '用于附加工作流文件',
+  'slack.scopes.channelsRead.reason': '用于选择目标频道',
+  'slack.scopes.groupsRead.reason': '用于选择私有频道',
+
   // Slack Errors
   'slack.error.channelNotFound': '未找到频道',
   'slack.error.notInChannel': '共享目标频道未添加 Slack 应用。',
@@ -629,8 +635,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.rateLimited': '超出速率限制。请在 {seconds} 秒后重试。',
   'slack.error.noWorkspaces': '没有连接的工作区',
   'slack.error.noChannels': '没有可用的频道',
-  'slack.error.noChannelsHelp':
-    'Slack 应用未加入任何频道。在 Slack 中使用 /invite @Claude Code Workflow Studio 邀请 Slack 应用加入频道。',
   'slack.error.invalidAuth': 'Slack 令牌无效。',
   'slack.error.missingScope': '缺少必要权限。',
   'slack.error.fileTooLarge': '文件大小过大。',

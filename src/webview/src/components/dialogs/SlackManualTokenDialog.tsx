@@ -629,7 +629,16 @@ export function SlackManualTokenDialog({
                 }}
               >
                 <div>1. {t('slack.manualToken.howToGet.step1')}</div>
-                <div>2. {t('slack.manualToken.howToGet.step2')}</div>
+                <div>
+                  2. {t('slack.manualToken.howToGet.step2')}
+                  <ul style={{ margin: '4px 0 4px 20px', paddingLeft: '0', listStyle: 'disc' }}>
+                    <li>chat:write ({t('slack.scopes.chatWrite.reason')})</li>
+                    <li>files:read ({t('slack.scopes.filesRead.reason')})</li>
+                    <li>files:write ({t('slack.scopes.filesWrite.reason')})</li>
+                    <li>channels:read ({t('slack.scopes.channelsRead.reason')})</li>
+                    <li>groups:read ({t('slack.scopes.groupsRead.reason')})</li>
+                  </ul>
+                </div>
                 <div>3. {t('slack.manualToken.howToGet.step3')}</div>
                 <div>4. {t('slack.manualToken.howToGet.step4')}</div>
               </div>

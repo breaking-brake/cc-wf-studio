@@ -563,8 +563,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.description': '自分で作成したSlack Appを通じてワークスペースに接続します。',
   'slack.manualToken.howToGet.title': 'Slack Appの設定方法',
   'slack.manualToken.howToGet.step1': 'Slack Appを作成（api.slack.com/apps）',
-  'slack.manualToken.howToGet.step2':
-    'User Token Scopesを追加（OAuth & Permissions）: chat:write, files:read, files:write, channels:read, groups:read',
+  'slack.manualToken.howToGet.step2': 'User Token Scopesを追加（OAuth & Permissions）:',
   'slack.manualToken.howToGet.step3': 'Appをワークスペースにインストール（OAuth & Permissions）',
   'slack.manualToken.howToGet.step4': 'User Token（xoxp-...）をOAuth & Permissionsページからコピー',
   'slack.manualToken.security.title': 'セキュリティーとプライバシー',
@@ -646,6 +645,13 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.search.searching': '検索中...',
   'slack.search.noResults': 'ワークフローが見つかりませんでした',
 
+  // Slack Scopes - reasons why each scope is required
+  'slack.scopes.chatWrite.reason': 'ワークフロー共有用',
+  'slack.scopes.filesRead.reason': 'ワークフロー取り込み用',
+  'slack.scopes.filesWrite.reason': 'ワークフローファイル添付用',
+  'slack.scopes.channelsRead.reason': '共有先チャンネル選択用',
+  'slack.scopes.groupsRead.reason': 'プライベートチャンネル選択用',
+
   // Slack Errors
   'slack.error.channelNotFound': 'チャンネルが見つかりません',
   'slack.error.notInChannel': '共有先のチャンネルにSlack Appが追加されていません。',
@@ -653,8 +659,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.rateLimited': 'レート制限を超過しました。{seconds}秒後に再試行してください。',
   'slack.error.noWorkspaces': '接続されているワークスペースがありません',
   'slack.error.noChannels': '利用可能なチャンネルがありません',
-  'slack.error.noChannelsHelp':
-    'Slack Appがどのチャンネルにも参加していません。Slackで /invite @Claude Code Workflow Studio を実行してSlack Appをチャンネルに招待してください。',
   'slack.error.invalidAuth': 'Slackトークンが無効です。',
   'slack.error.missingScope': '必要な権限がありません。',
   'slack.error.fileTooLarge': 'ファイルサイズが大きすぎます。',
