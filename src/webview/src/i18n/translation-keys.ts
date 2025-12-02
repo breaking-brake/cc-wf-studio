@@ -547,6 +547,13 @@ export interface WebviewTranslationKeys {
   'slack.search.searching': string;
   'slack.search.noResults': string;
 
+  // Slack Scopes - reasons why each scope is required
+  'slack.scopes.chatWrite.reason': string;
+  'slack.scopes.filesRead.reason': string;
+  'slack.scopes.filesWrite.reason': string;
+  'slack.scopes.channelsRead.reason': string;
+  'slack.scopes.groupsRead.reason': string;
+
   // Slack Errors
   'slack.error.channelNotFound': string;
   'slack.error.noChannels': string;

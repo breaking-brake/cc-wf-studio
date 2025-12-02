@@ -542,8 +542,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.description': '通过您自己创建的 Slack 应用连接到工作区。',
   'slack.manualToken.howToGet.title': 'Slack App 设置方法',
   'slack.manualToken.howToGet.step1': '创建 Slack App (api.slack.com/apps)',
-  'slack.manualToken.howToGet.step2':
-    '添加 User Token Scopes (OAuth & Permissions): chat:write, files:read, files:write, channels:read, groups:read',
+  'slack.manualToken.howToGet.step2': '添加 User Token Scopes (OAuth & Permissions):',
   'slack.manualToken.howToGet.step3': '将 App 安装到您的工作区 (OAuth & Permissions)',
   'slack.manualToken.howToGet.step4': '从 OAuth & Permissions 页面复制 User Token (xoxp-...)',
   'slack.manualToken.security.title': '安全和隐私',
@@ -621,6 +620,13 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.search.placeholder': '按名称、作者或频道搜索...',
   'slack.search.searching': '搜索中...',
   'slack.search.noResults': '未找到工作流',
+
+  // Slack Scopes - reasons why each scope is required
+  'slack.scopes.chatWrite.reason': '用于共享工作流',
+  'slack.scopes.filesRead.reason': '用于导入工作流',
+  'slack.scopes.filesWrite.reason': '用于附加工作流文件',
+  'slack.scopes.channelsRead.reason': '用于选择目标频道',
+  'slack.scopes.groupsRead.reason': '用于选择私有频道',
 
   // Slack Errors
   'slack.error.channelNotFound': '未找到频道',

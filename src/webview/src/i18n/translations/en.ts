@@ -566,8 +566,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.manualToken.description': 'Connect to your workspace through your own Slack App.',
   'slack.manualToken.howToGet.title': 'How to set up Slack App',
   'slack.manualToken.howToGet.step1': 'Create Slack App (at api.slack.com/apps)',
-  'slack.manualToken.howToGet.step2':
-    'Add User Token Scopes (OAuth & Permissions): chat:write, files:read, files:write, channels:read, groups:read',
+  'slack.manualToken.howToGet.step2': 'Add User Token Scopes (OAuth & Permissions):',
   'slack.manualToken.howToGet.step3': 'Install App to your workspace (OAuth & Permissions)',
   'slack.manualToken.howToGet.step4': 'Copy User Token (xoxp-...) from OAuth & Permissions page',
   'slack.manualToken.security.title': 'Security & Privacy',
@@ -650,6 +649,13 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.search.placeholder': 'Search by name, author, or channel...',
   'slack.search.searching': 'Searching...',
   'slack.search.noResults': 'No workflows found',
+
+  // Slack Scopes - reasons why each scope is required
+  'slack.scopes.chatWrite.reason': 'to share workflows',
+  'slack.scopes.filesRead.reason': 'to import workflows',
+  'slack.scopes.filesWrite.reason': 'to attach workflow files',
+  'slack.scopes.channelsRead.reason': 'to select destination channel',
+  'slack.scopes.groupsRead.reason': 'to select private channels',
 
   // Slack Errors
   'slack.error.channelNotFound': 'Channel not found',
