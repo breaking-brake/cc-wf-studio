@@ -2,7 +2,7 @@
   "name": "cc-wf-studio",
   "displayName": "Claude Code Workflow Studio",
   "description": "Visual workflow editor for Claude Code Slash Commands, Sub Agents, Agent Skills, and MCP Tools",
-  "version": "2.17.4",
+  "version": "2.17.3",
   "publisher": "breaking-brake",
   "icon": "resources/icon.png",
   "repository": {
@@ -23,7 +23,7 @@
     "mcp"
   ],
   "engines": {
-    "vscode": "^1.106.0"
+    "vscode": "^1.80.0"
   },
   "categories": [
     "AI",
@@ -90,7 +90,7 @@
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^10.0.1",
     "@types/node": "^24.10.1",
-    "@types/vscode": "^1.106.1",
+    "@types/vscode": "^1.80.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.3.8",
     "conventional-changelog-conventionalcommits": "^9.1.0",

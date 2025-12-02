@@ -1,9 +1,3 @@
-## [2.17.4](https://github.com/breaking-brake/cc-wf-studio/compare/v2.17.3...v2.17.4) (2025-12-02)
-
-### Bug Fixes
-
-* display User Token Scopes as list with permission reasons ([#202](https://github.com/breaking-brake/cc-wf-studio/issues/202)) ([90284d1](https://github.com/breaking-brake/cc-wf-studio/commit/90284d1c65e199b10ade7516ac7f6507aa333d0d))
-
 ## [2.17.3](https://github.com/breaking-brake/cc-wf-studio/compare/v2.17.2...v2.17.3) (2025-12-01)
 
 ### Bug Fixes
