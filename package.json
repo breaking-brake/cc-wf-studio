@@ -23,7 +23,7 @@
     "mcp"
   ],
   "engines": {
-    "vscode": "^1.80.0"
+    "vscode": "^1.106.0"
   },
   "categories": [
     "AI",
