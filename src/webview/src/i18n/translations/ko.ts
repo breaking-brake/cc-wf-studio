@@ -652,8 +652,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.rateLimited': '요청 한도를 초과했습니다. {seconds}초 후에 다시 시도하세요.',
   'slack.error.noWorkspaces': '연결된 워크스페이스가 없습니다',
   'slack.error.noChannels': '사용 가능한 채널이 없습니다',
-  'slack.error.noChannelsHelp':
-    'Slack 앱이 어떤 채널에도 참여하지 않았습니다. Slack에서 /invite @Claude Code Workflow Studio를 실행하여 Slack 앱을 채널에 초대하세요.',
   'slack.error.invalidAuth': 'Slack 토큰이 유효하지 않습니다.',
   'slack.error.missingScope': '필요한 권한이 없습니다.',
   'slack.error.fileTooLarge': '파일 크기가 너무 큽니다.',

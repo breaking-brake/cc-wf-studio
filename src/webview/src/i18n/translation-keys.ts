@@ -550,7 +550,6 @@ export interface WebviewTranslationKeys {
   // Slack Errors
   'slack.error.channelNotFound': string;
   'slack.error.noChannels': string;
-  'slack.error.noChannelsHelp': string;
   'slack.error.noWorkspaces': string;
   'slack.error.notInChannel': string;
   'slack.error.networkError': string;

@@ -655,8 +655,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.channelNotFound': 'Channel not found',
   'slack.error.noWorkspaces': 'No workspaces connected',
   'slack.error.noChannels': 'No channels available',
-  'slack.error.noChannelsHelp':
-    'The Slack App is not a member of any channels. Invite the Slack App to channels using /invite @Claude Code Workflow Studio in Slack.',
   'slack.error.notInChannel': 'Slack App has not been added to the destination channel.',
   'slack.error.networkError': 'Network error. Please check your connection.',
   'slack.error.rateLimited': 'Rate limit exceeded. Please try again in {seconds} seconds.',

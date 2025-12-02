@@ -626,23 +626,6 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
               ))
             )}
           </select>
-
-          {/* Help message when no channels available */}
-          {!loadingChannels && channels.length === 0 && workspace && (
-            <div
-              style={{
-                marginTop: '8px',
-                padding: '8px 12px',
-                backgroundColor: 'var(--vscode-textBlockQuote-background)',
-                border: '1px solid var(--vscode-textBlockQuote-border)',
-                borderRadius: '2px',
-                fontSize: '12px',
-                color: 'var(--vscode-descriptionForeground)',
-              }}
-            >
-              💡 {t('slack.error.noChannelsHelp')}
-            </div>
-          )}
         </div>
 
         {/* Description Input */}

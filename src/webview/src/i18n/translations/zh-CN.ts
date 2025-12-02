@@ -629,8 +629,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.error.rateLimited': '超出速率限制。请在 {seconds} 秒后重试。',
   'slack.error.noWorkspaces': '没有连接的工作区',
   'slack.error.noChannels': '没有可用的频道',
-  'slack.error.noChannelsHelp':
-    'Slack 应用未加入任何频道。在 Slack 中使用 /invite @Claude Code Workflow Studio 邀请 Slack 应用加入频道。',
   'slack.error.invalidAuth': 'Slack 令牌无效。',
   'slack.error.missingScope': '缺少必要权限。',
   'slack.error.fileTooLarge': '文件大小过大。',
