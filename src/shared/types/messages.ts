@@ -579,7 +579,9 @@ export type ExtensionMessage =
   | Message<void, 'SLACK_OAUTH_CANCELLED'>
   | Message<GetLastSharedChannelSuccessPayload, 'GET_LAST_SHARED_CHANNEL_SUCCESS'>
   | Message<SlackDescriptionSuccessPayload, 'SLACK_DESCRIPTION_SUCCESS'>
-  | Message<SlackDescriptionFailedPayload, 'SLACK_DESCRIPTION_FAILED'>;
+  | Message<SlackDescriptionFailedPayload, 'SLACK_DESCRIPTION_FAILED'>
+  | Message<WorkflowNameSuccessPayload, 'WORKFLOW_NAME_SUCCESS'>
+  | Message<WorkflowNameFailedPayload, 'WORKFLOW_NAME_FAILED'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -613,6 +615,47 @@ export interface SlackDescriptionSuccessPayload {
  * Slack description generation failed payload
  */
 export interface SlackDescriptionFailedPayload {
+  error: {
+    code: 'COMMAND_NOT_FOUND' | 'TIMEOUT' | 'PARSE_ERROR' | 'CANCELLED' | 'UNKNOWN_ERROR';
+    message: string;
+    details?: string;
+  };
+  executionTimeMs: number;
+  timestamp: string;
+}
+
+// ============================================================================
+// AI Workflow Name Generation Payloads
+// ============================================================================
+
+/**
+ * Generate workflow name request payload
+ */
+export interface GenerateWorkflowNamePayload {
+  /** Serialized workflow JSON for AI analysis */
+  workflowJson: string;
+  /** Current UI language (en, ja, ko, zh-CN, zh-TW) */
+  targetLanguage: string;
+  /** Optional timeout in milliseconds (default: 30000) */
+  timeoutMs?: number;
+}
+
+/**
+ * Workflow name generation success payload
+ */
+export interface WorkflowNameSuccessPayload {
+  /** Generated name (max 64 chars, kebab-case) */
+  name: string;
+  /** Execution time in milliseconds */
+  executionTimeMs: number;
+  /** Timestamp ISO 8601 */
+  timestamp: string;
+}
+
+/**
+ * Workflow name generation failed payload
+ */
+export interface WorkflowNameFailedPayload {
   error: {
     code: 'COMMAND_NOT_FOUND' | 'TIMEOUT' | 'PARSE_ERROR' | 'CANCELLED' | 'UNKNOWN_ERROR';
     message: string;
@@ -997,7 +1040,8 @@ export type WebviewMessage =
   | Message<OpenExternalUrlPayload, 'OPEN_EXTERNAL_URL'>
   | Message<void, 'GET_LAST_SHARED_CHANNEL'>
   | Message<SetLastSharedChannelPayload, 'SET_LAST_SHARED_CHANNEL'>
-  | Message<GenerateSlackDescriptionPayload, 'GENERATE_SLACK_DESCRIPTION'>;
+  | Message<GenerateSlackDescriptionPayload, 'GENERATE_SLACK_DESCRIPTION'>
+  | Message<GenerateWorkflowNamePayload, 'GENERATE_WORKFLOW_NAME'>;
 
 // ============================================================================
 // Error Codes

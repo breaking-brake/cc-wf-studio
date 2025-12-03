@@ -40,6 +40,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.validationFailed': 'ワークフローの検証に失敗しました',
   'toolbar.error.missingEndNode': 'ワークフローには最低1つのEndノードが必要です',
   'toolbar.error.noActiveWorkflow': 'ワークフローを読み込んでください',
+  'toolbar.generateNameWithAI': 'AIで名前を生成',
+  'toolbar.error.nameGenerationFailed':
+    'ワークフロー名の生成に失敗しました。再度お試しいただくか、手動で入力してください。',
 
   // Node Palette
   'palette.title': 'ノードパレット',

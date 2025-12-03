@@ -5,7 +5,12 @@
  * Based on: /specs/001-ai-workflow-generation/quickstart.md Phase 4
  */
 
-import type { ExtensionMessage, GenerateWorkflowPayload, Workflow } from '@shared/types/messages';
+import type {
+  ExtensionMessage,
+  GenerateWorkflowNamePayload,
+  GenerateWorkflowPayload,
+  Workflow,
+} from '@shared/types/messages';
 import { vscode } from '../main';
 
 /**
@@ -98,5 +103,66 @@ export function cancelWorkflowGeneration(requestId: string): void {
   vscode.postMessage({
     type: 'CANCEL_GENERATION',
     payload: { requestId },
+  });
+}
+
+/**
+ * Generate a workflow name using AI from the workflow JSON
+ *
+ * @param workflowJson - Serialized workflow JSON for AI analysis
+ * @param targetLanguage - Target language for the name (en, ja, ko, zh-CN, zh-TW)
+ * @param timeoutMs - Optional timeout in milliseconds (default: 30000)
+ * @returns Promise that resolves to the generated name (kebab-case)
+ * @throws {AIGenerationError} If generation fails
+ */
+export function generateWorkflowName(
+  workflowJson: string,
+  targetLanguage: string,
+  timeoutMs = 30000
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-name-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'WORKFLOW_NAME_SUCCESS' && message.payload) {
+          resolve(message.payload.name);
+        } else if (message.type === 'WORKFLOW_NAME_FAILED' && message.payload) {
+          reject(
+            new AIGenerationError(
+              message.payload.error.message,
+              message.payload.error.code,
+              message.payload.error.details
+            )
+          );
+        } else if (message.type === 'ERROR') {
+          reject(new Error(message.payload?.message || 'Failed to generate workflow name'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: GenerateWorkflowNamePayload = {
+      workflowJson,
+      targetLanguage,
+      timeoutMs,
+    };
+
+    vscode.postMessage({
+      type: 'GENERATE_WORKFLOW_NAME',
+      requestId,
+      payload,
+    });
+
+    // Client-side timeout (slightly longer than server-side)
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new AIGenerationError('Request timed out', 'TIMEOUT'));
+    }, timeoutMs + 5000);
   });
 }

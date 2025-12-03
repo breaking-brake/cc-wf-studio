@@ -34,6 +34,7 @@ import {
   handleListSlackWorkspaces,
   handleShareWorkflowToSlack,
 } from './slack-share-workflow';
+import { handleGenerateWorkflowName } from './workflow-name-generation';
 import {
   handleCancelRefinement,
   handleClearConversation,
@@ -527,6 +528,28 @@ export function registerOpenEditorCommand(
                   payload: {
                     code: 'VALIDATION_ERROR',
                     message: 'Generate Slack description payload is required',
+                  },
+                });
+              }
+              break;
+
+            case 'GENERATE_WORKFLOW_NAME':
+              // Generate workflow name with AI
+              if (message.payload) {
+                const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+                await handleGenerateWorkflowName(
+                  message.payload,
+                  webview,
+                  message.requestId || '',
+                  workspaceRoot
+                );
+              } else {
+                webview.postMessage({
+                  type: 'ERROR',
+                  requestId: message.requestId,
+                  payload: {
+                    code: 'VALIDATION_ERROR',
+                    message: 'Generate workflow name payload is required',
                   },
                 });
               }

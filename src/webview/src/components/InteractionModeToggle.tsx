@@ -5,11 +5,11 @@
  */
 
 import * as Switch from '@radix-ui/react-switch';
-import * as Tooltip from '@radix-ui/react-tooltip';
 import { Hand, MousePointerClick } from 'lucide-react';
 import type React from 'react';
 import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
+import { StyledTooltipItem, StyledTooltipProvider } from './common/StyledTooltip';
 
 /**
  * InteractionModeToggle Component
@@ -21,7 +21,7 @@ export const InteractionModeToggle: React.FC = () => {
   const { interactionMode, toggleInteractionMode } = useWorkflowStore();
 
   return (
-    <Tooltip.Provider delayDuration={300}>
+    <StyledTooltipProvider>
       <div
         style={{
           display: 'flex',
@@ -35,67 +35,46 @@ export const InteractionModeToggle: React.FC = () => {
         }}
       >
         {/* Pan Mode Icon (Left) */}
-        <Tooltip.Root>
-          <Tooltip.Trigger asChild>
-            <div
-              onClick={() => {
-                if (interactionMode !== 'pan') {
-                  toggleInteractionMode();
-                }
-              }}
-              onKeyDown={(e) => {
-                if ((e.key === 'Enter' || e.key === ' ') && interactionMode !== 'pan') {
-                  e.preventDefault();
-                  toggleInteractionMode();
-                }
-              }}
-              role="button"
-              tabIndex={interactionMode === 'pan' ? -1 : 0}
-              aria-label={t('toolbar.interactionMode.switchToPan')}
+        <StyledTooltipItem content={t('toolbar.interactionMode.switchToPan')}>
+          <div
+            onClick={() => {
+              if (interactionMode !== 'pan') {
+                toggleInteractionMode();
+              }
+            }}
+            onKeyDown={(e) => {
+              if ((e.key === 'Enter' || e.key === ' ') && interactionMode !== 'pan') {
+                e.preventDefault();
+                toggleInteractionMode();
+              }
+            }}
+            role="button"
+            tabIndex={interactionMode === 'pan' ? -1 : 0}
+            aria-label={t('toolbar.interactionMode.switchToPan')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '20px',
+              height: '20px',
+              borderRadius: '50%',
+              backgroundColor:
+                interactionMode === 'pan' ? 'var(--vscode-badge-background)' : 'transparent',
+              transition: 'background-color 150ms',
+              cursor: interactionMode === 'pan' ? 'default' : 'pointer',
+            }}
+          >
+            <Hand
+              size={12}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '20px',
-                height: '20px',
-                borderRadius: '50%',
-                backgroundColor:
-                  interactionMode === 'pan' ? 'var(--vscode-badge-background)' : 'transparent',
-                transition: 'background-color 150ms',
-                cursor: interactionMode === 'pan' ? 'default' : 'pointer',
+                color:
+                  interactionMode === 'pan'
+                    ? 'var(--vscode-badge-foreground)'
+                    : 'var(--vscode-disabledForeground)',
               }}
-            >
-              <Hand
-                size={12}
-                style={{
-                  color:
-                    interactionMode === 'pan'
-                      ? 'var(--vscode-badge-foreground)'
-                      : 'var(--vscode-disabledForeground)',
-                }}
-              />
-            </div>
-          </Tooltip.Trigger>
-          <Tooltip.Portal>
-            <Tooltip.Content
-              side="bottom"
-              sideOffset={5}
-              style={{
-                backgroundColor: 'var(--vscode-editorHoverWidget-background)',
-                color: 'var(--vscode-editorHoverWidget-foreground)',
-                border: '1px solid var(--vscode-editorHoverWidget-border)',
-                borderRadius: '3px',
-                padding: '6px 8px',
-                fontSize: '12px',
-                maxWidth: '250px',
-                zIndex: 10000,
-              }}
-            >
-              {t('toolbar.interactionMode.switchToPan')}
-              <Tooltip.Arrow style={{ fill: 'var(--vscode-editorHoverWidget-border)' }} />
-            </Tooltip.Content>
-          </Tooltip.Portal>
-        </Tooltip.Root>
+            />
+          </div>
+        </StyledTooltipItem>
 
         {/* Switch */}
         <Switch.Root
@@ -130,70 +109,47 @@ export const InteractionModeToggle: React.FC = () => {
         </Switch.Root>
 
         {/* Selection Mode Icon (Right) */}
-        <Tooltip.Root>
-          <Tooltip.Trigger asChild>
-            <div
-              onClick={() => {
-                if (interactionMode !== 'selection') {
-                  toggleInteractionMode();
-                }
-              }}
-              onKeyDown={(e) => {
-                if ((e.key === 'Enter' || e.key === ' ') && interactionMode !== 'selection') {
-                  e.preventDefault();
-                  toggleInteractionMode();
-                }
-              }}
-              role="button"
-              tabIndex={interactionMode === 'selection' ? -1 : 0}
-              aria-label={t('toolbar.interactionMode.switchToSelection')}
+        <StyledTooltipItem content={t('toolbar.interactionMode.switchToSelection')}>
+          <div
+            onClick={() => {
+              if (interactionMode !== 'selection') {
+                toggleInteractionMode();
+              }
+            }}
+            onKeyDown={(e) => {
+              if ((e.key === 'Enter' || e.key === ' ') && interactionMode !== 'selection') {
+                e.preventDefault();
+                toggleInteractionMode();
+              }
+            }}
+            role="button"
+            tabIndex={interactionMode === 'selection' ? -1 : 0}
+            aria-label={t('toolbar.interactionMode.switchToSelection')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '20px',
+              height: '20px',
+              borderRadius: '50%',
+              backgroundColor:
+                interactionMode === 'selection' ? 'var(--vscode-badge-background)' : 'transparent',
+              transition: 'background-color 150ms',
+              cursor: interactionMode === 'selection' ? 'default' : 'pointer',
+            }}
+          >
+            <MousePointerClick
+              size={12}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '20px',
-                height: '20px',
-                borderRadius: '50%',
-                backgroundColor:
+                color:
                   interactionMode === 'selection'
-                    ? 'var(--vscode-badge-background)'
-                    : 'transparent',
-                transition: 'background-color 150ms',
-                cursor: interactionMode === 'selection' ? 'default' : 'pointer',
+                    ? 'var(--vscode-badge-foreground)'
+                    : 'var(--vscode-disabledForeground)',
               }}
-            >
-              <MousePointerClick
-                size={12}
-                style={{
-                  color:
-                    interactionMode === 'selection'
-                      ? 'var(--vscode-badge-foreground)'
-                      : 'var(--vscode-disabledForeground)',
-                }}
-              />
-            </div>
-          </Tooltip.Trigger>
-          <Tooltip.Portal>
-            <Tooltip.Content
-              side="bottom"
-              sideOffset={5}
-              style={{
-                backgroundColor: 'var(--vscode-editorHoverWidget-background)',
-                color: 'var(--vscode-editorHoverWidget-foreground)',
-                border: '1px solid var(--vscode-editorHoverWidget-border)',
-                borderRadius: '3px',
-                padding: '6px 8px',
-                fontSize: '12px',
-                maxWidth: '250px',
-                zIndex: 10000,
-              }}
-            >
-              {t('toolbar.interactionMode.switchToSelection')}
-              <Tooltip.Arrow style={{ fill: 'var(--vscode-editorHoverWidget-border)' }} />
-            </Tooltip.Content>
-          </Tooltip.Portal>
-        </Tooltip.Root>
+            />
+          </div>
+        </StyledTooltipItem>
       </div>
-    </Tooltip.Provider>
+    </StyledTooltipProvider>
   );
 };

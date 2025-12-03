@@ -40,6 +40,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.validationFailed': '工作流验证失败',
   'toolbar.error.missingEndNode': '工作流必须至少包含一个End节点',
   'toolbar.error.noActiveWorkflow': '请先加载工作流',
+  'toolbar.generateNameWithAI': '使用AI生成名称',
+  'toolbar.error.nameGenerationFailed': '生成工作流名称失败。请重试或手动输入。',
 
   // Node Palette
   'palette.title': '节点面板',

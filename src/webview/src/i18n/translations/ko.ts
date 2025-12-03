@@ -40,6 +40,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.validationFailed': '워크플로 검증에 실패했습니다',
   'toolbar.error.missingEndNode': '워크플로에는 최소 1개의 End 노드가 필요합니다',
   'toolbar.error.noActiveWorkflow': '먼저 워크플로를 불러오세요',
+  'toolbar.generateNameWithAI': 'AI로 이름 생성',
+  'toolbar.error.nameGenerationFailed':
+    '워크플로 이름 생성에 실패했습니다. 다시 시도하거나 수동으로 입력하세요.',
 
   // Node Palette
   'palette.title': '노드 팔레트',

@@ -38,6 +38,8 @@ export interface WebviewTranslationKeys {
   'toolbar.error.validationFailed': string;
   'toolbar.error.missingEndNode': string;
   'toolbar.error.noActiveWorkflow': string;
+  'toolbar.generateNameWithAI': string;
+  'toolbar.error.nameGenerationFailed': string;
 
   // Node Palette
   'palette.title': string;
