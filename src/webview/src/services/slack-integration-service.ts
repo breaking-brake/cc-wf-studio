@@ -745,3 +745,81 @@ export function setLastSharedChannel(channelId: string): void {
     payload: { channelId },
   });
 }
+
+/**
+ * Custom error class for AI description generation errors
+ */
+export class AIGenerationError extends Error {
+  /** Error code for programmatic handling */
+  errorCode: 'COMMAND_NOT_FOUND' | 'TIMEOUT' | 'PARSE_ERROR' | 'CANCELLED' | 'UNKNOWN_ERROR';
+
+  constructor(
+    errorCode: 'COMMAND_NOT_FOUND' | 'TIMEOUT' | 'PARSE_ERROR' | 'CANCELLED' | 'UNKNOWN_ERROR',
+    message: string
+  ) {
+    super(message);
+    this.name = 'AIGenerationError';
+    this.errorCode = errorCode;
+  }
+}
+
+/**
+ * Generate workflow description using AI
+ *
+ * Uses Claude Code CLI to analyze workflow JSON and generate a concise description.
+ *
+ * @param workflowJson - Serialized workflow JSON
+ * @param targetLanguage - Target language for the description (en, ja, ko, zh-CN, zh-TW)
+ * @param timeoutMs - Optional timeout in milliseconds (default: 30000)
+ * @returns Promise that resolves with generated description
+ * @throws AIGenerationError if generation fails
+ */
+export function generateSlackDescription(
+  workflowJson: string,
+  targetLanguage: string,
+  timeoutMs = 30000
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'SLACK_DESCRIPTION_SUCCESS') {
+          resolve(message.payload?.description || '');
+        } else if (message.type === 'SLACK_DESCRIPTION_FAILED') {
+          const error = message.payload?.error;
+          reject(
+            new AIGenerationError(
+              error?.code || 'UNKNOWN_ERROR',
+              error?.message || 'Failed to generate description'
+            )
+          );
+        } else {
+          reject(new AIGenerationError('UNKNOWN_ERROR', 'Unexpected response type'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    vscode.postMessage({
+      type: 'GENERATE_SLACK_DESCRIPTION',
+      requestId,
+      payload: {
+        workflowJson,
+        targetLanguage,
+        timeoutMs,
+      },
+    });
+
+    // Client-side timeout (slightly longer than server-side)
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new AIGenerationError('TIMEOUT', 'Request timed out'));
+    }, timeoutMs + 5000);
+  });
+}

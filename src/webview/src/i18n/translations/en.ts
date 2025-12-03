@@ -604,6 +604,12 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.success': 'Workflow shared successfully',
   'slack.share.failed': 'Failed to share workflow',
 
+  // Slack Description AI Generation
+  'slack.description.generateWithAI': 'Generate with AI',
+  'slack.description.generating': 'Generating...',
+  'slack.description.generateFailed':
+    'Failed to generate description. Please try again or write manually.',
+
   // Slack Connect
   'slack.connect.button': 'Connect to Slack',
   'slack.connect.connecting': 'Connecting...',

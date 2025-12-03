@@ -599,6 +599,12 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.failed': '워크플로우 공유에 실패했습니다',
   'slack.share.descriptionPlaceholder': '설명을 추가하세요 (선택 사항)...',
 
+  // Slack Description AI Generation
+  'slack.description.generateWithAI': 'AI로 생성',
+  'slack.description.generating': '생성 중...',
+  'slack.description.generateFailed':
+    '설명 생성에 실패했습니다. 다시 시도하거나 직접 작성해 주세요.',
+
   // Slack Connect
   'slack.connect.button': 'Slack에 연결',
   'slack.connect.connecting': '연결 중...',

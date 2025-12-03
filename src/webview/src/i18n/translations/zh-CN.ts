@@ -576,6 +576,11 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.failed': '工作流分享失败',
   'slack.share.descriptionPlaceholder': '添加描述（可选）...',
 
+  // Slack Description AI Generation
+  'slack.description.generateWithAI': 'AI生成',
+  'slack.description.generating': '生成中...',
+  'slack.description.generateFailed': '生成描述失败。请重试或手动输入。',
+
   // Slack Connect
   'slack.connect.button': '连接到 Slack',
   'slack.connect.connecting': '连接中...',

@@ -600,6 +600,12 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.share.failed': 'ワークフローの共有に失敗しました',
   'slack.share.descriptionPlaceholder': '説明を追加（任意）...',
 
+  // Slack Description AI Generation
+  'slack.description.generateWithAI': 'AIで生成',
+  'slack.description.generating': '生成中...',
+  'slack.description.generateFailed':
+    '説明の生成に失敗しました。再度お試しいただくか、手動で入力してください。',
+
   // Slack Connect
   'slack.connect.button': 'Slackに接続',
   'slack.connect.connecting': '接続中...',

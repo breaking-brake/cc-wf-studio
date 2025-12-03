@@ -27,6 +27,7 @@ import { saveWorkflow } from './save-workflow';
 import { handleBrowseSkills, handleCreateSkill, handleValidateSkillFile } from './skill-operations';
 import { handleConnectSlackManual } from './slack-connect-manual';
 import { createOAuthService, handleConnectSlackOAuth } from './slack-connect-oauth';
+import { handleGenerateSlackDescription } from './slack-description-generation';
 import { handleImportWorkflowFromSlack } from './slack-import-workflow';
 import {
   handleGetSlackChannels,
@@ -504,6 +505,28 @@ export function registerOpenEditorCommand(
                   payload: {
                     code: 'VALIDATION_ERROR',
                     message: 'Share workflow payload is required',
+                  },
+                });
+              }
+              break;
+
+            case 'GENERATE_SLACK_DESCRIPTION':
+              // Generate workflow description with AI for Slack sharing
+              if (message.payload) {
+                const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+                await handleGenerateSlackDescription(
+                  message.payload,
+                  webview,
+                  message.requestId || '',
+                  workspaceRoot
+                );
+              } else {
+                webview.postMessage({
+                  type: 'ERROR',
+                  requestId: message.requestId,
+                  payload: {
+                    code: 'VALIDATION_ERROR',
+                    message: 'Generate Slack description payload is required',
                   },
                 });
               }

@@ -7,7 +7,7 @@
  * Based on specs/001-slack-workflow-sharing/plan.md
  */
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
 import type {
@@ -16,6 +16,7 @@ import type {
   SlackWorkspace,
 } from '../../services/slack-integration-service';
 import {
+  generateSlackDescription,
   getLastSharedChannel,
   getSlackChannels,
   listSlackWorkspaces,
@@ -35,7 +36,7 @@ interface SlackShareDialogProps {
 }
 
 export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDialogProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
 
@@ -78,6 +79,9 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
     null
   );
   const [isManualTokenDialogOpen, setIsManualTokenDialogOpen] = useState(false);
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+  const generationRequestIdRef = useRef<string | null>(null);
 
   // Load workspace when dialog opens (single workspace only)
   useEffect(() => {
@@ -186,6 +190,62 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
   const handleManualTokenClose = () => {
     setIsManualTokenDialogOpen(false);
   };
+
+  // Handle AI description generation
+  const handleGenerateDescription = useCallback(async () => {
+    const currentRequestId = `gen-${Date.now()}`;
+    generationRequestIdRef.current = currentRequestId;
+    setIsGeneratingDescription(true);
+    setGenerationError(null);
+
+    try {
+      // Serialize current workflow state
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName || 'Untitled Workflow',
+        'Created with Workflow Studio',
+        activeWorkflow?.conversationHistory
+      );
+      const workflowJson = JSON.stringify(workflow, null, 2);
+
+      // Determine target language from locale
+      // Map locale to supported languages (en, ja, ko, zh-CN, zh-TW)
+      let targetLanguage = locale;
+      if (locale.startsWith('zh-')) {
+        // Keep zh-CN or zh-TW as is
+        targetLanguage = locale === 'zh-TW' || locale === 'zh-HK' ? 'zh-TW' : 'zh-CN';
+      } else {
+        // For other locales, use the language code
+        targetLanguage = locale.split('-')[0];
+      }
+
+      const generatedDescription = await generateSlackDescription(workflowJson, targetLanguage);
+
+      // Only update if not cancelled
+      if (generationRequestIdRef.current === currentRequestId) {
+        setDescription(generatedDescription);
+      }
+    } catch {
+      // Only show error if not cancelled
+      if (generationRequestIdRef.current === currentRequestId) {
+        setGenerationError(t('slack.description.generateFailed'));
+      }
+    } finally {
+      // Only reset state if not cancelled
+      if (generationRequestIdRef.current === currentRequestId) {
+        setIsGeneratingDescription(false);
+        generationRequestIdRef.current = null;
+      }
+    }
+  }, [nodes, edges, workflowName, activeWorkflow?.conversationHistory, locale, t]);
+
+  // Handle cancel AI description generation
+  const handleCancelGeneration = useCallback(() => {
+    generationRequestIdRef.current = null;
+    setIsGeneratingDescription(false);
+    setGenerationError(null);
+  }, []);
 
   const handleShare = async () => {
     if (!workspace) {
@@ -630,23 +690,64 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
 
         {/* Description Input */}
         <div style={{ marginBottom: '0' }}>
-          <label
-            htmlFor="description-input"
+          <div
             style={{
-              display: 'block',
-              fontSize: '13px',
-              color: 'var(--vscode-foreground)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
               marginBottom: '8px',
-              fontWeight: 500,
             }}
           >
-            {t('description')} ({t('optional')})
-          </label>
+            <label
+              htmlFor="description-input"
+              style={{
+                fontSize: '13px',
+                color: 'var(--vscode-foreground)',
+                fontWeight: 500,
+              }}
+            >
+              {t('description')} ({t('optional')})
+            </label>
+            <button
+              type="button"
+              onClick={isGeneratingDescription ? handleCancelGeneration : handleGenerateDescription}
+              disabled={loading}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: isGeneratingDescription
+                  ? 'var(--vscode-errorForeground)'
+                  : 'var(--vscode-textLink-foreground)',
+                fontSize: '12px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                padding: '2px 4px',
+                opacity: loading ? 0.6 : 1,
+              }}
+            >
+              {isGeneratingDescription ? t('cancel') : t('slack.description.generateWithAI')}
+            </button>
+          </div>
+          {generationError && (
+            <div
+              style={{
+                fontSize: '12px',
+                color: 'var(--vscode-errorForeground)',
+                marginBottom: '8px',
+              }}
+            >
+              {generationError}
+            </div>
+          )}
+          {isGeneratingDescription && (
+            <div style={{ marginBottom: '8px' }}>
+              <IndeterminateProgressBar label={t('slack.description.generating')} />
+            </div>
+          )}
           <textarea
             id="description-input"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            disabled={loading}
+            disabled={loading || isGeneratingDescription}
             maxLength={500}
             rows={3}
             style={{

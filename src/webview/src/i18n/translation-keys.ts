@@ -520,6 +520,11 @@ export interface WebviewTranslationKeys {
   'slack.share.success': string;
   'slack.share.failed': string;
 
+  // Slack Description AI Generation
+  'slack.description.generateWithAI': string;
+  'slack.description.generating': string;
+  'slack.description.generateFailed': string;
+
   // Slack Connect
   'slack.connect.button': string;
   'slack.connect.connecting': string;

@@ -577,7 +577,50 @@ export type ExtensionMessage =
   | Message<SlackOAuthSuccessPayload, 'SLACK_OAUTH_SUCCESS'>
   | Message<SlackErrorPayload, 'SLACK_OAUTH_FAILED'>
   | Message<void, 'SLACK_OAUTH_CANCELLED'>
-  | Message<GetLastSharedChannelSuccessPayload, 'GET_LAST_SHARED_CHANNEL_SUCCESS'>;
+  | Message<GetLastSharedChannelSuccessPayload, 'GET_LAST_SHARED_CHANNEL_SUCCESS'>
+  | Message<SlackDescriptionSuccessPayload, 'SLACK_DESCRIPTION_SUCCESS'>
+  | Message<SlackDescriptionFailedPayload, 'SLACK_DESCRIPTION_FAILED'>;
+
+// ============================================================================
+// AI Slack Description Generation Payloads
+// ============================================================================
+
+/**
+ * Generate Slack description request payload
+ */
+export interface GenerateSlackDescriptionPayload {
+  /** Serialized workflow JSON for AI analysis */
+  workflowJson: string;
+  /** Current UI language (en, ja, ko, zh-CN, zh-TW) */
+  targetLanguage: string;
+  /** Optional timeout in milliseconds (default: 30000) */
+  timeoutMs?: number;
+}
+
+/**
+ * Slack description generation success payload
+ */
+export interface SlackDescriptionSuccessPayload {
+  /** Generated description (max 500 chars) */
+  description: string;
+  /** Execution time in milliseconds */
+  executionTimeMs: number;
+  /** Timestamp ISO 8601 */
+  timestamp: string;
+}
+
+/**
+ * Slack description generation failed payload
+ */
+export interface SlackDescriptionFailedPayload {
+  error: {
+    code: 'COMMAND_NOT_FOUND' | 'TIMEOUT' | 'PARSE_ERROR' | 'CANCELLED' | 'UNKNOWN_ERROR';
+    message: string;
+    details?: string;
+  };
+  executionTimeMs: number;
+  timestamp: string;
+}
 
 // ============================================================================
 // Slack Integration Payloads (001-slack-workflow-sharing)
@@ -953,7 +996,8 @@ export type WebviewMessage =
   | Message<ImportWorkflowFromSlackPayload, 'IMPORT_WORKFLOW_FROM_SLACK'>
   | Message<OpenExternalUrlPayload, 'OPEN_EXTERNAL_URL'>
   | Message<void, 'GET_LAST_SHARED_CHANNEL'>
-  | Message<SetLastSharedChannelPayload, 'SET_LAST_SHARED_CHANNEL'>;
+  | Message<SetLastSharedChannelPayload, 'SET_LAST_SHARED_CHANNEL'>
+  | Message<GenerateSlackDescriptionPayload, 'GENERATE_SLACK_DESCRIPTION'>;
 
 // ============================================================================
 // Error Codes
