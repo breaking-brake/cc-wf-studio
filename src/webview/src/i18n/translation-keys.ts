@@ -524,7 +524,6 @@ export interface WebviewTranslationKeys {
 
   // Slack Description AI Generation
   'slack.description.generateWithAI': string;
-  'slack.description.generating': string;
   'slack.description.generateFailed': string;
 
   // Slack Connect

@@ -609,7 +609,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Description AI Generation
   'slack.description.generateWithAI': 'Generate with AI',
-  'slack.description.generating': 'Generating...',
   'slack.description.generateFailed':
     'Failed to generate description. Please try again or write manually.',
 

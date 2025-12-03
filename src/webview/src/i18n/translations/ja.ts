@@ -605,7 +605,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Description AI Generation
   'slack.description.generateWithAI': 'AIで生成',
-  'slack.description.generating': '生成中...',
   'slack.description.generateFailed':
     '説明の生成に失敗しました。再度お試しいただくか、手動で入力してください。',
 

@@ -604,7 +604,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Description AI Generation
   'slack.description.generateWithAI': 'AI로 생성',
-  'slack.description.generating': '생성 중...',
   'slack.description.generateFailed':
     '설명 생성에 실패했습니다. 다시 시도하거나 직접 작성해 주세요.',
 

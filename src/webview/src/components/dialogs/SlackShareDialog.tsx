@@ -26,6 +26,7 @@ import {
 } from '../../services/slack-integration-service';
 import { serializeWorkflow } from '../../services/workflow-service';
 import { useWorkflowStore } from '../../stores/workflow-store';
+import { AiGenerateButton } from '../common/AiGenerateButton';
 import { IndeterminateProgressBar } from '../common/IndeterminateProgressBar';
 import { SlackManualTokenDialog } from './SlackManualTokenDialog';
 
@@ -708,24 +709,14 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
             >
               {t('description')} ({t('optional')})
             </label>
-            <button
-              type="button"
-              onClick={isGeneratingDescription ? handleCancelGeneration : handleGenerateDescription}
+            <AiGenerateButton
+              isGenerating={isGeneratingDescription}
+              onGenerate={handleGenerateDescription}
+              onCancel={handleCancelGeneration}
+              generateTooltip={t('slack.description.generateWithAI')}
+              cancelTooltip={t('cancel')}
               disabled={loading}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: isGeneratingDescription
-                  ? 'var(--vscode-errorForeground)'
-                  : 'var(--vscode-textLink-foreground)',
-                fontSize: '12px',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                padding: '2px 4px',
-                opacity: loading ? 0.6 : 1,
-              }}
-            >
-              {isGeneratingDescription ? t('cancel') : t('slack.description.generateWithAI')}
-            </button>
+            />
           </div>
           {generationError && (
             <div
@@ -736,11 +727,6 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
               }}
             >
               {generationError}
-            </div>
-          )}
-          {isGeneratingDescription && (
-            <div style={{ marginBottom: '8px' }}>
-              <IndeterminateProgressBar label={t('slack.description.generating')} />
             </div>
           )}
           <textarea

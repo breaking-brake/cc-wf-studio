@@ -5,7 +5,6 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
-import { Loader2, Wand2, X } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../i18n/i18n-context';
@@ -19,8 +18,8 @@ import {
 } from '../services/workflow-service';
 import { useRefinementStore } from '../stores/refinement-store';
 import { createWorkflowFromCanvas, useWorkflowStore } from '../stores/workflow-store';
+import { AiGenerateButton } from './common/AiGenerateButton';
 import { ProcessingOverlay } from './common/ProcessingOverlay';
-import { StyledTooltip } from './common/StyledTooltip';
 
 interface ToolbarProps {
   onError: (error: { code: string; message: string; details?: unknown }) => void;
@@ -332,68 +331,22 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
             boxSizing: 'border-box',
           }}
         />
-        {/* AI Generate / Cancel Buttons (positioned inside input) */}
+        {/* AI Generate / Cancel Button (positioned inside input) */}
         <div
           style={{
             position: 'absolute',
             right: '4px',
             top: '50%',
             transform: 'translateY(-50%)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '2px',
           }}
         >
-          {isGeneratingName ? (
-            <>
-              <Loader2
-                size={14}
-                style={{
-                  color: 'var(--vscode-foreground)',
-                  animation: 'spin 1s linear infinite',
-                }}
-              />
-              <StyledTooltip content={t('cancel')}>
-                <button
-                  type="button"
-                  onClick={handleCancelNameGeneration}
-                  aria-label={t('cancel')}
-                  style={{
-                    padding: '2px',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '2px',
-                  }}
-                >
-                  <X size={14} style={{ color: 'var(--vscode-foreground)' }} />
-                </button>
-              </StyledTooltip>
-            </>
-          ) : (
-            <StyledTooltip content={t('toolbar.generateNameWithAI')}>
-              <button
-                type="button"
-                onClick={handleGenerateWorkflowName}
-                aria-label={t('toolbar.generateNameWithAI')}
-                style={{
-                  padding: '2px',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '2px',
-                }}
-              >
-                <Wand2 size={14} style={{ color: 'var(--vscode-foreground)' }} />
-              </button>
-            </StyledTooltip>
-          )}
+          <AiGenerateButton
+            isGenerating={isGeneratingName}
+            onGenerate={handleGenerateWorkflowName}
+            onCancel={handleCancelNameGeneration}
+            generateTooltip={t('toolbar.generateNameWithAI')}
+            cancelTooltip={t('cancel')}
+          />
         </div>
       </div>
 

@@ -580,7 +580,6 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack Description AI Generation
   'slack.description.generateWithAI': 'AI產生',
-  'slack.description.generating': '產生中...',
   'slack.description.generateFailed': '產生描述失敗。請重試或手動輸入。',
 
   // Slack Connect
