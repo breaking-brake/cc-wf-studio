@@ -79,18 +79,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.title': 'Properties',
   'property.noSelection': 'Select a node to view its properties',
 
-  // Node type badges
-  'property.nodeType.subAgent': 'Sub-Agent',
-  'property.nodeType.askUserQuestion': 'Ask User Question',
-  'property.nodeType.branch': 'Branch Node',
-  'property.nodeType.ifElse': 'If/Else Node',
-  'property.nodeType.switch': 'Switch Node',
-  'property.nodeType.prompt': 'Prompt Node',
-  'property.nodeType.start': 'Start Node',
-  'property.nodeType.end': 'End Node',
-  'property.nodeType.skill': 'Skill Node',
-  'property.nodeType.unknown': 'Unknown',
-
   // Common property labels
   'property.nodeName': 'Node Name',
   'property.nodeName.placeholder': 'Enter node name',
@@ -440,7 +428,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.error.invalidMode': 'Invalid mode selected',
 
   // MCP Property Panel
-  'property.nodeType.mcp': 'MCP Tool',
   'property.mcp.serverId': 'Server',
   'property.mcp.toolName': 'Tool Name',
   'property.mcp.toolDescription': 'Description',

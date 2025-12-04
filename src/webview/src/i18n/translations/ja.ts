@@ -79,18 +79,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.title': 'プロパティ',
   'property.noSelection': 'ノードを選択してプロパティを表示',
 
-  // Node type badges
-  'property.nodeType.subAgent': 'Sub-Agent',
-  'property.nodeType.askUserQuestion': 'Ask User Question',
-  'property.nodeType.branch': 'Branch Node',
-  'property.nodeType.ifElse': 'If/Else Node',
-  'property.nodeType.switch': 'Switch Node',
-  'property.nodeType.prompt': 'Prompt Node',
-  'property.nodeType.start': 'Start Node',
-  'property.nodeType.end': 'End Node',
-  'property.nodeType.skill': 'Skillノード',
-  'property.nodeType.unknown': '不明',
-
   // Common property labels
   'property.nodeName': 'ノード名',
   'property.nodeName.placeholder': 'ノード名を入力',
@@ -439,7 +427,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.error.invalidMode': '無効なモードが選択されました',
 
   // MCP Property Panel
-  'property.nodeType.mcp': 'MCP Tool',
   'property.mcp.serverId': 'サーバー',
   'property.mcp.toolName': 'ツール名',
   'property.mcp.toolDescription': '説明',

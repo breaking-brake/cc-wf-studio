@@ -78,18 +78,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'property.title': '属性',
   'property.noSelection': '选择节点以查看其属性',
 
-  // Node type badges
-  'property.nodeType.subAgent': 'Sub-Agent',
-  'property.nodeType.askUserQuestion': 'Ask User Question',
-  'property.nodeType.branch': 'Branch Node',
-  'property.nodeType.ifElse': 'If/Else Node',
-  'property.nodeType.switch': 'Switch Node',
-  'property.nodeType.prompt': 'Prompt Node',
-  'property.nodeType.start': 'Start Node',
-  'property.nodeType.end': 'End Node',
-  'property.nodeType.skill': 'Skill节点',
-  'property.nodeType.unknown': '未知',
-
   // Common property labels
   'property.nodeName': '节点名称',
   'property.nodeName.placeholder': '输入节点名称',
@@ -421,7 +409,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.error.invalidMode': '选择了无效的模式',
 
   // MCP Property Panel
-  'property.nodeType.mcp': 'MCP Tool',
   'property.mcp.serverId': '服务器',
   'property.mcp.toolName': '工具名称',
   'property.mcp.toolDescription': '描述',

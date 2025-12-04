@@ -76,18 +76,6 @@ export interface WebviewTranslationKeys {
   'property.title': string;
   'property.noSelection': string;
 
-  // Node type badges
-  'property.nodeType.subAgent': string;
-  'property.nodeType.askUserQuestion': string;
-  'property.nodeType.branch': string;
-  'property.nodeType.ifElse': string;
-  'property.nodeType.switch': string;
-  'property.nodeType.prompt': string;
-  'property.nodeType.start': string;
-  'property.nodeType.end': string;
-  'property.nodeType.skill': string;
-  'property.nodeType.unknown': string;
-
   // Common property labels
   'property.nodeName': string;
   'property.nodeName.placeholder': string;
@@ -401,7 +389,6 @@ export interface WebviewTranslationKeys {
   'mcp.dialog.error.invalidMode': string;
 
   // MCP Property Panel
-  'property.nodeType.mcp': string;
   'property.mcp.serverId': string;
   'property.mcp.toolName': string;
   'property.mcp.toolDescription': string;

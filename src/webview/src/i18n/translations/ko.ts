@@ -80,18 +80,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.title': '속성',
   'property.noSelection': '노드를 선택하여 속성 보기',
 
-  // Node type badges
-  'property.nodeType.subAgent': 'Sub-Agent',
-  'property.nodeType.askUserQuestion': 'Ask User Question',
-  'property.nodeType.branch': 'Branch Node',
-  'property.nodeType.ifElse': 'If/Else Node',
-  'property.nodeType.switch': 'Switch Node',
-  'property.nodeType.prompt': 'Prompt Node',
-  'property.nodeType.start': 'Start Node',
-  'property.nodeType.end': 'End Node',
-  'property.nodeType.skill': 'Skill 노드',
-  'property.nodeType.unknown': '알 수 없음',
-
   // Common property labels
   'property.nodeName': '노드 이름',
   'property.nodeName.placeholder': '노드 이름 입력',
@@ -438,7 +426,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.error.invalidMode': '잘못된 모드가 선택되었습니다',
 
   // MCP Property Panel
-  'property.nodeType.mcp': 'MCP Tool',
   'property.mcp.serverId': '서버',
   'property.mcp.toolName': '도구 이름',
   'property.mcp.toolDescription': '설명',

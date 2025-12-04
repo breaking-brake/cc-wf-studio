@@ -20,6 +20,7 @@ import { SUB_AGENT_COLORS } from '@shared/types/workflow-definition';
 import type React from 'react';
 import { useState } from 'react';
 import type { Node } from 'reactflow';
+import { getNodeTypeLabel } from '../constants/node-type-labels';
 import { useResizablePanel } from '../hooks/useResizablePanel';
 import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
@@ -108,27 +109,7 @@ export const PropertyPanel: React.FC = () => {
           marginBottom: '16px',
         }}
       >
-        {selectedNode.type === 'subAgent'
-          ? t('property.nodeType.subAgent')
-          : selectedNode.type === 'askUserQuestion'
-            ? t('property.nodeType.askUserQuestion')
-            : selectedNode.type === 'branch'
-              ? t('property.nodeType.branch')
-              : selectedNode.type === 'ifElse'
-                ? t('property.nodeType.ifElse')
-                : selectedNode.type === 'switch'
-                  ? t('property.nodeType.switch')
-                  : selectedNode.type === 'prompt'
-                    ? t('property.nodeType.prompt')
-                    : selectedNode.type === 'start'
-                      ? t('property.nodeType.start')
-                      : selectedNode.type === 'end'
-                        ? t('property.nodeType.end')
-                        : selectedNode.type === 'skill'
-                          ? t('property.nodeType.skill')
-                          : selectedNode.type === 'mcp'
-                            ? t('property.nodeType.mcp')
-                            : t('property.nodeType.unknown')}
+        {getNodeTypeLabel(selectedNode.type)}
       </div>
 
       {/* Node Name (only for subAgent, askUserQuestion, branch, ifElse, switch, prompt, skill, and mcp types) */}
