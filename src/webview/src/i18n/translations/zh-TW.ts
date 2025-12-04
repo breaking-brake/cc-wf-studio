@@ -299,7 +299,6 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'refinement.cancelButton': '取消',
   'refinement.processing': '處理中...',
   'refinement.aiProcessing': 'AI正在處理您的請求...',
-  'refinement.charactersRemaining': '剩餘 {count} 字元',
   'refinement.iterationCounter': '編輯次數: {current}次',
   'refinement.iterationCounter.tooltip': '編輯次數過多可能導致儲存·載入速度變慢，影響編輯工作',
   'refinement.warning.title': '對話較長',

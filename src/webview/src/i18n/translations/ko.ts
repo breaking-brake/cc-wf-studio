@@ -310,7 +310,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.cancelButton': '취소',
   'refinement.processing': '처리 중...',
   'refinement.aiProcessing': 'AI가 요청을 처리하고 있습니다...',
-  'refinement.charactersRemaining': '남은 문자 수: {count}',
   'refinement.iterationCounter': '편집 횟수: {current}회',
   'refinement.iterationCounter.tooltip':
     '편집 횟수가 많으면 저장·불러오기가 느려지고 편집 작업에 지장이 생길 수 있습니다',

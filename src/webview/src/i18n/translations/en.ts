@@ -309,7 +309,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'refinement.cancelButton': 'Cancel',
   'refinement.processing': 'Processing...',
   'refinement.aiProcessing': 'AI is processing your request...',
-  'refinement.charactersRemaining': '{count} characters remaining',
   'refinement.iterationCounter': 'Edits: {current}',
   'refinement.iterationCounter.tooltip':
     'High edit counts may slow down save/load operations and impact editing workflow',

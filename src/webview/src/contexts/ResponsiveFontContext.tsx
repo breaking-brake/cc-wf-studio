@@ -6,9 +6,17 @@
  */
 
 import { createContext, type ReactNode, useContext } from 'react';
-import { type ResponsiveFontSizes, useResponsiveFontSizes } from '../hooks/useResponsiveFontSizes';
+import {
+  getPanelSizeMode,
+  type ResponsiveFontSizes,
+  useResponsiveFontSizes,
+} from '../hooks/useResponsiveFontSizes';
 
-const ResponsiveFontContext = createContext<ResponsiveFontSizes | null>(null);
+export interface ResponsiveFontContextValue extends ResponsiveFontSizes {
+  isCompact: boolean;
+}
+
+const ResponsiveFontContext = createContext<ResponsiveFontContextValue | null>(null);
 
 interface ResponsiveFontProviderProps {
   width: number;
@@ -20,17 +28,21 @@ interface ResponsiveFontProviderProps {
  */
 export function ResponsiveFontProvider({ width, children }: ResponsiveFontProviderProps) {
   const fontSizes = useResponsiveFontSizes(width);
+  const isCompact = getPanelSizeMode(width) === 'compact';
 
-  return (
-    <ResponsiveFontContext.Provider value={fontSizes}>{children}</ResponsiveFontContext.Provider>
-  );
+  const value: ResponsiveFontContextValue = {
+    ...fontSizes,
+    isCompact,
+  };
+
+  return <ResponsiveFontContext.Provider value={value}>{children}</ResponsiveFontContext.Provider>;
 }
 
 /**
  * Hook to access responsive font sizes from context
  * Returns default sizes if used outside of ResponsiveFontProvider
  */
-export function useResponsiveFonts(): ResponsiveFontSizes {
+export function useResponsiveFonts(): ResponsiveFontContextValue {
   const context = useContext(ResponsiveFontContext);
   if (!context) {
     // Fallback to default sizes if used outside provider
@@ -40,6 +52,7 @@ export function useResponsiveFonts(): ResponsiveFontSizes {
       xsmall: 10,
       button: 12,
       title: 13,
+      isCompact: false,
     };
   }
   return context;

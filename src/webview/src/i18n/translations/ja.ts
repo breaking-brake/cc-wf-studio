@@ -308,7 +308,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.cancelButton': 'キャンセル',
   'refinement.processing': '処理中...',
   'refinement.aiProcessing': 'AIがリクエストを処理中です...',
-  'refinement.charactersRemaining': '残り {count} 文字',
   'refinement.iterationCounter': '編集回数: {current}回',
   'refinement.iterationCounter.tooltip':
     '編集回数が多いと保存・読み込みが遅くなり、編集作業に支障が出る可能性があります',
