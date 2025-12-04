@@ -5,10 +5,12 @@
  * Based on: /specs/001-ai-workflow-refinement/spec.md FR-011
  */
 
+import { useResponsiveFonts } from '../../contexts/ResponsiveFontContext';
 import { useTranslation } from '../../i18n/i18n-context';
 
 export function WarningBanner() {
   const { t } = useTranslation();
+  const fontSizes = useResponsiveFonts();
 
   return (
     <div
@@ -67,7 +69,7 @@ export function WarningBanner() {
       <div
         style={{
           flex: 1,
-          fontSize: '13px',
+          fontSize: `${fontSizes.base}px`,
           lineHeight: '1.5',
           color: 'var(--vscode-inputValidation-warningForeground)',
         }}

@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useRef } from 'react';
+import { useResponsiveFonts } from '../../contexts/ResponsiveFontContext';
 import { useTranslation } from '../../i18n/i18n-context';
 import { useRefinementStore } from '../../stores/refinement-store';
 import { MessageBubble } from './MessageBubble';
@@ -19,6 +20,7 @@ interface MessageListProps {
 export function MessageList({ onRetry }: MessageListProps) {
   const { t } = useTranslation();
   const { conversationHistory } = useRefinementStore();
+  const fontSizes = useResponsiveFonts();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages arrive
@@ -44,7 +46,7 @@ export function MessageList({ onRetry }: MessageListProps) {
         <div
           style={{
             color: 'var(--vscode-foreground)',
-            fontSize: '13px',
+            fontSize: `${fontSizes.base}px`,
             lineHeight: '1.6',
             marginBottom: '16px',
             textAlign: 'center',
@@ -55,7 +57,7 @@ export function MessageList({ onRetry }: MessageListProps) {
         <div
           style={{
             color: 'var(--vscode-descriptionForeground)',
-            fontSize: '12px',
+            fontSize: `${fontSizes.button}px`,
             lineHeight: '1.6',
             textAlign: 'center',
           }}
@@ -69,7 +71,7 @@ export function MessageList({ onRetry }: MessageListProps) {
             backgroundColor: 'var(--vscode-textBlockQuote-background)',
             border: '1px solid var(--vscode-textBlockQuote-border)',
             borderRadius: '4px',
-            fontSize: '11px',
+            fontSize: `${fontSizes.small}px`,
             lineHeight: '1.6',
             color: 'var(--vscode-foreground)',
             whiteSpace: 'pre-wrap',

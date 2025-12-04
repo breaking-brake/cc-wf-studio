@@ -9,6 +9,7 @@
 
 import type React from 'react';
 import { useId } from 'react';
+import { useResponsiveFonts } from '../../contexts/ResponsiveFontContext';
 import { useTranslation } from '../../i18n/i18n-context';
 import { cancelWorkflowRefinement } from '../../services/refinement-service';
 import { useRefinementStore } from '../../stores/refinement-store';
@@ -24,6 +25,7 @@ interface MessageInputProps {
 export function MessageInput({ onSend }: MessageInputProps) {
   const { t } = useTranslation();
   const textareaId = useId();
+  const fontSizes = useResponsiveFonts();
   const { currentInput, setInput, canSend, isProcessing, currentRequestId } = useRefinementStore();
 
   const handleSend = () => {
@@ -74,7 +76,7 @@ export function MessageInput({ onSend }: MessageInputProps) {
           color: 'var(--vscode-input-foreground)',
           border: `1px solid var(--vscode-input-border)`,
           borderRadius: '4px',
-          fontSize: '13px',
+          fontSize: `${fontSizes.base}px`,
           fontFamily: 'var(--vscode-font-family)',
           resize: 'vertical',
         }}
@@ -98,7 +100,7 @@ export function MessageInput({ onSend }: MessageInputProps) {
         >
           <div
             style={{
-              fontSize: '12px',
+              fontSize: `${fontSizes.button}px`,
               color: isTooLong
                 ? 'var(--vscode-errorForeground)'
                 : 'var(--vscode-descriptionForeground)',

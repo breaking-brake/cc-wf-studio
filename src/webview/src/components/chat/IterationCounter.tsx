@@ -6,12 +6,14 @@
  * Updated: Removed hard limit - warning now shown separately via WarningBanner
  */
 
+import { useResponsiveFonts } from '../../contexts/ResponsiveFontContext';
 import { useTranslation } from '../../i18n/i18n-context';
 import { useRefinementStore } from '../../stores/refinement-store';
 
 export function IterationCounter() {
   const { t } = useTranslation();
   const { conversationHistory } = useRefinementStore();
+  const fontSizes = useResponsiveFonts();
 
   if (!conversationHistory) {
     return null;
@@ -22,7 +24,7 @@ export function IterationCounter() {
   return (
     <div
       style={{
-        fontSize: '12px',
+        fontSize: `${fontSizes.button}px`,
         padding: '4px 8px',
         borderRadius: '4px',
         backgroundColor: 'var(--vscode-badge-background)',

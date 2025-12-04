@@ -4,6 +4,7 @@
  * Allows users to select AI refinement timeout duration from preset values
  */
 
+import { useResponsiveFonts } from '../../contexts/ResponsiveFontContext';
 import { useTranslation } from '../../i18n/i18n-context';
 import { useRefinementStore } from '../../stores/refinement-store';
 
@@ -19,6 +20,7 @@ const TIMEOUT_PRESETS = [
 
 export function TimeoutSelector() {
   const { t } = useTranslation();
+  const fontSizes = useResponsiveFonts();
   const { timeoutSeconds, setTimeoutSeconds, isProcessing } = useRefinementStore();
 
   return (
@@ -32,7 +34,7 @@ export function TimeoutSelector() {
       <label
         htmlFor="timeout-selector"
         style={{
-          fontSize: '11px',
+          fontSize: `${fontSizes.small}px`,
           color: 'var(--vscode-foreground)',
           opacity: isProcessing ? 0.5 : 1,
         }}
@@ -46,7 +48,7 @@ export function TimeoutSelector() {
         disabled={isProcessing}
         style={{
           padding: '2px 4px',
-          fontSize: '11px',
+          fontSize: `${fontSizes.small}px`,
           backgroundColor: 'var(--vscode-dropdown-background)',
           color: 'var(--vscode-dropdown-foreground)',
           border: '1px solid var(--vscode-dropdown-border)',

@@ -7,6 +7,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useResponsiveFonts } from '../../contexts/ResponsiveFontContext';
 
 interface ProgressBarProps {
   /** Show progress bar */
@@ -19,6 +20,7 @@ interface ProgressBarProps {
 
 export function ProgressBar({ isProcessing, label, maxSeconds }: ProgressBarProps) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const fontSizes = useResponsiveFonts();
 
   // Progress timer - same logic as MessageInput
   useEffect(() => {
@@ -58,7 +60,7 @@ export function ProgressBar({ isProcessing, label, maxSeconds }: ProgressBarProp
         <div
           style={{
             marginBottom: '6px',
-            fontSize: '11px',
+            fontSize: `${fontSizes.small}px`,
             color: 'var(--vscode-descriptionForeground)',
             fontStyle: 'italic',
           }}
@@ -92,7 +94,7 @@ export function ProgressBar({ isProcessing, label, maxSeconds }: ProgressBarProp
       {/* Progress text */}
       <div
         style={{
-          fontSize: '10px',
+          fontSize: `${fontSizes.xsmall}px`,
           color: 'var(--vscode-descriptionForeground)',
           opacity: 0.7,
           display: 'flex',

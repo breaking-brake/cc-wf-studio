@@ -8,6 +8,7 @@
  */
 
 import type { ConversationMessage } from '@shared/types/workflow-definition';
+import { useResponsiveFonts } from '../../contexts/ResponsiveFontContext';
 import { useTranslation } from '../../i18n/i18n-context';
 import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
 import { useRefinementStore } from '../../stores/refinement-store';
@@ -22,6 +23,7 @@ interface MessageBubbleProps {
 export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
   const { t } = useTranslation();
   const { timeoutSeconds } = useRefinementStore();
+  const fontSizes = useResponsiveFonts();
   const isUser = message.sender === 'user';
   const isError = message.isError ?? false;
   const errorCode = message.errorCode;
@@ -63,7 +65,7 @@ export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
       >
         <div
           style={{
-            fontSize: '11px',
+            fontSize: `${fontSizes.small}px`,
             opacity: 0.7,
             marginBottom: '4px',
           }}
@@ -93,7 +95,7 @@ export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
                 style={{
                   marginTop: '8px',
                   padding: '4px 12px',
-                  fontSize: '12px',
+                  fontSize: `${fontSizes.button}px`,
                   fontWeight: 500,
                   backgroundColor: 'var(--vscode-button-background)',
                   color: 'var(--vscode-button-foreground)',
@@ -136,7 +138,7 @@ export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
         {!isLoading && !isError && (
           <div
             style={{
-              fontSize: '10px',
+              fontSize: `${fontSizes.xsmall}px`,
               opacity: 0.5,
               marginTop: '4px',
               textAlign: 'right',
