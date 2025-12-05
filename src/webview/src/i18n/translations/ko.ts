@@ -44,6 +44,12 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.nameGenerationFailed':
     '워크플로 이름 생성에 실패했습니다. 다시 시도하거나 수동으로 입력하세요.',
 
+  // Toolbar responsive tooltips
+  'toolbar.save.tooltip': '워크플로 저장',
+  'toolbar.convert.iconTooltip': 'Slash Command로 변환',
+  'toolbar.load.tooltip': '선택한 워크플로 불러오기',
+  'slack.share.tooltip': 'Slack에 공유',
+
   // Node Palette
   'palette.title': '노드 팔레트',
   'palette.basicNodes': '기본 노드',

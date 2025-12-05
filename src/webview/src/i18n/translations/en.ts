@@ -44,6 +44,12 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.nameGenerationFailed':
     'Failed to generate workflow name. Please try again or enter manually.',
 
+  // Toolbar responsive tooltips
+  'toolbar.save.tooltip': 'Save workflow',
+  'toolbar.convert.iconTooltip': 'Convert to Slash Command',
+  'toolbar.load.tooltip': 'Load selected workflow',
+  'slack.share.tooltip': 'Share to Slack',
+
   // Node Palette
   'palette.title': 'Node Palette',
   'palette.basicNodes': 'Basic Nodes',

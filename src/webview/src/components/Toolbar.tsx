@@ -5,8 +5,10 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
+import { FileDown, Save, Share2, SquareSlash } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useTranslation } from '../i18n/i18n-context';
 import { vscode } from '../main';
 import { generateWorkflowName } from '../services/ai-generation-service';
@@ -17,9 +19,10 @@ import {
   validateWorkflow,
 } from '../services/workflow-service';
 import { useRefinementStore } from '../stores/refinement-store';
-import { createWorkflowFromCanvas, useWorkflowStore } from '../stores/workflow-store';
+import { useWorkflowStore } from '../stores/workflow-store';
 import { AiGenerateButton } from './common/AiGenerateButton';
 import { ProcessingOverlay } from './common/ProcessingOverlay';
+import { StyledTooltipItem, StyledTooltipProvider } from './common/StyledTooltip';
 
 interface ToolbarProps {
   onError: (error: { code: string; message: string; details?: unknown }) => void;
@@ -36,6 +39,7 @@ interface WorkflowListItem {
 
 export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareToSlack }) => {
   const { t, locale } = useTranslation();
+  const isCompact = useIsCompactMode();
   const {
     nodes,
     edges,
@@ -46,8 +50,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
     workflowName,
     setWorkflowName,
   } = useWorkflowStore();
-  const { openChat, initConversation, loadConversationHistory, isProcessing } =
-    useRefinementStore();
+  const { isProcessing } = useRefinementStore();
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [workflows, setWorkflows] = useState<WorkflowListItem[]>([]);
@@ -213,26 +216,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
     }
   };
 
-  // Phase 3.13: Always enable refinement, generate workflow from current canvas state
-  const handleOpenRefinementChat = () => {
-    let workflow = activeWorkflow;
-
-    // If no active workflow exists, create one from current canvas state
-    if (!workflow) {
-      workflow = createWorkflowFromCanvas(nodes, edges);
-      setActiveWorkflow(workflow);
-    }
-
-    // Load conversation history if exists, otherwise initialize
-    if (workflow.conversationHistory) {
-      loadConversationHistory(workflow.conversationHistory);
-    } else {
-      initConversation();
-    }
-
-    openChat();
-  };
-
   // Handle AI workflow name generation
   const handleGenerateWorkflowName = useCallback(async () => {
     const currentRequestId = `gen-name-${Date.now()}`;
@@ -298,234 +281,241 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
   }, []);
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '8px 12px',
-        borderBottom: '1px solid var(--vscode-panel-border)',
-        backgroundColor: 'var(--vscode-editor-background)',
-      }}
-    >
-      {/* Workflow Name Input with AI Generate Button (inside input) */}
-      <div style={{ position: 'relative', flex: 1 }}>
-        <input
-          type="text"
-          value={workflowName}
-          onChange={(e) => setWorkflowName(e.target.value)}
-          placeholder={t('toolbar.workflowNamePlaceholder')}
-          disabled={isGeneratingName}
-          className="nodrag"
-          data-tour="workflow-name-input"
+    <StyledTooltipProvider>
+      <div
+        style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '8px 12px',
+          borderBottom: '1px solid var(--vscode-panel-border)',
+          backgroundColor: 'var(--vscode-editor-background)',
+        }}
+      >
+        {/* Workflow Name Input with AI Generate Button (inside input) */}
+        <div style={{ position: 'relative', flex: 1 }}>
+          <input
+            type="text"
+            value={workflowName}
+            onChange={(e) => setWorkflowName(e.target.value)}
+            placeholder={t('toolbar.workflowNamePlaceholder')}
+            disabled={isGeneratingName}
+            className="nodrag"
+            data-tour="workflow-name-input"
+            style={{
+              width: '100%',
+              padding: '4px 44px 4px 8px',
+              backgroundColor: 'var(--vscode-input-background)',
+              color: 'var(--vscode-input-foreground)',
+              border: '1px solid var(--vscode-input-border)',
+              borderRadius: '2px',
+              fontSize: '13px',
+              opacity: isGeneratingName ? 0.7 : 1,
+              boxSizing: 'border-box',
+            }}
+          />
+          {/* AI Generate / Cancel Button (positioned inside input) */}
+          <div
+            style={{
+              position: 'absolute',
+              right: '4px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+            }}
+          >
+            <AiGenerateButton
+              isGenerating={isGeneratingName}
+              onGenerate={handleGenerateWorkflowName}
+              onCancel={handleCancelNameGeneration}
+              generateTooltip={t('toolbar.generateNameWithAI')}
+              cancelTooltip={t('cancel')}
+            />
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <StyledTooltipItem content={t('toolbar.save.tooltip')}>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving}
+            data-tour="save-button"
+            style={{
+              padding: isCompact ? '4px 8px' : '4px 12px',
+              backgroundColor: 'var(--vscode-button-background)',
+              color: 'var(--vscode-button-foreground)',
+              border: 'none',
+              borderRadius: '2px',
+              cursor: isSaving ? 'not-allowed' : 'pointer',
+              fontSize: '13px',
+              opacity: isSaving ? 0.6 : 1,
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            {isCompact ? <Save size={16} /> : isSaving ? t('toolbar.saving') : t('toolbar.save')}
+          </button>
+        </StyledTooltipItem>
+
+        {/* Export Button */}
+        <StyledTooltipItem content={t('toolbar.convert.iconTooltip')}>
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={isExporting}
+            data-tour="export-button"
+            style={{
+              padding: isCompact ? '4px 8px' : '4px 12px',
+              backgroundColor: 'var(--vscode-button-secondaryBackground)',
+              color: 'var(--vscode-button-secondaryForeground)',
+              border: 'none',
+              borderRadius: '2px',
+              cursor: isExporting ? 'not-allowed' : 'pointer',
+              fontSize: '13px',
+              opacity: isExporting ? 0.6 : 1,
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            {isCompact ? (
+              <SquareSlash size={16} />
+            ) : isExporting ? (
+              t('toolbar.converting')
+            ) : (
+              t('toolbar.convert')
+            )}
+          </button>
+        </StyledTooltipItem>
+
+        {/* Divider */}
+        <div
           style={{
-            width: '100%',
-            padding: '4px 44px 4px 8px',
+            width: '1px',
+            height: '20px',
+            backgroundColor: 'var(--vscode-panel-border)',
+          }}
+        />
+
+        {/* Workflow Selector */}
+        <select
+          value={selectedWorkflowId}
+          onChange={(e) => setSelectedWorkflowId(e.target.value)}
+          onFocus={handleRefreshList}
+          className="nodrag"
+          data-tour="workflow-selector"
+          style={{
+            padding: '4px 8px',
             backgroundColor: 'var(--vscode-input-background)',
             color: 'var(--vscode-input-foreground)',
             border: '1px solid var(--vscode-input-border)',
             borderRadius: '2px',
             fontSize: '13px',
-            opacity: isGeneratingName ? 0.7 : 1,
-            boxSizing: 'border-box',
-          }}
-        />
-        {/* AI Generate / Cancel Button (positioned inside input) */}
-        <div
-          style={{
-            position: 'absolute',
-            right: '4px',
-            top: '50%',
-            transform: 'translateY(-50%)',
+            minWidth: '150px',
           }}
         >
-          <AiGenerateButton
-            isGenerating={isGeneratingName}
-            onGenerate={handleGenerateWorkflowName}
-            onCancel={handleCancelNameGeneration}
-            generateTooltip={t('toolbar.generateNameWithAI')}
-            cancelTooltip={t('cancel')}
-          />
-        </div>
+          <option value="">{t('toolbar.selectWorkflow')}</option>
+          {workflows.map((wf) => (
+            <option key={wf.id} value={wf.id}>
+              {wf.name}
+            </option>
+          ))}
+        </select>
+
+        {/* Load Button */}
+        <StyledTooltipItem content={t('toolbar.load.tooltip')}>
+          <button
+            type="button"
+            onClick={handleLoadWorkflow}
+            disabled={!selectedWorkflowId}
+            data-tour="load-button"
+            style={{
+              padding: isCompact ? '4px 8px' : '4px 12px',
+              backgroundColor: 'var(--vscode-button-secondaryBackground)',
+              color: 'var(--vscode-button-secondaryForeground)',
+              border: 'none',
+              borderRadius: '2px',
+              cursor: !selectedWorkflowId ? 'not-allowed' : 'pointer',
+              fontSize: '13px',
+              opacity: !selectedWorkflowId ? 0.6 : 1,
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            {isCompact ? <FileDown size={16} /> : t('toolbar.load')}
+          </button>
+        </StyledTooltipItem>
+
+        {/* Divider */}
+        <div
+          style={{
+            width: '1px',
+            height: '20px',
+            backgroundColor: 'var(--vscode-panel-border)',
+          }}
+        />
+
+        {/* Share to Slack Button - Phase 3.1 (Beta feature, placed before help button) */}
+        <StyledTooltipItem content={t('slack.share.tooltip')}>
+          <button
+            type="button"
+            onClick={onShareToSlack}
+            data-tour="slack-share-button"
+            style={{
+              padding: isCompact ? '4px 8px' : '4px 12px',
+              backgroundColor: 'var(--vscode-button-secondaryBackground)',
+              color: 'var(--vscode-button-secondaryForeground)',
+              border: 'none',
+              borderRadius: '2px',
+              cursor: 'pointer',
+              fontSize: '13px',
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            {isCompact ? <Share2 size={16} /> : t('slack.share.title')}
+          </button>
+        </StyledTooltipItem>
+
+        {/* Divider */}
+        <div
+          style={{
+            width: '1px',
+            height: '20px',
+            backgroundColor: 'var(--vscode-panel-border)',
+          }}
+        />
+
+        {/* Help Button */}
+        <button
+          type="button"
+          onClick={onStartTour}
+          title="Start Tour"
+          data-tour="help-button"
+          style={{
+            padding: '4px 8px',
+            backgroundColor: 'var(--vscode-button-secondaryBackground)',
+            color: 'var(--vscode-button-secondaryForeground)',
+            border: 'none',
+            borderRadius: '2px',
+            cursor: 'pointer',
+            fontSize: '13px',
+          }}
+        >
+          ?
+        </button>
+
+        {/* Processing Overlay (Phase 3.10) */}
+        <ProcessingOverlay isVisible={isProcessing} />
       </div>
-
-      {/* Save Button */}
-      <button
-        type="button"
-        onClick={handleSave}
-        disabled={isSaving}
-        data-tour="save-button"
-        style={{
-          padding: '4px 12px',
-          backgroundColor: 'var(--vscode-button-background)',
-          color: 'var(--vscode-button-foreground)',
-          border: 'none',
-          borderRadius: '2px',
-          cursor: isSaving ? 'not-allowed' : 'pointer',
-          fontSize: '13px',
-          opacity: isSaving ? 0.6 : 1,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {isSaving ? t('toolbar.saving') : t('toolbar.save')}
-      </button>
-
-      {/* Export Button */}
-      <button
-        type="button"
-        onClick={handleExport}
-        disabled={isExporting}
-        title={t('toolbar.convert.tooltip')}
-        data-tour="export-button"
-        style={{
-          padding: '4px 12px',
-          backgroundColor: 'var(--vscode-button-secondaryBackground)',
-          color: 'var(--vscode-button-secondaryForeground)',
-          border: 'none',
-          borderRadius: '2px',
-          cursor: isExporting ? 'not-allowed' : 'pointer',
-          fontSize: '13px',
-          opacity: isExporting ? 0.6 : 1,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {isExporting ? t('toolbar.converting') : t('toolbar.convert')}
-      </button>
-
-      {/* Refine with AI Button - Phase 3.14: Unified AI generation/refinement */}
-      <button
-        type="button"
-        onClick={handleOpenRefinementChat}
-        data-tour="ai-refine-button"
-        style={{
-          padding: '4px 12px',
-          backgroundColor: 'var(--vscode-button-background)',
-          color: 'var(--vscode-button-foreground)',
-          border: 'none',
-          borderRadius: '2px',
-          cursor: 'pointer',
-          fontSize: '13px',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {t('toolbar.refineWithAI')}
-      </button>
-
-      {/* Divider */}
-      <div
-        style={{
-          width: '1px',
-          height: '20px',
-          backgroundColor: 'var(--vscode-panel-border)',
-        }}
-      />
-
-      {/* Workflow Selector */}
-      <select
-        value={selectedWorkflowId}
-        onChange={(e) => setSelectedWorkflowId(e.target.value)}
-        onFocus={handleRefreshList}
-        className="nodrag"
-        data-tour="workflow-selector"
-        style={{
-          padding: '4px 8px',
-          backgroundColor: 'var(--vscode-input-background)',
-          color: 'var(--vscode-input-foreground)',
-          border: '1px solid var(--vscode-input-border)',
-          borderRadius: '2px',
-          fontSize: '13px',
-          minWidth: '150px',
-        }}
-      >
-        <option value="">{t('toolbar.selectWorkflow')}</option>
-        {workflows.map((wf) => (
-          <option key={wf.id} value={wf.id}>
-            {wf.name}
-          </option>
-        ))}
-      </select>
-
-      {/* Load Button */}
-      <button
-        type="button"
-        onClick={handleLoadWorkflow}
-        disabled={!selectedWorkflowId}
-        data-tour="load-button"
-        style={{
-          padding: '4px 12px',
-          backgroundColor: 'var(--vscode-button-secondaryBackground)',
-          color: 'var(--vscode-button-secondaryForeground)',
-          border: 'none',
-          borderRadius: '2px',
-          cursor: !selectedWorkflowId ? 'not-allowed' : 'pointer',
-          fontSize: '13px',
-          opacity: !selectedWorkflowId ? 0.6 : 1,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {t('toolbar.load')}
-      </button>
-
-      {/* Divider */}
-      <div
-        style={{
-          width: '1px',
-          height: '20px',
-          backgroundColor: 'var(--vscode-panel-border)',
-        }}
-      />
-
-      {/* Share to Slack Button - Phase 3.1 (Beta feature, placed before help button) */}
-      <button
-        type="button"
-        onClick={onShareToSlack}
-        title="Share workflow to Slack"
-        data-tour="slack-share-button"
-        style={{
-          padding: '4px 12px',
-          backgroundColor: 'var(--vscode-button-secondaryBackground)',
-          color: 'var(--vscode-button-secondaryForeground)',
-          border: 'none',
-          borderRadius: '2px',
-          cursor: 'pointer',
-          fontSize: '13px',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {t('slack.share.title')}
-      </button>
-
-      {/* Divider */}
-      <div
-        style={{
-          width: '1px',
-          height: '20px',
-          backgroundColor: 'var(--vscode-panel-border)',
-        }}
-      />
-
-      {/* Help Button */}
-      <button
-        type="button"
-        onClick={onStartTour}
-        title="Start Tour"
-        data-tour="help-button"
-        style={{
-          padding: '4px 8px',
-          backgroundColor: 'var(--vscode-button-secondaryBackground)',
-          color: 'var(--vscode-button-secondaryForeground)',
-          border: 'none',
-          borderRadius: '2px',
-          cursor: 'pointer',
-          fontSize: '13px',
-        }}
-      >
-        ?
-      </button>
-
-      {/* Processing Overlay (Phase 3.10) */}
-      <ProcessingOverlay isVisible={isProcessing} />
-    </div>
+    </StyledTooltipProvider>
   );
 };

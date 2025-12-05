@@ -44,6 +44,12 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.nameGenerationFailed':
     'ワークフロー名の生成に失敗しました。再度お試しいただくか、手動で入力してください。',
 
+  // Toolbar responsive tooltips
+  'toolbar.save.tooltip': 'ワークフローを保存',
+  'toolbar.convert.iconTooltip': 'Slash Commandに変換',
+  'toolbar.load.tooltip': '選択したワークフローを読み込み',
+  'slack.share.tooltip': 'Slackに共有',
+
   // Node Palette
   'palette.title': 'ノードパレット',
   'palette.basicNodes': '基本ノード',

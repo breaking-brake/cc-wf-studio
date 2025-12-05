@@ -43,6 +43,12 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.generateNameWithAI': '使用AI生成名称',
   'toolbar.error.nameGenerationFailed': '生成工作流名称失败。请重试或手动输入。',
 
+  // Toolbar responsive tooltips
+  'toolbar.save.tooltip': '保存工作流',
+  'toolbar.convert.iconTooltip': '转换为Slash Command',
+  'toolbar.load.tooltip': '加载选定的工作流',
+  'slack.share.tooltip': '分享到Slack',
+
   // Node Palette
   'palette.title': '节点面板',
   'palette.basicNodes': '基本节点',

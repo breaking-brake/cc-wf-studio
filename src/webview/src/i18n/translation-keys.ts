@@ -41,6 +41,12 @@ export interface WebviewTranslationKeys {
   'toolbar.generateNameWithAI': string;
   'toolbar.error.nameGenerationFailed': string;
 
+  // Toolbar responsive tooltips
+  'toolbar.save.tooltip': string;
+  'toolbar.convert.iconTooltip': string;
+  'toolbar.load.tooltip': string;
+  'slack.share.tooltip': string;
+
   // Node Palette
   'palette.title': string;
   'palette.basicNodes': string;
