@@ -7,6 +7,7 @@
 
 import type React from 'react';
 import { useState } from 'react';
+import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { McpNodeDialog } from './dialogs/McpNodeDialog';
@@ -17,6 +18,7 @@ import { SkillBrowserDialog } from './dialogs/SkillBrowserDialog';
  */
 export const NodePalette: React.FC = () => {
   const { t } = useTranslation();
+  const isCompact = useIsCompactMode();
   const { addNode, nodes } = useWorkflowStore();
   const [isSkillBrowserOpen, setIsSkillBrowserOpen] = useState(false);
   const [isMcpDialogOpen, setIsMcpDialogOpen] = useState(false);
@@ -185,21 +187,21 @@ export const NodePalette: React.FC = () => {
     <div
       className="node-palette"
       style={{
-        width: '200px',
+        width: isCompact ? '100px' : '200px',
         height: '100%',
         backgroundColor: 'var(--vscode-sideBar-background)',
         borderRight: '1px solid var(--vscode-panel-border)',
-        padding: '16px',
+        padding: isCompact ? '8px' : '16px',
         overflowY: 'auto',
       }}
     >
       {/* Header */}
       <div
         style={{
-          fontSize: '13px',
+          fontSize: isCompact ? '11px' : '13px',
           fontWeight: 600,
           color: 'var(--vscode-foreground)',
-          marginBottom: '16px',
+          marginBottom: isCompact ? '8px' : '16px',
           textTransform: 'uppercase',
           letterSpacing: '0.5px',
         }}
@@ -210,11 +212,11 @@ export const NodePalette: React.FC = () => {
       {/* Section: Basic Nodes */}
       <div
         style={{
-          fontSize: '11px',
+          fontSize: isCompact ? '10px' : '11px',
           fontWeight: 600,
           color: 'var(--vscode-descriptionForeground)',
-          marginBottom: '8px',
-          marginTop: '8px',
+          marginBottom: isCompact ? '4px' : '8px',
+          marginTop: isCompact ? '4px' : '8px',
           textTransform: 'uppercase',
           letterSpacing: '0.5px',
         }}
@@ -229,14 +231,14 @@ export const NodePalette: React.FC = () => {
         data-tour="add-prompt-button"
         style={{
           width: '100%',
-          padding: '12px',
-          marginBottom: '12px',
+          padding: isCompact ? '8px' : '12px',
+          marginBottom: isCompact ? '8px' : '12px',
           backgroundColor: 'var(--vscode-button-background)',
           color: 'var(--vscode-button-foreground)',
           border: '1px solid var(--vscode-button-border)',
           borderRadius: '4px',
           cursor: 'pointer',
-          fontSize: '13px',
+          fontSize: isCompact ? '11px' : '13px',
           fontWeight: 500,
           textAlign: 'left',
           display: 'flex',
@@ -251,15 +253,17 @@ export const NodePalette: React.FC = () => {
         }}
       >
         <div style={{ fontWeight: 600 }}>{t('node.prompt.title')}</div>
-        <div
-          style={{
-            fontSize: '11px',
-            color: 'var(--vscode-button-foreground)',
-            opacity: 0.8,
-          }}
-        >
-          {t('node.prompt.description')}
-        </div>
+        {!isCompact && (
+          <div
+            style={{
+              fontSize: '11px',
+              color: 'var(--vscode-button-foreground)',
+              opacity: 0.8,
+            }}
+          >
+            {t('node.prompt.description')}
+          </div>
+        )}
       </button>
 
       {/* Sub-Agent Node Button */}
@@ -269,14 +273,14 @@ export const NodePalette: React.FC = () => {
         data-tour="add-subagent-button"
         style={{
           width: '100%',
-          padding: '12px',
-          marginBottom: '12px',
+          padding: isCompact ? '8px' : '12px',
+          marginBottom: isCompact ? '8px' : '12px',
           backgroundColor: 'var(--vscode-button-background)',
           color: 'var(--vscode-button-foreground)',
           border: '1px solid var(--vscode-button-border)',
           borderRadius: '4px',
           cursor: 'pointer',
-          fontSize: '13px',
+          fontSize: isCompact ? '11px' : '13px',
           fontWeight: 500,
           textAlign: 'left',
           display: 'flex',
@@ -291,15 +295,17 @@ export const NodePalette: React.FC = () => {
         }}
       >
         <div style={{ fontWeight: 600 }}>{t('node.subAgent.title')}</div>
-        <div
-          style={{
-            fontSize: '11px',
-            color: 'var(--vscode-button-foreground)',
-            opacity: 0.8,
-          }}
-        >
-          {t('node.subAgent.description')}
-        </div>
+        {!isCompact && (
+          <div
+            style={{
+              fontSize: '11px',
+              color: 'var(--vscode-button-foreground)',
+              opacity: 0.8,
+            }}
+          >
+            {t('node.subAgent.description')}
+          </div>
+        )}
       </button>
 
       {/* Skill Node Button */}
@@ -309,14 +315,14 @@ export const NodePalette: React.FC = () => {
         data-tour="add-skill-button"
         style={{
           width: '100%',
-          padding: '12px',
-          marginBottom: '12px',
+          padding: isCompact ? '8px' : '12px',
+          marginBottom: isCompact ? '8px' : '12px',
           backgroundColor: 'var(--vscode-button-background)',
           color: 'var(--vscode-button-foreground)',
           border: '1px solid var(--vscode-button-border)',
           borderRadius: '4px',
           cursor: 'pointer',
-          fontSize: '13px',
+          fontSize: isCompact ? '11px' : '13px',
           fontWeight: 500,
           textAlign: 'left',
           display: 'flex',
@@ -331,15 +337,17 @@ export const NodePalette: React.FC = () => {
         }}
       >
         <div style={{ fontWeight: 600 }}>{t('node.skill.title')}</div>
-        <div
-          style={{
-            fontSize: '11px',
-            color: 'var(--vscode-button-foreground)',
-            opacity: 0.8,
-          }}
-        >
-          {t('node.skill.description')}
-        </div>
+        {!isCompact && (
+          <div
+            style={{
+              fontSize: '11px',
+              color: 'var(--vscode-button-foreground)',
+              opacity: 0.8,
+            }}
+          >
+            {t('node.skill.description')}
+          </div>
+        )}
       </button>
 
       {/* MCP Tool Node Button (Feature: 001-mcp-node) */}
@@ -349,14 +357,14 @@ export const NodePalette: React.FC = () => {
         data-tour="add-mcp-button"
         style={{
           width: '100%',
-          padding: '12px',
-          marginBottom: '12px',
+          padding: isCompact ? '8px' : '12px',
+          marginBottom: isCompact ? '8px' : '12px',
           backgroundColor: 'var(--vscode-button-background)',
           color: 'var(--vscode-button-foreground)',
           border: '1px solid var(--vscode-button-border)',
           borderRadius: '4px',
           cursor: 'pointer',
-          fontSize: '13px',
+          fontSize: isCompact ? '11px' : '13px',
           fontWeight: 500,
           textAlign: 'left',
           display: 'flex',
@@ -371,25 +379,27 @@ export const NodePalette: React.FC = () => {
         }}
       >
         <div style={{ fontWeight: 600 }}>{t('node.mcp.title')}</div>
-        <div
-          style={{
-            fontSize: '11px',
-            color: 'var(--vscode-button-foreground)',
-            opacity: 0.8,
-          }}
-        >
-          {t('node.mcp.description')}
-        </div>
+        {!isCompact && (
+          <div
+            style={{
+              fontSize: '11px',
+              color: 'var(--vscode-button-foreground)',
+              opacity: 0.8,
+            }}
+          >
+            {t('node.mcp.description')}
+          </div>
+        )}
       </button>
 
       {/* Section: Control Flow */}
       <div
         style={{
-          fontSize: '11px',
+          fontSize: isCompact ? '10px' : '11px',
           fontWeight: 600,
           color: 'var(--vscode-descriptionForeground)',
-          marginBottom: '8px',
-          marginTop: '16px',
+          marginBottom: isCompact ? '4px' : '8px',
+          marginTop: isCompact ? '8px' : '16px',
           textTransform: 'uppercase',
           letterSpacing: '0.5px',
         }}
@@ -403,14 +413,14 @@ export const NodePalette: React.FC = () => {
         onClick={handleAddIfElse}
         style={{
           width: '100%',
-          padding: '12px',
-          marginBottom: '12px',
+          padding: isCompact ? '8px' : '12px',
+          marginBottom: isCompact ? '8px' : '12px',
           backgroundColor: 'var(--vscode-button-background)',
           color: 'var(--vscode-button-foreground)',
           border: '1px solid var(--vscode-button-border)',
           borderRadius: '4px',
           cursor: 'pointer',
-          fontSize: '13px',
+          fontSize: isCompact ? '11px' : '13px',
           fontWeight: 500,
           textAlign: 'left',
           display: 'flex',
@@ -425,15 +435,17 @@ export const NodePalette: React.FC = () => {
         }}
       >
         <div style={{ fontWeight: 600 }}>{t('node.ifElse.title')}</div>
-        <div
-          style={{
-            fontSize: '11px',
-            color: 'var(--vscode-button-foreground)',
-            opacity: 0.8,
-          }}
-        >
-          {t('node.ifElse.description')}
-        </div>
+        {!isCompact && (
+          <div
+            style={{
+              fontSize: '11px',
+              color: 'var(--vscode-button-foreground)',
+              opacity: 0.8,
+            }}
+          >
+            {t('node.ifElse.description')}
+          </div>
+        )}
       </button>
 
       {/* Switch Node Button */}
@@ -442,14 +454,14 @@ export const NodePalette: React.FC = () => {
         onClick={handleAddSwitch}
         style={{
           width: '100%',
-          padding: '12px',
-          marginBottom: '12px',
+          padding: isCompact ? '8px' : '12px',
+          marginBottom: isCompact ? '8px' : '12px',
           backgroundColor: 'var(--vscode-button-background)',
           color: 'var(--vscode-button-foreground)',
           border: '1px solid var(--vscode-button-border)',
           borderRadius: '4px',
           cursor: 'pointer',
-          fontSize: '13px',
+          fontSize: isCompact ? '11px' : '13px',
           fontWeight: 500,
           textAlign: 'left',
           display: 'flex',
@@ -464,15 +476,17 @@ export const NodePalette: React.FC = () => {
         }}
       >
         <div style={{ fontWeight: 600 }}>{t('node.switch.title')}</div>
-        <div
-          style={{
-            fontSize: '11px',
-            color: 'var(--vscode-button-foreground)',
-            opacity: 0.8,
-          }}
-        >
-          {t('node.switch.description')}
-        </div>
+        {!isCompact && (
+          <div
+            style={{
+              fontSize: '11px',
+              color: 'var(--vscode-button-foreground)',
+              opacity: 0.8,
+            }}
+          >
+            {t('node.switch.description')}
+          </div>
+        )}
       </button>
 
       {/* AskUserQuestion Node Button */}
@@ -482,14 +496,14 @@ export const NodePalette: React.FC = () => {
         data-tour="add-askuserquestion-button"
         style={{
           width: '100%',
-          padding: '12px',
-          marginBottom: '12px',
+          padding: isCompact ? '8px' : '12px',
+          marginBottom: isCompact ? '8px' : '12px',
           backgroundColor: 'var(--vscode-button-background)',
           color: 'var(--vscode-button-foreground)',
           border: '1px solid var(--vscode-button-border)',
           borderRadius: '4px',
           cursor: 'pointer',
-          fontSize: '13px',
+          fontSize: isCompact ? '11px' : '13px',
           fontWeight: 500,
           textAlign: 'left',
           display: 'flex',
@@ -504,15 +518,17 @@ export const NodePalette: React.FC = () => {
         }}
       >
         <div style={{ fontWeight: 600 }}>{t('node.askUserQuestion.title')}</div>
-        <div
-          style={{
-            fontSize: '11px',
-            color: 'var(--vscode-button-foreground)',
-            opacity: 0.8,
-          }}
-        >
-          {t('node.askUserQuestion.description')}
-        </div>
+        {!isCompact && (
+          <div
+            style={{
+              fontSize: '11px',
+              color: 'var(--vscode-button-foreground)',
+              opacity: 0.8,
+            }}
+          >
+            {t('node.askUserQuestion.description')}
+          </div>
+        )}
       </button>
 
       {/* End Node Button */}
@@ -522,14 +538,14 @@ export const NodePalette: React.FC = () => {
         data-tour="add-end-button"
         style={{
           width: '100%',
-          padding: '12px',
-          marginBottom: '12px',
+          padding: isCompact ? '8px' : '12px',
+          marginBottom: isCompact ? '8px' : '12px',
           backgroundColor: 'var(--vscode-button-background)',
           color: 'var(--vscode-button-foreground)',
           border: '1px solid var(--vscode-button-border)',
           borderRadius: '4px',
           cursor: 'pointer',
-          fontSize: '13px',
+          fontSize: isCompact ? '11px' : '13px',
           fontWeight: 500,
           textAlign: 'left',
           display: 'flex',
@@ -544,15 +560,17 @@ export const NodePalette: React.FC = () => {
         }}
       >
         <div style={{ fontWeight: 600 }}>{t('node.end.title')}</div>
-        <div
-          style={{
-            fontSize: '11px',
-            color: 'var(--vscode-button-foreground)',
-            opacity: 0.8,
-          }}
-        >
-          {t('node.end.description')}
-        </div>
+        {!isCompact && (
+          <div
+            style={{
+              fontSize: '11px',
+              color: 'var(--vscode-button-foreground)',
+              opacity: 0.8,
+            }}
+          >
+            {t('node.end.description')}
+          </div>
+        )}
       </button>
 
       {/* Branch Node Button (Legacy) */}
@@ -561,14 +579,14 @@ export const NodePalette: React.FC = () => {
         onClick={handleAddBranch}
         style={{
           width: '100%',
-          padding: '12px',
-          marginBottom: '12px',
+          padding: isCompact ? '8px' : '12px',
+          marginBottom: isCompact ? '8px' : '12px',
           backgroundColor: 'var(--vscode-button-secondaryBackground)',
           color: 'var(--vscode-button-secondaryForeground)',
           border: '1px solid var(--vscode-button-border)',
           borderRadius: '4px',
           cursor: 'pointer',
-          fontSize: '13px',
+          fontSize: isCompact ? '11px' : '13px',
           fontWeight: 500,
           textAlign: 'left',
           display: 'flex',
@@ -584,50 +602,57 @@ export const NodePalette: React.FC = () => {
         }}
       >
         <div style={{ fontWeight: 600 }}>
-          {t('node.branch.title')} <span style={{ fontSize: '10px' }}>(Legacy)</span>
+          {t('node.branch.title')}{' '}
+          <span style={{ fontSize: isCompact ? '9px' : '10px' }}>(Legacy)</span>
         </div>
-        <div
-          style={{
-            fontSize: '11px',
-            color: 'var(--vscode-button-secondaryForeground)',
-            opacity: 0.8,
-          }}
-        >
-          {t('node.branch.description')}
-        </div>
-        <div
-          style={{
-            fontSize: '10px',
-            color: 'var(--vscode-editorWarning-foreground)',
-            marginTop: '4px',
-            fontStyle: 'italic',
-          }}
-        >
-          ⚠️ {t('node.branch.deprecationNotice')}
-        </div>
+        {!isCompact && (
+          <>
+            <div
+              style={{
+                fontSize: '11px',
+                color: 'var(--vscode-button-secondaryForeground)',
+                opacity: 0.8,
+              }}
+            >
+              {t('node.branch.description')}
+            </div>
+            <div
+              style={{
+                fontSize: '10px',
+                color: 'var(--vscode-editorWarning-foreground)',
+                marginTop: '4px',
+                fontStyle: 'italic',
+              }}
+            >
+              ⚠️ {t('node.branch.deprecationNotice')}
+            </div>
+          </>
+        )}
       </button>
 
-      {/* Instructions */}
-      <div
-        style={{
-          marginTop: '24px',
-          padding: '12px',
-          backgroundColor: 'var(--vscode-textBlockQuote-background)',
-          border: '1px solid var(--vscode-textBlockQuote-border)',
-          borderRadius: '4px',
-          fontSize: '11px',
-          color: 'var(--vscode-descriptionForeground)',
-          lineHeight: '1.5',
-        }}
-      >
-        <div style={{ fontWeight: 600, marginBottom: '8px' }}>{t('palette.quickStart')}</div>
-        <ul style={{ margin: 0, paddingLeft: '16px' }}>
-          <li>{t('palette.instruction.addNode')}</li>
-          <li>{t('palette.instruction.dragNode')}</li>
-          <li>{t('palette.instruction.connectNodes')}</li>
-          <li>{t('palette.instruction.editProperties')}</li>
-        </ul>
-      </div>
+      {/* Instructions - hidden in compact mode */}
+      {!isCompact && (
+        <div
+          style={{
+            marginTop: '24px',
+            padding: '12px',
+            backgroundColor: 'var(--vscode-textBlockQuote-background)',
+            border: '1px solid var(--vscode-textBlockQuote-border)',
+            borderRadius: '4px',
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+            lineHeight: '1.5',
+          }}
+        >
+          <div style={{ fontWeight: 600, marginBottom: '8px' }}>{t('palette.quickStart')}</div>
+          <ul style={{ margin: 0, paddingLeft: '16px' }}>
+            <li>{t('palette.instruction.addNode')}</li>
+            <li>{t('palette.instruction.dragNode')}</li>
+            <li>{t('palette.instruction.connectNodes')}</li>
+            <li>{t('palette.instruction.editProperties')}</li>
+          </ul>
+        </div>
+      )}
 
       {/* Skill Browser Dialog */}
       <SkillBrowserDialog
