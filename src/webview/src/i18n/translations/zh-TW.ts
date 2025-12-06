@@ -82,7 +82,6 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
 
   // Property Panel
   'property.title': '屬性',
-  'property.noSelection': '選擇節點以檢視其屬性',
 
   // Common property labels
   'property.nodeName': '節點名稱',

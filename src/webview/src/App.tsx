@@ -44,6 +44,8 @@ const App: React.FC = () => {
     setEdges,
     setWorkflowName,
     setActiveWorkflow,
+    isPropertyPanelOpen,
+    selectedNodeId,
   } = useWorkflowStore();
   const { isOpen: isRefinementPanelOpen, isProcessing } = useRefinementStore();
   const [error, setError] = useState<ErrorPayload | null>(null);
@@ -212,8 +214,12 @@ const App: React.FC = () => {
           <ProcessingOverlay isVisible={isProcessing} message={t('refinement.processingOverlay')} />
         </div>
 
-        {/* Right Panel: Property Panel or Refinement Chat Panel */}
-        {isRefinementPanelOpen ? <RefinementChatPanel /> : <PropertyPanel />}
+        {/* Right Panel: Property Panel (when node selected) > Refinement Chat Panel > none (canvas expands) */}
+        {selectedNodeId && isPropertyPanelOpen ? (
+          <PropertyPanel />
+        ) : isRefinementPanelOpen ? (
+          <RefinementChatPanel />
+        ) : null}
       </div>
 
       {/* Error Notification Overlay */}

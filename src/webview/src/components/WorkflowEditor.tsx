@@ -91,7 +91,7 @@ export const WorkflowEditor: React.FC = () => {
     setActiveWorkflow,
     workflowName,
   } = useWorkflowStore();
-  const { closeChat, openChat, initConversation, loadConversationHistory } = useRefinementStore();
+  const { openChat, initConversation, loadConversationHistory } = useRefinementStore();
 
   /**
    * 接続制約の検証
@@ -133,10 +133,8 @@ export const WorkflowEditor: React.FC = () => {
   const handleNodeClick = useCallback(
     (_event: React.MouseEvent, node: Node) => {
       setSelectedNodeId(node.id);
-      // Close AI refinement panel to show property panel
-      closeChat();
     },
-    [setSelectedNodeId, closeChat]
+    [setSelectedNodeId]
   );
 
   // Handle pane click (deselect)

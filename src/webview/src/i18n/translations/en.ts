@@ -83,7 +83,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Property Panel
   'property.title': 'Properties',
-  'property.noSelection': 'Select a node to view its properties',
 
   // Common property labels
   'property.nodeName': 'Node Name',

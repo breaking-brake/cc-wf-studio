@@ -84,7 +84,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Property Panel
   'property.title': '속성',
-  'property.noSelection': '노드를 선택하여 속성 보기',
 
   // Common property labels
   'property.nodeName': '노드 이름',

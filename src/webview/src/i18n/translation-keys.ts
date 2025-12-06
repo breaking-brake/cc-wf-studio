@@ -80,7 +80,6 @@ export interface WebviewTranslationKeys {
 
   // Property Panel
   'property.title': string;
-  'property.noSelection': string;
 
   // Common property labels
   'property.nodeName': string;

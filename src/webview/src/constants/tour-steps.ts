@@ -6,11 +6,26 @@
 
 import type { Config as DriverConfig, DriveStep } from 'driver.js';
 
+// Tour step indices (0-based)
+export const CANVAS_STEP_INDEX = 3;
+export const PROPERTY_PANEL_STEP_INDEX = 4;
+
 /**
  * Tour steps configuration
  * Each step guides users through creating their first workflow
+ *
+ * @param t - Translation function
+ * @param callbacks - Optional callbacks for step-specific actions
  */
-export const getTourSteps = (t: (key: string) => string): DriveStep[] => [
+export const getTourSteps = (
+  t: (key: string) => string,
+  callbacks?: {
+    onSelectStartNode?: () => void;
+    onDeselectNode?: () => void;
+    moveNext?: () => void;
+    movePrevious?: () => void;
+  }
+): DriveStep[] => [
   {
     popover: {
       title: '',
@@ -43,6 +58,14 @@ export const getTourSteps = (t: (key: string) => string): DriveStep[] => [
       description: t('tour.canvas'),
       side: 'over',
       align: 'center',
+      // Select Start node before moving to property panel step
+      onNextClick: () => {
+        callbacks?.onSelectStartNode?.();
+        // Small delay to allow React to render the property panel
+        setTimeout(() => {
+          callbacks?.moveNext?.();
+        }, 50);
+      },
     },
   },
   {
@@ -52,6 +75,16 @@ export const getTourSteps = (t: (key: string) => string): DriveStep[] => [
       description: t('tour.propertyPanel'),
       side: 'left',
       align: 'start',
+      // Deselect node when leaving property panel step (going back)
+      onPrevClick: () => {
+        callbacks?.onDeselectNode?.();
+        callbacks?.movePrevious?.();
+      },
+      // Deselect node when leaving property panel step (going forward)
+      onNextClick: () => {
+        callbacks?.onDeselectNode?.();
+        callbacks?.moveNext?.();
+      },
     },
   },
   {
@@ -61,6 +94,13 @@ export const getTourSteps = (t: (key: string) => string): DriveStep[] => [
       description: t('tour.addAskUserQuestion'),
       side: 'right',
       align: 'center',
+      // Select Start node when going back to property panel step
+      onPrevClick: () => {
+        callbacks?.onSelectStartNode?.();
+        setTimeout(() => {
+          callbacks?.movePrevious?.();
+        }, 50);
+      },
     },
   },
   {

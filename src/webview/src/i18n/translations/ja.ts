@@ -83,7 +83,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Property Panel
   'property.title': 'プロパティ',
-  'property.noSelection': 'ノードを選択してプロパティを表示',
 
   // Common property labels
   'property.nodeName': 'ノード名',
