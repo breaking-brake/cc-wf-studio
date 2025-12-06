@@ -247,6 +247,13 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.confirm': '削除',
   'dialog.deleteNode.cancel': 'キャンセル',
 
+  // Reset Workflow Confirmation Dialog
+  'toolbar.resetWorkflow': 'ワークフローをリセット',
+  'dialog.resetWorkflow.title': 'ワークフローをリセット',
+  'dialog.resetWorkflow.message':
+    'ワークフローをリセットしてもよろしいですか？Start と End 以外のすべてのノードが削除されます。',
+  'dialog.resetWorkflow.confirm': 'リセット',
+
   // Skill Browser Dialog
   'skill.browser.title': 'Skillを参照',
   'skill.browser.description':

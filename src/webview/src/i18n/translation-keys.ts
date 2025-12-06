@@ -227,6 +227,12 @@ export interface WebviewTranslationKeys {
   'dialog.deleteNode.confirm': string;
   'dialog.deleteNode.cancel': string;
 
+  // Reset Workflow Confirmation Dialog
+  'toolbar.resetWorkflow': string;
+  'dialog.resetWorkflow.title': string;
+  'dialog.resetWorkflow.message': string;
+  'dialog.resetWorkflow.confirm': string;
+
   // Skill Browser Dialog
   'skill.browser.title': string;
   'skill.browser.description': string;

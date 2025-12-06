@@ -5,7 +5,7 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
-import { FileDown, Save, Share2, SquareSlash } from 'lucide-react';
+import { FileDown, Save, Share2, SquareSlash, Trash2 } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
@@ -23,6 +23,7 @@ import { useWorkflowStore } from '../stores/workflow-store';
 import { AiGenerateButton } from './common/AiGenerateButton';
 import { ProcessingOverlay } from './common/ProcessingOverlay';
 import { StyledTooltipItem, StyledTooltipProvider } from './common/StyledTooltip';
+import { ConfirmDialog } from './dialogs/ConfirmDialog';
 
 interface ToolbarProps {
   onError: (error: { code: string; message: string; details?: unknown }) => void;
@@ -49,6 +50,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
     setActiveWorkflow,
     workflowName,
     setWorkflowName,
+    clearWorkflow,
   } = useWorkflowStore();
   const { isProcessing } = useRefinementStore();
   const [isSaving, setIsSaving] = useState(false);
@@ -56,7 +58,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
   const [workflows, setWorkflows] = useState<WorkflowListItem[]>([]);
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>('');
   const [isGeneratingName, setIsGeneratingName] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const generationNameRequestIdRef = useRef<string | null>(null);
+
+  // Handle reset workflow
+  const handleResetWorkflow = useCallback(() => {
+    clearWorkflow();
+    setShowResetConfirm(false);
+  }, [clearWorkflow]);
 
   const handleSave = async () => {
     if (!workflowName.trim()) {
@@ -485,14 +494,27 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
           </button>
         </StyledTooltipItem>
 
-        {/* Divider */}
-        <div
-          style={{
-            width: '1px',
-            height: '20px',
-            backgroundColor: 'var(--vscode-panel-border)',
-          }}
-        />
+        {/* Reset Workflow Button */}
+        <StyledTooltipItem content={t('toolbar.resetWorkflow')}>
+          <button
+            type="button"
+            onClick={() => setShowResetConfirm(true)}
+            style={{
+              padding: '4px 8px',
+              backgroundColor: 'var(--vscode-button-secondaryBackground)',
+              color: 'var(--vscode-button-secondaryForeground)',
+              border: 'none',
+              borderRadius: '2px',
+              cursor: 'pointer',
+              fontSize: '13px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            <Trash2 size={16} />
+          </button>
+        </StyledTooltipItem>
 
         {/* Help Button */}
         <button
@@ -515,6 +537,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
 
         {/* Processing Overlay (Phase 3.10) */}
         <ProcessingOverlay isVisible={isProcessing} />
+
+        {/* Reset Workflow Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={showResetConfirm}
+          title={t('dialog.resetWorkflow.title')}
+          message={t('dialog.resetWorkflow.message')}
+          confirmLabel={t('dialog.resetWorkflow.confirm')}
+          cancelLabel={t('common.cancel')}
+          onConfirm={handleResetWorkflow}
+          onCancel={() => setShowResetConfirm(false)}
+        />
       </div>
     </StyledTooltipProvider>
   );
