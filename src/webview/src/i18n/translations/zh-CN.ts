@@ -82,7 +82,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
 
   // Property Panel
   'property.title': '属性',
-  'property.noSelection': '选择节点以查看其属性',
 
   // Common property labels
   'property.nodeName': '节点名称',
@@ -237,6 +236,12 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': '确定要删除此节点吗？',
   'dialog.deleteNode.confirm': '删除',
   'dialog.deleteNode.cancel': '取消',
+
+  // Reset Workflow Confirmation Dialog
+  'toolbar.resetWorkflow': '重置工作流',
+  'dialog.resetWorkflow.title': '重置工作流',
+  'dialog.resetWorkflow.message': '确定要重置工作流吗？除 Start 和 End 外的所有节点都将被删除。',
+  'dialog.resetWorkflow.confirm': '重置',
 
   // Skill Browser Dialog
   'skill.browser.title': '浏览Skill',

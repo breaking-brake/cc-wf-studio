@@ -83,7 +83,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Property Panel
   'property.title': 'プロパティ',
-  'property.noSelection': 'ノードを選択してプロパティを表示',
 
   // Common property labels
   'property.nodeName': 'ノード名',
@@ -246,6 +245,13 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': 'このノードを削除してもよろしいですか？',
   'dialog.deleteNode.confirm': '削除',
   'dialog.deleteNode.cancel': 'キャンセル',
+
+  // Reset Workflow Confirmation Dialog
+  'toolbar.resetWorkflow': 'ワークフローをリセット',
+  'dialog.resetWorkflow.title': 'ワークフローをリセット',
+  'dialog.resetWorkflow.message':
+    'ワークフローをリセットしてもよろしいですか？Start と End 以外のすべてのノードが削除されます。',
+  'dialog.resetWorkflow.confirm': 'リセット',
 
   // Skill Browser Dialog
   'skill.browser.title': 'Skillを参照',

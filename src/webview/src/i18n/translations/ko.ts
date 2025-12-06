@@ -84,7 +84,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Property Panel
   'property.title': '속성',
-  'property.noSelection': '노드를 선택하여 속성 보기',
 
   // Common property labels
   'property.nodeName': '노드 이름',
@@ -248,6 +247,13 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': '이 노드를 삭제하시겠습니까?',
   'dialog.deleteNode.confirm': '삭제',
   'dialog.deleteNode.cancel': '취소',
+
+  // Reset Workflow Confirmation Dialog
+  'toolbar.resetWorkflow': '워크플로우 초기화',
+  'dialog.resetWorkflow.title': '워크플로우 초기화',
+  'dialog.resetWorkflow.message':
+    '워크플로우를 초기화하시겠습니까? Start와 End를 제외한 모든 노드가 삭제됩니다.',
+  'dialog.resetWorkflow.confirm': '초기화',
 
   // Skill Browser Dialog
   'skill.browser.title': 'Skill 탐색',

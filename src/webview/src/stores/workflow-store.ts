@@ -34,6 +34,7 @@ interface WorkflowStore {
   activeWorkflow: Workflow | null;
   interactionMode: InteractionMode;
   workflowName: string;
+  isPropertyPanelOpen: boolean;
 
   // React Flow Change Handlers
   onNodesChange: OnNodesChange;
@@ -47,6 +48,8 @@ interface WorkflowStore {
   setInteractionMode: (mode: InteractionMode) => void;
   toggleInteractionMode: () => void;
   setWorkflowName: (name: string) => void;
+  openPropertyPanel: () => void;
+  closePropertyPanel: () => void;
 
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
@@ -195,6 +198,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   activeWorkflow: null,
   interactionMode: 'pan', // Default: pan mode
   workflowName: 'my-workflow', // Default workflow name
+  isPropertyPanelOpen: true, // Property panel is open by default
 
   // React Flow Change Handlers (integrates with React Flow's onChange events)
   onNodesChange: (changes) => {
@@ -251,7 +255,14 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   setEdges: (edges) => set({ edges }),
 
-  setSelectedNodeId: (selectedNodeId) => set({ selectedNodeId }),
+  setSelectedNodeId: (selectedNodeId) => {
+    // When a node is selected, auto-open the property panel
+    if (selectedNodeId !== null) {
+      set({ selectedNodeId, isPropertyPanelOpen: true });
+    } else {
+      set({ selectedNodeId });
+    }
+  },
 
   setInteractionMode: (interactionMode) => set({ interactionMode }),
 
@@ -261,6 +272,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   },
 
   setWorkflowName: (workflowName) => set({ workflowName }),
+
+  openPropertyPanel: () => set({ isPropertyPanelOpen: true }),
+
+  closePropertyPanel: () => set({ isPropertyPanelOpen: false }),
 
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => {

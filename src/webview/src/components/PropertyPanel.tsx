@@ -34,40 +34,12 @@ import { McpNodeEditDialog } from './dialogs/McpNodeEditDialog';
  */
 export const PropertyPanel: React.FC = () => {
   const { t } = useTranslation();
-  const { nodes, selectedNodeId, updateNodeData, setNodes } = useWorkflowStore();
+  const { nodes, selectedNodeId, updateNodeData, setNodes, closePropertyPanel } =
+    useWorkflowStore();
   const { width, handleMouseDown } = useResizablePanel();
 
   // Find the selected node
   const selectedNode = nodes.find((node) => node.id === selectedNodeId);
-
-  if (!selectedNode) {
-    return (
-      <div
-        className="property-panel"
-        style={{
-          position: 'relative',
-          width: `${width}px`,
-          height: '100%',
-          backgroundColor: 'var(--vscode-sideBar-background)',
-          borderLeft: '1px solid var(--vscode-panel-border)',
-          padding: '16px',
-          overflowY: 'auto',
-        }}
-      >
-        <ResizeHandle onMouseDown={handleMouseDown} />
-        <div
-          style={{
-            fontSize: '13px',
-            color: 'var(--vscode-descriptionForeground)',
-            textAlign: 'center',
-            marginTop: '24px',
-          }}
-        >
-          {t('property.noSelection')}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div
@@ -83,170 +55,204 @@ export const PropertyPanel: React.FC = () => {
       }}
     >
       <ResizeHandle onMouseDown={handleMouseDown} />
-      {/* Header */}
+      {/* Header with close button */}
       <div
         style={{
-          fontSize: '13px',
-          fontWeight: 600,
-          color: 'var(--vscode-foreground)',
-          marginBottom: '16px',
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px',
-        }}
-      >
-        {t('property.title')}
-      </div>
-
-      {/* Node Type Badge */}
-      <div
-        style={{
-          fontSize: '11px',
-          color: 'var(--vscode-badge-foreground)',
-          backgroundColor: 'var(--vscode-badge-background)',
-          padding: '4px 8px',
-          borderRadius: '3px',
-          display: 'inline-block',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           marginBottom: '16px',
         }}
       >
-        {getNodeTypeLabel(selectedNode.type)}
+        <div
+          style={{
+            fontSize: '13px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+          }}
+        >
+          {t('property.title')}
+        </div>
+        <button
+          type="button"
+          onClick={closePropertyPanel}
+          style={{
+            padding: '4px 8px',
+            backgroundColor: 'transparent',
+            color: 'var(--vscode-foreground)',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '16px',
+          }}
+          aria-label="Close"
+        >
+          ✕
+        </button>
       </div>
 
-      {/* Node Name (only for subAgent, askUserQuestion, branch, ifElse, switch, prompt, skill, and mcp types) */}
-      {(selectedNode.type === 'subAgent' ||
-        selectedNode.type === 'askUserQuestion' ||
-        selectedNode.type === 'branch' ||
-        selectedNode.type === 'ifElse' ||
-        selectedNode.type === 'switch' ||
-        selectedNode.type === 'prompt' ||
-        selectedNode.type === 'skill' ||
-        selectedNode.type === 'mcp') && (
-        <div style={{ marginBottom: '16px' }}>
-          <label
-            htmlFor="node-name-input"
-            style={{
-              display: 'block',
-              fontSize: '12px',
-              fontWeight: 600,
-              color: 'var(--vscode-foreground)',
-              marginBottom: '6px',
-            }}
-          >
-            {t('property.nodeName')}
-          </label>
-          <input
-            id="node-name-input"
-            type="text"
-            value={selectedNode.data.name ?? selectedNode.id}
-            onChange={(e) => {
-              const newName = e.target.value;
-              setNodes(
-                nodes.map((n) =>
-                  n.id === selectedNode.id ? { ...n, data: { ...n.data, name: newName } } : n
-                )
-              );
-            }}
-            onBlur={(e) => {
-              // 入力欄が空の場合は、node IDに戻す（空の名前を防ぐ）
-              const currentName = e.target.value.trim();
-              if (!currentName) {
-                setNodes(
-                  nodes.map((n) =>
-                    n.id === selectedNode.id ? { ...n, data: { ...n.data, name: undefined } } : n
-                  )
-                );
-              }
-            }}
-            className="nodrag"
-            placeholder={t('property.nodeName.placeholder')}
-            style={{
-              width: '100%',
-              padding: '6px 8px',
-              backgroundColor: 'var(--vscode-input-background)',
-              color: 'var(--vscode-input-foreground)',
-              border: '1px solid var(--vscode-input-border)',
-              borderRadius: '2px',
-              fontSize: '13px',
-            }}
-          />
+      {/* Show content only when a node is selected */}
+      {!selectedNode ? null : (
+        <>
+          {/* Node Type Badge */}
           <div
             style={{
               fontSize: '11px',
-              color: 'var(--vscode-descriptionForeground)',
-              marginTop: '4px',
+              color: 'var(--vscode-badge-foreground)',
+              backgroundColor: 'var(--vscode-badge-background)',
+              padding: '4px 8px',
+              borderRadius: '3px',
+              display: 'inline-block',
+              marginBottom: '16px',
             }}
           >
-            {t('property.nodeName.help')}
+            {getNodeTypeLabel(selectedNode.type)}
           </div>
-        </div>
-      )}
 
-      {/* Render properties based on node type */}
-      {selectedNode.type === 'subAgent' ? (
-        <SubAgentProperties
-          node={selectedNode as Node<SubAgentData>}
-          updateNodeData={updateNodeData}
-        />
-      ) : selectedNode.type === 'askUserQuestion' ? (
-        <AskUserQuestionProperties
-          node={selectedNode as Node<AskUserQuestionData>}
-          updateNodeData={updateNodeData}
-        />
-      ) : selectedNode.type === 'branch' ? (
-        <BranchProperties
-          node={selectedNode as Node<BranchNodeData>}
-          updateNodeData={updateNodeData}
-        />
-      ) : selectedNode.type === 'ifElse' ? (
-        <IfElseProperties
-          node={selectedNode as Node<IfElseNodeData>}
-          updateNodeData={updateNodeData}
-        />
-      ) : selectedNode.type === 'switch' ? (
-        <SwitchProperties
-          node={selectedNode as Node<SwitchNodeData>}
-          updateNodeData={updateNodeData}
-        />
-      ) : selectedNode.type === 'prompt' ? (
-        <PromptProperties
-          node={selectedNode as Node<PromptNodeData>}
-          updateNodeData={updateNodeData}
-        />
-      ) : selectedNode.type === 'skill' ? (
-        <SkillProperties
-          node={selectedNode as Node<SkillNodeData>}
-          updateNodeData={updateNodeData}
-        />
-      ) : selectedNode.type === 'mcp' ? (
-        <McpProperties node={selectedNode as Node<McpNodeData>} updateNodeData={updateNodeData} />
-      ) : selectedNode.type === 'start' || selectedNode.type === 'end' ? (
-        <div
-          style={{
-            padding: '12px',
-            backgroundColor: 'var(--vscode-textBlockQuote-background)',
-            border: '1px solid var(--vscode-textBlockQuote-border)',
-            borderRadius: '4px',
-            fontSize: '12px',
-            color: 'var(--vscode-descriptionForeground)',
-          }}
-        >
-          {selectedNode.type === 'start'
-            ? t('property.startNodeDescription')
-            : t('property.endNodeDescription')}
-        </div>
-      ) : (
-        <div
-          style={{
-            padding: '12px',
-            backgroundColor: 'var(--vscode-errorBackground)',
-            border: '1px solid var(--vscode-errorBorder)',
-            borderRadius: '4px',
-            fontSize: '12px',
-            color: 'var(--vscode-errorForeground)',
-          }}
-        >
-          {t('property.unknownNodeType')} {selectedNode.type}
-        </div>
+          {/* Node Name (only for subAgent, askUserQuestion, branch, ifElse, switch, prompt, skill, and mcp types) */}
+          {(selectedNode.type === 'subAgent' ||
+            selectedNode.type === 'askUserQuestion' ||
+            selectedNode.type === 'branch' ||
+            selectedNode.type === 'ifElse' ||
+            selectedNode.type === 'switch' ||
+            selectedNode.type === 'prompt' ||
+            selectedNode.type === 'skill' ||
+            selectedNode.type === 'mcp') && (
+            <div style={{ marginBottom: '16px' }}>
+              <label
+                htmlFor="node-name-input"
+                style={{
+                  display: 'block',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                  marginBottom: '6px',
+                }}
+              >
+                {t('property.nodeName')}
+              </label>
+              <input
+                id="node-name-input"
+                type="text"
+                value={selectedNode.data.name ?? selectedNode.id}
+                onChange={(e) => {
+                  const newName = e.target.value;
+                  setNodes(
+                    nodes.map((n) =>
+                      n.id === selectedNode.id ? { ...n, data: { ...n.data, name: newName } } : n
+                    )
+                  );
+                }}
+                onBlur={(e) => {
+                  // 入力欄が空の場合は、node IDに戻す（空の名前を防ぐ）
+                  const currentName = e.target.value.trim();
+                  if (!currentName) {
+                    setNodes(
+                      nodes.map((n) =>
+                        n.id === selectedNode.id
+                          ? { ...n, data: { ...n.data, name: undefined } }
+                          : n
+                      )
+                    );
+                  }
+                }}
+                className="nodrag"
+                placeholder={t('property.nodeName.placeholder')}
+                style={{
+                  width: '100%',
+                  padding: '6px 8px',
+                  backgroundColor: 'var(--vscode-input-background)',
+                  color: 'var(--vscode-input-foreground)',
+                  border: '1px solid var(--vscode-input-border)',
+                  borderRadius: '2px',
+                  fontSize: '13px',
+                }}
+              />
+              <div
+                style={{
+                  fontSize: '11px',
+                  color: 'var(--vscode-descriptionForeground)',
+                  marginTop: '4px',
+                }}
+              >
+                {t('property.nodeName.help')}
+              </div>
+            </div>
+          )}
+
+          {/* Render properties based on node type */}
+          {selectedNode.type === 'subAgent' ? (
+            <SubAgentProperties
+              node={selectedNode as Node<SubAgentData>}
+              updateNodeData={updateNodeData}
+            />
+          ) : selectedNode.type === 'askUserQuestion' ? (
+            <AskUserQuestionProperties
+              node={selectedNode as Node<AskUserQuestionData>}
+              updateNodeData={updateNodeData}
+            />
+          ) : selectedNode.type === 'branch' ? (
+            <BranchProperties
+              node={selectedNode as Node<BranchNodeData>}
+              updateNodeData={updateNodeData}
+            />
+          ) : selectedNode.type === 'ifElse' ? (
+            <IfElseProperties
+              node={selectedNode as Node<IfElseNodeData>}
+              updateNodeData={updateNodeData}
+            />
+          ) : selectedNode.type === 'switch' ? (
+            <SwitchProperties
+              node={selectedNode as Node<SwitchNodeData>}
+              updateNodeData={updateNodeData}
+            />
+          ) : selectedNode.type === 'prompt' ? (
+            <PromptProperties
+              node={selectedNode as Node<PromptNodeData>}
+              updateNodeData={updateNodeData}
+            />
+          ) : selectedNode.type === 'skill' ? (
+            <SkillProperties
+              node={selectedNode as Node<SkillNodeData>}
+              updateNodeData={updateNodeData}
+            />
+          ) : selectedNode.type === 'mcp' ? (
+            <McpProperties
+              node={selectedNode as Node<McpNodeData>}
+              updateNodeData={updateNodeData}
+            />
+          ) : selectedNode.type === 'start' || selectedNode.type === 'end' ? (
+            <div
+              style={{
+                padding: '12px',
+                backgroundColor: 'var(--vscode-textBlockQuote-background)',
+                border: '1px solid var(--vscode-textBlockQuote-border)',
+                borderRadius: '4px',
+                fontSize: '12px',
+                color: 'var(--vscode-descriptionForeground)',
+              }}
+            >
+              {selectedNode.type === 'start'
+                ? t('property.startNodeDescription')
+                : t('property.endNodeDescription')}
+            </div>
+          ) : (
+            <div
+              style={{
+                padding: '12px',
+                backgroundColor: 'var(--vscode-errorBackground)',
+                border: '1px solid var(--vscode-errorBorder)',
+                borderRadius: '4px',
+                fontSize: '12px',
+                color: 'var(--vscode-errorForeground)',
+              }}
+            >
+              {t('property.unknownNodeType')} {selectedNode.type}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

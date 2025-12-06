@@ -80,7 +80,6 @@ export interface WebviewTranslationKeys {
 
   // Property Panel
   'property.title': string;
-  'property.noSelection': string;
 
   // Common property labels
   'property.nodeName': string;
@@ -226,6 +225,12 @@ export interface WebviewTranslationKeys {
   'dialog.deleteNode.message': string;
   'dialog.deleteNode.confirm': string;
   'dialog.deleteNode.cancel': string;
+
+  // Reset Workflow Confirmation Dialog
+  'toolbar.resetWorkflow': string;
+  'dialog.resetWorkflow.title': string;
+  'dialog.resetWorkflow.message': string;
+  'dialog.resetWorkflow.confirm': string;
 
   // Skill Browser Dialog
   'skill.browser.title': string;

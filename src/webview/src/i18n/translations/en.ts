@@ -83,7 +83,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Property Panel
   'property.title': 'Properties',
-  'property.noSelection': 'Select a node to view its properties',
 
   // Common property labels
   'property.nodeName': 'Node Name',
@@ -245,6 +244,13 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': 'Are you sure you want to delete this node?',
   'dialog.deleteNode.confirm': 'Delete',
   'dialog.deleteNode.cancel': 'Cancel',
+
+  // Reset Workflow Confirmation Dialog
+  'toolbar.resetWorkflow': 'Reset Workflow',
+  'dialog.resetWorkflow.title': 'Reset Workflow',
+  'dialog.resetWorkflow.message':
+    'Are you sure you want to reset the workflow? All nodes except Start and End will be removed.',
+  'dialog.resetWorkflow.confirm': 'Reset',
 
   // Skill Browser Dialog
   'skill.browser.title': 'Browse Skills',
