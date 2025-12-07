@@ -78,13 +78,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
 
     setIsSaving(true);
     try {
-      // Phase 5 (T024): Serialize workflow with conversation history
+      // Issue #89: Get subAgentFlows from store
+      const { subAgentFlows } = useWorkflowStore.getState();
+
+      // Phase 5 (T024): Serialize workflow with conversation history and subAgentFlows
       const workflow = serializeWorkflow(
         nodes,
         edges,
         workflowName,
         'Created with Workflow Studio',
-        activeWorkflow?.conversationHistory
+        activeWorkflow?.conversationHistory,
+        subAgentFlows
       );
 
       // Validate workflow before saving
@@ -189,12 +193,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
 
     setIsExporting(true);
     try {
-      // Serialize workflow
+      // Issue #89: Get subAgentFlows from store for export
+      const { subAgentFlows } = useWorkflowStore.getState();
+
+      // Serialize workflow with subAgentFlows
       const workflow = serializeWorkflow(
         nodes,
         edges,
         workflowName,
-        'Created with Workflow Studio'
+        'Created with Workflow Studio',
+        undefined, // conversationHistory not needed for export
+        subAgentFlows
       );
 
       // Validate workflow before export

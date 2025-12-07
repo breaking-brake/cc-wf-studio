@@ -74,7 +74,37 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'node.skill.title': 'Skill',
   'node.skill.description': '执行Claude Code Skill',
 
+  // SubAgentFlow Node (Feature: 089-subworkflow)
+  'node.subAgentFlow.title': 'Sub-Agent Flow',
+  'node.subAgentFlow.description': '详细控制Sub-Agent并执行',
+  'node.subAgentFlow.linked': '已链接',
+  'node.subAgentFlow.notLinked': '未链接',
+  'node.subAgentFlow.untitled': '未命名子代理流程',
+  'node.subAgentFlow.subAgentFlowNotFound': '未找到子代理流程',
+  'node.subAgentFlow.selectSubAgentFlow': '选择要执行的子代理流程',
+
+  // SubAgentFlow Panel (Feature: 089-subworkflow)
+  'subAgentFlow.panel.title': '子代理流程',
+  'subAgentFlow.create': '新建',
+  'subAgentFlow.delete': '删除',
+  'subAgentFlow.mainWorkflow': '主工作流',
+  'subAgentFlow.empty': '暂无子代理流程',
+  'subAgentFlow.default.name': 'subagentflow',
+  'subAgentFlow.editing': '编辑中:',
+  'subAgentFlow.edit': '编辑 Sub-Agent Flow',
+  'subAgentFlow.clickToEdit': '点击编辑名称',
+  'subAgentFlow.namePlaceholder': '例如: data-processing',
+  'subAgentFlow.dialog.close': '关闭并返回主工作流',
+  'subAgentFlow.dialog.submit': '确认并添加到工作流',
+  'subAgentFlow.dialog.cancel': '取消并放弃更改',
+
+  // SubAgentFlow validation errors
+  'error.subAgentFlow.nameRequired': '名称为必填项',
+  'error.subAgentFlow.nameTooLong': '名称不能超过50个字符',
+  'error.subAgentFlow.invalidName': '名称只能包含字母、数字、连字符和下划线',
+
   // Quick start instructions
+  'palette.nestedNotAllowed': '在子代理流程中不可用（不支持嵌套）',
   'palette.instruction.addNode': '点击节点将其添加到画布',
   'palette.instruction.dragNode': '拖动节点以重新定位',
   'palette.instruction.connectNodes': '从输出拖动到输入句柄以连接节点',
@@ -193,10 +223,23 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
     '节点面板包含可在工作流中使用的各种节点。\n\n点击Prompt、Sub-Agent、AskUserQuestion、If/Else、Switch等节点将其添加到画布。',
   'tour.addPrompt':
     '这个"Prompt"按钮可以将Prompt节点添加到画布。\n\nPrompt节点是支持变量的模板，是工作流的基本构建块。',
-  'tour.canvas': '这是画布。拖动节点调整位置，拖动手柄连接节点。\n\n已经放置了开始和结束节点。',
-  'tour.propertyPanel': '属性面板可以配置所选节点。\n\n您可以编辑节点名称、提示、模型选择等。',
+  'tour.addSubAgent':
+    '"Sub-Agent"节点是执行特定任务的专业代理。\n\n配置提示和工具限制，创建具有单一职责的代理。',
+  'tour.addSubAgentFlow':
+    '「Sub-Agent Flow」可以可视化定义复杂的Sub-Agent处理流程。\n\n如果您想并行执行MCP或Skill，可以将各处理包含在Sub-Agent Flow中，然后创建并行执行这些Sub-Agent Flow的工作流来实现。',
+  'tour.addSkill':
+    '"Skill"节点调用Claude Code技能。\n\n可以选择并执行个人用（~/.claude/skills/）或项目用（.claude/skills/）的技能。',
+  'tour.addMcp': '"MCP Tool"节点执行MCP服务器工具。\n\n可用于外部服务集成或自定义工具调用。',
   'tour.addAskUserQuestion':
     '"AskUserQuestion"节点用于根据用户选择分支工作流。\n\n可以使用此按钮将其添加到画布。',
+  'tour.addEnd':
+    '"End"节点表示工作流的结束点。\n\n可以放置多个End节点，根据不同结果设置不同的结束点。',
+  'tour.addIfElse':
+    '"If/Else"节点根据条件将工作流分成两个方向。\n\n设置真（True）或假（False）条件来控制处理流程。',
+  'tour.addSwitch':
+    '"Switch"节点根据多个条件将工作流分成多个方向。\n\n设置多个案例和默认案例来实现复杂的分支逻辑。',
+  'tour.canvas': '这是画布。拖动节点调整位置，拖动手柄连接节点。\n\n已经放置了开始和结束节点。',
+  'tour.propertyPanel': '属性面板可以配置所选节点。\n\n您可以编辑节点名称、提示、模型选择等。',
   'tour.connectNodes':
     '连接节点以创建工作流。\n\n从节点右侧的输出手柄(⚪)拖动到另一个节点左侧的输入手柄。',
   'tour.workflowName': '在这里可以为工作流命名。\n\n可以使用字母、数字、连字符和下划线。',

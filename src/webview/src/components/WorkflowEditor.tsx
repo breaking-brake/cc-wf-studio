@@ -35,6 +35,7 @@ import { McpNodeComponent } from './nodes/McpNode/McpNode';
 import { PromptNode } from './nodes/PromptNode';
 import { SkillNodeComponent } from './nodes/SkillNode';
 import { StartNode } from './nodes/StartNode';
+import { SubAgentFlowNodeComponent } from './nodes/SubAgentFlowNode';
 import { SubAgentNodeComponent } from './nodes/SubAgentNode';
 import { SwitchNodeComponent } from './nodes/SwitchNode';
 
@@ -56,6 +57,7 @@ const nodeTypes: NodeTypes = {
   prompt: PromptNode,
   skill: SkillNodeComponent,
   mcp: McpNodeComponent, // Feature: 001-mcp-node
+  subAgentFlow: SubAgentFlowNodeComponent, // Feature: 089-subworkflow
 };
 
 /**
@@ -91,6 +93,7 @@ export const WorkflowEditor: React.FC = () => {
     setActiveWorkflow,
     workflowName,
   } = useWorkflowStore();
+
   const { openChat, initConversation, loadConversationHistory } = useRefinementStore();
 
   /**
@@ -219,7 +222,7 @@ export const WorkflowEditor: React.FC = () => {
   ]);
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
+    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -267,6 +270,8 @@ export const WorkflowEditor: React.FC = () => {
                 return 'var(--vscode-charts-purple)';
               case 'skill':
                 return 'var(--vscode-charts-cyan)';
+              case 'subAgentFlow':
+                return 'var(--vscode-charts-purple)';
               default:
                 return 'var(--vscode-foreground)';
             }

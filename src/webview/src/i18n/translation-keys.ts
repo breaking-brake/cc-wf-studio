@@ -72,7 +72,37 @@ export interface WebviewTranslationKeys {
   'node.skill.title': string;
   'node.skill.description': string;
 
+  // SubAgentFlow Node (Feature: 089-subworkflow)
+  'node.subAgentFlow.title': string;
+  'node.subAgentFlow.description': string;
+  'node.subAgentFlow.linked': string;
+  'node.subAgentFlow.notLinked': string;
+  'node.subAgentFlow.untitled': string;
+  'node.subAgentFlow.subAgentFlowNotFound': string;
+  'node.subAgentFlow.selectSubAgentFlow': string;
+
+  // SubAgentFlow Panel (Feature: 089-subworkflow)
+  'subAgentFlow.panel.title': string;
+  'subAgentFlow.create': string;
+  'subAgentFlow.delete': string;
+  'subAgentFlow.mainWorkflow': string;
+  'subAgentFlow.empty': string;
+  'subAgentFlow.default.name': string;
+  'subAgentFlow.editing': string;
+  'subAgentFlow.edit': string;
+  'subAgentFlow.clickToEdit': string;
+  'subAgentFlow.namePlaceholder': string;
+  'subAgentFlow.dialog.close': string;
+  'subAgentFlow.dialog.submit': string;
+  'subAgentFlow.dialog.cancel': string;
+
+  // SubAgentFlow validation errors
+  'error.subAgentFlow.nameRequired': string;
+  'error.subAgentFlow.nameTooLong': string;
+  'error.subAgentFlow.invalidName': string;
+
   // Quick start instructions
+  'palette.nestedNotAllowed': string;
   'palette.instruction.addNode': string;
   'palette.instruction.dragNode': string;
   'palette.instruction.connectNodes': string;
@@ -188,9 +218,16 @@ export interface WebviewTranslationKeys {
   'tour.welcome': string;
   'tour.nodePalette': string;
   'tour.addPrompt': string;
+  'tour.addSubAgent': string;
+  'tour.addSubAgentFlow': string;
+  'tour.addSkill': string;
+  'tour.addMcp': string;
+  'tour.addAskUserQuestion': string;
+  'tour.addEnd': string;
+  'tour.addIfElse': string;
+  'tour.addSwitch': string;
   'tour.canvas': string;
   'tour.propertyPanel': string;
-  'tour.addAskUserQuestion': string;
   'tour.connectNodes': string;
   'tour.workflowName': string;
   'tour.saveWorkflow': string;

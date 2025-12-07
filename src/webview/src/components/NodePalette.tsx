@@ -5,21 +5,41 @@
  * Based on: /specs/001-cc-wf-studio/plan.md
  */
 
+import type { SubAgentFlow } from '@shared/types/workflow-definition';
+import { NodeType } from '@shared/types/workflow-definition';
 import type React from 'react';
 import { useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
+import { StyledTooltip } from './common/StyledTooltip';
 import { McpNodeDialog } from './dialogs/McpNodeDialog';
 import { SkillBrowserDialog } from './dialogs/SkillBrowserDialog';
 
 /**
  * NodePalette Component
  */
+/**
+ * Generate unique Sub-Agent Flow ID
+ */
+function generateSubAgentFlowId(): string {
+  return `subagentflow_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+}
+
 export const NodePalette: React.FC = () => {
   const { t } = useTranslation();
   const isCompact = useIsCompactMode();
-  const { addNode, nodes } = useWorkflowStore();
+  const {
+    addNode,
+    nodes,
+    subAgentFlows,
+    addSubAgentFlow,
+    setActiveSubAgentFlowId,
+    activeSubAgentFlowId,
+  } = useWorkflowStore();
+
+  // サブエージェントフロー編集中はネスト不可のノードを非活性にする
+  const isEditingSubAgentFlow = activeSubAgentFlowId !== null;
   const [isSkillBrowserOpen, setIsSkillBrowserOpen] = useState(false);
   const [isMcpDialogOpen, setIsMcpDialogOpen] = useState(false);
 
@@ -183,6 +203,39 @@ export const NodePalette: React.FC = () => {
     addNode(newNode);
   };
 
+  // Feature: 089-subworkflow - Create new Sub-Agent Flow and enter edit mode
+  const handleAddSubAgentFlowRef = () => {
+    const timestamp = Date.now();
+    const newSubAgentFlow: SubAgentFlow = {
+      id: generateSubAgentFlowId(),
+      name: `subagentflow-${subAgentFlows.length + 1}`,
+      description: '',
+      nodes: [
+        {
+          id: `start-${timestamp}`,
+          type: NodeType.Start,
+          name: 'Start',
+          position: { x: 100, y: 200 },
+          data: { label: 'Start' },
+        },
+        {
+          id: `end-${timestamp + 1}`,
+          type: NodeType.End,
+          name: 'End',
+          position: { x: 600, y: 200 },
+          data: { label: 'End' },
+        },
+      ],
+      connections: [],
+    };
+
+    // Add the new Sub-Agent Flow
+    addSubAgentFlow(newSubAgentFlow);
+
+    // Immediately enter edit mode for the new Sub-Agent Flow
+    setActiveSubAgentFlowId(newSubAgentFlow.id);
+  };
+
   return (
     <div
       className="node-palette"
@@ -267,46 +320,170 @@ export const NodePalette: React.FC = () => {
       </button>
 
       {/* Sub-Agent Node Button */}
-      <button
-        type="button"
-        onClick={handleAddSubAgent}
-        data-tour="add-subagent-button"
-        style={{
-          width: '100%',
-          padding: isCompact ? '8px' : '12px',
-          marginBottom: isCompact ? '8px' : '12px',
-          backgroundColor: 'var(--vscode-button-background)',
-          color: 'var(--vscode-button-foreground)',
-          border: '1px solid var(--vscode-button-border)',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontSize: isCompact ? '11px' : '13px',
-          fontWeight: 500,
-          textAlign: 'left',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '4px',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
-        }}
-      >
-        <div style={{ fontWeight: 600 }}>{t('node.subAgent.title')}</div>
-        {!isCompact && (
-          <div
+      {isEditingSubAgentFlow ? (
+        <StyledTooltip content={t('palette.nestedNotAllowed')} side="right">
+          <button
+            type="button"
+            onClick={handleAddSubAgent}
+            disabled={isEditingSubAgentFlow}
+            data-tour="add-subagent-button"
             style={{
-              fontSize: '11px',
+              width: '100%',
+              padding: isCompact ? '8px' : '12px',
+              marginBottom: isCompact ? '8px' : '12px',
+              backgroundColor: 'var(--vscode-button-background)',
               color: 'var(--vscode-button-foreground)',
-              opacity: 0.8,
+              border: '1px solid var(--vscode-button-border)',
+              borderRadius: '4px',
+              cursor: 'not-allowed',
+              fontSize: isCompact ? '11px' : '13px',
+              fontWeight: 500,
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+              opacity: 0.5,
             }}
           >
-            {t('node.subAgent.description')}
-          </div>
-        )}
-      </button>
+            <div style={{ fontWeight: 600 }}>{t('node.subAgent.title')}</div>
+            {!isCompact && (
+              <div
+                style={{
+                  fontSize: '11px',
+                  color: 'var(--vscode-button-foreground)',
+                  opacity: 0.8,
+                }}
+              >
+                {t('node.subAgent.description')}
+              </div>
+            )}
+          </button>
+        </StyledTooltip>
+      ) : (
+        <button
+          type="button"
+          onClick={handleAddSubAgent}
+          data-tour="add-subagent-button"
+          style={{
+            width: '100%',
+            padding: isCompact ? '8px' : '12px',
+            marginBottom: isCompact ? '8px' : '12px',
+            backgroundColor: 'var(--vscode-button-background)',
+            color: 'var(--vscode-button-foreground)',
+            border: '1px solid var(--vscode-button-border)',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: isCompact ? '11px' : '13px',
+            fontWeight: 500,
+            textAlign: 'left',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+          }}
+        >
+          <div style={{ fontWeight: 600 }}>{t('node.subAgent.title')}</div>
+          {!isCompact && (
+            <div
+              style={{
+                fontSize: '11px',
+                color: 'var(--vscode-button-foreground)',
+                opacity: 0.8,
+              }}
+            >
+              {t('node.subAgent.description')}
+            </div>
+          )}
+        </button>
+      )}
+
+      {/* Sub-Agent Flow Ref Node Button (Feature: 089-subworkflow) */}
+      {isEditingSubAgentFlow ? (
+        <StyledTooltip content={t('palette.nestedNotAllowed')} side="right">
+          <button
+            type="button"
+            onClick={handleAddSubAgentFlowRef}
+            disabled={isEditingSubAgentFlow}
+            data-tour="add-subagentflow-button"
+            style={{
+              width: '100%',
+              padding: isCompact ? '8px' : '12px',
+              marginBottom: isCompact ? '8px' : '12px',
+              backgroundColor: 'var(--vscode-button-background)',
+              color: 'var(--vscode-button-foreground)',
+              border: '1px solid var(--vscode-button-border)',
+              borderRadius: '4px',
+              cursor: 'not-allowed',
+              fontSize: isCompact ? '11px' : '13px',
+              fontWeight: 500,
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+              opacity: 0.5,
+            }}
+          >
+            <div style={{ fontWeight: 600 }}>{t('node.subAgentFlow.title')} β</div>
+            {!isCompact && (
+              <div
+                style={{
+                  fontSize: '11px',
+                  color: 'var(--vscode-button-foreground)',
+                  opacity: 0.8,
+                }}
+              >
+                {t('node.subAgentFlow.description')}
+              </div>
+            )}
+          </button>
+        </StyledTooltip>
+      ) : (
+        <button
+          type="button"
+          onClick={handleAddSubAgentFlowRef}
+          data-tour="add-subagentflow-button"
+          style={{
+            width: '100%',
+            padding: isCompact ? '8px' : '12px',
+            marginBottom: isCompact ? '8px' : '12px',
+            backgroundColor: 'var(--vscode-button-background)',
+            color: 'var(--vscode-button-foreground)',
+            border: '1px solid var(--vscode-button-border)',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: isCompact ? '11px' : '13px',
+            fontWeight: 500,
+            textAlign: 'left',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+          }}
+        >
+          <div style={{ fontWeight: 600 }}>{t('node.subAgentFlow.title')} β</div>
+          {!isCompact && (
+            <div
+              style={{
+                fontSize: '11px',
+                color: 'var(--vscode-button-foreground)',
+                opacity: 0.8,
+              }}
+            >
+              {t('node.subAgentFlow.description')}
+            </div>
+          )}
+        </button>
+      )}
 
       {/* Skill Node Button */}
       <button
@@ -410,6 +587,7 @@ export const NodePalette: React.FC = () => {
       {/* IfElse Node Button */}
       <button
         type="button"
+        data-tour="add-ifelse-button"
         onClick={handleAddIfElse}
         style={{
           width: '100%',
@@ -451,6 +629,7 @@ export const NodePalette: React.FC = () => {
       {/* Switch Node Button */}
       <button
         type="button"
+        data-tour="add-switch-button"
         onClick={handleAddSwitch}
         style={{
           width: '100%',
@@ -490,46 +669,87 @@ export const NodePalette: React.FC = () => {
       </button>
 
       {/* AskUserQuestion Node Button */}
-      <button
-        type="button"
-        onClick={handleAddAskUserQuestion}
-        data-tour="add-askuserquestion-button"
-        style={{
-          width: '100%',
-          padding: isCompact ? '8px' : '12px',
-          marginBottom: isCompact ? '8px' : '12px',
-          backgroundColor: 'var(--vscode-button-background)',
-          color: 'var(--vscode-button-foreground)',
-          border: '1px solid var(--vscode-button-border)',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontSize: isCompact ? '11px' : '13px',
-          fontWeight: 500,
-          textAlign: 'left',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '4px',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
-        }}
-      >
-        <div style={{ fontWeight: 600 }}>{t('node.askUserQuestion.title')}</div>
-        {!isCompact && (
-          <div
+      {isEditingSubAgentFlow ? (
+        <StyledTooltip content={t('palette.nestedNotAllowed')} side="right">
+          <button
+            type="button"
+            onClick={handleAddAskUserQuestion}
+            disabled={isEditingSubAgentFlow}
+            data-tour="add-askuserquestion-button"
             style={{
-              fontSize: '11px',
+              width: '100%',
+              padding: isCompact ? '8px' : '12px',
+              marginBottom: isCompact ? '8px' : '12px',
+              backgroundColor: 'var(--vscode-button-background)',
               color: 'var(--vscode-button-foreground)',
-              opacity: 0.8,
+              border: '1px solid var(--vscode-button-border)',
+              borderRadius: '4px',
+              cursor: 'not-allowed',
+              fontSize: isCompact ? '11px' : '13px',
+              fontWeight: 500,
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+              opacity: 0.5,
             }}
           >
-            {t('node.askUserQuestion.description')}
-          </div>
-        )}
-      </button>
+            <div style={{ fontWeight: 600 }}>{t('node.askUserQuestion.title')}</div>
+            {!isCompact && (
+              <div
+                style={{
+                  fontSize: '11px',
+                  color: 'var(--vscode-button-foreground)',
+                  opacity: 0.8,
+                }}
+              >
+                {t('node.askUserQuestion.description')}
+              </div>
+            )}
+          </button>
+        </StyledTooltip>
+      ) : (
+        <button
+          type="button"
+          onClick={handleAddAskUserQuestion}
+          data-tour="add-askuserquestion-button"
+          style={{
+            width: '100%',
+            padding: isCompact ? '8px' : '12px',
+            marginBottom: isCompact ? '8px' : '12px',
+            backgroundColor: 'var(--vscode-button-background)',
+            color: 'var(--vscode-button-foreground)',
+            border: '1px solid var(--vscode-button-border)',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: isCompact ? '11px' : '13px',
+            fontWeight: 500,
+            textAlign: 'left',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+          }}
+        >
+          <div style={{ fontWeight: 600 }}>{t('node.askUserQuestion.title')}</div>
+          {!isCompact && (
+            <div
+              style={{
+                fontSize: '11px',
+                color: 'var(--vscode-button-foreground)',
+                opacity: 0.8,
+              }}
+            >
+              {t('node.askUserQuestion.description')}
+            </div>
+          )}
+        </button>
+      )}
 
       {/* End Node Button */}
       <button

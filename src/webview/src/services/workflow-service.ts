@@ -8,6 +8,7 @@
 import type {
   Connection,
   ConversationHistory,
+  SubAgentFlow,
   Workflow,
   WorkflowNode,
 } from '@shared/types/workflow-definition';
@@ -21,6 +22,7 @@ import type { Edge, Node } from 'reactflow';
  * @param workflowName - Workflow name
  * @param workflowDescription - Workflow description
  * @param conversationHistory - Optional conversation history to preserve
+ * @param subAgentFlows - Optional sub-agent flows to include
  * @returns Workflow definition
  */
 export function serializeWorkflow(
@@ -28,7 +30,8 @@ export function serializeWorkflow(
   edges: Edge[],
   workflowName: string,
   workflowDescription?: string,
-  conversationHistory?: ConversationHistory
+  conversationHistory?: ConversationHistory,
+  subAgentFlows?: SubAgentFlow[]
 ): Workflow {
   // Convert React Flow nodes to WorkflowNodes
   const workflowNodes: WorkflowNode[] = nodes.map((node) => ({
@@ -61,6 +64,8 @@ export function serializeWorkflow(
     updatedAt: new Date(),
     // Phase 5 (T024): Include conversation history if provided
     conversationHistory,
+    // Issue #89: Include subAgentFlows if provided
+    subAgentFlows,
   };
 
   return workflow;

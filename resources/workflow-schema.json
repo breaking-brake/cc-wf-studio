@@ -12,7 +12,8 @@
       "ifElse",
       "switch",
       "skill",
-      "mcp"
+      "mcp",
+      "subAgentFlow"
     ]
   },
   "nodeTypes": {
@@ -280,6 +281,40 @@
             "outputPorts": 1
           }
         }
+      }
+    },
+    "subAgentFlow": {
+      "description": "Execute a defined sub-agent flow. Use this to reference and run a sub-agent flow within the main workflow. **Important: Always has exactly 1 output port. Sub-agent flows are executed sequentially from their Start to End node.**",
+      "fields": {
+        "subAgentFlowId": {
+          "type": "string",
+          "required": true,
+          "description": "ID of the sub-agent flow to execute (must match an existing sub-agent flow in the workflow's subAgentFlows array)"
+        },
+        "label": {
+          "type": "string",
+          "required": true,
+          "maxLength": 50,
+          "description": "Display label for this node"
+        },
+        "description": {
+          "type": "string",
+          "required": false,
+          "maxLength": 200,
+          "description": "Optional description of what this sub-agent flow does"
+        },
+        "outputPorts": {
+          "type": "number",
+          "required": true,
+          "value": 1
+        }
+      },
+      "inputPorts": 1,
+      "outputPorts": 1,
+      "mvpConstraints": {
+        "noNesting": "SubAgentFlow nodes cannot be used inside sub-agent flows (no nesting allowed in Phase 1 MVP)",
+        "noSubAgentInSubAgentFlow": "SubAgent nodes cannot be used inside sub-agent flows (Claude Code constraint)",
+        "sequentialExecution": "Sub-agent flows execute sequentially from Start to End"
       }
     }
   },

@@ -19,6 +19,7 @@ export enum NodeType {
   Prompt = 'prompt',
   Skill = 'skill', // New: Claude Code Skill integration
   Mcp = 'mcp', // New: MCP (Model Context Protocol) tool integration
+  SubAgentFlow = 'subAgentFlow', // New: Sub-Agent Flow reference node
 }
 
 // ============================================================================
@@ -168,6 +169,46 @@ export interface ToolParameter {
   properties?: Record<string, ToolParameter>;
 }
 
+// ============================================================================
+// Sub-Agent Flow Types
+// ============================================================================
+
+/**
+ * Sub-Agent Flow definition
+ *
+ * Represents a reusable sub-agent flow that can be referenced from the main workflow.
+ * Sub-Agent Flows are stored in the same workflow file under the `subAgentFlows` array.
+ * At runtime, Sub-Agent Flows are executed as Sub-Agents.
+ */
+export interface SubAgentFlow {
+  /** Unique identifier for the sub-agent flow */
+  id: string;
+  /** Display name of the sub-agent flow */
+  name: string;
+  /** Optional description of the sub-agent flow's purpose */
+  description?: string;
+  /** Nodes within the sub-agent flow (must include Start and End nodes) */
+  nodes: WorkflowNode[];
+  /** Connections between nodes within the sub-agent flow */
+  connections: Connection[];
+}
+
+/**
+ * SubAgentFlow node data
+ *
+ * References and executes a sub-agent flow defined in the same workflow file.
+ */
+export interface SubAgentFlowNodeData {
+  /** ID of the sub-agent flow to execute */
+  subAgentFlowId: string;
+  /** Display label for the node */
+  label: string;
+  /** Optional description */
+  description?: string;
+  /** Number of output ports (fixed at 1 for SubAgentFlow nodes) */
+  outputPorts: 1;
+}
+
 export interface McpNodeData {
   /** MCP server identifier (from 'claude mcp list') */
   serverId: string;
@@ -266,6 +307,11 @@ export interface McpNode extends BaseNode {
   data: McpNodeData;
 }
 
+export interface SubAgentFlowNode extends BaseNode {
+  type: NodeType.SubAgentFlow;
+  data: SubAgentFlowNodeData;
+}
+
 export type WorkflowNode =
   | SubAgentNode
   | AskUserQuestionNode
@@ -276,7 +322,8 @@ export type WorkflowNode =
   | EndNode
   | PromptNode
   | SkillNode
-  | McpNode;
+  | McpNode
+  | SubAgentFlowNode;
 
 // ============================================================================
 // Connection Type
@@ -363,6 +410,7 @@ export interface Workflow {
    * ワークフローファイル形式のバージョンを示します。
    * - 省略時: "1.0.0" (既存形式、新規ノードタイプ非対応)
    * - "1.1.0": Start/End/Promptノードをサポート
+   * - "1.2.0": SubWorkflowノードをサポート
    *
    * @default "1.0.0"
    */
@@ -374,6 +422,8 @@ export interface Workflow {
   metadata?: WorkflowMetadata;
   /** Optional conversation history for AI-assisted workflow refinement */
   conversationHistory?: ConversationHistory;
+  /** Optional sub-agent flows defined within this workflow */
+  subAgentFlows?: SubAgentFlow[];
 }
 
 // ============================================================================
@@ -450,6 +500,17 @@ export const VALIDATION_RULES = {
     TOOL_NAME_MIN_LENGTH: 1,
     TOOL_NAME_MAX_LENGTH: 200,
     TOOL_DESCRIPTION_MAX_LENGTH: 2048,
+    OUTPUT_PORTS: 1, // Fixed: 1 output port
+  },
+  SUB_AGENT_FLOW: {
+    NAME_MIN_LENGTH: 1,
+    NAME_MAX_LENGTH: 50,
+    NAME_PATTERN: /^[a-zA-Z0-9_-]+$/, // Alphanumeric, hyphens, underscores only
+    DESCRIPTION_MAX_LENGTH: 200,
+    MAX_NODES: 30, // Smaller than main workflow
+    // Node-specific validation (for SubAgentFlow reference nodes)
+    LABEL_MIN_LENGTH: 1,
+    LABEL_MAX_LENGTH: 50,
     OUTPUT_PORTS: 1, // Fixed: 1 output port
   },
 } as const;

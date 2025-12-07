@@ -14,6 +14,7 @@ import type {
   IfElseNodeData,
   SkillNodeData,
   SubAgentData,
+  SubAgentFlowNodeData,
   SwitchNodeData,
 } from '@shared/types/workflow-definition';
 import { SUB_AGENT_COLORS } from '@shared/types/workflow-definition';
@@ -34,7 +35,7 @@ import { McpNodeEditDialog } from './dialogs/McpNodeEditDialog';
  */
 export const PropertyPanel: React.FC = () => {
   const { t } = useTranslation();
-  const { nodes, selectedNodeId, updateNodeData, setNodes, closePropertyPanel } =
+  const { nodes, selectedNodeId, updateNodeData, setNodes, closePropertyPanel, subAgentFlows } =
     useWorkflowStore();
   const { width, handleMouseDown } = useResizablePanel();
 
@@ -111,7 +112,7 @@ export const PropertyPanel: React.FC = () => {
             {getNodeTypeLabel(selectedNode.type)}
           </div>
 
-          {/* Node Name (only for subAgent, askUserQuestion, branch, ifElse, switch, prompt, skill, and mcp types) */}
+          {/* Node Name (only for subAgent, askUserQuestion, branch, ifElse, switch, prompt, skill, mcp types) */}
           {(selectedNode.type === 'subAgent' ||
             selectedNode.type === 'askUserQuestion' ||
             selectedNode.type === 'branch' ||
@@ -182,6 +183,42 @@ export const PropertyPanel: React.FC = () => {
             </div>
           )}
 
+          {/* Node Name for SubAgentFlowRef (read-only, shows linked Sub-Agent Flow name) */}
+          {selectedNode.type === 'subAgentFlow' && (
+            <div style={{ marginBottom: '16px' }}>
+              <label
+                htmlFor="node-name-readonly"
+                style={{
+                  display: 'block',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                  marginBottom: '6px',
+                }}
+              >
+                {t('property.nodeName')}
+              </label>
+              <div
+                id="node-name-readonly"
+                style={{
+                  width: '100%',
+                  padding: '6px 8px',
+                  backgroundColor: 'var(--vscode-input-background)',
+                  color: 'var(--vscode-descriptionForeground)',
+                  border: '1px solid var(--vscode-input-border)',
+                  borderRadius: '2px',
+                  fontSize: '13px',
+                }}
+              >
+                {(() => {
+                  const refData = selectedNode.data as SubAgentFlowNodeData;
+                  const linkedFlow = subAgentFlows.find((sf) => sf.id === refData.subAgentFlowId);
+                  return linkedFlow?.name || t('node.subAgentFlow.notLinked');
+                })()}
+              </div>
+            </div>
+          )}
+
           {/* Render properties based on node type */}
           {selectedNode.type === 'subAgent' ? (
             <SubAgentProperties
@@ -221,6 +258,11 @@ export const PropertyPanel: React.FC = () => {
           ) : selectedNode.type === 'mcp' ? (
             <McpProperties
               node={selectedNode as Node<McpNodeData>}
+              updateNodeData={updateNodeData}
+            />
+          ) : selectedNode.type === 'subAgentFlow' ? (
+            <SubAgentFlowProperties
+              node={selectedNode as Node<SubAgentFlowNodeData>}
               updateNodeData={updateNodeData}
             />
           ) : selectedNode.type === 'start' || selectedNode.type === 'end' ? (
@@ -2396,5 +2438,97 @@ const McpProperties: React.FC<{
         onClose={() => setIsEditDialogOpen(false)}
       />
     </>
+  );
+};
+
+/**
+ * SubAgentFlowRef Properties Editor
+ *
+ * Feature: 089-subworkflow
+ * Allows selection of a sub-agent flow to reference and displays linked sub-agent flow info
+ */
+const SubAgentFlowProperties: React.FC<{
+  node: Node<SubAgentFlowNodeData>;
+  updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
+}> = ({ node }) => {
+  const { t } = useTranslation();
+  const { subAgentFlows, setActiveSubAgentFlowId } = useWorkflowStore();
+  const data = node.data;
+
+  // Find the linked sub-agent flow
+  const linkedSubAgentFlow = subAgentFlows.find((sf) => sf.id === data.subAgentFlowId);
+
+  // Handle edit button click - navigate to sub-agent flow edit mode
+  const handleEditSubAgentFlow = () => {
+    if (data.subAgentFlowId) {
+      setActiveSubAgentFlowId(data.subAgentFlowId);
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {/* Linked Sub-Agent Flow Info (Read-only) */}
+      {linkedSubAgentFlow && (
+        <>
+          {/* Sub-Agent Flow Description (Read-only) */}
+          {linkedSubAgentFlow.description && (
+            <div>
+              <label
+                htmlFor="subagentflow-description"
+                style={{
+                  display: 'block',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                  marginBottom: '6px',
+                }}
+              >
+                {t('property.description')}
+              </label>
+              <div
+                id="subagentflow-description"
+                style={{
+                  width: '100%',
+                  padding: '6px 8px',
+                  backgroundColor: 'var(--vscode-input-background)',
+                  color: 'var(--vscode-descriptionForeground)',
+                  border: '1px solid var(--vscode-input-border)',
+                  borderRadius: '2px',
+                  fontSize: '13px',
+                  lineHeight: '1.4',
+                }}
+              >
+                {linkedSubAgentFlow.description}
+              </div>
+            </div>
+          )}
+
+          {/* Edit Button */}
+          <button
+            type="button"
+            onClick={handleEditSubAgentFlow}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              backgroundColor: 'var(--vscode-button-background)',
+              color: 'var(--vscode-button-foreground)',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: 500,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+            }}
+          >
+            {t('subAgentFlow.edit')}
+          </button>
+        </>
+      )}
+    </div>
   );
 };

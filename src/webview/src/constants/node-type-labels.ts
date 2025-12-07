@@ -7,6 +7,7 @@
 
 export const NODE_TYPE_LABELS: Record<string, string> = {
   subAgent: 'Sub-Agent',
+  subAgentFlow: 'Sub-Agent Flow',
   askUserQuestion: 'Ask User Question',
   branch: 'Branch',
   ifElse: 'If/Else',

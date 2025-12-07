@@ -13,9 +13,12 @@ import type {
   McpNode,
   PromptNode,
   SkillNode,
+  SubAgentFlow,
+  SubAgentFlowNode,
   SubAgentNode,
   SwitchNode,
   Workflow,
+  WorkflowNode,
 } from '../../shared/types/workflow-definition';
 import { translate } from '../i18n/i18n-service';
 import type { FileService } from './file-service';
@@ -47,8 +50,22 @@ export async function checkExistingFiles(
     }
   }
 
+  // Check SubAgentFlow agent files (Issue #89)
+  // File format: {parent-workflow-name}_{subagentflow-name}.md
+  const workflowBaseName = nodeNameToFileName(workflow.name);
+  if (workflow.subAgentFlows && workflow.subAgentFlows.length > 0) {
+    for (const subAgentFlow of workflow.subAgentFlows) {
+      const subAgentFlowFileName = nodeNameToFileName(subAgentFlow.name);
+      const fileName = `${workflowBaseName}_${subAgentFlowFileName}`;
+      const filePath = path.join(agentsDir, `${fileName}.md`);
+      if (await fileService.fileExists(filePath)) {
+        existingFiles.push(filePath);
+      }
+    }
+  }
+
   // Check SlashCommand file
-  const commandFileName = nodeNameToFileName(workflow.name);
+  const commandFileName = workflowBaseName;
   const commandFilePath = path.join(commandsDir, `${commandFileName}.md`);
   if (await fileService.fileExists(commandFilePath)) {
     existingFiles.push(commandFilePath);
@@ -89,8 +106,22 @@ export async function exportWorkflow(
     exportedFiles.push(filePath);
   }
 
+  // Export SubAgentFlow as Sub-Agent files (Issue #89)
+  // File format: {parent-workflow-name}_{subagentflow-name}.md
+  const workflowBaseName = nodeNameToFileName(workflow.name);
+  if (workflow.subAgentFlows && workflow.subAgentFlows.length > 0) {
+    for (const subAgentFlow of workflow.subAgentFlows) {
+      const subAgentFlowFileName = nodeNameToFileName(subAgentFlow.name);
+      const fileName = `${workflowBaseName}_${subAgentFlowFileName}`;
+      const filePath = path.join(agentsDir, `${fileName}.md`);
+      const content = generateSubAgentFlowAgentFile(subAgentFlow, fileName);
+      await fileService.writeFile(filePath, content);
+      exportedFiles.push(filePath);
+    }
+  }
+
   // Export SlashCommand
-  const commandFileName = nodeNameToFileName(workflow.name);
+  const commandFileName = workflowBaseName;
   const commandFilePath = path.join(commandsDir, `${commandFileName}.md`);
   const commandContent = generateSlashCommandFile(workflow);
   await fileService.writeFile(commandFilePath, commandContent);
@@ -208,13 +239,68 @@ function generateSubAgentFile(node: SubAgentNode): string {
 }
 
 /**
- * Generate Mermaid flowchart from workflow
+ * Generate Sub-Agent file content from SubAgentFlow (Issue #89)
  *
- * @param workflow - Workflow definition
+ * Converts a SubAgentFlow into a Sub-Agent .md file that can be executed
+ * by Claude Code. The SubAgentFlow's nodes are converted to sequential
+ * execution steps.
+ *
+ * @param subAgentFlow - SubAgentFlow definition
+ * @param agentFileName - Generated file name (format: {parent}_{subagentflow})
+ * @returns Markdown content with YAML frontmatter
+ */
+function generateSubAgentFlowAgentFile(subAgentFlow: SubAgentFlow, agentFileName: string): string {
+  const agentName = agentFileName;
+
+  // YAML frontmatter (same structure as SlashCommand)
+  // Note: allowed-tools is omitted to allow all tools
+  const frontmatter = [
+    '---',
+    `name: ${agentName}`,
+    `description: ${subAgentFlow.description || subAgentFlow.name}`,
+    'model: sonnet',
+    '---',
+    '',
+  ].join('\n');
+
+  // Generate Mermaid flowchart (same as SlashCommand)
+  const mermaidFlowchart = generateMermaidFlowchart({
+    nodes: subAgentFlow.nodes,
+    connections: subAgentFlow.connections,
+  });
+
+  // Create a pseudo-Workflow object to reuse generateWorkflowExecutionLogic
+  // This ensures SubAgentFlow export format matches SlashCommand format exactly
+  const pseudoWorkflow: Workflow = {
+    name: subAgentFlow.name,
+    description: subAgentFlow.description,
+    nodes: subAgentFlow.nodes,
+    connections: subAgentFlow.connections,
+  };
+
+  // Generate execution logic (same format as SlashCommand)
+  const executionLogic = generateWorkflowExecutionLogic(pseudoWorkflow);
+
+  return `${frontmatter}${mermaidFlowchart}\n\n${executionLogic}`;
+}
+
+/**
+ * Common interface for Mermaid generation
+ * Used by both Workflow and SubWorkflow
+ */
+interface MermaidSource {
+  nodes: WorkflowNode[];
+  connections: { from: string; to: string; fromPort?: string }[];
+}
+
+/**
+ * Generate Mermaid flowchart from workflow or subworkflow
+ *
+ * @param source - Workflow or SubWorkflow definition
  * @returns Mermaid flowchart markdown
  */
-function generateMermaidFlowchart(workflow: Workflow): string {
-  const { nodes, connections } = workflow;
+function generateMermaidFlowchart(source: MermaidSource): string {
+  const { nodes, connections } = source;
   const lines: string[] = [];
 
   // Start Mermaid code block
@@ -265,6 +351,10 @@ function generateMermaidFlowchart(workflow: Workflow): string {
       const mcpNode = node as McpNode;
       const toolName = mcpNode.data.toolName || 'MCP Tool';
       lines.push(`    ${nodeId}[[${escapeLabel(`MCP: ${toolName}`)}]]`);
+    } else if (nodeType === 'subAgentFlow') {
+      // Feature: 089-subworkflow - SubAgentFlow node uses subroutine shape
+      const label = node.name || 'Sub-Agent Flow';
+      lines.push(`    ${nodeId}[["${escapeLabel(label)}"]]`);
     }
   }
 
@@ -674,6 +764,9 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
   const branchNodes = nodes.filter((n) => (n.type as string) === 'branch') as BranchNode[];
   const ifElseNodes = nodes.filter((n) => (n.type as string) === 'ifElse') as IfElseNode[];
   const switchNodes = nodes.filter((n) => (n.type as string) === 'switch') as SwitchNode[];
+  const subAgentFlowNodes = nodes.filter(
+    (n) => (n.type as string) === 'subAgentFlow'
+  ) as SubAgentFlowNode[];
 
   // Skill node details
   if (skillNodes.length > 0) {
@@ -727,6 +820,33 @@ function generateWorkflowExecutionLogic(workflow: Workflow): string {
       }
 
       sections.push(...nodeSections);
+    }
+  }
+
+  // SubAgentFlow node details (Feature: 089-subworkflow)
+  // Keep it simple like SubAgent - just reference the agent name
+  const parentWorkflowBaseName = nodeNameToFileName(workflow.name);
+  if (subAgentFlowNodes.length > 0) {
+    sections.push('## Sub-Agent Flow Nodes');
+    sections.push('');
+    for (const node of subAgentFlowNodes) {
+      const nodeId = sanitizeNodeId(node.id);
+      const label = node.data.label || node.name || 'Sub-Agent Flow';
+
+      // Find linked sub-agent flow
+      const linkedSubAgentFlow = workflow.subAgentFlows?.find(
+        (sf) => sf.id === node.data.subAgentFlowId
+      );
+
+      if (linkedSubAgentFlow) {
+        const subAgentFlowFileName = nodeNameToFileName(linkedSubAgentFlow.name);
+        const agentFileName = `${parentWorkflowBaseName}_${subAgentFlowFileName}`;
+
+        sections.push(`#### ${nodeId}(${label})`);
+        sections.push('');
+        sections.push(`@Sub-Agent: ${agentFileName}`);
+        sections.push('');
+      }
     }
   }
 

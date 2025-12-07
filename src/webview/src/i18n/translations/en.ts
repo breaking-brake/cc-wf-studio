@@ -75,7 +75,38 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'node.skill.title': 'Skill',
   'node.skill.description': 'Execute a Claude Code Skill',
 
+  // SubAgentFlow Node (Feature: 089-subworkflow)
+  'node.subAgentFlow.title': 'Sub-Agent Flow',
+  'node.subAgentFlow.description': 'Execute Sub-Agent with detailed control',
+  'node.subAgentFlow.linked': 'Linked',
+  'node.subAgentFlow.notLinked': 'Not linked',
+  'node.subAgentFlow.untitled': 'Untitled Sub-Agent Flow',
+  'node.subAgentFlow.subAgentFlowNotFound': 'Sub-Agent Flow not found',
+  'node.subAgentFlow.selectSubAgentFlow': 'Select a sub-agent flow to execute',
+
+  // SubAgentFlow Panel (Feature: 089-subworkflow)
+  'subAgentFlow.panel.title': 'Sub-Agent Flows',
+  'subAgentFlow.create': 'New',
+  'subAgentFlow.delete': 'Delete',
+  'subAgentFlow.mainWorkflow': 'Main Workflow',
+  'subAgentFlow.empty': 'No sub-agent flows yet',
+  'subAgentFlow.default.name': 'subagentflow',
+  'subAgentFlow.editing': 'Editing:',
+  'subAgentFlow.edit': 'Edit Sub-Agent Flow',
+  'subAgentFlow.clickToEdit': 'Click to edit name',
+  'subAgentFlow.namePlaceholder': 'e.g., data-processing',
+  'subAgentFlow.dialog.close': 'Close and return to main workflow',
+  'subAgentFlow.dialog.submit': 'Submit and add to workflow',
+  'subAgentFlow.dialog.cancel': 'Cancel and discard changes',
+
+  // SubAgentFlow validation errors
+  'error.subAgentFlow.nameRequired': 'Name is required',
+  'error.subAgentFlow.nameTooLong': 'Name must be 50 characters or less',
+  'error.subAgentFlow.invalidName':
+    'Name must contain only letters, numbers, hyphens, and underscores',
+
   // Quick start instructions
+  'palette.nestedNotAllowed': 'Not available in Sub-Agent Flow (nesting not supported)',
   'palette.instruction.addNode': 'Click a node to add it to the canvas',
   'palette.instruction.dragNode': 'Drag nodes to reposition them',
   'palette.instruction.connectNodes': 'Connect nodes by dragging from output to input handles',
@@ -196,12 +227,26 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'The Node Palette contains various nodes you can use in your workflow.\n\nClick on Prompt, Sub-Agent, AskUserQuestion, If/Else, Switch, and other nodes to add them to the canvas.',
   'tour.addPrompt':
     'This "Prompt" button lets you add Prompt nodes to the canvas.\n\nA Prompt node is a template that supports variables and is the basic building block of workflows.',
+  'tour.addSubAgent':
+    'The "Sub-Agent" node is a specialized agent that executes specific tasks.\n\nConfigure prompts and tool restrictions to create agents with single responsibilities.',
+  'tour.addSubAgentFlow':
+    '"Sub-Agent Flow" allows you to visually define complex Sub-Agent processing flows.\n\nTo run MCP or Skills in parallel, wrap each process in a Sub-Agent Flow and create a flow that executes those Sub-Agent Flows in parallel.',
+  'tour.addSkill':
+    'The "Skill" node calls Claude Code skills.\n\nSelect and execute skills from personal (~/.claude/skills/) or project (.claude/skills/) directories.',
+  'tour.addMcp':
+    'The "MCP Tool" node executes MCP server tools.\n\nUse it for external service integration or custom tool invocation.',
+  'tour.addAskUserQuestion':
+    'The "AskUserQuestion" node lets you branch the workflow based on user selection.\n\nYou can add it to the canvas using this button.',
+  'tour.addEnd':
+    'The "End" node marks the endpoint of a workflow.\n\nYou can place multiple End nodes to set different endpoints based on outcomes.',
+  'tour.addIfElse':
+    'The "If/Else" node branches the workflow in two directions based on a condition.\n\nSet True or False conditions to control the flow of processing.',
+  'tour.addSwitch':
+    'The "Switch" node branches the workflow in multiple directions based on multiple conditions.\n\nSet multiple cases and a default case to implement complex branching logic.',
   'tour.canvas':
     'This is the canvas. Drag nodes to adjust their position and drag handles to connect nodes.\n\nStart and End nodes are already placed.',
   'tour.propertyPanel':
     'The Property Panel lets you configure the selected node.\n\nYou can edit node name, prompt, model selection, and more.',
-  'tour.addAskUserQuestion':
-    'The "AskUserQuestion" node lets you branch the workflow based on user selection.\n\nYou can add it to the canvas using this button.',
   'tour.connectNodes':
     'Connect nodes to create your workflow.\n\nDrag from the output handle (⚪) on the right of a node to the input handle on the left of another node.',
   'tour.workflowName':

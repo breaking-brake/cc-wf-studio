@@ -10,6 +10,8 @@ import {
   type McpNodeData,
   NodeType,
   type SkillNodeData,
+  type SubAgentFlow,
+  type SubAgentFlowNodeData,
   type SwitchNodeData,
   VALIDATION_RULES,
   type Workflow,
@@ -203,6 +205,12 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
       const switchErrors = validateSwitchNode(node);
       errors.push(...switchErrors);
     }
+
+    // Validate SubAgentFlow nodes (Feature: 089-subworkflow)
+    if (node.type === NodeType.SubAgentFlow) {
+      const subAgentFlowErrors = validateSubAgentFlowNode(node);
+      errors.push(...subAgentFlowErrors);
+    }
   }
 
   return errors;
@@ -247,6 +255,135 @@ function validateSwitchNode(node: WorkflowNode): ValidationError[] {
         field: `nodes[${node.id}].data.branches`,
       });
     }
+  }
+
+  return errors;
+}
+
+/**
+ * Validate SubAgentFlow node structure and fields
+ *
+ * Feature: 089-subworkflow
+ *
+ * @param node - SubAgentFlow node to validate
+ * @returns Array of validation errors
+ */
+function validateSubAgentFlowNode(node: WorkflowNode): ValidationError[] {
+  const errors: ValidationError[] = [];
+  const refData = node.data as Partial<SubAgentFlowNodeData>;
+
+  // Required field: subAgentFlowId
+  if (!refData.subAgentFlowId || typeof refData.subAgentFlowId !== 'string') {
+    errors.push({
+      code: 'SUBAGENTFLOW_MISSING_REF_ID',
+      message: 'SubAgentFlow node must have a subAgentFlowId',
+      field: `nodes[${node.id}].data.subAgentFlowId`,
+    });
+  }
+
+  // Required field: label
+  if (!refData.label || typeof refData.label !== 'string') {
+    errors.push({
+      code: 'SUBAGENTFLOW_MISSING_LABEL',
+      message: 'SubAgentFlow node must have a label',
+      field: `nodes[${node.id}].data.label`,
+    });
+  }
+
+  // Output ports validation
+  if (refData.outputPorts !== VALIDATION_RULES.SUB_AGENT_FLOW.OUTPUT_PORTS) {
+    errors.push({
+      code: 'SUBAGENTFLOW_INVALID_PORTS',
+      message: 'SubAgentFlow outputPorts must equal 1',
+      field: `nodes[${node.id}].data.outputPorts`,
+    });
+  }
+
+  return errors;
+}
+
+/**
+ * Validate SubAgentFlow structure (for use within a workflow)
+ *
+ * Feature: 089-subworkflow
+ * MVP constraints:
+ * - No SubAgent nodes allowed
+ * - No nested SubAgentFlowRef nodes allowed
+ * - Must have exactly one Start node and at least one End node
+ *
+ * @param subAgentFlow - SubAgentFlow to validate
+ * @returns Array of validation errors
+ */
+export function validateSubAgentFlow(subAgentFlow: SubAgentFlow): ValidationError[] {
+  const errors: ValidationError[] = [];
+
+  // Required fields
+  if (!subAgentFlow.id) {
+    errors.push({
+      code: 'SUBAGENTFLOW_MISSING_ID',
+      message: 'SubAgentFlow must have an id',
+      field: 'id',
+    });
+  }
+
+  if (!subAgentFlow.name) {
+    errors.push({
+      code: 'SUBAGENTFLOW_MISSING_NAME',
+      message: 'SubAgentFlow must have a name',
+      field: 'name',
+    });
+  }
+
+  if (!Array.isArray(subAgentFlow.nodes)) {
+    errors.push({
+      code: 'SUBAGENTFLOW_MISSING_NODES',
+      message: 'SubAgentFlow must have a nodes array',
+      field: 'nodes',
+    });
+    return errors;
+  }
+
+  // Start/End node validation
+  const startNodes = subAgentFlow.nodes.filter((n) => n.type === NodeType.Start);
+  const endNodes = subAgentFlow.nodes.filter((n) => n.type === NodeType.End);
+
+  if (startNodes.length === 0) {
+    errors.push({
+      code: 'SUBAGENTFLOW_INVALID_START',
+      message: `SubAgentFlow "${subAgentFlow.name}" must have a Start node`,
+    });
+  }
+
+  if (startNodes.length > 1) {
+    errors.push({
+      code: 'SUBAGENTFLOW_MULTIPLE_START',
+      message: `SubAgentFlow "${subAgentFlow.name}" must have exactly one Start node`,
+    });
+  }
+
+  if (endNodes.length === 0) {
+    errors.push({
+      code: 'SUBAGENTFLOW_MISSING_END',
+      message: `SubAgentFlow "${subAgentFlow.name}" must have at least one End node`,
+    });
+  }
+
+  // MVP constraint: No SubAgent nodes in SubAgentFlows
+  const subAgentNodes = subAgentFlow.nodes.filter((n) => n.type === NodeType.SubAgent);
+  if (subAgentNodes.length > 0) {
+    errors.push({
+      code: 'SUBAGENTFLOW_CONTAINS_SUBAGENT',
+      message: `SubAgentFlow "${subAgentFlow.name}" cannot contain SubAgent nodes (MVP constraint)`,
+    });
+  }
+
+  // MVP constraint: No nested SubAgentFlow nodes
+  const nestedRefs = subAgentFlow.nodes.filter((n) => n.type === NodeType.SubAgentFlow);
+  if (nestedRefs.length > 0) {
+    errors.push({
+      code: 'SUBAGENTFLOW_NESTED_REF',
+      message: `SubAgentFlow "${subAgentFlow.name}" cannot contain SubAgentFlow nodes (no nesting allowed in MVP)`,
+    });
   }
 
   return errors;

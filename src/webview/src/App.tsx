@@ -20,6 +20,7 @@ import { RefinementChatPanel } from './components/dialogs/RefinementChatPanel';
 import { SlackConnectionRequiredDialog } from './components/dialogs/SlackConnectionRequiredDialog';
 import { SlackManualTokenDialog } from './components/dialogs/SlackManualTokenDialog';
 import { SlackShareDialog } from './components/dialogs/SlackShareDialog';
+import { SubAgentFlowDialog } from './components/dialogs/SubAgentFlowDialog';
 import { TermsOfUseDialog } from './components/dialogs/TermsOfUseDialog';
 import { ErrorNotification } from './components/ErrorNotification';
 import { NodePalette } from './components/NodePalette';
@@ -46,6 +47,8 @@ const App: React.FC = () => {
     setActiveWorkflow,
     isPropertyPanelOpen,
     selectedNodeId,
+    activeSubAgentFlowId,
+    setActiveSubAgentFlowId,
   } = useWorkflowStore();
   const { isOpen: isRefinementPanelOpen, isProcessing } = useRefinementStore();
   const [error, setError] = useState<ErrorPayload | null>(null);
@@ -201,9 +204,9 @@ const App: React.FC = () => {
         }}
       >
         {/* Left Panel: Node Palette with simple overlay (Phase 3.10 - modified) */}
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column' }}>
           <NodePalette />
-          {/* Simple overlay for Node Palette (no message) */}
+          {/* Simple overlay for Left Panel (no message) */}
           <SimpleOverlay isVisible={isProcessing} />
         </div>
 
@@ -268,6 +271,12 @@ const App: React.FC = () => {
       <SlackManualTokenDialog
         isOpen={isSlackManualTokenDialogOpen}
         onClose={() => setIsSlackManualTokenDialogOpen(false)}
+      />
+
+      {/* Sub-Agent Flow Edit Dialog */}
+      <SubAgentFlowDialog
+        isOpen={activeSubAgentFlowId !== null}
+        onClose={() => setActiveSubAgentFlowId(null)}
       />
 
       {/* Import Workflow Loading Overlay */}

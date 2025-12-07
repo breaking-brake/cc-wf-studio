@@ -75,7 +75,37 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'node.skill.title': 'Skill',
   'node.skill.description': 'Claude Code Skillを実行',
 
+  // SubAgentFlow Node (Feature: 089-subworkflow)
+  'node.subAgentFlow.title': 'Sub-Agent Flow',
+  'node.subAgentFlow.description': 'Sub-Agentを詳細に制御して実行',
+  'node.subAgentFlow.linked': 'リンク済み',
+  'node.subAgentFlow.notLinked': '未リンク',
+  'node.subAgentFlow.untitled': '無題のサブエージェントフロー',
+  'node.subAgentFlow.subAgentFlowNotFound': 'サブエージェントフローが見つかりません',
+  'node.subAgentFlow.selectSubAgentFlow': '実行するサブエージェントフローを選択',
+
+  // SubAgentFlow Panel (Feature: 089-subworkflow)
+  'subAgentFlow.panel.title': 'サブエージェントフロー',
+  'subAgentFlow.create': '新規',
+  'subAgentFlow.delete': '削除',
+  'subAgentFlow.mainWorkflow': 'メインワークフロー',
+  'subAgentFlow.empty': 'サブエージェントフローがありません',
+  'subAgentFlow.default.name': 'subagentflow',
+  'subAgentFlow.editing': '編集中:',
+  'subAgentFlow.edit': 'Sub-Agent Flowを編集',
+  'subAgentFlow.clickToEdit': 'クリックして名前を編集',
+  'subAgentFlow.namePlaceholder': '例: data-processing',
+  'subAgentFlow.dialog.close': '閉じてメインワークフローに戻る',
+  'subAgentFlow.dialog.submit': '確定してワークフローに追加',
+  'subAgentFlow.dialog.cancel': 'キャンセルして変更を破棄',
+
+  // SubAgentFlow validation errors
+  'error.subAgentFlow.nameRequired': '名前は必須です',
+  'error.subAgentFlow.nameTooLong': '名前は50文字以内で入力してください',
+  'error.subAgentFlow.invalidName': '名前は英数字、ハイフン、アンダースコアのみ使用できます',
+
   // Quick start instructions
+  'palette.nestedNotAllowed': 'サブエージェントフロー内では使用できません（ネスト非対応）',
   'palette.instruction.addNode': 'ノードをクリックしてキャンバスに追加',
   'palette.instruction.dragNode': 'ノードをドラッグして移動',
   'palette.instruction.connectNodes': '出力ハンドルから入力ハンドルへドラッグして接続',
@@ -197,12 +227,26 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     'ノードパレットには、ワークフローで使用できる様々なノードが用意されています。\n\nPrompt、Sub-Agent、AskUserQuestion、If/Else、Switchなどのノードをクリックしてキャンバスに追加できます。',
   'tour.addPrompt':
     'この「Prompt」ボタンから、Promptノードをキャンバスに追加できます。\n\nPromptノードは変数を使用できるテンプレートで、ワークフローの基本的な構成要素です。',
+  'tour.addSubAgent':
+    '「Sub-Agent」ノードは、特定のタスクを実行する専門のエージェントです。\n\nプロンプトとツール制限を設定して、単一の責務を持つエージェントを作成できます。',
+  'tour.addSubAgentFlow':
+    '「Sub-Agent Flow」は、複雑なSub-Agentの処理フローを視覚的に定義できます。\n\nMCPやSkillを並列実行したい場合は、各処理をSub-Agent Flowに内包し、それらのSub-Agent Flowを並列実行するフローを作成することで実現できます。',
+  'tour.addSkill':
+    '「Skill」ノードは、Claude Codeのスキルを呼び出します。\n\n個人用（~/.claude/skills/）またはプロジェクト用（.claude/skills/）のスキルを選択して実行できます。',
+  'tour.addMcp':
+    '「MCP Tool」ノードは、MCPサーバーのツールを実行します。\n\n外部サービスとの連携やカスタムツールの呼び出しに使用できます。',
+  'tour.addAskUserQuestion':
+    '「AskUserQuestion」ノードは、ユーザーの選択に応じてワークフローを分岐させるために使用します。\n\nこのボタンからキャンバスに追加できます。',
+  'tour.addEnd':
+    '「End」ノードは、ワークフローの終了点を示します。\n\n複数のEndノードを配置して、異なる結果に応じた終了点を設定できます。',
+  'tour.addIfElse':
+    '「If/Else」ノードは、条件に基づいてワークフローを2方向に分岐させます。\n\n真（True）または偽（False）の条件を設定して、処理の流れを制御できます。',
+  'tour.addSwitch':
+    '「Switch」ノードは、複数の条件に基づいてワークフローを多方向に分岐させます。\n\n複数のケースとデフォルトケースを設定して、複雑な分岐ロジックを実現できます。',
   'tour.canvas':
     'ここがキャンバスです。ノードをドラッグして配置を調整し、ハンドルをドラッグしてノード間を接続できます。\n\n既にStartノードとEndノードが配置されています。',
   'tour.propertyPanel':
     'プロパティパネルでは、選択したノードの詳細設定を行います。\n\nノード名、プロンプト、モデル選択などを編集できます。',
-  'tour.addAskUserQuestion':
-    '「AskUserQuestion」ノードは、ユーザーの選択に応じてワークフローを分岐させるために使用します。\n\nこのボタンからキャンバスに追加できます。',
   'tour.connectNodes':
     'ノードを接続してワークフローを作りましょう。\n\nノードの右側の出力ハンドル(⚪)を別のノードの左側の入力ハンドルにドラッグして接続します。',
   'tour.workflowName':

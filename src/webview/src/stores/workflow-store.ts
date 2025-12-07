@@ -8,7 +8,7 @@
 import type { McpNodeData } from '@shared/types/mcp-node';
 import { normalizeMcpNodeData } from '@shared/types/mcp-node';
 import type { Workflow } from '@shared/types/messages';
-import type { WorkflowNode } from '@shared/types/workflow-definition';
+import type { SubAgentFlow, WorkflowNode } from '@shared/types/workflow-definition';
 import { NodeType } from '@shared/types/workflow-definition';
 import type { Edge, Node, OnConnect, OnEdgesChange, OnNodesChange } from 'reactflow';
 import { addEdge, applyEdgeChanges, applyNodeChanges } from 'reactflow';
@@ -25,6 +25,17 @@ import { create } from 'zustand';
  */
 export type InteractionMode = 'pan' | 'selection';
 
+/**
+ * Snapshot of main workflow state for restoration after Sub-Agent Flow editing
+ */
+interface MainWorkflowSnapshot {
+  nodes: Node[];
+  edges: Edge[];
+  selectedNodeId: string | null;
+  /** True if this is a new Sub-Agent Flow creation (not editing existing) */
+  isNewSubAgentFlow: boolean;
+}
+
 interface WorkflowStore {
   // State
   nodes: Node[];
@@ -35,6 +46,11 @@ interface WorkflowStore {
   interactionMode: InteractionMode;
   workflowName: string;
   isPropertyPanelOpen: boolean;
+
+  // Sub-Agent Flow State (Feature: 089-subworkflow)
+  subAgentFlows: SubAgentFlow[];
+  activeSubAgentFlowId: string | null;
+  mainWorkflowSnapshot: MainWorkflowSnapshot | null;
 
   // React Flow Change Handlers
   onNodesChange: OnNodesChange;
@@ -62,6 +78,14 @@ interface WorkflowStore {
   addGeneratedWorkflow: (workflow: Workflow) => void;
   updateWorkflow: (workflow: Workflow) => void;
   setActiveWorkflow: (workflow: Workflow) => void; // Phase 3.12
+
+  // Sub-Agent Flow Actions (Feature: 089-subworkflow)
+  addSubAgentFlow: (subAgentFlow: SubAgentFlow) => void;
+  removeSubAgentFlow: (id: string) => void;
+  updateSubAgentFlow: (id: string, updates: Partial<SubAgentFlow>) => void;
+  setActiveSubAgentFlowId: (id: string | null) => void;
+  setSubAgentFlows: (subAgentFlows: SubAgentFlow[]) => void;
+  cancelSubAgentFlowEditing: () => void;
 }
 
 // ============================================================================
@@ -199,6 +223,11 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   interactionMode: 'pan', // Default: pan mode
   workflowName: 'my-workflow', // Default workflow name
   isPropertyPanelOpen: true, // Property panel is open by default
+
+  // Sub-Agent Flow Initial State (Feature: 089-subworkflow)
+  subAgentFlows: [],
+  activeSubAgentFlowId: null,
+  mainWorkflowSnapshot: null,
 
   // React Flow Change Handlers (integrates with React Flow's onChange events)
   onNodesChange: (changes) => {
@@ -436,10 +465,299 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     }));
 
     // Set active workflow and update canvas
+    // Also load subAgentFlows from the workflow if present
     set({
       nodes: newNodes,
       edges: newEdges,
       activeWorkflow: workflow,
+      subAgentFlows: workflow.subAgentFlows || [],
     });
+  },
+
+  // ============================================================================
+  // Sub-Agent Flow Actions (Feature: 089-subworkflow)
+  // ============================================================================
+
+  addSubAgentFlow: (subAgentFlow: SubAgentFlow) => {
+    set({
+      subAgentFlows: [...get().subAgentFlows, subAgentFlow],
+    });
+  },
+
+  removeSubAgentFlow: (id: string) => {
+    // If currently editing this sub-agent flow, return to main workflow first
+    if (get().activeSubAgentFlowId === id) {
+      const snapshot = get().mainWorkflowSnapshot;
+      if (snapshot) {
+        set({
+          nodes: snapshot.nodes,
+          edges: snapshot.edges,
+          selectedNodeId: snapshot.selectedNodeId,
+          activeSubAgentFlowId: null,
+          mainWorkflowSnapshot: null,
+        });
+      }
+    }
+
+    set({
+      subAgentFlows: get().subAgentFlows.filter((sf) => sf.id !== id),
+    });
+  },
+
+  updateSubAgentFlow: (id: string, updates: Partial<SubAgentFlow>) => {
+    set({
+      subAgentFlows: get().subAgentFlows.map((sf) => (sf.id === id ? { ...sf, ...updates } : sf)),
+    });
+  },
+
+  setActiveSubAgentFlowId: (id: string | null) => {
+    const currentActiveId = get().activeSubAgentFlowId;
+
+    // If switching from main to sub-agent flow
+    if (currentActiveId === null && id !== null) {
+      // Determine if this is a new Sub-Agent Flow (no existing reference node)
+      const isNewSubAgentFlow = !get().nodes.some(
+        (n) => n.type === 'subAgentFlow' && n.data?.subAgentFlowId === id
+      );
+
+      // Save current main workflow state
+      const snapshot: MainWorkflowSnapshot = {
+        nodes: get().nodes,
+        edges: get().edges,
+        selectedNodeId: get().selectedNodeId,
+        isNewSubAgentFlow,
+      };
+
+      // Find the sub-agent flow to edit
+      const subAgentFlow = get().subAgentFlows.find((sf) => sf.id === id);
+      if (!subAgentFlow) {
+        console.warn(`SubAgentFlow with id ${id} not found`);
+        return;
+      }
+
+      // Convert SubAgentFlow nodes to ReactFlow nodes
+      const subNodes: Node[] = subAgentFlow.nodes.map((node) => ({
+        id: node.id,
+        type: node.type,
+        position: { x: node.position.x, y: node.position.y },
+        data: node.data,
+      }));
+
+      // Convert SubAgentFlow connections to ReactFlow edges
+      const subEdges: Edge[] = subAgentFlow.connections.map((conn) => ({
+        id: conn.id,
+        source: conn.from,
+        target: conn.to,
+        sourceHandle: conn.fromPort,
+        targetHandle: conn.toPort,
+      }));
+
+      set({
+        mainWorkflowSnapshot: snapshot,
+        nodes: subNodes,
+        edges: subEdges,
+        selectedNodeId: null,
+        activeSubAgentFlowId: id,
+      });
+    }
+    // If switching from sub-agent flow back to main
+    else if (currentActiveId !== null && id === null) {
+      // Save current sub-agent flow state before switching
+      const currentSubAgentFlow = get().subAgentFlows.find((sf) => sf.id === currentActiveId);
+      if (currentSubAgentFlow) {
+        // Convert current canvas to SubAgentFlow format
+        const updatedNodes: WorkflowNode[] = get().nodes.map((node) => ({
+          id: node.id,
+          name: node.data?.label || node.id,
+          type: node.type as NodeType,
+          position: node.position,
+          data: node.data,
+        })) as WorkflowNode[];
+
+        const updatedConnections = get().edges.map((edge) => ({
+          id: edge.id,
+          from: edge.source,
+          to: edge.target,
+          fromPort: edge.sourceHandle || 'default',
+          toPort: edge.targetHandle || 'default',
+        }));
+
+        // Update the sub-agent flow with current canvas state
+        set({
+          subAgentFlows: get().subAgentFlows.map((sf) =>
+            sf.id === currentActiveId
+              ? { ...sf, nodes: updatedNodes, connections: updatedConnections }
+              : sf
+          ),
+        });
+      }
+
+      // Restore main workflow state
+      const snapshot = get().mainWorkflowSnapshot;
+      if (snapshot) {
+        // Check if SubAgentFlowNode already exists for this sub-agent flow
+        const hasRef = snapshot.nodes.some(
+          (n) => n.type === 'subAgentFlow' && n.data?.subAgentFlowId === currentActiveId
+        );
+
+        // Get the updated sub-agent flow (with latest name)
+        const subAgentFlow = get().subAgentFlows.find((sf) => sf.id === currentActiveId);
+
+        // Auto-add SubAgentFlowRefNode if it doesn't exist
+        if (!hasRef && subAgentFlow) {
+          // Calculate non-overlapping position
+          const calculatePosition = (
+            existingNodes: Node[],
+            defaultX: number,
+            defaultY: number
+          ): { x: number; y: number } => {
+            const OVERLAP_THRESHOLD = 50;
+            const OFFSET_X = 100;
+            const OFFSET_Y = 80;
+            const MAX_ATTEMPTS = 20;
+
+            let newX = defaultX;
+            let newY = defaultY;
+
+            for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+              const hasOverlap = existingNodes.some((node) => {
+                const dx = Math.abs(node.position.x - newX);
+                const dy = Math.abs(node.position.y - newY);
+                return dx < OVERLAP_THRESHOLD && dy < OVERLAP_THRESHOLD;
+              });
+
+              if (!hasOverlap) {
+                return { x: newX, y: newY };
+              }
+
+              newX += OFFSET_X;
+              newY += OFFSET_Y;
+            }
+
+            return { x: newX, y: newY };
+          };
+
+          const position = calculatePosition(snapshot.nodes, 350, 200);
+          const newRefNode: Node = {
+            id: `subagentflow-${Date.now()}`,
+            type: 'subAgentFlow',
+            position,
+            data: {
+              subAgentFlowId: currentActiveId,
+              label: subAgentFlow.name,
+              description: subAgentFlow.description || '',
+              outputPorts: 1,
+            },
+          };
+
+          set({
+            nodes: [...snapshot.nodes, newRefNode],
+            edges: snapshot.edges,
+            selectedNodeId: newRefNode.id,
+            activeSubAgentFlowId: null,
+            mainWorkflowSnapshot: null,
+          });
+        } else {
+          // No need to add ref node, just restore
+          set({
+            nodes: snapshot.nodes,
+            edges: snapshot.edges,
+            selectedNodeId: snapshot.selectedNodeId,
+            activeSubAgentFlowId: null,
+            mainWorkflowSnapshot: null,
+          });
+        }
+      }
+    }
+    // If switching between sub-agent flows
+    else if (currentActiveId !== null && id !== null && currentActiveId !== id) {
+      // First save current sub-agent flow
+      const currentSubAgentFlow = get().subAgentFlows.find((sf) => sf.id === currentActiveId);
+      if (currentSubAgentFlow) {
+        const updatedNodes: WorkflowNode[] = get().nodes.map((node) => ({
+          id: node.id,
+          name: node.data?.label || node.id,
+          type: node.type as NodeType,
+          position: node.position,
+          data: node.data,
+        })) as WorkflowNode[];
+
+        const updatedConnections = get().edges.map((edge) => ({
+          id: edge.id,
+          from: edge.source,
+          to: edge.target,
+          fromPort: edge.sourceHandle || 'default',
+          toPort: edge.targetHandle || 'default',
+        }));
+
+        set({
+          subAgentFlows: get().subAgentFlows.map((sf) =>
+            sf.id === currentActiveId
+              ? { ...sf, nodes: updatedNodes, connections: updatedConnections }
+              : sf
+          ),
+        });
+      }
+
+      // Then load new sub-agent flow
+      const newSubAgentFlow = get().subAgentFlows.find((sf) => sf.id === id);
+      if (!newSubAgentFlow) {
+        console.warn(`SubAgentFlow with id ${id} not found`);
+        return;
+      }
+
+      const subNodes: Node[] = newSubAgentFlow.nodes.map((node) => ({
+        id: node.id,
+        type: node.type,
+        position: { x: node.position.x, y: node.position.y },
+        data: node.data,
+      }));
+
+      const subEdges: Edge[] = newSubAgentFlow.connections.map((conn) => ({
+        id: conn.id,
+        source: conn.from,
+        target: conn.to,
+        sourceHandle: conn.fromPort,
+        targetHandle: conn.toPort,
+      }));
+
+      set({
+        nodes: subNodes,
+        edges: subEdges,
+        selectedNodeId: null,
+        activeSubAgentFlowId: id,
+      });
+    }
+  },
+
+  setSubAgentFlows: (subAgentFlows: SubAgentFlow[]) => {
+    set({ subAgentFlows });
+  },
+
+  cancelSubAgentFlowEditing: () => {
+    const currentActiveId = get().activeSubAgentFlowId;
+    if (currentActiveId === null) {
+      return; // Not in sub-agent flow editing mode
+    }
+
+    // Restore main workflow from snapshot (without saving sub-agent flow changes)
+    const snapshot = get().mainWorkflowSnapshot;
+    if (snapshot) {
+      set({
+        nodes: snapshot.nodes,
+        edges: snapshot.edges,
+        selectedNodeId: snapshot.selectedNodeId,
+        activeSubAgentFlowId: null,
+        mainWorkflowSnapshot: null,
+      });
+
+      // Only remove the sub-agent flow if it was newly created (not editing existing)
+      // For existing sub-agent flows, cancel just discards changes
+      if (snapshot.isNewSubAgentFlow) {
+        set({
+          subAgentFlows: get().subAgentFlows.filter((sf) => sf.id !== currentActiveId),
+        });
+      }
+    }
   },
 }));

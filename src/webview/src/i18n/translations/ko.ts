@@ -76,7 +76,37 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'node.skill.title': 'Skill',
   'node.skill.description': 'Claude Code Skill 실행',
 
+  // SubAgentFlow Node (Feature: 089-subworkflow)
+  'node.subAgentFlow.title': 'Sub-Agent Flow',
+  'node.subAgentFlow.description': 'Sub-Agent를 세부적으로 제어하여 실행',
+  'node.subAgentFlow.linked': '연결됨',
+  'node.subAgentFlow.notLinked': '연결 안 됨',
+  'node.subAgentFlow.untitled': '제목 없는 서브 에이전트 플로우',
+  'node.subAgentFlow.subAgentFlowNotFound': '서브 에이전트 플로우를 찾을 수 없음',
+  'node.subAgentFlow.selectSubAgentFlow': '실행할 서브 에이전트 플로우 선택',
+
+  // SubAgentFlow Panel (Feature: 089-subworkflow)
+  'subAgentFlow.panel.title': '서브 에이전트 플로우',
+  'subAgentFlow.create': '새로 만들기',
+  'subAgentFlow.delete': '삭제',
+  'subAgentFlow.mainWorkflow': '메인 워크플로우',
+  'subAgentFlow.empty': '서브 에이전트 플로우가 없습니다',
+  'subAgentFlow.default.name': 'subagentflow',
+  'subAgentFlow.editing': '편집 중:',
+  'subAgentFlow.edit': 'Sub-Agent Flow 편집',
+  'subAgentFlow.clickToEdit': '클릭하여 이름 편집',
+  'subAgentFlow.namePlaceholder': '예: data-processing',
+  'subAgentFlow.dialog.close': '닫고 메인 워크플로우로 돌아가기',
+  'subAgentFlow.dialog.submit': '확정하고 워크플로우에 추가',
+  'subAgentFlow.dialog.cancel': '취소하고 변경 사항 삭제',
+
+  // SubAgentFlow validation errors
+  'error.subAgentFlow.nameRequired': '이름은 필수입니다',
+  'error.subAgentFlow.nameTooLong': '이름은 50자 이하여야 합니다',
+  'error.subAgentFlow.invalidName': '이름은 영문자, 숫자, 하이픈, 밑줄만 사용할 수 있습니다',
+
   // Quick start instructions
+  'palette.nestedNotAllowed': '서브 에이전트 플로우에서 사용할 수 없습니다 (중첩 미지원)',
   'palette.instruction.addNode': '노드를 클릭하여 캔버스에 추가',
   'palette.instruction.dragNode': '노드를 드래그하여 재배치',
   'palette.instruction.connectNodes': '출력에서 입력 핸들로 드래그하여 연결',
@@ -199,12 +229,26 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     '노드 팔레트에는 워크플로우에서 사용할 수 있는 다양한 노드가 있습니다.\n\nPrompt, Sub-Agent, AskUserQuestion, If/Else, Switch 등의 노드를 클릭하여 캔버스에 추가할 수 있습니다.',
   'tour.addPrompt':
     '이 "Prompt" 버튼으로 캔버스에 Prompt 노드를 추가할 수 있습니다.\n\nPrompt 노드는 변수를 지원하는 템플릿으로 워크플로우의 기본 구성 요소입니다.',
+  'tour.addSubAgent':
+    '"Sub-Agent" 노드는 특정 작업을 실행하는 전문 에이전트입니다.\n\n프롬프트와 도구 제한을 설정하여 단일 책임을 가진 에이전트를 만들 수 있습니다.',
+  'tour.addSubAgentFlow':
+    '"Sub-Agent Flow"는 복잡한 Sub-Agent 처리 흐름을 시각적으로 정의할 수 있습니다.\n\nMCP나 Skill을 병렬로 실행하려면 각 처리를 Sub-Agent Flow에 포함하고 해당 Sub-Agent Flow들을 병렬로 실행하는 흐름을 만들면 됩니다.',
+  'tour.addSkill':
+    '"Skill" 노드는 Claude Code 스킬을 호출합니다.\n\n개인용(~/.claude/skills/) 또는 프로젝트용(.claude/skills/) 스킬을 선택하여 실행할 수 있습니다.',
+  'tour.addMcp':
+    '"MCP Tool" 노드는 MCP 서버 도구를 실행합니다.\n\n외부 서비스 연동이나 커스텀 도구 호출에 사용할 수 있습니다.',
+  'tour.addAskUserQuestion':
+    '"AskUserQuestion" 노드는 사용자 선택에 따라 워크플로우를 분기하는 데 사용됩니다.\n\n이 버튼으로 캔버스에 추가할 수 있습니다.',
+  'tour.addEnd':
+    '"End" 노드는 워크플로우의 종료 지점을 나타냅니다.\n\n여러 End 노드를 배치하여 결과에 따른 다른 종료 지점을 설정할 수 있습니다.',
+  'tour.addIfElse':
+    '"If/Else" 노드는 조건에 따라 워크플로우를 두 방향으로 분기합니다.\n\n참(True) 또는 거짓(False) 조건을 설정하여 처리 흐름을 제어할 수 있습니다.',
+  'tour.addSwitch':
+    '"Switch" 노드는 여러 조건에 따라 워크플로우를 다방향으로 분기합니다.\n\n여러 케이스와 기본 케이스를 설정하여 복잡한 분기 로직을 구현할 수 있습니다.',
   'tour.canvas':
     '여기가 캔버스입니다. 노드를 드래그하여 위치를 조정하고 핸들을 드래그하여 노드를 연결할 수 있습니다.\n\n시작 및 종료 노드가 이미 배치되어 있습니다.',
   'tour.propertyPanel':
     '속성 패널에서 선택한 노드를 구성할 수 있습니다.\n\n노드 이름, 프롬프트, 모델 선택 등을 편집할 수 있습니다.',
-  'tour.addAskUserQuestion':
-    '"AskUserQuestion" 노드는 사용자 선택에 따라 워크플로우를 분기하는 데 사용됩니다.\n\n이 버튼으로 캔버스에 추가할 수 있습니다.',
   'tour.connectNodes':
     '노드를 연결하여 워크플로우를 만드세요.\n\n노드 오른쪽의 출력 핸들(⚪)에서 다른 노드 왼쪽의 입력 핸들로 드래그하세요.',
   'tour.workflowName':
