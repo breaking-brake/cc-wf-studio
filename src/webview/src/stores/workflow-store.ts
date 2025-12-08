@@ -658,9 +658,27 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
             mainWorkflowSnapshot: null,
           });
         } else {
-          // No need to add ref node, just restore
+          // Update existing SubAgentFlowNode with latest name and description
+          const updatedNodes = snapshot.nodes.map((node) => {
+            if (
+              node.type === 'subAgentFlow' &&
+              node.data?.subAgentFlowId === currentActiveId &&
+              subAgentFlow
+            ) {
+              return {
+                ...node,
+                data: {
+                  ...node.data,
+                  label: subAgentFlow.name,
+                  description: subAgentFlow.description || '',
+                },
+              };
+            }
+            return node;
+          });
+
           set({
-            nodes: snapshot.nodes,
+            nodes: updatedNodes,
             edges: snapshot.edges,
             selectedNodeId: snapshot.selectedNodeId,
             activeSubAgentFlowId: null,
@@ -752,7 +770,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       });
 
       // Only remove the sub-agent flow if it was newly created (not editing existing)
-      // For existing sub-agent flows, cancel just discards changes
+      // For existing sub-agent flows, cancel just discards canvas changes (name is managed locally in dialog)
       if (snapshot.isNewSubAgentFlow) {
         set({
           subAgentFlows: get().subAgentFlows.filter((sf) => sf.id !== currentActiveId),

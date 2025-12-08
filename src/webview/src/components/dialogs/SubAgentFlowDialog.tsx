@@ -108,6 +108,20 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
   // Sub-Agent Flow name validation state
   const [nameError, setNameError] = useState<string | null>(null);
 
+  // Local name state (not saved to store until submit)
+  const [localName, setLocalName] = useState<string>('');
+
+  // Initialize local name when dialog opens (activeSubAgentFlowId changes)
+  useEffect(() => {
+    if (activeSubAgentFlowId) {
+      const flow = subAgentFlows.find((sf) => sf.id === activeSubAgentFlowId);
+      if (flow) {
+        setLocalName(flow.name);
+        setNameError(null);
+      }
+    }
+  }, [activeSubAgentFlowId, subAgentFlows]);
+
   // AI name generation state
   const [isGeneratingName, setIsGeneratingName] = useState(false);
   const generationNameRequestIdRef = useRef<string | null>(null);
@@ -115,9 +129,10 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
   // Sub-Agent Flow name pattern validation
   const SUBAGENTFLOW_NAME_PATTERN = /^[a-zA-Z0-9_-]+$/;
 
-  // Handle name change with validation and immediate save
+  // Handle name change with validation (local state only, saved on submit)
   const handleNameChange = useCallback(
     (value: string) => {
+      setLocalName(value);
       if (value.length === 0) {
         setNameError(t('error.subAgentFlow.nameRequired'));
       } else if (value.length > 50) {
@@ -126,13 +141,9 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
         setNameError(t('error.subAgentFlow.invalidName'));
       } else {
         setNameError(null);
-        // Save immediately when valid
-        if (activeSubAgentFlowId) {
-          updateSubAgentFlow(activeSubAgentFlowId, { name: value });
-        }
       }
     },
-    [t, activeSubAgentFlowId, updateSubAgentFlow]
+    [t]
   );
 
   // Handle AI name generation for Sub-Agent Flow
@@ -180,8 +191,8 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
         const validatedName = generatedName.replace(/[^a-zA-Z0-9_-]/g, '-');
         const truncatedName = validatedName.slice(0, 50);
 
-        if (activeSubAgentFlowId && truncatedName.length > 0) {
-          updateSubAgentFlow(activeSubAgentFlowId, { name: truncatedName });
+        if (truncatedName.length > 0) {
+          setLocalName(truncatedName);
           setNameError(null);
         }
       }
@@ -196,7 +207,7 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
         generationNameRequestIdRef.current = null;
       }
     }
-  }, [activeSubAgentFlow, nodes, edges, locale, activeSubAgentFlowId, updateSubAgentFlow]);
+  }, [activeSubAgentFlow, nodes, edges, locale]);
 
   // Handle cancel name generation
   const handleCancelNameGeneration = useCallback(() => {
@@ -204,11 +215,15 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
     setIsGeneratingName(false);
   }, []);
 
-  // Handle Submit: Save sub-agent flow and close dialog
+  // Handle Submit: Save sub-agent flow name and close dialog
   const handleSubmit = useCallback(() => {
-    // onClose will save the sub-agent flow via setActiveSubAgentFlowId(null)
+    // Save name to store only on submit (if valid)
+    if (activeSubAgentFlowId && localName && !nameError) {
+      updateSubAgentFlow(activeSubAgentFlowId, { name: localName });
+    }
+    // onClose will save the sub-agent flow canvas via setActiveSubAgentFlowId(null)
     onClose();
-  }, [onClose]);
+  }, [activeSubAgentFlowId, localName, nameError, updateSubAgentFlow, onClose]);
 
   // Handle Cancel: Discard sub-agent flow and close dialog
   const handleCancel = useCallback(() => {
@@ -370,7 +385,7 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
               <div style={{ position: 'relative' }}>
                 <input
                   type="text"
-                  value={activeSubAgentFlow.name}
+                  value={localName}
                   onChange={(e) => handleNameChange(e.target.value)}
                   onKeyDown={(e) => e.stopPropagation()}
                   disabled={isGeneratingName}
