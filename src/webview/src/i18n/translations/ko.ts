@@ -99,6 +99,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'subAgentFlow.dialog.close': '닫고 메인 워크플로우로 돌아가기',
   'subAgentFlow.dialog.submit': '확정하고 워크플로우에 추가',
   'subAgentFlow.dialog.cancel': '취소하고 변경 사항 삭제',
+  'subAgentFlow.generateNameWithAI': 'AI로 이름 생성',
 
   // SubAgentFlow validation errors
   'error.subAgentFlow.nameRequired': '이름은 필수입니다',

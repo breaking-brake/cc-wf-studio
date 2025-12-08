@@ -98,6 +98,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'subAgentFlow.dialog.close': '閉じてメインワークフローに戻る',
   'subAgentFlow.dialog.submit': '確定してワークフローに追加',
   'subAgentFlow.dialog.cancel': 'キャンセルして変更を破棄',
+  'subAgentFlow.generateNameWithAI': 'AIで名前を生成',
 
   // SubAgentFlow validation errors
   'error.subAgentFlow.nameRequired': '名前は必須です',

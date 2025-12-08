@@ -98,6 +98,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'subAgentFlow.dialog.close': 'Close and return to main workflow',
   'subAgentFlow.dialog.submit': 'Submit and add to workflow',
   'subAgentFlow.dialog.cancel': 'Cancel and discard changes',
+  'subAgentFlow.generateNameWithAI': 'Generate name with AI',
 
   // SubAgentFlow validation errors
   'error.subAgentFlow.nameRequired': 'Name is required',

@@ -97,6 +97,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'subAgentFlow.dialog.close': '關閉並返回主工作流程',
   'subAgentFlow.dialog.submit': '確認並新增到工作流程',
   'subAgentFlow.dialog.cancel': '取消並捨棄變更',
+  'subAgentFlow.generateNameWithAI': '使用 AI 生成名稱',
 
   // SubAgentFlow validation errors
   'error.subAgentFlow.nameRequired': '名稱為必填項',

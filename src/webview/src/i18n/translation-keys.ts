@@ -95,6 +95,7 @@ export interface WebviewTranslationKeys {
   'subAgentFlow.dialog.close': string;
   'subAgentFlow.dialog.submit': string;
   'subAgentFlow.dialog.cancel': string;
+  'subAgentFlow.generateNameWithAI': string;
 
   // SubAgentFlow validation errors
   'error.subAgentFlow.nameRequired': string;
