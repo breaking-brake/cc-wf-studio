@@ -8,6 +8,7 @@
         "releaseRules": [
           { "type": "feat", "release": "minor" },
           { "type": "fix", "release": "patch" },
+          { "type": "improvement", "release": "patch" },
           { "type": "perf", "release": "patch" },
           { "type": "revert", "release": "patch" },
           { "type": "docs", "release": false },
@@ -29,6 +30,7 @@
           "types": [
             { "type": "feat", "section": "Features" },
             { "type": "fix", "section": "Bug Fixes" },
+            { "type": "improvement", "section": "Improvements" },
             { "type": "perf", "section": "Performance Improvements" },
             { "type": "revert", "section": "Reverts" },
             { "type": "docs", "section": "Documentation", "hidden": false },

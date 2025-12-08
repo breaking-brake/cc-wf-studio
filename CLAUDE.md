@@ -59,6 +59,7 @@ fix: add missing MCP node definition to workflow schema
 #### Types
 - `feat:` - New feature (minor version bump)
 - `fix:` - Bug fix (patch version bump)
+- `improvement:` - Minor enhancement to existing feature (patch version bump)
 - `docs:` - Documentation only
 - `refactor:` - Code refactoring
 - `chore:` - Build/tooling changes
