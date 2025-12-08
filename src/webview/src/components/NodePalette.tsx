@@ -12,7 +12,6 @@ import { useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
-import { StyledTooltip } from './common/StyledTooltip';
 import { McpNodeDialog } from './dialogs/McpNodeDialog';
 import { SkillBrowserDialog } from './dialogs/SkillBrowserDialog';
 
@@ -319,47 +318,8 @@ export const NodePalette: React.FC = () => {
         )}
       </button>
 
-      {/* Sub-Agent Node Button */}
-      {isEditingSubAgentFlow ? (
-        <StyledTooltip content={t('palette.nestedNotAllowed')} side="right">
-          <button
-            type="button"
-            onClick={handleAddSubAgent}
-            disabled={isEditingSubAgentFlow}
-            data-tour="add-subagent-button"
-            style={{
-              width: '100%',
-              padding: isCompact ? '8px' : '12px',
-              marginBottom: isCompact ? '8px' : '12px',
-              backgroundColor: 'var(--vscode-button-background)',
-              color: 'var(--vscode-button-foreground)',
-              border: '1px solid var(--vscode-button-border)',
-              borderRadius: '4px',
-              cursor: 'not-allowed',
-              fontSize: isCompact ? '11px' : '13px',
-              fontWeight: 500,
-              textAlign: 'left',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '4px',
-              opacity: 0.5,
-            }}
-          >
-            <div style={{ fontWeight: 600 }}>{t('node.subAgent.title')}</div>
-            {!isCompact && (
-              <div
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--vscode-button-foreground)',
-                  opacity: 0.8,
-                }}
-              >
-                {t('node.subAgent.description')}
-              </div>
-            )}
-          </button>
-        </StyledTooltip>
-      ) : (
+      {/* Sub-Agent Node Button - hidden in SubAgentFlow edit mode */}
+      {!isEditingSubAgentFlow && (
         <button
           type="button"
           onClick={handleAddSubAgent}
@@ -402,47 +362,8 @@ export const NodePalette: React.FC = () => {
         </button>
       )}
 
-      {/* Sub-Agent Flow Ref Node Button (Feature: 089-subworkflow) */}
-      {isEditingSubAgentFlow ? (
-        <StyledTooltip content={t('palette.nestedNotAllowed')} side="right">
-          <button
-            type="button"
-            onClick={handleAddSubAgentFlowRef}
-            disabled={isEditingSubAgentFlow}
-            data-tour="add-subagentflow-button"
-            style={{
-              width: '100%',
-              padding: isCompact ? '8px' : '12px',
-              marginBottom: isCompact ? '8px' : '12px',
-              backgroundColor: 'var(--vscode-button-background)',
-              color: 'var(--vscode-button-foreground)',
-              border: '1px solid var(--vscode-button-border)',
-              borderRadius: '4px',
-              cursor: 'not-allowed',
-              fontSize: isCompact ? '11px' : '13px',
-              fontWeight: 500,
-              textAlign: 'left',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '4px',
-              opacity: 0.5,
-            }}
-          >
-            <div style={{ fontWeight: 600 }}>{t('node.subAgentFlow.title')} β</div>
-            {!isCompact && (
-              <div
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--vscode-button-foreground)',
-                  opacity: 0.8,
-                }}
-              >
-                {t('node.subAgentFlow.description')}
-              </div>
-            )}
-          </button>
-        </StyledTooltip>
-      ) : (
+      {/* Sub-Agent Flow Ref Node Button (Feature: 089-subworkflow) - hidden in SubAgentFlow edit mode */}
+      {!isEditingSubAgentFlow && (
         <button
           type="button"
           onClick={handleAddSubAgentFlowRef}
@@ -668,47 +589,8 @@ export const NodePalette: React.FC = () => {
         )}
       </button>
 
-      {/* AskUserQuestion Node Button */}
-      {isEditingSubAgentFlow ? (
-        <StyledTooltip content={t('palette.nestedNotAllowed')} side="right">
-          <button
-            type="button"
-            onClick={handleAddAskUserQuestion}
-            disabled={isEditingSubAgentFlow}
-            data-tour="add-askuserquestion-button"
-            style={{
-              width: '100%',
-              padding: isCompact ? '8px' : '12px',
-              marginBottom: isCompact ? '8px' : '12px',
-              backgroundColor: 'var(--vscode-button-background)',
-              color: 'var(--vscode-button-foreground)',
-              border: '1px solid var(--vscode-button-border)',
-              borderRadius: '4px',
-              cursor: 'not-allowed',
-              fontSize: isCompact ? '11px' : '13px',
-              fontWeight: 500,
-              textAlign: 'left',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '4px',
-              opacity: 0.5,
-            }}
-          >
-            <div style={{ fontWeight: 600 }}>{t('node.askUserQuestion.title')}</div>
-            {!isCompact && (
-              <div
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--vscode-button-foreground)',
-                  opacity: 0.8,
-                }}
-              >
-                {t('node.askUserQuestion.description')}
-              </div>
-            )}
-          </button>
-        </StyledTooltip>
-      ) : (
+      {/* AskUserQuestion Node Button - hidden in SubAgentFlow edit mode */}
+      {!isEditingSubAgentFlow && (
         <button
           type="button"
           onClick={handleAddAskUserQuestion}
@@ -793,65 +675,67 @@ export const NodePalette: React.FC = () => {
         )}
       </button>
 
-      {/* Branch Node Button (Legacy) */}
-      <button
-        type="button"
-        onClick={handleAddBranch}
-        style={{
-          width: '100%',
-          padding: isCompact ? '8px' : '12px',
-          marginBottom: isCompact ? '8px' : '12px',
-          backgroundColor: 'var(--vscode-button-secondaryBackground)',
-          color: 'var(--vscode-button-secondaryForeground)',
-          border: '1px solid var(--vscode-button-border)',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontSize: isCompact ? '11px' : '13px',
-          fontWeight: 500,
-          textAlign: 'left',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '4px',
-          opacity: 0.7,
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.opacity = '1';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.opacity = '0.7';
-        }}
-      >
-        <div style={{ fontWeight: 600 }}>
-          {t('node.branch.title')}{' '}
-          <span style={{ fontSize: isCompact ? '9px' : '10px' }}>(Legacy)</span>
-        </div>
-        {!isCompact && (
-          <>
-            <div
-              style={{
-                fontSize: '11px',
-                color: 'var(--vscode-button-secondaryForeground)',
-                opacity: 0.8,
-              }}
-            >
-              {t('node.branch.description')}
-            </div>
-            <div
-              style={{
-                fontSize: '10px',
-                color: 'var(--vscode-editorWarning-foreground)',
-                marginTop: '4px',
-                fontStyle: 'italic',
-              }}
-            >
-              ⚠️ {t('node.branch.deprecationNotice')}
-            </div>
-          </>
-        )}
-      </button>
+      {/* Branch Node Button (Legacy) - hidden in SubAgentFlow edit mode */}
+      {!isEditingSubAgentFlow && (
+        <button
+          type="button"
+          onClick={handleAddBranch}
+          style={{
+            width: '100%',
+            padding: isCompact ? '8px' : '12px',
+            marginBottom: isCompact ? '8px' : '12px',
+            backgroundColor: 'var(--vscode-button-secondaryBackground)',
+            color: 'var(--vscode-button-secondaryForeground)',
+            border: '1px solid var(--vscode-button-border)',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: isCompact ? '11px' : '13px',
+            fontWeight: 500,
+            textAlign: 'left',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+            opacity: 0.7,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.opacity = '1';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.opacity = '0.7';
+          }}
+        >
+          <div style={{ fontWeight: 600 }}>
+            {t('node.branch.title')}{' '}
+            <span style={{ fontSize: isCompact ? '9px' : '10px' }}>(Legacy)</span>
+          </div>
+          {!isCompact && (
+            <>
+              <div
+                style={{
+                  fontSize: '11px',
+                  color: 'var(--vscode-button-secondaryForeground)',
+                  opacity: 0.8,
+                }}
+              >
+                {t('node.branch.description')}
+              </div>
+              <div
+                style={{
+                  fontSize: '10px',
+                  color: 'var(--vscode-editorWarning-foreground)',
+                  marginTop: '4px',
+                  fontStyle: 'italic',
+                }}
+              >
+                ⚠️ {t('node.branch.deprecationNotice')}
+              </div>
+            </>
+          )}
+        </button>
+      )}
 
-      {/* Instructions - hidden in compact mode */}
-      {!isCompact && (
+      {/* Instructions - hidden in compact mode and SubAgentFlow edit mode */}
+      {!isCompact && !isEditingSubAgentFlow && (
         <div
           style={{
             marginTop: '24px',
