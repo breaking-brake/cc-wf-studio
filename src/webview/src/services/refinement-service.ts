@@ -10,6 +10,7 @@ import type {
   RefinementClarificationPayload,
   RefinementSuccessPayload,
   RefineWorkflowPayload,
+  SubAgentFlowRefinementSuccessPayload,
 } from '@shared/types/messages';
 import type { ConversationHistory, Workflow } from '@shared/types/workflow-definition';
 import { vscode } from '../main';
@@ -33,6 +34,13 @@ export class WorkflowRefinementError extends Error {
  */
 export type RefinementResult =
   | { type: 'success'; payload: RefinementSuccessPayload }
+  | { type: 'clarification'; payload: RefinementClarificationPayload };
+
+/**
+ * Result type for SubAgentFlow refinement (success or clarification)
+ */
+export type SubAgentFlowRefinementResult =
+  | { type: 'success'; payload: SubAgentFlowRefinementSuccessPayload }
   | { type: 'clarification'; payload: RefinementClarificationPayload };
 
 /**
@@ -175,5 +183,98 @@ export function cancelWorkflowRefinement(requestId: string): void {
   vscode.postMessage({
     type: 'CANCEL_REFINEMENT',
     payload: { requestId },
+  });
+}
+
+/**
+ * Refine a SubAgentFlow using AI based on user feedback
+ *
+ * @param workflowId - ID of the parent workflow
+ * @param subAgentFlowId - ID of the SubAgentFlow being refined
+ * @param userMessage - User's refinement request (1-5000 characters)
+ * @param currentWorkflow - Current workflow state (including subAgentFlows)
+ * @param conversationHistory - Current conversation history for this SubAgentFlow
+ * @param requestId - Request ID for this refinement
+ * @param useSkills - Whether to include skills in refinement (default: true)
+ * @param serverTimeoutMs - Server-side timeout in milliseconds (default: undefined, uses settings)
+ * @returns Promise that resolves to the refinement result (success or clarification)
+ * @throws {WorkflowRefinementError} If refinement fails
+ */
+export function refineSubAgentFlow(
+  workflowId: string,
+  subAgentFlowId: string,
+  userMessage: string,
+  currentWorkflow: Workflow,
+  conversationHistory: ConversationHistory,
+  requestId: string,
+  useSkills = true,
+  serverTimeoutMs?: number
+): Promise<SubAgentFlowRefinementResult> {
+  return new Promise((resolve, reject) => {
+    // Register response handler
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'SUBAGENTFLOW_REFINEMENT_SUCCESS' && message.payload) {
+          resolve({ type: 'success', payload: message.payload });
+        } else if (message.type === 'REFINEMENT_CLARIFICATION' && message.payload) {
+          resolve({ type: 'clarification', payload: message.payload });
+        } else if (message.type === 'REFINEMENT_CANCELLED') {
+          // Handle cancellation
+          reject(new WorkflowRefinementError('Refinement cancelled by user', 'CANCELLED'));
+        } else if (message.type === 'REFINEMENT_FAILED' && message.payload) {
+          reject(
+            new WorkflowRefinementError(
+              message.payload.error.message,
+              message.payload.error.code,
+              message.payload.error.details
+            )
+          );
+        } else if (message.type === 'ERROR') {
+          reject(
+            new WorkflowRefinementError(
+              message.payload?.message || 'Failed to refine SubAgentFlow',
+              'UNKNOWN_ERROR'
+            )
+          );
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    // Send refinement request with SubAgentFlow targeting
+    const payload: RefineWorkflowPayload = {
+      workflowId,
+      userMessage,
+      currentWorkflow,
+      conversationHistory,
+      useSkills,
+      timeoutMs: serverTimeoutMs,
+      targetType: 'subAgentFlow',
+      subAgentFlowId,
+    };
+
+    vscode.postMessage({
+      type: 'REFINE_WORKFLOW',
+      requestId,
+      payload,
+    });
+
+    // Local timeout: 5 seconds more than server timeout to allow for response
+    // Default server timeout is 90s (from settings), so client timeout is 95s
+    const clientTimeoutMs = serverTimeoutMs ? serverTimeoutMs + 5000 : 95000;
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(
+        new WorkflowRefinementError(
+          'SubAgentFlow refinement request timed out. Please try again or rephrase your request.',
+          'TIMEOUT'
+        )
+      );
+    }, clientTimeoutMs);
   });
 }

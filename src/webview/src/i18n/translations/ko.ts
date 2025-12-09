@@ -101,6 +101,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'subAgentFlow.dialog.cancel': '취소하고 변경 사항 삭제',
   'subAgentFlow.generateNameWithAI': 'AI로 이름 생성',
 
+  // SubAgentFlow AI Edit
+  'subAgentFlow.aiEdit.title': 'AI 편집',
+  'subAgentFlow.aiEdit.toggleButton': 'AI 편집 모드 전환',
+
   // SubAgentFlow validation errors
   'error.subAgentFlow.nameRequired': '이름은 필수입니다',
   'error.subAgentFlow.nameTooLong': '이름은 50자 이하여야 합니다',
@@ -421,6 +425,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     'AI 응답 파싱에 실패했습니다. 다시 시도하거나 요청을 다시 표현하세요.',
   'refinement.error.validationError':
     '개선된 워크플로가 검증에 실패했습니다. 다른 요청을 시도하세요.',
+  'refinement.error.prohibitedNodeType':
+    'SubAgent, SubAgentFlow, AskUserQuestion 노드는 서브 에이전트 플로우에서 사용할 수 없습니다.',
   'refinement.error.iterationLimitReached':
     '최대 반복 횟수(20)에 도달했습니다. 대화 기록을 지우고 처음부터 시작하거나 워크플로를 수동으로 편집하세요.',
   'refinement.error.unknown': '예상치 못한 오류가 발생했습니다. 로그를 확인하세요.',

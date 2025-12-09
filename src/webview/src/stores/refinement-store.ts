@@ -22,6 +22,10 @@ interface RefinementStore {
   useSkills: boolean;
   timeoutSeconds: number;
 
+  // SubAgentFlow Refinement State
+  targetType: 'workflow' | 'subAgentFlow';
+  targetSubAgentFlowId: string | null;
+
   // Actions
   openChat: () => void;
   closeChat: () => void;
@@ -29,6 +33,10 @@ interface RefinementStore {
   setTimeoutSeconds: (seconds: number) => void;
   initConversation: () => void;
   loadConversationHistory: (history: ConversationHistory | undefined) => void;
+  setTargetContext: (
+    targetType: 'workflow' | 'subAgentFlow',
+    subAgentFlowId?: string | null
+  ) => void;
   setInput: (input: string) => void;
   addUserMessage: (message: string) => void;
   startProcessing: (requestId: string) => void;
@@ -53,6 +61,7 @@ interface RefinementStore {
       | 'TIMEOUT'
       | 'PARSE_ERROR'
       | 'VALIDATION_ERROR'
+      | 'PROHIBITED_NODE_TYPE'
       | 'UNKNOWN_ERROR'
   ) => void;
 
@@ -80,6 +89,10 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   currentRequestId: null,
   useSkills: true,
   timeoutSeconds: 90, // Default timeout: 90 seconds (matches VSCode settings default)
+
+  // SubAgentFlow Refinement Initial State
+  targetType: 'workflow',
+  targetSubAgentFlowId: null,
 
   // Actions
   openChat: () => {
@@ -117,6 +130,13 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
       // Initialize new conversation if no history exists
       get().initConversation();
     }
+  },
+
+  setTargetContext: (targetType: 'workflow' | 'subAgentFlow', subAgentFlowId?: string | null) => {
+    set({
+      targetType,
+      targetSubAgentFlowId: targetType === 'subAgentFlow' ? (subAgentFlowId ?? null) : null,
+    });
   },
 
   setInput: (input: string) => {
@@ -250,6 +270,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
       | 'TIMEOUT'
       | 'PARSE_ERROR'
       | 'VALIDATION_ERROR'
+      | 'PROHIBITED_NODE_TYPE'
       | 'UNKNOWN_ERROR'
   ) => {
     const history = get().conversationHistory;

@@ -5,7 +5,7 @@
  * Provides a clear visual distinction from the main workflow canvas
  */
 
-import { Check, X } from 'lucide-react';
+import { Check, Sparkles, X } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactFlow, {
@@ -23,8 +23,11 @@ import ReactFlow, {
 import { useIsCompactMode } from '../../hooks/useWindowWidth';
 import { useTranslation } from '../../i18n/i18n-context';
 import { generateWorkflowName } from '../../services/ai-generation-service';
+import { serializeWorkflow } from '../../services/workflow-service';
+import { useRefinementStore } from '../../stores/refinement-store';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { AiGenerateButton } from '../common/AiGenerateButton';
+import { StyledTooltip } from '../common/StyledTooltip';
 import { InteractionModeToggle } from '../InteractionModeToggle';
 import { NodePalette } from '../NodePalette';
 import { AskUserQuestionNodeComponent } from '../nodes/AskUserQuestionNode';
@@ -39,6 +42,7 @@ import { SubAgentFlowNodeComponent } from '../nodes/SubAgentFlowNode';
 import { SubAgentNodeComponent } from '../nodes/SubAgentNode';
 import { SwitchNodeComponent } from '../nodes/SwitchNode';
 import { PropertyPanel } from '../PropertyPanel';
+import { RefinementChatPanel } from './RefinementChatPanel';
 
 /**
  * Node types registration
@@ -97,7 +101,13 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
     selectedNodeId,
     isPropertyPanelOpen,
     cancelSubAgentFlowEditing,
+    mainWorkflowSnapshot,
+    workflowName,
+    activeWorkflow,
+    setActiveWorkflow,
   } = useWorkflowStore();
+
+  const { loadConversationHistory, initConversation } = useRefinementStore();
 
   // Get active sub-agent flow info
   const activeSubAgentFlow = useMemo(
@@ -110,6 +120,85 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
 
   // Local name state (not saved to store until submit)
   const [localName, setLocalName] = useState<string>('');
+
+  // AI Edit mode state
+  const [isAiEditMode, setIsAiEditMode] = useState(false);
+
+  // Handle toggling AI edit mode with proper workflow context setup
+  const handleToggleAiEditMode = useCallback(() => {
+    if (!isAiEditMode) {
+      // Opening AI edit mode - need to set up activeWorkflow with main workflow context
+      if (mainWorkflowSnapshot && activeSubAgentFlowId) {
+        // Find the current SubAgentFlow being edited
+        const currentSubAgentFlow = subAgentFlows.find((sf) => sf.id === activeSubAgentFlowId);
+        if (!currentSubAgentFlow) return;
+
+        // Get current SubAgentFlow state from canvas (with latest edits)
+        // Use the same node structure as the original SubAgentFlow
+        const currentSubAgentFlowNodes = nodes.map((node) => ({
+          ...currentSubAgentFlow.nodes.find((n) => n.id === node.id),
+          id: node.id,
+          name: node.data?.label || node.id,
+          type: node.type,
+          position: node.position,
+          data: node.data,
+        }));
+
+        const currentSubAgentFlowConnections = edges.map((edge) => ({
+          id: edge.id,
+          from: edge.source,
+          to: edge.target,
+          fromPort: edge.sourceHandle || 'default',
+          toPort: edge.targetHandle || 'default',
+        }));
+
+        // Update subAgentFlows with current canvas state
+        const updatedSubAgentFlows = subAgentFlows.map((sf) =>
+          sf.id === activeSubAgentFlowId
+            ? {
+                ...sf,
+                nodes: currentSubAgentFlowNodes as typeof sf.nodes,
+                connections: currentSubAgentFlowConnections,
+              }
+            : sf
+        );
+
+        // Reconstruct the main workflow from snapshot
+        const mainWorkflow = serializeWorkflow(
+          mainWorkflowSnapshot.nodes,
+          mainWorkflowSnapshot.edges,
+          workflowName || 'Untitled',
+          activeWorkflow?.description || 'Created with Workflow Studio',
+          activeWorkflow?.conversationHistory,
+          updatedSubAgentFlows
+        );
+
+        // Set the main workflow as active
+        setActiveWorkflow(mainWorkflow);
+
+        // Initialize conversation history for the SubAgentFlow
+        const subAgentFlow = updatedSubAgentFlows.find((sf) => sf.id === activeSubAgentFlowId);
+        if (subAgentFlow?.conversationHistory) {
+          loadConversationHistory(subAgentFlow.conversationHistory);
+        } else {
+          initConversation();
+        }
+      }
+    }
+    setIsAiEditMode(!isAiEditMode);
+  }, [
+    isAiEditMode,
+    mainWorkflowSnapshot,
+    activeSubAgentFlowId,
+    nodes,
+    edges,
+    subAgentFlows,
+    workflowName,
+    activeWorkflow,
+    setActiveWorkflow,
+    loadConversationHistory,
+    initConversation,
+  ]);
 
   // Initialize local name when dialog opens (activeSubAgentFlowId changes)
   useEffect(() => {
@@ -558,11 +647,48 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
               <Panel position="top-left">
                 <InteractionModeToggle />
               </Panel>
+
+              {/* AI Refinement Button */}
+              <Panel position="top-right">
+                <StyledTooltip content={t('subAgentFlow.aiEdit.toggleButton')} side="left">
+                  <button
+                    type="button"
+                    onClick={handleToggleAiEditMode}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: isCompact ? '0' : '6px',
+                      padding: isCompact ? '6px' : '6px 10px',
+                      backgroundColor: 'var(--vscode-button-background)',
+                      color: 'var(--vscode-button-foreground)',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.2)',
+                      opacity: 0.9,
+                    }}
+                  >
+                    <Sparkles size={14} />
+                    {!isCompact && t('subAgentFlow.aiEdit.title')}
+                  </button>
+                </StyledTooltip>
+              </Panel>
             </ReactFlow>
           </div>
 
-          {/* Right: Property Panel (conditional) */}
-          {selectedNodeId && isPropertyPanelOpen && <PropertyPanel />}
+          {/* Right: Property Panel or AI Edit Panel (conditional) */}
+          {/* Priority: PropertyPanel > RefinementChatPanel (matches main workflow behavior) */}
+          {selectedNodeId && isPropertyPanelOpen ? (
+            <PropertyPanel />
+          ) : isAiEditMode && activeSubAgentFlowId ? (
+            <RefinementChatPanel
+              mode="subAgentFlow"
+              subAgentFlowId={activeSubAgentFlowId}
+              onClose={() => setIsAiEditMode(false)}
+            />
+          ) : null}
         </div>
       </div>
     </div>

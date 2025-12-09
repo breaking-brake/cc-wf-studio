@@ -337,6 +337,19 @@
     "workflow": { "maxNodes": 50, "nameMaxLength": 100, "versionPattern": "^\\d+\\.\\d+\\.\\d+$" },
     "node": { "nameMaxLength": 50, "namePattern": "^[a-zA-Z0-9_-]+$" }
   },
+  "subAgentFlowConstraints": {
+    "description": "Constraints specific to Sub-Agent Flow editing. When refining a Sub-Agent Flow, these rules MUST be followed.",
+    "maxNodes": 30,
+    "supportedNodeTypes": ["start", "end", "prompt", "ifElse", "switch", "skill", "mcp"],
+    "prohibitedNodeTypes": ["subAgent", "subAgentFlow", "askUserQuestion"],
+    "rules": [
+      "Sub-Agent Flows cannot contain SubAgent nodes (Claude Code constraint for sequential execution)",
+      "Sub-Agent Flows cannot contain SubAgentFlow nodes (no nesting allowed in Phase 1 MVP)",
+      "Sub-Agent Flows cannot contain AskUserQuestion nodes (user interaction not supported in sub-agent context)",
+      "Sub-Agent Flows must have exactly one Start node and at least one End node",
+      "Maximum 30 nodes per Sub-Agent Flow"
+    ]
+  },
   "examples": [
     {
       "name": "Simple Data Analysis",

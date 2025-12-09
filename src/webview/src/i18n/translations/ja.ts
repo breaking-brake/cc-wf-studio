@@ -100,6 +100,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'subAgentFlow.dialog.cancel': 'キャンセルして変更を破棄',
   'subAgentFlow.generateNameWithAI': 'AIで名前を生成',
 
+  // SubAgentFlow AI Edit
+  'subAgentFlow.aiEdit.title': 'AI編集',
+  'subAgentFlow.aiEdit.toggleButton': 'AI編集モードを切替',
+
   // SubAgentFlow validation errors
   'error.subAgentFlow.nameRequired': '名前は必須です',
   'error.subAgentFlow.nameTooLong': '名前は50文字以内で入力してください',
@@ -420,6 +424,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     'AI応答の解析に失敗しました。もう一度試すか、リクエストを言い換えてください。',
   'refinement.error.validationError':
     '改善されたワークフローが検証に失敗しました。別のリクエストを試してください。',
+  'refinement.error.prohibitedNodeType':
+    'SubAgent、SubAgentFlow、AskUserQuestionノードはサブエージェントフローでは使用できません。',
   'refinement.error.iterationLimitReached':
     '最大反復回数(20)に達しました。会話履歴をクリアして最初からやり直すか、手動でワークフローを編集してください。',
   'refinement.error.unknown': '予期しないエラーが発生しました。ログを確認してください。',

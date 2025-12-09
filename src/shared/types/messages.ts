@@ -232,6 +232,10 @@ export interface RefineWorkflowPayload {
   useSkills?: boolean;
   /** Optional timeout in milliseconds (default: 60000, min: 10000, max: 120000) */
   timeoutMs?: number;
+  /** Target type for refinement (default: 'workflow') */
+  targetType?: 'workflow' | 'subAgentFlow';
+  /** SubAgentFlow ID (required when targetType is 'subAgentFlow') */
+  subAgentFlowId?: string;
 }
 
 export interface RefinementSuccessPayload {
@@ -260,6 +264,7 @@ export interface RefinementFailedPayload {
       | 'VALIDATION_ERROR'
       | 'ITERATION_LIMIT_REACHED'
       | 'CANCELLED'
+      | 'PROHIBITED_NODE_TYPE'
       | 'UNKNOWN_ERROR';
     /** Human-readable error message */
     message: string;
@@ -295,6 +300,28 @@ export interface RefinementClarificationPayload {
   /** Updated conversation history with the clarification message */
   updatedConversationHistory: ConversationHistory;
   /** Time taken to execute refinement before clarification */
+  executionTimeMs: number;
+  /** Response timestamp */
+  timestamp: string; // ISO 8601
+}
+
+// ============================================================================
+// SubAgentFlow Refinement Payloads
+// ============================================================================
+
+export interface SubAgentFlowRefinementSuccessPayload {
+  /** ID of the SubAgentFlow that was refined */
+  subAgentFlowId: string;
+  /** The refined inner workflow (nodes and connections only) */
+  refinedInnerWorkflow: {
+    nodes: Workflow['nodes'];
+    connections: Workflow['connections'];
+  };
+  /** AI's response message */
+  aiMessage: ConversationMessage;
+  /** Updated conversation history with new messages */
+  updatedConversationHistory: ConversationHistory;
+  /** Time taken to execute refinement (in milliseconds) */
   executionTimeMs: number;
   /** Response timestamp */
   timestamp: string; // ISO 8601
@@ -547,6 +574,7 @@ export type ExtensionMessage =
   | Message<RefinementCancelledPayload, 'REFINEMENT_CANCELLED'>
   | Message<RefinementClarificationPayload, 'REFINEMENT_CLARIFICATION'>
   | Message<ConversationClearedPayload, 'CONVERSATION_CLEARED'>
+  | Message<SubAgentFlowRefinementSuccessPayload, 'SUBAGENTFLOW_REFINEMENT_SUCCESS'>
   | Message<McpServersResultPayload, 'MCP_SERVERS_RESULT'>
   | Message<McpToolsResultPayload, 'MCP_TOOLS_RESULT'>
   | Message<McpToolSchemaResultPayload, 'MCP_TOOL_SCHEMA_RESULT'>

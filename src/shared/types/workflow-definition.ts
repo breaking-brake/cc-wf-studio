@@ -191,6 +191,8 @@ export interface SubAgentFlow {
   nodes: WorkflowNode[];
   /** Connections between nodes within the sub-agent flow */
   connections: Connection[];
+  /** Optional conversation history for AI-assisted refinement */
+  conversationHistory?: ConversationHistory;
 }
 
 /**
@@ -371,6 +373,7 @@ export interface ConversationMessage {
     | 'TIMEOUT'
     | 'PARSE_ERROR'
     | 'VALIDATION_ERROR'
+    | 'PROHIBITED_NODE_TYPE'
     | 'UNKNOWN_ERROR';
 }
 

@@ -12,6 +12,7 @@ type ErrorCode =
   | 'TIMEOUT'
   | 'PARSE_ERROR'
   | 'VALIDATION_ERROR'
+  | 'PROHIBITED_NODE_TYPE'
   | 'UNKNOWN_ERROR';
 
 interface ErrorMessageInfo {
@@ -43,6 +44,10 @@ const ERROR_MESSAGE_MAP: Record<ErrorCode, ErrorMessageInfo> = {
   VALIDATION_ERROR: {
     messageKey: 'refinement.error.validationError',
     isRetryable: true,
+  },
+  PROHIBITED_NODE_TYPE: {
+    messageKey: 'refinement.error.prohibitedNodeType',
+    isRetryable: false,
   },
   UNKNOWN_ERROR: {
     messageKey: 'refinement.error.unknown',

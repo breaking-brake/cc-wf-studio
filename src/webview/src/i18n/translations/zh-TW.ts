@@ -99,6 +99,10 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'subAgentFlow.dialog.cancel': '取消並捨棄變更',
   'subAgentFlow.generateNameWithAI': '使用 AI 生成名稱',
 
+  // SubAgentFlow AI Edit
+  'subAgentFlow.aiEdit.title': 'AI 編輯',
+  'subAgentFlow.aiEdit.toggleButton': '切換 AI 編輯模式',
+
   // SubAgentFlow validation errors
   'error.subAgentFlow.nameRequired': '名稱為必填項',
   'error.subAgentFlow.nameTooLong': '名稱不能超過50個字元',
@@ -402,6 +406,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'refinement.error.timeout': 'AI優化逾時。請調整逾時設定值後重試。建議您也可以考慮簡化請求內容。',
   'refinement.error.parseError': '無法解析AI回應。請重試或重新表述您的請求。',
   'refinement.error.validationError': '優化後的工作流程驗證失敗。請嘗試不同的請求。',
+  'refinement.error.prohibitedNodeType':
+    'SubAgent、SubAgentFlow 和 AskUserQuestion 節點無法在子代理流程中使用。',
   'refinement.error.iterationLimitReached':
     '已達到最大迭代限制(20)。清除對話歷史記錄重新開始，或手動編輯工作流程。',
   'refinement.error.unknown': '發生意外錯誤。請檢查日誌以取得詳細資訊。',

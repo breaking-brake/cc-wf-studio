@@ -100,6 +100,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'subAgentFlow.dialog.cancel': 'Cancel and discard changes',
   'subAgentFlow.generateNameWithAI': 'Generate name with AI',
 
+  // SubAgentFlow AI Edit
+  'subAgentFlow.aiEdit.title': 'AI Edit',
+  'subAgentFlow.aiEdit.toggleButton': 'Toggle AI Edit Mode',
+
   // SubAgentFlow validation errors
   'error.subAgentFlow.nameRequired': 'Name is required',
   'error.subAgentFlow.nameTooLong': 'Name must be 50 characters or less',
@@ -421,6 +425,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Failed to parse AI response. Please try again or rephrase your request.',
   'refinement.error.validationError':
     'Refined workflow failed validation. Please try a different request.',
+  'refinement.error.prohibitedNodeType':
+    'SubAgent, SubAgentFlow, and AskUserQuestion nodes cannot be used in Sub-Agent Flows.',
   'refinement.error.iterationLimitReached':
     'Maximum iteration limit (20) has been reached. Clear conversation history to start fresh, or manually edit the workflow.',
   'refinement.error.unknown': 'An unexpected error occurred. Check logs for details.',

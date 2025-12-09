@@ -15,11 +15,12 @@ import type {
   RefinementFailedPayload,
   RefinementSuccessPayload,
   RefineWorkflowPayload,
+  SubAgentFlowRefinementSuccessPayload,
 } from '../../shared/types/messages';
 import type { ConversationMessage } from '../../shared/types/workflow-definition';
 import { log } from '../extension';
 import { cancelRefinement } from '../services/claude-code-service';
-import { refineWorkflow } from '../services/refinement-service';
+import { refineSubAgentFlow, refineWorkflow } from '../services/refinement-service';
 
 /**
  * Handle workflow refinement request
@@ -44,6 +45,8 @@ export async function handleRefineWorkflow(
     conversationHistory,
     useSkills = true,
     timeoutMs,
+    targetType = 'workflow',
+    subAgentFlowId,
   } = payload;
   const startTime = Date.now();
 
@@ -58,7 +61,15 @@ export async function handleRefineWorkflow(
     maxIterations: conversationHistory.maxIterations,
     useSkills,
     timeoutMs: effectiveTimeoutMs,
+    targetType,
+    subAgentFlowId,
   });
+
+  // Route to SubAgentFlow refinement if targetType is 'subAgentFlow'
+  if (targetType === 'subAgentFlow') {
+    await handleRefineSubAgentFlow(payload, webview, requestId, extensionPath, workspaceRoot);
+    return;
+  }
 
   try {
     // Check iteration limit
@@ -230,6 +241,258 @@ export async function handleRefineWorkflow(
 }
 
 /**
+ * Handle SubAgentFlow refinement request
+ *
+ * @param payload - Refinement request from Webview
+ * @param webview - Webview to send response messages to
+ * @param requestId - Request ID for correlation
+ * @param extensionPath - VSCode extension path for schema loading
+ * @param workspaceRoot - The workspace root path for CLI execution
+ */
+async function handleRefineSubAgentFlow(
+  payload: RefineWorkflowPayload,
+  webview: vscode.Webview,
+  requestId: string,
+  extensionPath: string,
+  workspaceRoot?: string
+): Promise<void> {
+  const {
+    workflowId,
+    userMessage,
+    currentWorkflow,
+    conversationHistory,
+    useSkills = true,
+    timeoutMs,
+    subAgentFlowId,
+  } = payload;
+  const startTime = Date.now();
+
+  // Use provided timeout or default to 90 seconds
+  const effectiveTimeoutMs = timeoutMs ?? 90000;
+
+  log('INFO', 'SubAgentFlow refinement request received', {
+    requestId,
+    workflowId,
+    subAgentFlowId,
+    messageLength: userMessage.length,
+    currentIteration: conversationHistory.currentIteration,
+    maxIterations: conversationHistory.maxIterations,
+    useSkills,
+    timeoutMs: effectiveTimeoutMs,
+  });
+
+  // Validate subAgentFlowId
+  if (!subAgentFlowId) {
+    log('ERROR', 'SubAgentFlow ID is required for SubAgentFlow refinement', {
+      requestId,
+      workflowId,
+    });
+
+    sendRefinementFailed(webview, requestId, {
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'SubAgentFlow ID is required for SubAgentFlow refinement',
+      },
+      executionTimeMs: Date.now() - startTime,
+      timestamp: new Date().toISOString(),
+    });
+    return;
+  }
+
+  // Find the SubAgentFlow
+  const subAgentFlow = currentWorkflow.subAgentFlows?.find((saf) => saf.id === subAgentFlowId);
+
+  if (!subAgentFlow) {
+    log('ERROR', 'SubAgentFlow not found', {
+      requestId,
+      workflowId,
+      subAgentFlowId,
+    });
+
+    sendRefinementFailed(webview, requestId, {
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: `SubAgentFlow with ID "${subAgentFlowId}" not found`,
+      },
+      executionTimeMs: Date.now() - startTime,
+      timestamp: new Date().toISOString(),
+    });
+    return;
+  }
+
+  try {
+    // Check iteration limit
+    if (conversationHistory.currentIteration >= conversationHistory.maxIterations) {
+      log('WARN', 'Iteration limit reached for SubAgentFlow', {
+        requestId,
+        workflowId,
+        subAgentFlowId,
+        currentIteration: conversationHistory.currentIteration,
+        maxIterations: conversationHistory.maxIterations,
+      });
+
+      sendRefinementFailed(webview, requestId, {
+        error: {
+          code: 'ITERATION_LIMIT_REACHED',
+          message: `Maximum iteration limit (${conversationHistory.maxIterations}) reached. Please clear conversation history to continue.`,
+        },
+        executionTimeMs: Date.now() - startTime,
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    // Execute SubAgentFlow refinement
+    const result = await refineSubAgentFlow(
+      { nodes: subAgentFlow.nodes, connections: subAgentFlow.connections },
+      conversationHistory,
+      userMessage,
+      extensionPath,
+      useSkills,
+      effectiveTimeoutMs,
+      requestId,
+      workspaceRoot
+    );
+
+    // Check if AI is asking for clarification
+    if (result.success && result.clarificationMessage && !result.refinedInnerWorkflow) {
+      log('INFO', 'AI requested clarification for SubAgentFlow', {
+        requestId,
+        workflowId,
+        subAgentFlowId,
+        messagePreview: result.clarificationMessage.substring(0, 100),
+        executionTimeMs: result.executionTimeMs,
+      });
+
+      // Create AI clarification message
+      const aiMessage: ConversationMessage = {
+        id: crypto.randomUUID(),
+        sender: 'ai',
+        content: result.clarificationMessage,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Create user message
+      const userMessageObj: ConversationMessage = {
+        id: crypto.randomUUID(),
+        sender: 'user',
+        content: userMessage,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Update conversation history
+      const updatedHistory = {
+        ...conversationHistory,
+        messages: [...conversationHistory.messages, userMessageObj, aiMessage],
+        currentIteration: conversationHistory.currentIteration + 1,
+        updatedAt: new Date().toISOString(),
+      };
+
+      log('INFO', 'Sending clarification request for SubAgentFlow to webview', {
+        requestId,
+        workflowId,
+        subAgentFlowId,
+        newIteration: updatedHistory.currentIteration,
+      });
+
+      // Send clarification message (reuse existing message type)
+      sendRefinementClarification(webview, requestId, {
+        aiMessage,
+        updatedConversationHistory: updatedHistory,
+        executionTimeMs: result.executionTimeMs,
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    if (!result.success || !result.refinedInnerWorkflow) {
+      // Refinement failed
+      log('ERROR', 'SubAgentFlow refinement failed', {
+        requestId,
+        workflowId,
+        subAgentFlowId,
+        errorCode: result.error?.code,
+        errorMessage: result.error?.message,
+        executionTimeMs: result.executionTimeMs,
+      });
+
+      sendRefinementFailed(webview, requestId, {
+        error: result.error ?? {
+          code: 'UNKNOWN_ERROR',
+          message: 'Unknown error occurred during SubAgentFlow refinement',
+        },
+        executionTimeMs: result.executionTimeMs,
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    // Create AI message with translation key
+    const aiMessage: ConversationMessage = {
+      id: crypto.randomUUID(),
+      sender: 'ai',
+      content: 'Sub-Agent Flow has been updated.', // Fallback English text
+      translationKey: 'subAgentFlow.refinement.success.defaultMessage',
+      timestamp: new Date().toISOString(),
+    };
+
+    // Create user message
+    const userMessageObj: ConversationMessage = {
+      id: crypto.randomUUID(),
+      sender: 'user',
+      content: userMessage,
+      timestamp: new Date().toISOString(),
+    };
+
+    // Update conversation history
+    const updatedHistory = {
+      ...conversationHistory,
+      messages: [...conversationHistory.messages, userMessageObj, aiMessage],
+      currentIteration: conversationHistory.currentIteration + 1,
+      updatedAt: new Date().toISOString(),
+    };
+
+    log('INFO', 'SubAgentFlow refinement successful', {
+      requestId,
+      workflowId,
+      subAgentFlowId,
+      executionTimeMs: result.executionTimeMs,
+      newIteration: updatedHistory.currentIteration,
+      totalMessages: updatedHistory.messages.length,
+    });
+
+    // Send SubAgentFlow-specific success response
+    sendSubAgentFlowRefinementSuccess(webview, requestId, {
+      subAgentFlowId,
+      refinedInnerWorkflow: result.refinedInnerWorkflow,
+      aiMessage,
+      updatedConversationHistory: updatedHistory,
+      executionTimeMs: result.executionTimeMs,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    const executionTimeMs = Date.now() - startTime;
+
+    log('ERROR', 'Unexpected error in handleRefineSubAgentFlow', {
+      requestId,
+      workflowId,
+      subAgentFlowId,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      executionTimeMs,
+    });
+
+    sendRefinementFailed(webview, requestId, {
+      error: {
+        code: 'UNKNOWN_ERROR',
+        message: error instanceof Error ? error.message : 'Unknown error occurred',
+      },
+      executionTimeMs,
+      timestamp: new Date().toISOString(),
+    });
+  }
+}
+
+/**
  * Handle conversation history clear request
  *
  * @param payload - Clear conversation request from Webview
@@ -330,6 +593,21 @@ function sendConversationCleared(
 ): void {
   webview.postMessage({
     type: 'CONVERSATION_CLEARED',
+    requestId,
+    payload,
+  });
+}
+
+/**
+ * Send SubAgentFlow refinement success message to Webview
+ */
+function sendSubAgentFlowRefinementSuccess(
+  webview: vscode.Webview,
+  requestId: string,
+  payload: SubAgentFlowRefinementSuccessPayload
+): void {
+  webview.postMessage({
+    type: 'SUBAGENTFLOW_REFINEMENT_SUCCESS',
     requestId,
     payload,
   });

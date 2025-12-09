@@ -97,6 +97,10 @@ export interface WebviewTranslationKeys {
   'subAgentFlow.dialog.cancel': string;
   'subAgentFlow.generateNameWithAI': string;
 
+  // SubAgentFlow AI Edit
+  'subAgentFlow.aiEdit.title': string;
+  'subAgentFlow.aiEdit.toggleButton': string;
+
   // SubAgentFlow validation errors
   'error.subAgentFlow.nameRequired': string;
   'error.subAgentFlow.nameTooLong': string;
@@ -377,6 +381,7 @@ export interface WebviewTranslationKeys {
   'refinement.error.timeout': string;
   'refinement.error.parseError': string;
   'refinement.error.validationError': string;
+  'refinement.error.prohibitedNodeType': string;
   'refinement.error.iterationLimitReached': string;
   'refinement.error.unknown': string;
 

@@ -508,3 +508,459 @@ async function resolveSkillPaths(
     nodes: resolvedNodes,
   };
 }
+
+// ============================================================================
+// SubAgentFlow Refinement Functions
+// ============================================================================
+
+/**
+ * Inner workflow representation for SubAgentFlow refinement
+ */
+export interface InnerWorkflow {
+  nodes: Workflow['nodes'];
+  connections: Workflow['connections'];
+}
+
+/**
+ * SubAgentFlow refinement result
+ */
+export interface SubAgentFlowRefinementResult {
+  success: boolean;
+  refinedInnerWorkflow?: InnerWorkflow;
+  clarificationMessage?: string;
+  error?: {
+    code:
+      | 'COMMAND_NOT_FOUND'
+      | 'TIMEOUT'
+      | 'PARSE_ERROR'
+      | 'VALIDATION_ERROR'
+      | 'PROHIBITED_NODE_TYPE'
+      | 'UNKNOWN_ERROR';
+    message: string;
+    details?: string;
+  };
+  executionTimeMs: number;
+}
+
+/**
+ * Prohibited node types in SubAgentFlow
+ */
+const SUBAGENTFLOW_PROHIBITED_NODE_TYPES = ['subAgent', 'subAgentFlow', 'askUserQuestion'];
+
+/**
+ * Maximum nodes allowed in SubAgentFlow
+ */
+const SUBAGENTFLOW_MAX_NODES = 30;
+
+/**
+ * Construct refinement prompt for SubAgentFlow
+ *
+ * @param innerWorkflow - The current inner workflow state (nodes + connections)
+ * @param conversationHistory - Full conversation history
+ * @param userMessage - User's current refinement request
+ * @param schema - Workflow schema for node type validation
+ * @param filteredSkills - Skills filtered by relevance (optional)
+ * @returns Prompt string for Claude Code CLI
+ */
+export function constructSubAgentFlowRefinementPrompt(
+  innerWorkflow: InnerWorkflow,
+  conversationHistory: ConversationHistory,
+  userMessage: string,
+  schema: unknown,
+  filteredSkills: SkillRelevanceScore[] = []
+): string {
+  // Get last 6 messages (3 rounds of user-AI conversation)
+  const recentMessages = conversationHistory.messages.slice(-6);
+
+  const conversationContext =
+    recentMessages.length > 0
+      ? `**Conversation History** (last ${recentMessages.length} messages):
+${recentMessages.map((msg) => `[${msg.sender.toUpperCase()}]: ${msg.content}`).join('\n')}\n`
+      : '**Conversation History**: (This is the first message)\n';
+
+  const schemaJSON = JSON.stringify(schema, null, 2);
+
+  // Construct skills section
+  const skillsSection =
+    filteredSkills.length > 0
+      ? `
+
+**Available Skills** (use when user description matches their purpose):
+${JSON.stringify(
+  filteredSkills.map((s) => ({
+    name: s.skill.name,
+    description: s.skill.description,
+    scope: s.skill.scope,
+  })),
+  null,
+  2
+)}
+
+**Instructions for Using Skills**:
+- Use a Skill node when the user's description matches a Skill's documented purpose
+- Copy the name, description, and scope exactly from the Available Skills list above
+- Set validationStatus to "valid" and outputPorts to 1
+- Do NOT include skillPath in your response (the system will resolve it automatically)
+- If both personal and project Skills match, prefer the project Skill
+
+`
+      : '';
+
+  return `You are an expert workflow designer for Claude Code Workflow Studio.
+
+**Task**: Refine a Sub-Agent Flow based on user's feedback.
+
+**IMPORTANT - Sub-Agent Flow Constraints**:
+Sub-Agent Flows have strict constraints that MUST be followed:
+1. **Prohibited Node Types**: You MUST NOT use the following node types:
+   - subAgent (Claude Code constraint for sequential execution)
+   - subAgentFlow (no nesting allowed)
+   - askUserQuestion (user interaction not supported in sub-agent context)
+2. **Allowed Node Types**: start, end, prompt, ifElse, switch, skill, mcp
+3. **Maximum Nodes**: ${SUBAGENTFLOW_MAX_NODES} nodes maximum
+4. **Must have exactly one Start node and at least one End node**
+
+**Current Sub-Agent Flow**:
+${JSON.stringify(innerWorkflow, null, 2)}
+
+${conversationContext}
+**User's Refinement Request**:
+${userMessage}
+
+**Refinement Guidelines**:
+1. Preserve existing nodes unless explicitly requested to remove
+2. Add new nodes ONLY if user asks for new functionality
+3. Modify node properties (labels, descriptions, prompts) based on feedback
+4. Maintain workflow connectivity and validity
+5. Respect node IDs - do not regenerate IDs for unchanged nodes
+6. Update only what the user requested - minimize unnecessary changes
+7. **NEVER add subAgent, subAgentFlow, or askUserQuestion nodes**
+
+**Node Positioning Guidelines**:
+1. Horizontal spacing between regular nodes: Use 300px (e.g., x: 350, 650, 950, 1250, 1550)
+2. Spacing after Start node: Use 250px (e.g., Start at x: 100, next at x: 350)
+3. Spacing before End node: Use 350px (e.g., previous at x: 1550, End at x: 1900)
+4. Vertical spacing: Use 150px between nodes on different branches
+5. When adding new nodes, calculate positions based on existing node positions and connections
+6. Preserve existing node positions unless repositioning is explicitly requested
+7. For branch nodes: offset vertically by 150px from the main path
+
+**Skill Node Constraints**:
+- Skill nodes MUST have exactly 1 output port (outputPorts: 1)
+- If branching is needed after Skill execution, add an ifElse or switch node after the Skill node
+- Never modify Skill node's outputPorts field
+
+**Branching Node Selection**:
+- Use ifElse node for 2-way conditional branching (true/false)
+- Use switch node for 3+ way branching or multiple conditions
+- Each branch output should connect to exactly one downstream node
+${skillsSection}
+**Workflow Schema** (reference for valid node types and structure):
+${schemaJSON}
+
+**Output Format**: Output ONLY valid JSON with "nodes" and "connections" arrays. Do not include markdown code blocks or explanations. Example:
+{
+  "nodes": [...],
+  "connections": [...]
+}`;
+}
+
+/**
+ * Validate that the inner workflow does not contain prohibited node types
+ */
+function validateSubAgentFlowNodes(innerWorkflow: InnerWorkflow): {
+  valid: boolean;
+  prohibitedNodes: string[];
+} {
+  const prohibitedNodes: string[] = [];
+
+  for (const node of innerWorkflow.nodes) {
+    if (SUBAGENTFLOW_PROHIBITED_NODE_TYPES.includes(node.type)) {
+      prohibitedNodes.push(`${node.type} (${node.id})`);
+    }
+  }
+
+  return {
+    valid: prohibitedNodes.length === 0,
+    prohibitedNodes,
+  };
+}
+
+/**
+ * Execute SubAgentFlow refinement via Claude Code CLI
+ *
+ * @param innerWorkflow - The current inner workflow state (nodes + connections)
+ * @param conversationHistory - Full conversation history
+ * @param userMessage - User's current refinement request
+ * @param extensionPath - VSCode extension path for schema loading
+ * @param useSkills - Whether to include skills in refinement (default: true)
+ * @param timeoutMs - Timeout in milliseconds (default: 90000)
+ * @param requestId - Optional request ID for cancellation support
+ * @param workspaceRoot - The workspace root path for CLI execution
+ * @returns SubAgentFlow refinement result
+ */
+export async function refineSubAgentFlow(
+  innerWorkflow: InnerWorkflow,
+  conversationHistory: ConversationHistory,
+  userMessage: string,
+  extensionPath: string,
+  useSkills = true,
+  timeoutMs = MAX_REFINEMENT_TIMEOUT_MS,
+  requestId?: string,
+  workspaceRoot?: string
+): Promise<SubAgentFlowRefinementResult> {
+  const startTime = Date.now();
+
+  log('INFO', 'Starting SubAgentFlow refinement', {
+    requestId,
+    nodeCount: innerWorkflow.nodes.length,
+    messageLength: userMessage.length,
+    historyLength: conversationHistory.messages.length,
+    currentIteration: conversationHistory.currentIteration,
+    useSkills,
+    timeoutMs,
+  });
+
+  try {
+    // Step 1: Load workflow schema (and optionally scan skills)
+    const schemaPath = getDefaultSchemaPath(extensionPath);
+
+    let schemaResult: Awaited<ReturnType<typeof loadWorkflowSchema>>;
+    let availableSkills: SkillReference[] = [];
+    let filteredSkills: SkillRelevanceScore[] = [];
+
+    if (useSkills) {
+      const [loadedSchema, skillsResult] = await Promise.all([
+        loadWorkflowSchema(schemaPath),
+        scanAllSkills(),
+      ]);
+
+      schemaResult = loadedSchema;
+
+      if (!schemaResult.success || !schemaResult.schema) {
+        log('ERROR', 'Failed to load workflow schema for SubAgentFlow', {
+          requestId,
+          errorMessage: schemaResult.error?.message,
+        });
+
+        return {
+          success: false,
+          error: {
+            code: 'UNKNOWN_ERROR',
+            message: 'Failed to load workflow schema',
+            details: schemaResult.error?.message,
+          },
+          executionTimeMs: Date.now() - startTime,
+        };
+      }
+
+      availableSkills = [...skillsResult.personal, ...skillsResult.project];
+      filteredSkills = filterSkillsByRelevance(userMessage, availableSkills);
+
+      log('INFO', 'Skills filtered for SubAgentFlow refinement', {
+        requestId,
+        filteredCount: filteredSkills.length,
+      });
+    } else {
+      schemaResult = await loadWorkflowSchema(schemaPath);
+
+      if (!schemaResult.success || !schemaResult.schema) {
+        return {
+          success: false,
+          error: {
+            code: 'UNKNOWN_ERROR',
+            message: 'Failed to load workflow schema',
+            details: schemaResult.error?.message,
+          },
+          executionTimeMs: Date.now() - startTime,
+        };
+      }
+    }
+
+    // Step 2: Construct SubAgentFlow-specific refinement prompt
+    const prompt = constructSubAgentFlowRefinementPrompt(
+      innerWorkflow,
+      conversationHistory,
+      userMessage,
+      schemaResult.schema,
+      filteredSkills
+    );
+
+    // Step 3: Execute Claude Code CLI
+    const cliResult = await executeClaudeCodeCLI(prompt, timeoutMs, requestId, workspaceRoot);
+
+    if (!cliResult.success || !cliResult.output) {
+      log('ERROR', 'SubAgentFlow refinement failed during CLI execution', {
+        requestId,
+        errorCode: cliResult.error?.code,
+        errorMessage: cliResult.error?.message,
+        executionTimeMs: cliResult.executionTimeMs,
+      });
+
+      return {
+        success: false,
+        error: cliResult.error ?? {
+          code: 'UNKNOWN_ERROR',
+          message: 'Unknown error occurred during CLI execution',
+        },
+        executionTimeMs: cliResult.executionTimeMs,
+      };
+    }
+
+    // Step 4: Check if output is a clarification message
+    if (isClarificationMessage(cliResult.output)) {
+      const clarificationText = extractClarificationMessage(cliResult.output);
+
+      log('INFO', 'AI is requesting clarification for SubAgentFlow', {
+        requestId,
+        outputPreview: clarificationText.substring(0, 200),
+        executionTimeMs: cliResult.executionTimeMs,
+      });
+
+      return {
+        success: true,
+        clarificationMessage: clarificationText,
+        executionTimeMs: cliResult.executionTimeMs,
+      };
+    }
+
+    // Step 5: Parse CLI output as inner workflow JSON
+    const parsedOutput = parseClaudeCodeOutput(cliResult.output);
+
+    if (!parsedOutput) {
+      log('ERROR', 'Failed to parse SubAgentFlow CLI output', {
+        requestId,
+        outputPreview: cliResult.output.substring(0, 200),
+        executionTimeMs: cliResult.executionTimeMs,
+      });
+
+      return {
+        success: false,
+        error: {
+          code: 'PARSE_ERROR',
+          message: 'Failed to parse AI response. Please try again or rephrase your request',
+          details: 'Failed to parse JSON from Claude Code output',
+        },
+        executionTimeMs: cliResult.executionTimeMs,
+      };
+    }
+
+    // Type check: ensure parsed output has nodes and connections
+    const refinedInnerWorkflow = parsedOutput as InnerWorkflow;
+
+    if (!refinedInnerWorkflow.nodes || !refinedInnerWorkflow.connections) {
+      log('ERROR', 'Parsed SubAgentFlow output missing required fields', {
+        requestId,
+        hasNodes: !!refinedInnerWorkflow.nodes,
+        hasConnections: !!refinedInnerWorkflow.connections,
+        executionTimeMs: cliResult.executionTimeMs,
+      });
+
+      return {
+        success: false,
+        error: {
+          code: 'PARSE_ERROR',
+          message: 'Refinement failed - AI output does not match expected format',
+          details: 'Missing required fields (nodes or connections)',
+        },
+        executionTimeMs: cliResult.executionTimeMs,
+      };
+    }
+
+    // Step 6: Validate prohibited node types
+    const nodeValidation = validateSubAgentFlowNodes(refinedInnerWorkflow);
+
+    if (!nodeValidation.valid) {
+      log('ERROR', 'SubAgentFlow contains prohibited node types', {
+        requestId,
+        prohibitedNodes: nodeValidation.prohibitedNodes,
+        executionTimeMs: cliResult.executionTimeMs,
+      });
+
+      return {
+        success: false,
+        error: {
+          code: 'PROHIBITED_NODE_TYPE',
+          message: 'Sub-Agent Flow cannot contain SubAgent, SubAgentFlow, or AskUserQuestion nodes',
+          details: `Prohibited nodes found: ${nodeValidation.prohibitedNodes.join(', ')}`,
+        },
+        executionTimeMs: cliResult.executionTimeMs,
+      };
+    }
+
+    // Step 7: Validate node count
+    if (refinedInnerWorkflow.nodes.length > SUBAGENTFLOW_MAX_NODES) {
+      log('ERROR', 'SubAgentFlow exceeds maximum node count', {
+        requestId,
+        nodeCount: refinedInnerWorkflow.nodes.length,
+        maxNodes: SUBAGENTFLOW_MAX_NODES,
+        executionTimeMs: cliResult.executionTimeMs,
+      });
+
+      return {
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: `Sub-Agent Flow cannot exceed ${SUBAGENTFLOW_MAX_NODES} nodes`,
+          details: `Current count: ${refinedInnerWorkflow.nodes.length}`,
+        },
+        executionTimeMs: cliResult.executionTimeMs,
+      };
+    }
+
+    // Step 8: Resolve skill paths if using skills
+    if (useSkills) {
+      // Create a temporary workflow object for skill path resolution
+      const tempWorkflow: Workflow = {
+        id: 'temp',
+        name: 'temp',
+        version: '1.0.0',
+        nodes: refinedInnerWorkflow.nodes,
+        connections: refinedInnerWorkflow.connections,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const resolvedWorkflow = await resolveSkillPaths(tempWorkflow, availableSkills);
+      refinedInnerWorkflow.nodes = resolvedWorkflow.nodes;
+
+      log('INFO', 'Skill paths resolved for SubAgentFlow', {
+        requestId,
+        skillNodesCount: refinedInnerWorkflow.nodes.filter((n) => n.type === 'skill').length,
+      });
+    }
+
+    const executionTimeMs = Date.now() - startTime;
+
+    log('INFO', 'SubAgentFlow refinement successful', {
+      requestId,
+      executionTimeMs,
+      nodeCount: refinedInnerWorkflow.nodes.length,
+      connectionCount: refinedInnerWorkflow.connections.length,
+    });
+
+    return {
+      success: true,
+      refinedInnerWorkflow,
+      executionTimeMs,
+    };
+  } catch (error) {
+    const executionTimeMs = Date.now() - startTime;
+
+    log('ERROR', 'Unexpected error during SubAgentFlow refinement', {
+      requestId,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      executionTimeMs,
+    });
+
+    return {
+      success: false,
+      error: {
+        code: 'UNKNOWN_ERROR',
+        message: 'An unexpected error occurred during refinement',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      executionTimeMs,
+    };
+  }
+}
