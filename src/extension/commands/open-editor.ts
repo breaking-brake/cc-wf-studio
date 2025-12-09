@@ -11,7 +11,9 @@ import { translate } from '../i18n/i18n-service';
 import { cancelGeneration } from '../services/claude-code-service';
 import { FileService } from '../services/file-service';
 import { SlackApiService } from '../services/slack-api-service';
+import { migrateWorkflow } from '../utils/migrate-workflow';
 import { SlackTokenManager } from '../utils/slack-token-manager';
+import { validateWorkflowFile } from '../utils/workflow-validator';
 import { getWebviewContent } from '../webview-content';
 import { handleGenerateWorkflow } from './ai-generation';
 import { handleExportWorkflow } from './export-workflow';
@@ -243,6 +245,83 @@ export function registerOpenEditorCommand(
                   payload: {
                     code: 'VALIDATION_ERROR',
                     message: 'Workflow ID is required',
+                  },
+                });
+              }
+              break;
+
+            case 'OPEN_FILE_PICKER':
+              // Open OS file picker to load workflow from any location
+              try {
+                const defaultUri = vscode.Uri.file(fileService.getWorkflowsDirectory());
+
+                const result = await vscode.window.showOpenDialog({
+                  canSelectFiles: true,
+                  canSelectFolders: false,
+                  canSelectMany: false,
+                  filters: {
+                    'Workflow Files': ['json'],
+                  },
+                  defaultUri,
+                  title: translate('filePicker.title'),
+                });
+
+                // User cancelled
+                if (!result || result.length === 0) {
+                  webview.postMessage({
+                    type: 'FILE_PICKER_CANCELLED',
+                    requestId: message.requestId,
+                  });
+                  break;
+                }
+
+                const selectedFile = result[0];
+                const filePath = selectedFile.fsPath;
+
+                // Read file content
+                const content = await fileService.readFile(filePath);
+
+                // Validate workflow
+                const validationResult = validateWorkflowFile(content);
+
+                if (!validationResult.valid) {
+                  webview.postMessage({
+                    type: 'ERROR',
+                    requestId: message.requestId,
+                    payload: {
+                      code: 'VALIDATION_ERROR',
+                      message: translate('filePicker.error.invalidWorkflow'),
+                      details: validationResult.errors,
+                    },
+                  });
+                  break;
+                }
+
+                // Apply migrations for backward compatibility
+                // validationResult.workflow is guaranteed to exist when validationResult.valid is true
+                const workflow = migrateWorkflow(
+                  validationResult.workflow as NonNullable<typeof validationResult.workflow>
+                );
+
+                // Send success response
+                webview.postMessage({
+                  type: 'LOAD_WORKFLOW',
+                  requestId: message.requestId,
+                  payload: { workflow },
+                });
+
+                console.log(`Workflow loaded from file picker: ${filePath}`);
+              } catch (error) {
+                webview.postMessage({
+                  type: 'ERROR',
+                  requestId: message.requestId,
+                  payload: {
+                    code: 'LOAD_FAILED',
+                    message:
+                      error instanceof Error
+                        ? error.message
+                        : translate('filePicker.error.loadFailed'),
+                    details: error,
                   },
                 });
               }

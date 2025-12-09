@@ -609,7 +609,8 @@ export type ExtensionMessage =
   | Message<SlackDescriptionSuccessPayload, 'SLACK_DESCRIPTION_SUCCESS'>
   | Message<SlackDescriptionFailedPayload, 'SLACK_DESCRIPTION_FAILED'>
   | Message<WorkflowNameSuccessPayload, 'WORKFLOW_NAME_SUCCESS'>
-  | Message<WorkflowNameFailedPayload, 'WORKFLOW_NAME_FAILED'>;
+  | Message<WorkflowNameFailedPayload, 'WORKFLOW_NAME_FAILED'>
+  | Message<void, 'FILE_PICKER_CANCELLED'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -1069,7 +1070,8 @@ export type WebviewMessage =
   | Message<void, 'GET_LAST_SHARED_CHANNEL'>
   | Message<SetLastSharedChannelPayload, 'SET_LAST_SHARED_CHANNEL'>
   | Message<GenerateSlackDescriptionPayload, 'GENERATE_SLACK_DESCRIPTION'>
-  | Message<GenerateWorkflowNamePayload, 'GENERATE_WORKFLOW_NAME'>;
+  | Message<GenerateWorkflowNamePayload, 'GENERATE_WORKFLOW_NAME'>
+  | Message<void, 'OPEN_FILE_PICKER'>;
 
 // ============================================================================
 // Error Codes

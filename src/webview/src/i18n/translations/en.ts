@@ -25,6 +25,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.refineWithAI': 'Edit with AI',
   'toolbar.selectWorkflow': 'Select workflow...',
   'toolbar.load': 'Load',
+  'toolbar.loading': 'Loading...',
   'toolbar.refreshList': 'Refresh workflow list',
 
   // Toolbar interaction mode
@@ -40,6 +41,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.validationFailed': 'Workflow validation failed',
   'toolbar.error.missingEndNode': 'Workflow must have at least one End node',
   'toolbar.error.noActiveWorkflow': 'Please load a workflow first',
+  'toolbar.error.invalidWorkflowFile':
+    'Invalid workflow file. Please select a valid JSON workflow file.',
   'toolbar.generateNameWithAI': 'Generate name with AI',
   'toolbar.error.nameGenerationFailed':
     'Failed to generate workflow name. Please try again or enter manually.',
@@ -47,7 +50,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Toolbar responsive tooltips
   'toolbar.save.tooltip': 'Save workflow',
   'toolbar.convert.iconTooltip': 'Convert to Slash Command',
-  'toolbar.load.tooltip': 'Load selected workflow',
+  'toolbar.load.tooltip': 'Load saved workflow',
   'slack.share.tooltip': 'Share to Slack',
 
   // Node Palette

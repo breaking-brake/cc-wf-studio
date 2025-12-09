@@ -12,7 +12,7 @@ import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useTranslation } from '../i18n/i18n-context';
 import { vscode } from '../main';
 import { generateWorkflowName } from '../services/ai-generation-service';
-import { loadWorkflowList, saveWorkflow } from '../services/vscode-bridge';
+import { saveWorkflow } from '../services/vscode-bridge';
 import {
   deserializeWorkflow,
   serializeWorkflow,
@@ -29,13 +29,6 @@ interface ToolbarProps {
   onError: (error: { code: string; message: string; details?: unknown }) => void;
   onStartTour: () => void;
   onShareToSlack: () => void;
-}
-
-interface WorkflowListItem {
-  id: string;
-  name: string;
-  description?: string;
-  updatedAt: string;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareToSlack }) => {
@@ -55,8 +48,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
   const { isProcessing } = useRefinementStore();
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [workflows, setWorkflows] = useState<WorkflowListItem[]>([]);
-  const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>('');
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isGeneratingName, setIsGeneratingName] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const generationNameRequestIdRef = useRef<string | null>(null);
@@ -118,15 +110,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
     }
   };
 
-  // Listen for workflow list updates from Extension
+  // Listen for messages from Extension
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.type === 'WORKFLOW_LIST_LOADED') {
-        setWorkflows(message.payload?.workflows || []);
-      } else if (message.type === 'LOAD_WORKFLOW') {
-        // Phase 5 (T025): Load workflow into canvas and set as active workflow
+      if (message.type === 'LOAD_WORKFLOW') {
+        // Load workflow into canvas and set as active workflow
+        setIsLoadingFile(false);
         const workflow: Workflow = message.payload?.workflow;
         if (workflow) {
           const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(workflow);
@@ -136,14 +127,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
           // Set as active workflow to preserve conversation history
           setActiveWorkflow(workflow);
         }
+      } else if (message.type === 'FILE_PICKER_CANCELLED') {
+        // User cancelled file picker - reset loading state
+        setIsLoadingFile(false);
       } else if (message.type === 'EXPORT_SUCCESS') {
         setIsExporting(false);
       } else if (message.type === 'EXPORT_CANCELLED') {
         // User cancelled export - reset exporting state
         setIsExporting(false);
       } else if (message.type === 'ERROR') {
-        // Reset exporting state on any error
+        // Reset loading states on any error
         setIsExporting(false);
+        setIsLoadingFile(false);
       }
     };
 
@@ -151,34 +146,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
     return () => window.removeEventListener('message', handler);
   }, [setNodes, setEdges, setActiveWorkflow, setWorkflowName]);
 
-  // Load workflow list on mount
-  useEffect(() => {
-    loadWorkflowList().catch((error) => {
-      console.error('Failed to load initial workflow list:', error);
-    });
-  }, []);
-
-  const handleRefreshList = async () => {
-    try {
-      await loadWorkflowList();
-    } catch (error) {
-      console.error('Failed to load workflow list:', error);
-    }
-  };
-
   const handleLoadWorkflow = () => {
-    if (!selectedWorkflowId) {
-      onError({
-        code: 'VALIDATION_ERROR',
-        message: t('toolbar.error.selectWorkflowToLoad'),
-      });
-      return;
-    }
-
-    // Request to load specific workflow
+    setIsLoadingFile(true);
+    // Open OS file picker via extension
     vscode.postMessage({
-      type: 'LOAD_WORKFLOW',
-      payload: { workflowId: selectedWorkflowId },
+      type: 'OPEN_FILE_PICKER',
     });
   };
 
@@ -378,6 +350,47 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
           </button>
         </StyledTooltipItem>
 
+        {/* Load Button */}
+        <StyledTooltipItem content={t('toolbar.load.tooltip')}>
+          <button
+            type="button"
+            onClick={handleLoadWorkflow}
+            disabled={isLoadingFile}
+            data-tour="load-button"
+            style={{
+              padding: isCompact ? '4px 8px' : '4px 12px',
+              backgroundColor: 'var(--vscode-button-secondaryBackground)',
+              color: 'var(--vscode-button-secondaryForeground)',
+              border: 'none',
+              borderRadius: '2px',
+              cursor: isLoadingFile ? 'not-allowed' : 'pointer',
+              fontSize: '13px',
+              opacity: isLoadingFile ? 0.6 : 1,
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            {isCompact ? (
+              <FileDown size={16} />
+            ) : isLoadingFile ? (
+              t('toolbar.loading')
+            ) : (
+              t('toolbar.load')
+            )}
+          </button>
+        </StyledTooltipItem>
+
+        {/* Divider */}
+        <div
+          style={{
+            width: '1px',
+            height: '20px',
+            backgroundColor: 'var(--vscode-panel-border)',
+          }}
+        />
+
         {/* Export Button */}
         <StyledTooltipItem content={t('toolbar.convert.iconTooltip')}>
           <button
@@ -387,8 +400,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
             data-tour="export-button"
             style={{
               padding: isCompact ? '4px 8px' : '4px 12px',
-              backgroundColor: 'var(--vscode-button-secondaryBackground)',
-              color: 'var(--vscode-button-secondaryForeground)',
+              backgroundColor: 'var(--vscode-button-background)',
+              color: 'var(--vscode-button-foreground)',
               border: 'none',
               borderRadius: '2px',
               cursor: isExporting ? 'not-allowed' : 'pointer',
@@ -407,66 +420,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
             ) : (
               t('toolbar.convert')
             )}
-          </button>
-        </StyledTooltipItem>
-
-        {/* Divider */}
-        <div
-          style={{
-            width: '1px',
-            height: '20px',
-            backgroundColor: 'var(--vscode-panel-border)',
-          }}
-        />
-
-        {/* Workflow Selector */}
-        <select
-          value={selectedWorkflowId}
-          onChange={(e) => setSelectedWorkflowId(e.target.value)}
-          onFocus={handleRefreshList}
-          className="nodrag"
-          data-tour="workflow-selector"
-          style={{
-            padding: '4px 8px',
-            backgroundColor: 'var(--vscode-input-background)',
-            color: 'var(--vscode-input-foreground)',
-            border: '1px solid var(--vscode-input-border)',
-            borderRadius: '2px',
-            fontSize: '13px',
-            minWidth: '150px',
-          }}
-        >
-          <option value="">{t('toolbar.selectWorkflow')}</option>
-          {workflows.map((wf) => (
-            <option key={wf.id} value={wf.id}>
-              {wf.name}
-            </option>
-          ))}
-        </select>
-
-        {/* Load Button */}
-        <StyledTooltipItem content={t('toolbar.load.tooltip')}>
-          <button
-            type="button"
-            onClick={handleLoadWorkflow}
-            disabled={!selectedWorkflowId}
-            data-tour="load-button"
-            style={{
-              padding: isCompact ? '4px 8px' : '4px 12px',
-              backgroundColor: 'var(--vscode-button-secondaryBackground)',
-              color: 'var(--vscode-button-secondaryForeground)',
-              border: 'none',
-              borderRadius: '2px',
-              cursor: !selectedWorkflowId ? 'not-allowed' : 'pointer',
-              fontSize: '13px',
-              opacity: !selectedWorkflowId ? 0.6 : 1,
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            {isCompact ? <FileDown size={16} /> : t('toolbar.load')}
           </button>
         </StyledTooltipItem>
 

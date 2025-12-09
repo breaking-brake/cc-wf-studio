@@ -23,6 +23,7 @@ export interface WebviewTranslationKeys {
   'toolbar.refineWithAI': string;
   'toolbar.selectWorkflow': string;
   'toolbar.load': string;
+  'toolbar.loading': string;
   'toolbar.refreshList': string;
 
   // Toolbar interaction mode
@@ -38,6 +39,7 @@ export interface WebviewTranslationKeys {
   'toolbar.error.validationFailed': string;
   'toolbar.error.missingEndNode': string;
   'toolbar.error.noActiveWorkflow': string;
+  'toolbar.error.invalidWorkflowFile': string;
   'toolbar.generateNameWithAI': string;
   'toolbar.error.nameGenerationFailed': string;
 

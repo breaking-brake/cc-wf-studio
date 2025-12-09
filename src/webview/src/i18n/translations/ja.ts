@@ -25,6 +25,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.refineWithAI': 'AI編集',
   'toolbar.selectWorkflow': 'ワークフローを選択...',
   'toolbar.load': '読み込み',
+  'toolbar.loading': '読み込み中...',
   'toolbar.refreshList': 'ワークフローリストを更新',
 
   // Toolbar interaction mode
@@ -40,6 +41,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.validationFailed': 'ワークフローの検証に失敗しました',
   'toolbar.error.missingEndNode': 'ワークフローには最低1つのEndノードが必要です',
   'toolbar.error.noActiveWorkflow': 'ワークフローを読み込んでください',
+  'toolbar.error.invalidWorkflowFile':
+    '無効なワークフローファイルです。有効なJSONワークフローファイルを選択してください。',
   'toolbar.generateNameWithAI': 'AIで名前を生成',
   'toolbar.error.nameGenerationFailed':
     'ワークフロー名の生成に失敗しました。再度お試しいただくか、手動で入力してください。',
@@ -47,7 +50,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Toolbar responsive tooltips
   'toolbar.save.tooltip': 'ワークフローを保存',
   'toolbar.convert.iconTooltip': 'Slash Commandに変換',
-  'toolbar.load.tooltip': '選択したワークフローを読み込み',
+  'toolbar.load.tooltip': '保存したワークフローを読み込む',
   'slack.share.tooltip': 'Slackに共有',
 
   // Node Palette

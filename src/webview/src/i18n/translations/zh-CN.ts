@@ -25,6 +25,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.refineWithAI': 'AI编辑',
   'toolbar.selectWorkflow': '选择工作流...',
   'toolbar.load': '加载',
+  'toolbar.loading': '加载中...',
   'toolbar.refreshList': '刷新工作流列表',
 
   // Toolbar interaction mode
@@ -40,13 +41,14 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.validationFailed': '工作流验证失败',
   'toolbar.error.missingEndNode': '工作流必须至少包含一个End节点',
   'toolbar.error.noActiveWorkflow': '请先加载工作流',
+  'toolbar.error.invalidWorkflowFile': '无效的工作流文件。请选择有效的JSON工作流文件。',
   'toolbar.generateNameWithAI': '使用AI生成名称',
   'toolbar.error.nameGenerationFailed': '生成工作流名称失败。请重试或手动输入。',
 
   // Toolbar responsive tooltips
   'toolbar.save.tooltip': '保存工作流',
   'toolbar.convert.iconTooltip': '转换为Slash Command',
-  'toolbar.load.tooltip': '加载选定的工作流',
+  'toolbar.load.tooltip': '加载已保存的工作流',
   'slack.share.tooltip': '分享到Slack',
 
   // Node Palette

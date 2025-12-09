@@ -25,6 +25,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.refineWithAI': 'AI로 편집',
   'toolbar.selectWorkflow': '워크플로 선택...',
   'toolbar.load': '불러오기',
+  'toolbar.loading': '불러오는 중...',
   'toolbar.refreshList': '워크플로 목록 새로고침',
 
   // Toolbar interaction mode
@@ -40,6 +41,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.validationFailed': '워크플로 검증에 실패했습니다',
   'toolbar.error.missingEndNode': '워크플로에는 최소 1개의 End 노드가 필요합니다',
   'toolbar.error.noActiveWorkflow': '먼저 워크플로를 불러오세요',
+  'toolbar.error.invalidWorkflowFile':
+    '잘못된 워크플로 파일입니다. 유효한 JSON 워크플로 파일을 선택해주세요.',
   'toolbar.generateNameWithAI': 'AI로 이름 생성',
   'toolbar.error.nameGenerationFailed':
     '워크플로 이름 생성에 실패했습니다. 다시 시도하거나 수동으로 입력하세요.',
@@ -47,7 +50,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Toolbar responsive tooltips
   'toolbar.save.tooltip': '워크플로 저장',
   'toolbar.convert.iconTooltip': 'Slash Command로 변환',
-  'toolbar.load.tooltip': '선택한 워크플로 불러오기',
+  'toolbar.load.tooltip': '저장된 워크플로 불러오기',
   'slack.share.tooltip': 'Slack에 공유',
 
   // Node Palette
