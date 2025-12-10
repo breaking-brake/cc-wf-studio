@@ -23,7 +23,6 @@ import ReactFlow, {
 import { useIsCompactMode } from '../../hooks/useWindowWidth';
 import { useTranslation } from '../../i18n/i18n-context';
 import { generateWorkflowName } from '../../services/ai-generation-service';
-import { serializeWorkflow } from '../../services/workflow-service';
 import { useRefinementStore } from '../../stores/refinement-store';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { EditableNameField } from '../common/EditableNameField';
@@ -102,9 +101,7 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
     isPropertyPanelOpen,
     cancelSubAgentFlowEditing,
     mainWorkflowSnapshot,
-    workflowName,
-    activeWorkflow,
-    setActiveWorkflow,
+    updateActiveWorkflowMetadata,
   } = useWorkflowStore();
 
   const { loadConversationHistory, initConversation } = useRefinementStore();
@@ -163,18 +160,9 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
             : sf
         );
 
-        // Reconstruct the main workflow from snapshot
-        const mainWorkflow = serializeWorkflow(
-          mainWorkflowSnapshot.nodes,
-          mainWorkflowSnapshot.edges,
-          workflowName || 'Untitled',
-          activeWorkflow?.description || 'Created with Workflow Studio',
-          activeWorkflow?.conversationHistory,
-          updatedSubAgentFlows
-        );
-
-        // Set the main workflow as active
-        setActiveWorkflow(mainWorkflow);
+        // Update only the subAgentFlows in activeWorkflow without changing the canvas
+        // Using updateActiveWorkflowMetadata to avoid overwriting SubAgentFlow canvas with main workflow
+        updateActiveWorkflowMetadata({ subAgentFlows: updatedSubAgentFlows });
 
         // Initialize conversation history for the SubAgentFlow
         const subAgentFlow = updatedSubAgentFlows.find((sf) => sf.id === activeSubAgentFlowId);
@@ -193,9 +181,7 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
     nodes,
     edges,
     subAgentFlows,
-    workflowName,
-    activeWorkflow,
-    setActiveWorkflow,
+    updateActiveWorkflowMetadata,
     loadConversationHistory,
     initConversation,
   ]);

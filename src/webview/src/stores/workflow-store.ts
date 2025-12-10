@@ -78,6 +78,7 @@ interface WorkflowStore {
   addGeneratedWorkflow: (workflow: Workflow) => void;
   updateWorkflow: (workflow: Workflow) => void;
   setActiveWorkflow: (workflow: Workflow) => void; // Phase 3.12
+  updateActiveWorkflowMetadata: (updates: Partial<Workflow>) => void; // Update activeWorkflow without changing canvas
 
   // Sub-Agent Flow Actions (Feature: 089-subworkflow)
   addSubAgentFlow: (subAgentFlow: SubAgentFlow) => void;
@@ -471,6 +472,25 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       edges: newEdges,
       activeWorkflow: workflow,
       subAgentFlows: workflow.subAgentFlows || [],
+    });
+  },
+
+  updateActiveWorkflowMetadata: (updates: Partial<Workflow>) => {
+    const { activeWorkflow } = get();
+    if (!activeWorkflow) return;
+
+    // Update only activeWorkflow without changing canvas (nodes/edges)
+    // This is used when editing SubAgentFlow to update parent workflow metadata
+    // without overwriting the SubAgentFlow canvas
+    set({
+      activeWorkflow: {
+        ...activeWorkflow,
+        ...updates,
+      },
+      // Also sync subAgentFlows if it's being updated
+      ...(updates.subAgentFlows !== undefined && {
+        subAgentFlows: updates.subAgentFlows,
+      }),
     });
   },
 
