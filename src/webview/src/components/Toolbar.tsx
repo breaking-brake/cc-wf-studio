@@ -20,7 +20,7 @@ import {
 } from '../services/workflow-service';
 import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
-import { AiGenerateButton } from './common/AiGenerateButton';
+import { EditableNameField } from './common/EditableNameField';
 import { ProcessingOverlay } from './common/ProcessingOverlay';
 import { StyledTooltipItem, StyledTooltipProvider } from './common/StyledTooltip';
 import { ConfirmDialog } from './dialogs/ConfirmDialog';
@@ -283,46 +283,21 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
           backgroundColor: 'var(--vscode-editor-background)',
         }}
       >
-        {/* Workflow Name Input with AI Generate Button (inside input) */}
-        <div style={{ position: 'relative', flex: 1 }}>
-          <input
-            type="text"
-            value={workflowName}
-            onChange={(e) => setWorkflowName(e.target.value)}
-            placeholder={t('toolbar.workflowNamePlaceholder')}
-            disabled={isGeneratingName}
-            className="nodrag"
-            data-tour="workflow-name-input"
-            style={{
-              width: '100%',
-              padding: '4px 44px 4px 8px',
-              backgroundColor: 'var(--vscode-input-background)',
-              color: 'var(--vscode-input-foreground)',
-              border: '1px solid var(--vscode-input-border)',
-              borderRadius: '2px',
-              fontSize: '13px',
-              opacity: isGeneratingName ? 0.7 : 1,
-              boxSizing: 'border-box',
-            }}
-          />
-          {/* AI Generate / Cancel Button (positioned inside input) */}
-          <div
-            style={{
-              position: 'absolute',
-              right: '4px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-            }}
-          >
-            <AiGenerateButton
-              isGenerating={isGeneratingName}
-              onGenerate={handleGenerateWorkflowName}
-              onCancel={handleCancelNameGeneration}
-              generateTooltip={t('toolbar.generateNameWithAI')}
-              cancelTooltip={t('cancel')}
-            />
-          </div>
-        </div>
+        {/* Workflow Name Display/Input with AI Generate Button */}
+        <EditableNameField
+          value={workflowName}
+          onChange={setWorkflowName}
+          placeholder={t('toolbar.workflowNamePlaceholder')}
+          disabled={isGeneratingName}
+          dataTour="workflow-name-input"
+          aiGeneration={{
+            isGenerating: isGeneratingName,
+            onGenerate: handleGenerateWorkflowName,
+            onCancel: handleCancelNameGeneration,
+            generateTooltip: t('toolbar.generateNameWithAI'),
+            cancelTooltip: t('cancel'),
+          }}
+        />
 
         {/* Save Button */}
         <StyledTooltipItem content={t('toolbar.save.tooltip')}>

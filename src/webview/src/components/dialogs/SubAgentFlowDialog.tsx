@@ -26,7 +26,7 @@ import { generateWorkflowName } from '../../services/ai-generation-service';
 import { serializeWorkflow } from '../../services/workflow-service';
 import { useRefinementStore } from '../../stores/refinement-store';
 import { useWorkflowStore } from '../../stores/workflow-store';
-import { AiGenerateButton } from '../common/AiGenerateButton';
+import { EditableNameField } from '../common/EditableNameField';
 import { StyledTooltip } from '../common/StyledTooltip';
 import { InteractionModeToggle } from '../InteractionModeToggle';
 import { NodePalette } from '../NodePalette';
@@ -469,59 +469,22 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
             >
               Sub-Agent Flow
             </span>
-            {/* Always-visible input field (Toolbar style) with AI Generate button inside */}
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, maxWidth: '300px' }}>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="text"
-                  value={localName}
-                  onChange={(e) => handleNameChange(e.target.value)}
-                  onKeyDown={(e) => e.stopPropagation()}
-                  disabled={isGeneratingName}
-                  style={{
-                    width: '100%',
-                    padding: '4px 44px 4px 8px',
-                    backgroundColor: 'var(--vscode-input-background)',
-                    color: 'var(--vscode-input-foreground)',
-                    border: nameError
-                      ? '1px solid var(--vscode-inputValidation-errorBorder)'
-                      : '1px solid var(--vscode-input-border)',
-                    borderRadius: '2px',
-                    fontSize: '13px',
-                    boxSizing: 'border-box',
-                    opacity: isGeneratingName ? 0.7 : 1,
-                  }}
-                  placeholder={t('subAgentFlow.namePlaceholder')}
-                />
-                {/* AI Generate / Cancel Button (positioned inside input) */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    right: '4px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                  }}
-                >
-                  <AiGenerateButton
-                    isGenerating={isGeneratingName}
-                    onGenerate={handleGenerateSubAgentFlowName}
-                    onCancel={handleCancelNameGeneration}
-                    generateTooltip={t('subAgentFlow.generateNameWithAI')}
-                    cancelTooltip={t('cancel')}
-                  />
-                </div>
-              </div>
-              {nameError && (
-                <span
-                  style={{
-                    fontSize: '11px',
-                    color: 'var(--vscode-inputValidation-errorForeground)',
-                    marginTop: '4px',
-                  }}
-                >
-                  {nameError}
-                </span>
-              )}
+            {/* Flow name display/input with AI Generate button inside */}
+            <div style={{ flex: 1, maxWidth: '300px' }}>
+              <EditableNameField
+                value={localName}
+                onChange={handleNameChange}
+                placeholder={t('subAgentFlow.namePlaceholder')}
+                disabled={isGeneratingName}
+                error={nameError}
+                aiGeneration={{
+                  isGenerating: isGeneratingName,
+                  onGenerate: handleGenerateSubAgentFlowName,
+                  onCancel: handleCancelNameGeneration,
+                  generateTooltip: t('subAgentFlow.generateNameWithAI'),
+                  cancelTooltip: t('cancel'),
+                }}
+              />
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
