@@ -92,6 +92,7 @@ export const WorkflowEditor: React.FC = () => {
     activeWorkflow,
     setActiveWorkflow,
     workflowName,
+    subAgentFlows,
   } = useWorkflowStore();
 
   const { openChat, initConversation, loadConversationHistory } = useRefinementStore();
@@ -190,12 +191,14 @@ export const WorkflowEditor: React.FC = () => {
   // Handle opening AI refinement chat
   const handleOpenRefinementChat = useCallback(() => {
     // Serialize current workflow state to set as active workflow
+    // Include subAgentFlows to preserve SubAgentFlow references
     const currentWorkflow = serializeWorkflow(
       nodes,
       edges,
       workflowName || 'Untitled',
       'Created with Workflow Studio',
-      activeWorkflow?.conversationHistory
+      activeWorkflow?.conversationHistory,
+      subAgentFlows
     );
     setActiveWorkflow(currentWorkflow);
 
@@ -214,6 +217,7 @@ export const WorkflowEditor: React.FC = () => {
     edges,
     workflowName,
     activeWorkflow?.conversationHistory,
+    subAgentFlows,
     setActiveWorkflow,
     loadConversationHistory,
     initConversation,
