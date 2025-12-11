@@ -65,7 +65,7 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
   };
 
   // Get current canvas state for workflow generation
-  const { nodes, edges, activeWorkflow, workflowName } = useWorkflowStore();
+  const { nodes, edges, activeWorkflow, workflowName, subAgentFlows } = useWorkflowStore();
 
   // State management
   const [loading, setLoading] = useState(false);
@@ -206,7 +206,8 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
         edges,
         workflowName || 'Untitled Workflow',
         'Created with Workflow Studio',
-        activeWorkflow?.conversationHistory
+        activeWorkflow?.conversationHistory,
+        subAgentFlows
       );
       const workflowJson = JSON.stringify(workflow, null, 2);
 
@@ -239,7 +240,7 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
         generationRequestIdRef.current = null;
       }
     }
-  }, [nodes, edges, workflowName, activeWorkflow?.conversationHistory, locale, t]);
+  }, [nodes, edges, workflowName, activeWorkflow?.conversationHistory, locale, t, subAgentFlows]);
 
   // Handle cancel AI description generation
   const handleCancelGeneration = useCallback(() => {
@@ -270,7 +271,8 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
         edges,
         workflowName,
         'Created with Workflow Studio',
-        activeWorkflow?.conversationHistory
+        activeWorkflow?.conversationHistory,
+        subAgentFlows
       );
 
       const result = await shareWorkflowToSlack({
@@ -315,7 +317,8 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
         edges,
         workflowName,
         'Created with Workflow Studio',
-        activeWorkflow?.conversationHistory
+        activeWorkflow?.conversationHistory,
+        subAgentFlows
       );
 
       const result = await shareWorkflowToSlack({
