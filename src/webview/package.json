@@ -20,7 +20,7 @@
     "driver.js": "^1.4.0",
     "lucide-react": "^0.555.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react-dom": "^19.2.1",
     "reactflow": "^11.10.0",
     "zustand": "^5.0.9"
   },
