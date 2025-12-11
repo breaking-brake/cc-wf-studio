@@ -425,7 +425,13 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
           outline: 'none',
         }}
         onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          // Only stop propagation for Escape to prevent closing parent dialogs
+          // Allow other keys (like Ctrl+C/V) to work normally
+          if (e.key === 'Escape') {
+            e.stopPropagation();
+          }
+        }}
         role="dialog"
         aria-modal="true"
         aria-labelledby="subagentflow-dialog-title"

@@ -58,8 +58,10 @@ export const EditableNameField: React.FC<EditableNameFieldProps> = ({
   }, []);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    e.stopPropagation();
+    // Only stop propagation for Enter/Escape to prevent parent handlers
+    // Allow other keys (like Ctrl+C/V) to work normally
     if (e.key === 'Enter' || e.key === 'Escape') {
+      e.stopPropagation();
       setIsEditing(false);
     }
   }, []);
