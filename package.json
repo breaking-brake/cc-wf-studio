@@ -100,7 +100,7 @@
     "vite": "^7.2.6"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.24.1",
+    "@modelcontextprotocol/sdk": "^1.24.3",
     "@slack/web-api": "^7.13.0",
     "nano-spawn": "^2.0.0"
   }
