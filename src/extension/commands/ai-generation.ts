@@ -13,7 +13,11 @@ import type {
   SkillReference,
   Workflow,
 } from '../../shared/types/messages';
-import type { SkillNodeData } from '../../shared/types/workflow-definition';
+import type {
+  SkillNodeData,
+  SubAgentFlow,
+  SubAgentFlowNodeData,
+} from '../../shared/types/workflow-definition';
 import { log } from '../extension';
 import { executeClaudeCodeCLI, parseClaudeCodeOutput } from '../services/claude-code-service';
 import { getDefaultSchemaPath, loadWorkflowSchema } from '../services/schema-loader-service';
@@ -164,8 +168,19 @@ export async function handleGenerateWorkflow(
       skillNodesCount: workflowWithResolvedSkills.nodes.filter((n) => n.type === 'skill').length,
     });
 
+    // Step 5.5: Resolve SubAgentFlow references
+    const workflowWithResolvedSubAgentFlows = resolveSubAgentFlows(workflowWithResolvedSkills);
+
+    log('INFO', 'SubAgentFlow references resolved', {
+      requestId,
+      subAgentFlowNodesCount: workflowWithResolvedSubAgentFlows.nodes.filter(
+        (n) => n.type === 'subAgentFlow'
+      ).length,
+      subAgentFlowsCount: workflowWithResolvedSubAgentFlows.subAgentFlows?.length || 0,
+    });
+
     // Step 6: Validate workflow
-    const validationResult = validateAIGeneratedWorkflow(workflowWithResolvedSkills);
+    const validationResult = validateAIGeneratedWorkflow(workflowWithResolvedSubAgentFlows);
 
     if (!validationResult.valid) {
       // Validation failed
@@ -191,12 +206,13 @@ export async function handleGenerateWorkflow(
 
     log('INFO', 'Workflow validated successfully', {
       requestId,
-      nodeCount: workflowWithResolvedSkills.nodes?.length ?? 0,
-      connectionCount: workflowWithResolvedSkills.connections?.length ?? 0,
+      nodeCount: workflowWithResolvedSubAgentFlows.nodes?.length ?? 0,
+      connectionCount: workflowWithResolvedSubAgentFlows.connections?.length ?? 0,
+      subAgentFlowsCount: workflowWithResolvedSubAgentFlows.subAgentFlows?.length ?? 0,
     });
 
     // Step 7: Adjust node positions for better spacing
-    const adjustedWorkflow = adjustNodeSpacing(workflowWithResolvedSkills);
+    const adjustedWorkflow = adjustNodeSpacing(workflowWithResolvedSubAgentFlows);
 
     // Step 7: Success - send generated workflow
     log('INFO', 'AI Workflow Generation completed successfully', {
@@ -392,6 +408,14 @@ ${schemaJSON}
 - Use semantic version for workflow version (e.g., "1.0.0")
 - Set createdAt and updatedAt to current ISO 8601 timestamp
 
+**SubAgentFlow Requirements** (IMPORTANT):
+- When using a subAgentFlow node, you MUST also create a corresponding SubAgentFlow definition in the "subAgentFlows" array
+- The SubAgentFlow definition MUST have the same ID as referenced in the node's "subAgentFlowId"
+- Each SubAgentFlow MUST contain at least Start and End nodes with a connection between them
+- SubAgentFlows can only contain: start, end, prompt, ifElse, switch, skill, mcp nodes
+- SubAgentFlows CANNOT contain: subAgent, subAgentFlow, askUserQuestion nodes
+- Maximum 30 nodes per SubAgentFlow
+
 **Output Format**:
 \`\`\`json
 {
@@ -400,6 +424,7 @@ ${schemaJSON}
   "version": "1.0.0",
   "nodes": [...],
   "connections": [...],
+  "subAgentFlows": [...],
   "createdAt": "${new Date().toISOString()}",
   "updatedAt": "${new Date().toISOString()}"
 }
@@ -455,6 +480,108 @@ async function resolveSkillPaths(
   return {
     ...workflow,
     nodes: resolvedNodes,
+  };
+}
+
+/**
+ * Create a minimal SubAgentFlow structure (Start → End only)
+ *
+ * Used as fallback when AI generates a subAgentFlow node without
+ * creating the corresponding SubAgentFlow definition.
+ *
+ * @param subAgentFlowId - ID for the SubAgentFlow (matches reference node's subAgentFlowId)
+ * @param label - Display label from the reference node
+ * @param description - Optional description from the reference node
+ * @returns Minimal SubAgentFlow with Start and End nodes connected
+ */
+function createMinimalSubAgentFlow(
+  subAgentFlowId: string,
+  label: string,
+  description?: string
+): SubAgentFlow {
+  return {
+    id: subAgentFlowId,
+    name: label,
+    description: description || `Sub-Agent Flow: ${label}`,
+    nodes: [
+      {
+        id: `${subAgentFlowId}-start`,
+        type: 'start',
+        name: 'Start',
+        position: { x: 100, y: 200 },
+        data: { label: 'Start' },
+      },
+      {
+        id: `${subAgentFlowId}-end`,
+        type: 'end',
+        name: 'End',
+        position: { x: 400, y: 200 },
+        data: { label: 'End' },
+      },
+    ],
+    connections: [
+      {
+        id: `${subAgentFlowId}-conn`,
+        from: `${subAgentFlowId}-start`,
+        to: `${subAgentFlowId}-end`,
+        fromPort: 'output',
+        toPort: 'input',
+      },
+    ],
+  };
+}
+
+/**
+ * Resolve SubAgentFlow references in AI-generated workflows
+ *
+ * For each subAgentFlow node, ensures a corresponding SubAgentFlow
+ * definition exists in workflow.subAgentFlows. Creates minimal
+ * structures (Start → End) for any missing definitions.
+ *
+ * @param workflow - AI-generated workflow (may have missing subAgentFlows)
+ * @returns Modified workflow with resolved SubAgentFlow definitions
+ */
+function resolveSubAgentFlows(workflow: Workflow): Workflow {
+  // Find all subAgentFlow nodes
+  const subAgentFlowNodes = workflow.nodes.filter((n) => n.type === 'subAgentFlow');
+
+  if (subAgentFlowNodes.length === 0) {
+    return workflow; // No SubAgentFlow nodes, nothing to resolve
+  }
+
+  // Initialize subAgentFlows array if not present
+  const existingSubAgentFlows = workflow.subAgentFlows || [];
+  const existingIds = new Set(existingSubAgentFlows.map((sf) => sf.id));
+
+  // Create missing SubAgentFlow definitions
+  const newSubAgentFlows: SubAgentFlow[] = [];
+
+  for (const node of subAgentFlowNodes) {
+    const refData = node.data as SubAgentFlowNodeData;
+    const targetId = refData.subAgentFlowId;
+
+    if (!existingIds.has(targetId)) {
+      // SubAgentFlow definition is missing - create minimal structure
+      log('INFO', 'Creating minimal SubAgentFlow for missing definition', {
+        subAgentFlowId: targetId,
+        nodeId: node.id,
+        label: refData.label,
+      });
+
+      const minimalSubAgentFlow = createMinimalSubAgentFlow(
+        targetId,
+        refData.label,
+        refData.description
+      );
+
+      newSubAgentFlows.push(minimalSubAgentFlow);
+      existingIds.add(targetId); // Prevent duplicates
+    }
+  }
+
+  return {
+    ...workflow,
+    subAgentFlows: [...existingSubAgentFlows, ...newSubAgentFlows],
   };
 }
 

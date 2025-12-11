@@ -9,6 +9,8 @@ import type { SkillReference } from '../../shared/types/messages';
 import type {
   ConversationHistory,
   SkillNodeData,
+  SubAgentFlow,
+  SubAgentFlowNodeData,
   Workflow,
 } from '../../shared/types/workflow-definition';
 import { log } from '../extension';
@@ -402,6 +404,15 @@ export async function refineWorkflow(
       log('INFO', 'Skipping skill path resolution (useSkills=false)', { requestId });
     }
 
+    // Step 7.5: Resolve SubAgentFlow references
+    refinedWorkflow = resolveSubAgentFlows(refinedWorkflow);
+
+    log('INFO', 'SubAgentFlow references resolved', {
+      requestId,
+      subAgentFlowNodesCount: refinedWorkflow.nodes.filter((n) => n.type === 'subAgentFlow').length,
+      subAgentFlowsCount: refinedWorkflow.subAgentFlows?.length || 0,
+    });
+
     // Step 8: Validate refined workflow
     const validation = validateAIGeneratedWorkflow(refinedWorkflow);
 
@@ -506,6 +517,108 @@ async function resolveSkillPaths(
   return {
     ...workflow,
     nodes: resolvedNodes,
+  };
+}
+
+/**
+ * Create a minimal SubAgentFlow structure (Start → End only)
+ *
+ * Used as fallback when AI generates a subAgentFlow node without
+ * creating the corresponding SubAgentFlow definition.
+ *
+ * @param subAgentFlowId - ID for the SubAgentFlow (matches reference node's subAgentFlowId)
+ * @param label - Display label from the reference node
+ * @param description - Optional description from the reference node
+ * @returns Minimal SubAgentFlow with Start and End nodes connected
+ */
+function createMinimalSubAgentFlow(
+  subAgentFlowId: string,
+  label: string,
+  description?: string
+): SubAgentFlow {
+  return {
+    id: subAgentFlowId,
+    name: label,
+    description: description || `Sub-Agent Flow: ${label}`,
+    nodes: [
+      {
+        id: `${subAgentFlowId}-start`,
+        type: 'start',
+        name: 'Start',
+        position: { x: 100, y: 200 },
+        data: { label: 'Start' },
+      },
+      {
+        id: `${subAgentFlowId}-end`,
+        type: 'end',
+        name: 'End',
+        position: { x: 400, y: 200 },
+        data: { label: 'End' },
+      },
+    ],
+    connections: [
+      {
+        id: `${subAgentFlowId}-conn`,
+        from: `${subAgentFlowId}-start`,
+        to: `${subAgentFlowId}-end`,
+        fromPort: 'output',
+        toPort: 'input',
+      },
+    ],
+  };
+}
+
+/**
+ * Resolve SubAgentFlow references in refined workflows
+ *
+ * For each subAgentFlow node, ensures a corresponding SubAgentFlow
+ * definition exists in workflow.subAgentFlows. Creates minimal
+ * structures (Start → End) for any missing definitions.
+ *
+ * @param workflow - Refined workflow (may have missing subAgentFlows)
+ * @returns Modified workflow with resolved SubAgentFlow definitions
+ */
+function resolveSubAgentFlows(workflow: Workflow): Workflow {
+  // Find all subAgentFlow nodes
+  const subAgentFlowNodes = workflow.nodes.filter((n) => n.type === 'subAgentFlow');
+
+  if (subAgentFlowNodes.length === 0) {
+    return workflow; // No SubAgentFlow nodes, nothing to resolve
+  }
+
+  // Initialize subAgentFlows array if not present
+  const existingSubAgentFlows = workflow.subAgentFlows || [];
+  const existingIds = new Set(existingSubAgentFlows.map((sf) => sf.id));
+
+  // Create missing SubAgentFlow definitions
+  const newSubAgentFlows: SubAgentFlow[] = [];
+
+  for (const node of subAgentFlowNodes) {
+    const refData = node.data as SubAgentFlowNodeData;
+    const targetId = refData.subAgentFlowId;
+
+    if (!existingIds.has(targetId)) {
+      // SubAgentFlow definition is missing - create minimal structure
+      log('INFO', 'Creating minimal SubAgentFlow for missing definition (refinement)', {
+        subAgentFlowId: targetId,
+        nodeId: node.id,
+        label: refData.label,
+      });
+
+      const minimalSubAgentFlow = createMinimalSubAgentFlow(
+        targetId,
+        refData.label,
+        refData.description
+      );
+
+      newSubAgentFlows.push(minimalSubAgentFlow);
+      existingIds.add(targetId); // Prevent duplicates
+    }
+  }
+
+  return {
+    ...workflow,
+    subAgentFlows: [...existingSubAgentFlows, ...newSubAgentFlows],
   };
 }
 

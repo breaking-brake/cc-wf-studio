@@ -405,11 +405,13 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     );
 
     // Completely replace existing workflow with generated workflow
+    // Also include subAgentFlows from the generated workflow
     set({
       nodes: newNodes,
       edges: newEdges,
       selectedNodeId: firstSelectableNode?.id || null,
       activeWorkflow: workflow,
+      subAgentFlows: workflow.subAgentFlows || [],
     });
   },
 
@@ -436,10 +438,12 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     }));
 
     // Update workflow while preserving selection
+    // Also include subAgentFlows from the refined workflow
     set({
       nodes: newNodes,
       edges: newEdges,
       activeWorkflow: workflow,
+      subAgentFlows: workflow.subAgentFlows || [],
     });
   },
 

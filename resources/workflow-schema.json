@@ -315,6 +315,65 @@
         "noNesting": "SubAgentFlow nodes cannot be used inside sub-agent flows (no nesting allowed in Phase 1 MVP)",
         "noSubAgentInSubAgentFlow": "SubAgent nodes cannot be used inside sub-agent flows (Claude Code constraint)",
         "sequentialExecution": "Sub-agent flows execute sequentially from Start to End"
+      },
+      "aiGenerationGuidance": {
+        "requirement": "When generating a subAgentFlow node, you MUST also create a corresponding SubAgentFlow definition in the 'subAgentFlows' array at the workflow root level",
+        "subAgentFlowDefinition": {
+          "id": "MUST match the subAgentFlowId in the reference node",
+          "name": "Same as the label of the reference node",
+          "description": "Optional description",
+          "nodes": "MUST include at least Start and End nodes",
+          "connections": "Connect Start to End (minimum structure)"
+        },
+        "constraints": [
+          "SubAgentFlow nodes array can only contain: start, end, prompt, ifElse, switch, skill, mcp",
+          "SubAgentFlow nodes array CANNOT contain: subAgent, subAgentFlow, askUserQuestion",
+          "Maximum 30 nodes per SubAgentFlow"
+        ],
+        "example": {
+          "nodeInWorkflow": {
+            "id": "subflow-ref-1",
+            "type": "subAgentFlow",
+            "name": "validation-ref",
+            "position": { "x": 400, "y": 200 },
+            "data": {
+              "subAgentFlowId": "validation-subflow-1",
+              "label": "Input Validation",
+              "description": "Validates user input",
+              "outputPorts": 1
+            }
+          },
+          "subAgentFlowDefinition": {
+            "id": "validation-subflow-1",
+            "name": "Input Validation",
+            "description": "Validates user input",
+            "nodes": [
+              {
+                "id": "sf-start",
+                "type": "start",
+                "name": "Start",
+                "position": { "x": 100, "y": 200 },
+                "data": { "label": "Start" }
+              },
+              {
+                "id": "sf-end",
+                "type": "end",
+                "name": "End",
+                "position": { "x": 400, "y": 200 },
+                "data": { "label": "End" }
+              }
+            ],
+            "connections": [
+              {
+                "id": "sf-conn-1",
+                "from": "sf-start",
+                "to": "sf-end",
+                "fromPort": "output",
+                "toPort": "input"
+              }
+            ]
+          }
+        }
       }
     }
   },
@@ -349,6 +408,43 @@
       "Sub-Agent Flows must have exactly one Start node and at least one End node",
       "Maximum 30 nodes per Sub-Agent Flow"
     ]
+  },
+  "workflowStructure": {
+    "description": "Top-level workflow structure fields",
+    "fields": {
+      "id": { "type": "string", "required": true },
+      "name": { "type": "string", "required": true, "maxLength": 100 },
+      "description": { "type": "string", "required": false },
+      "version": { "type": "string", "required": true, "pattern": "semver" },
+      "nodes": { "type": "array", "required": true },
+      "connections": { "type": "array", "required": true },
+      "subAgentFlows": {
+        "type": "array",
+        "required": false,
+        "description": "Array of SubAgentFlow definitions. Each subAgentFlow node in 'nodes' MUST have a corresponding entry here with matching id.",
+        "item": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "description": "Unique ID matching subAgentFlowId in the reference node"
+          },
+          "name": { "type": "string", "required": true, "maxLength": 50 },
+          "description": { "type": "string", "required": false, "maxLength": 200 },
+          "nodes": {
+            "type": "array",
+            "required": true,
+            "description": "Workflow nodes (must include Start and End)"
+          },
+          "connections": {
+            "type": "array",
+            "required": true,
+            "description": "Connections between nodes"
+          }
+        }
+      },
+      "createdAt": { "type": "string", "required": true, "format": "ISO8601" },
+      "updatedAt": { "type": "string", "required": true, "format": "ISO8601" }
+    }
   },
   "examples": [
     {

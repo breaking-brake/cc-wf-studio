@@ -133,10 +133,56 @@ export function validateAIGeneratedWorkflow(workflow: unknown): ValidationResult
     });
   }
 
+  // SubAgentFlow reference validation
+  const subAgentFlowErrors = validateSubAgentFlowReferences(wf as Workflow);
+  errors.push(...subAgentFlowErrors);
+
   return {
     valid: errors.length === 0,
     errors,
   };
+}
+
+/**
+ * Validate SubAgentFlow references in workflow
+ *
+ * Ensures all subAgentFlow nodes have corresponding SubAgentFlow definitions
+ * and all SubAgentFlow definitions are valid.
+ *
+ * @param workflow - Workflow to validate
+ * @returns Array of validation errors
+ */
+function validateSubAgentFlowReferences(workflow: Workflow): ValidationError[] {
+  const errors: ValidationError[] = [];
+
+  const subAgentFlowNodes = workflow.nodes.filter((n) => n.type === NodeType.SubAgentFlow);
+
+  if (subAgentFlowNodes.length === 0) {
+    return errors; // No SubAgentFlow nodes, nothing to validate
+  }
+
+  const subAgentFlowIds = new Set((workflow.subAgentFlows || []).map((sf) => sf.id));
+
+  // Check each subAgentFlow node has a corresponding definition
+  for (const node of subAgentFlowNodes) {
+    const refData = node.data as SubAgentFlowNodeData;
+
+    if (!subAgentFlowIds.has(refData.subAgentFlowId)) {
+      errors.push({
+        code: 'SUBAGENTFLOW_MISSING_DEFINITION',
+        message: `SubAgentFlow node "${node.id}" references non-existent SubAgentFlow "${refData.subAgentFlowId}"`,
+        field: `nodes[${node.id}].data.subAgentFlowId`,
+      });
+    }
+  }
+
+  // Validate each SubAgentFlow definition
+  for (const subAgentFlow of workflow.subAgentFlows || []) {
+    const subAgentFlowErrors = validateSubAgentFlow(subAgentFlow);
+    errors.push(...subAgentFlowErrors);
+  }
+
+  return errors;
 }
 
 /**
