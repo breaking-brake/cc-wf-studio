@@ -46,6 +46,7 @@ interface WorkflowStore {
   interactionMode: InteractionMode;
   workflowName: string;
   isPropertyPanelOpen: boolean;
+  isMinimapVisible: boolean;
 
   // Sub-Agent Flow State (Feature: 089-subworkflow)
   subAgentFlows: SubAgentFlow[];
@@ -66,6 +67,7 @@ interface WorkflowStore {
   setWorkflowName: (name: string) => void;
   openPropertyPanel: () => void;
   closePropertyPanel: () => void;
+  toggleMinimapVisibility: () => void;
 
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
@@ -224,6 +226,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   interactionMode: 'pan', // Default: pan mode
   workflowName: 'my-workflow', // Default workflow name
   isPropertyPanelOpen: true, // Property panel is open by default
+  isMinimapVisible: true, // Minimap is visible by default
 
   // Sub-Agent Flow Initial State (Feature: 089-subworkflow)
   subAgentFlows: [],
@@ -306,6 +309,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   openPropertyPanel: () => set({ isPropertyPanelOpen: true }),
 
   closePropertyPanel: () => set({ isPropertyPanelOpen: false }),
+
+  toggleMinimapVisibility: () => {
+    set({ isMinimapVisible: !get().isMinimapVisible });
+  },
 
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => {

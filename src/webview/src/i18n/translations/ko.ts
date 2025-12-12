@@ -34,6 +34,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.switchToPan': '손바닥 모드로 전환',
   'toolbar.interactionMode.switchToSelection': '선택 모드로 전환',
 
+  // Toolbar minimap toggle
+  'toolbar.minimapToggle.show': '미니맵 표시',
+  'toolbar.minimapToggle.hide': '미니맵 숨기기',
+
   // Toolbar errors
   'toolbar.error.workflowNameRequired': '워크플로 이름이 필요합니다',
   'toolbar.error.workflowNameRequiredForExport': '내보내기에는 워크플로 이름이 필요합니다',

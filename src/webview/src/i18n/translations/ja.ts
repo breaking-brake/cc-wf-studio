@@ -34,6 +34,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.switchToPan': '手のひらモードに切り替え',
   'toolbar.interactionMode.switchToSelection': '範囲選択モードに切り替え',
 
+  // Toolbar minimap toggle
+  'toolbar.minimapToggle.show': 'ミニマップを表示',
+  'toolbar.minimapToggle.hide': 'ミニマップを非表示',
+
   // Toolbar errors
   'toolbar.error.workflowNameRequired': 'ワークフロー名は必須です',
   'toolbar.error.workflowNameRequiredForExport': 'エクスポートにはワークフロー名が必要です',

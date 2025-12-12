@@ -34,6 +34,10 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.switchToPan': '切换到手掌模式',
   'toolbar.interactionMode.switchToSelection': '切换到选择模式',
 
+  // Toolbar minimap toggle
+  'toolbar.minimapToggle.show': '显示迷你地图',
+  'toolbar.minimapToggle.hide': '隐藏迷你地图',
+
   // Toolbar errors
   'toolbar.error.workflowNameRequired': '工作流名称必填',
   'toolbar.error.workflowNameRequiredForExport': '导出需要工作流名称',

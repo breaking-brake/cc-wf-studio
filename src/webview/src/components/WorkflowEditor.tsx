@@ -26,6 +26,7 @@ import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { StyledTooltip } from './common/StyledTooltip';
 import { InteractionModeToggle } from './InteractionModeToggle';
+import { MinimapContainer } from './MinimapContainer';
 import { AskUserQuestionNodeComponent } from './nodes/AskUserQuestionNode';
 import { BranchNodeComponent } from './nodes/BranchNode';
 import { EndNode } from './nodes/EndNode';
@@ -252,42 +253,46 @@ export const WorkflowEditor: React.FC = () => {
         {/* Controls (zoom, fit view, etc.) */}
         <Controls />
 
-        {/* Mini map */}
-        <MiniMap
-          nodeColor={(node) => {
-            switch (node.type) {
-              case 'subAgent':
-                return 'var(--vscode-charts-blue)';
-              case 'askUserQuestion':
-                return 'var(--vscode-charts-orange)';
-              case 'branch': // Legacy
-                return 'var(--vscode-charts-yellow)';
-              case 'ifElse':
-                return 'var(--vscode-charts-yellow)';
-              case 'switch':
-                return 'var(--vscode-charts-yellow)';
-              case 'start':
-                return 'var(--vscode-charts-green)';
-              case 'end':
-                return 'var(--vscode-charts-red)';
-              case 'prompt':
-                return 'var(--vscode-charts-purple)';
-              case 'skill':
-                return 'var(--vscode-charts-cyan)';
-              case 'subAgentFlow':
-                return 'var(--vscode-charts-purple)';
-              default:
-                return 'var(--vscode-foreground)';
-            }
-          }}
-          maskColor="rgba(0, 0, 0, 0.5)"
-          style={{
-            backgroundColor: 'var(--vscode-editor-background)',
-            border: '1px solid var(--vscode-panel-border)',
-            width: isCompact ? 120 : 200,
-            height: isCompact ? 80 : 150,
-          }}
-        />
+        {/* Mini map with container */}
+        <Panel position="bottom-right">
+          <MinimapContainer>
+            <MiniMap
+              nodeColor={(node) => {
+                switch (node.type) {
+                  case 'subAgent':
+                    return 'var(--vscode-charts-blue)';
+                  case 'askUserQuestion':
+                    return 'var(--vscode-charts-orange)';
+                  case 'branch': // Legacy
+                    return 'var(--vscode-charts-yellow)';
+                  case 'ifElse':
+                    return 'var(--vscode-charts-yellow)';
+                  case 'switch':
+                    return 'var(--vscode-charts-yellow)';
+                  case 'start':
+                    return 'var(--vscode-charts-green)';
+                  case 'end':
+                    return 'var(--vscode-charts-red)';
+                  case 'prompt':
+                    return 'var(--vscode-charts-purple)';
+                  case 'skill':
+                    return 'var(--vscode-charts-cyan)';
+                  case 'subAgentFlow':
+                    return 'var(--vscode-charts-purple)';
+                  default:
+                    return 'var(--vscode-foreground)';
+                }
+              }}
+              maskColor="rgba(0, 0, 0, 0.5)"
+              style={{
+                position: 'relative',
+                backgroundColor: 'var(--vscode-editor-background)',
+                width: isCompact ? 120 : 200,
+                height: isCompact ? 80 : 150,
+              }}
+            />
+          </MinimapContainer>
+        </Panel>
 
         {/* Interaction Mode Toggle */}
         <Panel position="top-left">

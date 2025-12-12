@@ -34,6 +34,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.switchToPan': 'Switch to Hand Tool mode',
   'toolbar.interactionMode.switchToSelection': 'Switch to Selection mode',
 
+  // Toolbar minimap toggle
+  'toolbar.minimapToggle.show': 'Show Minimap',
+  'toolbar.minimapToggle.hide': 'Hide Minimap',
+
   // Toolbar errors
   'toolbar.error.workflowNameRequired': 'Workflow name is required',
   'toolbar.error.workflowNameRequiredForExport': 'Workflow name is required for export',

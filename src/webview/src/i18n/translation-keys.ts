@@ -32,6 +32,10 @@ export interface WebviewTranslationKeys {
   'toolbar.interactionMode.switchToPan': string;
   'toolbar.interactionMode.switchToSelection': string;
 
+  // Toolbar minimap toggle
+  'toolbar.minimapToggle.show': string;
+  'toolbar.minimapToggle.hide': string;
+
   // Toolbar errors
   'toolbar.error.workflowNameRequired': string;
   'toolbar.error.workflowNameRequiredForExport': string;
