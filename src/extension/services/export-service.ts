@@ -110,11 +110,22 @@ export async function exportWorkflow(
   // File format: {parent-workflow-name}_{subagentflow-name}.md
   const workflowBaseName = nodeNameToFileName(workflow.name);
   if (workflow.subAgentFlows && workflow.subAgentFlows.length > 0) {
+    // Get all SubAgentFlow nodes to access their model/tools/color settings
+    const subAgentFlowNodes = workflow.nodes.filter(
+      (node) => node.type === 'subAgentFlow'
+    ) as SubAgentFlowNode[];
+
     for (const subAgentFlow of workflow.subAgentFlows) {
       const subAgentFlowFileName = nodeNameToFileName(subAgentFlow.name);
       const fileName = `${workflowBaseName}_${subAgentFlowFileName}`;
       const filePath = path.join(agentsDir, `${fileName}.md`);
-      const content = generateSubAgentFlowAgentFile(subAgentFlow, fileName);
+
+      // Find the node that references this SubAgentFlow to get model/tools/color
+      const referencingNode = subAgentFlowNodes.find(
+        (node) => node.data.subAgentFlowId === subAgentFlow.id
+      );
+
+      const content = generateSubAgentFlowAgentFile(subAgentFlow, fileName, referencingNode);
       await fileService.writeFile(filePath, content);
       exportedFiles.push(filePath);
     }
@@ -247,21 +258,41 @@ function generateSubAgentFile(node: SubAgentNode): string {
  *
  * @param subAgentFlow - SubAgentFlow definition
  * @param agentFileName - Generated file name (format: {parent}_{subagentflow})
+ * @param referencingNode - Optional SubAgentFlowNode that references this flow (for model/tools/color)
  * @returns Markdown content with YAML frontmatter
  */
-function generateSubAgentFlowAgentFile(subAgentFlow: SubAgentFlow, agentFileName: string): string {
+function generateSubAgentFlowAgentFile(
+  subAgentFlow: SubAgentFlow,
+  agentFileName: string,
+  referencingNode?: SubAgentFlowNode
+): string {
   const agentName = agentFileName;
 
-  // YAML frontmatter (same structure as SlashCommand)
-  // Note: allowed-tools is omitted to allow all tools
+  // Get model/tools/color from referencing node, or use defaults
+  const model = referencingNode?.data.model || 'sonnet';
+  const tools = referencingNode?.data.tools;
+  const color = referencingNode?.data.color;
+
+  // YAML frontmatter (same structure as SubAgent)
   const frontmatter = [
     '---',
     `name: ${agentName}`,
     `description: ${subAgentFlow.description || subAgentFlow.name}`,
-    'model: sonnet',
-    '---',
-    '',
-  ].join('\n');
+  ];
+
+  // Add optional fields
+  if (tools && tools.length > 0) {
+    frontmatter.push(`tools: ${tools}`);
+  }
+
+  frontmatter.push(`model: ${model}`);
+
+  if (color) {
+    frontmatter.push(`color: ${color}`);
+  }
+
+  frontmatter.push('---');
+  frontmatter.push('');
 
   // Generate Mermaid flowchart (same as SlashCommand)
   const mermaidFlowchart = generateMermaidFlowchart({
@@ -281,7 +312,7 @@ function generateSubAgentFlowAgentFile(subAgentFlow: SubAgentFlow, agentFileName
   // Generate execution logic (same format as SlashCommand)
   const executionLogic = generateWorkflowExecutionLogic(pseudoWorkflow);
 
-  return `${frontmatter}${mermaidFlowchart}\n\n${executionLogic}`;
+  return `${frontmatter.join('\n')}${mermaidFlowchart}\n\n${executionLogic}`;
 }
 
 /**

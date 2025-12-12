@@ -6,7 +6,6 @@
  * Updated: Phase 3.3 - Added resizable width functionality
  */
 
-import * as Select from '@radix-ui/react-select';
 import type { McpNodeData } from '@shared/types/mcp-node';
 import type {
   AskUserQuestionData,
@@ -17,7 +16,6 @@ import type {
   SubAgentFlowNodeData,
   SwitchNodeData,
 } from '@shared/types/workflow-definition';
-import { SUB_AGENT_COLORS } from '@shared/types/workflow-definition';
 import type React from 'react';
 import { useState } from 'react';
 import type { Node } from 'reactflow';
@@ -27,6 +25,7 @@ import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
 import type { PromptNodeData } from '../types/node-types';
 import { extractVariables } from '../utils/template-utils';
+import { ColorPicker } from './common/ColorPicker';
 import { ResizeHandle } from './common/ResizeHandle';
 import { McpNodeEditDialog } from './dialogs/McpNodeEditDialog';
 
@@ -461,131 +460,7 @@ const SubAgentProperties: React.FC<{
       </div>
 
       {/* Color */}
-      <div>
-        <label
-          htmlFor="color-select"
-          style={{
-            display: 'block',
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--vscode-foreground)',
-            marginBottom: '6px',
-          }}
-        >
-          {t('properties.subAgent.color')}
-        </label>
-        <Select.Root
-          value={data.color || 'none'}
-          onValueChange={(value) =>
-            updateNodeData(node.id, {
-              color: value === 'none' ? undefined : (value as SubAgentData['color']),
-            })
-          }
-        >
-          <Select.Trigger
-            className="nodrag"
-            style={{
-              width: '100%',
-              padding: '6px 8px',
-              backgroundColor: 'var(--vscode-input-background)',
-              color: 'var(--vscode-input-foreground)',
-              border: '1px solid var(--vscode-input-border)',
-              borderRadius: '2px',
-              fontSize: '13px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              cursor: 'pointer',
-            }}
-          >
-            <Select.Value placeholder={t('properties.subAgent.colorPlaceholder')}>
-              {data.color && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div
-                    style={{
-                      width: '14px',
-                      height: '14px',
-                      backgroundColor: SUB_AGENT_COLORS[data.color],
-                      borderRadius: '2px',
-                    }}
-                  />
-                  <span style={{ textTransform: 'capitalize' }}>{data.color}</span>
-                </div>
-              )}
-            </Select.Value>
-          </Select.Trigger>
-          <Select.Portal>
-            <Select.Content
-              position="popper"
-              sideOffset={4}
-              style={{
-                backgroundColor: 'var(--vscode-dropdown-background)',
-                border: '1px solid var(--vscode-dropdown-border)',
-                borderRadius: '2px',
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
-                zIndex: 9999,
-                minWidth: '200px',
-              }}
-            >
-              <Select.Viewport style={{ padding: '4px' }}>
-                <Select.Item
-                  value="none"
-                  style={{
-                    padding: '6px 8px',
-                    fontSize: '13px',
-                    color: 'var(--vscode-foreground)',
-                    cursor: 'pointer',
-                    outline: 'none',
-                    borderRadius: '2px',
-                  }}
-                >
-                  <Select.ItemText>{t('properties.subAgent.colorNone')}</Select.ItemText>
-                </Select.Item>
-                {(Object.keys(SUB_AGENT_COLORS) as Array<keyof typeof SUB_AGENT_COLORS>).map(
-                  (colorKey) => (
-                    <Select.Item
-                      key={colorKey}
-                      value={colorKey}
-                      style={{
-                        padding: '6px 8px',
-                        fontSize: '13px',
-                        color: 'var(--vscode-foreground)',
-                        cursor: 'pointer',
-                        outline: 'none',
-                        borderRadius: '2px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: '14px',
-                          height: '14px',
-                          backgroundColor: SUB_AGENT_COLORS[colorKey],
-                          borderRadius: '2px',
-                        }}
-                      />
-                      <Select.ItemText>
-                        <span style={{ textTransform: 'capitalize' }}>{colorKey}</span>
-                      </Select.ItemText>
-                    </Select.Item>
-                  )
-                )}
-              </Select.Viewport>
-            </Select.Content>
-          </Select.Portal>
-        </Select.Root>
-        <div
-          style={{
-            fontSize: '11px',
-            color: 'var(--vscode-descriptionForeground)',
-            marginTop: '4px',
-          }}
-        >
-          {t('properties.subAgent.colorHelp')}
-        </div>
-      </div>
+      <ColorPicker value={data.color} onChange={(color) => updateNodeData(node.id, { color })} />
     </div>
   );
 };
@@ -2450,7 +2325,7 @@ const McpProperties: React.FC<{
 const SubAgentFlowProperties: React.FC<{
   node: Node<SubAgentFlowNodeData>;
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
-}> = ({ node }) => {
+}> = ({ node, updateNodeData }) => {
   const { t } = useTranslation();
   const { subAgentFlows, setActiveSubAgentFlowId } = useWorkflowStore();
   const data = node.data;
@@ -2529,6 +2404,91 @@ const SubAgentFlowProperties: React.FC<{
           </button>
         </>
       )}
+
+      {/* Model */}
+      <div>
+        <label
+          htmlFor="subagentflow-model-select"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('property.model')}
+        </label>
+        <select
+          id="subagentflow-model-select"
+          value={data.model || 'sonnet'}
+          onChange={(e) =>
+            updateNodeData(node.id, {
+              model: e.target.value as 'sonnet' | 'opus' | 'haiku' | 'inherit',
+            })
+          }
+          className="nodrag"
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+          }}
+        >
+          <option value="sonnet">Sonnet</option>
+          <option value="opus">Opus</option>
+          <option value="haiku">Haiku</option>
+          <option value="inherit">Inherit</option>
+        </select>
+      </div>
+
+      {/* Tools */}
+      <div>
+        <label
+          htmlFor="subagentflow-tools-input"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('property.tools')}
+        </label>
+        <input
+          id="subagentflow-tools-input"
+          type="text"
+          value={data.tools || ''}
+          onChange={(e) => updateNodeData(node.id, { tools: e.target.value })}
+          placeholder={t('property.tools.placeholder')}
+          className="nodrag"
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+          }}
+        />
+        <div
+          style={{
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+            marginTop: '4px',
+          }}
+        >
+          {t('property.tools.help')}
+        </div>
+      </div>
+
+      {/* Color */}
+      <ColorPicker value={data.color} onChange={(color) => updateNodeData(node.id, { color })} />
     </div>
   );
 };

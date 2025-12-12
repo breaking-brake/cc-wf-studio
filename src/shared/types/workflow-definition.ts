@@ -209,6 +209,12 @@ export interface SubAgentFlowNodeData {
   description?: string;
   /** Number of output ports (fixed at 1 for SubAgentFlow nodes) */
   outputPorts: 1;
+  /** Model to use for this sub-agent flow execution */
+  model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
+  /** Comma-separated list of allowed tools */
+  tools?: string;
+  /** Visual color for the node */
+  color?: keyof typeof SUB_AGENT_COLORS;
 }
 
 export interface McpNodeData {

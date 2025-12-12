@@ -9,6 +9,7 @@
  */
 
 import type { SubAgentFlowNodeData } from '@shared/types/workflow-definition';
+import { SUB_AGENT_COLORS } from '@shared/types/workflow-definition';
 import { GitBranch } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
@@ -110,21 +111,40 @@ export const SubAgentFlowNodeComponent: React.FC<NodeProps<SubAgentFlowNodeData>
         )}
 
         {/* Sub-Agent Flow Info Badge */}
-        {isLinked && (
-          <div
-            style={{
-              fontSize: '10px',
-              color: 'var(--vscode-badge-foreground)',
-              backgroundColor: 'var(--vscode-badge-background)',
-              padding: '2px 6px',
-              borderRadius: '3px',
-              display: 'inline-block',
-              fontWeight: 600,
-            }}
-          >
-            {nodeCount} nodes
-          </div>
-        )}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {isLinked && (
+            <div
+              style={{
+                fontSize: '10px',
+                color: 'var(--vscode-badge-foreground)',
+                backgroundColor: 'var(--vscode-badge-background)',
+                padding: '2px 6px',
+                borderRadius: '3px',
+                display: 'inline-block',
+                fontWeight: 600,
+              }}
+            >
+              {nodeCount} nodes
+            </div>
+          )}
+
+          {/* Color Badge */}
+          {data.color && (
+            <div
+              style={{
+                fontSize: '10px',
+                color: '#ffffff',
+                backgroundColor: SUB_AGENT_COLORS[data.color],
+                padding: '2px 6px',
+                borderRadius: '3px',
+                display: 'inline-block',
+                textTransform: 'capitalize',
+              }}
+            >
+              {data.color}
+            </div>
+          )}
+        </div>
 
         {/* Not linked warning */}
         {!isLinked && data.subAgentFlowId && (
