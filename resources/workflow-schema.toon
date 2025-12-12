@@ -1,0 +1,704 @@
+schemaVersion: 1.0.0
+metadata:
+  description: Workflow schema for Claude Code Workflow Studio
+  maxNodes: 50
+  supportedNodeTypes[10]: start,end,prompt,subAgent,askUserQuestion,ifElse,switch,skill,mcp,subAgentFlow
+nodeTypes:
+  start:
+    description: Workflow entry point. Exactly one required per workflow.
+    fields:
+      label:
+        type: string
+        required: false
+        default: Start
+    inputPorts: 0
+    outputPorts: 1
+  end:
+    description: Workflow exit point. At least one required per workflow.
+    fields:
+      label:
+        type: string
+        required: false
+        default: End
+    inputPorts: unlimited
+    outputPorts: 0
+  prompt:
+    description: Display a message/instructions to user
+    fields:
+      label:
+        type: string
+        required: false
+      prompt:
+        type: string
+        required: true
+        maxLength: 10000
+      variables:
+        type: object
+        required: false
+    inputPorts: 1
+    outputPorts: 1
+  subAgent:
+    description: AI sub-agent executing a task with given prompt
+    fields:
+      description:
+        type: string
+        required: true
+        maxLength: 200
+      prompt:
+        type: string
+        required: true
+        maxLength: 10000
+      tools:
+        type: string
+        required: false
+      model:
+        type: string
+        required: false
+        enum[4]: sonnet,opus,haiku,inherit
+        default: sonnet
+      color:
+        type: string
+        required: false
+        enum[8]: red,blue,green,yellow,purple,orange,pink,cyan
+        description: Visual indicator color for this sub-agent (optional)
+      outputPorts:
+        type: number
+        required: true
+        value: 1
+    inputPorts: 1
+    outputPorts: 1
+  askUserQuestion:
+    description: Present a question with multiple-choice options
+    fields:
+      questionText:
+        type: string
+        required: true
+        maxLength: 500
+      options:
+        type: array
+        required: true
+        minLength: 2
+        maxLength: 4
+        items:
+          id:
+            type: string
+            required: false
+          label:
+            type: string
+            required: true
+            maxLength: 50
+          description:
+            type: string
+            required: true
+            maxLength: 200
+      multiSelect:
+        type: boolean
+        required: false
+        default: false
+      useAiSuggestions:
+        type: boolean
+        required: false
+        default: false
+      outputPorts:
+        type: number
+        required: true
+        min: 1
+        max: 4
+    inputPorts: 1
+    outputPorts: 2-4
+  ifElse:
+    description: Two-way conditional branching (if/else). Use for 2-way branching only (true/false).
+    fields:
+      evaluationTarget:
+        type: string
+        required: false
+      branches:
+        type: array
+        required: true
+        length: 2
+        items:
+          id:
+            type: string
+            required: false
+          label:
+            type: string
+            required: true
+            maxLength: 50
+          condition:
+            type: string
+            required: true
+            maxLength: 500
+      outputPorts:
+        type: number
+        required: true
+        value: 2
+    inputPorts: 1
+    outputPorts: 2
+  switch:
+    description: "Multi-way branching (switch/case). Use for 3+ way branching - ideal for time-based, case-based, or multi-condition routing. **Important: Always include a default branch as the last branch with isDefault: true.**"
+    fields:
+      evaluationTarget:
+        type: string
+        required: false
+      branches:
+        type: array
+        required: true
+        minLength: 2
+        maxLength: 10
+        items:
+          id:
+            type: string
+            required: false
+          label:
+            type: string
+            required: true
+            maxLength: 50
+          condition:
+            type: string
+            required: true
+            maxLength: 500
+          isDefault:
+            type: boolean
+            required: false
+            default: false
+            description: "If true, this is the default branch (must be last, exactly one per node)"
+        constraint: "Last branch must have isDefault: true with label 'default' and condition 'Other cases'"
+      outputPorts:
+        type: number
+        required: true
+        min: 2
+        max: 10
+    inputPorts: 1
+    outputPorts: 2-10
+  skill:
+    description: "Reference a Claude Code Skill (specialized agent capability defined in SKILL.md files). Use when user description matches a Skill's documented purpose. **Important: Skills always have exactly 1 output port. For conditional branching based on Skill results, add an ifElse or switch node after the Skill node.**"
+    fields:
+      name:
+        type: string
+        required: true
+        maxLength: 64
+        pattern: "^[a-z0-9-]+$"
+        description: Exact Skill name from available Skills list
+      description:
+        type: string
+        required: true
+        maxLength: 1024
+        description: Exact description from available Skills list
+      scope:
+        type: string
+        enum[2]: personal,project
+        required: true
+        description: Skill scope (personal or project)
+      skillPath:
+        type: string
+        required: false
+        description: Auto-resolved by system after generation - do NOT include in AI output
+      allowedTools:
+        type: string
+        required: false
+        description: Optional tool restrictions from Skill definition
+      validationStatus:
+        type: string
+        enum[3]: valid,missing,invalid
+        required: true
+        default: valid
+      outputPorts:
+        type: number
+        required: true
+        value: 1
+    inputPorts: 1
+    outputPorts: 1
+  mcp:
+    description: "Execute an MCP (Model Context Protocol) tool from an external server. MCP enables integration with external services, databases, APIs, and tools. **Important: Always use 'manualParameterConfig' mode for AI-generated workflows. Parameters must be provided as an array of parameter definitions, NOT as key-value pairs.**"
+    fields:
+      serverId:
+        type: string
+        required: true
+        minLength: 1
+        maxLength: 100
+        description: "MCP server identifier (e.g., 'playwright', 'github', 'filesystem')"
+      toolName:
+        type: string
+        required: true
+        minLength: 1
+        maxLength: 100
+        description: "Tool function name from the MCP server (e.g., 'playwright_navigate', 'get_file_contents')"
+      toolDescription:
+        type: string
+        required: false
+        maxLength: 1024
+        description: Human-readable description of what the tool does
+      parameters:
+        type: array
+        required: false
+        description: "Array of parameter schema definitions (NOT parameter values). Each parameter object must have: name (string), type (string), description (string), required (boolean). Example: [{\"name\": \"url\", \"type\": \"string\", \"description\": \"Target URL\", \"required\": true}]"
+        items:
+          name:
+            type: string
+            required: true
+          type:
+            type: string
+            required: true
+            enum[5]: string,number,boolean,array,object
+          description:
+            type: string
+            required: false
+          required:
+            type: boolean
+            required: true
+      parameterValues:
+        type: object
+        required: false
+        description: "Key-value pairs of parameter values. Keys must match parameter names from the 'parameters' array. Example: {\"url\": \"https://example.com\"}"
+      mode:
+        type: string
+        required: false
+        enum[3]: manualParameterConfig,aiParameterConfig,aiToolSelection
+        default: manualParameterConfig
+        description: Configuration mode - ALWAYS use 'manualParameterConfig' for AI-generated workflows
+      validationStatus:
+        type: string
+        enum[3]: valid,missing,invalid
+        required: true
+        default: valid
+      outputPorts:
+        type: number
+        required: true
+        value: 1
+    inputPorts: 1
+    outputPorts: 1
+    aiGenerationGuidance:
+      mode: ALWAYS set mode to 'manualParameterConfig'
+      parameters: "MUST be an array of parameter schema objects with {name, type, description, required} fields"
+      parameterValues: Optional object with key-value pairs matching parameter names
+      commonTools:
+        playwright[4]: playwright_navigate,playwright_click,playwright_screenshot,playwright_evaluate
+        filesystem[3]: read_file,write_file,list_directory
+        github[3]: get_issue,create_pull_request,list_repositories
+      example:
+        type: mcp
+        data:
+          serverId: playwright
+          toolName: playwright_navigate
+          toolDescription: Navigate browser to URL
+          parameters[1]{name,type,description,required}:
+            url,string,Target URL to navigate to,true
+          parameterValues:
+            url: "https://example.com"
+          mode: manualParameterConfig
+          validationStatus: valid
+          outputPorts: 1
+  subAgentFlow:
+    description: "Execute a defined sub-agent flow. Use this to reference and run a sub-agent flow within the main workflow. **Important: Always has exactly 1 output port. Sub-agent flows are executed sequentially from their Start to End node.**"
+    fields:
+      subAgentFlowId:
+        type: string
+        required: true
+        description: ID of the sub-agent flow to execute (must match an existing sub-agent flow in the workflow's subAgentFlows array)
+      label:
+        type: string
+        required: true
+        maxLength: 50
+        description: Display label for this node
+      description:
+        type: string
+        required: false
+        maxLength: 200
+        description: Optional description of what this sub-agent flow does
+      outputPorts:
+        type: number
+        required: true
+        value: 1
+    inputPorts: 1
+    outputPorts: 1
+    mvpConstraints:
+      noNesting: SubAgentFlow nodes cannot be used inside sub-agent flows (no nesting allowed in Phase 1 MVP)
+      noSubAgentInSubAgentFlow: SubAgent nodes cannot be used inside sub-agent flows (Claude Code constraint)
+      sequentialExecution: Sub-agent flows execute sequentially from Start to End
+    aiGenerationGuidance:
+      requirement: "When generating a subAgentFlow node, you MUST also create a corresponding SubAgentFlow definition in the 'subAgentFlows' array at the workflow root level"
+      subAgentFlowDefinition:
+        id: MUST match the subAgentFlowId in the reference node
+        name: Same as the label of the reference node
+        description: Optional description
+        nodes: MUST include at least Start and End nodes
+        connections: Connect Start to End (minimum structure)
+      constraints[3]: "SubAgentFlow nodes array can only contain: start, end, prompt, ifElse, switch, skill, mcp","SubAgentFlow nodes array CANNOT contain: subAgent, subAgentFlow, askUserQuestion",Maximum 30 nodes per SubAgentFlow
+      example:
+        nodeInWorkflow:
+          id: subflow-ref-1
+          type: subAgentFlow
+          name: validation-ref
+          position:
+            x: 400
+            y: 200
+          data:
+            subAgentFlowId: validation-subflow-1
+            label: Input Validation
+            description: Validates user input
+            outputPorts: 1
+        subAgentFlowDefinition:
+          id: validation-subflow-1
+          name: Input Validation
+          description: Validates user input
+          nodes[2]:
+            -
+              id: sf-start
+              type: start
+              name: Start
+              position:
+                x: 100
+                y: 200
+              data:
+                label: Start
+            -
+              id: sf-end
+              type: end
+              name: End
+              position:
+                x: 400
+                y: 200
+              data:
+                label: End
+          connections[1]{id,from,to,fromPort,toPort}:
+            sf-conn-1,sf-start,sf-end,output,input
+connectionRules:
+  forbidden[5]: Start node cannot have input connections,End node cannot have output connections,No cycles allowed,No self-connections,One connection per output port
+  required[4]: Exactly one Start node per workflow,At least one End node per workflow,All non-Start nodes must have input connection,All non-End nodes must have output connection
+validationRules:
+  workflow:
+    maxNodes: 50
+    nameMaxLength: 100
+    versionPattern: "^\\d+\\.\\d+\\.\\d+$"
+  node:
+    nameMaxLength: 50
+    namePattern: "^[a-zA-Z0-9_-]+$"
+subAgentFlowConstraints:
+  description: "Constraints specific to Sub-Agent Flow editing. When refining a Sub-Agent Flow, these rules MUST be followed."
+  maxNodes: 30
+  supportedNodeTypes[7]: start,end,prompt,ifElse,switch,skill,mcp
+  prohibitedNodeTypes[3]: subAgent,subAgentFlow,askUserQuestion
+  rules[5]: Sub-Agent Flows cannot contain SubAgent nodes (Claude Code constraint for sequential execution),Sub-Agent Flows cannot contain SubAgentFlow nodes (no nesting allowed in Phase 1 MVP),Sub-Agent Flows cannot contain AskUserQuestion nodes (user interaction not supported in sub-agent context),Sub-Agent Flows must have exactly one Start node and at least one End node,Maximum 30 nodes per Sub-Agent Flow
+workflowStructure:
+  description: Top-level workflow structure fields
+  fields:
+    id:
+      type: string
+      required: true
+    name:
+      type: string
+      required: true
+      maxLength: 100
+    description:
+      type: string
+      required: false
+    version:
+      type: string
+      required: true
+      pattern: semver
+    nodes:
+      type: array
+      required: true
+    connections:
+      type: array
+      required: true
+    subAgentFlows:
+      type: array
+      required: false
+      description: Array of SubAgentFlow definitions. Each subAgentFlow node in 'nodes' MUST have a corresponding entry here with matching id.
+      item:
+        id:
+          type: string
+          required: true
+          description: Unique ID matching subAgentFlowId in the reference node
+        name:
+          type: string
+          required: true
+          maxLength: 50
+        description:
+          type: string
+          required: false
+          maxLength: 200
+        nodes:
+          type: array
+          required: true
+          description: Workflow nodes (must include Start and End)
+        connections:
+          type: array
+          required: true
+          description: Connections between nodes
+    createdAt:
+      type: string
+      required: true
+      format: ISO8601
+    updatedAt:
+      type: string
+      required: true
+      format: ISO8601
+examples[3]:
+  -
+    name: Simple Data Analysis
+    complexity: simple
+    workflow:
+      id: ex-simple
+      name: Data Analysis
+      version: 1.0.0
+      nodes[3]:
+        -
+          id: start-1
+          type: start
+          name: start-node
+          position:
+            x: 100
+            y: 200
+          data:
+            label: Start
+        -
+          id: agent-1
+          type: subAgent
+          name: analyzer
+          position:
+            x: 350
+            y: 200
+          data:
+            description: Analyze data
+            prompt: Analyze data and generate insights.
+            model: sonnet
+            outputPorts: 1
+        -
+          id: end-1
+          type: end
+          name: end-node
+          position:
+            x: 700
+            y: 200
+          data:
+            label: End
+      connections[2]{id,from,to,fromPort,toPort}:
+        c1,start-1,agent-1,output,input
+        c2,agent-1,end-1,output,input
+      createdAt: "2025-11-06T00:00:00Z"
+      updatedAt: "2025-11-06T00:00:00Z"
+  -
+    name: Code Review with Priority
+    complexity: medium
+    workflow:
+      id: ex-medium
+      name: Code Review
+      version: 1.0.0
+      nodes[6]:
+        -
+          id: start-1
+          type: start
+          name: start-node
+          position:
+            x: 100
+            y: 300
+          data:
+            label: Start
+        -
+          id: scanner-1
+          type: subAgent
+          name: scanner
+          position:
+            x: 350
+            y: 300
+          data:
+            description: Scan code
+            prompt: Scan for bugs and issues.
+            outputPorts: 1
+        -
+          id: ask-1
+          type: askUserQuestion
+          name: priority
+          position:
+            x: 650
+            y: 300
+          data:
+            questionText: Priority level?
+            options[2]{label,description}:
+              Critical,High priority only
+              All,All issues
+            outputPorts: 2
+        -
+          id: fix-1
+          type: subAgent
+          name: critical-fixer
+          position:
+            x: 950
+            y: 150
+          data:
+            description: Critical fixes
+            prompt: Generate critical fixes.
+            outputPorts: 1
+        -
+          id: fix-2
+          type: subAgent
+          name: all-fixer
+          position:
+            x: 950
+            y: 450
+          data:
+            description: All fixes
+            prompt: Generate all fixes.
+            outputPorts: 1
+        -
+          id: end-1
+          type: end
+          name: end-node
+          position:
+            x: 1300
+            y: 300
+          data:
+            label: End
+      connections[6]{id,from,to,fromPort,toPort}:
+        c1,start-1,scanner-1,output,input
+        c2,scanner-1,ask-1,output,input
+        c3,ask-1,fix-1,branch-0,input
+        c4,ask-1,fix-2,branch-1,input
+        c5,fix-1,end-1,output,input
+        c6,fix-2,end-1,output,input
+      createdAt: "2025-11-06T00:00:00Z"
+      updatedAt: "2025-11-06T00:00:00Z"
+  -
+    name: Document Processing Pipeline
+    complexity: complex
+    workflow:
+      id: ex-complex
+      name: Doc Pipeline
+      version: 1.0.0
+      nodes[11]:
+        -
+          id: start-1
+          type: start
+          name: start-node
+          position:
+            x: 100
+            y: 350
+          data:
+            label: Start
+        -
+          id: validator-1
+          type: subAgent
+          name: validator
+          position:
+            x: 350
+            y: 350
+          data:
+            description: Validate doc
+            prompt: Validate document format.
+            outputPorts: 1
+        -
+          id: if-1
+          type: ifElse
+          name: valid-check
+          position:
+            x: 650
+            y: 350
+          data:
+            branches[2]{label,condition}:
+              Valid,Passed
+              Invalid,Failed
+            outputPorts: 2
+        -
+          id: analyzer-1
+          type: subAgent
+          name: analyzer
+          position:
+            x: 950
+            y: 200
+          data:
+            description: Analyze content
+            prompt: Analyze content.
+            outputPorts: 1
+        -
+          id: error-1
+          type: subAgent
+          name: error-handler
+          position:
+            x: 950
+            y: 500
+          data:
+            description: Error report
+            prompt: Generate error report.
+            outputPorts: 1
+        -
+          id: ask-1
+          type: askUserQuestion
+          name: format
+          position:
+            x: 1250
+            y: 200
+          data:
+            questionText: Output format?
+            options[3]{label,description}:
+              PDF,PDF
+              Markdown,MD
+              HTML,HTML
+            outputPorts: 3
+        -
+          id: fmt-pdf
+          type: subAgent
+          name: pdf-fmt
+          position:
+            x: 1550
+            y: 50
+          data:
+            description: PDF format
+            prompt: Format as PDF.
+            outputPorts: 1
+        -
+          id: fmt-md
+          type: subAgent
+          name: md-fmt
+          position:
+            x: 1550
+            y: 200
+          data:
+            description: MD format
+            prompt: Format as Markdown.
+            outputPorts: 1
+        -
+          id: fmt-html
+          type: subAgent
+          name: html-fmt
+          position:
+            x: 1550
+            y: 350
+          data:
+            description: HTML format
+            prompt: Format as HTML.
+            outputPorts: 1
+        -
+          id: end-ok
+          type: end
+          name: success
+          position:
+            x: 1900
+            y: 200
+          data:
+            label: Success
+        -
+          id: end-err
+          type: end
+          name: error
+          position:
+            x: 1300
+            y: 500
+          data:
+            label: Error
+      connections[12]{id,from,to,fromPort,toPort}:
+        c1,start-1,validator-1,output,input
+        c2,validator-1,if-1,output,input
+        c3,if-1,analyzer-1,branch-0,input
+        c4,if-1,error-1,branch-1,input
+        c5,analyzer-1,ask-1,output,input
+        c6,ask-1,fmt-pdf,branch-0,input
+        c7,ask-1,fmt-md,branch-1,input
+        c8,ask-1,fmt-html,branch-2,input
+        c9,fmt-pdf,end-ok,output,input
+        c10,fmt-md,end-ok,output,input
+        c11,fmt-html,end-ok,output,input
+        c12,error-1,end-err,output,input
+      createdAt: "2025-11-06T00:00:00Z"
+      updatedAt: "2025-11-06T00:00:00Z"

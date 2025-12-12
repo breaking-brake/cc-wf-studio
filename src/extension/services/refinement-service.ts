@@ -15,8 +15,14 @@ import type {
 } from '../../shared/types/workflow-definition';
 import { log } from '../extension';
 import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
+import {
+  estimateTokens,
+  getConfiguredSchemaFormat,
+  isMetricsCollectionEnabled,
+  recordMetrics,
+} from './ai-metrics-service';
 import { executeClaudeCodeCLI, parseClaudeCodeOutput } from './claude-code-service';
-import { getDefaultSchemaPath, loadWorkflowSchema } from './schema-loader-service';
+import { loadWorkflowSchemaByFormat, type SchemaLoadResult } from './schema-loader-service';
 import { filterSkillsByRelevance, type SkillRelevanceScore } from './skill-relevance-matcher';
 import { scanAllSkills } from './skill-service';
 
@@ -83,17 +89,17 @@ function extractClarificationMessage(output: string): string {
  * @param currentWorkflow - The current workflow state
  * @param conversationHistory - Full conversation history
  * @param userMessage - User's current refinement request
- * @param schema - Workflow schema for node type validation
+ * @param schemaResult - Schema load result (JSON or TOON)
  * @param filteredSkills - Skills filtered by relevance (optional)
- * @returns Prompt string for Claude Code CLI
+ * @returns Object with prompt string and schema size
  */
 export function constructRefinementPrompt(
   currentWorkflow: Workflow,
   conversationHistory: ConversationHistory,
   userMessage: string,
-  schema: unknown,
+  schemaResult: SchemaLoadResult,
   filteredSkills: SkillRelevanceScore[] = []
-): string {
+): { prompt: string; schemaSize: number } {
   // Get last 6 messages (3 rounds of user-AI conversation)
   // This provides sufficient context without overwhelming the prompt
   const recentMessages = conversationHistory.messages.slice(-6);
@@ -104,7 +110,24 @@ export function constructRefinementPrompt(
 ${recentMessages.map((msg) => `[${msg.sender.toUpperCase()}]: ${msg.content}`).join('\n')}\n`
       : '**Conversation History**: (This is the first message)\n';
 
-  const schemaJSON = JSON.stringify(schema, null, 2);
+  // Format schema based on type
+  let schemaSection: string;
+  let schemaSize: number;
+
+  if (schemaResult.format === 'toon' && schemaResult.schemaString) {
+    // TOON format - use as-is with format indicator
+    schemaSection = `**Workflow Schema** (TOON format - Token-Oriented Object Notation):
+\`\`\`toon
+${schemaResult.schemaString}
+\`\`\``;
+    schemaSize = schemaResult.schemaString.length;
+  } else {
+    // JSON format - existing behavior
+    const schemaJSON = JSON.stringify(schemaResult.schema, null, 2);
+    schemaSection = `**Workflow Schema** (reference for valid node types and structure):
+${schemaJSON}`;
+    schemaSize = schemaJSON.length;
+  }
 
   // Construct skills section (similar to ai-generation.ts)
   const skillsSection =
@@ -132,7 +155,7 @@ ${JSON.stringify(
 `
       : '';
 
-  return `You are an expert workflow designer for Claude Code Workflow Studio.
+  const prompt = `You are an expert workflow designer for Claude Code Workflow Studio.
 
 **Task**: Refine the existing workflow based on user's feedback.
 
@@ -170,10 +193,11 @@ ${userMessage}
 - Use switch node for 3+ way branching or multiple conditions
 - Each branch output should connect to exactly one downstream node - never create serial connections from different branch outputs
 ${skillsSection}
-**Workflow Schema** (reference for valid node types and structure):
-${schemaJSON}
+${schemaSection}
 
 **Output Format**: Output ONLY valid JSON matching the Workflow interface. Do not include markdown code blocks or explanations.`;
+
+  return { prompt, schemaSize };
 }
 
 /**
@@ -208,6 +232,10 @@ export async function refineWorkflow(
 ): Promise<RefinementResult> {
   const startTime = Date.now();
 
+  // Get configured schema format and metrics settings
+  const schemaFormat = getConfiguredSchemaFormat();
+  const collectMetrics = isMetricsCollectionEnabled();
+
   log('INFO', 'Starting workflow refinement', {
     requestId,
     workflowId: currentWorkflow.id,
@@ -216,26 +244,26 @@ export async function refineWorkflow(
     currentIteration: conversationHistory.currentIteration,
     useSkills,
     timeoutMs,
+    schemaFormat,
+    collectMetrics,
   });
 
   try {
-    // Step 1: Load workflow schema (and optionally scan skills)
-    const schemaPath = getDefaultSchemaPath(extensionPath);
-
-    let schemaResult: Awaited<ReturnType<typeof loadWorkflowSchema>>;
+    // Step 1: Load workflow schema in configured format (and optionally scan skills)
+    let schemaResult: SchemaLoadResult;
     let availableSkills: SkillReference[] = [];
     let filteredSkills: SkillRelevanceScore[] = [];
 
     if (useSkills) {
       // Scan skills in parallel with schema loading
       const [loadedSchema, skillsResult] = await Promise.all([
-        loadWorkflowSchema(schemaPath),
+        loadWorkflowSchemaByFormat(extensionPath, schemaFormat),
         scanAllSkills(),
       ]);
 
       schemaResult = loadedSchema;
 
-      if (!schemaResult.success || !schemaResult.schema) {
+      if (!schemaResult.success || (!schemaResult.schema && !schemaResult.schemaString)) {
         log('ERROR', 'Failed to load workflow schema', {
           requestId,
           errorMessage: schemaResult.error?.message,
@@ -272,9 +300,9 @@ export async function refineWorkflow(
       });
     } else {
       // Skip skill scanning
-      schemaResult = await loadWorkflowSchema(schemaPath);
+      schemaResult = await loadWorkflowSchemaByFormat(extensionPath, schemaFormat);
 
-      if (!schemaResult.success || !schemaResult.schema) {
+      if (!schemaResult.success || (!schemaResult.schema && !schemaResult.schemaString)) {
         log('ERROR', 'Failed to load workflow schema', {
           requestId,
           errorMessage: schemaResult.error?.message,
@@ -294,20 +322,43 @@ export async function refineWorkflow(
       log('INFO', 'Skipping skill scan (useSkills=false)', { requestId });
     }
 
+    log('INFO', 'Workflow schema loaded successfully', {
+      requestId,
+      format: schemaResult.format,
+      sizeBytes: schemaResult.sizeBytes,
+    });
+
     // Step 3: Construct refinement prompt (with or without skills)
-    const prompt = constructRefinementPrompt(
+    const { prompt, schemaSize } = constructRefinementPrompt(
       currentWorkflow,
       conversationHistory,
       userMessage,
-      schemaResult.schema,
+      schemaResult,
       filteredSkills
     );
+
+    // Record prompt size for metrics
+    const promptSizeChars = prompt.length;
 
     // Step 4: Execute Claude Code CLI
     const cliResult = await executeClaudeCodeCLI(prompt, timeoutMs, requestId, workspaceRoot);
 
     if (!cliResult.success || !cliResult.output) {
-      // CLI execution failed
+      // CLI execution failed - record metrics
+      if (collectMetrics) {
+        recordMetrics({
+          requestId: requestId || `refine-${Date.now()}`,
+          schemaFormat: schemaResult.format,
+          promptSizeChars,
+          schemaSizeChars: schemaSize,
+          estimatedTokens: estimateTokens(promptSizeChars),
+          executionTimeMs: cliResult.executionTimeMs,
+          success: false,
+          timestamp: new Date().toISOString(),
+          userDescriptionLength: userMessage.length,
+        });
+      }
+
       log('ERROR', 'Refinement failed during CLI execution', {
         requestId,
         errorCode: cliResult.error?.code,
@@ -435,6 +486,21 @@ export async function refineWorkflow(
     }
 
     const executionTimeMs = Date.now() - startTime;
+
+    // Record metrics for successful refinement
+    if (collectMetrics) {
+      recordMetrics({
+        requestId: requestId || `refine-${Date.now()}`,
+        schemaFormat: schemaResult.format,
+        promptSizeChars,
+        schemaSizeChars: schemaSize,
+        estimatedTokens: estimateTokens(promptSizeChars),
+        executionTimeMs,
+        success: true,
+        timestamp: new Date().toISOString(),
+        userDescriptionLength: userMessage.length,
+      });
+    }
 
     log('INFO', 'Workflow refinement successful', {
       requestId,
@@ -671,17 +737,17 @@ const SUBAGENTFLOW_MAX_NODES = 30;
  * @param innerWorkflow - The current inner workflow state (nodes + connections)
  * @param conversationHistory - Full conversation history
  * @param userMessage - User's current refinement request
- * @param schema - Workflow schema for node type validation
+ * @param schemaResult - Schema load result (JSON or TOON)
  * @param filteredSkills - Skills filtered by relevance (optional)
- * @returns Prompt string for Claude Code CLI
+ * @returns Object with prompt string and schema size
  */
 export function constructSubAgentFlowRefinementPrompt(
   innerWorkflow: InnerWorkflow,
   conversationHistory: ConversationHistory,
   userMessage: string,
-  schema: unknown,
+  schemaResult: SchemaLoadResult,
   filteredSkills: SkillRelevanceScore[] = []
-): string {
+): { prompt: string; schemaSize: number } {
   // Get last 6 messages (3 rounds of user-AI conversation)
   const recentMessages = conversationHistory.messages.slice(-6);
 
@@ -691,7 +757,24 @@ export function constructSubAgentFlowRefinementPrompt(
 ${recentMessages.map((msg) => `[${msg.sender.toUpperCase()}]: ${msg.content}`).join('\n')}\n`
       : '**Conversation History**: (This is the first message)\n';
 
-  const schemaJSON = JSON.stringify(schema, null, 2);
+  // Format schema based on type
+  let schemaSection: string;
+  let schemaSize: number;
+
+  if (schemaResult.format === 'toon' && schemaResult.schemaString) {
+    // TOON format - use as-is with format indicator
+    schemaSection = `**Workflow Schema** (TOON format - Token-Oriented Object Notation):
+\`\`\`toon
+${schemaResult.schemaString}
+\`\`\``;
+    schemaSize = schemaResult.schemaString.length;
+  } else {
+    // JSON format - existing behavior
+    const schemaJSON = JSON.stringify(schemaResult.schema, null, 2);
+    schemaSection = `**Workflow Schema** (reference for valid node types and structure):
+${schemaJSON}`;
+    schemaSize = schemaJSON.length;
+  }
 
   // Construct skills section
   const skillsSection =
@@ -719,7 +802,7 @@ ${JSON.stringify(
 `
       : '';
 
-  return `You are an expert workflow designer for Claude Code Workflow Studio.
+  const prompt = `You are an expert workflow designer for Claude Code Workflow Studio.
 
 **Task**: Refine a Sub-Agent Flow based on user's feedback.
 
@@ -768,14 +851,15 @@ ${userMessage}
 - Use switch node for 3+ way branching or multiple conditions
 - Each branch output should connect to exactly one downstream node
 ${skillsSection}
-**Workflow Schema** (reference for valid node types and structure):
-${schemaJSON}
+${schemaSection}
 
 **Output Format**: Output ONLY valid JSON with "nodes" and "connections" arrays. Do not include markdown code blocks or explanations. Example:
 {
   "nodes": [...],
   "connections": [...]
 }`;
+
+  return { prompt, schemaSize };
 }
 
 /**
@@ -824,6 +908,10 @@ export async function refineSubAgentFlow(
 ): Promise<SubAgentFlowRefinementResult> {
   const startTime = Date.now();
 
+  // Get configured schema format and metrics settings
+  const schemaFormat = getConfiguredSchemaFormat();
+  const collectMetrics = isMetricsCollectionEnabled();
+
   log('INFO', 'Starting SubAgentFlow refinement', {
     requestId,
     nodeCount: innerWorkflow.nodes.length,
@@ -832,25 +920,25 @@ export async function refineSubAgentFlow(
     currentIteration: conversationHistory.currentIteration,
     useSkills,
     timeoutMs,
+    schemaFormat,
+    collectMetrics,
   });
 
   try {
-    // Step 1: Load workflow schema (and optionally scan skills)
-    const schemaPath = getDefaultSchemaPath(extensionPath);
-
-    let schemaResult: Awaited<ReturnType<typeof loadWorkflowSchema>>;
+    // Step 1: Load workflow schema in configured format (and optionally scan skills)
+    let schemaResult: SchemaLoadResult;
     let availableSkills: SkillReference[] = [];
     let filteredSkills: SkillRelevanceScore[] = [];
 
     if (useSkills) {
       const [loadedSchema, skillsResult] = await Promise.all([
-        loadWorkflowSchema(schemaPath),
+        loadWorkflowSchemaByFormat(extensionPath, schemaFormat),
         scanAllSkills(),
       ]);
 
       schemaResult = loadedSchema;
 
-      if (!schemaResult.success || !schemaResult.schema) {
+      if (!schemaResult.success || (!schemaResult.schema && !schemaResult.schemaString)) {
         log('ERROR', 'Failed to load workflow schema for SubAgentFlow', {
           requestId,
           errorMessage: schemaResult.error?.message,
@@ -875,9 +963,9 @@ export async function refineSubAgentFlow(
         filteredCount: filteredSkills.length,
       });
     } else {
-      schemaResult = await loadWorkflowSchema(schemaPath);
+      schemaResult = await loadWorkflowSchemaByFormat(extensionPath, schemaFormat);
 
-      if (!schemaResult.success || !schemaResult.schema) {
+      if (!schemaResult.success || (!schemaResult.schema && !schemaResult.schemaString)) {
         return {
           success: false,
           error: {
@@ -890,19 +978,43 @@ export async function refineSubAgentFlow(
       }
     }
 
+    log('INFO', 'Workflow schema loaded for SubAgentFlow', {
+      requestId,
+      format: schemaResult.format,
+      sizeBytes: schemaResult.sizeBytes,
+    });
+
     // Step 2: Construct SubAgentFlow-specific refinement prompt
-    const prompt = constructSubAgentFlowRefinementPrompt(
+    const { prompt, schemaSize } = constructSubAgentFlowRefinementPrompt(
       innerWorkflow,
       conversationHistory,
       userMessage,
-      schemaResult.schema,
+      schemaResult,
       filteredSkills
     );
+
+    // Record prompt size for metrics
+    const promptSizeChars = prompt.length;
 
     // Step 3: Execute Claude Code CLI
     const cliResult = await executeClaudeCodeCLI(prompt, timeoutMs, requestId, workspaceRoot);
 
     if (!cliResult.success || !cliResult.output) {
+      // Record metrics for failed CLI execution
+      if (collectMetrics) {
+        recordMetrics({
+          requestId: requestId || `subagentflow-refine-${Date.now()}`,
+          schemaFormat: schemaResult.format,
+          promptSizeChars,
+          schemaSizeChars: schemaSize,
+          estimatedTokens: estimateTokens(promptSizeChars),
+          executionTimeMs: cliResult.executionTimeMs,
+          success: false,
+          timestamp: new Date().toISOString(),
+          userDescriptionLength: userMessage.length,
+        });
+      }
+
       log('ERROR', 'SubAgentFlow refinement failed during CLI execution', {
         requestId,
         errorCode: cliResult.error?.code,
@@ -1044,6 +1156,21 @@ export async function refineSubAgentFlow(
     }
 
     const executionTimeMs = Date.now() - startTime;
+
+    // Record metrics for successful SubAgentFlow refinement
+    if (collectMetrics) {
+      recordMetrics({
+        requestId: requestId || `subagentflow-refine-${Date.now()}`,
+        schemaFormat: schemaResult.format,
+        promptSizeChars,
+        schemaSizeChars: schemaSize,
+        estimatedTokens: estimateTokens(promptSizeChars),
+        executionTimeMs,
+        success: true,
+        timestamp: new Date().toISOString(),
+        userDescriptionLength: userMessage.length,
+      });
+    }
 
     log('INFO', 'SubAgentFlow refinement successful', {
       requestId,

@@ -19,8 +19,17 @@ import type {
   SubAgentFlowNodeData,
 } from '../../shared/types/workflow-definition';
 import { log } from '../extension';
+import {
+  estimateTokens,
+  getConfiguredSchemaFormat,
+  isMetricsCollectionEnabled,
+  recordMetrics,
+} from '../services/ai-metrics-service';
 import { executeClaudeCodeCLI, parseClaudeCodeOutput } from '../services/claude-code-service';
-import { getDefaultSchemaPath, loadWorkflowSchema } from '../services/schema-loader-service';
+import {
+  loadWorkflowSchemaByFormat,
+  type SchemaLoadResult,
+} from '../services/schema-loader-service';
 import {
   filterSkillsByRelevance,
   type SkillRelevanceScore,
@@ -46,21 +55,26 @@ export async function handleGenerateWorkflow(
 ): Promise<void> {
   const startTime = Date.now();
 
+  // Get configured schema format and metrics settings
+  const schemaFormat = getConfiguredSchemaFormat();
+  const collectMetrics = isMetricsCollectionEnabled();
+
   log('INFO', 'AI Workflow Generation started', {
     requestId,
     descriptionLength: payload.userDescription.length,
     timeoutMs: payload.timeoutMs,
+    schemaFormat,
+    collectMetrics,
   });
 
   try {
-    // Step 1: Load workflow schema and scan Skills in parallel (T014)
-    const schemaPath = getDefaultSchemaPath(extensionPath);
+    // Step 1: Load workflow schema in configured format and scan Skills in parallel (T014)
     const [schemaResult, skillsResult] = await Promise.all([
-      loadWorkflowSchema(schemaPath),
+      loadWorkflowSchemaByFormat(extensionPath, schemaFormat),
       scanAllSkills(),
     ]);
 
-    if (!schemaResult.success || !schemaResult.schema) {
+    if (!schemaResult.success || (!schemaResult.schema && !schemaResult.schemaString)) {
       // Schema loading failed
       log('ERROR', 'Failed to load workflow schema', {
         requestId,
@@ -79,7 +93,11 @@ export async function handleGenerateWorkflow(
       return;
     }
 
-    log('INFO', 'Workflow schema loaded successfully', { requestId });
+    log('INFO', 'Workflow schema loaded successfully', {
+      requestId,
+      format: schemaResult.format,
+      sizeBytes: schemaResult.sizeBytes,
+    });
 
     // Combine personal and project Skills
     const availableSkills: SkillReference[] = [...skillsResult.personal, ...skillsResult.project];
@@ -101,14 +119,35 @@ export async function handleGenerateWorkflow(
     });
 
     // Step 3: Construct prompt with Skills (T016-T017)
-    const prompt = constructPrompt(payload.userDescription, schemaResult.schema, filteredSkills);
+    const { prompt, schemaSize } = constructPrompt(
+      payload.userDescription,
+      schemaResult,
+      filteredSkills
+    );
+
+    // Record prompt size for metrics
+    const promptSizeChars = prompt.length;
 
     // Step 3: Execute Claude Code CLI (pass requestId for cancellation support)
     const timeout = payload.timeoutMs ?? 60000;
     const cliResult = await executeClaudeCodeCLI(prompt, timeout, requestId, workspaceRoot);
 
     if (!cliResult.success || !cliResult.output) {
-      // CLI execution failed
+      // CLI execution failed - record metrics
+      if (collectMetrics) {
+        recordMetrics({
+          requestId,
+          schemaFormat: schemaResult.format,
+          promptSizeChars,
+          schemaSizeChars: schemaSize,
+          estimatedTokens: estimateTokens(promptSizeChars),
+          executionTimeMs: cliResult.executionTimeMs,
+          success: false,
+          timestamp: new Date().toISOString(),
+          userDescriptionLength: payload.userDescription.length,
+        });
+      }
+
       log('ERROR', 'AI generation failed during CLI execution', {
         requestId,
         errorCode: cliResult.error?.code,
@@ -214,7 +253,22 @@ export async function handleGenerateWorkflow(
     // Step 7: Adjust node positions for better spacing
     const adjustedWorkflow = adjustNodeSpacing(workflowWithResolvedSubAgentFlows);
 
-    // Step 7: Success - send generated workflow
+    // Record metrics for successful generation
+    if (collectMetrics) {
+      recordMetrics({
+        requestId,
+        schemaFormat: schemaResult.format,
+        promptSizeChars,
+        schemaSizeChars: schemaSize,
+        estimatedTokens: estimateTokens(promptSizeChars),
+        executionTimeMs: cliResult.executionTimeMs,
+        success: true,
+        timestamp: new Date().toISOString(),
+        userDescriptionLength: payload.userDescription.length,
+      });
+    }
+
+    // Step 8: Success - send generated workflow
     log('INFO', 'AI Workflow Generation completed successfully', {
       requestId,
       executionTimeMs: cliResult.executionTimeMs,
@@ -350,16 +404,33 @@ function adjustNodeSpacing(workflow: Workflow): Workflow {
  * Enhanced with: /specs/001-ai-skill-generation/contracts/skill-scanning-api.md Section 3.1
  *
  * @param userDescription - User's workflow description
- * @param schema - Workflow schema
+ * @param schemaResult - Schema load result (JSON or TOON)
  * @param filteredSkills - Top N relevant Skills (T016)
- * @returns Complete prompt string
+ * @returns Object with prompt string and schema size
  */
 function constructPrompt(
   userDescription: string,
-  schema: unknown,
+  schemaResult: SchemaLoadResult,
   filteredSkills: SkillRelevanceScore[]
-): string {
-  const schemaJSON = JSON.stringify(schema, null, 2);
+): { prompt: string; schemaSize: number } {
+  // Format schema based on type
+  let schemaSection: string;
+  let schemaSize: number;
+
+  if (schemaResult.format === 'toon' && schemaResult.schemaString) {
+    // TOON format - use as-is with format indicator
+    schemaSection = `**Workflow Schema** (TOON format - Token-Oriented Object Notation):
+\`\`\`toon
+${schemaResult.schemaString}
+\`\`\``;
+    schemaSize = schemaResult.schemaString.length;
+  } else {
+    // JSON format - existing behavior
+    const schemaJSON = JSON.stringify(schemaResult.schema, null, 2);
+    schemaSection = `**Workflow Schema**:
+${schemaJSON}`;
+    schemaSize = schemaJSON.length;
+  }
 
   // Prepare Skills list for AI prompt (T017)
   const skillsSection =
@@ -386,15 +457,14 @@ ${JSON.stringify(
 `
       : '';
 
-  return `You are an expert workflow designer for Claude Code Workflow Studio.
+  const prompt = `You are an expert workflow designer for Claude Code Workflow Studio.
 
 **Task**: Generate a valid workflow JSON based on the user's natural language description.
 
 **User Description**:
 ${userDescription}
 ${skillsSection}
-**Workflow Schema**:
-${schemaJSON}
+${schemaSection}
 
 **Output Requirements**:
 - Output ONLY valid JSON matching the Workflow interface
@@ -429,6 +499,8 @@ ${schemaJSON}
   "updatedAt": "${new Date().toISOString()}"
 }
 \`\`\``;
+
+  return { prompt, schemaSize };
 }
 
 /**

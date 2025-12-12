@@ -59,6 +59,20 @@
           "minimum": 30,
           "maximum": 300,
           "description": "Timeout in seconds for AI workflow refinement requests (30-300 seconds)"
+        },
+        "cc-wf-studio.ai.schemaFormat": {
+          "type": "string",
+          "enum": [
+            "json",
+            "toon"
+          ],
+          "default": "toon",
+          "description": "Schema format for AI prompts. 'toon' reduces token consumption by ~23%."
+        },
+        "cc-wf-studio.ai.collectMetrics": {
+          "type": "boolean",
+          "default": false,
+          "description": "Collect and log metrics for A/B comparison of schema formats."
         }
       }
     }
@@ -68,7 +82,8 @@
   ],
   "scripts": {
     "vscode:prepublish": "npm run build",
-    "build": "npm run build:webview && npm run build:extension",
+    "generate:toon": "npx tsx scripts/generate-toon-schema.ts",
+    "build": "npm run generate:toon && npm run build:webview && npm run build:extension",
     "build:dev": "npm run build:webview:dev && npm run build:extension:dev",
     "build:webview": "cd src/webview && npm run build",
     "build:webview:dev": "cd src/webview && npm run build:dev",
@@ -102,6 +117,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.24.3",
     "@slack/web-api": "^7.13.0",
+    "@toon-format/toon": "^1.0.0",
     "nano-spawn": "^2.0.0"
   }
 }
