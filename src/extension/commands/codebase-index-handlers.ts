@@ -8,8 +8,10 @@
 import * as vscode from 'vscode';
 import type {
   BuildIndexPayload,
+  GetSettingPayload,
   IndexProgress,
   SearchCodebasePayload,
+  SetSettingPayload,
 } from '../../shared/types/messages';
 import {
   getCodebaseIndexService,
@@ -339,6 +341,84 @@ export async function handleSearchCodebase(
 }
 
 /**
+ * Handle GET_SETTING message
+ */
+export async function handleGetSetting(
+  payload: GetSettingPayload,
+  webview: vscode.Webview,
+  requestId: string
+): Promise<void> {
+  log(`Handling GET_SETTING request: "${payload.key}"`);
+
+  try {
+    const config = vscode.workspace.getConfiguration('cc-wf-studio');
+    const value = config.get(payload.key);
+
+    webview.postMessage({
+      type: 'GET_SETTING_RESULT',
+      requestId,
+      payload: {
+        key: payload.key,
+        value,
+      },
+    });
+
+    log(`Setting ${payload.key} = ${JSON.stringify(value)}`);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    log(`Error handling GET_SETTING: ${errorMessage}`);
+
+    webview.postMessage({
+      type: 'GET_SETTING_RESULT',
+      requestId,
+      payload: {
+        key: payload.key,
+        value: undefined,
+      },
+    });
+  }
+}
+
+/**
+ * Handle SET_SETTING message
+ */
+export async function handleSetSetting(
+  payload: SetSettingPayload,
+  webview: vscode.Webview,
+  requestId: string
+): Promise<void> {
+  log(`Handling SET_SETTING request: "${payload.key}" = ${JSON.stringify(payload.value)}`);
+
+  try {
+    const config = vscode.workspace.getConfiguration('cc-wf-studio');
+    await config.update(payload.key, payload.value, vscode.ConfigurationTarget.Global);
+
+    webview.postMessage({
+      type: 'SET_SETTING_RESULT',
+      requestId,
+      payload: {
+        key: payload.key,
+        success: true,
+      },
+    });
+
+    log(`Setting ${payload.key} updated successfully`);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    log(`Error handling SET_SETTING: ${errorMessage}`);
+
+    webview.postMessage({
+      type: 'SET_SETTING_RESULT',
+      requestId,
+      payload: {
+        key: payload.key,
+        success: false,
+      },
+    });
+  }
+}
+
+/**
  * Handle all codebase index messages
  */
 export async function handleCodebaseIndexMessage(
@@ -388,6 +468,18 @@ export async function handleCodebaseIndexMessage(
             timestamp: new Date().toISOString(),
           },
         });
+      }
+      return true;
+
+    case 'GET_SETTING':
+      if (message.payload) {
+        await handleGetSetting(message.payload as GetSettingPayload, webview, requestId);
+      }
+      return true;
+
+    case 'SET_SETTING':
+      if (message.payload) {
+        await handleSetSetting(message.payload as SetSettingPayload, webview, requestId);
       }
       return true;
 

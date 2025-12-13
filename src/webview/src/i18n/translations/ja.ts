@@ -751,4 +751,33 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     'このワークフローをインポートするには、インポート元のSlackワークスペースに接続してください。ワークフローファイルは現在接続されていないワークスペースにあります。',
   'slack.import.connectionRequired.workspaceInfo': 'インポート元ワークスペース:',
   'slack.import.connectionRequired.connectButton': 'Slackに接続',
+
+  // Codebase Index (Issue #265)
+  'codebaseIndex.building': 'インデックス構築中...',
+  'codebaseIndex.ready': 'インデックス準備完了',
+  'codebaseIndex.notBuilt': 'インデックス未構築',
+  'codebaseIndex.statusBadge': 'コードベースインデックスの状態',
+  'codebaseIndex.rebuild': 'インデックスを再構築',
+  'codebaseIndex.build': 'インデックスを構築',
+  'codebaseIndex.clear': 'インデックスをクリア',
+  'codebaseIndex.documents': 'ドキュメント数',
+  'codebaseIndex.files': 'ファイル数',
+  'codebaseIndex.noIndex': 'インデックスが構築されていません',
+  'codebaseIndex.cancel': 'キャンセル',
+  'codebaseIndex.button': 'コードベース参照(β)',
+  'codebaseIndex.enableReference': 'コードベース参照を有効化',
+  'codebaseIndex.settings.title': 'コードベース参照の設定',
+  'codebaseIndex.settings.description1':
+    '有効にすると、AI応答にコードベースから関連するコードスニペットが含まれます。@codebase コマンドで明示的に検索することもできます。',
+  'codebaseIndex.settings.description2':
+    '現在はキーワード検索（BM25）で実装されており、将来的にはベクトルDBによる意味検索にアップグレード予定です。',
+  'codebaseIndex.settings.status': 'インデックスの状態',
+  'codebaseIndex.settings.disabled': 'コードベース参照は無効です',
+
+  // Codebase Reference (Issue #265)
+  'codebaseReference.toggle': 'コードベース参照結果の表示切替',
+  'codebaseReference.explicitResults': 'コードベース参照結果',
+  'codebaseReference.relatedCode': '関連コード',
+  'codebaseReference.queryLabel': '検索クエリ',
+  'codebaseReference.moreResults': '+{count}件の結果',
 };

@@ -3,14 +3,31 @@
  *
  * Zustand store for managing AI-assisted workflow refinement chat state
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.1
+ * Updated: Issue #265 - Added codebase index state management
  */
 
+import type { IndexStatus, SearchResult } from '@shared/types/codebase-index';
 import type { ConversationHistory, ConversationMessage } from '@shared/types/workflow-definition';
 import { create } from 'zustand';
+import { getSetting, setSetting } from '../services/codebase-search-service';
 
 // ============================================================================
 // Store State Interface
 // ============================================================================
+
+/**
+ * Search results attached to a message
+ */
+export interface MessageSearchResults {
+  /** Message ID these results belong to */
+  messageId: string;
+  /** Search results */
+  results: SearchResult[];
+  /** Search query used */
+  query: string;
+  /** Whether this was from @codebase command (true) or auto-search (false) */
+  isExplicit: boolean;
+}
 
 interface RefinementStore {
   // State
@@ -25,6 +42,13 @@ interface RefinementStore {
   // SubAgentFlow Refinement State
   targetType: 'workflow' | 'subAgentFlow';
   targetSubAgentFlowId: string | null;
+
+  // Codebase Index State (Issue #265)
+  indexStatus: IndexStatus | null;
+  isIndexBuilding: boolean;
+  indexBuildProgress: number;
+  messageSearchResults: Map<string, MessageSearchResults>;
+  useCodebaseSearch: boolean; // Beta feature - default OFF
 
   // Actions
   openChat: () => void;
@@ -68,9 +92,20 @@ interface RefinementStore {
   // Phase 3.11: Message removal operation
   removeMessage: (messageId: string) => void;
 
+  // Codebase Index Actions (Issue #265)
+  setIndexStatus: (status: IndexStatus | null) => void;
+  setIndexBuilding: (isBuilding: boolean, progress?: number) => void;
+  setMessageSearchResults: (messageId: string, results: MessageSearchResults) => void;
+  getMessageSearchResults: (messageId: string) => MessageSearchResults | undefined;
+  clearMessageSearchResults: (messageId: string) => void;
+  toggleUseCodebaseSearch: () => void;
+  setUseCodebaseSearch: (enabled: boolean) => void;
+  loadCodebaseSearchSetting: () => Promise<void>;
+
   // Computed
   canSend: () => boolean;
   shouldShowWarning: () => boolean;
+  isIndexReady: () => boolean;
 }
 
 // ============================================================================
@@ -93,6 +128,13 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   // SubAgentFlow Refinement Initial State
   targetType: 'workflow',
   targetSubAgentFlowId: null,
+
+  // Codebase Index Initial State (Issue #265)
+  indexStatus: null,
+  isIndexBuilding: false,
+  indexBuildProgress: 0,
+  messageSearchResults: new Map(),
+  useCodebaseSearch: false, // Beta feature - default OFF
 
   // Actions
   openChat: () => {
@@ -309,6 +351,51 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     });
   },
 
+  // Codebase Index Actions (Issue #265)
+  setIndexStatus: (status: IndexStatus | null) => {
+    set({ indexStatus: status });
+  },
+
+  setIndexBuilding: (isBuilding: boolean, progress = 0) => {
+    set({ isIndexBuilding: isBuilding, indexBuildProgress: progress });
+  },
+
+  setMessageSearchResults: (messageId: string, results: MessageSearchResults) => {
+    const currentMap = get().messageSearchResults;
+    const newMap = new Map(currentMap);
+    newMap.set(messageId, results);
+    set({ messageSearchResults: newMap });
+  },
+
+  getMessageSearchResults: (messageId: string) => {
+    return get().messageSearchResults.get(messageId);
+  },
+
+  clearMessageSearchResults: (messageId: string) => {
+    const currentMap = get().messageSearchResults;
+    const newMap = new Map(currentMap);
+    newMap.delete(messageId);
+    set({ messageSearchResults: newMap });
+  },
+
+  toggleUseCodebaseSearch: () => {
+    const newValue = !get().useCodebaseSearch;
+    set({ useCodebaseSearch: newValue });
+    // Persist to VSCode settings
+    setSetting('codebaseReference.enabled', newValue);
+  },
+
+  setUseCodebaseSearch: (enabled: boolean) => {
+    set({ useCodebaseSearch: enabled });
+  },
+
+  loadCodebaseSearchSetting: async () => {
+    const value = await getSetting<boolean>('codebaseReference.enabled');
+    if (value !== undefined) {
+      set({ useCodebaseSearch: value });
+    }
+  },
+
   // Computed Methods
   canSend: () => {
     const { conversationHistory, isProcessing, currentInput } = get();
@@ -340,5 +427,10 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
 
     // Show warning when 20 or more iterations have been completed
     return conversationHistory.currentIteration >= 20;
+  },
+
+  isIndexReady: () => {
+    const { indexStatus } = get();
+    return indexStatus?.state === 'ready';
   },
 }));

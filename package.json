@@ -40,10 +40,6 @@
           "light": "resources/icon.png",
           "dark": "resources/icon.png"
         }
-      },
-      {
-        "command": "cc-wf-studio.testCodebaseIndex",
-        "title": "Claude Code Workflow Studio: Test Codebase Index"
       }
     ],
     "menus": {
@@ -77,6 +73,11 @@
           "type": "boolean",
           "default": false,
           "description": "Collect and log metrics for A/B comparison of schema formats."
+        },
+        "cc-wf-studio.codebaseReference.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable codebase reference feature (Beta). When enabled, AI responses will include related code snippets from your codebase."
         }
       }
     }

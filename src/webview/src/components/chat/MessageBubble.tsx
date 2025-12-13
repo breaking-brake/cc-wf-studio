@@ -5,6 +5,7 @@
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.2
  * Updated: Phase 3.7 - Added loading state for AI messages
  * Updated: Phase 3.8 - Added error state display
+ * Updated: Issue #265 - Added codebase search results section
  */
 
 import type { ConversationMessage } from '@shared/types/workflow-definition';
@@ -13,6 +14,7 @@ import { useTranslation } from '../../i18n/i18n-context';
 import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
 import { useRefinementStore } from '../../stores/refinement-store';
 import { getErrorMessageInfo } from '../../utils/error-messages';
+import { CodebaseSearchResults } from './CodebaseSearchResults';
 import { ProgressBar } from './ProgressBar';
 
 interface MessageBubbleProps {
@@ -22,7 +24,7 @@ interface MessageBubbleProps {
 
 export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
   const { t } = useTranslation();
-  const { timeoutSeconds } = useRefinementStore();
+  const { timeoutSeconds, getMessageSearchResults } = useRefinementStore();
   const fontSizes = useResponsiveFonts();
   const isUser = message.sender === 'user';
   const isError = message.isError ?? false;
@@ -35,6 +37,9 @@ export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
   const errorMessageInfo = isError && errorCode ? getErrorMessageInfo(errorCode) : null;
   const errorMessage = errorMessageInfo ? t(errorMessageInfo.messageKey) : '';
   const isRetryable = errorMessageInfo?.isRetryable ?? false;
+
+  // Issue #265: Get search results for this message (AI messages only)
+  const searchResults = !isUser ? getMessageSearchResults(message.id) : undefined;
 
   return (
     <div
@@ -131,6 +136,15 @@ export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
             isProcessing={true}
             label={t('refinement.aiProcessing')}
             maxSeconds={timeoutSeconds}
+          />
+        )}
+
+        {/* Issue #265: Codebase search results (AI messages only) */}
+        {searchResults && searchResults.results.length > 0 && !isLoading && !isError && (
+          <CodebaseSearchResults
+            results={searchResults.results}
+            query={searchResults.query}
+            isExplicit={searchResults.isExplicit}
           />
         )}
 

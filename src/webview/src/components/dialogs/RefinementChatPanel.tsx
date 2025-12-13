@@ -9,6 +9,7 @@
  * Updated: Phase 3.3 - Added resizable width functionality
  * Updated: Phase 3.7 - Added immediate loading message display
  * Updated: SubAgentFlow support - Unified panel for both workflow types
+ * Updated: Issue #265 - Added codebase index status badge
  */
 
 import { useCallback, useEffect, useState } from 'react';
@@ -17,6 +18,11 @@ import { useResizablePanel } from '../../hooks/useResizablePanel';
 import { getPanelSizeMode, useResponsiveFontSizes } from '../../hooks/useResponsiveFontSizes';
 import { useTranslation } from '../../i18n/i18n-context';
 import {
+  extractSearchKeywords,
+  parseCodebaseCommand,
+  searchCodebase,
+} from '../../services/codebase-search-service';
+import {
   clearConversation,
   refineSubAgentFlow,
   refineWorkflow,
@@ -24,6 +30,7 @@ import {
 } from '../../services/refinement-service';
 import { useRefinementStore } from '../../stores/refinement-store';
 import { useWorkflowStore } from '../../stores/workflow-store';
+import { CodebaseStatusBadge } from '../chat/CodebaseStatusBadge';
 import { IterationCounter } from '../chat/IterationCounter';
 import { MessageInput } from '../chat/MessageInput';
 import { MessageList } from '../chat/MessageList';
@@ -76,6 +83,9 @@ export function RefinementChatPanel({
     useSkills,
     toggleUseSkills,
     timeoutSeconds,
+    setMessageSearchResults,
+    isIndexReady,
+    useCodebaseSearch,
   } = useRefinementStore();
 
   const { activeWorkflow, updateWorkflow, subAgentFlows, updateSubAgentFlow, setNodes, setEdges } =
@@ -152,11 +162,44 @@ export function RefinementChatPanel({
     return null;
   }
 
+  /**
+   * Issue #265: Perform codebase search and store results with the AI message
+   * @param aiMessageId - The AI message ID to associate results with
+   * @param query - Search query
+   * @param isExplicit - Whether this was from @codebase command (true) or auto-search (false)
+   */
+  const performCodebaseSearch = async (aiMessageId: string, query: string, isExplicit: boolean) => {
+    // Skip if codebase search is disabled (Beta feature - default OFF)
+    if (!useCodebaseSearch || !isIndexReady() || !query.trim()) {
+      return;
+    }
+
+    try {
+      const searchResponse = await searchCodebase(query, { limit: 5 });
+      if (searchResponse && searchResponse.results.length > 0) {
+        setMessageSearchResults(aiMessageId, {
+          messageId: aiMessageId,
+          results: searchResponse.results,
+          query,
+          isExplicit,
+        });
+      }
+    } catch (error) {
+      // Silently fail - search is non-critical
+      console.warn('Codebase search failed:', error);
+    }
+  };
+
   // Handle sending refinement request
   const handleSend = async (message: string) => {
     if (!conversationHistory || !activeWorkflow) {
       return;
     }
+
+    // Issue #265: Parse @codebase command from message
+    const parsedCommand = parseCodebaseCommand(message);
+    const messageToSend = parsedCommand.hasCommand ? parsedCommand.cleanedMessage : message;
+    const explicitSearchQuery = parsedCommand.hasCommand ? parsedCommand.searchQuery : null;
 
     // Phase 3.7: Add user message and loading AI message immediately for instant feedback
     addUserMessage(message);
@@ -174,7 +217,7 @@ export function RefinementChatPanel({
         const result = await refineSubAgentFlow(
           activeWorkflow.id,
           subAgentFlowId,
-          message,
+          messageToSend,
           activeWorkflow,
           conversationHistory,
           requestId,
@@ -214,6 +257,17 @@ export function RefinementChatPanel({
           updateMessageContent(aiMessageId, aiMessage.content);
           updateMessageLoadingState(aiMessageId, false);
           handleRefinementSuccess(aiMessage, updatedConversationHistory);
+
+          // Issue #265: Perform codebase search after AI response
+          if (explicitSearchQuery) {
+            await performCodebaseSearch(aiMessageId, explicitSearchQuery, true);
+          } else {
+            // Auto-search using extracted keywords from user message
+            const keywords = extractSearchKeywords(message);
+            if (keywords.length > 0) {
+              await performCodebaseSearch(aiMessageId, keywords.join(' '), false);
+            }
+          }
         } else if (result.type === 'clarification') {
           const { aiMessage, updatedConversationHistory } = result.payload;
 
@@ -225,12 +279,22 @@ export function RefinementChatPanel({
           updateMessageContent(aiMessageId, aiMessage.content);
           updateMessageLoadingState(aiMessageId, false);
           handleRefinementSuccess(aiMessage, updatedConversationHistory);
+
+          // Issue #265: Perform codebase search after AI response
+          if (explicitSearchQuery) {
+            await performCodebaseSearch(aiMessageId, explicitSearchQuery, true);
+          } else {
+            const keywords = extractSearchKeywords(message);
+            if (keywords.length > 0) {
+              await performCodebaseSearch(aiMessageId, keywords.join(' '), false);
+            }
+          }
         }
       } else {
         // Main workflow refinement
         const result = await refineWorkflow(
           activeWorkflow.id,
-          message,
+          messageToSend,
           activeWorkflow,
           conversationHistory,
           requestId,
@@ -246,6 +310,16 @@ export function RefinementChatPanel({
             result.payload.aiMessage,
             result.payload.updatedConversationHistory
           );
+
+          // Issue #265: Perform codebase search after AI response
+          if (explicitSearchQuery) {
+            await performCodebaseSearch(aiMessageId, explicitSearchQuery, true);
+          } else {
+            const keywords = extractSearchKeywords(message);
+            if (keywords.length > 0) {
+              await performCodebaseSearch(aiMessageId, keywords.join(' '), false);
+            }
+          }
         } else if (result.type === 'clarification') {
           updateMessageContent(aiMessageId, result.payload.aiMessage.content);
           updateMessageLoadingState(aiMessageId, false);
@@ -253,6 +327,16 @@ export function RefinementChatPanel({
             result.payload.aiMessage,
             result.payload.updatedConversationHistory
           );
+
+          // Issue #265: Perform codebase search after AI response
+          if (explicitSearchQuery) {
+            await performCodebaseSearch(aiMessageId, explicitSearchQuery, true);
+          } else {
+            const keywords = extractSearchKeywords(message);
+            if (keywords.length > 0) {
+              await performCodebaseSearch(aiMessageId, keywords.join(' '), false);
+            }
+          }
         }
       }
     } catch (error) {
@@ -485,19 +569,22 @@ export function RefinementChatPanel({
               alignItems: 'center',
             }}
           >
-            <h2
-              id="refinement-title"
-              style={{
-                margin: 0,
-                fontSize: `${fontSizes.title}px`,
-                fontWeight: 600,
-                color: 'var(--vscode-foreground)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-              }}
-            >
-              {panelTitle}
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h2
+                id="refinement-title"
+                style={{
+                  margin: 0,
+                  fontSize: `${fontSizes.title}px`,
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                }}
+              >
+                {panelTitle}
+              </h2>
+              <CodebaseStatusBadge />
+            </div>
 
             {/* Close button - in compact mode, shown in row 1 */}
             {isCompact && (

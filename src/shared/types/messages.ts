@@ -569,6 +569,48 @@ export interface McpCacheRefreshedPayload {
 }
 
 // ============================================================================
+// Settings Payloads (Issue #265)
+// ============================================================================
+
+/**
+ * Get setting request payload
+ */
+export interface GetSettingPayload {
+  /** Setting key (e.g., 'codebaseReference.enabled') */
+  key: string;
+}
+
+/**
+ * Get setting result payload
+ */
+export interface GetSettingResultPayload {
+  /** Setting key */
+  key: string;
+  /** Setting value */
+  value: unknown;
+}
+
+/**
+ * Set setting request payload
+ */
+export interface SetSettingPayload {
+  /** Setting key (e.g., 'codebaseReference.enabled') */
+  key: string;
+  /** Setting value */
+  value: unknown;
+}
+
+/**
+ * Set setting result payload
+ */
+export interface SetSettingResultPayload {
+  /** Setting key */
+  key: string;
+  /** Whether the setting was updated successfully */
+  success: boolean;
+}
+
+// ============================================================================
 // Extension → Webview Messages
 // ============================================================================
 
@@ -639,7 +681,10 @@ export type ExtensionMessage =
   | Message<SearchCodebaseResultPayload, 'SEARCH_CODEBASE_RESULT'>
   | Message<SearchCodebaseFailedPayload, 'SEARCH_CODEBASE_FAILED'>
   | Message<void, 'INDEX_BUILD_CANCELLED'>
-  | Message<void, 'INDEX_CLEARED'>;
+  | Message<void, 'INDEX_CLEARED'>
+  // Settings Messages (Issue #265)
+  | Message<GetSettingResultPayload, 'GET_SETTING_RESULT'>
+  | Message<SetSettingResultPayload, 'SET_SETTING_RESULT'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -1194,7 +1239,10 @@ export type WebviewMessage =
   | Message<void, 'GET_INDEX_STATUS'>
   | Message<void, 'CANCEL_INDEX_BUILD'>
   | Message<void, 'CLEAR_INDEX'>
-  | Message<SearchCodebasePayload, 'SEARCH_CODEBASE'>;
+  | Message<SearchCodebasePayload, 'SEARCH_CODEBASE'>
+  // Settings Messages (Issue #265)
+  | Message<GetSettingPayload, 'GET_SETTING'>
+  | Message<SetSettingPayload, 'SET_SETTING'>;
 
 // ============================================================================
 // Error Codes

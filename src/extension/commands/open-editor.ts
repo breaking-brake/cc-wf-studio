@@ -826,13 +826,47 @@ export function registerOpenEditorCommand(
             case 'GET_INDEX_STATUS':
             case 'CANCEL_INDEX_BUILD':
             case 'CLEAR_INDEX':
-            case 'SEARCH_CODEBASE': {
+            case 'SEARCH_CODEBASE':
+            case 'GET_SETTING':
+            case 'SET_SETTING': {
               const handled = await handleCodebaseIndexMessage(message, webview, context);
               if (!handled) {
                 console.warn('Unhandled codebase index message:', message.type);
               }
               break;
             }
+
+            case 'OPEN_FILE_AT_LINE':
+              // Issue #265: Open file at specific line from codebase search results
+              if (message.payload?.filePath) {
+                try {
+                  const line = message.payload.line ?? 1;
+                  const uri = vscode.Uri.file(message.payload.filePath);
+                  const document = await vscode.workspace.openTextDocument(uri);
+                  const editor = await vscode.window.showTextDocument(document, {
+                    preview: false,
+                    viewColumn: vscode.ViewColumn.One,
+                  });
+                  // Move cursor to the specified line
+                  const position = new vscode.Position(Math.max(0, line - 1), 0);
+                  editor.selection = new vscode.Selection(position, position);
+                  editor.revealRange(
+                    new vscode.Range(position, position),
+                    vscode.TextEditorRevealType.InCenter
+                  );
+                } catch (error) {
+                  console.error('Failed to open file:', error);
+                  webview.postMessage({
+                    type: 'ERROR',
+                    requestId: message.requestId,
+                    payload: {
+                      code: 'FILE_OPEN_FAILED',
+                      message: error instanceof Error ? error.message : 'Failed to open file',
+                    },
+                  });
+                }
+              }
+              break;
 
             default:
               console.warn('Unknown message type:', message);
