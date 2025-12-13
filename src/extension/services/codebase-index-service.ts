@@ -5,6 +5,7 @@
  * Based on: GitHub Issue #265
  */
 
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { minimatch } from 'minimatch';
@@ -104,6 +105,7 @@ function getLanguageFromExtension(filePath: string): string {
 class CodebaseIndexService {
   private vectorSearchService: VectorSearchService;
   private workspaceRoot: string | null = null;
+  private storageUri: vscode.Uri | null = null;
   private indexState: IndexState = 'idle';
   private lastBuildTime: string | null = null;
   private indexFilePath: string | null = null;
@@ -118,11 +120,15 @@ class CodebaseIndexService {
   }
 
   /**
-   * Initialize the service with a workspace root
+   * Initialize the service with a workspace root and storage URI
    */
-  async initialize(workspaceRoot: string): Promise<void> {
+  async initialize(workspaceRoot: string, storageUri: vscode.Uri): Promise<void> {
     this.workspaceRoot = workspaceRoot;
+    this.storageUri = storageUri;
     await this.vectorSearchService.initialize();
+
+    // Migrate old index from .vscode/ to globalStorageUri if needed
+    await this.migrateOldIndex();
 
     // Try to restore existing index
     const indexPath = this.getDefaultIndexPath();
@@ -137,16 +143,50 @@ class CodebaseIndexService {
     }
 
     log(`CodebaseIndexService initialized for workspace: ${workspaceRoot}`);
+    log(`Index storage location: ${this.getDefaultIndexPath()}`);
   }
 
   /**
-   * Get the default index file path
+   * Migrate old index from .vscode/ to globalStorageUri
+   */
+  private async migrateOldIndex(): Promise<void> {
+    if (!this.workspaceRoot) return;
+
+    const oldPath = path.join(this.workspaceRoot, '.vscode', 'codebase-index.json');
+    const newPath = this.getDefaultIndexPath();
+
+    if (fs.existsSync(oldPath) && !fs.existsSync(newPath)) {
+      try {
+        const newDir = path.dirname(newPath);
+        if (!fs.existsSync(newDir)) {
+          await fs.promises.mkdir(newDir, { recursive: true });
+        }
+        await fs.promises.rename(oldPath, newPath);
+        log(`Migrated index from ${oldPath} to ${newPath}`);
+      } catch (error) {
+        log(`Failed to migrate old index: ${error}`);
+      }
+    }
+  }
+
+  /**
+   * Get the default index file path in globalStorageUri
    */
   private getDefaultIndexPath(): string {
-    if (!this.workspaceRoot) {
-      throw new Error('Workspace root not set');
+    if (!this.workspaceRoot || !this.storageUri) {
+      throw new Error('Service not initialized');
     }
-    return path.join(this.workspaceRoot, '.vscode', 'codebase-index.json');
+
+    // Generate hash from workspace path to create unique directory
+    const hash = crypto
+      .createHash('sha256')
+      .update(this.workspaceRoot)
+      .digest('hex')
+      .substring(0, 16);
+
+    // globalStorageUri/indexes/{hash}/codebase-index.json
+    const indexDir = path.join(this.storageUri.fsPath, 'indexes', hash);
+    return path.join(indexDir, 'codebase-index.json');
   }
 
   /**
@@ -223,7 +263,7 @@ class CodebaseIndexService {
       }
     };
 
-    await scanDirectory(this.workspaceRoot);
+    await scanDirectory(workspaceRoot);
     log(`Found ${files.length} files to index`);
     return files;
   }
@@ -558,7 +598,7 @@ let codebaseIndexServiceInstance: CodebaseIndexService | null = null;
  * Initialize the codebase index service
  */
 export async function initializeCodebaseIndexService(
-  _context: vscode.ExtensionContext
+  context: vscode.ExtensionContext
 ): Promise<CodebaseIndexService | null> {
   const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 
@@ -569,7 +609,7 @@ export async function initializeCodebaseIndexService(
 
   if (!codebaseIndexServiceInstance) {
     codebaseIndexServiceInstance = new CodebaseIndexService();
-    await codebaseIndexServiceInstance.initialize(workspaceRoot);
+    await codebaseIndexServiceInstance.initialize(workspaceRoot, context.globalStorageUri);
   }
 
   return codebaseIndexServiceInstance;

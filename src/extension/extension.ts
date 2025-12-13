@@ -7,10 +7,6 @@
 import * as vscode from 'vscode';
 import { registerOpenEditorCommand } from './commands/open-editor';
 import { handleConnectSlackManual } from './commands/slack-connect-manual';
-import {
-  getCodebaseIndexService,
-  initializeCodebaseIndexService,
-} from './services/codebase-index-service';
 import { SlackApiService } from './services/slack-api-service';
 import { SlackTokenManager } from './utils/slack-token-manager';
 
