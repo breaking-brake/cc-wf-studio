@@ -40,6 +40,10 @@
           "light": "resources/icon.png",
           "dark": "resources/icon.png"
         }
+      },
+      {
+        "command": "cc-wf-studio.testCodebaseIndex",
+        "title": "Claude Code Workflow Studio: Test Codebase Index"
       }
     ],
     "menus": {
@@ -116,6 +120,8 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.24.3",
+    "@orama/orama": "^3.1.16",
+    "@orama/plugin-data-persistence": "^3.1.16",
     "@slack/web-api": "^7.13.0",
     "@toon-format/toon": "^1.0.0",
     "nano-spawn": "^2.0.0"

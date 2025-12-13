@@ -9,6 +9,7 @@ import * as vscode from 'vscode';
 import type { WebviewMessage } from '../../shared/types/messages';
 import { translate } from '../i18n/i18n-service';
 import { cancelGeneration } from '../services/claude-code-service';
+import { initializeCodebaseIndexService } from '../services/codebase-index-service';
 import { FileService } from '../services/file-service';
 import { SlackApiService } from '../services/slack-api-service';
 import { migrateWorkflow } from '../utils/migrate-workflow';
@@ -16,6 +17,7 @@ import { SlackTokenManager } from '../utils/slack-token-manager';
 import { validateWorkflowFile } from '../utils/workflow-validator';
 import { getWebviewContent } from '../webview-content';
 import { handleGenerateWorkflow } from './ai-generation';
+import { handleCodebaseIndexMessage } from './codebase-index-handlers';
 import { handleExportWorkflow } from './export-workflow';
 import { loadWorkflow } from './load-workflow';
 import { loadWorkflowList } from './load-workflow-list';
@@ -104,6 +106,12 @@ export function registerOpenEditorCommand(
       // Initialize Slack services
       slackTokenManager = new SlackTokenManager(context);
       slackApiService = new SlackApiService(slackTokenManager);
+
+      // Initialize Codebase Index service (non-blocking)
+      initializeCodebaseIndexService(context).catch((error) => {
+        console.error('Failed to initialize codebase index service:', error);
+      });
+
       const columnToShowIn = vscode.window.activeTextEditor
         ? vscode.window.activeTextEditor.viewColumn
         : undefined;
@@ -812,6 +820,19 @@ export function registerOpenEditorCommand(
                 );
               }
               break;
+
+            // Codebase Index messages (Issue #265)
+            case 'BUILD_INDEX':
+            case 'GET_INDEX_STATUS':
+            case 'CANCEL_INDEX_BUILD':
+            case 'CLEAR_INDEX':
+            case 'SEARCH_CODEBASE': {
+              const handled = await handleCodebaseIndexMessage(message, webview, context);
+              if (!handled) {
+                console.warn('Unhandled codebase index message:', message.type);
+              }
+              break;
+            }
 
             default:
               console.warn('Unknown message type:', message);

@@ -7,6 +7,10 @@
 import * as vscode from 'vscode';
 import { registerOpenEditorCommand } from './commands/open-editor';
 import { handleConnectSlackManual } from './commands/slack-connect-manual';
+import {
+  getCodebaseIndexService,
+  initializeCodebaseIndexService,
+} from './services/codebase-index-service';
 import { SlackApiService } from './services/slack-api-service';
 import { SlackTokenManager } from './utils/slack-token-manager';
 
@@ -96,6 +100,172 @@ export function activate(context: vscode.ExtensionContext): void {
       const slackApiService = new SlackApiService(tokenManager);
 
       await handleConnectSlackManual(tokenManager, slackApiService);
+    })
+  );
+
+  // Register Codebase Index test command (Issue #265 - for E2E testing)
+  context.subscriptions.push(
+    vscode.commands.registerCommand('cc-wf-studio.testCodebaseIndex', async () => {
+      log('INFO', 'Codebase Index: Test command invoked');
+
+      try {
+        // Initialize service if needed
+        let service = getCodebaseIndexService();
+        if (!service) {
+          log('INFO', 'Initializing codebase index service...');
+          service = await initializeCodebaseIndexService(context);
+        }
+
+        if (!service) {
+          vscode.window.showErrorMessage('No workspace folder found. Open a workspace first.');
+          return;
+        }
+
+        // Show options to user
+        const action = await vscode.window.showQuickPick(
+          [
+            { label: '$(database) Build Index', value: 'build' },
+            { label: '$(search) Search Codebase', value: 'search' },
+            { label: '$(info) Get Status', value: 'status' },
+            { label: '$(trash) Clear Index', value: 'clear' },
+          ],
+          { placeHolder: 'Select an action' }
+        );
+
+        if (!action) return;
+
+        switch (action.value) {
+          case 'build': {
+            vscode.window.withProgress(
+              {
+                location: vscode.ProgressLocation.Notification,
+                title: 'Building codebase index...',
+                cancellable: true,
+              },
+              async (progress, token) => {
+                // Set up progress callback
+                service.setProgressCallback((p) => {
+                  progress.report({
+                    message: `${p.phase}: ${p.processedFiles}/${p.totalFiles} files (${p.percentage}%)`,
+                    increment: p.percentage > 0 ? 1 : 0,
+                  });
+                });
+
+                // Handle cancellation
+                token.onCancellationRequested(() => {
+                  service.cancelBuild();
+                });
+
+                const result = await service.buildIndex();
+                service.setProgressCallback(null);
+
+                if (result.success) {
+                  vscode.window.showInformationMessage(
+                    `Index built: ${result.documentCount} documents from ${result.fileCount} files in ${result.buildTimeMs}ms`
+                  );
+                  log('INFO', 'Index build completed', result);
+                } else {
+                  vscode.window.showErrorMessage(`Index build failed: ${result.errorMessage}`);
+                  log('ERROR', 'Index build failed', result);
+                }
+              }
+            );
+            break;
+          }
+
+          case 'search': {
+            const query = await vscode.window.showInputBox({
+              prompt: 'Enter search query',
+              placeHolder: 'function, class, import...',
+            });
+
+            if (!query) return;
+
+            try {
+              const result = await service.search(query, { limit: 10 });
+              log('INFO', 'Search completed', {
+                query,
+                resultCount: result.results.length,
+                executionTimeMs: result.executionTimeMs,
+              });
+
+              if (result.results.length === 0) {
+                vscode.window.showInformationMessage(`No results found for "${query}"`);
+                return;
+              }
+
+              // Show results in quick pick
+              const items = result.results.map((r) => ({
+                label: `$(file) ${r.document.filePath}`,
+                description: `Lines ${r.document.startLine}-${r.document.endLine} (score: ${r.score.toFixed(3)})`,
+                detail: r.document.content.substring(0, 100) + '...',
+                filePath: r.document.filePath,
+                startLine: r.document.startLine,
+              }));
+
+              const selected = await vscode.window.showQuickPick(items, {
+                placeHolder: `${result.results.length} results found (${result.executionTimeMs}ms)`,
+              });
+
+              if (selected) {
+                // Open the file at the specified line
+                const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+                if (workspaceRoot) {
+                  const uri = vscode.Uri.file(`${workspaceRoot}/${selected.filePath}`);
+                  const doc = await vscode.workspace.openTextDocument(uri);
+                  await vscode.window.showTextDocument(doc, {
+                    selection: new vscode.Range(
+                      selected.startLine - 1,
+                      0,
+                      selected.startLine - 1,
+                      0
+                    ),
+                  });
+                }
+              }
+            } catch (error) {
+              const msg = error instanceof Error ? error.message : 'Unknown error';
+              vscode.window.showErrorMessage(`Search failed: ${msg}`);
+              log('ERROR', 'Search failed', { query, error: msg });
+            }
+            break;
+          }
+
+          case 'status': {
+            const status = await service.getStatus();
+            const message = [
+              `State: ${status.state}`,
+              `Documents: ${status.documentCount}`,
+              `Files: ${status.fileCount}`,
+              `Last Build: ${status.lastBuildTime || 'Never'}`,
+              `Index File: ${status.indexFilePath || 'None'}`,
+            ].join('\n');
+
+            vscode.window.showInformationMessage(message, { modal: true });
+            log('INFO', 'Index status', status);
+            break;
+          }
+
+          case 'clear': {
+            const confirm = await vscode.window.showWarningMessage(
+              'Are you sure you want to clear the index?',
+              { modal: true },
+              'Yes, Clear'
+            );
+
+            if (confirm === 'Yes, Clear') {
+              await service.clearIndex();
+              vscode.window.showInformationMessage('Index cleared successfully');
+              log('INFO', 'Index cleared');
+            }
+            break;
+          }
+        }
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : 'Unknown error';
+        vscode.window.showErrorMessage(`Codebase Index Error: ${msg}`);
+        log('ERROR', 'Codebase index test command failed', { error: msg });
+      }
     })
   );
 
