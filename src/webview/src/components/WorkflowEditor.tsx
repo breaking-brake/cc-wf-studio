@@ -289,6 +289,7 @@ export const WorkflowEditor: React.FC = () => {
                 backgroundColor: 'var(--vscode-editor-background)',
                 width: isCompact ? 120 : 200,
                 height: isCompact ? 80 : 150,
+                margin: '4px 16px',
               }}
             />
           </MinimapContainer>
