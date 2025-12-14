@@ -84,9 +84,7 @@ export const Toggle: React.FC<ToggleProps> = ({
           fontSize: `${dimensions.fontSize}px`,
           fontWeight: 600,
           // ON: white text on green / OFF: dark text on gray for light theme compatibility
-          color: checked
-            ? 'var(--vscode-button-foreground)'
-            : 'var(--vscode-foreground)',
+          color: checked ? 'var(--vscode-button-foreground)' : 'var(--vscode-foreground)',
           pointerEvents: 'none',
           transition: 'left 100ms, right 100ms, color 100ms',
           userSelect: 'none',

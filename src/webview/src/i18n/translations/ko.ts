@@ -760,9 +760,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'codebaseIndex.rebuild': '인덱스 재구축',
   'codebaseIndex.build': '인덱스 구축',
   'codebaseIndex.clear': '인덱스 삭제',
-  'codebaseIndex.documents': '문서',
-  'codebaseIndex.files': '파일',
-  'codebaseIndex.noIndex': '미구축',
   'codebaseIndex.cancel': '취소',
   'codebaseIndex.button': '코드베이스 참조(β)',
   'codebaseIndex.enableReference': '코드베이스 참조 활성화',
@@ -771,7 +768,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     '활성화하면 AI 응답에 코드베이스에서 관련 코드 스니펫이 포함됩니다. @codebase 명령을 사용하여 명시적으로 검색할 수도 있습니다.',
   'codebaseIndex.settings.description2':
     '현재는 키워드 검색(BM25)으로 구현되어 있으며, 향후 벡터 DB를 사용한 의미 검색으로 업그레이드할 예정입니다.',
-  'codebaseIndex.settings.status': '인덱스 상태',
   'codebaseIndex.settings.disabled': '코드베이스 참조가 비활성화되어 있습니다',
 
   // Codebase Reference (Issue #265)

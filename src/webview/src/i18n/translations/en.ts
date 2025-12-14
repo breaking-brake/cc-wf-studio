@@ -767,9 +767,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'codebaseIndex.rebuild': 'Rebuild Index',
   'codebaseIndex.build': 'Build Index',
   'codebaseIndex.clear': 'Clear Index',
-  'codebaseIndex.documents': 'Documents',
-  'codebaseIndex.files': 'Files',
-  'codebaseIndex.noIndex': 'Not built',
   'codebaseIndex.cancel': 'Cancel',
   'codebaseIndex.button': 'Codebase Reference (β)',
   'codebaseIndex.enableReference': 'Enable codebase reference',
@@ -778,7 +775,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'When enabled, AI responses will include related code snippets from your codebase. You can also use @codebase command to search explicitly.',
   'codebaseIndex.settings.description2':
     'Currently implemented with keyword search (BM25), with plans to upgrade to semantic search using vector DB in the future.',
-  'codebaseIndex.settings.status': 'Index Status',
   'codebaseIndex.settings.disabled': 'Codebase reference is disabled',
 
   // Codebase Reference (Issue #265)

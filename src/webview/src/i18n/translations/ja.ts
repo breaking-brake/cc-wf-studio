@@ -760,9 +760,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'codebaseIndex.rebuild': 'インデックスを再構築',
   'codebaseIndex.build': 'インデックスを構築',
   'codebaseIndex.clear': 'インデックスをクリア',
-  'codebaseIndex.documents': 'ドキュメント数',
-  'codebaseIndex.files': 'ファイル数',
-  'codebaseIndex.noIndex': '未作成',
   'codebaseIndex.cancel': 'キャンセル',
   'codebaseIndex.button': 'コードベース参照(β)',
   'codebaseIndex.enableReference': 'コードベース参照を有効化',
@@ -771,7 +768,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     '有効にすると、AI応答にコードベースから関連するコードスニペットが含まれます。@codebase コマンドで明示的に検索することもできます。',
   'codebaseIndex.settings.description2':
     '現在はキーワード検索（BM25）で実装されており、将来的にはベクトルDBによる意味検索にアップグレード予定です。',
-  'codebaseIndex.settings.status': 'インデックスの状態',
   'codebaseIndex.settings.disabled': 'コードベース参照は無効です',
 
   // Codebase Reference (Issue #265)

@@ -693,16 +693,12 @@ export interface WebviewTranslationKeys {
   'codebaseIndex.rebuild': string;
   'codebaseIndex.build': string;
   'codebaseIndex.clear': string;
-  'codebaseIndex.documents': string;
-  'codebaseIndex.files': string;
-  'codebaseIndex.noIndex': string;
   'codebaseIndex.cancel': string;
   'codebaseIndex.button': string;
   'codebaseIndex.enableReference': string;
   'codebaseIndex.settings.title': string;
   'codebaseIndex.settings.description1': string;
   'codebaseIndex.settings.description2': string;
-  'codebaseIndex.settings.status': string;
   'codebaseIndex.settings.disabled': string;
 
   // Codebase Reference (Issue #265)

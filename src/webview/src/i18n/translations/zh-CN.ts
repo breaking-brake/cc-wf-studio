@@ -731,9 +731,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'codebaseIndex.rebuild': '重建索引',
   'codebaseIndex.build': '构建索引',
   'codebaseIndex.clear': '清除索引',
-  'codebaseIndex.documents': '文档',
-  'codebaseIndex.files': '文件',
-  'codebaseIndex.noIndex': '未构建',
   'codebaseIndex.cancel': '取消',
   'codebaseIndex.button': '代码库参照(β)',
   'codebaseIndex.enableReference': '启用代码库参照',
@@ -742,7 +739,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
     '启用后，AI响应将包含代码库中的相关代码片段。您也可以使用@codebase命令进行显式搜索。',
   'codebaseIndex.settings.description2':
     '目前使用关键词搜索（BM25）实现，未来计划升级为使用向量数据库的语义搜索。',
-  'codebaseIndex.settings.status': '索引状态',
   'codebaseIndex.settings.disabled': '代码库参照已禁用',
 
   // Codebase Reference (Issue #265)
