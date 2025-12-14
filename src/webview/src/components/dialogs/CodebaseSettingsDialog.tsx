@@ -20,6 +20,7 @@ import {
   getIndexStatus,
 } from '../../services/codebase-search-service';
 import { useRefinementStore } from '../../stores/refinement-store';
+import { Toggle } from '../common/Toggle';
 
 interface CodebaseSettingsDialogProps {
   isOpen: boolean;
@@ -195,48 +196,43 @@ export const CodebaseSettingsDialog: React.FC<CodebaseSettingsDialogProps> = ({
             marginBottom: '16px',
           }}
         >
-          <label
+          <div
             style={{
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'space-between',
               gap: '8px',
-              cursor: 'pointer',
             }}
           >
-            {/* Checkbox */}
-            <input
-              type="checkbox"
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span
+                style={{
+                  fontSize: '14px',
+                  color: 'var(--vscode-foreground)',
+                }}
+              >
+                {t('codebaseIndex.enableReference')}
+              </span>
+              <span
+                style={{
+                  padding: '2px 6px',
+                  backgroundColor: 'var(--vscode-badge-background)',
+                  color: 'var(--vscode-badge-foreground)',
+                  borderRadius: '4px',
+                  fontSize: '11px',
+                  fontWeight: 500,
+                }}
+              >
+                Beta
+              </span>
+            </div>
+            <Toggle
               checked={useCodebaseSearch}
               onChange={toggleUseCodebaseSearch}
-              style={{
-                width: '16px',
-                height: '16px',
-                margin: 0,
-                cursor: 'pointer',
-                accentColor: 'var(--vscode-focusBorder)',
-              }}
+              ariaLabel={t('codebaseIndex.enableReference')}
+              size="small"
             />
-            <span
-              style={{
-                fontSize: '14px',
-                color: 'var(--vscode-foreground)',
-              }}
-            >
-              {t('codebaseIndex.enableReference')}
-            </span>
-            <span
-              style={{
-                padding: '2px 6px',
-                backgroundColor: 'var(--vscode-badge-background)',
-                color: 'var(--vscode-badge-foreground)',
-                borderRadius: '4px',
-                fontSize: '11px',
-                fontWeight: 500,
-              }}
-            >
-              Beta
-            </span>
-          </label>
+          </div>
           <ul
             style={{
               margin: '8px 0 0 0',
