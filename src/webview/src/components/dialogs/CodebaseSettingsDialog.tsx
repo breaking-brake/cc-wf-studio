@@ -260,33 +260,53 @@ export const CodebaseSettingsDialog: React.FC<CodebaseSettingsDialogProps> = ({
             marginBottom: '16px',
           }}
         >
+          {/* Status header with badge */}
           <div
             style={{
-              fontSize: '13px',
-              fontWeight: 500,
-              color: 'var(--vscode-foreground)',
-              marginBottom: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: isIndexBuilding ? '12px' : isReady && documentCount > 0 ? '12px' : '0',
             }}
           >
-            {t('codebaseIndex.settings.status')}
+            <span
+              style={{
+                fontSize: '13px',
+                fontWeight: 500,
+                color: 'var(--vscode-foreground)',
+              }}
+            >
+              {t('codebaseIndex.settings.status')}:
+            </span>
+            <span
+              style={{
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                fontWeight: 500,
+                backgroundColor: isIndexBuilding
+                  ? 'var(--vscode-charts-yellow)'
+                  : isReady && documentCount > 0
+                    ? 'var(--vscode-charts-green)'
+                    : 'var(--vscode-badge-background)',
+                color: isIndexBuilding
+                  ? 'var(--vscode-editor-background)'
+                  : isReady && documentCount > 0
+                    ? 'var(--vscode-editor-background)'
+                    : 'var(--vscode-badge-foreground)',
+              }}
+            >
+              {isIndexBuilding
+                ? t('codebaseIndex.building')
+                : isReady && documentCount > 0
+                  ? t('codebaseIndex.ready')
+                  : t('codebaseIndex.noIndex')}
+            </span>
           </div>
 
-          {isIndexBuilding ? (
+          {/* Progress bar (only when building) */}
+          {isIndexBuilding && (
             <div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '8px',
-                }}
-              >
-                <span style={{ color: 'var(--vscode-charts-yellow)' }}>🔄</span>
-                <span style={{ fontSize: '13px', color: 'var(--vscode-foreground)' }}>
-                  {t('codebaseIndex.building')}
-                </span>
-              </div>
-              {/* Progress bar */}
               <div
                 style={{
                   width: '100%',
@@ -315,50 +335,25 @@ export const CodebaseSettingsDialog: React.FC<CodebaseSettingsDialogProps> = ({
                 {indexBuildProgress}%
               </div>
             </div>
-          ) : isReady && documentCount > 0 ? (
-            <div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '8px',
-                }}
-              >
-                <span style={{ color: 'var(--vscode-charts-green)' }}>📊</span>
-                <span style={{ fontSize: '13px', color: 'var(--vscode-foreground)' }}>
-                  {t('codebaseIndex.ready')}
-                </span>
-              </div>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '8px',
-                  fontSize: '12px',
-                  color: 'var(--vscode-descriptionForeground)',
-                }}
-              >
-                <div>
-                  {t('codebaseIndex.documents')}: <strong>{documentCount.toLocaleString()}</strong>
-                </div>
-                <div>
-                  {t('codebaseIndex.files')}: <strong>{fileCount.toLocaleString()}</strong>
-                </div>
-              </div>
-            </div>
-          ) : (
+          )}
+
+          {/* Document/File counts (only when ready) */}
+          {isReady && documentCount > 0 && (
             <div
               style={{
-                display: 'flex',
-                alignItems: 'center',
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
                 gap: '8px',
+                fontSize: '12px',
+                color: 'var(--vscode-descriptionForeground)',
               }}
             >
-              <span style={{ color: 'var(--vscode-disabledForeground)' }}>📊</span>
-              <span style={{ fontSize: '13px', color: 'var(--vscode-descriptionForeground)' }}>
-                {t('codebaseIndex.noIndex')}
-              </span>
+              <div>
+                {t('codebaseIndex.documents')}: <strong>{documentCount.toLocaleString()}</strong>
+              </div>
+              <div>
+                {t('codebaseIndex.files')}: <strong>{fileCount.toLocaleString()}</strong>
+              </div>
             </div>
           )}
         </div>
@@ -417,8 +412,7 @@ export const CodebaseSettingsDialog: React.FC<CodebaseSettingsDialogProps> = ({
                   e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
                 }}
               >
-                <span>🔨</span>
-                <span>{isReady ? t('codebaseIndex.rebuild') : t('codebaseIndex.build')}</span>
+                {isReady ? t('codebaseIndex.rebuild') : t('codebaseIndex.build')}
               </button>
 
               {isReady && documentCount > 0 && (
@@ -447,8 +441,7 @@ export const CodebaseSettingsDialog: React.FC<CodebaseSettingsDialogProps> = ({
                       'var(--vscode-button-secondaryBackground)';
                   }}
                 >
-                  <span>🗑️</span>
-                  <span>{t('codebaseIndex.clear')}</span>
+                  {t('codebaseIndex.clear')}
                 </button>
               )}
             </>
