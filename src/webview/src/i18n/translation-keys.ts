@@ -19,7 +19,6 @@ export interface WebviewTranslationKeys {
   'toolbar.convert': string;
   'toolbar.convert.tooltip': string;
   'toolbar.converting': string;
-  'toolbar.generateWithAI': string;
   'toolbar.refineWithAI': string;
   'toolbar.selectWorkflow': string;
   'toolbar.load': string;

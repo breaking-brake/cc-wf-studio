@@ -104,48 +104,8 @@ export interface LoadWorkflowRequestPayload {
   workflowId: string;
 }
 
-export interface CancelGenerationPayload {
-  requestId: string; // キャンセル対象のリクエストID
-}
-
 export interface CancelRefinementPayload {
   requestId: string; // キャンセル対象のリクエストID
-}
-
-// ============================================================================
-// AI Generation Payloads (001-ai-workflow-generation)
-// ============================================================================
-
-export interface GenerateWorkflowPayload {
-  userDescription: string; // Max 2000 characters
-  timeoutMs?: number; // Optional, defaults to 30000
-}
-
-export interface GenerationSuccessPayload {
-  workflow: Workflow;
-  executionTimeMs: number;
-  timestamp: string; // ISO 8601
-}
-
-export interface GenerationFailedPayload {
-  error: {
-    code:
-      | 'COMMAND_NOT_FOUND'
-      | 'TIMEOUT'
-      | 'PARSE_ERROR'
-      | 'VALIDATION_ERROR'
-      | 'CANCELLED'
-      | 'UNKNOWN_ERROR';
-    message: string;
-    details?: string;
-  };
-  executionTimeMs: number;
-  timestamp: string; // ISO 8601
-}
-
-export interface GenerationCancelledPayload {
-  executionTimeMs: number;
-  timestamp: string; // ISO 8601
 }
 
 // ============================================================================
@@ -623,9 +583,6 @@ export type ExtensionMessage =
   | Message<InitialStatePayload, 'INITIAL_STATE'>
   | Message<void, 'SAVE_CANCELLED'>
   | Message<void, 'EXPORT_CANCELLED'>
-  | Message<GenerationSuccessPayload, 'GENERATION_SUCCESS'>
-  | Message<GenerationFailedPayload, 'GENERATION_FAILED'>
-  | Message<GenerationCancelledPayload, 'GENERATION_CANCELLED'>
   | Message<SkillListLoadedPayload, 'SKILL_LIST_LOADED'>
   | Message<SkillCreationSuccessPayload, 'SKILL_CREATION_SUCCESS'>
   | Message<SkillValidationErrorPayload, 'SKILL_CREATION_FAILED'>
@@ -1204,8 +1161,6 @@ export type WebviewMessage =
   | Message<StateUpdatePayload, 'STATE_UPDATE'>
   | Message<void, 'ACCEPT_TERMS'>
   | Message<void, 'CANCEL_TERMS'>
-  | Message<GenerateWorkflowPayload, 'GENERATE_WORKFLOW'>
-  | Message<CancelGenerationPayload, 'CANCEL_GENERATION'>
   | Message<void, 'BROWSE_SKILLS'>
   | Message<CreateSkillPayload, 'CREATE_SKILL'>
   | Message<ValidateSkillFilePayload, 'VALIDATE_SKILL_FILE'>

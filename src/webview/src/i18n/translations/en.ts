@@ -21,7 +21,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.convert': 'Convert to Slash Command',
   'toolbar.convert.tooltip': 'Convert to Slash Command and save to .claude/commands/',
   'toolbar.converting': 'Converting...',
-  'toolbar.generateWithAI': 'Generate with AI',
   'toolbar.refineWithAI': 'Edit with AI',
   'toolbar.selectWorkflow': 'Select workflow...',
   'toolbar.load': 'Load',

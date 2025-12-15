@@ -21,7 +21,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.convert': 'Slash Commandに変換',
   'toolbar.convert.tooltip': 'Slash Commandに変換して.claude/commands/に保存',
   'toolbar.converting': '変換中...',
-  'toolbar.generateWithAI': 'AIで生成',
   'toolbar.refineWithAI': 'AI編集',
   'toolbar.selectWorkflow': 'ワークフローを選択...',
   'toolbar.load': '読み込み',

@@ -21,7 +21,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.convert': '转换为 Slash Command',
   'toolbar.convert.tooltip': '转换为 Slash Command 并保存到 .claude/commands/',
   'toolbar.converting': '转换中...',
-  'toolbar.generateWithAI': 'AI生成',
   'toolbar.refineWithAI': 'AI编辑',
   'toolbar.selectWorkflow': '选择工作流...',
   'toolbar.load': '加载',

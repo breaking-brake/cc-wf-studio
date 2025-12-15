@@ -21,7 +21,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.convert': 'Slash Command로 변환',
   'toolbar.convert.tooltip': 'Slash Command로 변환하여 .claude/commands/에 저장',
   'toolbar.converting': '변환 중...',
-  'toolbar.generateWithAI': 'AI로 생성',
   'toolbar.refineWithAI': 'AI로 편집',
   'toolbar.selectWorkflow': '워크플로 선택...',
   'toolbar.load': '불러오기',

@@ -8,7 +8,6 @@
 import * as vscode from 'vscode';
 import type { WebviewMessage } from '../../shared/types/messages';
 import { translate } from '../i18n/i18n-service';
-import { cancelGeneration } from '../services/claude-code-service';
 import { initializeCodebaseIndexService } from '../services/codebase-index-service';
 import { FileService } from '../services/file-service';
 import { SlackApiService } from '../services/slack-api-service';
@@ -16,7 +15,6 @@ import { migrateWorkflow } from '../utils/migrate-workflow';
 import { SlackTokenManager } from '../utils/slack-token-manager';
 import { validateWorkflowFile } from '../utils/workflow-validator';
 import { getWebviewContent } from '../webview-content';
-import { handleGenerateWorkflow } from './ai-generation';
 import { handleCodebaseIndexMessage } from './codebase-index-handlers';
 import { handleExportWorkflow } from './export-workflow';
 import { loadWorkflow } from './load-workflow';
@@ -355,56 +353,6 @@ export function registerOpenEditorCommand(
             case 'CANCEL_TERMS':
               // User cancelled terms of use - close the panel
               currentPanel?.dispose();
-              break;
-
-            case 'GENERATE_WORKFLOW':
-              // AI-assisted workflow generation
-              if (message.payload) {
-                const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-                await handleGenerateWorkflow(
-                  message.payload,
-                  webview,
-                  context.extensionPath,
-                  message.requestId || '',
-                  workspaceRoot
-                );
-              } else {
-                webview.postMessage({
-                  type: 'ERROR',
-                  requestId: message.requestId,
-                  payload: {
-                    code: 'VALIDATION_ERROR',
-                    message: 'Generation payload is required',
-                  },
-                });
-              }
-              break;
-
-            case 'CANCEL_GENERATION':
-              // Cancel AI generation
-              if (message.payload?.requestId) {
-                const result = cancelGeneration(message.payload.requestId);
-
-                if (result.cancelled) {
-                  webview.postMessage({
-                    type: 'GENERATION_CANCELLED',
-                    requestId: message.payload.requestId,
-                    payload: {
-                      executionTimeMs: result.executionTimeMs || 0,
-                      timestamp: new Date().toISOString(),
-                    },
-                  });
-                } else {
-                  webview.postMessage({
-                    type: 'ERROR',
-                    requestId: message.payload.requestId,
-                    payload: {
-                      code: 'VALIDATION_ERROR',
-                      message: 'No active generation found to cancel',
-                    },
-                  });
-                }
-              }
               break;
 
             case 'CONFIRM_OVERWRITE':
