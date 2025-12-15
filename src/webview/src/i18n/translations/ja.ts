@@ -402,6 +402,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.timeout.label': 'タイムアウト',
   'refinement.timeout.ariaLabel': 'AIリファインメントのタイムアウト時間を選択',
 
+  // Settings dropdown
+  'refinement.settings.title': '設定',
+
   'refinement.chat.claudeMdTip':
     '💡 Tip: ワークフロー固有のルールや制約をCLAUDE.mdに記載すると、AIがより的確な編集を行えます',
   'refinement.chat.refining': 'AIがワークフローを改善中... 最大120秒かかる場合があります。',

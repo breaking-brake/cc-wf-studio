@@ -13,7 +13,6 @@ import { useResponsiveFonts } from '../../contexts/ResponsiveFontContext';
 import { useTranslation } from '../../i18n/i18n-context';
 import { cancelWorkflowRefinement } from '../../services/refinement-service';
 import { useRefinementStore } from '../../stores/refinement-store';
-import { TimeoutSelector } from './TimeoutSelector';
 
 const MAX_MESSAGE_LENGTH = 5000;
 const MIN_MESSAGE_LENGTH = 1;
@@ -25,7 +24,7 @@ interface MessageInputProps {
 export function MessageInput({ onSend }: MessageInputProps) {
   const { t } = useTranslation();
   const textareaId = useId();
-  const { isCompact, ...fontSizes } = useResponsiveFonts();
+  const fontSizes = useResponsiveFonts();
   const { currentInput, setInput, canSend, isProcessing, currentRequestId } = useRefinementStore();
 
   const handleSend = () => {
@@ -85,37 +84,24 @@ export function MessageInput({ onSend }: MessageInputProps) {
       <div
         style={{
           display: 'flex',
-          flexDirection: isCompact ? 'column' : 'row',
           justifyContent: 'space-between',
-          alignItems: isCompact ? 'stretch' : 'center',
-          gap: isCompact ? '8px' : '0',
+          alignItems: 'center',
           marginTop: '8px',
         }}
       >
-        {/* Row 1: Character count + Timeout selector */}
+        {/* Character count */}
         <div
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: '12px',
+            fontSize: `${fontSizes.button}px`,
+            color: isTooLong
+              ? 'var(--vscode-errorForeground)'
+              : 'var(--vscode-descriptionForeground)',
           }}
         >
-          <div
-            style={{
-              fontSize: `${fontSizes.button}px`,
-              color: isTooLong
-                ? 'var(--vscode-errorForeground)'
-                : 'var(--vscode-descriptionForeground)',
-            }}
-          >
-            {currentInput.length}/{MAX_MESSAGE_LENGTH}
-          </div>
-
-          <TimeoutSelector />
+          {currentInput.length}/{MAX_MESSAGE_LENGTH}
         </div>
 
-        {/* Row 2 (compact) / Same row (normal): Send/Cancel button */}
+        {/* Send/Cancel button */}
         {isProcessing ? (
           <button
             type="button"
@@ -127,7 +113,6 @@ export function MessageInput({ onSend }: MessageInputProps) {
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer',
-              width: isCompact ? '100%' : 'auto',
             }}
           >
             {t('refinement.cancelButton')}
@@ -145,7 +130,6 @@ export function MessageInput({ onSend }: MessageInputProps) {
               borderRadius: '4px',
               cursor: canSend() && !isTooLong && !isTooShort ? 'pointer' : 'not-allowed',
               opacity: canSend() && !isTooLong && !isTooShort ? 1 : 0.5,
-              width: isCompact ? '100%' : 'auto',
             }}
           >
             {t('refinement.sendButton')}

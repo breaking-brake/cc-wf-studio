@@ -15,7 +15,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ResponsiveFontProvider } from '../../contexts/ResponsiveFontContext';
 import { useResizablePanel } from '../../hooks/useResizablePanel';
-import { getPanelSizeMode, useResponsiveFontSizes } from '../../hooks/useResponsiveFontSizes';
+import { useResponsiveFontSizes } from '../../hooks/useResponsiveFontSizes';
 import { useTranslation } from '../../i18n/i18n-context';
 import {
   extractSearchKeywords,
@@ -30,12 +30,10 @@ import {
 } from '../../services/refinement-service';
 import { useRefinementStore } from '../../stores/refinement-store';
 import { useWorkflowStore } from '../../stores/workflow-store';
-import { CodebaseStatusBadge } from '../chat/CodebaseStatusBadge';
-import { IterationCounter } from '../chat/IterationCounter';
 import { MessageInput } from '../chat/MessageInput';
 import { MessageList } from '../chat/MessageList';
+import { SettingsDropdown } from '../chat/SettingsDropdown';
 import { WarningBanner } from '../chat/WarningBanner';
-import { Checkbox } from '../common/Checkbox';
 import { ResizeHandle } from '../common/ResizeHandle';
 import { ConfirmDialog } from './ConfirmDialog';
 
@@ -60,7 +58,6 @@ export function RefinementChatPanel({
   const { t } = useTranslation();
   const { width, handleMouseDown } = useResizablePanel();
   const fontSizes = useResponsiveFontSizes(width);
-  const isCompact = getPanelSizeMode(width) === 'compact';
 
   const {
     isOpen,
@@ -81,7 +78,6 @@ export function RefinementChatPanel({
     shouldShowWarning,
     isProcessing,
     useSkills,
-    toggleUseSkills,
     timeoutSeconds,
     setMessageSearchResults,
     isIndexReady,
@@ -548,164 +544,56 @@ export function RefinementChatPanel({
     >
       <ResponsiveFontProvider width={width}>
         <ResizeHandle onMouseDown={handleMouseDown} />
-        {/* Header */}
+        {/* Header - Single row layout (simplified after Settings dropdown consolidation) */}
         <div
           style={{
             padding: '16px',
             borderBottom: '1px solid var(--vscode-panel-border)',
             display: 'flex',
-            flexDirection: isCompact ? 'column' : 'row',
             justifyContent: 'space-between',
-            alignItems: isCompact ? 'stretch' : 'center',
-            gap: isCompact ? '8px' : '0',
+            alignItems: 'center',
             flexShrink: 0,
           }}
         >
-          {/* Row 1: Title + Close button (always visible) */}
-          <div
+          <h2
+            id="refinement-title"
             style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              margin: 0,
+              fontSize: `${fontSizes.title}px`,
+              fontWeight: 600,
+              color: 'var(--vscode-foreground)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h2
-                id="refinement-title"
-                style={{
-                  margin: 0,
-                  fontSize: `${fontSizes.title}px`,
-                  fontWeight: 600,
-                  color: 'var(--vscode-foreground)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                {panelTitle}
-              </h2>
-              <CodebaseStatusBadge />
-            </div>
+            {panelTitle}
+          </h2>
 
-            {/* Close button - in compact mode, shown in row 1 */}
-            {isCompact && (
-              <button
-                type="button"
-                onClick={handleClose}
-                disabled={isProcessing}
-                style={{
-                  padding: '4px 8px',
-                  backgroundColor: 'transparent',
-                  color: 'var(--vscode-foreground)',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: isProcessing ? 'not-allowed' : 'pointer',
-                  fontSize: '16px',
-                  opacity: isProcessing ? 0.5 : 1,
-                }}
-                aria-label="Close"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-
-          {/* Row 2 (compact) / Same row (normal): Controls */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: isCompact ? '8px' : '12px' }}>
-            <IterationCounter />
-
-            <Checkbox
-              checked={useSkills}
-              onChange={toggleUseSkills}
-              disabled={isProcessing}
-              label={t('refinement.chat.useSkillsCheckbox')}
-              ariaLabel={t('refinement.chat.useSkillsCheckbox')}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <SettingsDropdown
+              onClearHistoryClick={handleClearHistoryClick}
+              hasMessages={conversationHistory ? conversationHistory.messages.length > 0 : false}
             />
 
-            {/* Clear button - in normal mode, shown inline */}
-            {!isCompact && (
-              <button
-                type="button"
-                onClick={handleClearHistoryClick}
-                disabled={
-                  !conversationHistory || conversationHistory.messages.length === 0 || isProcessing
-                }
-                style={{
-                  padding: '4px 8px',
-                  backgroundColor: 'transparent',
-                  color: 'var(--vscode-foreground)',
-                  border: '1px solid var(--vscode-panel-border)',
-                  borderRadius: '4px',
-                  cursor:
-                    conversationHistory && conversationHistory.messages.length > 0 && !isProcessing
-                      ? 'pointer'
-                      : 'not-allowed',
-                  fontSize: `${fontSizes.small}px`,
-                  opacity:
-                    conversationHistory && conversationHistory.messages.length > 0 && !isProcessing
-                      ? 1
-                      : 0.5,
-                }}
-                title={t('refinement.chat.clearButton.tooltip')}
-                aria-label={t('refinement.chat.clearButton')}
-              >
-                {t('refinement.chat.clearButton')}
-              </button>
-            )}
-
-            {/* Close button - in normal mode, shown at the end */}
-            {!isCompact && (
-              <button
-                type="button"
-                onClick={handleClose}
-                disabled={isProcessing}
-                style={{
-                  padding: '4px 8px',
-                  backgroundColor: 'transparent',
-                  color: 'var(--vscode-foreground)',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: isProcessing ? 'not-allowed' : 'pointer',
-                  fontSize: '16px',
-                  opacity: isProcessing ? 0.5 : 1,
-                }}
-                aria-label="Close"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-
-          {/* Row 3 (compact only): Clear button full width */}
-          {isCompact && (
             <button
               type="button"
-              onClick={handleClearHistoryClick}
-              disabled={
-                !conversationHistory || conversationHistory.messages.length === 0 || isProcessing
-              }
+              onClick={handleClose}
+              disabled={isProcessing}
               style={{
                 padding: '4px 8px',
-                width: '100%',
                 backgroundColor: 'transparent',
                 color: 'var(--vscode-foreground)',
-                border: '1px solid var(--vscode-panel-border)',
+                border: 'none',
                 borderRadius: '4px',
-                cursor:
-                  conversationHistory && conversationHistory.messages.length > 0 && !isProcessing
-                    ? 'pointer'
-                    : 'not-allowed',
-                fontSize: `${fontSizes.small}px`,
-                opacity:
-                  conversationHistory && conversationHistory.messages.length > 0 && !isProcessing
-                    ? 1
-                    : 0.5,
+                cursor: isProcessing ? 'not-allowed' : 'pointer',
+                fontSize: '16px',
+                opacity: isProcessing ? 0.5 : 1,
               }}
-              title={t('refinement.chat.clearButton.tooltip')}
-              aria-label={t('refinement.chat.clearButton')}
+              aria-label="Close"
             >
-              {t('refinement.chat.clearButton')}
+              ✕
             </button>
-          )}
+          </div>
         </div>
 
         {/* Warning Banner - Show when 20+ iterations */}

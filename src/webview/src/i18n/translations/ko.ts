@@ -403,6 +403,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.timeout.label': '타임아웃',
   'refinement.timeout.ariaLabel': 'AI 리파인먼트 타임아웃 시간 선택',
 
+  // Settings dropdown
+  'refinement.settings.title': '설정',
+
   'refinement.chat.claudeMdTip':
     '💡 팁: CLAUDE.md 에 워크플로별 규칙과 제약을 추가하면AI가 더 정확한 편집을 수행합니다',
   'refinement.chat.refining': 'AI가 워크플로를 개선하는 중... 최대 120초가 소요될 수 있습니다.',

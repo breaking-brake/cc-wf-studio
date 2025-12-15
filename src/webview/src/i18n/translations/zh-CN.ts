@@ -388,6 +388,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'refinement.timeout.label': '超时',
   'refinement.timeout.ariaLabel': '选择AI优化超时时间',
 
+  // Settings dropdown
+  'refinement.settings.title': '设置',
+
   'refinement.chat.claudeMdTip':
     '💡 提示：在 CLAUDE.md 中添加工作流特定的规则和约束，AI可以进行更准确的编辑',
   'refinement.chat.refining': 'AI正在优化工作流... 最多可能需要120秒。',

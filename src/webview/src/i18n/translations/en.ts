@@ -403,6 +403,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'refinement.timeout.label': 'Timeout',
   'refinement.timeout.ariaLabel': 'Select AI refinement timeout duration',
 
+  // Settings dropdown
+  'refinement.settings.title': 'Settings',
+
   'refinement.chat.claudeMdTip':
     '💡 Tip: Add workflow-specific rules and constraints to CLAUDE.md for more accurate AI edits',
   'refinement.chat.refining': 'AI is refining workflow... This may take up to 120 seconds.',

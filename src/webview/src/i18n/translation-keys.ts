@@ -364,6 +364,9 @@ export interface WebviewTranslationKeys {
   'refinement.timeout.label': string;
   'refinement.timeout.ariaLabel': string;
 
+  // Settings dropdown
+  'refinement.settings.title': string;
+
   'refinement.chat.claudeMdTip': string;
   'refinement.chat.refining': string;
   'refinement.chat.progressTime': string;
