@@ -50,7 +50,10 @@ export interface WebviewTranslationKeys {
   'toolbar.save.tooltip': string;
   'toolbar.convert.iconTooltip': string;
   'toolbar.load.tooltip': string;
-  'slack.share.tooltip': string;
+
+  // Toolbar more actions dropdown
+  'toolbar.moreActions': string;
+  'toolbar.help': string;
 
   // Node Palette
   'palette.title': string;
@@ -244,8 +247,7 @@ export interface WebviewTranslationKeys {
   'tour.loadWorkflow': string;
   'tour.exportWorkflow': string;
   'tour.refineWithAI': string;
-  'tour.slackShare': string;
-  'tour.helpButton': string;
+  'tour.moreActions': string;
 
   // Tour buttons
   'tour.button.back': string;

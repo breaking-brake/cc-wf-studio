@@ -52,7 +52,10 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.save.tooltip': '儲存工作流程',
   'toolbar.convert.iconTooltip': '轉換為Slash Command',
   'toolbar.load.tooltip': '載入已儲存的工作流程',
-  'slack.share.tooltip': '分享到Slack',
+
+  // Toolbar more actions dropdown
+  'toolbar.moreActions': '更多',
+  'toolbar.help': '說明',
 
   // Node Palette
   'palette.title': '節點面板',
@@ -260,9 +263,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
     '點擊「匯出」按鈕以Claude Code可執行的格式匯出。\n\nSub-Agent匯出到`.claude/agents/`，SlashCommand匯出到`.claude/commands/`。',
   'tour.refineWithAI':
     '使用「AI編輯」按鈕透過與AI對話建立或改善工作流程。\n\n可以從空白畫布開始或以對話方式編輯現有工作流程。',
-  'tour.slackShare':
-    '點擊「分享到Slack」按鈕與團隊分享您的工作流程。\n\n可以將工作流程發布到Slack頻道以便於協作。',
-  'tour.helpButton': '要再次檢視此導覽，請點擊說明按鈕(?)。\n\n享受建立工作流程的樂趣！',
+  'tour.moreActions':
+    '「更多」選單提供以下功能：<br><br>• 分享到Slack - 與團隊分享工作流程<br>• 重置 - 清空畫布<br>• 說明 - 再次檢視此導覽<br><br>享受建立工作流程的樂趣！',
 
   // Tour buttons
   'tour.button.back': '返回',

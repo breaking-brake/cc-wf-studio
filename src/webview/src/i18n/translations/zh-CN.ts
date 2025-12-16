@@ -52,7 +52,10 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.save.tooltip': '保存工作流',
   'toolbar.convert.iconTooltip': '转换为Slash Command',
   'toolbar.load.tooltip': '加载已保存的工作流',
-  'slack.share.tooltip': '分享到Slack',
+
+  // Toolbar more actions dropdown
+  'toolbar.moreActions': '更多',
+  'toolbar.help': '帮助',
 
   // Node Palette
   'palette.title': '节点面板',
@@ -260,9 +263,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
     '点击"导出"按钮以Claude Code可执行的格式导出。\n\nSub-Agent导出到`.claude/agents/`，SlashCommand导出到`.claude/commands/`。',
   'tour.refineWithAI':
     '使用"AI编辑"按钮通过与AI对话创建或改进工作流。\n\n可以从空画布开始或以对话方式编辑现有工作流。',
-  'tour.slackShare':
-    '点击"分享到Slack"按钮与团队分享您的工作流。\n\n可以将工作流发布到Slack频道以便于协作。',
-  'tour.helpButton': '要再次查看此导览，请点击帮助按钮(?)。\n\n享受创建工作流的乐趣！',
+  'tour.moreActions':
+    '"更多"菜单提供以下功能：<br><br>• 分享到Slack - 与团队分享工作流<br>• 重置 - 清空画布<br>• 帮助 - 再次查看此导览<br><br>享受创建工作流的乐趣！',
 
   // Tour buttons
   'tour.button.back': '返回',

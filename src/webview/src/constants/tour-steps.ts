@@ -213,19 +213,10 @@ export const getTourSteps = (
     },
   },
   {
-    element: '[data-tour="slack-share-button"]',
+    element: '[data-tour="more-actions-button"]',
     popover: {
       title: '',
-      description: t('tour.slackShare'),
-      side: 'bottom',
-      align: 'start',
-    },
-  },
-  {
-    element: '[data-tour="help-button"]',
-    popover: {
-      title: '',
-      description: t('tour.helpButton'),
+      description: t('tour.moreActions'),
       side: 'bottom',
       align: 'start',
     },

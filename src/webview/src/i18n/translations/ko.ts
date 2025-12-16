@@ -54,7 +54,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.save.tooltip': '워크플로 저장',
   'toolbar.convert.iconTooltip': 'Slash Command로 변환',
   'toolbar.load.tooltip': '저장된 워크플로 불러오기',
-  'slack.share.tooltip': 'Slack에 공유',
+
+  // Toolbar more actions dropdown
+  'toolbar.moreActions': '더보기',
+  'toolbar.help': '도움말',
 
   // Node Palette
   'palette.title': '노드 팔레트',
@@ -272,10 +275,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     '"내보내기" 버튼을 클릭하면 Claude Code에서 실행 가능한 형식으로 내보내집니다.\n\nSub-Agent는 `.claude/agents/`로, SlashCommand는 `.claude/commands/`로 이동합니다.',
   'tour.refineWithAI':
     '"AI로 편집" 버튼을 사용하여 AI와 대화하며 워크플로우를 생성하거나 개선할 수 있습니다.\n\n빈 캔버스에서 시작하거나 기존 워크플로우를 대화형으로 수정할 수 있습니다.',
-  'tour.slackShare':
-    '"Slack에 공유" 버튼을 클릭하여 팀과 워크플로우를 공유하세요.\n\nSlack 채널에 워크플로우를 게시하여 쉽게 협업할 수 있습니다.',
-  'tour.helpButton':
-    '이 투어를 다시 보려면 도움말 버튼(?)을 클릭하세요.\n\n워크플로우 생성을 즐기세요!',
+  'tour.moreActions':
+    '"더보기" 메뉴에서 추가 작업을 사용할 수 있습니다:<br><br>• Slack에 공유 - 팀과 워크플로우 공유<br>• 초기화 - 캔버스 지우기<br>• 도움말 - 이 투어 다시 보기<br><br>워크플로우 생성을 즐기세요!',
 
   // Tour buttons
   'tour.button.back': '뒤로',

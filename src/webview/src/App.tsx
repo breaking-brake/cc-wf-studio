@@ -63,6 +63,7 @@ const App: React.FC = () => {
   const [connectionRequiredWorkspaceName, setConnectionRequiredWorkspaceName] = useState<
     string | undefined
   >(undefined);
+  const [isMoreActionsOpen, setIsMoreActionsOpen] = useState(false);
 
   const handleError = (errorData: ErrorPayload) => {
     setError(errorData);
@@ -192,6 +193,8 @@ const App: React.FC = () => {
         onError={handleError}
         onStartTour={handleStartTour}
         onShareToSlack={handleShareToSlack}
+        moreActionsOpen={isMoreActionsOpen}
+        onMoreActionsOpenChange={setIsMoreActionsOpen}
       />
 
       {/* Main Content: 3-column layout */}

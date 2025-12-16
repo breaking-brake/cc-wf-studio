@@ -54,7 +54,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.save.tooltip': 'ワークフローを保存',
   'toolbar.convert.iconTooltip': 'Slash Commandに変換',
   'toolbar.load.tooltip': '保存したワークフローを読み込む',
-  'slack.share.tooltip': 'Slackに共有',
+
+  // Toolbar more actions dropdown
+  'toolbar.moreActions': 'その他',
+  'toolbar.help': 'ヘルプ',
 
   // Node Palette
   'palette.title': 'ノードパレット',
@@ -270,10 +273,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     '「エクスポート」ボタンをクリックすると、Claude Codeで実行可能な形式にエクスポートされます。\n\nSub-Agentは`.claude/agents/`に、SlashCommandは`.claude/commands/`に出力されます。',
   'tour.refineWithAI':
     '「AI編集」ボタンで、AIとチャットしながらワークフローを生成・改善できます。\n\n空のキャンバスから新規作成も、既存のワークフローの修正も対話的に行えます。',
-  'tour.slackShare':
-    '「Slackに共有」ボタンをクリックすると、チームとワークフローを共有できます。\n\nSlackチャンネルにワークフローを投稿して、簡単にコラボレーションできます。',
-  'tour.helpButton':
-    'このツアーをもう一度見たい場合は、ヘルプボタン(?)をクリックしてください。\n\nそれでは、ワークフロー作成を楽しんでください！',
+  'tour.moreActions':
+    '「その他」メニューから追加の操作が利用できます：<br><br>• Slackに共有 - チームとワークフローを共有<br>• リセット - キャンバスをクリア<br>• ヘルプ - このツアーを再表示<br><br>それでは、ワークフロー作成を楽しんでください！',
 
   // Tour buttons
   'tour.button.back': '戻る',

@@ -5,7 +5,7 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
-import { FileDown, Save, Share2, SquareSlash, Trash2 } from 'lucide-react';
+import { FileDown, Save, SquareSlash } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
@@ -24,14 +24,23 @@ import { EditableNameField } from './common/EditableNameField';
 import { ProcessingOverlay } from './common/ProcessingOverlay';
 import { StyledTooltipItem, StyledTooltipProvider } from './common/StyledTooltip';
 import { ConfirmDialog } from './dialogs/ConfirmDialog';
+import { MoreActionsDropdown } from './toolbar/MoreActionsDropdown';
 
 interface ToolbarProps {
   onError: (error: { code: string; message: string; details?: unknown }) => void;
   onStartTour: () => void;
   onShareToSlack: () => void;
+  moreActionsOpen?: boolean;
+  onMoreActionsOpenChange?: (open: boolean) => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareToSlack }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({
+  onError,
+  onStartTour,
+  onShareToSlack,
+  moreActionsOpen,
+  onMoreActionsOpenChange,
+}) => {
   const { t, locale } = useTranslation();
   const isCompact = useIsCompactMode();
   const {
@@ -407,70 +416,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onError, onStartTour, onShareT
           }}
         />
 
-        {/* Share to Slack Button - Phase 3.1 (Beta feature, placed before help button) */}
-        <StyledTooltipItem content={t('slack.share.tooltip')}>
-          <button
-            type="button"
-            onClick={onShareToSlack}
-            data-tour="slack-share-button"
-            style={{
-              padding: isCompact ? '4px 8px' : '4px 12px',
-              backgroundColor: 'var(--vscode-button-secondaryBackground)',
-              color: 'var(--vscode-button-secondaryForeground)',
-              border: 'none',
-              borderRadius: '2px',
-              cursor: 'pointer',
-              fontSize: '13px',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            {isCompact ? <Share2 size={16} /> : t('slack.share.title')}
-          </button>
-        </StyledTooltipItem>
-
-        {/* Reset Workflow Button */}
-        <StyledTooltipItem content={t('toolbar.resetWorkflow')}>
-          <button
-            type="button"
-            onClick={() => setShowResetConfirm(true)}
-            style={{
-              padding: '4px 8px',
-              backgroundColor: 'var(--vscode-button-secondaryBackground)',
-              color: 'var(--vscode-button-secondaryForeground)',
-              border: 'none',
-              borderRadius: '2px',
-              cursor: 'pointer',
-              fontSize: '13px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            <Trash2 size={16} />
-          </button>
-        </StyledTooltipItem>
-
-        {/* Help Button */}
-        <button
-          type="button"
-          onClick={onStartTour}
-          title="Start Tour"
-          data-tour="help-button"
-          style={{
-            padding: '4px 8px',
-            backgroundColor: 'var(--vscode-button-secondaryBackground)',
-            color: 'var(--vscode-button-secondaryForeground)',
-            border: 'none',
-            borderRadius: '2px',
-            cursor: 'pointer',
-            fontSize: '13px',
-          }}
-        >
-          ?
-        </button>
+        {/* More Actions Dropdown */}
+        <MoreActionsDropdown
+          onShareToSlack={onShareToSlack}
+          onResetWorkflow={() => setShowResetConfirm(true)}
+          onStartTour={onStartTour}
+          open={moreActionsOpen}
+          onOpenChange={onMoreActionsOpenChange}
+        />
 
         {/* Processing Overlay (Phase 3.10) */}
         <ProcessingOverlay isVisible={isProcessing} />
