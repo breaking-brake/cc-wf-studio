@@ -226,7 +226,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   interactionMode: 'pan', // Default: pan mode
   workflowName: 'my-workflow', // Default workflow name
   isPropertyPanelOpen: true, // Property panel is open by default
-  isMinimapVisible: true, // Minimap is visible by default
+  isMinimapVisible: (() => {
+    const saved = localStorage.getItem('cc-wf-studio.minimapVisible');
+    return saved !== null ? saved === 'true' : true; // Default: visible
+  })(),
 
   // Sub-Agent Flow Initial State (Feature: 089-subworkflow)
   subAgentFlows: [],
@@ -311,7 +314,9 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   closePropertyPanel: () => set({ isPropertyPanelOpen: false }),
 
   toggleMinimapVisibility: () => {
-    set({ isMinimapVisible: !get().isMinimapVisible });
+    const newValue = !get().isMinimapVisible;
+    localStorage.setItem('cc-wf-studio.minimapVisible', newValue.toString());
+    set({ isMinimapVisible: newValue });
   },
 
   // Custom Actions
