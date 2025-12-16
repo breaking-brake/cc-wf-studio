@@ -28,6 +28,7 @@ import { PropertyPanel } from './components/PropertyPanel';
 import { Toolbar } from './components/Toolbar';
 import { Tour } from './components/Tour';
 import { WorkflowEditor } from './components/WorkflowEditor';
+import { useCollapsiblePanel } from './hooks/useCollapsiblePanel';
 import { useTranslation } from './i18n/i18n-context';
 import { vscode } from './main';
 import { deserializeWorkflow } from './services/workflow-service';
@@ -64,6 +65,13 @@ const App: React.FC = () => {
     string | undefined
   >(undefined);
   const [isMoreActionsOpen, setIsMoreActionsOpen] = useState(false);
+
+  // Node Palette collapse state
+  const {
+    isCollapsed: isNodePaletteCollapsed,
+    toggle: toggleNodePalette,
+    expand: expandNodePalette,
+  } = useCollapsiblePanel();
 
   const handleError = (errorData: ErrorPayload) => {
     setError(errorData);
@@ -206,16 +214,38 @@ const App: React.FC = () => {
           overflow: 'hidden',
         }}
       >
-        {/* Left Panel: Node Palette with simple overlay (Phase 3.10 - modified) */}
-        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column' }}>
-          <NodePalette />
-          {/* Simple overlay for Left Panel (no message) */}
+        {/* Left Panel: Node Palette with collapse/expand animation */}
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            width: isNodePaletteCollapsed ? '0px' : '200px',
+            minWidth: isNodePaletteCollapsed ? '0px' : '200px',
+            transition: 'width 150ms ease-out, min-width 150ms ease-out',
+            overflow: 'hidden',
+          }}
+        >
+          {/* NodePalette with slide animation */}
+          <div
+            style={{
+              transform: isNodePaletteCollapsed ? 'translateX(-100%)' : 'translateX(0)',
+              pointerEvents: isNodePaletteCollapsed ? 'none' : 'auto',
+              transition: 'transform 150ms ease-out',
+            }}
+          >
+            <NodePalette onCollapse={toggleNodePalette} />
+          </div>
+          {/* Simple overlay for Left Panel */}
           <SimpleOverlay isVisible={isProcessing} />
         </div>
 
         {/* Center: Workflow Editor with processing overlay (Phase 3.10 - modified) */}
         <div style={{ flex: 1, position: 'relative' }}>
-          <WorkflowEditor />
+          <WorkflowEditor
+            isNodePaletteCollapsed={isNodePaletteCollapsed}
+            onExpandNodePalette={expandNodePalette}
+          />
           {/* Processing overlay for canvas area only (with message centered in canvas) */}
           <ProcessingOverlay isVisible={isProcessing} message={t('refinement.processingOverlay')} />
         </div>

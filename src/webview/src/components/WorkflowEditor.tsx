@@ -5,7 +5,7 @@
  * Based on: /specs/001-cc-wf-studio/research.md section 3.4
  */
 
-import { Sparkles } from 'lucide-react';
+import { PanelLeftOpen, Sparkles } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactFlow, {
@@ -75,9 +75,20 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 const edgeTypes: EdgeTypes = {};
 
 /**
+ * WorkflowEditor Component Props
+ */
+interface WorkflowEditorProps {
+  isNodePaletteCollapsed?: boolean;
+  onExpandNodePalette?: () => void;
+}
+
+/**
  * WorkflowEditor Component
  */
-export const WorkflowEditor: React.FC = () => {
+export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
+  isNodePaletteCollapsed = false,
+  onExpandNodePalette,
+}) => {
   const { t } = useTranslation();
   const isCompact = useIsCompactMode();
 
@@ -299,6 +310,31 @@ export const WorkflowEditor: React.FC = () => {
         <Panel position="top-left">
           <InteractionModeToggle />
         </Panel>
+
+        {/* Expand Node Palette Button (when collapsed) */}
+        {isNodePaletteCollapsed && onExpandNodePalette && (
+          <Panel position="top-left" style={{ marginTop: '48px' }}>
+            <button
+              type="button"
+              onClick={onExpandNodePalette}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                backgroundColor: 'var(--vscode-editor-background)',
+                border: '1px solid var(--vscode-panel-border)',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                color: 'var(--vscode-foreground)',
+                opacity: 0.85,
+              }}
+            >
+              <PanelLeftOpen size={16} aria-hidden="true" />
+            </button>
+          </Panel>
+        )}
 
         {/* AI Refinement Button */}
         <Panel position="top-right">

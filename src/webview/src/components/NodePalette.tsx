@@ -7,6 +7,7 @@
 
 import type { SubAgentFlow } from '@shared/types/workflow-definition';
 import { NodeType } from '@shared/types/workflow-definition';
+import { PanelLeftClose } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
@@ -16,8 +17,12 @@ import { McpNodeDialog } from './dialogs/McpNodeDialog';
 import { SkillBrowserDialog } from './dialogs/SkillBrowserDialog';
 
 /**
- * NodePalette Component
+ * NodePalette Component Props
  */
+interface NodePaletteProps {
+  onCollapse?: () => void;
+}
+
 /**
  * Generate unique Sub-Agent Flow ID
  */
@@ -25,7 +30,7 @@ function generateSubAgentFlowId(): string {
   return `subagentflow_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
-export const NodePalette: React.FC = () => {
+export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
   const { t } = useTranslation();
   const isCompact = useIsCompactMode();
   const {
@@ -250,15 +255,53 @@ export const NodePalette: React.FC = () => {
       {/* Header */}
       <div
         style={{
-          fontSize: isCompact ? '11px' : '13px',
-          fontWeight: 600,
-          color: 'var(--vscode-foreground)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
           marginBottom: isCompact ? '8px' : '16px',
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px',
         }}
       >
-        {t('palette.title')}
+        <div
+          style={{
+            fontSize: isCompact ? '11px' : '13px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+          }}
+        >
+          {t('palette.title')}
+        </div>
+        {onCollapse && (
+          <button
+            type="button"
+            onClick={onCollapse}
+            style={{
+              width: '20px',
+              height: '20px',
+              padding: '2px',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--vscode-foreground)',
+              opacity: 0.7,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--vscode-toolbar-hoverBackground)';
+              e.currentTarget.style.opacity = '1';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.opacity = '0.7';
+            }}
+          >
+            <PanelLeftClose size={14} aria-hidden="true" />
+          </button>
+        )}
       </div>
 
       {/* Section: Basic Nodes */}
