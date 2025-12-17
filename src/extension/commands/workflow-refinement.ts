@@ -175,12 +175,12 @@ export async function handleRefineWorkflow(
       return;
     }
 
-    // Create AI message with translation key
+    // Create AI message - use AI's message if available, otherwise use translation key
     const aiMessage: ConversationMessage = {
       id: crypto.randomUUID(),
       sender: 'ai',
-      content: 'Workflow has been updated.', // Fallback English text
-      translationKey: 'refinement.success.defaultMessage',
+      content: result.aiMessage || 'Workflow has been updated.', // AI message or fallback
+      translationKey: result.aiMessage ? undefined : 'refinement.success.defaultMessage',
       timestamp: new Date().toISOString(),
     };
 
@@ -427,12 +427,14 @@ async function handleRefineSubAgentFlow(
       return;
     }
 
-    // Create AI message with translation key
+    // Create AI message - use AI's message if available, otherwise use translation key
     const aiMessage: ConversationMessage = {
       id: crypto.randomUUID(),
       sender: 'ai',
-      content: 'Sub-Agent Flow has been updated.', // Fallback English text
-      translationKey: 'subAgentFlow.refinement.success.defaultMessage',
+      content: result.aiMessage || 'Sub-Agent Flow has been updated.', // AI message or fallback
+      translationKey: result.aiMessage
+        ? undefined
+        : 'subAgentFlow.refinement.success.defaultMessage',
       timestamp: new Date().toISOString(),
     };
 

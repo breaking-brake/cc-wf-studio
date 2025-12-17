@@ -6,12 +6,13 @@
  */
 
 import type { SkillReference } from '../../shared/types/messages';
-import type {
-  ConversationHistory,
-  SkillNodeData,
-  SubAgentFlow,
-  SubAgentFlowNodeData,
-  Workflow,
+import {
+  type ConversationHistory,
+  NodeType,
+  type SkillNodeData,
+  type SubAgentFlow,
+  type SubAgentFlowNodeData,
+  type Workflow,
 } from '../../shared/types/workflow-definition';
 import { log } from '../extension';
 import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
@@ -30,12 +31,37 @@ export interface RefinementResult {
   success: boolean;
   refinedWorkflow?: Workflow;
   clarificationMessage?: string;
+  aiMessage?: string; // AI's response message for display in chat UI
   error?: {
     code: 'COMMAND_NOT_FOUND' | 'TIMEOUT' | 'PARSE_ERROR' | 'VALIDATION_ERROR' | 'UNKNOWN_ERROR';
     message: string;
     details?: string;
   };
   executionTimeMs: number;
+}
+
+/**
+ * AI response structure for workflow refinement
+ * Forces AI to return structured JSON instead of plain text
+ */
+interface AIRefinementResponse {
+  status: 'success' | 'error' | 'clarification';
+  values?: {
+    workflow: Workflow;
+  };
+  message?: string; // For clarification or error messages
+}
+
+/**
+ * AI response structure for SubAgentFlow refinement
+ */
+interface AISubAgentFlowResponse {
+  status: 'success' | 'error' | 'clarification';
+  values?: {
+    nodes: Workflow['nodes'];
+    connections: Workflow['connections'];
+  };
+  message?: string;
 }
 
 /**
@@ -81,6 +107,50 @@ function extractClarificationMessage(output: string): string {
 
   // Trim whitespace
   return cleanedOutput.trim();
+}
+
+/**
+ * Parse AI refinement response with structured format
+ *
+ * @param output - Raw CLI output string
+ * @returns Parsed AIRefinementResponse or null if parsing fails
+ */
+function parseRefinementResponse(output: string): AIRefinementResponse | null {
+  const parsed = parseClaudeCodeOutput(output);
+  if (!parsed || typeof parsed !== 'object') {
+    return null;
+  }
+
+  const response = parsed as AIRefinementResponse;
+
+  // Validate required status field
+  if (!response.status || !['success', 'error', 'clarification'].includes(response.status)) {
+    return null;
+  }
+
+  return response;
+}
+
+/**
+ * Parse AI SubAgentFlow refinement response with structured format
+ *
+ * @param output - Raw CLI output string
+ * @returns Parsed AISubAgentFlowResponse or null if parsing fails
+ */
+function parseSubAgentFlowResponse(output: string): AISubAgentFlowResponse | null {
+  const parsed = parseClaudeCodeOutput(output);
+  if (!parsed || typeof parsed !== 'object') {
+    return null;
+  }
+
+  const response = parsed as AISubAgentFlowResponse;
+
+  // Validate required status field
+  if (!response.status || !['success', 'error', 'clarification'].includes(response.status)) {
+    return null;
+  }
+
+  return response;
 }
 
 /**
@@ -195,7 +265,35 @@ ${userMessage}
 ${skillsSection}
 ${schemaSection}
 
-**Output Format**: Output ONLY valid JSON matching the Workflow interface. Do not include markdown code blocks or explanations.`;
+**Output Format**: You MUST output a structured JSON response in exactly this format:
+
+For successful refinement (or if no changes are needed):
+{
+  "status": "success",
+  "message": "Brief description of what was changed or why no changes were needed",
+  "values": {
+    "workflow": { /* refined or original workflow matching Workflow interface */ }
+  }
+}
+
+If you need clarification from the user:
+{
+  "status": "clarification",
+  "message": "Your question here"
+}
+
+If there's an error or the request cannot be fulfilled:
+{
+  "status": "error",
+  "message": "Error description"
+}
+
+CRITICAL RULES:
+- ALWAYS output valid JSON, NEVER plain text explanations
+- NEVER include markdown code blocks or explanations outside the JSON structure
+- Even if NO changes are required, you MUST wrap the original workflow in the success response format
+- The "status" field is REQUIRED in every response
+- The "message" field is REQUIRED for all status types - describe what was done or why`;
 
   return { prompt, schemaSize };
 }
@@ -376,34 +474,34 @@ export async function refineWorkflow(
       };
     }
 
-    log('INFO', 'CLI execution successful, checking output type', {
+    log('INFO', 'CLI execution successful, parsing structured response', {
       requestId,
       executionTimeMs: cliResult.executionTimeMs,
+      rawOutput: cliResult.output,
     });
 
-    // Step 5: Check if output is a clarification message
-    if (isClarificationMessage(cliResult.output)) {
-      const clarificationText = extractClarificationMessage(cliResult.output);
+    // Step 5: Parse structured AI response
+    const aiResponse = parseRefinementResponse(cliResult.output);
 
-      log('INFO', 'AI is requesting clarification', {
-        requestId,
-        outputPreview: clarificationText.substring(0, 200),
-        executionTimeMs: cliResult.executionTimeMs,
-      });
+    if (!aiResponse) {
+      // Structured response parsing failed - try legacy format detection
+      if (isClarificationMessage(cliResult.output)) {
+        const clarificationText = extractClarificationMessage(cliResult.output);
 
-      return {
-        success: true,
-        clarificationMessage: clarificationText,
-        executionTimeMs: cliResult.executionTimeMs,
-      };
-    }
+        log('INFO', 'AI is requesting clarification (legacy format)', {
+          requestId,
+          outputPreview: clarificationText.substring(0, 200),
+          executionTimeMs: cliResult.executionTimeMs,
+        });
 
-    // Step 6: Parse CLI output as workflow JSON
-    const parsedOutput = parseClaudeCodeOutput(cliResult.output);
+        return {
+          success: true,
+          clarificationMessage: clarificationText,
+          executionTimeMs: cliResult.executionTimeMs,
+        };
+      }
 
-    if (!parsedOutput) {
-      // Parsing failed
-      log('ERROR', 'Failed to parse CLI output', {
+      log('ERROR', 'Failed to parse structured AI response', {
         requestId,
         outputPreview: cliResult.output.substring(0, 200),
         executionTimeMs: cliResult.executionTimeMs,
@@ -414,17 +512,68 @@ export async function refineWorkflow(
         error: {
           code: 'PARSE_ERROR',
           message: 'Failed to parse AI response. Please try again or rephrase your request',
-          details: 'Failed to parse JSON from Claude Code output',
+          details: 'AI response does not match expected structured format',
         },
         executionTimeMs: cliResult.executionTimeMs,
       };
     }
 
-    // Type check: ensure parsed output is a Workflow
-    let refinedWorkflow = parsedOutput as Workflow;
+    // Step 6: Handle response based on status
+    if (aiResponse.status === 'clarification') {
+      log('INFO', 'AI is requesting clarification', {
+        requestId,
+        message: aiResponse.message?.substring(0, 200),
+        executionTimeMs: cliResult.executionTimeMs,
+      });
+
+      return {
+        success: true,
+        clarificationMessage: aiResponse.message || 'Please provide more details',
+        executionTimeMs: cliResult.executionTimeMs,
+      };
+    }
+
+    if (aiResponse.status === 'error') {
+      log('WARN', 'AI returned error status', {
+        requestId,
+        message: aiResponse.message,
+        executionTimeMs: cliResult.executionTimeMs,
+      });
+
+      return {
+        success: false,
+        error: {
+          code: 'PARSE_ERROR',
+          message: aiResponse.message || 'AI could not process the request',
+          details: 'AI returned error status in response',
+        },
+        executionTimeMs: cliResult.executionTimeMs,
+      };
+    }
+
+    // status === 'success' - extract workflow
+    if (!aiResponse.values?.workflow) {
+      log('ERROR', 'AI success response missing workflow', {
+        requestId,
+        hasValues: !!aiResponse.values,
+        executionTimeMs: cliResult.executionTimeMs,
+      });
+
+      return {
+        success: false,
+        error: {
+          code: 'PARSE_ERROR',
+          message: 'Refinement failed - AI response missing workflow data',
+          details: 'Success response does not contain workflow in values',
+        },
+        executionTimeMs: cliResult.executionTimeMs,
+      };
+    }
+
+    let refinedWorkflow = aiResponse.values.workflow;
 
     if (!refinedWorkflow.id || !refinedWorkflow.nodes || !refinedWorkflow.connections) {
-      log('ERROR', 'Parsed output is not a valid Workflow', {
+      log('ERROR', 'Parsed workflow is not valid', {
         requestId,
         hasId: !!refinedWorkflow.id,
         hasNodes: !!refinedWorkflow.nodes,
@@ -507,11 +656,13 @@ export async function refineWorkflow(
       executionTimeMs,
       nodeCount: refinedWorkflow.nodes.length,
       connectionCount: refinedWorkflow.connections.length,
+      aiMessage: aiResponse.message,
     });
 
     return {
       success: true,
       refinedWorkflow,
+      aiMessage: aiResponse.message,
       executionTimeMs,
     };
   } catch (error) {
@@ -609,14 +760,14 @@ function createMinimalSubAgentFlow(
     nodes: [
       {
         id: `${subAgentFlowId}-start`,
-        type: 'start',
+        type: NodeType.Start,
         name: 'Start',
         position: { x: 100, y: 200 },
         data: { label: 'Start' },
       },
       {
         id: `${subAgentFlowId}-end`,
-        type: 'end',
+        type: NodeType.End,
         name: 'End',
         position: { x: 400, y: 200 },
         data: { label: 'End' },
@@ -707,6 +858,7 @@ export interface SubAgentFlowRefinementResult {
   success: boolean;
   refinedInnerWorkflow?: InnerWorkflow;
   clarificationMessage?: string;
+  aiMessage?: string; // AI's response message for display in chat UI
   error?: {
     code:
       | 'COMMAND_NOT_FOUND'
@@ -853,11 +1005,36 @@ ${userMessage}
 ${skillsSection}
 ${schemaSection}
 
-**Output Format**: Output ONLY valid JSON with "nodes" and "connections" arrays. Do not include markdown code blocks or explanations. Example:
+**Output Format**: You MUST output a structured JSON response in exactly this format:
+
+For successful refinement (or if no changes are needed):
 {
-  "nodes": [...],
-  "connections": [...]
-}`;
+  "status": "success",
+  "message": "Brief description of what was changed or why no changes were needed",
+  "values": {
+    "nodes": [...],
+    "connections": [...]
+  }
+}
+
+If you need clarification from the user:
+{
+  "status": "clarification",
+  "message": "Your question here"
+}
+
+If there's an error or the request cannot be fulfilled:
+{
+  "status": "error",
+  "message": "Error description"
+}
+
+CRITICAL RULES:
+- ALWAYS output valid JSON, NEVER plain text explanations
+- NEVER include markdown code blocks or explanations outside the JSON structure
+- Even if NO changes are required, you MUST wrap the original nodes/connections in the success response format
+- The "status" field is REQUIRED in every response
+- The "message" field is REQUIRED for all status types - describe what was done or why`;
 
   return { prompt, schemaSize };
 }
@@ -1032,28 +1209,34 @@ export async function refineSubAgentFlow(
       };
     }
 
-    // Step 4: Check if output is a clarification message
-    if (isClarificationMessage(cliResult.output)) {
-      const clarificationText = extractClarificationMessage(cliResult.output);
+    log('INFO', 'SubAgentFlow CLI execution successful, parsing structured response', {
+      requestId,
+      executionTimeMs: cliResult.executionTimeMs,
+      rawOutput: cliResult.output,
+    });
 
-      log('INFO', 'AI is requesting clarification for SubAgentFlow', {
-        requestId,
-        outputPreview: clarificationText.substring(0, 200),
-        executionTimeMs: cliResult.executionTimeMs,
-      });
+    // Step 4: Parse structured AI response
+    const aiResponse = parseSubAgentFlowResponse(cliResult.output);
 
-      return {
-        success: true,
-        clarificationMessage: clarificationText,
-        executionTimeMs: cliResult.executionTimeMs,
-      };
-    }
+    if (!aiResponse) {
+      // Structured response parsing failed - try legacy format detection
+      if (isClarificationMessage(cliResult.output)) {
+        const clarificationText = extractClarificationMessage(cliResult.output);
 
-    // Step 5: Parse CLI output as inner workflow JSON
-    const parsedOutput = parseClaudeCodeOutput(cliResult.output);
+        log('INFO', 'AI is requesting clarification for SubAgentFlow (legacy format)', {
+          requestId,
+          outputPreview: clarificationText.substring(0, 200),
+          executionTimeMs: cliResult.executionTimeMs,
+        });
 
-    if (!parsedOutput) {
-      log('ERROR', 'Failed to parse SubAgentFlow CLI output', {
+        return {
+          success: true,
+          clarificationMessage: clarificationText,
+          executionTimeMs: cliResult.executionTimeMs,
+        };
+      }
+
+      log('ERROR', 'Failed to parse structured SubAgentFlow AI response', {
         requestId,
         outputPreview: cliResult.output.substring(0, 200),
         executionTimeMs: cliResult.executionTimeMs,
@@ -1064,20 +1247,31 @@ export async function refineSubAgentFlow(
         error: {
           code: 'PARSE_ERROR',
           message: 'Failed to parse AI response. Please try again or rephrase your request',
-          details: 'Failed to parse JSON from Claude Code output',
+          details: 'AI response does not match expected structured format',
         },
         executionTimeMs: cliResult.executionTimeMs,
       };
     }
 
-    // Type check: ensure parsed output has nodes and connections
-    const refinedInnerWorkflow = parsedOutput as InnerWorkflow;
-
-    if (!refinedInnerWorkflow.nodes || !refinedInnerWorkflow.connections) {
-      log('ERROR', 'Parsed SubAgentFlow output missing required fields', {
+    // Step 5: Handle response based on status
+    if (aiResponse.status === 'clarification') {
+      log('INFO', 'AI is requesting clarification for SubAgentFlow', {
         requestId,
-        hasNodes: !!refinedInnerWorkflow.nodes,
-        hasConnections: !!refinedInnerWorkflow.connections,
+        message: aiResponse.message?.substring(0, 200),
+        executionTimeMs: cliResult.executionTimeMs,
+      });
+
+      return {
+        success: true,
+        clarificationMessage: aiResponse.message || 'Please provide more details',
+        executionTimeMs: cliResult.executionTimeMs,
+      };
+    }
+
+    if (aiResponse.status === 'error') {
+      log('WARN', 'AI returned error status for SubAgentFlow', {
+        requestId,
+        message: aiResponse.message,
         executionTimeMs: cliResult.executionTimeMs,
       });
 
@@ -1085,12 +1279,38 @@ export async function refineSubAgentFlow(
         success: false,
         error: {
           code: 'PARSE_ERROR',
-          message: 'Refinement failed - AI output does not match expected format',
-          details: 'Missing required fields (nodes or connections)',
+          message: aiResponse.message || 'AI could not process the request',
+          details: 'AI returned error status in response',
         },
         executionTimeMs: cliResult.executionTimeMs,
       };
     }
+
+    // status === 'success' - extract inner workflow
+    if (!aiResponse.values?.nodes || !aiResponse.values?.connections) {
+      log('ERROR', 'AI success response missing nodes/connections', {
+        requestId,
+        hasValues: !!aiResponse.values,
+        hasNodes: !!aiResponse.values?.nodes,
+        hasConnections: !!aiResponse.values?.connections,
+        executionTimeMs: cliResult.executionTimeMs,
+      });
+
+      return {
+        success: false,
+        error: {
+          code: 'PARSE_ERROR',
+          message: 'Refinement failed - AI response missing workflow data',
+          details: 'Success response does not contain nodes/connections in values',
+        },
+        executionTimeMs: cliResult.executionTimeMs,
+      };
+    }
+
+    const refinedInnerWorkflow: InnerWorkflow = {
+      nodes: aiResponse.values.nodes,
+      connections: aiResponse.values.connections,
+    };
 
     // Step 6: Validate prohibited node types
     const nodeValidation = validateSubAgentFlowNodes(refinedInnerWorkflow);
@@ -1177,11 +1397,13 @@ export async function refineSubAgentFlow(
       executionTimeMs,
       nodeCount: refinedInnerWorkflow.nodes.length,
       connectionCount: refinedInnerWorkflow.connections.length,
+      aiMessage: aiResponse.message,
     });
 
     return {
       success: true,
       refinedInnerWorkflow,
+      aiMessage: aiResponse.message,
       executionTimeMs,
     };
   } catch (error) {
