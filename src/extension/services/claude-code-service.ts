@@ -151,11 +151,19 @@ export async function executeClaudeCodeCLI(
 
     // Handle SubprocessError from nano-spawn
     if (isSubprocessError(error)) {
-      // Timeout error
-      if (error.isTerminated && error.signalName === 'SIGTERM') {
+      // Timeout error detection:
+      // - nano-spawn may set isTerminated=true and signalName='SIGTERM'
+      // - OR it may only set exitCode=143 (128 + 15 = SIGTERM)
+      const isTimeout =
+        (error.isTerminated && error.signalName === 'SIGTERM') || error.exitCode === 143;
+
+      if (isTimeout) {
         log('WARN', 'Claude Code CLI execution timed out', {
           timeoutMs,
           executionTimeMs,
+          exitCode: error.exitCode,
+          isTerminated: error.isTerminated,
+          signalName: error.signalName,
         });
 
         return {
