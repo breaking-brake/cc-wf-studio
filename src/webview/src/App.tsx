@@ -5,6 +5,7 @@
  * Based on: /specs/001-cc-wf-studio/plan.md
  */
 
+import * as Collapsible from '@radix-ui/react-collapsible';
 import type {
   ErrorPayload,
   ImportWorkflowFromSlackPayload,
@@ -214,31 +215,21 @@ const App: React.FC = () => {
           overflow: 'hidden',
         }}
       >
-        {/* Left Panel: Node Palette with collapse/expand animation */}
-        <div
+        {/* Left Panel: Node Palette with Radix Collapsible */}
+        <Collapsible.Root
+          open={!isNodePaletteCollapsed}
           style={{
             position: 'relative',
             display: 'flex',
             flexDirection: 'column',
-            width: isNodePaletteCollapsed ? '0px' : '200px',
-            minWidth: isNodePaletteCollapsed ? '0px' : '200px',
-            transition: 'width 150ms ease-out, min-width 150ms ease-out',
-            overflow: 'hidden',
           }}
         >
-          {/* NodePalette with slide animation */}
-          <div
-            style={{
-              transform: isNodePaletteCollapsed ? 'translateX(-100%)' : 'translateX(0)',
-              pointerEvents: isNodePaletteCollapsed ? 'none' : 'auto',
-              transition: 'transform 150ms ease-out',
-            }}
-          >
+          <Collapsible.Content className="node-palette-collapsible">
             <NodePalette onCollapse={toggleNodePalette} />
-          </div>
+          </Collapsible.Content>
           {/* Simple overlay for Left Panel */}
           <SimpleOverlay isVisible={isProcessing} />
-        </div>
+        </Collapsible.Root>
 
         {/* Center: Workflow Editor with processing overlay (Phase 3.10 - modified) */}
         <div style={{ flex: 1, position: 'relative' }}>
@@ -361,6 +352,39 @@ const App: React.FC = () => {
           @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+          }
+
+          /* Node Palette Collapsible Animation */
+          .node-palette-collapsible {
+            overflow: hidden;
+          }
+
+          .node-palette-collapsible[data-state='open'] {
+            width: 200px;
+            animation: slideOpen 150ms ease-out;
+          }
+
+          .node-palette-collapsible[data-state='closed'] {
+            width: 0px;
+            animation: slideClose 150ms ease-out;
+          }
+
+          @keyframes slideOpen {
+            from {
+              width: 0px;
+            }
+            to {
+              width: 200px;
+            }
+          }
+
+          @keyframes slideClose {
+            from {
+              width: 200px;
+            }
+            to {
+              width: 0px;
+            }
           }
         `}
       </style>
