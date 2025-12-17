@@ -1,3 +1,9 @@
+## [3.8.0](https://github.com/breaking-brake/cc-wf-studio/compare/v3.7.4...v3.8.0) (2025-12-17)
+
+### Features
+
+* structured JSON response format for AI refinement ([#287](https://github.com/breaking-brake/cc-wf-studio/issues/287)) ([d16f74e](https://github.com/breaking-brake/cc-wf-studio/commit/d16f74e184acf9ab95dd985bbe6a0b453b232d2d))
+
 ## [3.7.4](https://github.com/breaking-brake/cc-wf-studio/compare/v3.7.3...v3.7.4) (2025-12-16)
 
 ### Improvements
