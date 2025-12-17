@@ -251,16 +251,31 @@ function isSubprocessError(error: unknown): error is SubprocessError {
 /**
  * Parse JSON output from Claude Code CLI
  *
+ * Handles two output formats:
+ * 1. Markdown-wrapped: ```json { ... } ```
+ * 2. Raw JSON: { ... }
+ *
+ * Note: Uses string position-based extraction (not regex) to handle cases
+ * where the JSON content itself contains markdown code blocks.
+ *
  * @param output - Raw output string from CLI
  * @returns Parsed JSON object or null if parsing fails
  */
 export function parseClaudeCodeOutput(output: string): unknown {
   try {
-    // Claude Code might wrap output in markdown code blocks, so extract JSON
-    const jsonMatch = output.match(/```json\s*([\s\S]*?)\s*```/);
-    const jsonString = jsonMatch ? jsonMatch[1] : output;
+    const trimmed = output.trim();
 
-    return JSON.parse(jsonString.trim());
+    // Strategy 1: If wrapped in ```json...```, remove outer markers only
+    if (trimmed.startsWith('```json') && trimmed.endsWith('```')) {
+      const jsonContent = trimmed
+        .slice(7) // Remove ```json
+        .slice(0, -3) // Remove trailing ```
+        .trim();
+      return JSON.parse(jsonContent);
+    }
+
+    // Strategy 2: Try parsing as-is
+    return JSON.parse(trimmed);
   } catch (_error) {
     // If parsing fails, return null
     return null;
