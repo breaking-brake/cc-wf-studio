@@ -349,15 +349,13 @@ export function cancelGeneration(requestId: string): {
 /**
  * Progress callback for streaming CLI execution
  * @param chunk - Current text chunk
- * @param accumulated - Accumulated display text
- * @param explanatoryText - Explanatory text (non-JSON)
- * @param action - 'new' to add a new message bubble, 'update' to update current bubble
+ * @param displayText - Display text (may include tool usage info) - for streaming display
+ * @param explanatoryText - Explanatory text only (no tool info) - for preserving in chat history
  */
 export type StreamingProgressCallback = (
   chunk: string,
-  accumulated: string,
-  explanatoryText: string,
-  action: 'new' | 'update'
+  displayText: string,
+  explanatoryText: string
 ) => void;
 
 /**
@@ -412,13 +410,10 @@ export async function executeClaudeCodeCLIStreaming(
       });
     }
 
-    // Track explanatory text (non-JSON text from AI)
+    // Track explanatory text (non-JSON text from AI, for chat history)
     let explanatoryText = '';
-    // Track last content type to determine action for new messages
-    // 'tool_use' -> next text should be 'new' message
-    // 'text' -> next text should be 'update' (continue same message)
-    // null -> first message should be 'new'
-    let lastContentType: 'text' | 'tool_use' | null = null;
+    // Track current tool info for display (not preserved in history)
+    let currentToolInfo = '';
 
     // Process streaming output using AsyncIterable
     for await (const chunk of subprocess.stdout) {
@@ -444,12 +439,11 @@ export async function executeClaudeCodeCLIStreaming(
                 : JSON.stringify(parsed).substring(0, 500),
           });
 
-          // Extract text content from assistant messages
+          // Extract content from assistant messages
           if (parsed.type === 'assistant' && parsed.message?.content) {
             for (const content of parsed.message.content) {
-              // Handle tool_use content - show tool name and relevant details
+              // Handle tool_use content - show tool name and relevant details (display only)
               if (content.type === 'tool_use' && content.name) {
-                // Extract meaningful description from tool input
                 const toolName = content.name;
                 const input = content.input || {};
                 let description = '';
@@ -471,17 +465,16 @@ export async function executeClaudeCodeCLIStreaming(
                   description = input.file_path;
                 }
 
-                const toolLine = description ? `${toolName}: ${description}` : toolName;
+                currentToolInfo = description ? `${toolName}: ${description}` : toolName;
 
-                // Combine explanatory text with tool usage
+                // Build display text (explanatory + tool info)
                 const displayText = explanatoryText
-                  ? `${explanatoryText}\n\n${toolLine}`
-                  : toolLine;
+                  ? `${explanatoryText}\n\n🔧 ${currentToolInfo}`
+                  : `🔧 ${currentToolInfo}`;
 
-                // Tool use always updates current message (doesn't create new bubble)
-                lastContentType = 'tool_use';
-                onProgress(toolLine, displayText, explanatoryText, 'update');
+                onProgress(currentToolInfo, displayText, explanatoryText);
               }
+
               // Handle text content
               if (content.type === 'text' && content.text) {
                 accumulated += content.text;
@@ -508,11 +501,6 @@ export async function executeClaudeCodeCLIStreaming(
                     hasMessage: !!jsonResponse.message,
                     hasValues: !!jsonResponse.values,
                   });
-                  if (jsonResponse.status && jsonResponse.message && jsonResponse.values) {
-                    // Final complete response - skip progress, let success handler display it
-                  } else if (jsonResponse.message && typeof jsonResponse.message === 'string') {
-                    // Partial response with message - skip to avoid confusion
-                  }
                   // JSON parsed successfully - don't call onProgress for JSON content
                 } catch {
                   // JSON parsing failed - this is explanatory text or incomplete JSON
@@ -531,7 +519,6 @@ export async function executeClaudeCodeCLIStreaming(
                     // Check if text contains ```json block and extract text before it
                     const jsonBlockIndex = trimmedAccumulated.indexOf('```json');
                     if (jsonBlockIndex !== -1) {
-                      // Extract only the explanatory text before the JSON block
                       explanatoryText = trimmedAccumulated.slice(0, jsonBlockIndex).trim();
                       log('DEBUG', 'Extracted explanatory text before ```json', {
                         explanatoryTextLength: explanatoryText.length,
@@ -541,12 +528,11 @@ export async function executeClaudeCodeCLIStreaming(
                       explanatoryText = trimmedAccumulated;
                     }
 
-                    // Text after tool_use or first text -> new message bubble
-                    // Text continuing from previous text -> update current bubble
-                    const action =
-                      lastContentType === 'tool_use' || lastContentType === null ? 'new' : 'update';
-                    lastContentType = 'text';
-                    onProgress(content.text, explanatoryText, explanatoryText, action);
+                    // Clear tool info when new text comes (text replaces tool display)
+                    currentToolInfo = '';
+
+                    // Display text is same as explanatory text when no tool is active
+                    onProgress(content.text, explanatoryText, explanatoryText);
                   }
                 }
               }

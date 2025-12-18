@@ -72,9 +72,6 @@ export async function handleRefineWorkflow(
     return;
   }
 
-  // Track the latest explanatory text from streaming progress
-  let latestExplanatoryText = '';
-
   try {
     // Check iteration limit
     if (conversationHistory.currentIteration >= conversationHistory.maxIterations) {
@@ -97,31 +94,18 @@ export async function handleRefineWorkflow(
     }
 
     // Create streaming progress callback
-    const onProgress = (
-      chunk: string,
-      accumulated: string,
-      explanatoryText: string,
-      action: 'new' | 'update'
-    ) => {
+    const onProgress = (chunk: string, displayText: string, explanatoryText: string) => {
       log('INFO', 'onProgress callback invoked', {
         requestId,
         chunkLength: chunk.length,
-        accumulatedLength: accumulated.length,
-        explanatoryTextLength: explanatoryText?.length ?? 0,
-        explanatoryTextPreview: explanatoryText?.substring(0, 200),
-        action,
+        displayTextLength: displayText.length,
+        explanatoryTextLength: explanatoryText.length,
       });
-
-      // Track the latest explanatory text for inclusion in success payload
-      if (explanatoryText) {
-        latestExplanatoryText = explanatoryText;
-      }
 
       sendRefinementProgress(webview, requestId, {
         chunk,
-        accumulatedText: accumulated,
+        accumulatedText: displayText,
         explanatoryText: explanatoryText || undefined,
-        action,
         timestamp: new Date().toISOString(),
       });
     };
@@ -244,16 +228,12 @@ export async function handleRefineWorkflow(
       executionTimeMs: result.executionTimeMs,
       newIteration: updatedHistory.currentIteration,
       totalMessages: updatedHistory.messages.length,
-      hasExplanatoryText: !!latestExplanatoryText,
-      explanatoryTextLength: latestExplanatoryText.length,
     });
 
-    // Send success response with explanatory text for chat history
     sendRefinementSuccess(webview, requestId, {
       refinedWorkflow: result.refinedWorkflow,
       aiMessage,
       updatedConversationHistory: updatedHistory,
-      explanatoryText: latestExplanatoryText || undefined,
       executionTimeMs: result.executionTimeMs,
       timestamp: new Date().toISOString(),
     });

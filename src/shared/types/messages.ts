@@ -227,8 +227,6 @@ export interface RefinementSuccessPayload {
   updatedConversationHistory: ConversationHistory;
   /** Optional: brief summary of changes made (max 500 chars) */
   changesSummary?: string;
-  /** Explanatory text from AI (non-JSON text to preserve in final message) */
-  explanatoryText?: string;
   /** Time taken to execute refinement (in milliseconds) */
   executionTimeMs: number;
   /** Response timestamp */
@@ -290,12 +288,10 @@ export interface RefinementClarificationPayload {
 export interface RefinementProgressPayload {
   /** New text chunk from streaming output */
   chunk: string;
-  /** Accumulated text (full content so far) - for display */
+  /** Display text (may include tool usage info) - for streaming display */
   accumulatedText: string;
-  /** Explanatory text from AI (non-JSON text to preserve in final message) */
+  /** Explanatory text only (no tool info) - for preserving in chat history */
   explanatoryText?: string;
-  /** Action type: 'new' adds a new message bubble, 'update' updates current bubble */
-  action: 'new' | 'update';
   /** Progress timestamp */
   timestamp: string; // ISO 8601
 }
