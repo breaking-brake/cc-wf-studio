@@ -57,7 +57,7 @@ export async function handleGenerateSlackDescription(
 
     // Execute Claude Code CLI
     const timeoutMs = payload.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-    const result = await executeClaudeCodeCLI(prompt, timeoutMs, requestId, workspaceRoot);
+    const result = await executeClaudeCodeCLI(prompt, timeoutMs, requestId, workspaceRoot, 'haiku');
 
     const executionTimeMs = Date.now() - startTime;
 
