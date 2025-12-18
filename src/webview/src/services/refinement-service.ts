@@ -6,6 +6,7 @@
  */
 
 import type {
+  ClaudeModel,
   ExtensionMessage,
   RefinementClarificationPayload,
   RefinementProgressPayload,
@@ -60,6 +61,7 @@ export type RefinementProgressCallback = (payload: RefinementProgressPayload) =>
  * @param useSkills - Whether to include skills in refinement (default: true)
  * @param serverTimeoutMs - Server-side timeout in milliseconds (default: undefined, uses settings)
  * @param onProgress - Optional callback for streaming progress updates
+ * @param model - Claude model to use (default: 'sonnet')
  * @returns Promise that resolves to the refinement result (success or clarification)
  * @throws {WorkflowRefinementError} If refinement fails
  */
@@ -71,7 +73,8 @@ export function refineWorkflow(
   requestId: string,
   useSkills = true,
   serverTimeoutMs?: number,
-  onProgress?: RefinementProgressCallback
+  onProgress?: RefinementProgressCallback,
+  model: ClaudeModel = 'sonnet'
 ): Promise<RefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
@@ -124,6 +127,7 @@ export function refineWorkflow(
       conversationHistory,
       useSkills,
       timeoutMs: serverTimeoutMs, // Pass timeout to server (undefined = use settings)
+      model,
     };
 
     vscode.postMessage({
@@ -212,6 +216,7 @@ export function cancelWorkflowRefinement(requestId: string): void {
  * @param requestId - Request ID for this refinement
  * @param useSkills - Whether to include skills in refinement (default: true)
  * @param serverTimeoutMs - Server-side timeout in milliseconds (default: undefined, uses settings)
+ * @param model - Claude model to use (default: 'sonnet')
  * @returns Promise that resolves to the refinement result (success or clarification)
  * @throws {WorkflowRefinementError} If refinement fails
  */
@@ -223,7 +228,8 @@ export function refineSubAgentFlow(
   conversationHistory: ConversationHistory,
   requestId: string,
   useSkills = true,
-  serverTimeoutMs?: number
+  serverTimeoutMs?: number,
+  model: ClaudeModel = 'sonnet'
 ): Promise<SubAgentFlowRefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
@@ -271,6 +277,7 @@ export function refineSubAgentFlow(
       timeoutMs: serverTimeoutMs,
       targetType: 'subAgentFlow',
       subAgentFlowId,
+      model,
     };
 
     vscode.postMessage({

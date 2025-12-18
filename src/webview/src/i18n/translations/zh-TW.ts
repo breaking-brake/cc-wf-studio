@@ -389,6 +389,9 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'refinement.timeout.label': '逾時',
   'refinement.timeout.ariaLabel': '選擇AI優化逾時時間',
 
+  // Model selector
+  'refinement.model.label': '模型',
+
   // Settings dropdown
   'refinement.settings.title': '設定',
 

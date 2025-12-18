@@ -403,6 +403,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'refinement.timeout.label': 'Timeout',
   'refinement.timeout.ariaLabel': 'Select AI refinement timeout duration',
 
+  // Model selector
+  'refinement.model.label': 'Model',
+
   // Settings dropdown
   'refinement.settings.title': 'Settings',
 

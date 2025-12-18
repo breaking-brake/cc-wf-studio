@@ -9,8 +9,9 @@
  */
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import type { ClaudeModel } from '@shared/types/messages';
 // Edit3 is commented out with Iteration Counter - uncomment when re-enabling
-import { Check, ChevronLeft, Clock, Database, Trash2, UserCog } from 'lucide-react';
+import { Check, ChevronLeft, Clock, Cpu, Database, Trash2, UserCog } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { useRefinementStore } from '../../stores/refinement-store';
@@ -24,6 +25,12 @@ const TIMEOUT_PRESETS = [
   { seconds: 180, label: '3min' },
   { seconds: 240, label: '4min' },
   { seconds: 300, label: '5min' },
+];
+
+const MODEL_PRESETS: { value: ClaudeModel; label: string }[] = [
+  { value: 'sonnet', label: 'Sonnet' },
+  { value: 'opus', label: 'Opus' },
+  { value: 'haiku', label: 'Haiku' },
 ];
 
 // Fixed font sizes for dropdown menu (not responsive)
@@ -46,6 +53,8 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
     setTimeoutSeconds,
     isProcessing,
     useCodebaseSearch,
+    selectedModel,
+    setSelectedModel,
     // conversationHistory, // Uncomment when re-enabling Iteration Counter
   } = useRefinementStore();
 
@@ -53,6 +62,8 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
 
   const currentTimeoutLabel =
     TIMEOUT_PRESETS.find((p) => p.seconds === timeoutSeconds)?.label || `${timeoutSeconds}s`;
+
+  const currentModelLabel = MODEL_PRESETS.find((p) => p.value === selectedModel)?.label || 'Sonnet';
 
   return (
     <>
@@ -260,6 +271,90 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                       <DropdownMenu.RadioItem
                         key={preset.seconds}
                         value={String(preset.seconds)}
+                        style={{
+                          padding: '6px 12px',
+                          fontSize: `${FONT_SIZES.small}px`,
+                          color: 'var(--vscode-foreground)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          outline: 'none',
+                          borderRadius: '2px',
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '12px',
+                            height: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <DropdownMenu.ItemIndicator>
+                            <Check size={12} />
+                          </DropdownMenu.ItemIndicator>
+                        </div>
+                        <span>{preset.label}</span>
+                      </DropdownMenu.RadioItem>
+                    ))}
+                  </DropdownMenu.RadioGroup>
+                </DropdownMenu.SubContent>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Sub>
+
+            {/* Model Sub-menu */}
+            <DropdownMenu.Sub>
+              <DropdownMenu.SubTrigger
+                disabled={isProcessing}
+                style={{
+                  padding: '8px 12px',
+                  fontSize: `${FONT_SIZES.small}px`,
+                  color: 'var(--vscode-foreground)',
+                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px',
+                  outline: 'none',
+                  borderRadius: '2px',
+                  opacity: isProcessing ? 0.5 : 1,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <ChevronLeft size={14} />
+                  <span style={{ color: 'var(--vscode-descriptionForeground)' }}>
+                    {currentModelLabel}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Cpu size={14} />
+                  <span>{t('refinement.model.label')}</span>
+                </div>
+              </DropdownMenu.SubTrigger>
+
+              <DropdownMenu.Portal>
+                <DropdownMenu.SubContent
+                  sideOffset={4}
+                  style={{
+                    backgroundColor: 'var(--vscode-dropdown-background)',
+                    border: '1px solid var(--vscode-dropdown-border)',
+                    borderRadius: '4px',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+                    zIndex: 10000,
+                    minWidth: '100px',
+                    padding: '4px',
+                  }}
+                >
+                  <DropdownMenu.RadioGroup
+                    value={selectedModel}
+                    onValueChange={(value) => setSelectedModel(value as ClaudeModel)}
+                  >
+                    {MODEL_PRESETS.map((preset) => (
+                      <DropdownMenu.RadioItem
+                        key={preset.value}
+                        value={preset.value}
                         style={{
                           padding: '6px 12px',
                           fontSize: `${FONT_SIZES.small}px`,

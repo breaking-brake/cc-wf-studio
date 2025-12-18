@@ -199,6 +199,14 @@ export interface SkillValidationSuccessPayload {
 
 import type { ConversationHistory, ConversationMessage } from './workflow-definition';
 
+/**
+ * Claude model selection for AI refinement
+ * - sonnet: Claude Sonnet (default, balanced performance)
+ * - opus: Claude Opus (highest capability)
+ * - haiku: Claude Haiku (fastest, most economical)
+ */
+export type ClaudeModel = 'sonnet' | 'opus' | 'haiku';
+
 export interface RefineWorkflowPayload {
   /** ID of the workflow being refined */
   workflowId: string;
@@ -216,6 +224,8 @@ export interface RefineWorkflowPayload {
   targetType?: 'workflow' | 'subAgentFlow';
   /** SubAgentFlow ID (required when targetType is 'subAgentFlow') */
   subAgentFlowId?: string;
+  /** Claude model to use (default: 'sonnet') */
+  model?: ClaudeModel;
 }
 
 export interface RefinementSuccessPayload {

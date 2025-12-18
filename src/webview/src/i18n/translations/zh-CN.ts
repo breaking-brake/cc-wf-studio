@@ -389,6 +389,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'refinement.timeout.label': '超时',
   'refinement.timeout.ariaLabel': '选择AI优化超时时间',
 
+  // Model selector
+  'refinement.model.label': '模型',
+
   // Settings dropdown
   'refinement.settings.title': '设置',
 

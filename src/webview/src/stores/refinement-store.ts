@@ -7,9 +7,40 @@
  */
 
 import type { IndexStatus, SearchResult } from '@shared/types/codebase-index';
+import type { ClaudeModel } from '@shared/types/messages';
 import type { ConversationHistory, ConversationMessage } from '@shared/types/workflow-definition';
 import { create } from 'zustand';
 import { getSetting, setSetting } from '../services/codebase-search-service';
+
+// localStorage key for model selection persistence
+const MODEL_STORAGE_KEY = 'cc-wf-studio.refinement.selectedModel';
+
+/**
+ * Load selected model from localStorage
+ * Returns 'sonnet' as default if no value is stored or value is invalid
+ */
+function loadModelFromStorage(): ClaudeModel {
+  try {
+    const saved = localStorage.getItem(MODEL_STORAGE_KEY);
+    if (saved === 'sonnet' || saved === 'opus' || saved === 'haiku') {
+      return saved;
+    }
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+  return 'sonnet'; // Default
+}
+
+/**
+ * Save selected model to localStorage
+ */
+function saveModelToStorage(model: ClaudeModel): void {
+  try {
+    localStorage.setItem(MODEL_STORAGE_KEY, model);
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+}
 
 // ============================================================================
 // Store State Interface
@@ -38,6 +69,7 @@ interface RefinementStore {
   currentRequestId: string | null;
   useSkills: boolean;
   timeoutSeconds: number;
+  selectedModel: ClaudeModel;
 
   // SubAgentFlow Refinement State
   targetType: 'workflow' | 'subAgentFlow';
@@ -55,6 +87,7 @@ interface RefinementStore {
   closeChat: () => void;
   toggleUseSkills: () => void;
   setTimeoutSeconds: (seconds: number) => void;
+  setSelectedModel: (model: ClaudeModel) => void;
   initConversation: () => void;
   loadConversationHistory: (history: ConversationHistory | undefined) => void;
   setTargetContext: (
@@ -129,6 +162,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   currentRequestId: null,
   useSkills: true,
   timeoutSeconds: 90, // Default timeout: 90 seconds (matches VSCode settings default)
+  selectedModel: loadModelFromStorage(), // Load from localStorage, default: 'sonnet'
 
   // SubAgentFlow Refinement Initial State
   targetType: 'workflow',
@@ -156,6 +190,11 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
 
   setTimeoutSeconds: (seconds: number) => {
     set({ timeoutSeconds: seconds });
+  },
+
+  setSelectedModel: (model: ClaudeModel) => {
+    set({ selectedModel: model });
+    saveModelToStorage(model);
   },
 
   initConversation: () => {

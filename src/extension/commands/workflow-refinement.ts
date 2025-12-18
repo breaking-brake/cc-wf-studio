@@ -48,6 +48,7 @@ export async function handleRefineWorkflow(
     timeoutMs,
     targetType = 'workflow',
     subAgentFlowId,
+    model = 'sonnet',
   } = payload;
   const startTime = Date.now();
 
@@ -64,6 +65,7 @@ export async function handleRefineWorkflow(
     timeoutMs: effectiveTimeoutMs,
     targetType,
     subAgentFlowId,
+    model,
   });
 
   // Route to SubAgentFlow refinement if targetType is 'subAgentFlow'
@@ -120,7 +122,8 @@ export async function handleRefineWorkflow(
       effectiveTimeoutMs,
       requestId,
       workspaceRoot,
-      onProgress
+      onProgress,
+      model
     );
 
     // Check if AI is asking for clarification
@@ -282,6 +285,7 @@ async function handleRefineSubAgentFlow(
     useSkills = true,
     timeoutMs,
     subAgentFlowId,
+    model = 'sonnet',
   } = payload;
   const startTime = Date.now();
 
@@ -297,6 +301,7 @@ async function handleRefineSubAgentFlow(
     maxIterations: conversationHistory.maxIterations,
     useSkills,
     timeoutMs: effectiveTimeoutMs,
+    model,
   });
 
   // Validate subAgentFlowId
@@ -369,7 +374,8 @@ async function handleRefineSubAgentFlow(
       useSkills,
       effectiveTimeoutMs,
       requestId,
-      workspaceRoot
+      workspaceRoot,
+      model
     );
 
     // Check if AI is asking for clarification

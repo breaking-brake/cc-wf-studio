@@ -403,6 +403,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.timeout.label': '타임아웃',
   'refinement.timeout.ariaLabel': 'AI 리파인먼트 타임아웃 시간 선택',
 
+  // Model selector
+  'refinement.model.label': '모델',
+
   // Settings dropdown
   'refinement.settings.title': '설정',
 

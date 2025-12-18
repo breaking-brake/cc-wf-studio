@@ -365,6 +365,9 @@ export interface WebviewTranslationKeys {
   'refinement.timeout.label': string;
   'refinement.timeout.ariaLabel': string;
 
+  // Model selector
+  'refinement.model.label': string;
+
   // Settings dropdown
   'refinement.settings.title': string;
 

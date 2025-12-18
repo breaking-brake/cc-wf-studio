@@ -402,6 +402,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.timeout.label': 'タイムアウト',
   'refinement.timeout.ariaLabel': 'AIリファインメントのタイムアウト時間を選択',
 
+  // Model selector
+  'refinement.model.label': 'モデル',
+
   // Settings dropdown
   'refinement.settings.title': '設定',
 

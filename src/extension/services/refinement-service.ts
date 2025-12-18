@@ -5,7 +5,7 @@
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md
  */
 
-import type { SkillReference } from '../../shared/types/messages';
+import type { ClaudeModel, SkillReference } from '../../shared/types/messages';
 import {
   type ConversationHistory,
   NodeType,
@@ -322,6 +322,7 @@ const MAX_REFINEMENT_TIMEOUT_MS = 90000;
  * @param requestId - Optional request ID for cancellation support
  * @param workspaceRoot - The workspace root path for CLI execution
  * @param onProgress - Optional callback for streaming progress updates
+ * @param model - Claude model to use (default: 'sonnet')
  * @returns Refinement result with success status and refined workflow or error
  */
 export async function refineWorkflow(
@@ -333,7 +334,8 @@ export async function refineWorkflow(
   timeoutMs = MAX_REFINEMENT_TIMEOUT_MS,
   requestId?: string,
   workspaceRoot?: string,
-  onProgress?: StreamingProgressCallback
+  onProgress?: StreamingProgressCallback,
+  model: ClaudeModel = 'sonnet'
 ): Promise<RefinementResult> {
   const startTime = Date.now();
 
@@ -447,8 +449,15 @@ export async function refineWorkflow(
 
     // Step 4: Execute Claude Code CLI (streaming if onProgress callback provided)
     const cliResult = onProgress
-      ? await executeClaudeCodeCLIStreaming(prompt, onProgress, timeoutMs, requestId, workspaceRoot)
-      : await executeClaudeCodeCLI(prompt, timeoutMs, requestId, workspaceRoot);
+      ? await executeClaudeCodeCLIStreaming(
+          prompt,
+          onProgress,
+          timeoutMs,
+          requestId,
+          workspaceRoot,
+          model
+        )
+      : await executeClaudeCodeCLI(prompt, timeoutMs, requestId, workspaceRoot, model);
 
     if (!cliResult.success || !cliResult.output) {
       // CLI execution failed - record metrics
@@ -1080,6 +1089,7 @@ function validateSubAgentFlowNodes(innerWorkflow: InnerWorkflow): {
  * @param timeoutMs - Timeout in milliseconds (default: 90000)
  * @param requestId - Optional request ID for cancellation support
  * @param workspaceRoot - The workspace root path for CLI execution
+ * @param model - Claude model to use (default: 'sonnet')
  * @returns SubAgentFlow refinement result
  */
 export async function refineSubAgentFlow(
@@ -1090,7 +1100,8 @@ export async function refineSubAgentFlow(
   useSkills = true,
   timeoutMs = MAX_REFINEMENT_TIMEOUT_MS,
   requestId?: string,
-  workspaceRoot?: string
+  workspaceRoot?: string,
+  model: ClaudeModel = 'sonnet'
 ): Promise<SubAgentFlowRefinementResult> {
   const startTime = Date.now();
 
@@ -1183,7 +1194,13 @@ export async function refineSubAgentFlow(
     const promptSizeChars = prompt.length;
 
     // Step 3: Execute Claude Code CLI
-    const cliResult = await executeClaudeCodeCLI(prompt, timeoutMs, requestId, workspaceRoot);
+    const cliResult = await executeClaudeCodeCLI(
+      prompt,
+      timeoutMs,
+      requestId,
+      workspaceRoot,
+      model
+    );
 
     if (!cliResult.success || !cliResult.output) {
       // Record metrics for failed CLI execution

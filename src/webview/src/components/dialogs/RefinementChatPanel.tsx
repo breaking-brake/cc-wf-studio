@@ -84,6 +84,7 @@ export function RefinementChatPanel({
     setMessageSearchResults,
     isIndexReady,
     useCodebaseSearch,
+    selectedModel,
   } = useRefinementStore();
 
   const { activeWorkflow, updateWorkflow, subAgentFlows, updateSubAgentFlow, setNodes, setEdges } =
@@ -237,7 +238,8 @@ export function RefinementChatPanel({
           conversationHistory,
           requestId,
           useSkills,
-          timeoutSeconds * 1000
+          timeoutSeconds * 1000,
+          selectedModel
         );
 
         if (result.type === 'success') {
@@ -335,7 +337,8 @@ export function RefinementChatPanel({
           requestId,
           useSkills,
           timeoutSeconds * 1000,
-          onProgress
+          onProgress,
+          selectedModel
         );
 
         if (result.type === 'success') {
@@ -453,7 +456,8 @@ export function RefinementChatPanel({
           conversationHistory,
           requestId,
           useSkills,
-          timeoutSeconds * 1000
+          timeoutSeconds * 1000,
+          selectedModel
         );
 
         if (result.type === 'success') {
@@ -526,7 +530,8 @@ export function RefinementChatPanel({
           requestId,
           useSkills,
           timeoutSeconds * 1000,
-          onProgress
+          onProgress,
+          selectedModel
         );
 
         if (result.type === 'success') {

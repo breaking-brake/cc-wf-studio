@@ -10,6 +10,7 @@
 
 import type { ChildProcess } from 'node:child_process';
 import nanoSpawn from 'nano-spawn';
+import type { ClaudeModel } from '../../shared/types/messages';
 import { log } from '../extension';
 
 /**
@@ -67,25 +68,40 @@ export interface ClaudeCodeExecutionResult {
 }
 
 /**
+ * Map ClaudeModel type to Claude CLI model alias
+ * See: https://code.claude.com/docs/en/model-config.md
+ */
+function getCliModelName(model: ClaudeModel): string {
+  // Claude CLI accepts model aliases: 'sonnet', 'opus', 'haiku'
+  return model;
+}
+
+/**
  * Execute Claude Code CLI with a prompt and return the output
  *
  * @param prompt - The prompt to send to Claude Code CLI
  * @param timeoutMs - Timeout in milliseconds (default: 60000)
  * @param requestId - Optional request ID for cancellation support
  * @param workingDirectory - Working directory for CLI execution (defaults to current directory)
+ * @param model - Claude model to use (default: 'sonnet')
  * @returns Execution result with success status and output/error
  */
 export async function executeClaudeCodeCLI(
   prompt: string,
   timeoutMs = 60000,
   requestId?: string,
-  workingDirectory?: string
+  workingDirectory?: string,
+  model: ClaudeModel = 'sonnet'
 ): Promise<ClaudeCodeExecutionResult> {
   const startTime = Date.now();
+
+  const modelName = getCliModelName(model);
 
   log('INFO', 'Starting Claude Code CLI execution', {
     promptLength: prompt.length,
     timeoutMs,
+    model,
+    modelName,
     cwd: workingDirectory ?? process.cwd(),
   });
 
@@ -93,7 +109,7 @@ export async function executeClaudeCodeCLI(
     // Spawn Claude Code CLI process using nano-spawn (cross-platform compatible)
     // Use stdin for prompt instead of -p argument to avoid Windows command line length limits
     // Use npx to ensure cross-platform compatibility (Windows PATH issues with global npm installs)
-    const subprocess = spawn('npx', ['claude', '-p', '-'], {
+    const subprocess = spawn('npx', ['claude', '-p', '-', '--model', modelName], {
       cwd: workingDirectory,
       timeout: timeoutMs,
       stdin: { string: prompt },
@@ -369,6 +385,7 @@ export type StreamingProgressCallback = (
  * @param timeoutMs - Timeout in milliseconds (default: 60000)
  * @param requestId - Optional request ID for cancellation support
  * @param workingDirectory - Working directory for CLI execution
+ * @param model - Claude model to use (default: 'sonnet')
  * @returns Execution result with success status and output/error
  */
 export async function executeClaudeCodeCLIStreaming(
@@ -376,14 +393,19 @@ export async function executeClaudeCodeCLIStreaming(
   onProgress: StreamingProgressCallback,
   timeoutMs = 60000,
   requestId?: string,
-  workingDirectory?: string
+  workingDirectory?: string,
+  model: ClaudeModel = 'sonnet'
 ): Promise<ClaudeCodeExecutionResult> {
   const startTime = Date.now();
   let accumulated = '';
 
+  const modelName = getCliModelName(model);
+
   log('INFO', 'Starting Claude Code CLI streaming execution', {
     promptLength: prompt.length,
     timeoutMs,
+    model,
+    modelName,
     cwd: workingDirectory ?? process.cwd(),
   });
 
@@ -392,7 +414,7 @@ export async function executeClaudeCodeCLIStreaming(
     // Note: --verbose is required when using --output-format=stream-json with -p (print mode)
     const subprocess = spawn(
       'npx',
-      ['claude', '-p', '-', '--output-format', 'stream-json', '--verbose'],
+      ['claude', '-p', '-', '--output-format', 'stream-json', '--verbose', '--model', modelName],
       {
         cwd: workingDirectory,
         timeout: timeoutMs,
@@ -477,6 +499,10 @@ export async function executeClaudeCodeCLIStreaming(
 
               // Handle text content
               if (content.type === 'text' && content.text) {
+                // Add separator between text chunks for better readability
+                if (accumulated.length > 0 && !accumulated.endsWith('\n')) {
+                  accumulated += '\n\n';
+                }
                 accumulated += content.text;
 
                 // Check if accumulated text looks like JSON response
