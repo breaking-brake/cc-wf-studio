@@ -2,7 +2,7 @@
  * Indeterminate Progress Bar Component
  *
  * Reusable indeterminate (infinite) progress bar for loading states.
- * Used across MCP server/tool loading operations.
+ * Used across MCP server/tool loading operations and AI refinement with unlimited timeout.
  *
  * @example
  * ```tsx
@@ -10,23 +10,27 @@
  * ```
  */
 
+import { useResponsiveFonts } from '../../contexts/ResponsiveFontContext';
+
 interface IndeterminateProgressBarProps {
   /** Label text above progress bar */
   label: string;
 }
 
 export function IndeterminateProgressBar({ label }: IndeterminateProgressBarProps) {
+  const fontSizes = useResponsiveFonts();
+
   return (
     <div
       style={{
-        padding: '16px',
+        marginTop: '8px',
       }}
     >
       {/* Loading label */}
       <div
         style={{
           marginBottom: '6px',
-          fontSize: '11px',
+          fontSize: `${fontSizes.small}px`,
           color: 'var(--vscode-descriptionForeground)',
           fontStyle: 'italic',
         }}

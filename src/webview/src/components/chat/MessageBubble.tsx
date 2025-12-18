@@ -14,6 +14,7 @@ import { useTranslation } from '../../i18n/i18n-context';
 import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
 import { useRefinementStore } from '../../stores/refinement-store';
 import { getErrorMessageInfo } from '../../utils/error-messages';
+import { IndeterminateProgressBar } from '../common/IndeterminateProgressBar';
 import { CodebaseSearchResults } from './CodebaseSearchResults';
 import { ProgressBar } from './ProgressBar';
 
@@ -131,13 +132,16 @@ export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
         )}
 
         {/* Loading state */}
-        {isLoading && (
-          <ProgressBar
-            isProcessing={true}
-            label={t('refinement.aiProcessing')}
-            maxSeconds={timeoutSeconds}
-          />
-        )}
+        {isLoading &&
+          (timeoutSeconds === 0 ? (
+            <IndeterminateProgressBar label={t('refinement.aiProcessing')} />
+          ) : (
+            <ProgressBar
+              isProcessing={true}
+              label={t('refinement.aiProcessing')}
+              maxSeconds={timeoutSeconds}
+            />
+          ))}
 
         {/* Issue #265: Codebase search results (AI messages only) */}
         {searchResults && searchResults.results.length > 0 && !isLoading && !isError && (

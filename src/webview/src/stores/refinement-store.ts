@@ -17,7 +17,7 @@ const MODEL_STORAGE_KEY = 'cc-wf-studio.refinement.selectedModel';
 
 /**
  * Load selected model from localStorage
- * Returns 'sonnet' as default if no value is stored or value is invalid
+ * Returns 'haiku' as default if no value is stored or value is invalid
  */
 function loadModelFromStorage(): ClaudeModel {
   try {
@@ -28,7 +28,7 @@ function loadModelFromStorage(): ClaudeModel {
   } catch {
     // localStorage may not be available in some contexts
   }
-  return 'sonnet'; // Default
+  return 'haiku'; // Default
 }
 
 /**
@@ -161,8 +161,8 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   currentInput: '',
   currentRequestId: null,
   useSkills: true,
-  timeoutSeconds: 90, // Default timeout: 90 seconds (matches VSCode settings default)
-  selectedModel: loadModelFromStorage(), // Load from localStorage, default: 'sonnet'
+  timeoutSeconds: 0, // Default timeout: Unlimited (0 = no timeout)
+  selectedModel: loadModelFromStorage(), // Load from localStorage, default: 'haiku'
 
   // SubAgentFlow Refinement Initial State
   targetType: 'workflow',

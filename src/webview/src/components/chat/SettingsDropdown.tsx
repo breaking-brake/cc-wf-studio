@@ -18,6 +18,7 @@ import { useRefinementStore } from '../../stores/refinement-store';
 import { CodebaseSettingsDialog } from '../dialogs/CodebaseSettingsDialog';
 
 const TIMEOUT_PRESETS = [
+  { seconds: 0, label: 'Unlimited' },
   { seconds: 30, label: '30s' },
   { seconds: 60, label: '60s' },
   { seconds: 90, label: '90s' },
