@@ -22,7 +22,12 @@ import {
   isMetricsCollectionEnabled,
   recordMetrics,
 } from './ai-metrics-service';
-import { executeClaudeCodeCLI, parseClaudeCodeOutput } from './claude-code-service';
+import {
+  executeClaudeCodeCLI,
+  executeClaudeCodeCLIStreaming,
+  parseClaudeCodeOutput,
+  type StreamingProgressCallback,
+} from './claude-code-service';
 import { loadWorkflowSchemaByFormat, type SchemaLoadResult } from './schema-loader-service';
 import { filterSkillsByRelevance, type SkillRelevanceScore } from './skill-relevance-matcher';
 import { scanAllSkills } from './skill-service';
@@ -316,6 +321,7 @@ const MAX_REFINEMENT_TIMEOUT_MS = 90000;
  * @param timeoutMs - Timeout in milliseconds (default: 90000, can be configured via settings)
  * @param requestId - Optional request ID for cancellation support
  * @param workspaceRoot - The workspace root path for CLI execution
+ * @param onProgress - Optional callback for streaming progress updates
  * @returns Refinement result with success status and refined workflow or error
  */
 export async function refineWorkflow(
@@ -326,7 +332,8 @@ export async function refineWorkflow(
   useSkills = true,
   timeoutMs = MAX_REFINEMENT_TIMEOUT_MS,
   requestId?: string,
-  workspaceRoot?: string
+  workspaceRoot?: string,
+  onProgress?: StreamingProgressCallback
 ): Promise<RefinementResult> {
   const startTime = Date.now();
 
@@ -438,8 +445,10 @@ export async function refineWorkflow(
     // Record prompt size for metrics
     const promptSizeChars = prompt.length;
 
-    // Step 4: Execute Claude Code CLI
-    const cliResult = await executeClaudeCodeCLI(prompt, timeoutMs, requestId, workspaceRoot);
+    // Step 4: Execute Claude Code CLI (streaming if onProgress callback provided)
+    const cliResult = onProgress
+      ? await executeClaudeCodeCLIStreaming(prompt, onProgress, timeoutMs, requestId, workspaceRoot)
+      : await executeClaudeCodeCLI(prompt, timeoutMs, requestId, workspaceRoot);
 
     if (!cliResult.success || !cliResult.output) {
       // CLI execution failed - record metrics

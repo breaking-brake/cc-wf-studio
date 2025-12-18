@@ -8,6 +8,7 @@
 import type {
   ExtensionMessage,
   RefinementClarificationPayload,
+  RefinementProgressPayload,
   RefinementSuccessPayload,
   RefineWorkflowPayload,
   SubAgentFlowRefinementSuccessPayload,
@@ -44,6 +45,11 @@ export type SubAgentFlowRefinementResult =
   | { type: 'clarification'; payload: RefinementClarificationPayload };
 
 /**
+ * Progress callback for streaming refinement updates
+ */
+export type RefinementProgressCallback = (payload: RefinementProgressPayload) => void;
+
+/**
  * Refine a workflow using AI based on user feedback
  *
  * @param workflowId - ID of the workflow being refined
@@ -53,6 +59,7 @@ export type SubAgentFlowRefinementResult =
  * @param requestId - Request ID for this refinement
  * @param useSkills - Whether to include skills in refinement (default: true)
  * @param serverTimeoutMs - Server-side timeout in milliseconds (default: undefined, uses settings)
+ * @param onProgress - Optional callback for streaming progress updates
  * @returns Promise that resolves to the refinement result (success or clarification)
  * @throws {WorkflowRefinementError} If refinement fails
  */
@@ -63,7 +70,8 @@ export function refineWorkflow(
   conversationHistory: ConversationHistory,
   requestId: string,
   useSkills = true,
-  serverTimeoutMs?: number
+  serverTimeoutMs?: number,
+  onProgress?: RefinementProgressCallback
 ): Promise<RefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
@@ -71,6 +79,13 @@ export function refineWorkflow(
       const message: ExtensionMessage = event.data;
 
       if (message.requestId === requestId) {
+        // Handle streaming progress (don't remove listener)
+        if (message.type === 'REFINEMENT_PROGRESS' && message.payload && onProgress) {
+          onProgress(message.payload);
+          return; // Keep listening for more messages
+        }
+
+        // Handle completion messages (remove listener)
         window.removeEventListener('message', handler);
 
         if (message.type === 'REFINEMENT_SUCCESS' && message.payload) {

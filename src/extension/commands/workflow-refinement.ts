@@ -13,6 +13,7 @@ import type {
   RefinementCancelledPayload,
   RefinementClarificationPayload,
   RefinementFailedPayload,
+  RefinementProgressPayload,
   RefinementSuccessPayload,
   RefineWorkflowPayload,
   SubAgentFlowRefinementSuccessPayload,
@@ -92,7 +93,16 @@ export async function handleRefineWorkflow(
       return;
     }
 
-    // Execute refinement
+    // Create streaming progress callback
+    const onProgress = (chunk: string, accumulated: string) => {
+      sendRefinementProgress(webview, requestId, {
+        chunk,
+        accumulatedText: accumulated,
+        timestamp: new Date().toISOString(),
+      });
+    };
+
+    // Execute refinement with streaming
     const result = await refineWorkflow(
       currentWorkflow,
       conversationHistory,
@@ -101,7 +111,8 @@ export async function handleRefineWorkflow(
       useSkills,
       effectiveTimeoutMs,
       requestId,
-      workspaceRoot
+      workspaceRoot,
+      onProgress
     );
 
     // Check if AI is asking for clarification
@@ -538,6 +549,21 @@ export async function handleClearConversation(
       workflowId,
     });
   }
+}
+
+/**
+ * Send refinement progress message to Webview (streaming)
+ */
+function sendRefinementProgress(
+  webview: vscode.Webview,
+  requestId: string,
+  payload: RefinementProgressPayload
+): void {
+  webview.postMessage({
+    type: 'REFINEMENT_PROGRESS',
+    requestId,
+    payload,
+  });
 }
 
 /**

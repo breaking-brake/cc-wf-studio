@@ -24,6 +24,7 @@ import {
 } from '../../services/codebase-search-service';
 import {
   clearConversation,
+  type RefinementProgressCallback,
   refineSubAgentFlow,
   refineWorkflow,
   WorkflowRefinementError,
@@ -287,7 +288,12 @@ export function RefinementChatPanel({
           }
         }
       } else {
-        // Main workflow refinement
+        // Main workflow refinement with streaming progress
+        const onProgress: RefinementProgressCallback = (payload) => {
+          // Update message content with accumulated text for real-time display
+          updateMessageContent(aiMessageId, payload.accumulatedText);
+        };
+
         const result = await refineWorkflow(
           activeWorkflow.id,
           messageToSend,
@@ -295,7 +301,8 @@ export function RefinementChatPanel({
           conversationHistory,
           requestId,
           useSkills,
-          timeoutSeconds * 1000
+          timeoutSeconds * 1000,
+          onProgress
         );
 
         if (result.type === 'success') {
@@ -422,7 +429,11 @@ export function RefinementChatPanel({
           handleRefinementSuccess(aiMessage, updatedConversationHistory);
         }
       } else {
-        // Main workflow retry
+        // Main workflow retry with streaming progress
+        const onProgress: RefinementProgressCallback = (payload) => {
+          updateMessageContent(aiMessageId, payload.accumulatedText);
+        };
+
         const result = await refineWorkflow(
           activeWorkflow.id,
           userMessage.content,
@@ -430,7 +441,8 @@ export function RefinementChatPanel({
           conversationHistory,
           requestId,
           useSkills,
-          timeoutSeconds * 1000
+          timeoutSeconds * 1000,
+          onProgress
         );
 
         if (result.type === 'success') {

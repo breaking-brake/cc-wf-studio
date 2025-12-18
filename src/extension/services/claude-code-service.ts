@@ -329,6 +329,194 @@ export function cancelGeneration(requestId: string): {
 }
 
 /**
+ * Progress callback for streaming CLI execution
+ */
+export type StreamingProgressCallback = (chunk: string, accumulated: string) => void;
+
+/**
+ * Execute Claude Code CLI with streaming output
+ *
+ * Uses --output-format stream-json to receive real-time output from Claude Code CLI.
+ * The onProgress callback is invoked for each text chunk received.
+ *
+ * @param prompt - The prompt to send to Claude Code CLI
+ * @param onProgress - Callback invoked with each text chunk and accumulated text
+ * @param timeoutMs - Timeout in milliseconds (default: 60000)
+ * @param requestId - Optional request ID for cancellation support
+ * @param workingDirectory - Working directory for CLI execution
+ * @returns Execution result with success status and output/error
+ */
+export async function executeClaudeCodeCLIStreaming(
+  prompt: string,
+  onProgress: StreamingProgressCallback,
+  timeoutMs = 60000,
+  requestId?: string,
+  workingDirectory?: string
+): Promise<ClaudeCodeExecutionResult> {
+  const startTime = Date.now();
+  let accumulated = '';
+
+  log('INFO', 'Starting Claude Code CLI streaming execution', {
+    promptLength: prompt.length,
+    timeoutMs,
+    cwd: workingDirectory ?? process.cwd(),
+  });
+
+  try {
+    // Spawn Claude Code CLI with streaming output format
+    // Note: --verbose is required when using --output-format=stream-json with -p (print mode)
+    const subprocess = spawn('npx', ['claude', '-p', '-', '--output-format', 'stream-json', '--verbose'], {
+      cwd: workingDirectory,
+      timeout: timeoutMs,
+      stdin: { string: prompt },
+      stdout: 'pipe',
+      stderr: 'pipe',
+    });
+
+    // Register as active process if requestId is provided
+    if (requestId) {
+      activeProcesses.set(requestId, { subprocess, startTime });
+      log('INFO', `Registered active streaming process for requestId: ${requestId}`, {
+        pid: subprocess.nodeChildProcess.pid,
+      });
+    }
+
+    // Process streaming output using AsyncIterable
+    for await (const chunk of subprocess.stdout) {
+      // Split by newlines (JSON Lines format)
+      const lines = chunk.split('\n').filter((line: string) => line.trim());
+
+      for (const line of lines) {
+        try {
+          const parsed = JSON.parse(line);
+
+          // Extract text content from assistant messages
+          if (parsed.type === 'assistant' && parsed.message?.content) {
+            for (const content of parsed.message.content) {
+              if (content.type === 'text' && content.text) {
+                accumulated += content.text;
+                onProgress(content.text, accumulated);
+              }
+            }
+          }
+        } catch {
+          // Ignore JSON parse errors (may be partial chunks)
+          log('DEBUG', 'Skipping non-JSON line in streaming output', {
+            lineLength: line.length,
+          });
+        }
+      }
+    }
+
+    // Wait for subprocess to complete
+    const result = await subprocess;
+
+    // Remove from active processes
+    if (requestId) {
+      activeProcesses.delete(requestId);
+      log('INFO', `Removed active streaming process (success) for requestId: ${requestId}`);
+    }
+
+    const executionTimeMs = Date.now() - startTime;
+
+    log('INFO', 'Claude Code CLI streaming execution succeeded', {
+      executionTimeMs,
+      accumulatedLength: accumulated.length,
+      rawOutputLength: result.stdout.length,
+    });
+
+    return {
+      success: true,
+      output: accumulated || result.stdout.trim(),
+      executionTimeMs,
+    };
+  } catch (error) {
+    // Remove from active processes
+    if (requestId) {
+      activeProcesses.delete(requestId);
+      log('INFO', `Removed active streaming process (error) for requestId: ${requestId}`);
+    }
+
+    const executionTimeMs = Date.now() - startTime;
+
+    log('ERROR', 'Claude Code CLI streaming error caught', {
+      errorType: typeof error,
+      errorConstructor: error?.constructor?.name,
+      executionTimeMs,
+      accumulatedLength: accumulated.length,
+      // Add detailed error info for debugging
+      exitCode: isSubprocessError(error) ? error.exitCode : undefined,
+      stderr: isSubprocessError(error) ? error.stderr?.substring(0, 500) : undefined,
+      stdout: isSubprocessError(error) ? error.stdout?.substring(0, 500) : undefined,
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
+
+    // Handle SubprocessError from nano-spawn
+    if (isSubprocessError(error)) {
+      const isTimeout =
+        (error.isTerminated && error.signalName === 'SIGTERM') || error.exitCode === 143;
+
+      if (isTimeout) {
+        log('WARN', 'Claude Code CLI streaming execution timed out', {
+          timeoutMs,
+          executionTimeMs,
+          exitCode: error.exitCode,
+          accumulatedLength: accumulated.length,
+        });
+
+        return {
+          success: false,
+          output: accumulated, // Return accumulated content even on timeout
+          error: {
+            code: 'TIMEOUT',
+            message: `AI generation timed out after ${Math.floor(timeoutMs / 1000)} seconds. Try simplifying your description.`,
+            details: `Timeout after ${timeoutMs}ms`,
+          },
+          executionTimeMs,
+        };
+      }
+
+      // Command not found (ENOENT)
+      if (error.code === 'ENOENT') {
+        return {
+          success: false,
+          error: {
+            code: 'COMMAND_NOT_FOUND',
+            message: 'Cannot connect to Claude Code - please ensure it is installed and running',
+            details: error.message,
+          },
+          executionTimeMs,
+        };
+      }
+
+      // Non-zero exit code
+      return {
+        success: false,
+        output: accumulated, // Return accumulated content even on error
+        error: {
+          code: 'UNKNOWN_ERROR',
+          message: 'Generation failed - please try again or rephrase your description',
+          details: `Exit code: ${error.exitCode ?? 'unknown'}, stderr: ${error.stderr ?? 'none'}`,
+        },
+        executionTimeMs,
+      };
+    }
+
+    // Unknown error type
+    return {
+      success: false,
+      output: accumulated,
+      error: {
+        code: 'UNKNOWN_ERROR',
+        message: 'An unexpected error occurred. Please try again.',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      executionTimeMs,
+    };
+  }
+}
+
+/**
  * Cancel an active refinement process
  *
  * @param requestId - Request ID of the refinement to cancel

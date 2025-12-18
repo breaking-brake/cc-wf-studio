@@ -285,6 +285,15 @@ export interface RefinementClarificationPayload {
   timestamp: string; // ISO 8601
 }
 
+export interface RefinementProgressPayload {
+  /** New text chunk from streaming output */
+  chunk: string;
+  /** Accumulated text (full content so far) */
+  accumulatedText: string;
+  /** Progress timestamp */
+  timestamp: string; // ISO 8601
+}
+
 // ============================================================================
 // SubAgentFlow Refinement Payloads
 // ============================================================================
@@ -592,6 +601,7 @@ export type ExtensionMessage =
   | Message<RefinementFailedPayload, 'REFINEMENT_FAILED'>
   | Message<RefinementCancelledPayload, 'REFINEMENT_CANCELLED'>
   | Message<RefinementClarificationPayload, 'REFINEMENT_CLARIFICATION'>
+  | Message<RefinementProgressPayload, 'REFINEMENT_PROGRESS'>
   | Message<ConversationClearedPayload, 'CONVERSATION_CLEARED'>
   | Message<SubAgentFlowRefinementSuccessPayload, 'SUBAGENTFLOW_REFINEMENT_SUCCESS'>
   | Message<McpServersResultPayload, 'MCP_SERVERS_RESULT'>
