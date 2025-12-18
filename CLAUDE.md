@@ -261,40 +261,6 @@ sequenceDiagram
     Toolbar->>User: Show notification
 ```
 
-### AI ワークフロー生成フロー
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant Dialog as AiGenerationDialog.tsx
-    participant Svc as ai-generation-service.ts
-    participant Cmd as ai-generation.ts
-    participant Schema as schema-loader-service.ts
-    participant Skill as skill-service.ts
-    participant CLI as claude-code-service.ts
-    participant Store as workflow-store.ts
-
-    User->>Dialog: Enter description
-    User->>Dialog: Click Generate
-    Dialog->>Svc: generateWorkflow(description)
-    Svc->>Cmd: postMessage(GENERATE_WORKFLOW)
-
-    par Parallel Loading
-        Cmd->>Schema: loadWorkflowSchema()
-        Cmd->>Skill: scanAllSkills()
-    end
-
-    Cmd->>Cmd: filterSkillsByRelevance()
-    Cmd->>Cmd: constructPrompt()
-    Cmd->>CLI: executeClaudeCodeCLI()
-    CLI-->>Cmd: JSON response
-    Cmd->>Cmd: parseAndValidate()
-    Cmd->>Svc: postMessage(GENERATION_SUCCESS)
-    Svc->>Store: addGeneratedWorkflow()
-    Store->>Dialog: Update canvas
-    Dialog->>User: Show success
-```
-
 ### AI ワークフロー改善フロー (Refinement)
 
 ```mermaid
@@ -308,14 +274,27 @@ sequenceDiagram
 
     User->>Panel: Enter refinement request
     Panel->>Store: addMessage(userMessage)
+    Panel->>Store: addLoadingAiMessage()
     Panel->>Cmd: postMessage(REFINE_WORKFLOW)
-    Cmd->>Svc: refineWorkflow(workflow, history)
+    Cmd->>Svc: refineWorkflow(workflow, history, onProgress)
     Svc->>Svc: buildPromptWithHistory()
-    Svc->>CLI: executeClaudeCodeCLI()
+    Svc->>CLI: executeClaudeCodeCLIStreaming()
+
+    Note over CLI,Panel: Streaming Phase
+    loop For each chunk
+        CLI->>Svc: onProgress(chunk)
+        Svc->>Cmd: Parse chunk & extract text
+        Cmd->>Panel: postMessage(REFINEMENT_PROGRESS)
+        Panel->>Store: updateMessageContent()
+        Store->>Panel: Update UI in real-time
+        Panel->>User: Display AI response progressively
+    end
+
     CLI-->>Svc: Refined workflow JSON
     Svc->>Svc: validateRefinedWorkflow()
     Svc-->>Cmd: result
-    Cmd->>Store: postMessage(REFINEMENT_SUCCESS)
+    Cmd->>Panel: postMessage(REFINEMENT_SUCCESS)
+    Panel->>Store: updateWorkflow() & updateMessageContent()
     Store->>Store: updateConversationHistory()
     Store->>Panel: Update canvas & chat
     Panel->>User: Show refined workflow
