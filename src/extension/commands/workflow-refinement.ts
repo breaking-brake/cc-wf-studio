@@ -105,7 +105,7 @@ export async function handleRefineWorkflow(
       sendRefinementProgress(webview, requestId, {
         chunk,
         accumulatedText: displayText,
-        explanatoryText: explanatoryText || undefined,
+        explanatoryText,
         timestamp: new Date().toISOString(),
       });
     };
