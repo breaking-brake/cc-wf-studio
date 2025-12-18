@@ -251,9 +251,10 @@ function isSubprocessError(error: unknown): error is SubprocessError {
 /**
  * Parse JSON output from Claude Code CLI
  *
- * Handles two output formats:
+ * Handles multiple output formats:
  * 1. Markdown-wrapped: ```json { ... } ```
  * 2. Raw JSON: { ... }
+ * 3. Text with embedded JSON block: "Some text...\n```json\n{...}\n```"
  *
  * Note: Uses string position-based extraction (not regex) to handle cases
  * where the JSON content itself contains markdown code blocks.
@@ -274,7 +275,24 @@ export function parseClaudeCodeOutput(output: string): unknown {
       return JSON.parse(jsonContent);
     }
 
-    // Strategy 2: Try parsing as-is
+    // Strategy 2: Try parsing as-is (raw JSON)
+    if (trimmed.startsWith('{')) {
+      return JSON.parse(trimmed);
+    }
+
+    // Strategy 3: Find ```json block within text (e.g., explanation + JSON)
+    const jsonBlockStart = trimmed.indexOf('```json');
+    if (jsonBlockStart !== -1) {
+      // Find the closing ``` after the json block
+      const contentStart = jsonBlockStart + 7; // Skip ```json
+      const jsonBlockEnd = trimmed.lastIndexOf('```');
+      if (jsonBlockEnd > contentStart) {
+        const jsonContent = trimmed.slice(contentStart, jsonBlockEnd).trim();
+        return JSON.parse(jsonContent);
+      }
+    }
+
+    // Strategy 4: Try parsing as-is (fallback)
     return JSON.parse(trimmed);
   } catch (_error) {
     // If parsing fails, return null
@@ -330,8 +348,17 @@ export function cancelGeneration(requestId: string): {
 
 /**
  * Progress callback for streaming CLI execution
+ * @param chunk - Current text chunk
+ * @param accumulated - Accumulated display text
+ * @param explanatoryText - Explanatory text (non-JSON)
+ * @param action - 'new' to add a new message bubble, 'update' to update current bubble
  */
-export type StreamingProgressCallback = (chunk: string, accumulated: string) => void;
+export type StreamingProgressCallback = (
+  chunk: string,
+  accumulated: string,
+  explanatoryText: string,
+  action: 'new' | 'update'
+) => void;
 
 /**
  * Execute Claude Code CLI with streaming output
@@ -365,13 +392,17 @@ export async function executeClaudeCodeCLIStreaming(
   try {
     // Spawn Claude Code CLI with streaming output format
     // Note: --verbose is required when using --output-format=stream-json with -p (print mode)
-    const subprocess = spawn('npx', ['claude', '-p', '-', '--output-format', 'stream-json', '--verbose'], {
-      cwd: workingDirectory,
-      timeout: timeoutMs,
-      stdin: { string: prompt },
-      stdout: 'pipe',
-      stderr: 'pipe',
-    });
+    const subprocess = spawn(
+      'npx',
+      ['claude', '-p', '-', '--output-format', 'stream-json', '--verbose'],
+      {
+        cwd: workingDirectory,
+        timeout: timeoutMs,
+        stdin: { string: prompt },
+        stdout: 'pipe',
+        stderr: 'pipe',
+      }
+    );
 
     // Register as active process if requestId is provided
     if (requestId) {
@@ -380,6 +411,14 @@ export async function executeClaudeCodeCLIStreaming(
         pid: subprocess.nodeChildProcess.pid,
       });
     }
+
+    // Track explanatory text (non-JSON text from AI)
+    let explanatoryText = '';
+    // Track last content type to determine action for new messages
+    // 'tool_use' -> next text should be 'new' message
+    // 'text' -> next text should be 'update' (continue same message)
+    // null -> first message should be 'new'
+    let lastContentType: 'text' | 'tool_use' | null = null;
 
     // Process streaming output using AsyncIterable
     for await (const chunk of subprocess.stdout) {
@@ -390,12 +429,126 @@ export async function executeClaudeCodeCLIStreaming(
         try {
           const parsed = JSON.parse(line);
 
+          // Log parsed streaming JSON for debugging
+          log('DEBUG', 'Streaming JSON line parsed', {
+            type: parsed.type,
+            hasMessage: !!parsed.message,
+            contentTypes: parsed.message?.content?.map((c: { type: string }) => c.type),
+            // Show content preview (truncated to 500 chars)
+            contentPreview:
+              parsed.type === 'assistant' && parsed.message?.content
+                ? parsed.message.content
+                    .filter((c: { type: string }) => c.type === 'text')
+                    .map((c: { text: string }) => c.text?.substring(0, 200))
+                    .join('')
+                : JSON.stringify(parsed).substring(0, 500),
+          });
+
           // Extract text content from assistant messages
           if (parsed.type === 'assistant' && parsed.message?.content) {
             for (const content of parsed.message.content) {
+              // Handle tool_use content - show tool name and relevant details
+              if (content.type === 'tool_use' && content.name) {
+                // Extract meaningful description from tool input
+                const toolName = content.name;
+                const input = content.input || {};
+                let description = '';
+
+                // Extract relevant info based on tool type
+                if (toolName === 'Read' && input.file_path) {
+                  description = input.file_path;
+                } else if (toolName === 'Bash' && input.command) {
+                  description = input.command.substring(0, 100);
+                } else if (toolName === 'Task' && input.description) {
+                  description = input.description;
+                } else if (toolName === 'Glob' && input.pattern) {
+                  description = input.pattern;
+                } else if (toolName === 'Grep' && input.pattern) {
+                  description = input.pattern;
+                } else if (toolName === 'Edit' && input.file_path) {
+                  description = input.file_path;
+                } else if (toolName === 'Write' && input.file_path) {
+                  description = input.file_path;
+                }
+
+                const toolLine = description ? `${toolName}: ${description}` : toolName;
+
+                // Combine explanatory text with tool usage
+                const displayText = explanatoryText
+                  ? `${explanatoryText}\n\n${toolLine}`
+                  : toolLine;
+
+                // Tool use always updates current message (doesn't create new bubble)
+                lastContentType = 'tool_use';
+                onProgress(toolLine, displayText, explanatoryText, 'update');
+              }
+              // Handle text content
               if (content.type === 'text' && content.text) {
                 accumulated += content.text;
-                onProgress(content.text, accumulated);
+
+                // Check if accumulated text looks like JSON response
+                const trimmedAccumulated = accumulated.trim();
+                let strippedText = trimmedAccumulated;
+
+                // Strip markdown code block markers
+                if (strippedText.startsWith('```json')) {
+                  strippedText = strippedText.slice(7).trimStart();
+                } else if (strippedText.startsWith('```')) {
+                  strippedText = strippedText.slice(3).trimStart();
+                }
+                if (strippedText.endsWith('```')) {
+                  strippedText = strippedText.slice(0, -3).trimEnd();
+                }
+
+                // Try to parse as JSON - if successful, skip progress (let success handler show it)
+                try {
+                  const jsonResponse = JSON.parse(strippedText);
+                  log('DEBUG', 'JSON parse succeeded in text content handler', {
+                    hasStatus: !!jsonResponse.status,
+                    hasMessage: !!jsonResponse.message,
+                    hasValues: !!jsonResponse.values,
+                  });
+                  if (jsonResponse.status && jsonResponse.message && jsonResponse.values) {
+                    // Final complete response - skip progress, let success handler display it
+                  } else if (jsonResponse.message && typeof jsonResponse.message === 'string') {
+                    // Partial response with message - skip to avoid confusion
+                  }
+                  // JSON parsed successfully - don't call onProgress for JSON content
+                } catch {
+                  // JSON parsing failed - this is explanatory text or incomplete JSON
+                  // Only show if it doesn't look like JSON being built
+                  const looksLikeJsonStart =
+                    strippedText.startsWith('{') || trimmedAccumulated.startsWith('```');
+
+                  log('DEBUG', 'JSON parse failed in text content handler', {
+                    looksLikeJsonStart,
+                    strippedTextStartsWith: strippedText.substring(0, 20),
+                    trimmedAccumulatedStartsWith: trimmedAccumulated.substring(0, 20),
+                  });
+
+                  if (!looksLikeJsonStart) {
+                    // This is explanatory text from AI
+                    // Check if text contains ```json block and extract text before it
+                    const jsonBlockIndex = trimmedAccumulated.indexOf('```json');
+                    if (jsonBlockIndex !== -1) {
+                      // Extract only the explanatory text before the JSON block
+                      explanatoryText = trimmedAccumulated.slice(0, jsonBlockIndex).trim();
+                      log('DEBUG', 'Extracted explanatory text before ```json', {
+                        explanatoryTextLength: explanatoryText.length,
+                        explanatoryTextPreview: explanatoryText.substring(0, 200),
+                      });
+                    } else {
+                      explanatoryText = trimmedAccumulated;
+                    }
+
+                    // Text after tool_use or first text -> new message bubble
+                    // Text continuing from previous text -> update current bubble
+                    const action =
+                      lastContentType === 'tool_use' || lastContentType === null ? 'new' : 'update';
+                    lastContentType = 'text';
+                    onProgress(content.text, explanatoryText, explanatoryText, action);
+                  }
+                }
               }
             }
           }

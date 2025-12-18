@@ -70,6 +70,7 @@ export function RefinementChatPanel({
     startProcessing,
     handleRefinementSuccess,
     handleRefinementFailed,
+    finishProcessing,
     addLoadingAiMessage,
     updateMessageLoadingState,
     updateMessageContent,
@@ -289,9 +290,31 @@ export function RefinementChatPanel({
         }
       } else {
         // Main workflow refinement with streaming progress
+        // Track current message ID (may change when new messages are added)
+        let currentAiMessageId = aiMessageId;
+        let latestExplanatoryText = '';
+        let isFirstProgress = true;
+
         const onProgress: RefinementProgressCallback = (payload) => {
-          // Update message content with accumulated text for real-time display
-          updateMessageContent(aiMessageId, payload.accumulatedText);
+          // Handle action type: 'new' creates new message bubble, 'update' updates current
+          if (payload.action === 'new' && !isFirstProgress) {
+            // Finalize current message (stop loading)
+            updateMessageLoadingState(currentAiMessageId, false);
+
+            // Create new message bubble for next content
+            currentAiMessageId = `ai-${Date.now()}-${Math.random()}`;
+            addLoadingAiMessage(currentAiMessageId);
+          }
+
+          isFirstProgress = false;
+
+          // Update current message content with accumulated text
+          updateMessageContent(currentAiMessageId, payload.accumulatedText);
+
+          // Track explanatory text (non-JSON text from AI)
+          if (payload.explanatoryText) {
+            latestExplanatoryText = payload.explanatoryText;
+          }
         };
 
         const result = await refineWorkflow(
@@ -307,37 +330,67 @@ export function RefinementChatPanel({
 
         if (result.type === 'success') {
           updateWorkflow(result.payload.refinedWorkflow);
-          updateMessageContent(aiMessageId, result.payload.aiMessage.content);
-          updateMessageLoadingState(aiMessageId, false);
-          handleRefinementSuccess(
-            result.payload.aiMessage,
-            result.payload.updatedConversationHistory
-          );
+
+          // Check if we have explanatory text to preserve
+          const explanatoryContent = result.payload.explanatoryText || latestExplanatoryText;
+
+          if (explanatoryContent) {
+            // Finalize current message with explanatory text
+            updateMessageContent(currentAiMessageId, explanatoryContent);
+            updateMessageLoadingState(currentAiMessageId, false);
+
+            // Add new message bubble for completion message
+            const completionMessageId = `ai-completion-${Date.now()}-${Math.random()}`;
+            addLoadingAiMessage(completionMessageId);
+            updateMessageContent(completionMessageId, result.payload.aiMessage.content);
+            updateMessageLoadingState(completionMessageId, false);
+
+            // Use finishProcessing to preserve frontend messages (don't overwrite with server history)
+            finishProcessing();
+          } else {
+            // No explanatory text, just show completion message
+            updateMessageContent(currentAiMessageId, result.payload.aiMessage.content);
+            updateMessageLoadingState(currentAiMessageId, false);
+
+            // Use server's conversation history when no explanatory text
+            handleRefinementSuccess(
+              result.payload.aiMessage,
+              result.payload.updatedConversationHistory
+            );
+          }
 
           // Issue #265: Perform codebase search after AI response
           if (explicitSearchQuery) {
-            await performCodebaseSearch(aiMessageId, explicitSearchQuery, true);
+            await performCodebaseSearch(currentAiMessageId, explicitSearchQuery, true);
           } else {
             const keywords = extractSearchKeywords(message);
             if (keywords.length > 0) {
-              await performCodebaseSearch(aiMessageId, keywords.join(' '), false);
+              await performCodebaseSearch(currentAiMessageId, keywords.join(' '), false);
             }
           }
         } else if (result.type === 'clarification') {
-          updateMessageContent(aiMessageId, result.payload.aiMessage.content);
-          updateMessageLoadingState(aiMessageId, false);
-          handleRefinementSuccess(
-            result.payload.aiMessage,
-            result.payload.updatedConversationHistory
-          );
+          // Use explanatoryText if available for clarification too
+          const clarificationContent = latestExplanatoryText || result.payload.aiMessage.content;
+          updateMessageContent(currentAiMessageId, clarificationContent);
+          updateMessageLoadingState(currentAiMessageId, false);
+
+          if (latestExplanatoryText) {
+            // Preserve frontend messages when explanatory text exists
+            finishProcessing();
+          } else {
+            handleRefinementSuccess(
+              result.payload.aiMessage,
+              result.payload.updatedConversationHistory
+            );
+          }
 
           // Issue #265: Perform codebase search after AI response
           if (explicitSearchQuery) {
-            await performCodebaseSearch(aiMessageId, explicitSearchQuery, true);
+            await performCodebaseSearch(currentAiMessageId, explicitSearchQuery, true);
           } else {
             const keywords = extractSearchKeywords(message);
             if (keywords.length > 0) {
-              await performCodebaseSearch(aiMessageId, keywords.join(' '), false);
+              await performCodebaseSearch(currentAiMessageId, keywords.join(' '), false);
             }
           }
         }
@@ -430,8 +483,30 @@ export function RefinementChatPanel({
         }
       } else {
         // Main workflow retry with streaming progress
+        // Track current message ID (may change when new messages are added)
+        let currentAiMessageId = aiMessageId;
+        let latestExplanatoryText = '';
+        let isFirstProgress = true;
+
         const onProgress: RefinementProgressCallback = (payload) => {
-          updateMessageContent(aiMessageId, payload.accumulatedText);
+          // Handle action type: 'new' creates new message bubble, 'update' updates current
+          if (payload.action === 'new' && !isFirstProgress) {
+            // Finalize current message (stop loading)
+            updateMessageLoadingState(currentAiMessageId, false);
+
+            // Create new message bubble for next content
+            currentAiMessageId = `ai-${Date.now()}-${Math.random()}`;
+            addLoadingAiMessage(currentAiMessageId);
+          }
+
+          isFirstProgress = false;
+
+          // Update current message content
+          updateMessageContent(currentAiMessageId, payload.accumulatedText);
+
+          if (payload.explanatoryText) {
+            latestExplanatoryText = payload.explanatoryText;
+          }
         };
 
         const result = await refineWorkflow(
@@ -447,19 +522,46 @@ export function RefinementChatPanel({
 
         if (result.type === 'success') {
           updateWorkflow(result.payload.refinedWorkflow);
-          updateMessageContent(aiMessageId, result.payload.aiMessage.content);
-          updateMessageLoadingState(aiMessageId, false);
-          handleRefinementSuccess(
-            result.payload.aiMessage,
-            result.payload.updatedConversationHistory
-          );
+
+          // Check if we have explanatory text to preserve
+          const explanatoryContent = result.payload.explanatoryText || latestExplanatoryText;
+
+          if (explanatoryContent) {
+            // Finalize current message with explanatory text
+            updateMessageContent(currentAiMessageId, explanatoryContent);
+            updateMessageLoadingState(currentAiMessageId, false);
+
+            // Add new message bubble for completion message
+            const completionMessageId = `ai-completion-${Date.now()}-${Math.random()}`;
+            addLoadingAiMessage(completionMessageId);
+            updateMessageContent(completionMessageId, result.payload.aiMessage.content);
+            updateMessageLoadingState(completionMessageId, false);
+
+            // Use finishProcessing to preserve frontend messages
+            finishProcessing();
+          } else {
+            // No explanatory text, just show completion message
+            updateMessageContent(currentAiMessageId, result.payload.aiMessage.content);
+            updateMessageLoadingState(currentAiMessageId, false);
+
+            handleRefinementSuccess(
+              result.payload.aiMessage,
+              result.payload.updatedConversationHistory
+            );
+          }
         } else if (result.type === 'clarification') {
-          updateMessageContent(aiMessageId, result.payload.aiMessage.content);
-          updateMessageLoadingState(aiMessageId, false);
-          handleRefinementSuccess(
-            result.payload.aiMessage,
-            result.payload.updatedConversationHistory
-          );
+          const clarificationContent = latestExplanatoryText || result.payload.aiMessage.content;
+          updateMessageContent(currentAiMessageId, clarificationContent);
+          updateMessageLoadingState(currentAiMessageId, false);
+
+          if (latestExplanatoryText) {
+            finishProcessing();
+          } else {
+            handleRefinementSuccess(
+              result.payload.aiMessage,
+              result.payload.updatedConversationHistory
+            );
+          }
         }
       }
     } catch (error) {

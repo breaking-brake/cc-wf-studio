@@ -69,6 +69,11 @@ interface RefinementStore {
     updatedHistory: ConversationHistory
   ) => void;
   handleRefinementFailed: () => void;
+  /**
+   * Finish processing without replacing conversation history.
+   * Use this when frontend has already managed messages (e.g., streaming with explanatory text).
+   */
+  finishProcessing: () => void;
   clearHistory: () => void;
 
   // Phase 3.7: Message operations for loading state
@@ -224,6 +229,10 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   },
 
   handleRefinementFailed: () => {
+    set({ isProcessing: false, currentRequestId: null });
+  },
+
+  finishProcessing: () => {
     set({ isProcessing: false, currentRequestId: null });
   },
 
