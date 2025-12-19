@@ -381,11 +381,25 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   },
 
   clearWorkflow: () => {
+    const { activeWorkflow } = get();
+
     // StartノードとEndノードは保持し、他のノードとすべてのエッジをクリア
     set({
       nodes: [DEFAULT_START_NODE, DEFAULT_END_NODE],
       edges: [],
       selectedNodeId: null,
+      // Sub-Agent Flow関連の状態をクリア
+      subAgentFlows: [],
+      activeSubAgentFlowId: null,
+      mainWorkflowSnapshot: null,
+      // activeWorkflow の conversationHistory と subAgentFlows をクリア
+      activeWorkflow: activeWorkflow
+        ? {
+            ...activeWorkflow,
+            conversationHistory: undefined,
+            subAgentFlows: undefined,
+          }
+        : null,
     });
   },
 

@@ -54,7 +54,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setWorkflowName,
     clearWorkflow,
   } = useWorkflowStore();
-  const { isProcessing } = useRefinementStore();
+  const { isProcessing, clearHistory } = useRefinementStore();
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
@@ -65,8 +65,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   // Handle reset workflow
   const handleResetWorkflow = useCallback(() => {
     clearWorkflow();
+    clearHistory(); // Clear AI refinement chat history
     setShowResetConfirm(false);
-  }, [clearWorkflow]);
+  }, [clearWorkflow, clearHistory]);
 
   const handleSave = async () => {
     if (!workflowName.trim()) {
