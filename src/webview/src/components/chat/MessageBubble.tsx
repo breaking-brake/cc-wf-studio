@@ -26,7 +26,7 @@ interface MessageBubbleProps {
 
 export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
   const { t } = useTranslation();
-  const { timeoutSeconds, getMessageSearchResults, currentToolInfo } = useRefinementStore();
+  const { timeoutSeconds, getMessageSearchResults } = useRefinementStore();
   const fontSizes = useResponsiveFonts();
   const isUser = message.sender === 'user';
   const isError = message.isError ?? false;
@@ -136,7 +136,7 @@ export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
         {isLoading && (
           <>
             {/* Tool execution indicator (only during tool execution) */}
-            {currentToolInfo && !isUser && <ToolExecutionIndicator toolInfo={currentToolInfo} />}
+            {message.toolInfo && !isUser && <ToolExecutionIndicator toolInfo={message.toolInfo} />}
 
             {/* Progress bar */}
             {timeoutSeconds === 0 ? (

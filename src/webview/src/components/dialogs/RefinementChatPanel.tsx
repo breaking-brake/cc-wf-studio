@@ -85,7 +85,7 @@ export function RefinementChatPanel({
     isIndexReady,
     useCodebaseSearch,
     selectedModel,
-    setCurrentToolInfo,
+    updateMessageToolInfo,
   } = useRefinementStore();
 
   const { activeWorkflow, updateWorkflow, subAgentFlows, updateSubAgentFlow, setNodes, setEdges } =
@@ -246,9 +246,6 @@ export function RefinementChatPanel({
         if (result.type === 'success') {
           const { refinedInnerWorkflow, aiMessage, updatedConversationHistory } = result.payload;
 
-          // Tool Loading Animation: Clear tool info on success
-          setCurrentToolInfo(null);
-
           // Update SubAgentFlow in store
           updateSubAgentFlow(subAgentFlowId, {
             nodes: refinedInnerWorkflow.nodes,
@@ -322,10 +319,10 @@ export function RefinementChatPanel({
           // Tool Loading Animation: Detect tool execution from chunk
           if (payload.chunk && !payload.chunk.startsWith('{') && !payload.chunk.includes('```')) {
             // chunk is not JSON/Markdown = tool information
-            setCurrentToolInfo(payload.chunk);
+            updateMessageToolInfo(aiMessageId, payload.chunk);
           } else {
             // Text content arrived = tool execution completed
-            setCurrentToolInfo(null);
+            updateMessageToolInfo(aiMessageId, null);
           }
 
           // Update message content with display text (may include tool info)
@@ -356,9 +353,6 @@ export function RefinementChatPanel({
         );
 
         if (result.type === 'success') {
-          // Tool Loading Animation: Clear tool info on success
-          setCurrentToolInfo(null);
-
           updateWorkflow(result.payload.refinedWorkflow);
 
           console.log('[RefinementChatPanel] handleSend success:', {
@@ -480,9 +474,6 @@ export function RefinementChatPanel({
         if (result.type === 'success') {
           const { refinedInnerWorkflow, aiMessage, updatedConversationHistory } = result.payload;
 
-          // Tool Loading Animation: Clear tool info on success
-          setCurrentToolInfo(null);
-
           updateSubAgentFlow(subAgentFlowId, {
             nodes: refinedInnerWorkflow.nodes,
             connections: refinedInnerWorkflow.connections,
@@ -531,10 +522,10 @@ export function RefinementChatPanel({
           // Tool Loading Animation: Detect tool execution from chunk
           if (payload.chunk && !payload.chunk.startsWith('{') && !payload.chunk.includes('```')) {
             // chunk is not JSON/Markdown = tool information
-            setCurrentToolInfo(payload.chunk);
+            updateMessageToolInfo(aiMessageId, payload.chunk);
           } else {
             // Text content arrived = tool execution completed
-            setCurrentToolInfo(null);
+            updateMessageToolInfo(aiMessageId, null);
           }
 
           // Update message content with display text (may include tool info)
@@ -565,9 +556,6 @@ export function RefinementChatPanel({
         );
 
         if (result.type === 'success') {
-          // Tool Loading Animation: Clear tool info on success
-          setCurrentToolInfo(null);
-
           updateWorkflow(result.payload.refinedWorkflow);
 
           if (hasReceivedProgress && latestExplanatoryText) {
@@ -617,9 +605,6 @@ export function RefinementChatPanel({
 
   // Common error handling for refinement requests
   const handleRefinementError = (error: unknown, aiMessageId: string) => {
-    // Tool Loading Animation: Clear tool info on error/cancellation
-    setCurrentToolInfo(null);
-
     // Handle cancellation
     if (error instanceof WorkflowRefinementError && error.code === 'CANCELLED') {
       removeMessage(aiMessageId);

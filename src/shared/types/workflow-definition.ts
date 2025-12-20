@@ -381,6 +381,8 @@ export interface ConversationMessage {
     | 'VALIDATION_ERROR'
     | 'PROHIBITED_NODE_TYPE'
     | 'UNKNOWN_ERROR';
+  /** Tool execution information (e.g., "Bash: npm run build") */
+  toolInfo?: string | null;
 }
 
 /**
