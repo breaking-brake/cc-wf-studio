@@ -11,10 +11,20 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import type { ClaudeModel } from '@shared/types/messages';
 // Edit3 is commented out with Iteration Counter - uncomment when re-enabling
-import { Check, ChevronLeft, Clock, Cpu, Database, Trash2, UserCog } from 'lucide-react';
+import {
+  Check,
+  ChevronLeft,
+  Clock,
+  Cpu,
+  Database,
+  RotateCcw,
+  Trash2,
+  UserCog,
+  Wrench,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
-import { useRefinementStore } from '../../stores/refinement-store';
+import { AVAILABLE_TOOLS, useRefinementStore } from '../../stores/refinement-store';
 import { CodebaseSettingsDialog } from '../dialogs/CodebaseSettingsDialog';
 
 const TIMEOUT_PRESETS = [
@@ -56,6 +66,9 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
     useCodebaseSearch,
     selectedModel,
     setSelectedModel,
+    allowedTools,
+    toggleAllowedTool,
+    resetAllowedTools,
     // conversationHistory, // Uncomment when re-enabling Iteration Counter
   } = useRefinementStore();
 
@@ -385,6 +398,112 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                       </DropdownMenu.RadioItem>
                     ))}
                   </DropdownMenu.RadioGroup>
+                </DropdownMenu.SubContent>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Sub>
+
+            {/* Allowed Tools Sub-menu */}
+            <DropdownMenu.Sub>
+              <DropdownMenu.SubTrigger
+                disabled={isProcessing}
+                style={{
+                  padding: '8px 12px',
+                  fontSize: `${FONT_SIZES.small}px`,
+                  color: 'var(--vscode-foreground)',
+                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  outline: 'none',
+                  borderRadius: '2px',
+                  opacity: isProcessing ? 0.5 : 1,
+                }}
+              >
+                <Wrench size={14} />
+                <span>Allowed Tools</span>
+              </DropdownMenu.SubTrigger>
+
+              <DropdownMenu.Portal>
+                <DropdownMenu.SubContent
+                  sideOffset={4}
+                  style={{
+                    backgroundColor: 'var(--vscode-dropdown-background)',
+                    border: '1px solid var(--vscode-dropdown-border)',
+                    borderRadius: '4px',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+                    zIndex: 10000,
+                    minWidth: '150px',
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                    padding: '4px',
+                  }}
+                >
+                  {AVAILABLE_TOOLS.map((tool) => (
+                    <DropdownMenu.CheckboxItem
+                      key={tool}
+                      checked={allowedTools.includes(tool)}
+                      onSelect={(event) => {
+                        event.preventDefault(); // Prevent menu from closing
+                        toggleAllowedTool(tool);
+                      }}
+                      style={{
+                        padding: '6px 12px',
+                        fontSize: `${FONT_SIZES.small}px`,
+                        color: 'var(--vscode-foreground)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        outline: 'none',
+                        borderRadius: '2px',
+                        position: 'relative',
+                        paddingLeft: '28px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: '8px',
+                          width: '12px',
+                          height: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <DropdownMenu.ItemIndicator>
+                          <Check size={12} />
+                        </DropdownMenu.ItemIndicator>
+                      </div>
+                      <span>{tool}</span>
+                    </DropdownMenu.CheckboxItem>
+                  ))}
+
+                  <DropdownMenu.Separator
+                    style={{
+                      height: '1px',
+                      backgroundColor: 'var(--vscode-panel-border)',
+                      margin: '4px 0',
+                    }}
+                  />
+
+                  <DropdownMenu.Item
+                    onSelect={resetAllowedTools}
+                    style={{
+                      padding: '6px 12px',
+                      fontSize: `${FONT_SIZES.small}px`,
+                      color: 'var(--vscode-foreground)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      outline: 'none',
+                      borderRadius: '2px',
+                    }}
+                  >
+                    <RotateCcw size={12} />
+                    <span>Reset to Default</span>
+                  </DropdownMenu.Item>
                 </DropdownMenu.SubContent>
               </DropdownMenu.Portal>
             </DropdownMenu.Sub>

@@ -84,6 +84,7 @@ function getCliModelName(model: ClaudeModel): string {
  * @param requestId - Optional request ID for cancellation support
  * @param workingDirectory - Working directory for CLI execution (defaults to current directory)
  * @param model - Claude model to use (default: 'sonnet')
+ * @param allowedTools - Optional array of allowed tool names (e.g., ['Read', 'Grep', 'Glob'])
  * @returns Execution result with success status and output/error
  */
 export async function executeClaudeCodeCLI(
@@ -91,7 +92,8 @@ export async function executeClaudeCodeCLI(
   timeoutMs = 60000,
   requestId?: string,
   workingDirectory?: string,
-  model: ClaudeModel = 'sonnet'
+  model: ClaudeModel = 'sonnet',
+  allowedTools?: string[]
 ): Promise<ClaudeCodeExecutionResult> {
   const startTime = Date.now();
 
@@ -102,14 +104,23 @@ export async function executeClaudeCodeCLI(
     timeoutMs,
     model,
     modelName,
+    allowedTools,
     cwd: workingDirectory ?? process.cwd(),
   });
 
   try {
+    // Build CLI arguments
+    const args = ['claude', '-p', '-', '--model', modelName];
+
+    // Add --allowed-tools flag if provided
+    if (allowedTools && allowedTools.length > 0) {
+      args.push('--allowed-tools', allowedTools.join(','));
+    }
+
     // Spawn Claude Code CLI process using nano-spawn (cross-platform compatible)
     // Use stdin for prompt instead of -p argument to avoid Windows command line length limits
     // Use npx to ensure cross-platform compatibility (Windows PATH issues with global npm installs)
-    const subprocess = spawn('npx', ['claude', '-p', '-', '--model', modelName], {
+    const subprocess = spawn('npx', args, {
       cwd: workingDirectory,
       timeout: timeoutMs,
       stdin: { string: prompt },
@@ -387,6 +398,7 @@ export type StreamingProgressCallback = (
  * @param requestId - Optional request ID for cancellation support
  * @param workingDirectory - Working directory for CLI execution
  * @param model - Claude model to use (default: 'sonnet')
+ * @param allowedTools - Array of allowed tool names for CLI (optional)
  * @returns Execution result with success status and output/error
  */
 export async function executeClaudeCodeCLIStreaming(
@@ -395,7 +407,8 @@ export async function executeClaudeCodeCLIStreaming(
   timeoutMs = 60000,
   requestId?: string,
   workingDirectory?: string,
-  model: ClaudeModel = 'sonnet'
+  model: ClaudeModel = 'sonnet',
+  allowedTools?: string[]
 ): Promise<ClaudeCodeExecutionResult> {
   const startTime = Date.now();
   let accumulated = '';
@@ -407,23 +420,37 @@ export async function executeClaudeCodeCLIStreaming(
     timeoutMs,
     model,
     modelName,
+    allowedTools,
     cwd: workingDirectory ?? process.cwd(),
   });
 
   try {
+    // Build CLI arguments
+    const args = [
+      'claude',
+      '-p',
+      '-',
+      '--output-format',
+      'stream-json',
+      '--verbose',
+      '--model',
+      modelName,
+    ];
+
+    // Add --allowed-tools flag if provided
+    if (allowedTools && allowedTools.length > 0) {
+      args.push('--allowed-tools', allowedTools.join(','));
+    }
+
     // Spawn Claude Code CLI with streaming output format
     // Note: --verbose is required when using --output-format=stream-json with -p (print mode)
-    const subprocess = spawn(
-      'npx',
-      ['claude', '-p', '-', '--output-format', 'stream-json', '--verbose', '--model', modelName],
-      {
-        cwd: workingDirectory,
-        timeout: timeoutMs,
-        stdin: { string: prompt },
-        stdout: 'pipe',
-        stderr: 'pipe',
-      }
-    );
+    const subprocess = spawn('npx', args, {
+      cwd: workingDirectory,
+      timeout: timeoutMs,
+      stdin: { string: prompt },
+      stdout: 'pipe',
+      stderr: 'pipe',
+    });
 
     // Register as active process if requestId is provided
     if (requestId) {

@@ -226,6 +226,7 @@ const MAX_REFINEMENT_TIMEOUT_MS = 90000;
  * @param workspaceRoot - The workspace root path for CLI execution
  * @param onProgress - Optional callback for streaming progress updates
  * @param model - Claude model to use (default: 'sonnet')
+ * @param allowedTools - Array of allowed tool names for CLI (optional)
  * @returns Refinement result with success status and refined workflow or error
  */
 export async function refineWorkflow(
@@ -238,7 +239,8 @@ export async function refineWorkflow(
   requestId?: string,
   workspaceRoot?: string,
   onProgress?: StreamingProgressCallback,
-  model: ClaudeModel = 'sonnet'
+  model: ClaudeModel = 'sonnet',
+  allowedTools?: string[]
 ): Promise<RefinementResult> {
   const startTime = Date.now();
 
@@ -359,9 +361,17 @@ export async function refineWorkflow(
           timeoutMs,
           requestId,
           workspaceRoot,
-          model
+          model,
+          allowedTools
         )
-      : await executeClaudeCodeCLI(prompt, timeoutMs, requestId, workspaceRoot, model);
+      : await executeClaudeCodeCLI(
+          prompt,
+          timeoutMs,
+          requestId,
+          workspaceRoot,
+          model,
+          allowedTools
+        );
 
     if (!cliResult.success || !cliResult.output) {
       // CLI execution failed - record metrics
@@ -996,6 +1006,7 @@ function validateSubAgentFlowNodes(innerWorkflow: InnerWorkflow): {
  * @param requestId - Optional request ID for cancellation support
  * @param workspaceRoot - The workspace root path for CLI execution
  * @param model - Claude model to use (default: 'sonnet')
+ * @param allowedTools - Optional array of allowed tool names (e.g., ['Read', 'Grep', 'Glob'])
  * @returns SubAgentFlow refinement result
  */
 export async function refineSubAgentFlow(
@@ -1007,7 +1018,8 @@ export async function refineSubAgentFlow(
   timeoutMs = MAX_REFINEMENT_TIMEOUT_MS,
   requestId?: string,
   workspaceRoot?: string,
-  model: ClaudeModel = 'sonnet'
+  model: ClaudeModel = 'sonnet',
+  allowedTools?: string[]
 ): Promise<SubAgentFlowRefinementResult> {
   const startTime = Date.now();
 
@@ -1106,7 +1118,8 @@ export async function refineSubAgentFlow(
       timeoutMs,
       requestId,
       workspaceRoot,
-      model
+      model,
+      allowedTools
     );
 
     if (!cliResult.success || !cliResult.output) {

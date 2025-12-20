@@ -226,6 +226,8 @@ export interface RefineWorkflowPayload {
   subAgentFlowId?: string;
   /** Claude model to use (default: 'sonnet') */
   model?: ClaudeModel;
+  /** Allowed tools for Claude Code CLI (optional, e.g., ['Read', 'Grep', 'Glob', 'WebSearch', 'WebFetch']) */
+  allowedTools?: string[];
 }
 
 export interface RefinementSuccessPayload {

@@ -74,7 +74,8 @@ export function refineWorkflow(
   useSkills = true,
   serverTimeoutMs?: number,
   onProgress?: RefinementProgressCallback,
-  model: ClaudeModel = 'sonnet'
+  model: ClaudeModel = 'sonnet',
+  allowedTools?: string[]
 ): Promise<RefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
@@ -128,6 +129,7 @@ export function refineWorkflow(
       useSkills,
       timeoutMs: serverTimeoutMs, // Pass timeout to server (undefined = use settings)
       model,
+      allowedTools,
     };
 
     vscode.postMessage({
@@ -229,7 +231,8 @@ export function refineSubAgentFlow(
   requestId: string,
   useSkills = true,
   serverTimeoutMs?: number,
-  model: ClaudeModel = 'sonnet'
+  model: ClaudeModel = 'sonnet',
+  allowedTools?: string[]
 ): Promise<SubAgentFlowRefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
@@ -278,6 +281,7 @@ export function refineSubAgentFlow(
       targetType: 'subAgentFlow',
       subAgentFlowId,
       model,
+      allowedTools,
     };
 
     vscode.postMessage({
