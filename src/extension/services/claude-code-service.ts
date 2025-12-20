@@ -371,7 +371,8 @@ export function cancelGeneration(requestId: string): {
 export type StreamingProgressCallback = (
   chunk: string,
   displayText: string,
-  explanatoryText: string
+  explanatoryText: string,
+  contentType?: 'tool_use' | 'text'
 ) => void;
 
 /**
@@ -494,7 +495,7 @@ export async function executeClaudeCodeCLIStreaming(
                   ? `${explanatoryText}\n\n🔧 ${currentToolInfo}`
                   : `🔧 ${currentToolInfo}`;
 
-                onProgress(currentToolInfo, displayText, explanatoryText);
+                onProgress(currentToolInfo, displayText, explanatoryText, 'tool_use');
               }
 
               // Handle text content
@@ -558,7 +559,7 @@ export async function executeClaudeCodeCLIStreaming(
                     currentToolInfo = '';
 
                     // Display text is same as explanatory text when no tool is active
-                    onProgress(content.text, explanatoryText, explanatoryText);
+                    onProgress(content.text, explanatoryText, explanatoryText, 'text');
                   }
                 }
               }

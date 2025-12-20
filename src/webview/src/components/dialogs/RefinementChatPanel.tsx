@@ -316,11 +316,11 @@ export function RefinementChatPanel({
         const onProgress: RefinementProgressCallback = (payload) => {
           hasReceivedProgress = true;
 
-          // Tool Loading Animation: Detect tool execution from chunk
-          if (payload.chunk && !payload.chunk.startsWith('{') && !payload.chunk.includes('```')) {
-            // chunk is not JSON/Markdown = tool information
+          // Tool Loading Animation: Use contentType from Extension to detect tool execution
+          if (payload.contentType === 'tool_use') {
+            // Tool execution in progress
             updateMessageToolInfo(aiMessageId, payload.chunk);
-          } else {
+          } else if (payload.contentType === 'text') {
             // Text content arrived = tool execution completed
             updateMessageToolInfo(aiMessageId, null);
           }
@@ -520,11 +520,11 @@ export function RefinementChatPanel({
         const onProgress: RefinementProgressCallback = (payload) => {
           hasReceivedProgress = true;
 
-          // Tool Loading Animation: Detect tool execution from chunk
-          if (payload.chunk && !payload.chunk.startsWith('{') && !payload.chunk.includes('```')) {
-            // chunk is not JSON/Markdown = tool information
+          // Tool Loading Animation: Use contentType from Extension to detect tool execution
+          if (payload.contentType === 'tool_use') {
+            // Tool execution in progress
             updateMessageToolInfo(aiMessageId, payload.chunk);
-          } else {
+          } else if (payload.contentType === 'text') {
             // Text content arrived = tool execution completed
             updateMessageToolInfo(aiMessageId, null);
           }

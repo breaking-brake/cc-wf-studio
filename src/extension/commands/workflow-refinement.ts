@@ -96,18 +96,25 @@ export async function handleRefineWorkflow(
     }
 
     // Create streaming progress callback
-    const onProgress = (chunk: string, displayText: string, explanatoryText: string) => {
+    const onProgress = (
+      chunk: string,
+      displayText: string,
+      explanatoryText: string,
+      contentType?: 'tool_use' | 'text'
+    ) => {
       log('INFO', 'onProgress callback invoked', {
         requestId,
         chunkLength: chunk.length,
         displayTextLength: displayText.length,
         explanatoryTextLength: explanatoryText.length,
+        contentType,
       });
 
       sendRefinementProgress(webview, requestId, {
         chunk,
         accumulatedText: displayText,
         explanatoryText,
+        contentType,
         timestamp: new Date().toISOString(),
       });
     };

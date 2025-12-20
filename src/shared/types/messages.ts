@@ -302,6 +302,8 @@ export interface RefinementProgressPayload {
   accumulatedText: string;
   /** Explanatory text only (no tool info) - for preserving in chat history */
   explanatoryText?: string;
+  /** Content type from Claude streaming response ('tool_use' or 'text') */
+  contentType?: 'tool_use' | 'text';
   /** Progress timestamp */
   timestamp: string; // ISO 8601
 }
