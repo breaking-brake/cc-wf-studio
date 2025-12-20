@@ -325,8 +325,9 @@ export function RefinementChatPanel({
             updateMessageToolInfo(aiMessageId, null);
           }
 
-          // Update message content with display text (may include tool info)
-          updateMessageContent(aiMessageId, payload.accumulatedText);
+          // Update message content with explanatory text only (tool info shown separately by ToolExecutionIndicator)
+          // Use accumulatedText as fallback if explanatoryText is undefined
+          updateMessageContent(aiMessageId, payload.explanatoryText ?? payload.accumulatedText);
           // Track explanatory text separately (for preserving in chat history)
           // Note: explanatoryText can be empty string if AI only uses tools
           if (payload.explanatoryText !== undefined) {
@@ -528,8 +529,9 @@ export function RefinementChatPanel({
             updateMessageToolInfo(aiMessageId, null);
           }
 
-          // Update message content with display text (may include tool info)
-          updateMessageContent(aiMessageId, payload.accumulatedText);
+          // Update message content with explanatory text only (tool info shown separately by ToolExecutionIndicator)
+          // Use accumulatedText as fallback if explanatoryText is undefined
+          updateMessageContent(aiMessageId, payload.explanatoryText ?? payload.accumulatedText);
           // Track explanatory text separately (for preserving in chat history)
           // Note: explanatoryText can be empty string if AI only uses tools
           if (payload.explanatoryText !== undefined) {
