@@ -39,7 +39,14 @@ export const AVAILABLE_TOOLS = [
 ] as const;
 
 // Default allowed tools (read-only tools for security)
-export const DEFAULT_ALLOWED_TOOLS: string[] = ['Read', 'Grep', 'Glob', 'WebSearch', 'WebFetch'];
+export const DEFAULT_ALLOWED_TOOLS: string[] = [
+  'Read',
+  'Grep',
+  'Glob',
+  'WebSearch',
+  'WebFetch',
+  'TodoWrite',
+];
 
 /**
  * Load selected model from localStorage

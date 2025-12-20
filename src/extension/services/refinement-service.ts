@@ -71,51 +71,6 @@ interface AISubAgentFlowResponse {
 }
 
 /**
- * Check if AI output is a clarification message instead of a workflow
- *
- * @param output - AI output text
- * @returns true if output appears to be a clarification message
- */
-function isClarificationMessage(output: string): boolean {
-  // Remove JSON code blocks to avoid false positives
-  const textWithoutCodeBlocks = output.replace(/```json[\s\S]*?```/g, '');
-
-  // Clarification indicators (case-insensitive)
-  const clarificationPatterns = [
-    /I need to understand/i,
-    /could you (please\s+)?(clarify|specify|tell me more)/i,
-    /ambiguous/i,
-    /unclear/i,
-    /could mean/i,
-    /which (one|approach|option|method)/i,
-    /would you like me to/i,
-    /please (clarify|specify)/i,
-    /not sure (what|which|how)/i,
-    /can you provide more (details|information)/i,
-  ];
-
-  return clarificationPatterns.some((pattern) => pattern.test(textWithoutCodeBlocks));
-}
-
-/**
- * Extract clarification message from AI output (removes JSON blocks)
- *
- * @param output - AI output text containing clarification and possibly JSON
- * @returns Clarification message without JSON blocks
- */
-function extractClarificationMessage(output: string): string {
-  // Remove JSON code blocks (```json ... ```)
-  let cleanedOutput = output.replace(/```json[\s\S]*?```/g, '');
-
-  // Remove standalone JSON blocks (raw JSON without markdown code blocks)
-  // This regex matches JSON objects that start with { and end with }
-  cleanedOutput = cleanedOutput.replace(/\n\s*\{[\s\S]*\}\s*$/g, '');
-
-  // Trim whitespace
-  return cleanedOutput.trim();
-}
-
-/**
  * Parse AI refinement response with structured format
  *
  * @param output - Raw CLI output string
@@ -417,23 +372,7 @@ export async function refineWorkflow(
     const aiResponse = parseRefinementResponse(cliResult.output);
 
     if (!aiResponse) {
-      // Structured response parsing failed - try legacy format detection
-      if (isClarificationMessage(cliResult.output)) {
-        const clarificationText = extractClarificationMessage(cliResult.output);
-
-        log('INFO', 'AI is requesting clarification (legacy format)', {
-          requestId,
-          outputPreview: clarificationText.substring(0, 200),
-          executionTimeMs: cliResult.executionTimeMs,
-        });
-
-        return {
-          success: true,
-          clarificationMessage: clarificationText,
-          executionTimeMs: cliResult.executionTimeMs,
-        };
-      }
-
+      // Structured response parsing failed
       log('ERROR', 'Failed to parse structured AI response', {
         requestId,
         outputPreview: cliResult.output.substring(0, 200),
@@ -1166,23 +1105,7 @@ export async function refineSubAgentFlow(
     const aiResponse = parseSubAgentFlowResponse(cliResult.output);
 
     if (!aiResponse) {
-      // Structured response parsing failed - try legacy format detection
-      if (isClarificationMessage(cliResult.output)) {
-        const clarificationText = extractClarificationMessage(cliResult.output);
-
-        log('INFO', 'AI is requesting clarification for SubAgentFlow (legacy format)', {
-          requestId,
-          outputPreview: clarificationText.substring(0, 200),
-          executionTimeMs: cliResult.executionTimeMs,
-        });
-
-        return {
-          success: true,
-          clarificationMessage: clarificationText,
-          executionTimeMs: cliResult.executionTimeMs,
-        };
-      }
-
+      // Structured response parsing failed
       log('ERROR', 'Failed to parse structured SubAgentFlow AI response', {
         requestId,
         outputPreview: cliResult.output.substring(0, 200),

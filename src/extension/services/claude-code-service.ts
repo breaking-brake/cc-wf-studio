@@ -112,8 +112,11 @@ export async function executeClaudeCodeCLI(
     // Build CLI arguments
     const args = ['claude', '-p', '-', '--model', modelName];
 
-    // Add --allowed-tools flag if provided
+    // Add --tools and --allowed-tools flags if provided
+    // --tools: whitelist restriction (only these tools available)
+    // --allowed-tools: no permission prompt for these tools
     if (allowedTools && allowedTools.length > 0) {
+      args.push('--tools', allowedTools.join(','));
       args.push('--allowed-tools', allowedTools.join(','));
     }
 
@@ -437,8 +440,11 @@ export async function executeClaudeCodeCLIStreaming(
       modelName,
     ];
 
-    // Add --allowed-tools flag if provided
+    // Add --tools and --allowed-tools flags if provided
+    // --tools: whitelist restriction (only these tools available)
+    // --allowed-tools: no permission prompt for these tools
     if (allowedTools && allowedTools.length > 0) {
+      args.push('--tools', allowedTools.join(','));
       args.push('--allowed-tools', allowedTools.join(','));
     }
 

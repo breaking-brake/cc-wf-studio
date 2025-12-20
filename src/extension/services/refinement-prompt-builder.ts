@@ -112,6 +112,8 @@ export class RefinementPromptBuilder {
         'NEVER include markdown code blocks',
         'Even if no changes, wrap in success response',
         'status and message fields REQUIRED',
+        'If you need clarification, use { status: "clarification", message: "..." } format',
+        'NEVER ask questions in plain text - use clarification JSON format',
       ],
     };
   }

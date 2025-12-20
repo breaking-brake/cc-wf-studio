@@ -475,7 +475,26 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                           <Check size={12} />
                         </DropdownMenu.ItemIndicator>
                       </div>
-                      <span>{tool}</span>
+                      <span
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          opacity: tool === 'AskUserQuestion' ? 0.7 : 1,
+                        }}
+                      >
+                        {tool}
+                        {tool === 'AskUserQuestion' && (
+                          <span
+                            style={{
+                              fontSize: '10px',
+                              color: 'var(--vscode-editorWarning-foreground)',
+                            }}
+                          >
+                            ⚠️ Not recommended
+                          </span>
+                        )}
+                      </span>
                     </DropdownMenu.CheckboxItem>
                   ))}
 

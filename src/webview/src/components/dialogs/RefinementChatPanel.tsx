@@ -403,14 +403,15 @@ export function RefinementChatPanel({
             }
           }
         } else if (result.type === 'clarification') {
-          if (hasReceivedProgress && latestExplanatoryText) {
-            // Replace display text with explanatory text only
-            updateMessageContent(aiMessageId, latestExplanatoryText);
-            updateMessageLoadingState(aiMessageId, false);
+          // Always use the complete clarification message from result.payload
+          updateMessageContent(aiMessageId, result.payload.aiMessage.content);
+          updateMessageLoadingState(aiMessageId, false);
+
+          if (hasReceivedProgress) {
+            // Streaming occurred, use finishProcessing to preserve frontend messages
             finishProcessing();
           } else {
-            updateMessageContent(aiMessageId, result.payload.aiMessage.content);
-            updateMessageLoadingState(aiMessageId, false);
+            // No streaming, update conversation history normally
             handleRefinementSuccess(
               result.payload.aiMessage,
               result.payload.updatedConversationHistory
@@ -590,14 +591,15 @@ export function RefinementChatPanel({
             );
           }
         } else if (result.type === 'clarification') {
-          if (hasReceivedProgress && latestExplanatoryText) {
-            // Replace display text with explanatory text only
-            updateMessageContent(aiMessageId, latestExplanatoryText);
-            updateMessageLoadingState(aiMessageId, false);
+          // Always use the complete clarification message from result.payload
+          updateMessageContent(aiMessageId, result.payload.aiMessage.content);
+          updateMessageLoadingState(aiMessageId, false);
+
+          if (hasReceivedProgress) {
+            // Streaming occurred, use finishProcessing to preserve frontend messages
             finishProcessing();
           } else {
-            updateMessageContent(aiMessageId, result.payload.aiMessage.content);
-            updateMessageLoadingState(aiMessageId, false);
+            // No streaming, update conversation history normally
             handleRefinementSuccess(
               result.payload.aiMessage,
               result.payload.updatedConversationHistory
