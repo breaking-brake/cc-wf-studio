@@ -17,6 +17,7 @@ import { getErrorMessageInfo } from '../../utils/error-messages';
 import { IndeterminateProgressBar } from '../common/IndeterminateProgressBar';
 import { CodebaseSearchResults } from './CodebaseSearchResults';
 import { ProgressBar } from './ProgressBar';
+import { ToolExecutionIndicator } from './ToolExecutionIndicator';
 
 interface MessageBubbleProps {
   message: ConversationMessage;
@@ -25,7 +26,7 @@ interface MessageBubbleProps {
 
 export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
   const { t } = useTranslation();
-  const { timeoutSeconds, getMessageSearchResults } = useRefinementStore();
+  const { timeoutSeconds, getMessageSearchResults, currentToolInfo } = useRefinementStore();
   const fontSizes = useResponsiveFonts();
   const isUser = message.sender === 'user';
   const isError = message.isError ?? false;
@@ -132,16 +133,23 @@ export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
         )}
 
         {/* Loading state */}
-        {isLoading &&
-          (timeoutSeconds === 0 ? (
-            <IndeterminateProgressBar label={t('refinement.aiProcessing')} />
-          ) : (
-            <ProgressBar
-              isProcessing={true}
-              label={t('refinement.aiProcessing')}
-              maxSeconds={timeoutSeconds}
-            />
-          ))}
+        {isLoading && (
+          <>
+            {/* Tool execution indicator (only during tool execution) */}
+            {currentToolInfo && !isUser && <ToolExecutionIndicator toolInfo={currentToolInfo} />}
+
+            {/* Progress bar */}
+            {timeoutSeconds === 0 ? (
+              <IndeterminateProgressBar label={t('refinement.aiProcessing')} />
+            ) : (
+              <ProgressBar
+                isProcessing={true}
+                label={t('refinement.aiProcessing')}
+                maxSeconds={timeoutSeconds}
+              />
+            )}
+          </>
+        )}
 
         {/* Issue #265: Codebase search results (AI messages only) */}
         {searchResults && searchResults.results.length > 0 && !isLoading && !isError && (

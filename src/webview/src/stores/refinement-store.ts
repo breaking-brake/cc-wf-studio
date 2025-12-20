@@ -82,6 +82,9 @@ interface RefinementStore {
   messageSearchResults: Map<string, MessageSearchResults>;
   useCodebaseSearch: boolean; // Beta feature - default OFF
 
+  // Tool Execution State (Tool Loading Animation)
+  currentToolInfo: string | null;
+
   // Actions
   openChat: () => void;
   closeChat: () => void;
@@ -140,6 +143,9 @@ interface RefinementStore {
   setUseCodebaseSearch: (enabled: boolean) => void;
   loadCodebaseSearchSetting: () => Promise<void>;
 
+  // Tool Execution Actions (Tool Loading Animation)
+  setCurrentToolInfo: (toolInfo: string | null) => void;
+
   // Computed
   canSend: () => boolean;
   shouldShowWarning: () => boolean;
@@ -174,6 +180,9 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   indexBuildProgress: 0,
   messageSearchResults: new Map(),
   useCodebaseSearch: false, // Beta feature - default OFF
+
+  // Tool Execution Initial State (Tool Loading Animation)
+  currentToolInfo: null,
 
   // Actions
   openChat: () => {
@@ -442,6 +451,11 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     if (value !== undefined) {
       set({ useCodebaseSearch: value });
     }
+  },
+
+  // Tool Execution Actions (Tool Loading Animation)
+  setCurrentToolInfo: (toolInfo: string | null) => {
+    set({ currentToolInfo: toolInfo });
   },
 
   // Computed Methods
