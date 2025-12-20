@@ -72,7 +72,7 @@
         "cc-wf-studio.ai.collectMetrics": {
           "type": "boolean",
           "default": false,
-          "description": "Collect and log metrics for A/B comparison of schema formats."
+          "description": "Collect and log metrics for A/B comparison of schema formats. Note: Prompt format is always 'toon'."
         },
         "cc-wf-studio.codebaseReference.enabled": {
           "type": "boolean",
@@ -124,7 +124,7 @@
     "@orama/orama": "^3.1.16",
     "@orama/plugin-data-persistence": "^3.1.16",
     "@slack/web-api": "^7.13.0",
-    "@toon-format/toon": "^1.0.0",
+    "@toon-format/toon": "^1.4.0",
     "nano-spawn": "^2.0.0"
   }
 }

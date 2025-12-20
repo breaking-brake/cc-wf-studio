@@ -40,7 +40,8 @@ export function recordMetrics(metrics: AIGenerationMetrics): void {
   // Log to output channel
   log('INFO', 'AI Generation Metrics', {
     requestId: metrics.requestId,
-    format: metrics.schemaFormat,
+    schemaFormat: metrics.schemaFormat,
+    promptFormat: metrics.promptFormat,
     promptSize: metrics.promptSizeChars,
     schemaSize: metrics.schemaSizeChars,
     estimatedTokens: metrics.estimatedTokens,

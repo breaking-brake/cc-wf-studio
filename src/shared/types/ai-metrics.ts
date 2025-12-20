@@ -3,6 +3,7 @@
  */
 
 export type SchemaFormat = 'json' | 'toon';
+export type PromptFormat = 'freetext' | 'json' | 'toon';
 
 export interface AIGenerationMetrics {
   /** Unique request ID */
@@ -10,6 +11,9 @@ export interface AIGenerationMetrics {
 
   /** Schema format used */
   schemaFormat: SchemaFormat;
+
+  /** Prompt structure format used */
+  promptFormat: PromptFormat;
 
   /** Total prompt size in characters */
   promptSizeChars: number;

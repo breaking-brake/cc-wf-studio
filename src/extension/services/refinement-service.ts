@@ -28,6 +28,7 @@ import {
   parseClaudeCodeOutput,
   type StreamingProgressCallback,
 } from './claude-code-service';
+import { RefinementPromptBuilder } from './refinement-prompt-builder';
 import { loadWorkflowSchemaByFormat, type SchemaLoadResult } from './schema-loader-service';
 import { filterSkillsByRelevance, type SkillRelevanceScore } from './skill-relevance-matcher';
 import { scanAllSkills } from './skill-service';
@@ -175,130 +176,32 @@ export function constructRefinementPrompt(
   schemaResult: SchemaLoadResult,
   filteredSkills: SkillRelevanceScore[] = []
 ): { prompt: string; schemaSize: number } {
-  // Get last 6 messages (3 rounds of user-AI conversation)
-  // This provides sufficient context without overwhelming the prompt
-  const recentMessages = conversationHistory.messages.slice(-6);
+  const schemaFormat = getConfiguredSchemaFormat();
 
-  const conversationContext =
-    recentMessages.length > 0
-      ? `**Conversation History** (last ${recentMessages.length} messages):
-${recentMessages.map((msg) => `[${msg.sender.toUpperCase()}]: ${msg.content}`).join('\n')}\n`
-      : '**Conversation History**: (This is the first message)\n';
+  log('INFO', 'Constructing refinement prompt', {
+    promptFormat: 'toon',
+    schemaFormat: schemaFormat,
+    userMessageLength: userMessage.length,
+    conversationHistoryLength: conversationHistory.messages.length,
+    filteredSkillsCount: filteredSkills.length,
+  });
 
-  // Format schema based on type
-  let schemaSection: string;
-  let schemaSize: number;
+  const builder = new RefinementPromptBuilder(
+    currentWorkflow,
+    conversationHistory,
+    userMessage,
+    schemaResult,
+    filteredSkills
+  );
 
-  if (schemaResult.format === 'toon' && schemaResult.schemaString) {
-    // TOON format - use as-is with format indicator
-    schemaSection = `**Workflow Schema** (TOON format - Token-Oriented Object Notation):
-\`\`\`toon
-${schemaResult.schemaString}
-\`\`\``;
-    schemaSize = schemaResult.schemaString.length;
-  } else {
-    // JSON format - existing behavior
-    const schemaJSON = JSON.stringify(schemaResult.schema, null, 2);
-    schemaSection = `**Workflow Schema** (reference for valid node types and structure):
-${schemaJSON}`;
-    schemaSize = schemaJSON.length;
-  }
+  const prompt = builder.buildPrompt();
+  const schemaSize = schemaResult.sizeBytes;
 
-  // Construct skills section (similar to ai-generation.ts)
-  const skillsSection =
-    filteredSkills.length > 0
-      ? `
-
-**Available Skills** (use when user description matches their purpose):
-${JSON.stringify(
-  filteredSkills.map((s) => ({
-    name: s.skill.name,
-    description: s.skill.description,
-    scope: s.skill.scope,
-  })),
-  null,
-  2
-)}
-
-**Instructions for Using Skills**:
-- Use a Skill node when the user's description matches a Skill's documented purpose
-- Copy the name, description, and scope exactly from the Available Skills list above
-- Set validationStatus to "valid" and outputPorts to 1
-- Do NOT include skillPath in your response (the system will resolve it automatically)
-- If both personal and project Skills match, prefer the project Skill
-
-`
-      : '';
-
-  const prompt = `You are an expert workflow designer for Claude Code Workflow Studio.
-
-**Task**: Refine the existing workflow based on user's feedback.
-
-**Current Workflow**:
-${JSON.stringify(currentWorkflow, null, 2)}
-
-${conversationContext}
-**User's Refinement Request**:
-${userMessage}
-
-**Refinement Guidelines**:
-1. Preserve existing nodes unless explicitly requested to remove
-2. Add new nodes ONLY if user asks for new functionality
-3. Modify node properties (labels, descriptions, prompts) based on feedback
-4. Maintain workflow connectivity and validity
-5. Respect node IDs - do not regenerate IDs for unchanged nodes
-6. Update only what the user requested - minimize unnecessary changes
-
-**Node Positioning Guidelines**:
-1. Horizontal spacing between regular nodes: Use 300px (e.g., x: 350, 650, 950, 1250, 1550)
-2. Spacing after Start node: Use 250px (e.g., Start at x: 100, next at x: 350)
-3. Spacing before End node: Use 350px (e.g., previous at x: 1550, End at x: 1900)
-4. Vertical spacing: Use 150px between nodes on different branches
-5. When adding new nodes, calculate positions based on existing node positions and connections
-6. Preserve existing node positions unless repositioning is explicitly requested
-7. For branch nodes: offset vertically by 150px from the main path (e.g., y: 300 for main, y: 150/450 for branches)
-
-**Skill Node Constraints**:
-- Skill nodes MUST have exactly 1 output port (outputPorts: 1)
-- If branching is needed after Skill execution, add an ifElse or switch node after the Skill node
-- Never modify Skill node's outputPorts field
-
-**Branching Node Selection**:
-- Use ifElse node for 2-way conditional branching (true/false)
-- Use switch node for 3+ way branching or multiple conditions
-- Each branch output should connect to exactly one downstream node - never create serial connections from different branch outputs
-${skillsSection}
-${schemaSection}
-
-**Output Format**: You MUST output a structured JSON response in exactly this format:
-
-For successful refinement (or if no changes are needed):
-{
-  "status": "success",
-  "message": "Brief description of what was changed or why no changes were needed",
-  "values": {
-    "workflow": { /* refined or original workflow matching Workflow interface */ }
-  }
-}
-
-If you need clarification from the user:
-{
-  "status": "clarification",
-  "message": "Your question here"
-}
-
-If there's an error or the request cannot be fulfilled:
-{
-  "status": "error",
-  "message": "Error description"
-}
-
-CRITICAL RULES:
-- ALWAYS output valid JSON, NEVER plain text explanations
-- NEVER include markdown code blocks or explanations outside the JSON structure
-- Even if NO changes are required, you MUST wrap the original workflow in the success response format
-- The "status" field is REQUIRED in every response
-- The "message" field is REQUIRED for all status types - describe what was done or why`;
+  log('INFO', 'Refinement prompt constructed', {
+    promptFormat: 'toon',
+    promptSizeChars: prompt.length,
+    estimatedTokens: estimateTokens(prompt.length),
+  });
 
   return { prompt, schemaSize };
 }
@@ -352,6 +255,7 @@ export async function refineWorkflow(
     useSkills,
     timeoutMs,
     schemaFormat,
+    promptFormat: 'toon',
     collectMetrics,
   });
 
@@ -465,6 +369,7 @@ export async function refineWorkflow(
         recordMetrics({
           requestId: requestId || `refine-${Date.now()}`,
           schemaFormat: schemaResult.format,
+          promptFormat: 'toon',
           promptSizeChars,
           schemaSizeChars: schemaSize,
           estimatedTokens: estimateTokens(promptSizeChars),
@@ -659,6 +564,7 @@ export async function refineWorkflow(
       recordMetrics({
         requestId: requestId || `refine-${Date.now()}`,
         schemaFormat: schemaResult.format,
+        promptFormat: 'toon',
         promptSizeChars,
         schemaSizeChars: schemaSize,
         estimatedTokens: estimateTokens(promptSizeChars),
@@ -1118,6 +1024,7 @@ export async function refineSubAgentFlow(
     useSkills,
     timeoutMs,
     schemaFormat,
+    promptFormat: 'toon',
     collectMetrics,
   });
 
@@ -1208,6 +1115,7 @@ export async function refineSubAgentFlow(
         recordMetrics({
           requestId: requestId || `subagentflow-refine-${Date.now()}`,
           schemaFormat: schemaResult.format,
+          promptFormat: 'toon',
           promptSizeChars,
           schemaSizeChars: schemaSize,
           estimatedTokens: estimateTokens(promptSizeChars),
@@ -1408,6 +1316,7 @@ export async function refineSubAgentFlow(
       recordMetrics({
         requestId: requestId || `subagentflow-refine-${Date.now()}`,
         schemaFormat: schemaResult.format,
+        promptFormat: 'toon',
         promptSizeChars,
         schemaSizeChars: schemaSize,
         estimatedTokens: estimateTokens(promptSizeChars),
