@@ -413,14 +413,23 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                   cursor: isProcessing ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'space-between',
                   gap: '8px',
                   outline: 'none',
                   borderRadius: '2px',
                   opacity: isProcessing ? 0.5 : 1,
                 }}
               >
-                <Wrench size={14} />
-                <span>Allowed Tools</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <ChevronLeft size={14} />
+                  <span style={{ color: 'var(--vscode-descriptionForeground)' }}>
+                    {allowedTools.length} tools
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Wrench size={14} />
+                  <span>Allowed Tools</span>
+                </div>
               </DropdownMenu.SubTrigger>
 
               <DropdownMenu.Portal>
