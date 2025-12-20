@@ -13,21 +13,13 @@ import type {
 } from '../../shared/types/messages';
 import { log } from '../extension';
 import { executeClaudeCodeCLI } from '../services/claude-code-service';
+import { WorkflowNamePromptBuilder } from '../services/workflow-name-prompt-builder';
 
 /** Default timeout for name generation (30 seconds) */
 const DEFAULT_TIMEOUT_MS = 30000;
 
 /** Maximum name length */
 const MAX_NAME_LENGTH = 64;
-
-/** Language instructions for AI prompt */
-const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
-  en: 'Generate the name in English.',
-  ja: 'Generate the name in English but it can reflect Japanese concepts.',
-  ko: 'Generate the name in English but it can reflect Korean concepts.',
-  'zh-CN': 'Generate the name in English but it can reflect Chinese concepts.',
-  'zh-TW': 'Generate the name in English but it can reflect Chinese concepts.',
-};
 
 /**
  * Handle workflow name generation request
@@ -47,6 +39,7 @@ export async function handleGenerateWorkflowName(
 
   log('INFO', 'Workflow name generation started', {
     requestId,
+    promptFormat: 'toon',
     targetLanguage: payload.targetLanguage,
     workflowJsonLength: payload.workflowJson.length,
   });
@@ -125,25 +118,8 @@ export async function handleGenerateWorkflowName(
  * @returns Constructed prompt string
  */
 function constructNamePrompt(workflowJson: string, targetLanguage: string): string {
-  const languageInstruction = LANGUAGE_INSTRUCTIONS[targetLanguage] ?? LANGUAGE_INSTRUCTIONS.en;
-
-  return `You are a workflow naming specialist.
-
-**Task**: Analyze the following workflow JSON and generate a concise, descriptive name.
-
-**Workflow JSON**:
-${workflowJson}
-
-**Requirements**:
-1. ${languageInstruction}
-2. Use kebab-case format (e.g., "data-analysis-pipeline", "user-auth-flow")
-3. Maximum 50 characters
-4. Focus on the workflow's primary purpose or function
-5. Do NOT include generic words like "workflow" or "process" unless necessary
-6. Do NOT include markdown, code blocks, or formatting
-7. Output ONLY the name, nothing else
-
-**Output**: A single kebab-case name describing the workflow purpose.`;
+  const builder = new WorkflowNamePromptBuilder(workflowJson, targetLanguage);
+  return builder.buildPrompt();
 }
 
 /**

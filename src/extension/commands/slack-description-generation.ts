@@ -13,21 +13,13 @@ import type {
 } from '../../shared/types/messages';
 import { log } from '../extension';
 import { executeClaudeCodeCLI } from '../services/claude-code-service';
+import { SlackDescriptionPromptBuilder } from '../services/slack-description-prompt-builder';
 
 /** Default timeout for description generation (30 seconds) */
 const DEFAULT_TIMEOUT_MS = 30000;
 
 /** Maximum description length (matches Slack share dialog limit) */
 const MAX_DESCRIPTION_LENGTH = 500;
-
-/** Language instructions for AI prompt */
-const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
-  en: 'Write the description in English.',
-  ja: 'Write the description in Japanese (日本語で記述してください).',
-  ko: 'Write the description in Korean (한국어로 작성하세요).',
-  'zh-CN': 'Write the description in Simplified Chinese (用简体中文撰写).',
-  'zh-TW': 'Write the description in Traditional Chinese (用繁體中文撰寫).',
-};
 
 /**
  * Handle Slack description generation request
@@ -47,6 +39,7 @@ export async function handleGenerateSlackDescription(
 
   log('INFO', 'Slack description generation started', {
     requestId,
+    promptFormat: 'toon',
     targetLanguage: payload.targetLanguage,
     workflowJsonLength: payload.workflowJson.length,
   });
@@ -124,24 +117,8 @@ export async function handleGenerateSlackDescription(
  * @returns Constructed prompt string
  */
 function constructDescriptionPrompt(workflowJson: string, targetLanguage: string): string {
-  const languageInstruction = LANGUAGE_INSTRUCTIONS[targetLanguage] ?? LANGUAGE_INSTRUCTIONS.en;
-
-  return `You are a technical writer creating a brief workflow description for Slack sharing.
-
-**Task**: Analyze the following workflow JSON and generate a concise description.
-
-**Workflow JSON**:
-${workflowJson}
-
-**Requirements**:
-1. ${languageInstruction}
-2. Maximum 200 characters (aim for 100-150 for readability)
-3. Focus on what the workflow accomplishes, not technical implementation details
-4. Use active voice and clear language
-5. Do NOT include markdown, code blocks, or formatting
-6. Output ONLY the description text, nothing else
-
-**Output**: A single line of plain text describing the workflow purpose.`;
+  const builder = new SlackDescriptionPromptBuilder(workflowJson, targetLanguage);
+  return builder.buildPrompt();
 }
 
 /**
