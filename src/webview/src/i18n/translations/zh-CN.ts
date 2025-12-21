@@ -729,29 +729,4 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
     '要导入此工作流，请连接到源 Slack 工作区。工作流文件位于当前未连接的工作区中。',
   'slack.import.connectionRequired.workspaceInfo': '源工作区:',
   'slack.import.connectionRequired.connectButton': '连接到 Slack',
-
-  // Codebase Index (Issue #265)
-  'codebaseIndex.building': '构建中',
-  'codebaseIndex.ready': '已就绪',
-  'codebaseIndex.notBuilt': '未构建',
-  'codebaseIndex.statusBadge': '代码库索引状态',
-  'codebaseIndex.rebuild': '重建索引',
-  'codebaseIndex.build': '构建索引',
-  'codebaseIndex.clear': '清除索引',
-  'codebaseIndex.cancel': '取消',
-  'codebaseIndex.button': '代码库参照(β)',
-  'codebaseIndex.enableReference': '启用代码库参照',
-  'codebaseIndex.settings.title': '代码库参照设置',
-  'codebaseIndex.settings.description1':
-    '启用后，AI响应将包含代码库中的相关代码片段。您也可以使用@codebase命令进行显式搜索。',
-  'codebaseIndex.settings.description2':
-    '目前使用关键词搜索（BM25）实现，未来计划升级为使用向量数据库的语义搜索。',
-  'codebaseIndex.settings.disabled': '代码库参照已禁用',
-
-  // Codebase Reference (Issue #265)
-  'codebaseReference.toggle': '切换代码库参照结果',
-  'codebaseReference.explicitResults': '代码库参照结果',
-  'codebaseReference.relatedCode': '相关代码',
-  'codebaseReference.queryLabel': '搜索词',
-  'codebaseReference.moreResults': '+{count}条更多结果',
 };

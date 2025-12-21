@@ -4,30 +4,10 @@
  * Based on: /specs/001-cc-wf-studio/contracts/extension-webview-api.md
  */
 
-import type {
-  CodebaseIndexErrorCode,
-  IndexBuildResult,
-  IndexOptions,
-  IndexProgress,
-  IndexStatus,
-  SearchOptions,
-  SearchResponse,
-} from './codebase-index';
 import type { Connection, Workflow, WorkflowNode } from './workflow-definition';
 
 // Re-export Workflow for convenience
 export type { Workflow, WorkflowNode, Connection };
-
-// Re-export codebase index types for convenience
-export type {
-  CodebaseIndexErrorCode,
-  IndexBuildResult,
-  IndexOptions,
-  IndexProgress,
-  IndexStatus,
-  SearchOptions,
-  SearchResponse,
-};
 
 // ============================================================================
 // Base Message
@@ -554,48 +534,6 @@ export interface McpCacheRefreshedPayload {
 }
 
 // ============================================================================
-// Settings Payloads (Issue #265)
-// ============================================================================
-
-/**
- * Get setting request payload
- */
-export interface GetSettingPayload {
-  /** Setting key (e.g., 'codebaseReference.enabled') */
-  key: string;
-}
-
-/**
- * Get setting result payload
- */
-export interface GetSettingResultPayload {
-  /** Setting key */
-  key: string;
-  /** Setting value */
-  value: unknown;
-}
-
-/**
- * Set setting request payload
- */
-export interface SetSettingPayload {
-  /** Setting key (e.g., 'codebaseReference.enabled') */
-  key: string;
-  /** Setting value */
-  value: unknown;
-}
-
-/**
- * Set setting result payload
- */
-export interface SetSettingResultPayload {
-  /** Setting key */
-  key: string;
-  /** Whether the setting was updated successfully */
-  success: boolean;
-}
-
-// ============================================================================
 // Extension → Webview Messages
 // ============================================================================
 
@@ -655,19 +593,7 @@ export type ExtensionMessage =
   | Message<SlackDescriptionFailedPayload, 'SLACK_DESCRIPTION_FAILED'>
   | Message<WorkflowNameSuccessPayload, 'WORKFLOW_NAME_SUCCESS'>
   | Message<WorkflowNameFailedPayload, 'WORKFLOW_NAME_FAILED'>
-  | Message<void, 'FILE_PICKER_CANCELLED'>
-  // Codebase Index Messages (Issue #265)
-  | Message<IndexBuildProgressPayload, 'INDEX_BUILD_PROGRESS'>
-  | Message<IndexBuildSuccessPayload, 'INDEX_BUILD_SUCCESS'>
-  | Message<IndexBuildFailedPayload, 'INDEX_BUILD_FAILED'>
-  | Message<IndexStatusPayload, 'INDEX_STATUS'>
-  | Message<SearchCodebaseResultPayload, 'SEARCH_CODEBASE_RESULT'>
-  | Message<SearchCodebaseFailedPayload, 'SEARCH_CODEBASE_FAILED'>
-  | Message<void, 'INDEX_BUILD_CANCELLED'>
-  | Message<void, 'INDEX_CLEARED'>
-  // Settings Messages (Issue #265)
-  | Message<GetSettingResultPayload, 'GET_SETTING_RESULT'>
-  | Message<SetSettingResultPayload, 'SET_SETTING_RESULT'>;
+  | Message<void, 'FILE_PICKER_CANCELLED'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -1060,94 +986,6 @@ export interface ShareWorkflowFailedPayload {
 }
 
 // ============================================================================
-// Codebase Index Payloads (Issue #265)
-// ============================================================================
-
-/**
- * Build codebase index request payload
- */
-export interface BuildIndexPayload {
-  /** Custom indexing options (optional) */
-  options?: Partial<IndexOptions>;
-}
-
-/**
- * Search codebase request payload
- */
-export interface SearchCodebasePayload {
-  /** Search query string */
-  query: string;
-  /** Search options (optional) */
-  options?: SearchOptions;
-}
-
-/**
- * Index build progress payload (Extension → Webview)
- */
-export interface IndexBuildProgressPayload {
-  /** Progress information */
-  progress: IndexProgress;
-}
-
-/**
- * Index build success payload (Extension → Webview)
- */
-export interface IndexBuildSuccessPayload {
-  /** Build result */
-  result: IndexBuildResult;
-  /** Timestamp ISO 8601 */
-  timestamp: string;
-}
-
-/**
- * Index build failed payload (Extension → Webview)
- */
-export interface IndexBuildFailedPayload {
-  /** Error code */
-  errorCode: CodebaseIndexErrorCode;
-  /** Error message */
-  errorMessage: string;
-  /** Additional details */
-  details?: string;
-  /** Timestamp ISO 8601 */
-  timestamp: string;
-}
-
-/**
- * Index status payload (Extension → Webview)
- */
-export interface IndexStatusPayload {
-  /** Current index status */
-  status: IndexStatus;
-  /** Timestamp ISO 8601 */
-  timestamp: string;
-}
-
-/**
- * Search codebase result payload (Extension → Webview)
- */
-export interface SearchCodebaseResultPayload {
-  /** Search response */
-  response: SearchResponse;
-  /** Timestamp ISO 8601 */
-  timestamp: string;
-}
-
-/**
- * Search codebase failed payload (Extension → Webview)
- */
-export interface SearchCodebaseFailedPayload {
-  /** Error code */
-  errorCode: CodebaseIndexErrorCode;
-  /** Error message */
-  errorMessage: string;
-  /** The query that was searched */
-  query: string;
-  /** Timestamp ISO 8601 */
-  timestamp: string;
-}
-
-// ============================================================================
 // Utility Payloads
 // ============================================================================
 
@@ -1214,16 +1052,7 @@ export type WebviewMessage =
   | Message<SetLastSharedChannelPayload, 'SET_LAST_SHARED_CHANNEL'>
   | Message<GenerateSlackDescriptionPayload, 'GENERATE_SLACK_DESCRIPTION'>
   | Message<GenerateWorkflowNamePayload, 'GENERATE_WORKFLOW_NAME'>
-  | Message<void, 'OPEN_FILE_PICKER'>
-  // Codebase Index Messages (Issue #265)
-  | Message<BuildIndexPayload, 'BUILD_INDEX'>
-  | Message<void, 'GET_INDEX_STATUS'>
-  | Message<void, 'CANCEL_INDEX_BUILD'>
-  | Message<void, 'CLEAR_INDEX'>
-  | Message<SearchCodebasePayload, 'SEARCH_CODEBASE'>
-  // Settings Messages (Issue #265)
-  | Message<GetSettingPayload, 'GET_SETTING'>
-  | Message<SetSettingPayload, 'SET_SETTING'>;
+  | Message<void, 'OPEN_FILE_PICKER'>;
 
 // ============================================================================
 // Error Codes

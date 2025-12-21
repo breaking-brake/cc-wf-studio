@@ -73,11 +73,6 @@
           "type": "boolean",
           "default": false,
           "description": "Collect and log metrics for A/B comparison of schema formats. Note: Prompt format is always 'toon'."
-        },
-        "cc-wf-studio.codebaseReference.enabled": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enable codebase reference feature (Beta). When enabled, AI responses will include related code snippets from your codebase."
         }
       }
     }
@@ -121,8 +116,6 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.24.3",
-    "@orama/orama": "^3.1.16",
-    "@orama/plugin-data-persistence": "^3.1.16",
     "@slack/web-api": "^7.13.0",
     "@toon-format/toon": "^1.4.0",
     "nano-spawn": "^2.0.0"

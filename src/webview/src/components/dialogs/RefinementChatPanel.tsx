@@ -9,7 +9,6 @@
  * Updated: Phase 3.3 - Added resizable width functionality
  * Updated: Phase 3.7 - Added immediate loading message display
  * Updated: SubAgentFlow support - Unified panel for both workflow types
- * Updated: Issue #265 - Added codebase index status badge
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -17,11 +16,6 @@ import { ResponsiveFontProvider } from '../../contexts/ResponsiveFontContext';
 import { useResizablePanel } from '../../hooks/useResizablePanel';
 import { useResponsiveFontSizes } from '../../hooks/useResponsiveFontSizes';
 import { useTranslation } from '../../i18n/i18n-context';
-import {
-  extractSearchKeywords,
-  parseCodebaseCommand,
-  searchCodebase,
-} from '../../services/codebase-search-service';
 import {
   clearConversation,
   type RefinementProgressCallback,
@@ -81,9 +75,6 @@ export function RefinementChatPanel({
     isProcessing,
     useSkills,
     timeoutSeconds,
-    setMessageSearchResults,
-    isIndexReady,
-    useCodebaseSearch,
     selectedModel,
     updateMessageToolInfo,
     allowedTools,
@@ -180,44 +171,11 @@ export function RefinementChatPanel({
     return null;
   }
 
-  /**
-   * Issue #265: Perform codebase search and store results with the AI message
-   * @param aiMessageId - The AI message ID to associate results with
-   * @param query - Search query
-   * @param isExplicit - Whether this was from @codebase command (true) or auto-search (false)
-   */
-  const performCodebaseSearch = async (aiMessageId: string, query: string, isExplicit: boolean) => {
-    // Skip if codebase search is disabled (Beta feature - default OFF)
-    if (!useCodebaseSearch || !isIndexReady() || !query.trim()) {
-      return;
-    }
-
-    try {
-      const searchResponse = await searchCodebase(query, { limit: 5 });
-      if (searchResponse && searchResponse.results.length > 0) {
-        setMessageSearchResults(aiMessageId, {
-          messageId: aiMessageId,
-          results: searchResponse.results,
-          query,
-          isExplicit,
-        });
-      }
-    } catch (error) {
-      // Silently fail - search is non-critical
-      console.warn('Codebase search failed:', error);
-    }
-  };
-
   // Handle sending refinement request
   const handleSend = async (message: string) => {
     if (!conversationHistory || !activeWorkflow) {
       return;
     }
-
-    // Issue #265: Parse @codebase command from message
-    const parsedCommand = parseCodebaseCommand(message);
-    const messageToSend = parsedCommand.hasCommand ? parsedCommand.cleanedMessage : message;
-    const explicitSearchQuery = parsedCommand.hasCommand ? parsedCommand.searchQuery : null;
 
     // Phase 3.7: Add user message and loading AI message immediately for instant feedback
     addUserMessage(message);
@@ -235,7 +193,7 @@ export function RefinementChatPanel({
         const result = await refineSubAgentFlow(
           activeWorkflow.id,
           subAgentFlowId,
-          messageToSend,
+          message,
           activeWorkflow,
           conversationHistory,
           requestId,
@@ -277,17 +235,6 @@ export function RefinementChatPanel({
           updateMessageContent(aiMessageId, aiMessage.content);
           updateMessageLoadingState(aiMessageId, false);
           handleRefinementSuccess(aiMessage, updatedConversationHistory);
-
-          // Issue #265: Perform codebase search after AI response
-          if (explicitSearchQuery) {
-            await performCodebaseSearch(aiMessageId, explicitSearchQuery, true);
-          } else {
-            // Auto-search using extracted keywords from user message
-            const keywords = extractSearchKeywords(message);
-            if (keywords.length > 0) {
-              await performCodebaseSearch(aiMessageId, keywords.join(' '), false);
-            }
-          }
         } else if (result.type === 'clarification') {
           const { aiMessage, updatedConversationHistory } = result.payload;
 
@@ -299,16 +246,6 @@ export function RefinementChatPanel({
           updateMessageContent(aiMessageId, aiMessage.content);
           updateMessageLoadingState(aiMessageId, false);
           handleRefinementSuccess(aiMessage, updatedConversationHistory);
-
-          // Issue #265: Perform codebase search after AI response
-          if (explicitSearchQuery) {
-            await performCodebaseSearch(aiMessageId, explicitSearchQuery, true);
-          } else {
-            const keywords = extractSearchKeywords(message);
-            if (keywords.length > 0) {
-              await performCodebaseSearch(aiMessageId, keywords.join(' '), false);
-            }
-          }
         }
       } else {
         // Main workflow refinement with streaming progress
@@ -345,7 +282,7 @@ export function RefinementChatPanel({
 
         const result = await refineWorkflow(
           activeWorkflow.id,
-          messageToSend,
+          message,
           activeWorkflow,
           conversationHistory,
           requestId,
@@ -392,16 +329,6 @@ export function RefinementChatPanel({
               result.payload.updatedConversationHistory
             );
           }
-
-          // Issue #265: Perform codebase search after AI response
-          if (explicitSearchQuery) {
-            await performCodebaseSearch(aiMessageId, explicitSearchQuery, true);
-          } else {
-            const keywords = extractSearchKeywords(message);
-            if (keywords.length > 0) {
-              await performCodebaseSearch(aiMessageId, keywords.join(' '), false);
-            }
-          }
         } else if (result.type === 'clarification') {
           // Always use the complete clarification message from result.payload
           updateMessageContent(aiMessageId, result.payload.aiMessage.content);
@@ -416,16 +343,6 @@ export function RefinementChatPanel({
               result.payload.aiMessage,
               result.payload.updatedConversationHistory
             );
-          }
-
-          // Issue #265: Perform codebase search after AI response
-          if (explicitSearchQuery) {
-            await performCodebaseSearch(aiMessageId, explicitSearchQuery, true);
-          } else {
-            const keywords = extractSearchKeywords(message);
-            if (keywords.length > 0) {
-              await performCodebaseSearch(aiMessageId, keywords.join(' '), false);
-            }
           }
         }
       }

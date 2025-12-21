@@ -8,14 +8,12 @@
 import * as vscode from 'vscode';
 import type { WebviewMessage } from '../../shared/types/messages';
 import { translate } from '../i18n/i18n-service';
-import { initializeCodebaseIndexService } from '../services/codebase-index-service';
 import { FileService } from '../services/file-service';
 import { SlackApiService } from '../services/slack-api-service';
 import { migrateWorkflow } from '../utils/migrate-workflow';
 import { SlackTokenManager } from '../utils/slack-token-manager';
 import { validateWorkflowFile } from '../utils/workflow-validator';
 import { getWebviewContent } from '../webview-content';
-import { handleCodebaseIndexMessage } from './codebase-index-handlers';
 import { handleExportWorkflow } from './export-workflow';
 import { loadWorkflow } from './load-workflow';
 import { loadWorkflowList } from './load-workflow-list';
@@ -104,11 +102,6 @@ export function registerOpenEditorCommand(
       // Initialize Slack services
       slackTokenManager = new SlackTokenManager(context);
       slackApiService = new SlackApiService(slackTokenManager);
-
-      // Initialize Codebase Index service (non-blocking)
-      initializeCodebaseIndexService(context).catch((error) => {
-        console.error('Failed to initialize codebase index service:', error);
-      });
 
       const columnToShowIn = vscode.window.activeTextEditor
         ? vscode.window.activeTextEditor.viewColumn
@@ -766,53 +759,6 @@ export function registerOpenEditorCommand(
                   'slack-last-shared-channel',
                   message.payload.channelId
                 );
-              }
-              break;
-
-            // Codebase Index messages (Issue #265)
-            case 'BUILD_INDEX':
-            case 'GET_INDEX_STATUS':
-            case 'CANCEL_INDEX_BUILD':
-            case 'CLEAR_INDEX':
-            case 'SEARCH_CODEBASE':
-            case 'GET_SETTING':
-            case 'SET_SETTING': {
-              const handled = await handleCodebaseIndexMessage(message, webview, context);
-              if (!handled) {
-                console.warn('Unhandled codebase index message:', message.type);
-              }
-              break;
-            }
-
-            case 'OPEN_FILE_AT_LINE':
-              // Issue #265: Open file at specific line from codebase search results
-              if (message.payload?.filePath) {
-                try {
-                  const line = message.payload.line ?? 1;
-                  const uri = vscode.Uri.file(message.payload.filePath);
-                  const document = await vscode.workspace.openTextDocument(uri);
-                  const editor = await vscode.window.showTextDocument(document, {
-                    preview: false,
-                    viewColumn: vscode.ViewColumn.One,
-                  });
-                  // Move cursor to the specified line
-                  const position = new vscode.Position(Math.max(0, line - 1), 0);
-                  editor.selection = new vscode.Selection(position, position);
-                  editor.revealRange(
-                    new vscode.Range(position, position),
-                    vscode.TextEditorRevealType.InCenter
-                  );
-                } catch (error) {
-                  console.error('Failed to open file:', error);
-                  webview.postMessage({
-                    type: 'ERROR',
-                    requestId: message.requestId,
-                    payload: {
-                      code: 'FILE_OPEN_FAILED',
-                      message: error instanceof Error ? error.message : 'Failed to open file',
-                    },
-                  });
-                }
               }
               break;
 

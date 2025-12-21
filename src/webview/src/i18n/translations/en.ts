@@ -764,29 +764,4 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Please connect to the source Slack workspace to import this workflow. The workflow file is hosted in a workspace that you are not currently connected to.',
   'slack.import.connectionRequired.workspaceInfo': 'Source Workspace:',
   'slack.import.connectionRequired.connectButton': 'Connect to Slack',
-
-  // Codebase Index (Issue #265)
-  'codebaseIndex.building': 'Building',
-  'codebaseIndex.ready': 'Ready',
-  'codebaseIndex.notBuilt': 'Not built',
-  'codebaseIndex.statusBadge': 'Codebase index status',
-  'codebaseIndex.rebuild': 'Rebuild Index',
-  'codebaseIndex.build': 'Build Index',
-  'codebaseIndex.clear': 'Clear Index',
-  'codebaseIndex.cancel': 'Cancel',
-  'codebaseIndex.button': 'Codebase Reference (β)',
-  'codebaseIndex.enableReference': 'Enable codebase reference',
-  'codebaseIndex.settings.title': 'Codebase Reference Settings',
-  'codebaseIndex.settings.description1':
-    'When enabled, AI responses will include related code snippets from your codebase. You can also use @codebase command to search explicitly.',
-  'codebaseIndex.settings.description2':
-    'Currently implemented with keyword search (BM25), with plans to upgrade to semantic search using vector DB in the future.',
-  'codebaseIndex.settings.disabled': 'Codebase reference is disabled',
-
-  // Codebase Reference (Issue #265)
-  'codebaseReference.toggle': 'Toggle codebase reference results',
-  'codebaseReference.explicitResults': 'Codebase Reference Results',
-  'codebaseReference.relatedCode': 'Related Code',
-  'codebaseReference.queryLabel': 'Query',
-  'codebaseReference.moreResults': '+{count} more results',
 };

@@ -691,27 +691,4 @@ export interface WebviewTranslationKeys {
   'slack.import.connectionRequired.message': string;
   'slack.import.connectionRequired.workspaceInfo': string;
   'slack.import.connectionRequired.connectButton': string;
-
-  // Codebase Index (Issue #265)
-  'codebaseIndex.building': string;
-  'codebaseIndex.ready': string;
-  'codebaseIndex.notBuilt': string;
-  'codebaseIndex.statusBadge': string;
-  'codebaseIndex.rebuild': string;
-  'codebaseIndex.build': string;
-  'codebaseIndex.clear': string;
-  'codebaseIndex.cancel': string;
-  'codebaseIndex.button': string;
-  'codebaseIndex.enableReference': string;
-  'codebaseIndex.settings.title': string;
-  'codebaseIndex.settings.description1': string;
-  'codebaseIndex.settings.description2': string;
-  'codebaseIndex.settings.disabled': string;
-
-  // Codebase Reference (Issue #265)
-  'codebaseReference.toggle': string;
-  'codebaseReference.explicitResults': string;
-  'codebaseReference.relatedCode': string;
-  'codebaseReference.queryLabel': string;
-  'codebaseReference.moreResults': string;
 }
