@@ -554,13 +554,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 gap: '4px',
               }}
             >
-              {isCompact ? (
-                <Play size={16} />
-              ) : isRunning ? (
-                t('toolbar.running')
-              ) : (
-                t('toolbar.run')
-              )}
+              {isCompact ? <Play size={16} /> : isRunning ? t('toolbar.running') : t('toolbar.run')}
             </button>
           </div>
         </div>

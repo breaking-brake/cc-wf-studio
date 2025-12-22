@@ -30,6 +30,7 @@ import { Toolbar } from './components/Toolbar';
 import { Tour } from './components/Tour';
 import { WorkflowEditor } from './components/WorkflowEditor';
 import { useCollapsiblePanel } from './hooks/useCollapsiblePanel';
+import { useIsCompactMode } from './hooks/useWindowWidth';
 import { useTranslation } from './i18n/i18n-context';
 import { vscode } from './main';
 import { deserializeWorkflow } from './services/workflow-service';
@@ -73,6 +74,7 @@ const App: React.FC = () => {
     toggle: toggleNodePalette,
     expand: expandNodePalette,
   } = useCollapsiblePanel();
+  const isCompact = useIsCompactMode();
 
   const handleError = (errorData: ErrorPayload) => {
     setError(errorData);
@@ -224,7 +226,7 @@ const App: React.FC = () => {
             flexDirection: 'column',
           }}
         >
-          <Collapsible.Content className="node-palette-collapsible">
+          <Collapsible.Content className={`node-palette-collapsible${isCompact ? ' compact' : ''}`}>
             <NodePalette onCollapse={toggleNodePalette} />
           </Collapsible.Content>
           {/* Simple overlay for Left Panel */}
@@ -356,11 +358,16 @@ const App: React.FC = () => {
 
           /* Node Palette Collapsible Animation */
           .node-palette-collapsible {
+            --palette-width: 200px;
             overflow: hidden;
           }
 
+          .node-palette-collapsible.compact {
+            --palette-width: 100px;
+          }
+
           .node-palette-collapsible[data-state='open'] {
-            width: 200px;
+            width: var(--palette-width);
             animation: slideOpen 150ms ease-out;
           }
 
@@ -374,13 +381,13 @@ const App: React.FC = () => {
               width: 0px;
             }
             to {
-              width: 200px;
+              width: var(--palette-width);
             }
           }
 
           @keyframes slideClose {
             from {
-              width: 200px;
+              width: var(--palette-width);
             }
             to {
               width: 0px;
