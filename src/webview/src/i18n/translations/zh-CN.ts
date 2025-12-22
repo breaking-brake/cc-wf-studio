@@ -259,7 +259,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
     '点击"保存"按钮将工作流以JSON格式保存到`.vscode/workflows/`目录。\n\n稍后可以加载并继续编辑。',
   'tour.loadWorkflow': '要加载已保存的工作流，请从下拉菜单中选择工作流并点击"加载"按钮。',
   'tour.exportWorkflow':
-    '点击"导出"按钮以Claude Code可执行的格式导出。\n\nSub-Agent导出到`.claude/agents/`，SlashCommand导出到`.claude/commands/`。',
+    '点击"Convert"按钮可将工作流转换为Slash Command格式。\n\n转换后的文件保存在.claude/commands/目录中。',
+  'tour.runSlashCommand':
+    '点击"Run"按钮可将工作流转换为Slash Command并立即在Claude Code中执行。\n\n一键完成转换和执行。',
   'tour.refineWithAI':
     '使用"AI编辑"按钮通过与AI对话创建或改进工作流。\n\n可以从空画布开始或以对话方式编辑现有工作流。',
   'tour.moreActions':

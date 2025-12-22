@@ -186,7 +186,7 @@ export const getTourSteps = (
     },
   },
   {
-    element: '[data-tour="workflow-selector"]',
+    element: '[data-tour="load-button"]',
     popover: {
       title: '',
       description: t('tour.loadWorkflow'),
@@ -199,6 +199,15 @@ export const getTourSteps = (
     popover: {
       title: '',
       description: t('tour.exportWorkflow'),
+      side: 'bottom',
+      align: 'start',
+    },
+  },
+  {
+    element: '[data-tour="run-button"]',
+    popover: {
+      title: '',
+      description: t('tour.runSlashCommand'),
       side: 'bottom',
       align: 'start',
     },

@@ -269,7 +269,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'tour.loadWorkflow':
     '保存したワークフローを読み込むには、ドロップダウンメニューからワークフローを選択し、「読み込み」ボタンをクリックします。',
   'tour.exportWorkflow':
-    '「エクスポート」ボタンをクリックすると、Claude Codeで実行可能な形式にエクスポートされます。\n\nSub-Agentは`.claude/agents/`に、SlashCommandは`.claude/commands/`に出力されます。',
+    '「Convert」ボタンをクリックすると、ワークフローをSlash Command形式に変換できます。\n\n変換されたファイルは .claude/commands/ ディレクトリに保存されます。',
+  'tour.runSlashCommand':
+    '「Run」ボタンをクリックすると、ワークフローをSlash Commandに変換し、即座にClaude Codeで実行できます。\n\n変換と実行を一度に行えます。',
   'tour.refineWithAI':
     '「AI編集」ボタンで、AIとチャットしながらワークフローを生成・改善できます。\n\n空のキャンバスから新規作成も、既存のワークフローの修正も対話的に行えます。',
   'tour.moreActions':

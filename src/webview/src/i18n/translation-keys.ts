@@ -245,6 +245,7 @@ export interface WebviewTranslationKeys {
   'tour.saveWorkflow': string;
   'tour.loadWorkflow': string;
   'tour.exportWorkflow': string;
+  'tour.runSlashCommand': string;
   'tour.refineWithAI': string;
   'tour.moreActions': string;
 

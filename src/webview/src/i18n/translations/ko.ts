@@ -271,7 +271,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'tour.loadWorkflow':
     '저장된 워크플로우를 로드하려면 드롭다운 메뉴에서 워크플로우를 선택하고 "불러오기" 버튼을 클릭하세요.',
   'tour.exportWorkflow':
-    '"내보내기" 버튼을 클릭하면 Claude Code에서 실행 가능한 형식으로 내보내집니다.\n\nSub-Agent는 `.claude/agents/`로, SlashCommand는 `.claude/commands/`로 이동합니다.',
+    '"Convert" 버튼을 클릭하면 워크플로우를 Slash Command 형식으로 변환합니다.\n\n변환된 파일은 .claude/commands/ 디렉토리에 저장됩니다.',
+  'tour.runSlashCommand':
+    '"Run" 버튼을 클릭하면 워크플로우를 Slash Command로 변환하고 즉시 Claude Code에서 실행합니다.\n\n변환과 실행을 한 번에 수행합니다.',
   'tour.refineWithAI':
     '"AI로 편집" 버튼을 사용하여 AI와 대화하며 워크플로우를 생성하거나 개선할 수 있습니다.\n\n빈 캔버스에서 시작하거나 기존 워크플로우를 대화형으로 수정할 수 있습니다.',
   'tour.moreActions':

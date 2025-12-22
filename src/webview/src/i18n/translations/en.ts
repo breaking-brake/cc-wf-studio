@@ -269,7 +269,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'tour.loadWorkflow':
     'To load a saved workflow, select it from the dropdown menu and click the "Load" button.',
   'tour.exportWorkflow':
-    'Click the "Export" button to export in a format executable by Claude Code.\n\nSub-Agents go to `.claude/agents/` and SlashCommands to `.claude/commands/`.',
+    'Click the "Convert" button to convert your workflow to a Slash Command format.\n\nThe converted files are saved to the .claude/commands/ directory.',
+  'tour.runSlashCommand':
+    'Click the "Run" button to convert your workflow to a Slash Command and immediately execute it in Claude Code.\n\nThis combines conversion and execution in a single action.',
   'tour.refineWithAI':
     'Use the "Edit with AI" button to create or improve workflows through an interactive chat with AI.\n\nYou can start from an empty canvas or edit existing workflows conversationally.',
   'tour.moreActions':
