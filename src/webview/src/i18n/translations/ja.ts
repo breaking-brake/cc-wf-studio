@@ -18,7 +18,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.workflowNamePlaceholder': 'ワークフロー名',
   'toolbar.save': '保存',
   'toolbar.saving': '保存中...',
-  'toolbar.convert': 'Slash Commandに変換',
+  'toolbar.convert': '変換',
   'toolbar.convert.tooltip': 'Slash Commandに変換して.claude/commands/に保存',
   'toolbar.converting': '変換中...',
   'toolbar.refineWithAI': 'AI編集',
@@ -50,10 +50,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.nameGenerationFailed':
     'ワークフロー名の生成に失敗しました。再度お試しいただくか、手動で入力してください。',
 
-  // Toolbar responsive tooltips
-  'toolbar.save.tooltip': 'ワークフローを保存',
-  'toolbar.convert.iconTooltip': 'Slash Commandに変換',
-  'toolbar.load.tooltip': '保存したワークフローを読み込む',
+  // Toolbar slash command group
+  'toolbar.run': '実行',
+  'toolbar.running': '実行中...',
 
   // Toolbar more actions dropdown
   'toolbar.moreActions': 'その他',

@@ -46,10 +46,9 @@ export interface WebviewTranslationKeys {
   'toolbar.generateNameWithAI': string;
   'toolbar.error.nameGenerationFailed': string;
 
-  // Toolbar responsive tooltips
-  'toolbar.save.tooltip': string;
-  'toolbar.convert.iconTooltip': string;
-  'toolbar.load.tooltip': string;
+  // Toolbar slash command group
+  'toolbar.run': string;
+  'toolbar.running': string;
 
   // Toolbar more actions dropdown
   'toolbar.moreActions': string;

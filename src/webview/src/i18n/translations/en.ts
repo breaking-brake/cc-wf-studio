@@ -18,7 +18,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.workflowNamePlaceholder': 'Workflow name',
   'toolbar.save': 'Save',
   'toolbar.saving': 'Saving...',
-  'toolbar.convert': 'Convert to Slash Command',
+  'toolbar.convert': 'Convert',
   'toolbar.convert.tooltip': 'Convert to Slash Command and save to .claude/commands/',
   'toolbar.converting': 'Converting...',
   'toolbar.refineWithAI': 'Edit with AI',
@@ -50,10 +50,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.nameGenerationFailed':
     'Failed to generate workflow name. Please try again or enter manually.',
 
-  // Toolbar responsive tooltips
-  'toolbar.save.tooltip': 'Save workflow',
-  'toolbar.convert.iconTooltip': 'Convert to Slash Command',
-  'toolbar.load.tooltip': 'Load saved workflow',
+  // Toolbar slash command group
+  'toolbar.run': 'Run',
+  'toolbar.running': 'Running...',
 
   // Toolbar more actions dropdown
   'toolbar.moreActions': 'More',

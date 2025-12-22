@@ -89,6 +89,31 @@ export interface CancelRefinementPayload {
 }
 
 // ============================================================================
+// Run as Slash Command Payloads
+// ============================================================================
+
+/**
+ * Run workflow as slash command request payload
+ * Converts workflow to slash command and runs it in VSCode terminal
+ */
+export interface RunAsSlashCommandPayload {
+  /** Workflow to run */
+  workflow: Workflow;
+}
+
+/**
+ * Run as slash command success payload
+ */
+export interface RunAsSlashCommandSuccessPayload {
+  /** Workflow name that was run */
+  workflowName: string;
+  /** Terminal name where command is running */
+  terminalName: string;
+  /** Timestamp of run */
+  timestamp: string; // ISO 8601
+}
+
+// ============================================================================
 // Skill Node Payloads (001-skill-node)
 // ============================================================================
 
@@ -593,7 +618,9 @@ export type ExtensionMessage =
   | Message<SlackDescriptionFailedPayload, 'SLACK_DESCRIPTION_FAILED'>
   | Message<WorkflowNameSuccessPayload, 'WORKFLOW_NAME_SUCCESS'>
   | Message<WorkflowNameFailedPayload, 'WORKFLOW_NAME_FAILED'>
-  | Message<void, 'FILE_PICKER_CANCELLED'>;
+  | Message<void, 'FILE_PICKER_CANCELLED'>
+  | Message<RunAsSlashCommandSuccessPayload, 'RUN_AS_SLASH_COMMAND_SUCCESS'>
+  | Message<void, 'RUN_AS_SLASH_COMMAND_CANCELLED'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -1052,7 +1079,8 @@ export type WebviewMessage =
   | Message<SetLastSharedChannelPayload, 'SET_LAST_SHARED_CHANNEL'>
   | Message<GenerateSlackDescriptionPayload, 'GENERATE_SLACK_DESCRIPTION'>
   | Message<GenerateWorkflowNamePayload, 'GENERATE_WORKFLOW_NAME'>
-  | Message<void, 'OPEN_FILE_PICKER'>;
+  | Message<void, 'OPEN_FILE_PICKER'>
+  | Message<RunAsSlashCommandPayload, 'RUN_AS_SLASH_COMMAND'>;
 
 // ============================================================================
 // Error Codes

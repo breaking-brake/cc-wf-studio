@@ -5,7 +5,7 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
-import { FileDown, Save, SquareSlash } from 'lucide-react';
+import { FileDown, Play, Save, SquareSlash } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
@@ -15,7 +15,7 @@ import {
   cancelWorkflowNameGeneration,
   generateWorkflowName,
 } from '../services/ai-generation-service';
-import { saveWorkflow } from '../services/vscode-bridge';
+import { runAsSlashCommand, saveWorkflow } from '../services/vscode-bridge';
 import {
   deserializeWorkflow,
   serializeWorkflow,
@@ -25,7 +25,7 @@ import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { EditableNameField } from './common/EditableNameField';
 import { ProcessingOverlay } from './common/ProcessingOverlay';
-import { StyledTooltipItem, StyledTooltipProvider } from './common/StyledTooltip';
+import { StyledTooltipProvider } from './common/StyledTooltip';
 import { ConfirmDialog } from './dialogs/ConfirmDialog';
 import { MoreActionsDropdown } from './toolbar/MoreActionsDropdown';
 
@@ -60,6 +60,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const { isProcessing, clearHistory } = useRefinementStore();
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isGeneratingName, setIsGeneratingName] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -148,9 +149,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       } else if (message.type === 'EXPORT_CANCELLED') {
         // User cancelled export - reset exporting state
         setIsExporting(false);
+      } else if (message.type === 'RUN_AS_SLASH_COMMAND_SUCCESS') {
+        setIsRunning(false);
+      } else if (message.type === 'RUN_AS_SLASH_COMMAND_CANCELLED') {
+        // User cancelled run - reset running state
+        setIsRunning(false);
       } else if (message.type === 'ERROR') {
         // Reset loading states on any error
         setIsExporting(false);
+        setIsRunning(false);
         setIsLoadingFile(false);
       }
     };
@@ -216,6 +223,56 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         details: error,
       });
       setIsExporting(false);
+    }
+  };
+
+  const handleRunAsSlashCommand = async () => {
+    if (!workflowName.trim()) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    setIsRunning(true);
+    try {
+      // Issue #89: Get subAgentFlows from store for run
+      const { subAgentFlows } = useWorkflowStore.getState();
+
+      // Serialize workflow with subAgentFlows
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        'Created with Workflow Studio',
+        undefined, // conversationHistory not needed for run
+        subAgentFlows
+      );
+
+      // Validate workflow before run
+      validateWorkflow(workflow);
+
+      // Run as slash command
+      await runAsSlashCommand(workflow);
+      console.log('Workflow run as slash command:', workflowName);
+    } catch (error) {
+      // Translate error messages
+      let errorMessage = t('toolbar.error.validationFailed');
+      if (error instanceof Error) {
+        if (error.message.includes('at least one End node')) {
+          errorMessage = t('toolbar.error.missingEndNode');
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: errorMessage,
+        details: error,
+      });
+      setIsRunning(false);
     }
   };
 
@@ -305,138 +362,247 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           backgroundColor: 'var(--vscode-editor-background)',
         }}
       >
-        {/* Workflow Name Display/Input with AI Generate Button */}
-        <EditableNameField
-          value={workflowName}
-          onChange={setWorkflowName}
-          placeholder={t('toolbar.workflowNamePlaceholder')}
-          disabled={isGeneratingName}
-          dataTour="workflow-name-input"
-          aiGeneration={{
-            isGenerating: isGeneratingName,
-            onGenerate: handleGenerateWorkflowName,
-            onCancel: handleCancelNameGeneration,
-            generateTooltip: t('toolbar.generateNameWithAI'),
-            cancelTooltip: t('cancel'),
+        {/* Workflow Group */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: '2px',
+            flex: 1,
+            minWidth: 0,
           }}
-        />
-
-        {/* Save Button */}
-        <StyledTooltipItem content={t('toolbar.save.tooltip')}>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={isSaving}
-            data-tour="save-button"
+        >
+          {/* Group Label */}
+          <span
             style={{
-              padding: isCompact ? '4px 8px' : '4px 12px',
-              backgroundColor: 'var(--vscode-button-background)',
-              color: 'var(--vscode-button-foreground)',
-              border: 'none',
-              borderRadius: '2px',
-              cursor: isSaving ? 'not-allowed' : 'pointer',
-              fontSize: '13px',
-              opacity: isSaving ? 0.6 : 1,
+              fontSize: '10px',
+              color: 'var(--vscode-descriptionForeground)',
               whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
             }}
           >
-            {isCompact ? <Save size={16} /> : isSaving ? t('toolbar.saving') : t('toolbar.save')}
-          </button>
-        </StyledTooltipItem>
+            Workflow
+          </span>
 
-        {/* Load Button */}
-        <StyledTooltipItem content={t('toolbar.load.tooltip')}>
-          <button
-            type="button"
-            onClick={handleLoadWorkflow}
-            disabled={isLoadingFile}
-            data-tour="load-button"
+          {/* Workflow Controls */}
+          <div
             style={{
-              padding: isCompact ? '4px 8px' : '4px 12px',
-              backgroundColor: 'var(--vscode-button-secondaryBackground)',
-              color: 'var(--vscode-button-secondaryForeground)',
-              border: 'none',
-              borderRadius: '2px',
-              cursor: isLoadingFile ? 'not-allowed' : 'pointer',
-              fontSize: '13px',
-              opacity: isLoadingFile ? 0.6 : 1,
-              whiteSpace: 'nowrap',
               display: 'flex',
               alignItems: 'center',
-              gap: '4px',
+              gap: '8px',
+              width: '100%',
             }}
           >
-            {isCompact ? (
-              <FileDown size={16} />
-            ) : isLoadingFile ? (
-              t('toolbar.loading')
-            ) : (
-              t('toolbar.load')
-            )}
-          </button>
-        </StyledTooltipItem>
+            {/* Workflow Name Display/Input with AI Generate Button */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <EditableNameField
+                value={workflowName}
+                onChange={setWorkflowName}
+                placeholder={t('toolbar.workflowNamePlaceholder')}
+                disabled={isGeneratingName}
+                dataTour="workflow-name-input"
+                aiGeneration={{
+                  isGenerating: isGeneratingName,
+                  onGenerate: handleGenerateWorkflowName,
+                  onCancel: handleCancelNameGeneration,
+                  generateTooltip: t('toolbar.generateNameWithAI'),
+                  cancelTooltip: t('cancel'),
+                }}
+              />
+            </div>
+
+            {/* Save Button */}
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving}
+              data-tour="save-button"
+              style={{
+                padding: isCompact ? '4px 8px' : '4px 12px',
+                backgroundColor: 'var(--vscode-button-background)',
+                color: 'var(--vscode-button-foreground)',
+                border: 'none',
+                borderRadius: '2px',
+                cursor: isSaving ? 'not-allowed' : 'pointer',
+                fontSize: '13px',
+                opacity: isSaving ? 0.6 : 1,
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              {isCompact ? <Save size={16} /> : isSaving ? t('toolbar.saving') : t('toolbar.save')}
+            </button>
+
+            {/* Load Button */}
+            <button
+              type="button"
+              onClick={handleLoadWorkflow}
+              disabled={isLoadingFile}
+              data-tour="load-button"
+              style={{
+                padding: isCompact ? '4px 8px' : '4px 12px',
+                backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                color: 'var(--vscode-button-secondaryForeground)',
+                border: 'none',
+                borderRadius: '2px',
+                cursor: isLoadingFile ? 'not-allowed' : 'pointer',
+                fontSize: '13px',
+                opacity: isLoadingFile ? 0.6 : 1,
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              {isCompact ? (
+                <FileDown size={16} />
+              ) : isLoadingFile ? (
+                t('toolbar.loading')
+              ) : (
+                t('toolbar.load')
+              )}
+            </button>
+          </div>
+        </div>
 
         {/* Divider */}
         <div
           style={{
             width: '1px',
-            height: '20px',
+            height: '32px',
             backgroundColor: 'var(--vscode-panel-border)',
           }}
         />
 
-        {/* Export Button */}
-        <StyledTooltipItem content={t('toolbar.convert.iconTooltip')}>
-          <button
-            type="button"
-            onClick={handleExport}
-            disabled={isExporting}
-            data-tour="export-button"
+        {/* Slash Command Button Group */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: '2px',
+          }}
+        >
+          {/* Group Label */}
+          <span
             style={{
-              padding: isCompact ? '4px 8px' : '4px 12px',
-              backgroundColor: 'var(--vscode-button-background)',
-              color: 'var(--vscode-button-foreground)',
-              border: 'none',
-              borderRadius: '2px',
-              cursor: isExporting ? 'not-allowed' : 'pointer',
-              fontSize: '13px',
-              opacity: isExporting ? 0.6 : 1,
+              fontSize: '10px',
+              color: 'var(--vscode-descriptionForeground)',
               whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
             }}
           >
-            {isCompact ? (
-              <SquareSlash size={16} />
-            ) : isExporting ? (
-              t('toolbar.converting')
-            ) : (
-              t('toolbar.convert')
-            )}
-          </button>
-        </StyledTooltipItem>
+            Slash Command
+          </span>
+
+          {/* Button Group */}
+          <div
+            style={{
+              display: 'flex',
+              gap: '8px',
+            }}
+          >
+            {/* Convert Button */}
+            <button
+              type="button"
+              onClick={handleExport}
+              disabled={isExporting}
+              data-tour="export-button"
+              style={{
+                padding: isCompact ? '4px 8px' : '4px 12px',
+                backgroundColor: 'var(--vscode-button-background)',
+                color: 'var(--vscode-button-foreground)',
+                border: 'none',
+                borderRadius: '2px',
+                cursor: isExporting ? 'not-allowed' : 'pointer',
+                fontSize: '13px',
+                opacity: isExporting ? 0.6 : 1,
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              {isCompact ? (
+                <SquareSlash size={16} />
+              ) : isExporting ? (
+                t('toolbar.converting')
+              ) : (
+                t('toolbar.convert')
+              )}
+            </button>
+
+            {/* Run Button */}
+            <button
+              type="button"
+              onClick={handleRunAsSlashCommand}
+              disabled={isRunning}
+              data-tour="run-button"
+              style={{
+                padding: isCompact ? '4px 8px' : '4px 12px',
+                backgroundColor: 'var(--vscode-button-background)',
+                color: 'var(--vscode-button-foreground)',
+                border: 'none',
+                borderRadius: '2px',
+                cursor: isRunning ? 'not-allowed' : 'pointer',
+                fontSize: '13px',
+                opacity: isRunning ? 0.6 : 1,
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              {isCompact ? (
+                <Play size={16} />
+              ) : isRunning ? (
+                t('toolbar.running')
+              ) : (
+                t('toolbar.run')
+              )}
+            </button>
+          </div>
+        </div>
 
         {/* Divider */}
         <div
           style={{
             width: '1px',
-            height: '20px',
+            height: '32px',
             backgroundColor: 'var(--vscode-panel-border)',
           }}
         />
 
-        {/* More Actions Dropdown */}
-        <MoreActionsDropdown
-          onShareToSlack={onShareToSlack}
-          onResetWorkflow={() => setShowResetConfirm(true)}
-          onStartTour={onStartTour}
-          open={moreActionsOpen}
-          onOpenChange={onMoreActionsOpenChange}
-        />
+        {/* Other Group */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: '2px',
+          }}
+        >
+          {/* Group Label */}
+          <span
+            style={{
+              fontSize: '10px',
+              color: 'var(--vscode-descriptionForeground)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Other
+          </span>
+
+          {/* More Actions Dropdown */}
+          <MoreActionsDropdown
+            onShareToSlack={onShareToSlack}
+            onResetWorkflow={() => setShowResetConfirm(true)}
+            onStartTour={onStartTour}
+            open={moreActionsOpen}
+            onOpenChange={onMoreActionsOpenChange}
+          />
+        </div>
 
         {/* Processing Overlay (Phase 3.10) */}
         <ProcessingOverlay isVisible={isProcessing} />

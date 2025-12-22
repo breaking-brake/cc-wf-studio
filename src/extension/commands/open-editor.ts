@@ -11,11 +11,12 @@ import { translate } from '../i18n/i18n-service';
 import { cancelGeneration } from '../services/claude-code-service';
 import { FileService } from '../services/file-service';
 import { SlackApiService } from '../services/slack-api-service';
+import { executeSlashCommandInTerminal } from '../services/terminal-execution-service';
 import { migrateWorkflow } from '../utils/migrate-workflow';
 import { SlackTokenManager } from '../utils/slack-token-manager';
 import { validateWorkflowFile } from '../utils/workflow-validator';
 import { getWebviewContent } from '../webview-content';
-import { handleExportWorkflow } from './export-workflow';
+import { handleExportWorkflow, handleExportWorkflowForExecution } from './export-workflow';
 import { loadWorkflow } from './load-workflow';
 import { loadWorkflowList } from './load-workflow-list';
 import {
@@ -219,6 +220,76 @@ export function registerOpenEditorCommand(
                   payload: {
                     code: 'VALIDATION_ERROR',
                     message: 'Export payload is required',
+                  },
+                });
+              }
+              break;
+
+            case 'RUN_AS_SLASH_COMMAND':
+              // Run workflow as slash command in terminal
+              if (message.payload?.workflow) {
+                try {
+                  // First, export the workflow to .claude format
+                  const exportResult = await handleExportWorkflowForExecution(
+                    message.payload.workflow,
+                    fileService
+                  );
+
+                  if (!exportResult.success) {
+                    if (exportResult.cancelled) {
+                      // User cancelled - send cancellation message (not an error)
+                      webview.postMessage({
+                        type: 'RUN_AS_SLASH_COMMAND_CANCELLED',
+                        requestId: message.requestId,
+                      });
+                    } else {
+                      webview.postMessage({
+                        type: 'ERROR',
+                        requestId: message.requestId,
+                        payload: {
+                          code: 'EXPORT_FAILED',
+                          message: exportResult.error || 'Failed to export workflow',
+                        },
+                      });
+                    }
+                    break;
+                  }
+
+                  // Run the slash command in terminal
+                  const workspacePath = fileService.getWorkspacePath();
+                  const result = executeSlashCommandInTerminal({
+                    workflowName: message.payload.workflow.name,
+                    workingDirectory: workspacePath,
+                  });
+
+                  // Send success response
+                  webview.postMessage({
+                    type: 'RUN_AS_SLASH_COMMAND_SUCCESS',
+                    requestId: message.requestId,
+                    payload: {
+                      workflowName: message.payload.workflow.name,
+                      terminalName: result.terminalName,
+                      timestamp: new Date().toISOString(),
+                    },
+                  });
+                } catch (error) {
+                  webview.postMessage({
+                    type: 'ERROR',
+                    requestId: message.requestId,
+                    payload: {
+                      code: 'RUN_FAILED',
+                      message: error instanceof Error ? error.message : 'Failed to run workflow',
+                      details: error,
+                    },
+                  });
+                }
+              } else {
+                webview.postMessage({
+                  type: 'ERROR',
+                  requestId: message.requestId,
+                  payload: {
+                    code: 'VALIDATION_ERROR',
+                    message: 'Workflow is required',
                   },
                 });
               }

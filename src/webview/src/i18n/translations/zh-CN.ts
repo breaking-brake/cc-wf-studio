@@ -18,7 +18,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.workflowNamePlaceholder': '工作流名称',
   'toolbar.save': '保存',
   'toolbar.saving': '保存中...',
-  'toolbar.convert': '转换为 Slash Command',
+  'toolbar.convert': '转换',
   'toolbar.convert.tooltip': '转换为 Slash Command 并保存到 .claude/commands/',
   'toolbar.converting': '转换中...',
   'toolbar.refineWithAI': 'AI编辑',
@@ -48,10 +48,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.generateNameWithAI': '使用AI生成名称',
   'toolbar.error.nameGenerationFailed': '生成工作流名称失败。请重试或手动输入。',
 
-  // Toolbar responsive tooltips
-  'toolbar.save.tooltip': '保存工作流',
-  'toolbar.convert.iconTooltip': '转换为Slash Command',
-  'toolbar.load.tooltip': '加载已保存的工作流',
+  // Toolbar slash command group
+  'toolbar.run': '执行',
+  'toolbar.running': '执行中...',
 
   // Toolbar more actions dropdown
   'toolbar.moreActions': '更多',

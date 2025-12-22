@@ -18,7 +18,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.workflowNamePlaceholder': '워크플로 이름',
   'toolbar.save': '저장',
   'toolbar.saving': '저장 중...',
-  'toolbar.convert': 'Slash Command로 변환',
+  'toolbar.convert': '변환',
   'toolbar.convert.tooltip': 'Slash Command로 변환하여 .claude/commands/에 저장',
   'toolbar.converting': '변환 중...',
   'toolbar.refineWithAI': 'AI로 편집',
@@ -50,10 +50,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.error.nameGenerationFailed':
     '워크플로 이름 생성에 실패했습니다. 다시 시도하거나 수동으로 입력하세요.',
 
-  // Toolbar responsive tooltips
-  'toolbar.save.tooltip': '워크플로 저장',
-  'toolbar.convert.iconTooltip': 'Slash Command로 변환',
-  'toolbar.load.tooltip': '저장된 워크플로 불러오기',
+  // Toolbar slash command group
+  'toolbar.run': '실행',
+  'toolbar.running': '실행 중...',
 
   // Toolbar more actions dropdown
   'toolbar.moreActions': '더보기',
