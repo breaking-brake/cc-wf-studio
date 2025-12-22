@@ -3,7 +3,6 @@
  *
  * Consolidates AI refinement settings into a single dropdown menu:
  * - Use Skills toggle
- * - Timeout selector
  * - Model selector
  * - Allowed Tools selector
  * - Clear History action
@@ -12,20 +11,9 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import type { ClaudeModel } from '@shared/types/messages';
 // Edit3 is commented out with Iteration Counter - uncomment when re-enabling
-import { Check, ChevronLeft, Clock, Cpu, RotateCcw, Trash2, UserCog, Wrench } from 'lucide-react';
+import { Check, ChevronLeft, Cpu, RotateCcw, Trash2, UserCog, Wrench } from 'lucide-react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { AVAILABLE_TOOLS, useRefinementStore } from '../../stores/refinement-store';
-
-const TIMEOUT_PRESETS = [
-  { seconds: 0, label: 'None' },
-  { seconds: 30, label: '30s' },
-  { seconds: 60, label: '60s' },
-  { seconds: 90, label: '90s' },
-  { seconds: 120, label: '2min' },
-  { seconds: 180, label: '3min' },
-  { seconds: 240, label: '4min' },
-  { seconds: 300, label: '5min' },
-];
 
 const MODEL_PRESETS: { value: ClaudeModel; label: string }[] = [
   { value: 'sonnet', label: 'Sonnet' },
@@ -49,8 +37,6 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
   const {
     useSkills,
     toggleUseSkills,
-    timeoutSeconds,
-    setTimeoutSeconds,
     isProcessing,
     selectedModel,
     setSelectedModel,
@@ -59,9 +45,6 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
     resetAllowedTools,
     // conversationHistory, // Uncomment when re-enabling Iteration Counter
   } = useRefinementStore();
-
-  const currentTimeoutLabel =
-    TIMEOUT_PRESETS.find((p) => p.seconds === timeoutSeconds)?.label || `${timeoutSeconds}s`;
 
   const currentModelLabel = MODEL_PRESETS.find((p) => p.value === selectedModel)?.label || 'Sonnet';
 
@@ -238,91 +221,6 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                       onSelect={(event) => {
                         event.preventDefault();
                         setSelectedModel(preset.value);
-                      }}
-                      style={{
-                        padding: '6px 12px',
-                        fontSize: `${FONT_SIZES.small}px`,
-                        color: 'var(--vscode-foreground)',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        outline: 'none',
-                        borderRadius: '2px',
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: '12px',
-                          height: '12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <DropdownMenu.ItemIndicator>
-                          <Check size={12} />
-                        </DropdownMenu.ItemIndicator>
-                      </div>
-                      <span>{preset.label}</span>
-                    </DropdownMenu.RadioItem>
-                  ))}
-                </DropdownMenu.RadioGroup>
-              </DropdownMenu.SubContent>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Sub>
-
-          {/* Timeout Sub-menu */}
-          <DropdownMenu.Sub>
-            <DropdownMenu.SubTrigger
-              disabled={isProcessing}
-              style={{
-                padding: '8px 12px',
-                fontSize: `${FONT_SIZES.small}px`,
-                color: 'var(--vscode-foreground)',
-                cursor: isProcessing ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '8px',
-                outline: 'none',
-                borderRadius: '2px',
-                opacity: isProcessing ? 0.5 : 1,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <ChevronLeft size={14} />
-                <span style={{ color: 'var(--vscode-descriptionForeground)' }}>
-                  {currentTimeoutLabel}
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Clock size={14} />
-                <span>{t('refinement.timeout.label')}</span>
-              </div>
-            </DropdownMenu.SubTrigger>
-
-            <DropdownMenu.Portal>
-              <DropdownMenu.SubContent
-                sideOffset={4}
-                style={{
-                  backgroundColor: 'var(--vscode-dropdown-background)',
-                  border: '1px solid var(--vscode-dropdown-border)',
-                  borderRadius: '4px',
-                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
-                  zIndex: 10000,
-                  minWidth: '100px',
-                  padding: '4px',
-                }}
-              >
-                <DropdownMenu.RadioGroup value={String(timeoutSeconds)}>
-                  {TIMEOUT_PRESETS.map((preset) => (
-                    <DropdownMenu.RadioItem
-                      key={preset.seconds}
-                      value={String(preset.seconds)}
-                      onSelect={(event) => {
-                        event.preventDefault();
-                        setTimeoutSeconds(preset.seconds);
                       }}
                       style={{
                         padding: '6px 12px',
