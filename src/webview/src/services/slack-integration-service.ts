@@ -771,16 +771,18 @@ export class AIGenerationError extends Error {
  * @param workflowJson - Serialized workflow JSON
  * @param targetLanguage - Target language for the description (en, ja, ko, zh-CN, zh-TW)
  * @param timeoutMs - Optional timeout in milliseconds (default: 30000)
+ * @param externalRequestId - Optional external request ID for cancellation support
  * @returns Promise that resolves with generated description
  * @throws AIGenerationError if generation fails
  */
 export function generateSlackDescription(
   workflowJson: string,
   targetLanguage: string,
-  timeoutMs = 30000
+  timeoutMs = 30000,
+  externalRequestId?: string
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    const requestId = `req-${Date.now()}-${Math.random()}`;
+    const requestId = externalRequestId || `req-${Date.now()}-${Math.random()}`;
 
     const handler = (event: MessageEvent) => {
       const message: ExtensionMessage = event.data;
@@ -821,5 +823,18 @@ export function generateSlackDescription(
       window.removeEventListener('message', handler);
       reject(new AIGenerationError('TIMEOUT', 'Request timed out'));
     }, timeoutMs + 5000);
+  });
+}
+
+/**
+ * Cancel an active Slack description generation request
+ *
+ * @param requestId - Request ID to cancel
+ */
+export function cancelSlackDescriptionGeneration(requestId: string): void {
+  vscode.postMessage({
+    type: 'CANCEL_SLACK_DESCRIPTION',
+    requestId,
+    payload: { targetRequestId: requestId },
   });
 }

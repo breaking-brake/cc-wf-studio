@@ -692,7 +692,7 @@ export async function handleCancelRefinement(
 
   try {
     // Cancel the active refinement process
-    const result = cancelRefinement(targetRequestId);
+    const result = await cancelRefinement(targetRequestId);
 
     if (result.cancelled) {
       log('INFO', 'Refinement cancelled successfully', {

@@ -8,6 +8,7 @@
 import * as vscode from 'vscode';
 import type { WebviewMessage } from '../../shared/types/messages';
 import { translate } from '../i18n/i18n-service';
+import { cancelGeneration } from '../services/claude-code-service';
 import { FileService } from '../services/file-service';
 import { SlackApiService } from '../services/slack-api-service';
 import { migrateWorkflow } from '../utils/migrate-workflow';
@@ -561,6 +562,13 @@ export function registerOpenEditorCommand(
               }
               break;
 
+            case 'CANCEL_SLACK_DESCRIPTION':
+              // Cancel Slack description generation
+              if (message.payload?.targetRequestId) {
+                await cancelGeneration(message.payload.targetRequestId);
+              }
+              break;
+
             case 'GENERATE_WORKFLOW_NAME':
               // Generate workflow name with AI
               if (message.payload) {
@@ -580,6 +588,13 @@ export function registerOpenEditorCommand(
                     message: 'Generate workflow name payload is required',
                   },
                 });
+              }
+              break;
+
+            case 'CANCEL_WORKFLOW_NAME':
+              // Cancel workflow name generation
+              if (message.payload?.targetRequestId) {
+                await cancelGeneration(message.payload.targetRequestId);
               }
               break;
 

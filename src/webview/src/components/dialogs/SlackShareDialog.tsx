@@ -16,6 +16,7 @@ import type {
   SlackWorkspace,
 } from '../../services/slack-integration-service';
 import {
+  cancelSlackDescriptionGeneration,
   generateSlackDescription,
   getLastSharedChannel,
   getSlackChannels,
@@ -222,7 +223,13 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
         targetLanguage = locale.split('-')[0];
       }
 
-      const generatedDescription = await generateSlackDescription(workflowJson, targetLanguage);
+      // Generate description with AI (pass requestId for cancellation support)
+      const generatedDescription = await generateSlackDescription(
+        workflowJson,
+        targetLanguage,
+        30000,
+        currentRequestId
+      );
 
       // Only update if not cancelled
       if (generationRequestIdRef.current === currentRequestId) {
@@ -244,6 +251,10 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
 
   // Handle cancel AI description generation
   const handleCancelGeneration = useCallback(() => {
+    const requestId = generationRequestIdRef.current;
+    if (requestId) {
+      cancelSlackDescriptionGeneration(requestId);
+    }
     generationRequestIdRef.current = null;
     setIsGeneratingDescription(false);
     setGenerationError(null);

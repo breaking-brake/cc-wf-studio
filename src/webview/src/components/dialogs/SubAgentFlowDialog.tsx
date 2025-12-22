@@ -22,7 +22,10 @@ import ReactFlow, {
 } from 'reactflow';
 import { useIsCompactMode } from '../../hooks/useWindowWidth';
 import { useTranslation } from '../../i18n/i18n-context';
-import { generateWorkflowName } from '../../services/ai-generation-service';
+import {
+  cancelWorkflowNameGeneration,
+  generateWorkflowName,
+} from '../../services/ai-generation-service';
 import { useRefinementStore } from '../../stores/refinement-store';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { EditableNameField } from '../common/EditableNameField';
@@ -258,8 +261,13 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
         targetLanguage = locale.split('-')[0];
       }
 
-      // Generate name with AI
-      const generatedName = await generateWorkflowName(subAgentFlowJson, targetLanguage);
+      // Generate name with AI (pass requestId for cancellation support)
+      const generatedName = await generateWorkflowName(
+        subAgentFlowJson,
+        targetLanguage,
+        30000,
+        currentRequestId
+      );
 
       // Only update if not cancelled
       if (generationNameRequestIdRef.current === currentRequestId) {
@@ -287,6 +295,10 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
 
   // Handle cancel name generation
   const handleCancelNameGeneration = useCallback(() => {
+    const requestId = generationNameRequestIdRef.current;
+    if (requestId) {
+      cancelWorkflowNameGeneration(requestId);
+    }
     generationNameRequestIdRef.current = null;
     setIsGeneratingName(false);
   }, []);

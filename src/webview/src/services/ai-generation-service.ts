@@ -27,16 +27,18 @@ export class AIGenerationError extends Error {
  * @param workflowJson - Serialized workflow JSON for AI analysis
  * @param targetLanguage - Target language for the name (en, ja, ko, zh-CN, zh-TW)
  * @param timeoutMs - Optional timeout in milliseconds (default: 30000)
+ * @param externalRequestId - Optional external request ID for cancellation support
  * @returns Promise that resolves to the generated name (kebab-case)
  * @throws {AIGenerationError} If generation fails
  */
 export function generateWorkflowName(
   workflowJson: string,
   targetLanguage: string,
-  timeoutMs = 30000
+  timeoutMs = 30000,
+  externalRequestId?: string
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    const requestId = `req-name-${Date.now()}-${Math.random()}`;
+    const requestId = externalRequestId || `req-name-${Date.now()}-${Math.random()}`;
 
     const handler = (event: MessageEvent) => {
       const message: ExtensionMessage = event.data;
@@ -79,5 +81,18 @@ export function generateWorkflowName(
       window.removeEventListener('message', handler);
       reject(new AIGenerationError('Request timed out', 'TIMEOUT'));
     }, timeoutMs + 5000);
+  });
+}
+
+/**
+ * Cancel an active workflow name generation request
+ *
+ * @param requestId - Request ID to cancel
+ */
+export function cancelWorkflowNameGeneration(requestId: string): void {
+  vscode.postMessage({
+    type: 'CANCEL_WORKFLOW_NAME',
+    requestId,
+    payload: { targetRequestId: requestId },
   });
 }

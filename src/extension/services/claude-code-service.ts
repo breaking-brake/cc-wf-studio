@@ -37,7 +37,9 @@ interface Result {
 }
 
 interface Subprocess extends Promise<Result> {
-  nodeChildProcess: ChildProcess;
+  // nano-spawn v2.0.0: nodeChildProcess is a Promise that resolves to ChildProcess
+  // (spawnSubprocess is an async function)
+  nodeChildProcess: Promise<ChildProcess>;
   stdout: AsyncIterable<string>;
   stderr: AsyncIterable<string>;
 }
@@ -134,9 +136,7 @@ export async function executeClaudeCodeCLI(
     // Register as active process if requestId is provided
     if (requestId) {
       activeProcesses.set(requestId, { subprocess, startTime });
-      log('INFO', `Registered active process for requestId: ${requestId}`, {
-        pid: subprocess.nodeChildProcess.pid,
-      });
+      log('INFO', `Registered active process for requestId: ${requestId}`);
     }
 
     // Wait for subprocess to complete
@@ -336,10 +336,10 @@ export function parseClaudeCodeOutput(output: string): unknown {
  * @param requestId - Request ID of the generation to cancel
  * @returns True if process was found and killed, false otherwise
  */
-export function cancelGeneration(requestId: string): {
+export async function cancelGeneration(requestId: string): Promise<{
   cancelled: boolean;
   executionTimeMs?: number;
-} {
+}> {
   const activeGen = activeProcesses.get(requestId);
 
   if (!activeGen) {
@@ -348,8 +348,11 @@ export function cancelGeneration(requestId: string): {
   }
 
   const { subprocess, startTime } = activeGen;
-  const childProcess = subprocess.nodeChildProcess;
   const executionTimeMs = Date.now() - startTime;
+
+  // nano-spawn v2.0.0: nodeChildProcess is a Promise that resolves to ChildProcess
+  // We need to await it before calling kill()
+  const childProcess = await subprocess.nodeChildProcess;
 
   log('INFO', `Cancelling generation for requestId: ${requestId}`, {
     pid: childProcess.pid,
@@ -461,9 +464,7 @@ export async function executeClaudeCodeCLIStreaming(
     // Register as active process if requestId is provided
     if (requestId) {
       activeProcesses.set(requestId, { subprocess, startTime });
-      log('INFO', `Registered active streaming process for requestId: ${requestId}`, {
-        pid: subprocess.nodeChildProcess.pid,
-      });
+      log('INFO', `Registered active streaming process for requestId: ${requestId}`);
     }
 
     // Track explanatory text (non-JSON text from AI, for chat history)
@@ -721,10 +722,10 @@ export async function executeClaudeCodeCLIStreaming(
  * @param requestId - Request ID of the refinement to cancel
  * @returns True if process was found and killed, false otherwise
  */
-export function cancelRefinement(requestId: string): {
+export async function cancelRefinement(requestId: string): Promise<{
   cancelled: boolean;
   executionTimeMs?: number;
-} {
+}> {
   const activeGen = activeProcesses.get(requestId);
 
   if (!activeGen) {
@@ -733,8 +734,11 @@ export function cancelRefinement(requestId: string): {
   }
 
   const { subprocess, startTime } = activeGen;
-  const childProcess = subprocess.nodeChildProcess;
   const executionTimeMs = Date.now() - startTime;
+
+  // nano-spawn v2.0.0: nodeChildProcess is a Promise that resolves to ChildProcess
+  // We need to await it before calling kill()
+  const childProcess = await subprocess.nodeChildProcess;
 
   log('INFO', `Cancelling refinement for requestId: ${requestId}`, {
     pid: childProcess.pid,
