@@ -230,14 +230,15 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                   padding: '4px',
                 }}
               >
-                <DropdownMenu.RadioGroup
-                  value={selectedModel}
-                  onValueChange={(value) => setSelectedModel(value as ClaudeModel)}
-                >
+                <DropdownMenu.RadioGroup value={selectedModel}>
                   {MODEL_PRESETS.map((preset) => (
                     <DropdownMenu.RadioItem
                       key={preset.value}
                       value={preset.value}
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        setSelectedModel(preset.value);
+                      }}
                       style={{
                         padding: '6px 12px',
                         fontSize: `${FONT_SIZES.small}px`,
@@ -314,14 +315,15 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                   padding: '4px',
                 }}
               >
-                <DropdownMenu.RadioGroup
-                  value={String(timeoutSeconds)}
-                  onValueChange={(value) => setTimeoutSeconds(Number(value))}
-                >
+                <DropdownMenu.RadioGroup value={String(timeoutSeconds)}>
                   {TIMEOUT_PRESETS.map((preset) => (
                     <DropdownMenu.RadioItem
                       key={preset.seconds}
                       value={String(preset.seconds)}
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        setTimeoutSeconds(preset.seconds);
+                      }}
                       style={{
                         padding: '6px 12px',
                         fontSize: `${FONT_SIZES.small}px`,
@@ -469,7 +471,10 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                 />
 
                 <DropdownMenu.Item
-                  onSelect={resetAllowedTools}
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    resetAllowedTools();
+                  }}
                   style={{
                     padding: '6px 12px',
                     fontSize: `${FONT_SIZES.small}px`,
