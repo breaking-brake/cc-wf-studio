@@ -18,6 +18,24 @@ import type { ConversationHistory, Workflow } from '@shared/types/workflow-defin
 import { vscode } from '../main';
 
 /**
+ * Maximum client-side timeout as a system guard (10 minutes)
+ * This ensures refinement requests don't hang indefinitely even when "unlimited" is selected
+ */
+const MAX_CLIENT_TIMEOUT_MS = 600000; // 10 minutes
+
+/**
+ * Calculate client-side timeout with system guard
+ * @param serverTimeoutMs - Server timeout in milliseconds (0 = unlimited, undefined = default)
+ * @returns Client timeout capped at MAX_CLIENT_TIMEOUT_MS
+ */
+function calculateClientTimeout(serverTimeoutMs?: number): number {
+  if (serverTimeoutMs && serverTimeoutMs > 0) {
+    return Math.min(serverTimeoutMs + 5000, MAX_CLIENT_TIMEOUT_MS);
+  }
+  return MAX_CLIENT_TIMEOUT_MS;
+}
+
+/**
  * Error class for workflow refinement failures
  */
 export class WorkflowRefinementError extends Error {
@@ -138,9 +156,7 @@ export function refineWorkflow(
       payload,
     });
 
-    // Local timeout: 5 seconds more than server timeout to allow for response
-    // Default server timeout is 90s (from settings), so client timeout is 95s
-    const clientTimeoutMs = serverTimeoutMs ? serverTimeoutMs + 5000 : 95000;
+    // Client-side timeout with system guard (max 10 minutes)
     setTimeout(() => {
       window.removeEventListener('message', handler);
       reject(
@@ -149,7 +165,7 @@ export function refineWorkflow(
           'TIMEOUT'
         )
       );
-    }, clientTimeoutMs);
+    }, calculateClientTimeout(serverTimeoutMs));
   });
 }
 
@@ -290,9 +306,7 @@ export function refineSubAgentFlow(
       payload,
     });
 
-    // Local timeout: 5 seconds more than server timeout to allow for response
-    // Default server timeout is 90s (from settings), so client timeout is 95s
-    const clientTimeoutMs = serverTimeoutMs ? serverTimeoutMs + 5000 : 95000;
+    // Client-side timeout with system guard (max 10 minutes)
     setTimeout(() => {
       window.removeEventListener('message', handler);
       reject(
@@ -301,6 +315,6 @@ export function refineSubAgentFlow(
           'TIMEOUT'
         )
       );
-    }, clientTimeoutMs);
+    }, calculateClientTimeout(serverTimeoutMs));
   });
 }

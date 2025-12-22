@@ -21,7 +21,11 @@ import type {
 import type { ConversationMessage } from '../../shared/types/workflow-definition';
 import { log } from '../extension';
 import { cancelRefinement } from '../services/claude-code-service';
-import { refineSubAgentFlow, refineWorkflow } from '../services/refinement-service';
+import {
+  DEFAULT_REFINEMENT_TIMEOUT_MS,
+  refineSubAgentFlow,
+  refineWorkflow,
+} from '../services/refinement-service';
 
 /**
  * Handle workflow refinement request
@@ -53,8 +57,8 @@ export async function handleRefineWorkflow(
   } = payload;
   const startTime = Date.now();
 
-  // Use provided timeout or default to 90 seconds
-  const effectiveTimeoutMs = timeoutMs ?? 90000;
+  // Use provided timeout or default
+  const effectiveTimeoutMs = timeoutMs ?? DEFAULT_REFINEMENT_TIMEOUT_MS;
 
   log('INFO', 'Workflow refinement request received', {
     requestId,
@@ -300,8 +304,8 @@ async function handleRefineSubAgentFlow(
   } = payload;
   const startTime = Date.now();
 
-  // Use provided timeout or default to 90 seconds
-  const effectiveTimeoutMs = timeoutMs ?? 90000;
+  // Use provided timeout or default
+  const effectiveTimeoutMs = timeoutMs ?? DEFAULT_REFINEMENT_TIMEOUT_MS;
 
   log('INFO', 'SubAgentFlow refinement request received', {
     requestId,

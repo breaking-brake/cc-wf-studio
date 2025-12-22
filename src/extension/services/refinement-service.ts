@@ -163,10 +163,9 @@ export function constructRefinementPrompt(
 
 /**
  * Default timeout for workflow refinement (90 seconds)
- * Can be overridden by user configuration (cc-wf-studio.aiRefinement.timeout)
- * Aligned with AI generation timeout for consistency
+ * Can be overridden by user selection in the Refinement Chat Panel settings
  */
-const MAX_REFINEMENT_TIMEOUT_MS = 90000;
+export const DEFAULT_REFINEMENT_TIMEOUT_MS = 90000;
 
 /**
  * Execute workflow refinement via Claude Code CLI
@@ -190,7 +189,7 @@ export async function refineWorkflow(
   userMessage: string,
   extensionPath: string,
   useSkills = true,
-  timeoutMs = MAX_REFINEMENT_TIMEOUT_MS,
+  timeoutMs = DEFAULT_REFINEMENT_TIMEOUT_MS,
   requestId?: string,
   workspaceRoot?: string,
   onProgress?: StreamingProgressCallback,
@@ -954,7 +953,7 @@ export async function refineSubAgentFlow(
   userMessage: string,
   extensionPath: string,
   useSkills = true,
-  timeoutMs = MAX_REFINEMENT_TIMEOUT_MS,
+  timeoutMs = DEFAULT_REFINEMENT_TIMEOUT_MS,
   requestId?: string,
   workspaceRoot?: string,
   model: ClaudeModel = 'sonnet',

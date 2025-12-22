@@ -275,22 +275,6 @@ Change the AskUserQuestion node to have 3 options instead of 2: High, Medium, Lo
    - Click **Save** to store as JSON in `.vscode/workflows/`
    - Click **Export** to generate `.claude` files ready for Claude Code
 
-### Configuration
-
-You can customize the extension behavior through VSCode settings (`Ctrl+,` / `Cmd+,`):
-
-**AI Refinement Timeout** (`cc-wf-studio.aiRefinement.timeout`)
-- Controls how long the extension waits for AI workflow refinement responses
-- **Default**: 90 seconds
-- **Range**: 30-300 seconds
-- **Usage**: Increase for complex workflows, decrease for faster feedback on simple changes
-- **Location**: Settings → Extensions → Claude Code Workflow Studio
-
-To adjust:
-1. Open VSCode Settings (`Ctrl+,` / `Cmd+,`)
-2. Search for "Claude Code Workflow Studio"
-3. Adjust "AI Refinement Timeout" to your preference
-
 ## How It Works
 
 ### Prompt Nodes

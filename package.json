@@ -53,13 +53,6 @@
     "configuration": {
       "title": "Claude Code Workflow Studio",
       "properties": {
-        "cc-wf-studio.aiRefinement.timeout": {
-          "type": "number",
-          "default": 90,
-          "minimum": 30,
-          "maximum": 300,
-          "description": "Timeout in seconds for AI workflow refinement requests (30-300 seconds)"
-        },
         "cc-wf-studio.ai.schemaFormat": {
           "type": "string",
           "enum": [
