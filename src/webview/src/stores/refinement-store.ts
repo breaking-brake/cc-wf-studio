@@ -196,7 +196,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   currentInput: '',
   currentRequestId: null,
   useSkills: true,
-  timeoutSeconds: 0, // Default timeout: Unlimited (0 = no timeout)
+  timeoutSeconds: 0, // Default timeout: None (0 = use system guard)
   selectedModel: loadModelFromStorage(), // Load from localStorage, default: 'haiku'
   allowedTools: loadAllowedToolsFromStorage(), // Load from localStorage, default: DEFAULT_ALLOWED_TOOLS
 

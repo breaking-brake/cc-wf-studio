@@ -17,7 +17,7 @@ import { useTranslation } from '../../i18n/i18n-context';
 import { AVAILABLE_TOOLS, useRefinementStore } from '../../stores/refinement-store';
 
 const TIMEOUT_PRESETS = [
-  { seconds: 0, label: 'Unlimited' },
+  { seconds: 0, label: 'None' },
   { seconds: 30, label: '30s' },
   { seconds: 60, label: '60s' },
   { seconds: 90, label: '90s' },
