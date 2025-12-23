@@ -241,14 +241,31 @@ const App: React.FC = () => {
           />
           {/* Processing overlay for canvas area only (with message centered in canvas) */}
           <ProcessingOverlay isVisible={isProcessing} message={t('refinement.processingOverlay')} />
+
+          {/* Property Panel - overlay on canvas right side */}
+          {selectedNodeId && isPropertyPanelOpen && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 5,
+                right: 5,
+                bottom: 5,
+                zIndex: 10,
+              }}
+            >
+              <PropertyPanel />
+            </div>
+          )}
         </div>
 
-        {/* Right Panel: Property Panel (when node selected) > Refinement Chat Panel > none (canvas expands) */}
-        {selectedNodeId && isPropertyPanelOpen ? (
-          <PropertyPanel />
-        ) : isRefinementPanelOpen ? (
-          <RefinementChatPanel />
-        ) : null}
+        {/* Refinement Panel with Radix Collapsible for slide animation */}
+        <Collapsible.Root open={isRefinementPanelOpen}>
+          <Collapsible.Content
+            className={`refinement-panel-collapsible${isCompact ? ' compact' : ''}`}
+          >
+            <RefinementChatPanel />
+          </Collapsible.Content>
+        </Collapsible.Root>
       </div>
 
       {/* Error Notification Overlay */}
@@ -388,6 +405,45 @@ const App: React.FC = () => {
           @keyframes slideClose {
             from {
               width: var(--palette-width);
+            }
+            to {
+              width: 0px;
+            }
+          }
+
+          /* Refinement Panel Collapsible Animation */
+          .refinement-panel-collapsible {
+            --refinement-width: 320px;
+            overflow: hidden;
+            height: 100%;
+          }
+
+          .refinement-panel-collapsible.compact {
+            --refinement-width: 280px;
+          }
+
+          .refinement-panel-collapsible[data-state='open'] {
+            width: var(--refinement-width);
+            animation: slideOpenFromRight 150ms ease-out;
+          }
+
+          .refinement-panel-collapsible[data-state='closed'] {
+            width: 0px;
+            animation: slideCloseToRight 150ms ease-out;
+          }
+
+          @keyframes slideOpenFromRight {
+            from {
+              width: 0px;
+            }
+            to {
+              width: var(--refinement-width);
+            }
+          }
+
+          @keyframes slideCloseToRight {
+            from {
+              width: var(--refinement-width);
             }
             to {
               width: 0px;

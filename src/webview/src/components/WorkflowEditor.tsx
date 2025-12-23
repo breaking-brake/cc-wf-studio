@@ -5,7 +5,7 @@
  * Based on: /specs/001-cc-wf-studio/research.md section 3.4
  */
 
-import { PanelLeftOpen, Sparkles } from 'lucide-react';
+import { PanelLeftOpen } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactFlow, {
@@ -20,11 +20,7 @@ import ReactFlow, {
   Panel,
 } from 'reactflow';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
-import { useTranslation } from '../i18n/i18n-context';
-import { serializeWorkflow } from '../services/workflow-service';
-import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
-import { StyledTooltip } from './common/StyledTooltip';
 import { InteractionModeToggle } from './InteractionModeToggle';
 import { MinimapContainer } from './MinimapContainer';
 import { AskUserQuestionNodeComponent } from './nodes/AskUserQuestionNode';
@@ -89,7 +85,6 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   isNodePaletteCollapsed = false,
   onExpandNodePalette,
 }) => {
-  const { t } = useTranslation();
   const isCompact = useIsCompactMode();
 
   // Get state and handlers from Zustand store
@@ -101,13 +96,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     onConnect,
     setSelectedNodeId,
     interactionMode,
-    activeWorkflow,
-    setActiveWorkflow,
-    workflowName,
-    subAgentFlows,
   } = useWorkflowStore();
-
-  const { openChat, initConversation, loadConversationHistory } = useRefinementStore();
 
   /**
    * 接続制約の検証
@@ -199,43 +188,6 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   // ReactFlow interaction props based on effective mode
   const panOnDrag = effectiveMode === 'pan';
   const selectionOnDrag = effectiveMode === 'selection';
-
-  // Handle opening AI refinement chat
-  const handleOpenRefinementChat = useCallback(() => {
-    // Serialize current workflow state to set as active workflow
-    // Include subAgentFlows to preserve SubAgentFlow references
-    const currentWorkflow = serializeWorkflow(
-      nodes,
-      edges,
-      workflowName || 'Untitled',
-      'Created with Workflow Studio',
-      activeWorkflow?.conversationHistory,
-      subAgentFlows
-    );
-    setActiveWorkflow(currentWorkflow);
-
-    // Load or initialize conversation history
-    if (activeWorkflow?.conversationHistory) {
-      loadConversationHistory(activeWorkflow.conversationHistory);
-    } else {
-      initConversation();
-    }
-
-    // Deselect node and open chat
-    setSelectedNodeId(null);
-    openChat();
-  }, [
-    nodes,
-    edges,
-    workflowName,
-    activeWorkflow?.conversationHistory,
-    subAgentFlows,
-    setActiveWorkflow,
-    loadConversationHistory,
-    initConversation,
-    setSelectedNodeId,
-    openChat,
-  ]);
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -335,35 +287,6 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
             </button>
           </Panel>
         )}
-
-        {/* AI Refinement Button */}
-        <Panel position="top-right">
-          <StyledTooltip content={t('toolbar.refineWithAI')} side="left">
-            <button
-              type="button"
-              onClick={handleOpenRefinementChat}
-              data-tour="ai-refine-button"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: isCompact ? '0' : '6px',
-                padding: isCompact ? '6px' : '6px 10px',
-                backgroundColor: 'var(--vscode-button-background)',
-                color: 'var(--vscode-button-foreground)',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                fontWeight: 500,
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.2)',
-                opacity: 0.9,
-              }}
-            >
-              <Sparkles size={14} />
-              {!isCompact && t('toolbar.refineWithAI')}
-            </button>
-          </StyledTooltip>
-        </Panel>
       </ReactFlow>
     </div>
   );

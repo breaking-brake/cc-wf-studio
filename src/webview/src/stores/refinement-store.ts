@@ -125,6 +125,7 @@ interface RefinementStore {
   // Actions
   openChat: () => void;
   closeChat: () => void;
+  toggleChat: () => void;
   toggleUseSkills: () => void;
   setTimeoutSeconds: (seconds: number) => void;
   setSelectedModel: (model: ClaudeModel) => void;
@@ -211,6 +212,10 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
 
   closeChat: () => {
     set({ isOpen: false });
+  },
+
+  toggleChat: () => {
+    set({ isOpen: !get().isOpen });
   },
 
   toggleUseSkills: () => {

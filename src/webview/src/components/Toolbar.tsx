@@ -5,7 +5,7 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
-import { FileDown, Play, Save, SquareSlash } from 'lucide-react';
+import { FileDown, Play, Save, Sparkles, SquareSlash } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
@@ -56,8 +56,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     workflowName,
     setWorkflowName,
     clearWorkflow,
+    subAgentFlows,
   } = useWorkflowStore();
-  const { isProcessing, clearHistory } = useRefinementStore();
+  const {
+    isProcessing,
+    clearHistory,
+    isOpen: isRefinementOpen,
+    openChat,
+    closeChat,
+    initConversation,
+    loadConversationHistory,
+  } = useRefinementStore();
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
@@ -349,6 +358,49 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setIsGeneratingName(false);
   }, []);
 
+  // Handle toggling AI refinement chat
+  const handleOpenRefinementChat = useCallback(() => {
+    // If already open, just close it
+    if (isRefinementOpen) {
+      closeChat();
+      return;
+    }
+
+    // Serialize current workflow state to set as active workflow
+    // Include subAgentFlows to preserve SubAgentFlow references
+    const currentWorkflow = serializeWorkflow(
+      nodes,
+      edges,
+      workflowName || 'Untitled',
+      'Created with Workflow Studio',
+      activeWorkflow?.conversationHistory,
+      subAgentFlows
+    );
+    setActiveWorkflow(currentWorkflow);
+
+    // Load or initialize conversation history
+    if (activeWorkflow?.conversationHistory) {
+      loadConversationHistory(activeWorkflow.conversationHistory);
+    } else {
+      initConversation();
+    }
+
+    // Open chat
+    openChat();
+  }, [
+    isRefinementOpen,
+    closeChat,
+    nodes,
+    edges,
+    workflowName,
+    activeWorkflow?.conversationHistory,
+    subAgentFlows,
+    setActiveWorkflow,
+    loadConversationHistory,
+    initConversation,
+    openChat,
+  ]);
+
   return (
     <StyledTooltipProvider>
       <div
@@ -588,14 +640,45 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             Other
           </span>
 
-          {/* More Actions Dropdown */}
-          <MoreActionsDropdown
-            onShareToSlack={onShareToSlack}
-            onResetWorkflow={() => setShowResetConfirm(true)}
-            onStartTour={onStartTour}
-            open={moreActionsOpen}
-            onOpenChange={onMoreActionsOpenChange}
-          />
+          {/* Button Group */}
+          <div
+            style={{
+              display: 'flex',
+              gap: '8px',
+            }}
+          >
+            {/* AI Edit Button */}
+            <button
+              type="button"
+              onClick={handleOpenRefinementChat}
+              data-tour="ai-refine-button"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: isCompact ? '0' : '4px',
+                padding: isCompact ? '4px 8px' : '4px 12px',
+                backgroundColor: 'var(--vscode-button-background)',
+                color: 'var(--vscode-button-foreground)',
+                border: 'none',
+                borderRadius: '2px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <Sparkles size={14} />
+              {!isCompact && t('toolbar.refineWithAI')}
+            </button>
+
+            {/* More Actions Dropdown */}
+            <MoreActionsDropdown
+              onShareToSlack={onShareToSlack}
+              onResetWorkflow={() => setShowResetConfirm(true)}
+              onStartTour={onStartTour}
+              open={moreActionsOpen}
+              onOpenChange={onMoreActionsOpenChange}
+            />
+          </div>
         </div>
 
         {/* Processing Overlay (Phase 3.10) */}

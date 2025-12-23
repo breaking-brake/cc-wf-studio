@@ -49,9 +49,11 @@ export const PropertyPanel: React.FC = () => {
         width: `${width}px`,
         height: '100%',
         backgroundColor: 'var(--vscode-sideBar-background)',
-        borderLeft: '1px solid var(--vscode-panel-border)',
+        border: '1px solid var(--vscode-panel-border)',
+        borderRadius: '4px',
         padding: '16px',
         overflowY: 'auto',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
       }}
     >
       <ResizeHandle onMouseDown={handleMouseDown} />

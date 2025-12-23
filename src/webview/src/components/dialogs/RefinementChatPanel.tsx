@@ -11,10 +11,11 @@
  * Updated: SubAgentFlow support - Unified panel for both workflow types
  */
 
+import { PanelRightClose } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ResponsiveFontProvider } from '../../contexts/ResponsiveFontContext';
-import { useResizablePanel } from '../../hooks/useResizablePanel';
 import { useResponsiveFontSizes } from '../../hooks/useResponsiveFontSizes';
+import { useIsCompactMode } from '../../hooks/useWindowWidth';
 import { useTranslation } from '../../i18n/i18n-context';
 import {
   clearConversation,
@@ -29,8 +30,11 @@ import { MessageInput } from '../chat/MessageInput';
 import { MessageList } from '../chat/MessageList';
 import { SettingsDropdown } from '../chat/SettingsDropdown';
 import { WarningBanner } from '../chat/WarningBanner';
-import { ResizeHandle } from '../common/ResizeHandle';
 import { ConfirmDialog } from './ConfirmDialog';
+
+// Fixed panel widths (like Node Palette)
+const PANEL_WIDTH_NORMAL = 320;
+const PANEL_WIDTH_COMPACT = 280;
 
 /**
  * Props for RefinementChatPanel
@@ -51,7 +55,8 @@ export function RefinementChatPanel({
   onClose,
 }: RefinementChatPanelProps) {
   const { t } = useTranslation();
-  const { width, handleMouseDown } = useResizablePanel();
+  const isCompact = useIsCompactMode();
+  const width = isCompact ? PANEL_WIDTH_COMPACT : PANEL_WIDTH_NORMAL;
   const fontSizes = useResponsiveFontSizes(width);
 
   const {
@@ -617,11 +622,10 @@ export function RefinementChatPanel({
       }}
     >
       <ResponsiveFontProvider width={width}>
-        <ResizeHandle onMouseDown={handleMouseDown} />
         {/* Header - Single row layout (simplified after Settings dropdown consolidation) */}
         <div
           style={{
-            padding: '16px',
+            padding: '10px 16px',
             borderBottom: '1px solid var(--vscode-panel-border)',
             display: 'flex',
             justifyContent: 'space-between',
@@ -654,18 +658,32 @@ export function RefinementChatPanel({
               onClick={handleClose}
               disabled={isProcessing}
               style={{
-                padding: '4px 8px',
+                width: '20px',
+                height: '20px',
+                padding: '2px',
                 backgroundColor: 'transparent',
                 color: 'var(--vscode-foreground)',
                 border: 'none',
                 borderRadius: '4px',
                 cursor: isProcessing ? 'not-allowed' : 'pointer',
-                fontSize: '16px',
-                opacity: isProcessing ? 0.5 : 1,
+                opacity: isProcessing ? 0.5 : 0.7,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+              onMouseEnter={(e) => {
+                if (!isProcessing) {
+                  e.currentTarget.style.backgroundColor = 'var(--vscode-toolbar-hoverBackground)';
+                  e.currentTarget.style.opacity = '1';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.opacity = isProcessing ? '0.5' : '0.7';
               }}
               aria-label="Close"
             >
-              ✕
+              <PanelRightClose size={14} aria-hidden="true" />
             </button>
           </div>
         </div>
