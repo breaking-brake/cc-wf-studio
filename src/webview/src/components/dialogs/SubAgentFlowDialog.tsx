@@ -5,6 +5,7 @@
  * Provides a clear visual distinction from the main workflow canvas
  */
 
+import * as Collapsible from '@radix-ui/react-collapsible';
 import { Check, Sparkles, X } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -108,7 +109,13 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
     updateActiveWorkflowMetadata,
   } = useWorkflowStore();
 
-  const { loadConversationHistory, initConversation } = useRefinementStore();
+  const {
+    isOpen: isRefinementPanelOpen,
+    openChat,
+    closeChat,
+    loadConversationHistory,
+    initConversation,
+  } = useRefinementStore();
 
   // Get active sub-agent flow info
   const activeSubAgentFlow = useMemo(
@@ -122,12 +129,9 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
   // Local name state (not saved to store until submit)
   const [localName, setLocalName] = useState<string>('');
 
-  // AI Edit mode state
-  const [isAiEditMode, setIsAiEditMode] = useState(false);
-
   // Handle toggling AI edit mode with proper workflow context setup
   const handleToggleAiEditMode = useCallback(() => {
-    if (!isAiEditMode) {
+    if (!isRefinementPanelOpen) {
       // Opening AI edit mode - need to set up activeWorkflow with main workflow context
       if (mainWorkflowSnapshot && activeSubAgentFlowId) {
         // Find the current SubAgentFlow being edited
@@ -176,10 +180,12 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
           initConversation();
         }
       }
+      openChat();
+    } else {
+      closeChat();
     }
-    setIsAiEditMode(!isAiEditMode);
   }, [
-    isAiEditMode,
+    isRefinementPanelOpen,
     mainWorkflowSnapshot,
     activeSubAgentFlowId,
     nodes,
@@ -188,6 +194,8 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
     updateActiveWorkflowMetadata,
     loadConversationHistory,
     initConversation,
+    openChat,
+    closeChat,
   ]);
 
   // Initialize local name when dialog opens (activeSubAgentFlowId changes)
@@ -493,6 +501,38 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* AI Edit button */}
+            <StyledTooltip content={t('subAgentFlow.aiEdit.toggleButton')} side="bottom">
+              <button
+                type="button"
+                onClick={handleToggleAiEditMode}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: isCompact ? '0' : '4px',
+                  padding: isCompact ? '0 8px' : '0 12px',
+                  height: '32px',
+                  backgroundColor: 'var(--vscode-button-background)',
+                  color: 'var(--vscode-button-foreground)',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  transition: 'background-color 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+                }}
+              >
+                <Sparkles size={14} />
+                {!isCompact && t('toolbar.refineWithAI')}
+              </button>
+            </StyledTooltip>
+
             {/* Submit button */}
             <button
               type="button"
@@ -623,48 +663,36 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
               <Panel position="top-left">
                 <InteractionModeToggle />
               </Panel>
-
-              {/* AI Refinement Button */}
-              <Panel position="top-right">
-                <StyledTooltip content={t('subAgentFlow.aiEdit.toggleButton')} side="left">
-                  <button
-                    type="button"
-                    onClick={handleToggleAiEditMode}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: isCompact ? '0' : '6px',
-                      padding: isCompact ? '6px' : '6px 10px',
-                      backgroundColor: 'var(--vscode-button-background)',
-                      color: 'var(--vscode-button-foreground)',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      fontWeight: 500,
-                      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.2)',
-                      opacity: 0.9,
-                    }}
-                  >
-                    <Sparkles size={14} />
-                    {!isCompact && t('subAgentFlow.aiEdit.title')}
-                  </button>
-                </StyledTooltip>
-              </Panel>
             </ReactFlow>
+
+            {/* Property Overlay - overlay on canvas right side */}
+            {selectedNodeId && isPropertyOverlayOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 5,
+                  right: 5,
+                  bottom: 5,
+                  zIndex: 10,
+                }}
+              >
+                <PropertyOverlay />
+              </div>
+            )}
           </div>
 
-          {/* Right: Property Overlay or AI Edit Panel (conditional) */}
-          {/* Priority: PropertyOverlay > RefinementChatPanel (matches main workflow behavior) */}
-          {selectedNodeId && isPropertyOverlayOpen ? (
-            <PropertyOverlay />
-          ) : isAiEditMode && activeSubAgentFlowId ? (
-            <RefinementChatPanel
-              mode="subAgentFlow"
-              subAgentFlowId={activeSubAgentFlowId}
-              onClose={() => setIsAiEditMode(false)}
-            />
-          ) : null}
+          {/* Refinement Panel with Radix Collapsible for slide animation */}
+          <Collapsible.Root open={isRefinementPanelOpen}>
+            <Collapsible.Content
+              className={`refinement-panel-collapsible${isCompact ? ' compact' : ''}`}
+            >
+              <RefinementChatPanel
+                mode="subAgentFlow"
+                subAgentFlowId={activeSubAgentFlowId || undefined}
+                onClose={closeChat}
+              />
+            </Collapsible.Content>
+          </Collapsible.Root>
         </div>
       </div>
     </div>
