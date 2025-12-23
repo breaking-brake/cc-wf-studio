@@ -7,7 +7,7 @@
  * Based on: specs/001-mcp-natural-language-mode/tasks.md T017, T048
  */
 
-import * as Portal from '@radix-ui/react-portal';
+import * as Dialog from '@radix-ui/react-dialog';
 import type { McpToolReference } from '@shared/types/mcp-node';
 import { NodeType } from '@shared/types/workflow-definition';
 import { useEffect, useState } from 'react';
@@ -79,10 +79,6 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
 
     return { x: newX, y: newY };
   };
-
-  if (!isOpen) {
-    return null;
-  }
 
   const handleSaveNode = () => {
     if (!wizard.isComplete) {
@@ -359,117 +355,89 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
     }
   };
 
-  // Portal ensures dialog renders at document.body, avoiding transform containment issues
   return (
-    <Portal.Root>
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-        }}
-        onClick={handleClose}
-        role="presentation"
-      >
-        {/* biome-ignore lint/a11y/useKeyWithClickEvents: onClick is only used to stop event propagation, not for click actions */}
-        <div
+    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay
           style={{
-            backgroundColor: 'var(--vscode-editor-background)',
-            border: '1px solid var(--vscode-panel-border)',
-            borderRadius: '6px',
-            padding: '24px',
-            maxWidth: '600px',
-            width: '90%',
-            maxHeight: '90vh',
-            overflow: 'auto',
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-          onClick={(e) => e.stopPropagation()}
-          role="dialog"
-          aria-modal="true"
         >
-          {/* Dialog Header */}
-          <h2
+          <Dialog.Content
             style={{
-              margin: '0 0 8px 0',
-              fontSize: '18px',
-              fontWeight: 600,
-              color: 'var(--vscode-foreground)',
+              backgroundColor: 'var(--vscode-editor-background)',
+              border: '1px solid var(--vscode-panel-border)',
+              borderRadius: '6px',
+              padding: '24px',
+              maxWidth: '600px',
+              width: '90%',
+              maxHeight: '90vh',
+              overflow: 'auto',
             }}
           >
-            {t('mcp.dialog.title')}
-          </h2>
+            {/* Dialog Header */}
+            <Dialog.Title
+              style={{
+                margin: '0 0 8px 0',
+                fontSize: '18px',
+                fontWeight: 600,
+                color: 'var(--vscode-foreground)',
+              }}
+            >
+              {t('mcp.dialog.title')}
+            </Dialog.Title>
 
-          {/* Step Indicator */}
-          <div
-            style={{
-              marginBottom: '20px',
-              fontSize: '12px',
-              color: 'var(--vscode-descriptionForeground)',
-            }}
-          >
-            {t('mcp.dialog.wizardStep', {
-              current: wizard.state.currentStep.toString(),
-              total: '7',
-            })}
-          </div>
+            {/* Step Indicator */}
+            <Dialog.Description
+              style={{
+                marginBottom: '20px',
+                fontSize: '12px',
+                color: 'var(--vscode-descriptionForeground)',
+              }}
+            >
+              {t('mcp.dialog.wizardStep', {
+                current: wizard.state.currentStep.toString(),
+                total: '7',
+              })}
+            </Dialog.Description>
 
-          {/* Error Message */}
-          {error && (
+            {/* Error Message */}
+            {error && (
+              <div
+                style={{
+                  marginBottom: '16px',
+                  padding: '12px',
+                  backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
+                  border: '1px solid var(--vscode-inputValidation-errorBorder)',
+                  borderRadius: '4px',
+                  color: 'var(--vscode-errorForeground)',
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            {/* Step Content */}
+            <div style={{ marginBottom: '20px', minHeight: '300px' }}>{renderStepContent()}</div>
+
+            {/* Dialog Actions */}
             <div
               style={{
-                marginBottom: '16px',
-                padding: '12px',
-                backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
-                border: '1px solid var(--vscode-inputValidation-errorBorder)',
-                borderRadius: '4px',
-                color: 'var(--vscode-errorForeground)',
+                display: 'flex',
+                gap: '12px',
+                justifyContent: 'flex-end',
+                paddingTop: '20px',
+                borderTop: '1px solid var(--vscode-panel-border)',
               }}
             >
-              {error}
-            </div>
-          )}
-
-          {/* Step Content */}
-          <div style={{ marginBottom: '20px', minHeight: '300px' }}>{renderStepContent()}</div>
-
-          {/* Dialog Actions */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '12px',
-              justifyContent: 'flex-end',
-              paddingTop: '20px',
-              borderTop: '1px solid var(--vscode-panel-border)',
-            }}
-          >
-            <button
-              type="button"
-              onClick={handleClose}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                color: 'var(--vscode-button-secondaryForeground)',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '13px',
-              }}
-            >
-              {t('mcp.dialog.cancelButton')}
-            </button>
-
-            {/* Back Button */}
-            {wizard.state.currentStep !== WizardStep.ServerSelection && (
               <button
                 type="button"
-                onClick={wizard.prevStep}
+                onClick={handleClose}
                 style={{
                   padding: '8px 16px',
                   backgroundColor: 'var(--vscode-button-secondaryBackground)',
@@ -480,35 +448,54 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
                   fontSize: '13px',
                 }}
               >
-                {t('mcp.dialog.backButton')}
+                {t('mcp.dialog.cancelButton')}
               </button>
-            )}
 
-            {/* Next/Save Button */}
-            <button
-              type="button"
-              onClick={handleActionButton}
-              disabled={!wizard.canProceed}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: wizard.canProceed
-                  ? 'var(--vscode-button-background)'
-                  : 'var(--vscode-button-secondaryBackground)',
-                color: wizard.canProceed
-                  ? 'var(--vscode-button-foreground)'
-                  : 'var(--vscode-descriptionForeground)',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: wizard.canProceed ? 'pointer' : 'not-allowed',
-                fontSize: '13px',
-                opacity: wizard.canProceed ? 1 : 0.6,
-              }}
-            >
-              {getActionButtonLabel()}
-            </button>
-          </div>
-        </div>
-      </div>
-    </Portal.Root>
+              {/* Back Button */}
+              {wizard.state.currentStep !== WizardStep.ServerSelection && (
+                <button
+                  type="button"
+                  onClick={wizard.prevStep}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                    color: 'var(--vscode-button-secondaryForeground)',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                  }}
+                >
+                  {t('mcp.dialog.backButton')}
+                </button>
+              )}
+
+              {/* Next/Save Button */}
+              <button
+                type="button"
+                onClick={handleActionButton}
+                disabled={!wizard.canProceed}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: wizard.canProceed
+                    ? 'var(--vscode-button-background)'
+                    : 'var(--vscode-button-secondaryBackground)',
+                  color: wizard.canProceed
+                    ? 'var(--vscode-button-foreground)'
+                    : 'var(--vscode-descriptionForeground)',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: wizard.canProceed ? 'pointer' : 'not-allowed',
+                  fontSize: '13px',
+                  opacity: wizard.canProceed ? 1 : 0.6,
+                }}
+              >
+                {getActionButtonLabel()}
+              </button>
+            </div>
+          </Dialog.Content>
+        </Dialog.Overlay>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

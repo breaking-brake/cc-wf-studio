@@ -6,6 +6,7 @@
  */
 
 import * as Collapsible from '@radix-ui/react-collapsible';
+import * as Dialog from '@radix-ui/react-dialog';
 import { Check, Sparkles, X } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -362,16 +363,11 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
   // Track modifier key state
   const [isModifierKeyPressed, setIsModifierKeyPressed] = useState(false);
 
-  // Keyboard event handlers
+  // Keyboard event handlers for modifier keys
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Only handle Escape when not focused on input
-      if (event.key === 'Escape' && document.activeElement?.tagName !== 'INPUT') {
-        handleCancel();
-        return;
-      }
       if (event.ctrlKey || event.metaKey) {
         setIsModifierKeyPressed(true);
       }
@@ -390,7 +386,7 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [isOpen, handleCancel]);
+  }, [isOpen]);
 
   // Focus dialog on open
   useEffect(() => {
@@ -410,292 +406,287 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
   const panOnDrag = effectiveMode === 'pan';
   const selectionOnDrag = effectiveMode === 'selection';
 
-  if (!isOpen || !activeSubAgentFlow) {
+  if (!activeSubAgentFlow) {
     return null;
   }
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        zIndex: 2000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-      role="presentation"
-      onClick={handleCancel}
-    >
-      <div
-        ref={dialogRef}
-        tabIndex={-1}
-        style={{
-          width: '95vw',
-          height: '95vh',
-          backgroundColor: 'var(--vscode-editor-background)',
-          border: '2px solid var(--vscode-charts-purple)',
-          borderRadius: '8px',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          outline: 'none',
-        }}
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => {
-          // Only stop propagation for Escape to prevent closing parent dialogs
-          // Allow other keys (like Ctrl+C/V) to work normally
-          if (e.key === 'Escape') {
-            e.stopPropagation();
-          }
-        }}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="subagentflow-dialog-title"
-      >
-        {/* Header */}
-        <div
+    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
+      <Dialog.Portal>
+        <Dialog.Overlay
           style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '12px 16px',
-            backgroundColor: 'var(--vscode-editorWidget-background)',
-            borderBottom: '2px solid var(--vscode-charts-purple)',
+            justifyContent: 'center',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-            <span
-              id="subagentflow-dialog-title"
-              style={{
-                fontSize: '12px',
-                fontWeight: 600,
-                color: 'var(--vscode-charts-purple)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                flexShrink: 0,
-              }}
-            >
-              Sub-Agent Flow
-            </span>
-            {/* Flow name display/input with AI Generate button inside */}
-            <div style={{ flex: 1, maxWidth: '300px' }}>
-              <EditableNameField
-                value={localName}
-                onChange={handleNameChange}
-                placeholder={t('subAgentFlow.namePlaceholder')}
-                disabled={isGeneratingName}
-                error={nameError}
-                aiGeneration={{
-                  isGenerating: isGeneratingName,
-                  onGenerate: handleGenerateSubAgentFlowName,
-                  onCancel: handleCancelNameGeneration,
-                  generateTooltip: t('subAgentFlow.generateNameWithAI'),
-                  cancelTooltip: t('cancel'),
-                }}
-              />
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {/* AI Edit button */}
-            <StyledTooltip content={t('subAgentFlow.aiEdit.toggleButton')} side="bottom">
-              <button
-                type="button"
-                onClick={handleToggleAiEditMode}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: isCompact ? '0' : '4px',
-                  padding: isCompact ? '0 8px' : '0 12px',
-                  height: '32px',
-                  backgroundColor: 'var(--vscode-button-background)',
-                  color: 'var(--vscode-button-foreground)',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                  transition: 'background-color 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
-                }}
-              >
-                <Sparkles size={14} />
-                {!isCompact && t('toolbar.refineWithAI')}
-              </button>
-            </StyledTooltip>
-
-            {/* Submit button */}
-            <button
-              type="button"
-              onClick={handleSubmit}
-              title={t('subAgentFlow.dialog.submit')}
+          <Dialog.Content
+            ref={dialogRef}
+            aria-label="Sub-Agent Flow Editor"
+            aria-describedby={undefined}
+            onEscapeKeyDown={(e) => {
+              // Only close when not focused on input
+              if (document.activeElement?.tagName === 'INPUT') {
+                e.preventDefault();
+              }
+            }}
+            style={{
+              position: 'relative',
+              width: '95vw',
+              height: '95vh',
+              backgroundColor: 'var(--vscode-editor-background)',
+              border: '2px solid var(--vscode-charts-purple)',
+              borderRadius: '8px',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              outline: 'none',
+            }}
+          >
+            {/* Header */}
+            <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                width: '32px',
-                height: '32px',
-                backgroundColor: 'var(--vscode-button-background)',
-                color: 'var(--vscode-button-foreground)',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+                justifyContent: 'space-between',
+                padding: '12px 16px',
+                backgroundColor: 'var(--vscode-editorWidget-background)',
+                borderBottom: '2px solid var(--vscode-charts-purple)',
               }}
             >
-              <Check size={18} />
-            </button>
-            {/* Cancel button */}
-            <button
-              type="button"
-              onClick={handleCancel}
-              title={t('subAgentFlow.dialog.cancel')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '32px',
-                height: '32px',
-                backgroundColor: 'transparent',
-                color: 'var(--vscode-foreground)',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--vscode-toolbar-hoverBackground)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-              }}
-            >
-              <X size={18} />
-            </button>
-          </div>
-        </div>
-
-        {/* Main Content: 3-column layout */}
-        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-          {/* Left: Node Palette */}
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <NodePalette />
-          </div>
-
-          {/* Center: ReactFlow Canvas */}
-          <div style={{ flex: 1, position: 'relative' }}>
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
-              onNodeClick={handleNodeClick}
-              onPaneClick={handlePaneClick}
-              nodeTypes={nodeTypes}
-              edgeTypes={edgeTypes}
-              defaultEdgeOptions={defaultEdgeOptions}
-              isValidConnection={isValidConnection}
-              snapToGrid={true}
-              snapGrid={snapGrid}
-              panOnDrag={panOnDrag}
-              selectionOnDrag={selectionOnDrag}
-              fitView
-              attributionPosition="bottom-left"
-            >
-              <Background color="rgba(136, 87, 229, 0.3)" gap={15} size={1} />
-              <Controls />
-
-              {/* Mini map with container */}
-              <Panel position="bottom-right">
-                <MinimapContainer>
-                  <MiniMap
-                    nodeColor={(node) => {
-                      switch (node.type) {
-                        case 'subAgent':
-                          return 'var(--vscode-charts-blue)';
-                        case 'askUserQuestion':
-                          return 'var(--vscode-charts-orange)';
-                        case 'branch':
-                        case 'ifElse':
-                        case 'switch':
-                          return 'var(--vscode-charts-yellow)';
-                        case 'start':
-                          return 'var(--vscode-charts-green)';
-                        case 'end':
-                          return 'var(--vscode-charts-red)';
-                        case 'prompt':
-                        case 'subAgentFlowRef':
-                          return 'var(--vscode-charts-purple)';
-                        case 'skill':
-                          return 'var(--vscode-charts-cyan)';
-                        default:
-                          return 'var(--vscode-foreground)';
-                      }
-                    }}
-                    maskColor="rgba(0, 0, 0, 0.5)"
-                    style={{
-                      position: 'relative',
-                      backgroundColor: 'var(--vscode-editor-background)',
-                      width: isCompact ? 120 : 200,
-                      height: isCompact ? 80 : 150,
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: 'var(--vscode-charts-purple)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    flexShrink: 0,
+                  }}
+                >
+                  Sub-Agent Flow
+                </span>
+                {/* Flow name display/input with AI Generate button inside */}
+                <div style={{ flex: 1, maxWidth: '300px' }}>
+                  <EditableNameField
+                    value={localName}
+                    onChange={handleNameChange}
+                    placeholder={t('subAgentFlow.namePlaceholder')}
+                    disabled={isGeneratingName}
+                    error={nameError}
+                    aiGeneration={{
+                      isGenerating: isGeneratingName,
+                      onGenerate: handleGenerateSubAgentFlowName,
+                      onCancel: handleCancelNameGeneration,
+                      generateTooltip: t('subAgentFlow.generateNameWithAI'),
+                      cancelTooltip: t('cancel'),
                     }}
                   />
-                </MinimapContainer>
-              </Panel>
-
-              {/* Interaction Mode Toggle */}
-              <Panel position="top-left">
-                <InteractionModeToggle />
-              </Panel>
-            </ReactFlow>
-
-            {/* Property Overlay - overlay on canvas right side */}
-            {selectedNodeId && isPropertyOverlayOpen && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 5,
-                  right: 5,
-                  bottom: 5,
-                  zIndex: 10,
-                }}
-              >
-                <PropertyOverlay />
+                </div>
               </div>
-            )}
-          </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {/* AI Edit button */}
+                <StyledTooltip content={t('subAgentFlow.aiEdit.toggleButton')} side="bottom">
+                  <button
+                    type="button"
+                    onClick={handleToggleAiEditMode}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: isCompact ? '0' : '4px',
+                      padding: isCompact ? '0 8px' : '0 12px',
+                      height: '32px',
+                      backgroundColor: 'var(--vscode-button-background)',
+                      color: 'var(--vscode-button-foreground)',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        'var(--vscode-button-hoverBackground)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+                    }}
+                  >
+                    <Sparkles size={14} />
+                    {!isCompact && t('toolbar.refineWithAI')}
+                  </button>
+                </StyledTooltip>
 
-          {/* Refinement Panel with Radix Collapsible for slide animation */}
-          <Collapsible.Root open={isRefinementPanelOpen}>
-            <Collapsible.Content
-              className={`refinement-panel-collapsible${isCompact ? ' compact' : ''}`}
-            >
-              <RefinementChatPanel
-                mode="subAgentFlow"
-                subAgentFlowId={activeSubAgentFlowId || undefined}
-                onClose={closeChat}
-              />
-            </Collapsible.Content>
-          </Collapsible.Root>
-        </div>
-      </div>
-    </div>
+                {/* Submit button */}
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  title={t('subAgentFlow.dialog.submit')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '32px',
+                    height: '32px',
+                    backgroundColor: 'var(--vscode-button-background)',
+                    color: 'var(--vscode-button-foreground)',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+                  }}
+                >
+                  <Check size={18} />
+                </button>
+                {/* Cancel button */}
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  title={t('subAgentFlow.dialog.cancel')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '32px',
+                    height: '32px',
+                    backgroundColor: 'transparent',
+                    color: 'var(--vscode-foreground)',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--vscode-toolbar-hoverBackground)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Main Content: 3-column layout */}
+            <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+              {/* Left: Node Palette */}
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <NodePalette />
+              </div>
+
+              {/* Center: ReactFlow Canvas */}
+              <div style={{ flex: 1, position: 'relative' }}>
+                <ReactFlow
+                  nodes={nodes}
+                  edges={edges}
+                  onNodesChange={onNodesChange}
+                  onEdgesChange={onEdgesChange}
+                  onConnect={onConnect}
+                  onNodeClick={handleNodeClick}
+                  onPaneClick={handlePaneClick}
+                  nodeTypes={nodeTypes}
+                  edgeTypes={edgeTypes}
+                  defaultEdgeOptions={defaultEdgeOptions}
+                  isValidConnection={isValidConnection}
+                  snapToGrid={true}
+                  snapGrid={snapGrid}
+                  panOnDrag={panOnDrag}
+                  selectionOnDrag={selectionOnDrag}
+                  fitView
+                  attributionPosition="bottom-left"
+                >
+                  <Background color="rgba(136, 87, 229, 0.3)" gap={15} size={1} />
+                  <Controls />
+
+                  {/* Mini map with container */}
+                  <Panel position="bottom-right">
+                    <MinimapContainer>
+                      <MiniMap
+                        nodeColor={(node) => {
+                          switch (node.type) {
+                            case 'subAgent':
+                              return 'var(--vscode-charts-blue)';
+                            case 'askUserQuestion':
+                              return 'var(--vscode-charts-orange)';
+                            case 'branch':
+                            case 'ifElse':
+                            case 'switch':
+                              return 'var(--vscode-charts-yellow)';
+                            case 'start':
+                              return 'var(--vscode-charts-green)';
+                            case 'end':
+                              return 'var(--vscode-charts-red)';
+                            case 'prompt':
+                            case 'subAgentFlowRef':
+                              return 'var(--vscode-charts-purple)';
+                            case 'skill':
+                              return 'var(--vscode-charts-cyan)';
+                            default:
+                              return 'var(--vscode-foreground)';
+                          }
+                        }}
+                        maskColor="rgba(0, 0, 0, 0.5)"
+                        style={{
+                          position: 'relative',
+                          backgroundColor: 'var(--vscode-editor-background)',
+                          width: isCompact ? 120 : 200,
+                          height: isCompact ? 80 : 150,
+                        }}
+                      />
+                    </MinimapContainer>
+                  </Panel>
+
+                  {/* Interaction Mode Toggle */}
+                  <Panel position="top-left">
+                    <InteractionModeToggle />
+                  </Panel>
+                </ReactFlow>
+
+                {/* Property Overlay - overlay on canvas right side */}
+                {selectedNodeId && isPropertyOverlayOpen && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 5,
+                      right: 5,
+                      bottom: 5,
+                      zIndex: 10,
+                    }}
+                  >
+                    <PropertyOverlay />
+                  </div>
+                )}
+              </div>
+
+              {/* Refinement Panel with Radix Collapsible for slide animation */}
+              <Collapsible.Root open={isRefinementPanelOpen}>
+                <Collapsible.Content
+                  className={`refinement-panel-collapsible${isCompact ? ' compact' : ''}`}
+                >
+                  <RefinementChatPanel
+                    mode="subAgentFlow"
+                    subAgentFlowId={activeSubAgentFlowId || undefined}
+                    onClose={closeChat}
+                  />
+                </Collapsible.Content>
+              </Collapsible.Root>
+            </div>
+          </Dialog.Content>
+        </Dialog.Overlay>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 };
 

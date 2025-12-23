@@ -434,7 +434,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
             e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
           }}
         >
-          <div style={{ fontWeight: 600 }}>{t('node.subAgentFlow.title')} β</div>
+          <div style={{ fontWeight: 600 }}>{t('node.subAgentFlow.title')}</div>
           {!isCompact && (
             <div
               style={{

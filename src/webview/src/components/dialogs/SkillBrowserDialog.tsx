@@ -7,7 +7,7 @@
  * Based on: specs/001-skill-node/design.md Section 6.2
  */
 
-import * as Portal from '@radix-ui/react-portal';
+import * as Dialog from '@radix-ui/react-dialog';
 import type { SkillReference } from '@shared/types/messages';
 import { NodeType } from '@shared/types/workflow-definition';
 import { useEffect, useState } from 'react';
@@ -124,10 +124,6 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
     }
   };
 
-  if (!isOpen) {
-    return null;
-  }
-
   const handleAddSkill = () => {
     if (!selectedSkill) {
       setError(t('skill.error.noSelection'));
@@ -183,393 +179,381 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
 
   const currentSkills = activeTab === 'personal' ? personalSkills : projectSkills;
 
-  // Portal ensures dialog renders at document.body, avoiding transform containment issues
   return (
-    <Portal.Root>
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-        }}
-        onClick={handleClose}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') {
-            handleClose();
-          }
-        }}
-        role="presentation"
-      >
-        <div
+    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay
           style={{
-            backgroundColor: 'var(--vscode-editor-background)',
-            border: '1px solid var(--vscode-panel-border)',
-            borderRadius: '6px',
-            padding: '24px',
-            maxWidth: '700px',
-            width: '90%',
-            maxHeight: '80vh',
-            overflow: 'auto',
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-          role="dialog"
-          aria-modal="true"
         >
-          {/* Header */}
-          <h2
+          <Dialog.Content
             style={{
-              margin: '0 0 8px 0',
-              fontSize: '18px',
-              fontWeight: 600,
-              color: 'var(--vscode-foreground)',
-            }}
-          >
-            {t('skill.browser.title')}
-          </h2>
-          <p
-            style={{
-              margin: '0 0 20px 0',
-              fontSize: '13px',
-              color: 'var(--vscode-descriptionForeground)',
-              lineHeight: '1.5',
-            }}
-          >
-            {t('skill.browser.description')}
-          </p>
-
-          {/* Tabs */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '8px',
-              marginBottom: '16px',
-              borderBottom: '1px solid var(--vscode-panel-border)',
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setActiveTab('personal')}
-              style={{
-                padding: '8px 16px',
-                fontSize: '13px',
-                background: 'none',
-                border: 'none',
-                borderBottom:
-                  activeTab === 'personal' ? '2px solid var(--vscode-focusBorder)' : 'none',
-                color:
-                  activeTab === 'personal'
-                    ? 'var(--vscode-foreground)'
-                    : 'var(--vscode-descriptionForeground)',
-                cursor: 'pointer',
-                fontWeight: activeTab === 'personal' ? 600 : 400,
-              }}
-            >
-              {t('skill.browser.personalTab')} ({personalSkills.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('project')}
-              style={{
-                padding: '8px 16px',
-                fontSize: '13px',
-                background: 'none',
-                border: 'none',
-                borderBottom:
-                  activeTab === 'project' ? '2px solid var(--vscode-focusBorder)' : 'none',
-                color:
-                  activeTab === 'project'
-                    ? 'var(--vscode-foreground)'
-                    : 'var(--vscode-descriptionForeground)',
-                cursor: 'pointer',
-                fontWeight: activeTab === 'project' ? 600 : 400,
-              }}
-            >
-              {t('skill.browser.projectTab')} ({projectSkills.length})
-            </button>
-          </div>
-
-          {/* Refresh Button */}
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={refreshing || loading}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              marginBottom: '16px',
-              fontSize: '13px',
-              backgroundColor: 'var(--vscode-button-secondaryBackground)',
-              color: 'var(--vscode-button-secondaryForeground)',
+              backgroundColor: 'var(--vscode-editor-background)',
               border: '1px solid var(--vscode-panel-border)',
-              borderRadius: '4px',
-              cursor: refreshing || loading ? 'wait' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
+              borderRadius: '6px',
+              padding: '24px',
+              maxWidth: '700px',
+              width: '90%',
+              maxHeight: '80vh',
+              overflow: 'auto',
             }}
           >
-            <span>{refreshing ? t('skill.refreshing') : t('skill.action.refresh')}</span>
-          </button>
-
-          {/* Loading State */}
-          {loading && (
-            <div
+            {/* Header */}
+            <Dialog.Title
               style={{
-                textAlign: 'center',
-                padding: '40px',
-                color: 'var(--vscode-descriptionForeground)',
+                margin: '0 0 8px 0',
+                fontSize: '18px',
+                fontWeight: 600,
+                color: 'var(--vscode-foreground)',
               }}
             >
-              {t('skill.browser.loading')}
-            </div>
-          )}
-
-          {/* Error State */}
-          {error && !loading && (
-            <div
+              {t('skill.browser.title')}
+            </Dialog.Title>
+            <Dialog.Description
               style={{
-                padding: '12px',
-                backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
-                border: '1px solid var(--vscode-inputValidation-errorBorder)',
-                borderRadius: '4px',
-                marginBottom: '16px',
+                margin: '0 0 20px 0',
                 fontSize: '13px',
-                color: 'var(--vscode-inputValidation-errorForeground)',
-              }}
-            >
-              {error}
-            </div>
-          )}
-
-          {/* Skills List */}
-          {!loading && !error && currentSkills.length === 0 && (
-            <div
-              style={{
-                textAlign: 'center',
-                padding: '40px',
                 color: 'var(--vscode-descriptionForeground)',
+                lineHeight: '1.5',
               }}
             >
-              {t('skill.browser.noSkills')}
-            </div>
-          )}
+              {t('skill.browser.description')}
+            </Dialog.Description>
 
-          {!loading && !error && currentSkills.length > 0 && (
+            {/* Tabs */}
             <div
               style={{
-                border: '1px solid var(--vscode-panel-border)',
-                borderRadius: '4px',
-                maxHeight: '400px',
-                overflow: 'auto',
+                display: 'flex',
+                gap: '8px',
+                marginBottom: '16px',
+                borderBottom: '1px solid var(--vscode-panel-border)',
               }}
             >
-              {currentSkills.map((skill) => (
-                <div
-                  key={skill.skillPath}
-                  onClick={() => setSelectedSkill(skill)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setSelectedSkill(skill);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  style={{
-                    padding: '12px',
-                    borderBottom: '1px solid var(--vscode-panel-border)',
-                    cursor: 'pointer',
-                    backgroundColor:
-                      selectedSkill?.skillPath === skill.skillPath
-                        ? 'var(--vscode-list-activeSelectionBackground)'
-                        : 'transparent',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedSkill?.skillPath !== skill.skillPath) {
-                      e.currentTarget.style.backgroundColor = 'var(--vscode-list-hoverBackground)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedSkill?.skillPath !== skill.skillPath) {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '4px',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span
-                        style={{
-                          fontSize: '14px',
-                          fontWeight: 600,
-                          color: 'var(--vscode-foreground)',
-                        }}
-                      >
-                        {skill.name}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: '10px',
-                          padding: '2px 6px',
-                          borderRadius: '3px',
-                          backgroundColor:
-                            skill.scope === 'personal'
-                              ? 'var(--vscode-badge-background)'
-                              : 'var(--vscode-button-secondaryBackground)',
-                          color:
-                            skill.scope === 'personal'
-                              ? 'var(--vscode-badge-foreground)'
-                              : 'var(--vscode-button-secondaryForeground)',
-                          fontWeight: 500,
-                        }}
-                      >
-                        {skill.scope === 'personal'
-                          ? t('skill.browser.personalTab')
-                          : t('skill.browser.projectTab')}
-                      </span>
-                    </div>
-                    <span
-                      style={{
-                        fontSize: '11px',
-                        color:
-                          skill.validationStatus === 'valid'
-                            ? 'var(--vscode-testing-iconPassed)'
-                            : skill.validationStatus === 'missing'
-                              ? 'var(--vscode-editorWarning-foreground)'
-                              : 'var(--vscode-errorForeground)',
-                      }}
-                    >
-                      {skill.validationStatus === 'valid'
-                        ? '✓'
-                        : skill.validationStatus === 'missing'
-                          ? '⚠'
-                          : '✗'}
-                    </span>
-                  </div>
-                  <div
-                    style={{
-                      fontSize: '12px',
-                      color: 'var(--vscode-descriptionForeground)',
-                      marginBottom: '4px',
-                    }}
-                  >
-                    {skill.description}
-                  </div>
-                  {skill.allowedTools && (
-                    <div
-                      style={{
-                        fontSize: '11px',
-                        color: 'var(--vscode-descriptionForeground)',
-                      }}
-                    >
-                      🔧 {skill.allowedTools}
-                    </div>
-                  )}
-                </div>
-              ))}
+              <button
+                type="button"
+                onClick={() => setActiveTab('personal')}
+                style={{
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom:
+                    activeTab === 'personal' ? '2px solid var(--vscode-focusBorder)' : 'none',
+                  color:
+                    activeTab === 'personal'
+                      ? 'var(--vscode-foreground)'
+                      : 'var(--vscode-descriptionForeground)',
+                  cursor: 'pointer',
+                  fontWeight: activeTab === 'personal' ? 600 : 400,
+                }}
+              >
+                {t('skill.browser.personalTab')} ({personalSkills.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('project')}
+                style={{
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom:
+                    activeTab === 'project' ? '2px solid var(--vscode-focusBorder)' : 'none',
+                  color:
+                    activeTab === 'project'
+                      ? 'var(--vscode-foreground)'
+                      : 'var(--vscode-descriptionForeground)',
+                  cursor: 'pointer',
+                  fontWeight: activeTab === 'project' ? 600 : 400,
+                }}
+              >
+                {t('skill.browser.projectTab')} ({projectSkills.length})
+              </button>
             </div>
-          )}
 
-          {/* Create New Skill Button */}
-          {!loading && (
+            {/* Refresh Button */}
             <button
               type="button"
-              onClick={() => setIsSkillCreationOpen(true)}
+              onClick={handleRefresh}
+              disabled={refreshing || loading}
               style={{
                 width: '100%',
-                padding: '12px',
-                marginTop: '16px',
+                padding: '8px 12px',
+                marginBottom: '16px',
                 fontSize: '13px',
-                border: '1px solid var(--vscode-button-border)',
-                borderRadius: '4px',
                 backgroundColor: 'var(--vscode-button-secondaryBackground)',
                 color: 'var(--vscode-button-secondaryForeground)',
-                cursor: 'pointer',
-                textAlign: 'center',
-                fontWeight: 500,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  'var(--vscode-button-secondaryHoverBackground)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--vscode-button-secondaryBackground)';
-              }}
-            >
-              + Create New Skill
-            </button>
-          )}
-
-          {/* Actions */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '8px',
-              marginTop: '20px',
-            }}
-          >
-            <button
-              type="button"
-              onClick={handleClose}
-              style={{
-                padding: '8px 16px',
-                fontSize: '13px',
-                border: '1px solid var(--vscode-button-border)',
+                border: '1px solid var(--vscode-panel-border)',
                 borderRadius: '4px',
-                backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                color: 'var(--vscode-button-secondaryForeground)',
-                cursor: 'pointer',
+                cursor: refreshing || loading ? 'wait' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
               }}
             >
-              {t('skill.browser.cancelButton')}
+              <span>{refreshing ? t('skill.refreshing') : t('skill.action.refresh')}</span>
             </button>
-            <button
-              type="button"
-              onClick={handleAddSkill}
-              disabled={!selectedSkill || loading}
-              style={{
-                padding: '8px 16px',
-                fontSize: '13px',
-                border: 'none',
-                borderRadius: '4px',
-                backgroundColor: selectedSkill
-                  ? 'var(--vscode-button-background)'
-                  : 'var(--vscode-button-secondaryBackground)',
-                color: selectedSkill
-                  ? 'var(--vscode-button-foreground)'
-                  : 'var(--vscode-descriptionForeground)',
-                cursor: selectedSkill ? 'pointer' : 'not-allowed',
-                opacity: selectedSkill ? 1 : 0.5,
-              }}
-            >
-              {t('skill.browser.selectButton')}
-            </button>
-          </div>
-        </div>
 
-        {/* Skill Creation Dialog */}
-        <SkillCreationDialog
-          isOpen={isSkillCreationOpen}
-          onClose={() => setIsSkillCreationOpen(false)}
-          onSubmit={handleSkillCreate}
-        />
-      </div>
-    </Portal.Root>
+            {/* Loading State */}
+            {loading && (
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '40px',
+                  color: 'var(--vscode-descriptionForeground)',
+                }}
+              >
+                {t('skill.browser.loading')}
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && !loading && (
+              <div
+                style={{
+                  padding: '12px',
+                  backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
+                  border: '1px solid var(--vscode-inputValidation-errorBorder)',
+                  borderRadius: '4px',
+                  marginBottom: '16px',
+                  fontSize: '13px',
+                  color: 'var(--vscode-inputValidation-errorForeground)',
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            {/* Skills List */}
+            {!loading && !error && currentSkills.length === 0 && (
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '40px',
+                  color: 'var(--vscode-descriptionForeground)',
+                }}
+              >
+                {t('skill.browser.noSkills')}
+              </div>
+            )}
+
+            {!loading && !error && currentSkills.length > 0 && (
+              <div
+                style={{
+                  border: '1px solid var(--vscode-panel-border)',
+                  borderRadius: '4px',
+                  maxHeight: '400px',
+                  overflow: 'auto',
+                }}
+              >
+                {currentSkills.map((skill) => (
+                  <div
+                    key={skill.skillPath}
+                    onClick={() => setSelectedSkill(skill)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedSkill(skill);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    style={{
+                      padding: '12px',
+                      borderBottom: '1px solid var(--vscode-panel-border)',
+                      cursor: 'pointer',
+                      backgroundColor:
+                        selectedSkill?.skillPath === skill.skillPath
+                          ? 'var(--vscode-list-activeSelectionBackground)'
+                          : 'transparent',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedSkill?.skillPath !== skill.skillPath) {
+                        e.currentTarget.style.backgroundColor =
+                          'var(--vscode-list-hoverBackground)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedSkill?.skillPath !== skill.skillPath) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span
+                          style={{
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            color: 'var(--vscode-foreground)',
+                          }}
+                        >
+                          {skill.name}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '10px',
+                            padding: '2px 6px',
+                            borderRadius: '3px',
+                            backgroundColor:
+                              skill.scope === 'personal'
+                                ? 'var(--vscode-badge-background)'
+                                : 'var(--vscode-button-secondaryBackground)',
+                            color:
+                              skill.scope === 'personal'
+                                ? 'var(--vscode-badge-foreground)'
+                                : 'var(--vscode-button-secondaryForeground)',
+                            fontWeight: 500,
+                          }}
+                        >
+                          {skill.scope === 'personal'
+                            ? t('skill.browser.personalTab')
+                            : t('skill.browser.projectTab')}
+                        </span>
+                      </div>
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          color:
+                            skill.validationStatus === 'valid'
+                              ? 'var(--vscode-testing-iconPassed)'
+                              : skill.validationStatus === 'missing'
+                                ? 'var(--vscode-editorWarning-foreground)'
+                                : 'var(--vscode-errorForeground)',
+                        }}
+                      >
+                        {skill.validationStatus === 'valid'
+                          ? '✓'
+                          : skill.validationStatus === 'missing'
+                            ? '⚠'
+                            : '✗'}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '12px',
+                        color: 'var(--vscode-descriptionForeground)',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      {skill.description}
+                    </div>
+                    {skill.allowedTools && (
+                      <div
+                        style={{
+                          fontSize: '11px',
+                          color: 'var(--vscode-descriptionForeground)',
+                        }}
+                      >
+                        {skill.allowedTools}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Create New Skill Button */}
+            {!loading && (
+              <button
+                type="button"
+                onClick={() => setIsSkillCreationOpen(true)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  marginTop: '16px',
+                  fontSize: '13px',
+                  border: '1px solid var(--vscode-button-border)',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                  color: 'var(--vscode-button-secondaryForeground)',
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                  fontWeight: 500,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    'var(--vscode-button-secondaryHoverBackground)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    'var(--vscode-button-secondaryBackground)';
+                }}
+              >
+                + Create New Skill
+              </button>
+            )}
+
+            {/* Actions */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '8px',
+                marginTop: '20px',
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleClose}
+                style={{
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  border: '1px solid var(--vscode-button-border)',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                  color: 'var(--vscode-button-secondaryForeground)',
+                  cursor: 'pointer',
+                }}
+              >
+                {t('skill.browser.cancelButton')}
+              </button>
+              <button
+                type="button"
+                onClick={handleAddSkill}
+                disabled={!selectedSkill || loading}
+                style={{
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  border: 'none',
+                  borderRadius: '4px',
+                  backgroundColor: selectedSkill
+                    ? 'var(--vscode-button-background)'
+                    : 'var(--vscode-button-secondaryBackground)',
+                  color: selectedSkill
+                    ? 'var(--vscode-button-foreground)'
+                    : 'var(--vscode-descriptionForeground)',
+                  cursor: selectedSkill ? 'pointer' : 'not-allowed',
+                  opacity: selectedSkill ? 1 : 0.5,
+                }}
+              >
+                {t('skill.browser.selectButton')}
+              </button>
+            </div>
+
+            {/* Skill Creation Dialog - nested dialog */}
+            <SkillCreationDialog
+              isOpen={isSkillCreationOpen}
+              onClose={() => setIsSkillCreationOpen(false)}
+              onSubmit={handleSkillCreate}
+            />
+          </Dialog.Content>
+        </Dialog.Overlay>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
