@@ -1,5 +1,5 @@
 /**
- * Node type labels for PropertyPanel
+ * Node type labels for PropertyOverlay
  *
  * These are technical terms that don't need translation.
  * They are consistent across all languages.

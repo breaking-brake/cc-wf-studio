@@ -44,7 +44,7 @@ import { StartNode } from '../nodes/StartNode';
 import { SubAgentFlowNodeComponent } from '../nodes/SubAgentFlowNode';
 import { SubAgentNodeComponent } from '../nodes/SubAgentNode';
 import { SwitchNodeComponent } from '../nodes/SwitchNode';
-import { PropertyPanel } from '../PropertyPanel';
+import { PropertyOverlay } from '../PropertyOverlay';
 import { RefinementChatPanel } from './RefinementChatPanel';
 
 /**
@@ -102,7 +102,7 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
     subAgentFlows,
     updateSubAgentFlow,
     selectedNodeId,
-    isPropertyPanelOpen,
+    isPropertyOverlayOpen,
     cancelSubAgentFlowEditing,
     mainWorkflowSnapshot,
     updateActiveWorkflowMetadata,
@@ -654,10 +654,10 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
             </ReactFlow>
           </div>
 
-          {/* Right: Property Panel or AI Edit Panel (conditional) */}
-          {/* Priority: PropertyPanel > RefinementChatPanel (matches main workflow behavior) */}
-          {selectedNodeId && isPropertyPanelOpen ? (
-            <PropertyPanel />
+          {/* Right: Property Overlay or AI Edit Panel (conditional) */}
+          {/* Priority: PropertyOverlay > RefinementChatPanel (matches main workflow behavior) */}
+          {selectedNodeId && isPropertyOverlayOpen ? (
+            <PropertyOverlay />
           ) : isAiEditMode && activeSubAgentFlowId ? (
             <RefinementChatPanel
               mode="subAgentFlow"

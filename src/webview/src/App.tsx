@@ -25,7 +25,7 @@ import { SubAgentFlowDialog } from './components/dialogs/SubAgentFlowDialog';
 import { TermsOfUseDialog } from './components/dialogs/TermsOfUseDialog';
 import { ErrorNotification } from './components/ErrorNotification';
 import { NodePalette } from './components/NodePalette';
-import { PropertyPanel } from './components/PropertyPanel';
+import { PropertyOverlay } from './components/PropertyOverlay';
 import { Toolbar } from './components/Toolbar';
 import { Tour } from './components/Tour';
 import { WorkflowEditor } from './components/WorkflowEditor';
@@ -48,7 +48,7 @@ const App: React.FC = () => {
     setEdges,
     setWorkflowName,
     setActiveWorkflow,
-    isPropertyPanelOpen,
+    isPropertyOverlayOpen,
     selectedNodeId,
     activeSubAgentFlowId,
     setActiveSubAgentFlowId,
@@ -242,8 +242,8 @@ const App: React.FC = () => {
           {/* Processing overlay for canvas area only (with message centered in canvas) */}
           <ProcessingOverlay isVisible={isProcessing} message={t('refinement.processingOverlay')} />
 
-          {/* Property Panel - overlay on canvas right side */}
-          {selectedNodeId && isPropertyPanelOpen && (
+          {/* Property Overlay - overlay on canvas right side */}
+          {selectedNodeId && isPropertyOverlayOpen && (
             <div
               style={{
                 position: 'absolute',
@@ -253,7 +253,7 @@ const App: React.FC = () => {
                 zIndex: 10,
               }}
             >
-              <PropertyPanel />
+              <PropertyOverlay />
             </div>
           )}
         </div>

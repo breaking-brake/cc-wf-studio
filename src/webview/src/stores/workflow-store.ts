@@ -45,7 +45,7 @@ interface WorkflowStore {
   activeWorkflow: Workflow | null;
   interactionMode: InteractionMode;
   workflowName: string;
-  isPropertyPanelOpen: boolean;
+  isPropertyOverlayOpen: boolean;
   isMinimapVisible: boolean;
 
   // Sub-Agent Flow State (Feature: 089-subworkflow)
@@ -65,8 +65,8 @@ interface WorkflowStore {
   setInteractionMode: (mode: InteractionMode) => void;
   toggleInteractionMode: () => void;
   setWorkflowName: (name: string) => void;
-  openPropertyPanel: () => void;
-  closePropertyPanel: () => void;
+  openPropertyOverlay: () => void;
+  closePropertyOverlay: () => void;
   toggleMinimapVisibility: () => void;
 
   // Custom Actions
@@ -225,7 +225,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   activeWorkflow: null,
   interactionMode: 'pan', // Default: pan mode
   workflowName: 'my-workflow', // Default workflow name
-  isPropertyPanelOpen: true, // Property panel is open by default
+  isPropertyOverlayOpen: true, // Property overlay is open by default
   isMinimapVisible: (() => {
     const saved = localStorage.getItem('cc-wf-studio.minimapVisible');
     return saved !== null ? saved === 'true' : true; // Default: visible
@@ -292,9 +292,9 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   setEdges: (edges) => set({ edges }),
 
   setSelectedNodeId: (selectedNodeId) => {
-    // When a node is selected, auto-open the property panel
+    // When a node is selected, auto-open the property overlay
     if (selectedNodeId !== null) {
-      set({ selectedNodeId, isPropertyPanelOpen: true });
+      set({ selectedNodeId, isPropertyOverlayOpen: true });
     } else {
       set({ selectedNodeId });
     }
@@ -309,9 +309,9 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   setWorkflowName: (workflowName) => set({ workflowName }),
 
-  openPropertyPanel: () => set({ isPropertyPanelOpen: true }),
+  openPropertyOverlay: () => set({ isPropertyOverlayOpen: true }),
 
-  closePropertyPanel: () => set({ isPropertyPanelOpen: false }),
+  closePropertyOverlay: () => set({ isPropertyOverlayOpen: false }),
 
   toggleMinimapVisibility: () => {
     const newValue = !get().isMinimapVisible;
