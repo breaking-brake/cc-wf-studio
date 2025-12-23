@@ -13,7 +13,7 @@ import type {
   Workflow,
 } from '@shared/types/messages';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ProcessingOverlay } from './components/common/ProcessingOverlay';
 import { SimpleOverlay } from './components/common/SimpleOverlay';
 import { ConfirmDialog } from './components/dialogs/ConfirmDialog';
@@ -36,6 +36,7 @@ import { vscode } from './main';
 import { deserializeWorkflow } from './services/workflow-service';
 import { useRefinementStore } from './stores/refinement-store';
 import { useWorkflowStore } from './stores/workflow-store';
+import type { RefinementChatState } from './types/refinement-chat-state';
 
 const App: React.FC = () => {
   const { t } = useTranslation();
@@ -53,7 +54,40 @@ const App: React.FC = () => {
     activeSubAgentFlowId,
     setActiveSubAgentFlowId,
   } = useWorkflowStore();
-  const { isOpen: isRefinementPanelOpen, isProcessing } = useRefinementStore();
+  // Get all refinement store state and actions for main workflow chat
+  const refinementStore = useRefinementStore();
+  const { isOpen: isRefinementPanelOpen, isProcessing } = refinementStore;
+
+  // Build mainChatState from refinement store (for main workflow RefinementChatPanel)
+  const mainChatState: RefinementChatState = useMemo(
+    () => ({
+      conversationHistory: refinementStore.conversationHistory,
+      isProcessing: refinementStore.isProcessing,
+      currentInput: refinementStore.currentInput,
+      currentRequestId: refinementStore.currentRequestId,
+      setInput: refinementStore.setInput,
+      canSend: refinementStore.canSend,
+      addUserMessage: refinementStore.addUserMessage,
+      addLoadingAiMessage: refinementStore.addLoadingAiMessage,
+      updateMessageContent: refinementStore.updateMessageContent,
+      updateMessageLoadingState: refinementStore.updateMessageLoadingState,
+      updateMessageErrorState: refinementStore.updateMessageErrorState,
+      updateMessageToolInfo: refinementStore.updateMessageToolInfo,
+      removeMessage: refinementStore.removeMessage,
+      clearHistory: refinementStore.clearHistory,
+      startProcessing: refinementStore.startProcessing,
+      finishProcessing: refinementStore.finishProcessing,
+      handleRefinementSuccess: refinementStore.handleRefinementSuccess,
+      handleRefinementFailed: refinementStore.handleRefinementFailed,
+      shouldShowWarning: refinementStore.shouldShowWarning,
+    }),
+    [refinementStore]
+  );
+
+  const handleCloseRefinementPanel = useCallback(() => {
+    refinementStore.closeChat();
+  }, [refinementStore]);
+
   const [error, setError] = useState<ErrorPayload | null>(null);
   const [runTour, setRunTour] = useState(false);
   const [tourKey, setTourKey] = useState(0); // Used to force Tour component remount
@@ -263,7 +297,7 @@ const App: React.FC = () => {
           <Collapsible.Content
             className={`refinement-panel-collapsible${isCompact ? ' compact' : ''}`}
           >
-            <RefinementChatPanel />
+            <RefinementChatPanel chatState={mainChatState} onClose={handleCloseRefinementPanel} />
           </Collapsible.Content>
         </Collapsible.Root>
       </div>

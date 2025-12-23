@@ -5,8 +5,10 @@
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.2
  * Updated: Phase 3.8 - Added retry handler support
  * Updated: Phase 3.12 - Added initial instructional message
+ * Updated: Controlled Component - Accept conversationHistory from props
  */
 
+import type { ConversationHistory } from '@shared/types/workflow-definition';
 import { useEffect, useRef } from 'react';
 import { useResponsiveFonts } from '../../contexts/ResponsiveFontContext';
 import { useTranslation } from '../../i18n/i18n-context';
@@ -15,11 +17,19 @@ import { MessageBubble } from './MessageBubble';
 
 interface MessageListProps {
   onRetry?: (messageId: string) => void;
+  /** Conversation history (controlled mode). If provided, uses this instead of store. */
+  conversationHistory?: ConversationHistory | null;
 }
 
-export function MessageList({ onRetry }: MessageListProps) {
+export function MessageList({
+  onRetry,
+  conversationHistory: propsConversationHistory,
+}: MessageListProps) {
   const { t } = useTranslation();
-  const { conversationHistory } = useRefinementStore();
+  const { conversationHistory: storeConversationHistory } = useRefinementStore();
+
+  // Use props if provided (controlled mode), otherwise use store (uncontrolled mode)
+  const conversationHistory = propsConversationHistory ?? storeConversationHistory;
   const fontSizes = useResponsiveFonts();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 

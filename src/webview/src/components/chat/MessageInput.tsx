@@ -5,6 +5,7 @@
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.2
  * Updated: Phase 3.2 - Added progress bar during processing
  * Updated: Phase 3.7 - Removed progress bar (moved to message bubble)
+ * Updated: Controlled Component - Accept input state from props
  */
 
 import type React from 'react';
@@ -17,15 +18,33 @@ import { useRefinementStore } from '../../stores/refinement-store';
 const MAX_MESSAGE_LENGTH = 5000;
 const MIN_MESSAGE_LENGTH = 1;
 
-interface MessageInputProps {
-  onSend: (message: string) => void;
+/** Input state props for controlled mode */
+interface InputStateProps {
+  currentInput: string;
+  setInput: (input: string) => void;
+  isProcessing: boolean;
+  currentRequestId: string | null;
+  canSend: () => boolean;
 }
 
-export function MessageInput({ onSend }: MessageInputProps) {
+interface MessageInputProps {
+  onSend: (message: string) => void;
+  /** Input state (controlled mode). If provided, uses this instead of store. */
+  inputState?: InputStateProps;
+}
+
+export function MessageInput({ onSend, inputState }: MessageInputProps) {
   const { t } = useTranslation();
   const textareaId = useId();
   const fontSizes = useResponsiveFonts();
-  const { currentInput, setInput, canSend, isProcessing, currentRequestId } = useRefinementStore();
+  const storeState = useRefinementStore();
+
+  // Use props if provided (controlled mode), otherwise use store (uncontrolled mode)
+  const currentInput = inputState?.currentInput ?? storeState.currentInput;
+  const setInput = inputState?.setInput ?? storeState.setInput;
+  const isProcessing = inputState?.isProcessing ?? storeState.isProcessing;
+  const currentRequestId = inputState?.currentRequestId ?? storeState.currentRequestId;
+  const canSend = inputState?.canSend ?? storeState.canSend;
 
   const handleSend = () => {
     if (canSend()) {

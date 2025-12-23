@@ -12,7 +12,7 @@
  */
 
 import { PanelRightClose } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ResponsiveFontProvider } from '../../contexts/ResponsiveFontContext';
 import { useResponsiveFontSizes } from '../../hooks/useResponsiveFontSizes';
 import { useIsCompactMode } from '../../hooks/useWindowWidth';
@@ -26,6 +26,7 @@ import {
 } from '../../services/refinement-service';
 import { useRefinementStore } from '../../stores/refinement-store';
 import { useWorkflowStore } from '../../stores/workflow-store';
+import type { RefinementChatState } from '../../types/refinement-chat-state';
 import { MessageInput } from '../chat/MessageInput';
 import { MessageList } from '../chat/MessageList';
 import { SettingsDropdown } from '../chat/SettingsDropdown';
@@ -39,17 +40,20 @@ const PANEL_WIDTH_COMPACT = 280;
 /**
  * Props for RefinementChatPanel
  *
+ * @param chatState - Refinement chat state (controlled component pattern)
  * @param mode - Target mode: 'workflow' (default) or 'subAgentFlow'
  * @param subAgentFlowId - Required when mode is 'subAgentFlow'
- * @param onClose - Close callback for SubAgentFlow mode (workflow mode uses internal closeChat)
+ * @param onClose - Close callback
  */
 interface RefinementChatPanelProps {
+  chatState: RefinementChatState;
   mode?: 'workflow' | 'subAgentFlow';
   subAgentFlowId?: string;
-  onClose?: () => void;
+  onClose: () => void;
 }
 
 export function RefinementChatPanel({
+  chatState,
   mode = 'workflow',
   subAgentFlowId,
   onClose,
@@ -59,31 +63,27 @@ export function RefinementChatPanel({
   const width = isCompact ? PANEL_WIDTH_COMPACT : PANEL_WIDTH_NORMAL;
   const fontSizes = useResponsiveFontSizes(width);
 
+  // Destructure chatState for easier access
   const {
-    isOpen,
-    closeChat,
     conversationHistory,
-    loadConversationHistory,
-    setTargetContext,
+    isProcessing,
     addUserMessage,
-    startProcessing,
-    handleRefinementSuccess,
-    handleRefinementFailed,
-    finishProcessing,
     addLoadingAiMessage,
-    updateMessageLoadingState,
     updateMessageContent,
+    updateMessageLoadingState,
     updateMessageErrorState,
+    updateMessageToolInfo,
     removeMessage,
     clearHistory,
+    startProcessing,
+    finishProcessing,
+    handleRefinementSuccess,
+    handleRefinementFailed,
     shouldShowWarning,
-    isProcessing,
-    useSkills,
-    timeoutSeconds,
-    selectedModel,
-    updateMessageToolInfo,
-    allowedTools,
-  } = useRefinementStore();
+  } = chatState;
+
+  // Settings from refinement store (shared across all panels)
+  const { useSkills, timeoutSeconds, selectedModel, allowedTools } = useRefinementStore();
 
   const { activeWorkflow, updateWorkflow, subAgentFlows, updateSubAgentFlow, setNodes, setEdges } =
     useWorkflowStore();
@@ -96,85 +96,19 @@ export function RefinementChatPanel({
       ? subAgentFlows.find((sf) => sf.id === subAgentFlowId)
       : undefined;
 
-  // Determine if panel should be visible
-  const isVisible = mode === 'subAgentFlow' ? !!subAgentFlow : isOpen && !!activeWorkflow;
-
-  // Phase 7 (T034): Define handleClose early for use in useEffect
-  const handleClose = useCallback(() => {
-    if (mode === 'subAgentFlow' && onClose) {
-      onClose();
-    } else {
-      closeChat();
-    }
-  }, [mode, onClose, closeChat]);
-
-  // Track the last loaded workflow/subAgentFlow ID to avoid reloading during refinement
-  const lastLoadedWorkflowIdRef = useRef<string | null>(null);
-  const lastLoadedSubAgentFlowIdRef = useRef<string | null>(null);
-
-  // Load conversation history and set target context when panel opens
-  // IMPORTANT: Don't reload conversation history when activeWorkflow changes during refinement
-  // because this would overwrite the frontend's streaming messages with the server's history
-  useEffect(() => {
-    if (!isVisible) return;
-
-    if (mode === 'subAgentFlow' && subAgentFlow && subAgentFlowId) {
-      // Only reload if switching to a different SubAgentFlow
-      if (lastLoadedSubAgentFlowIdRef.current !== subAgentFlowId) {
-        setTargetContext('subAgentFlow', subAgentFlowId);
-        loadConversationHistory(subAgentFlow.conversationHistory);
-        lastLoadedSubAgentFlowIdRef.current = subAgentFlowId;
-        lastLoadedWorkflowIdRef.current = null;
-      }
-    } else if (mode === 'workflow' && activeWorkflow) {
-      // Only reload if switching to a different workflow
-      // This prevents reloading during refinement (same workflow ID, updated reference)
-      if (lastLoadedWorkflowIdRef.current !== activeWorkflow.id) {
-        setTargetContext('workflow');
-        loadConversationHistory(activeWorkflow.conversationHistory);
-        lastLoadedWorkflowIdRef.current = activeWorkflow.id;
-        lastLoadedSubAgentFlowIdRef.current = null;
-      }
-    }
-
-    // Reset context when unmounting (only for subAgentFlow mode)
-    return () => {
-      if (mode === 'subAgentFlow') {
-        setTargetContext('workflow');
-      }
-    };
-  }, [
-    isVisible,
-    mode,
-    activeWorkflow,
-    subAgentFlow,
-    subAgentFlowId,
-    setTargetContext,
-    loadConversationHistory,
-  ]);
-
   // Phase 7 (T034): Accessibility - Close panel on Escape key
   useEffect(() => {
-    if (!isVisible) {
-      return;
-    }
-
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && !isProcessing) {
         e.preventDefault();
         e.stopPropagation();
-        handleClose();
+        onClose();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isVisible, handleClose, isProcessing]);
-
-  // Early return if not visible
-  if (!isVisible) {
-    return null;
-  }
+  }, [onClose, isProcessing]);
 
   // Handle sending refinement request
   const handleSend = async (message: string) => {
@@ -655,7 +589,7 @@ export function RefinementChatPanel({
 
             <button
               type="button"
-              onClick={handleClose}
+              onClick={onClose}
               disabled={isProcessing}
               style={{
                 width: '20px',
@@ -691,11 +625,20 @@ export function RefinementChatPanel({
         {/* Warning Banner - Show when 20+ iterations */}
         {shouldShowWarning() && <WarningBanner />}
 
-        {/* Message List */}
-        <MessageList onRetry={handleRetry} />
+        {/* Message List (controlled mode - pass conversation history from chatState) */}
+        <MessageList onRetry={handleRetry} conversationHistory={conversationHistory} />
 
-        {/* Input */}
-        <MessageInput onSend={handleSend} />
+        {/* Input (controlled mode - pass input state from chatState) */}
+        <MessageInput
+          onSend={handleSend}
+          inputState={{
+            currentInput: chatState.currentInput,
+            setInput: chatState.setInput,
+            isProcessing,
+            currentRequestId: chatState.currentRequestId,
+            canSend: chatState.canSend,
+          }}
+        />
 
         {/* Clear Confirmation Dialog */}
         <ConfirmDialog

@@ -7,6 +7,7 @@
 
 import * as Collapsible from '@radix-ui/react-collapsible';
 import * as Dialog from '@radix-ui/react-dialog';
+import type { ConversationHistory } from '@shared/types/workflow-definition';
 import { Check, Sparkles, X } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -22,13 +23,13 @@ import ReactFlow, {
   Panel,
   ReactFlowProvider,
 } from 'reactflow';
+import { useLocalRefinementChatState } from '../../hooks/useLocalRefinementChatState';
 import { useIsCompactMode } from '../../hooks/useWindowWidth';
 import { useTranslation } from '../../i18n/i18n-context';
 import {
   cancelWorkflowNameGeneration,
   generateWorkflowName,
 } from '../../services/ai-generation-service';
-import { useRefinementStore } from '../../stores/refinement-store';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { EditableNameField } from '../common/EditableNameField';
 import { StyledTooltip } from '../common/StyledTooltip';
@@ -105,14 +106,30 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
     cancelSubAgentFlowEditing,
     mainWorkflowSnapshot,
     updateActiveWorkflowMetadata,
+    ensureActiveWorkflow,
   } = useWorkflowStore();
-
-  const { loadConversationHistory, initConversation } = useRefinementStore();
 
   // Local state for panel display (independent from main canvas)
   const [localSelectedNodeId, setLocalSelectedNodeId] = useState<string | null>(null);
   const [isLocalPropertyOverlayOpen, setIsLocalPropertyOverlayOpen] = useState(false);
   const [isLocalRefinementPanelOpen, setIsLocalRefinementPanelOpen] = useState(false);
+
+  // Local chat state hook (independent from main workflow's refinement store)
+  const handleLocalRefinementSuccess = useCallback(
+    (updatedHistory: ConversationHistory) => {
+      if (activeSubAgentFlowId) {
+        updateSubAgentFlow(activeSubAgentFlowId, {
+          conversationHistory: updatedHistory,
+        });
+      }
+    },
+    [activeSubAgentFlowId, updateSubAgentFlow]
+  );
+
+  const { chatState: localChatState, initializeHistory: initializeLocalChatHistory } =
+    useLocalRefinementChatState({
+      onRefinementSuccess: handleLocalRefinementSuccess,
+    });
 
   // Get active sub-agent flow info
   const activeSubAgentFlow = useMemo(
@@ -129,6 +146,10 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
   // Handle toggling AI edit mode with proper workflow context setup
   const handleToggleAiEditMode = useCallback(() => {
     if (!isLocalRefinementPanelOpen) {
+      // Ensure activeWorkflow exists before opening AI edit mode
+      // This handles the case where workflow was created manually (not via AI generation or load)
+      ensureActiveWorkflow();
+
       // Opening AI edit mode - need to set up activeWorkflow with main workflow context
       if (mainWorkflowSnapshot && activeSubAgentFlowId) {
         // Find the current SubAgentFlow being edited
@@ -169,13 +190,9 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
         // Using updateActiveWorkflowMetadata to avoid overwriting SubAgentFlow canvas with main workflow
         updateActiveWorkflowMetadata({ subAgentFlows: updatedSubAgentFlows });
 
-        // Initialize conversation history for the SubAgentFlow
+        // Initialize local conversation history using hook (not global store)
         const subAgentFlow = updatedSubAgentFlows.find((sf) => sf.id === activeSubAgentFlowId);
-        if (subAgentFlow?.conversationHistory) {
-          loadConversationHistory(subAgentFlow.conversationHistory);
-        } else {
-          initConversation();
-        }
+        initializeLocalChatHistory(subAgentFlow?.conversationHistory ?? null);
       }
       setIsLocalRefinementPanelOpen(true);
     } else {
@@ -189,8 +206,8 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
     edges,
     subAgentFlows,
     updateActiveWorkflowMetadata,
-    loadConversationHistory,
-    initConversation,
+    initializeLocalChatHistory,
+    ensureActiveWorkflow,
   ]);
 
   // Initialize local name when dialog opens (activeSubAgentFlowId changes)
@@ -681,6 +698,7 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
                   className={`refinement-panel-collapsible${isCompact ? ' compact' : ''}`}
                 >
                   <RefinementChatPanel
+                    chatState={localChatState}
                     mode="subAgentFlow"
                     subAgentFlowId={activeSubAgentFlowId || undefined}
                     onClose={() => setIsLocalRefinementPanelOpen(false)}

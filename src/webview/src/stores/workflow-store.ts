@@ -81,6 +81,7 @@ interface WorkflowStore {
   updateWorkflow: (workflow: Workflow) => void;
   setActiveWorkflow: (workflow: Workflow) => void; // Phase 3.12
   updateActiveWorkflowMetadata: (updates: Partial<Workflow>) => void; // Update activeWorkflow without changing canvas
+  ensureActiveWorkflow: () => void; // Ensure activeWorkflow exists (create from canvas if null)
 
   // Sub-Agent Flow Actions (Feature: 089-subworkflow)
   addSubAgentFlow: (subAgentFlow: SubAgentFlow) => void;
@@ -522,6 +523,45 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         subAgentFlows: updates.subAgentFlows,
       }),
     });
+  },
+
+  ensureActiveWorkflow: () => {
+    const { activeWorkflow, nodes, edges, workflowName, subAgentFlows } = get();
+
+    // If activeWorkflow already exists, do nothing
+    if (activeWorkflow) return;
+
+    // Create activeWorkflow from current canvas state
+    const now = new Date();
+    const workflowNodes: WorkflowNode[] = nodes.map((node) => ({
+      id: node.id,
+      name: node.data?.label || node.id,
+      type: node.type as NodeType,
+      position: node.position,
+      data: node.data,
+    })) as WorkflowNode[];
+
+    const connections = edges.map((edge) => ({
+      id: edge.id,
+      from: edge.source,
+      to: edge.target,
+      fromPort: edge.sourceHandle || 'default',
+      toPort: edge.targetHandle || 'default',
+    }));
+
+    const newWorkflow: Workflow = {
+      id: `workflow-${now.getTime()}`,
+      name: workflowName,
+      version: '1.0.0',
+      schemaVersion: '1.2.0',
+      nodes: workflowNodes,
+      connections,
+      createdAt: now,
+      updatedAt: now,
+      subAgentFlows: subAgentFlows.length > 0 ? subAgentFlows : undefined,
+    };
+
+    set({ activeWorkflow: newWorkflow });
   },
 
   // ============================================================================
