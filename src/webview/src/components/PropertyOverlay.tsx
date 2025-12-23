@@ -30,13 +30,39 @@ import { ResizeHandle } from './common/ResizeHandle';
 import { McpNodeEditDialog } from './dialogs/McpNodeEditDialog';
 
 /**
+ * PropertyOverlay Props
+ */
+interface PropertyOverlayProps {
+  /** Override selected node ID (for SubAgentFlowDialog local state) */
+  overrideSelectedNodeId?: string | null;
+  /** Override close handler (for SubAgentFlowDialog local state) */
+  onClose?: () => void;
+}
+
+/**
  * PropertyOverlay Component
  */
-export const PropertyOverlay: React.FC = () => {
+export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
+  overrideSelectedNodeId,
+  onClose,
+}) => {
   const { t } = useTranslation();
-  const { nodes, selectedNodeId, updateNodeData, setNodes, closePropertyOverlay, subAgentFlows } =
-    useWorkflowStore();
+  const {
+    nodes,
+    selectedNodeId: storeSelectedNodeId,
+    updateNodeData,
+    setNodes,
+    closePropertyOverlay,
+    subAgentFlows,
+  } = useWorkflowStore();
   const { width, handleMouseDown } = useResizablePanel();
+
+  // Use override if provided, otherwise use store value
+  const selectedNodeId =
+    overrideSelectedNodeId !== undefined ? overrideSelectedNodeId : storeSelectedNodeId;
+
+  // Use override close handler if provided
+  const handleClose = onClose || closePropertyOverlay;
 
   // Find the selected node
   const selectedNode = nodes.find((node) => node.id === selectedNodeId);
@@ -79,7 +105,7 @@ export const PropertyOverlay: React.FC = () => {
         </div>
         <button
           type="button"
-          onClick={closePropertyOverlay}
+          onClick={handleClose}
           style={{
             padding: '4px 8px',
             backgroundColor: 'transparent',
