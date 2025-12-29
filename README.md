@@ -32,13 +32,13 @@
 
 ---
 
-<!-- Export Demo GIF -->
+<!-- Run Workflow Demo GIF -->
 <p align="center">
-  <img src="./resources/export-demo.gif" alt="One-Click Export to Slash Commands Demo" width="800">
+  <img src="./resources/demo_run_workflow.gif" alt="Run Workflow Demo - Execute workflows directly from the editor" width="800">
 </p>
 
 <p align="center">
-  <em>📤 One click to transform visual workflows into ready-to-use slash commands</em>
+  <em>▶️ Run workflows directly from the editor – See your AI automation in action instantly</em>
 </p>
 
 ---
