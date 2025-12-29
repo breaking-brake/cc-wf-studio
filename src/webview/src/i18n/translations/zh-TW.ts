@@ -295,6 +295,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '重設工作流程',
+  'toolbar.focusMode': '專注模式',
   'dialog.resetWorkflow.title': '重設工作流程',
   'dialog.resetWorkflow.message': '確定要重設工作流程嗎？除 Start 和 End 外的所有節點都將被刪除。',
   'dialog.resetWorkflow.confirm': '重設',

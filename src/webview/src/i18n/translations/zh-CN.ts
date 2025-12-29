@@ -295,6 +295,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '重置工作流',
+  'toolbar.focusMode': '专注模式',
   'dialog.resetWorkflow.title': '重置工作流',
   'dialog.resetWorkflow.message': '确定要重置工作流吗？除 Start 和 End 外的所有节点都将被删除。',
   'dialog.resetWorkflow.confirm': '重置',

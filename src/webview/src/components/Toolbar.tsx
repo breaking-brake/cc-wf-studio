@@ -57,6 +57,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setWorkflowName,
     clearWorkflow,
     subAgentFlows,
+    isFocusMode,
+    toggleFocusMode,
   } = useWorkflowStore();
   const {
     isProcessing,
@@ -675,6 +677,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onShareToSlack={onShareToSlack}
               onResetWorkflow={() => setShowResetConfirm(true)}
               onStartTour={onStartTour}
+              isFocusMode={isFocusMode}
+              onToggleFocusMode={toggleFocusMode}
               open={moreActionsOpen}
               onOpenChange={onMoreActionsOpenChange}
             />

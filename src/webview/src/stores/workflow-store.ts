@@ -47,6 +47,7 @@ interface WorkflowStore {
   workflowName: string;
   isPropertyOverlayOpen: boolean;
   isMinimapVisible: boolean;
+  isFocusMode: boolean;
 
   // Sub-Agent Flow State (Feature: 089-subworkflow)
   subAgentFlows: SubAgentFlow[];
@@ -68,6 +69,7 @@ interface WorkflowStore {
   openPropertyOverlay: () => void;
   closePropertyOverlay: () => void;
   toggleMinimapVisibility: () => void;
+  toggleFocusMode: () => void;
 
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
@@ -231,6 +233,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     const saved = localStorage.getItem('cc-wf-studio.minimapVisible');
     return saved !== null ? saved === 'true' : true; // Default: visible
   })(),
+  isFocusMode: (() => {
+    const saved = localStorage.getItem('cc-wf-studio.focusMode');
+    return saved !== null ? saved === 'true' : false; // Default: off
+  })(),
 
   // Sub-Agent Flow Initial State (Feature: 089-subworkflow)
   subAgentFlows: [],
@@ -318,6 +324,12 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     const newValue = !get().isMinimapVisible;
     localStorage.setItem('cc-wf-studio.minimapVisible', newValue.toString());
     set({ isMinimapVisible: newValue });
+  },
+
+  toggleFocusMode: () => {
+    const newValue = !get().isFocusMode;
+    localStorage.setItem('cc-wf-studio.focusMode', newValue.toString());
+    set({ isFocusMode: newValue });
   },
 
   // Custom Actions

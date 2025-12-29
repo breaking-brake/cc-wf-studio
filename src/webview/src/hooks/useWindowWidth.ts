@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useWorkflowStore } from '../stores/workflow-store';
 
 const RESPONSIVE_BREAKPOINT = 900;
 
@@ -25,9 +26,10 @@ export function useWindowWidth(): number {
 }
 
 /**
- * Hook to check if window is in compact mode (width <= 900px)
+ * Hook to check if window is in compact mode (width <= 900px or Focus Mode enabled)
  */
 export function useIsCompactMode(): boolean {
   const width = useWindowWidth();
-  return width <= RESPONSIVE_BREAKPOINT;
+  const isFocusMode = useWorkflowStore((state) => state.isFocusMode);
+  return isFocusMode || width <= RESPONSIVE_BREAKPOINT;
 }

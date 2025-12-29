@@ -8,7 +8,7 @@
  */
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { HelpCircle, MoreHorizontal, Share2, Trash2 } from 'lucide-react';
+import { Check, Focus, HelpCircle, MoreHorizontal, Share2, Trash2 } from 'lucide-react';
 import { useIsCompactMode } from '../../hooks/useWindowWidth';
 import { useTranslation } from '../../i18n/i18n-context';
 
@@ -21,6 +21,8 @@ interface MoreActionsDropdownProps {
   onShareToSlack: () => void;
   onResetWorkflow: () => void;
   onStartTour: () => void;
+  isFocusMode: boolean;
+  onToggleFocusMode: () => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -29,6 +31,8 @@ export function MoreActionsDropdown({
   onShareToSlack,
   onResetWorkflow,
   onStartTour,
+  isFocusMode,
+  onToggleFocusMode,
   open,
   onOpenChange,
 }: MoreActionsDropdownProps) {
@@ -110,6 +114,26 @@ export function MoreActionsDropdown({
           >
             <Trash2 size={14} />
             <span>{t('toolbar.resetWorkflow')}</span>
+          </DropdownMenu.Item>
+
+          {/* Focus Mode Toggle */}
+          <DropdownMenu.Item
+            onSelect={onToggleFocusMode}
+            style={{
+              padding: '8px 12px',
+              fontSize: `${FONT_SIZES.small}px`,
+              color: 'var(--vscode-foreground)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              outline: 'none',
+              borderRadius: '2px',
+            }}
+          >
+            <Focus size={14} />
+            <span style={{ flex: 1 }}>{t('toolbar.focusMode')}</span>
+            {isFocusMode && <Check size={14} />}
           </DropdownMenu.Item>
 
           <DropdownMenu.Separator

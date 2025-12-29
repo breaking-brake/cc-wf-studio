@@ -307,6 +307,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '워크플로우 초기화',
+  'toolbar.focusMode': '집중 모드',
   'dialog.resetWorkflow.title': '워크플로우 초기화',
   'dialog.resetWorkflow.message':
     '워크플로우를 초기화하시겠습니까? Start와 End를 제외한 모든 노드가 삭제됩니다.',

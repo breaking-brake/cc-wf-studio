@@ -277,6 +277,7 @@ export interface WebviewTranslationKeys {
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': string;
+  'toolbar.focusMode': string;
   'dialog.resetWorkflow.title': string;
   'dialog.resetWorkflow.message': string;
   'dialog.resetWorkflow.confirm': string;
