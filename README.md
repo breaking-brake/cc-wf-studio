@@ -21,24 +21,13 @@
 
 ---
 
-<!-- AI Refinement Demo GIF 1: Initial Creation -->
+<!-- AI Edit Demo GIF: PR Code Review Workflow -->
 <p align="center">
-  <img src="./resources/ai-refinement-demo-1.gif" alt="AI-Assisted Workflow Refinement Demo - Initial Creation" width="800">
+  <img src="./resources/demo_edit_with_ai.gif" alt="AI-Assisted Workflow Creation Demo - PR Code Review" width="800">
 </p>
 
 <p align="center">
-  <em>✨ AI Refinement (1): "Create a workflow that sends a greeting prompt" – Build workflows from scratch with AI</em>
-</p>
-
----
-
-<!-- AI Refinement Demo GIF 2: Iterative Refinement -->
-<p align="center">
-  <img src="./resources/ai-refinement-demo-2.gif" alt="AI-Assisted Workflow Refinement Demo - Iterative Refinement" width="800">
-</p>
-
-<p align="center">
-  <em>✨ AI Refinement (2): "Can you modify it to change the greeting based on the current time?" – Refine iteratively through conversation</em>
+  <em>✨ Edit with AI: Create a PR code review workflow with MCP, Skills, and conditional branching – All with natural language</em>
 </p>
 
 ---
@@ -165,14 +154,14 @@ claude --version
 
 ### Example Refinement Requests
 
-**Pattern 1: Initial Creation** (See Demo GIF #1 above)
+**Pattern 1: Initial Creation** (See Demo GIF above)
 ```
-Create a workflow that sends a greeting prompt
+e.g. Create a PR code review workflow with MCP, Skills, and conditional branching
 ```
 
-**Pattern 2: Iterative Refinement** (See Demo GIF #2 above)
+**Pattern 2: Iterative Refinement**
 ```
-Can you modify it to change the greeting based on the current time?
+e.g. Add error handling when the MCP tool fails to fetch PR details
 ```
 
 **Adding Validation Logic**
