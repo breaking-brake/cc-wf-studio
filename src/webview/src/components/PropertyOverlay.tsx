@@ -4,6 +4,7 @@
  * Property editor for selected nodes (displayed as overlay on canvas)
  * Based on: /specs/001-cc-wf-studio/plan.md
  * Updated: Phase 3.3 - Added resizable width functionality
+ * Updated: Added "Edit in Editor" button for textarea fields
  */
 
 import type { McpNodeData } from '@shared/types/mcp-node';
@@ -26,6 +27,7 @@ import { useWorkflowStore } from '../stores/workflow-store';
 import type { PromptNodeData } from '../types/node-types';
 import { extractVariables } from '../utils/template-utils';
 import { ColorPicker } from './common/ColorPicker';
+import { EditInEditorButton } from './common/EditInEditorButton';
 import { ResizeHandle } from './common/ResizeHandle';
 import { McpNodeEditDialog } from './dialogs/McpNodeEditDialog';
 
@@ -373,18 +375,32 @@ const SubAgentProperties: React.FC<{
 
       {/* Prompt */}
       <div>
-        <label
-          htmlFor="prompt-textarea"
+        <div
           style={{
-            display: 'block',
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--vscode-foreground)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
             marginBottom: '6px',
           }}
         >
-          {t('property.prompt')}
-        </label>
+          <label
+            htmlFor="prompt-textarea"
+            style={{
+              display: 'block',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--vscode-foreground)',
+            }}
+          >
+            {t('property.prompt')}
+          </label>
+          <EditInEditorButton
+            content={data.prompt}
+            onContentUpdated={(newContent) => updateNodeData(node.id, { prompt: newContent })}
+            label={t('property.prompt')}
+            language="markdown"
+          />
+        </div>
         <textarea
           id="prompt-textarea"
           value={data.prompt}
@@ -556,18 +572,32 @@ const AskUserQuestionProperties: React.FC<{
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       {/* Question Text */}
       <div>
-        <label
-          htmlFor="question-text-input"
+        <div
           style={{
-            display: 'block',
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--vscode-foreground)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
             marginBottom: '6px',
           }}
         >
-          {t('property.questionText')}
-        </label>
+          <label
+            htmlFor="question-text-input"
+            style={{
+              display: 'block',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--vscode-foreground)',
+            }}
+          >
+            {t('property.questionText')}
+          </label>
+          <EditInEditorButton
+            content={data.questionText}
+            onContentUpdated={(newContent) => updateNodeData(node.id, { questionText: newContent })}
+            label={t('property.questionText')}
+            language="markdown"
+          />
+        </div>
         <textarea
           id="question-text-input"
           value={data.questionText}
@@ -842,18 +872,32 @@ const PromptProperties: React.FC<{
 
       {/* Prompt */}
       <div>
-        <label
-          htmlFor="prompt-textarea"
+        <div
           style={{
-            display: 'block',
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--vscode-foreground)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
             marginBottom: '6px',
           }}
         >
-          {t('property.prompt.label')}
-        </label>
+          <label
+            htmlFor="prompt-textarea"
+            style={{
+              display: 'block',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--vscode-foreground)',
+            }}
+          >
+            {t('property.prompt.label')}
+          </label>
+          <EditInEditorButton
+            content={data.prompt}
+            onContentUpdated={(newContent) => updateNodeData(node.id, { prompt: newContent })}
+            label={t('property.prompt.label')}
+            language="markdown"
+          />
+        </div>
         <textarea
           id="prompt-textarea"
           value={data.prompt}

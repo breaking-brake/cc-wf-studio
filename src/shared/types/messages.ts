@@ -620,7 +620,8 @@ export type ExtensionMessage =
   | Message<WorkflowNameFailedPayload, 'WORKFLOW_NAME_FAILED'>
   | Message<void, 'FILE_PICKER_CANCELLED'>
   | Message<RunAsSlashCommandSuccessPayload, 'RUN_AS_SLASH_COMMAND_SUCCESS'>
-  | Message<void, 'RUN_AS_SLASH_COMMAND_CANCELLED'>;
+  | Message<void, 'RUN_AS_SLASH_COMMAND_CANCELLED'>
+  | Message<EditorContentUpdatedPayload, 'EDITOR_CONTENT_UPDATED'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -1013,6 +1014,38 @@ export interface ShareWorkflowFailedPayload {
 }
 
 // ============================================================================
+// Edit in VSCode Editor Payloads
+// ============================================================================
+
+/**
+ * Open content in VSCode Editor payload
+ * Feature: Edit in VSCode Editor functionality
+ */
+export interface OpenInEditorPayload {
+  /** Unique identifier for this edit session */
+  sessionId: string;
+  /** Current text content to edit */
+  content: string;
+  /** Label for the editor tab (optional) */
+  label?: string;
+  /** Language mode for syntax highlighting (default: 'markdown') */
+  language?: 'markdown' | 'plaintext';
+}
+
+/**
+ * Editor content updated payload (sent when user saves or closes editor)
+ * Feature: Edit in VSCode Editor functionality
+ */
+export interface EditorContentUpdatedPayload {
+  /** Session ID matching the original request */
+  sessionId: string;
+  /** Updated text content */
+  content: string;
+  /** Whether the user saved (true) or cancelled/closed without saving (false) */
+  saved: boolean;
+}
+
+// ============================================================================
 // Utility Payloads
 // ============================================================================
 
@@ -1080,7 +1113,8 @@ export type WebviewMessage =
   | Message<GenerateSlackDescriptionPayload, 'GENERATE_SLACK_DESCRIPTION'>
   | Message<GenerateWorkflowNamePayload, 'GENERATE_WORKFLOW_NAME'>
   | Message<void, 'OPEN_FILE_PICKER'>
-  | Message<RunAsSlashCommandPayload, 'RUN_AS_SLASH_COMMAND'>;
+  | Message<RunAsSlashCommandPayload, 'RUN_AS_SLASH_COMMAND'>
+  | Message<OpenInEditorPayload, 'OPEN_IN_EDITOR'>;
 
 // ============================================================================
 // Error Codes

@@ -759,4 +759,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     'このワークフローをインポートするには、インポート元のSlackワークスペースに接続してください。ワークフローファイルは現在接続されていないワークスペースにあります。',
   'slack.import.connectionRequired.workspaceInfo': 'インポート元ワークスペース:',
   'slack.import.connectionRequired.connectButton': 'Slackに接続',
+
+  // Edit in VSCode Editor
+  'editor.openInEditor': 'エディタで編集',
+  'editor.openInEditor.tooltip': 'VSCodeエディタで開いて編集（vimキーバインド、テーマなど）',
 };

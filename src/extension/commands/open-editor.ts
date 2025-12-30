@@ -36,6 +36,7 @@ import {
   handleListSlackWorkspaces,
   handleShareWorkflowToSlack,
 } from './slack-share-workflow';
+import { handleOpenInEditor } from './text-editor';
 import { handleGenerateWorkflowName } from './workflow-name-generation';
 import {
   handleCancelRefinement,
@@ -845,6 +846,13 @@ export function registerOpenEditorCommand(
                   'slack-last-shared-channel',
                   message.payload.channelId
                 );
+              }
+              break;
+
+            case 'OPEN_IN_EDITOR':
+              // Open text content in VSCode native editor
+              if (message.payload) {
+                await handleOpenInEditor(message.payload, webview);
               }
               break;
 

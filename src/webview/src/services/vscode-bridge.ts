@@ -6,8 +6,10 @@
  */
 
 import type {
+  EditorContentUpdatedPayload,
   ExportWorkflowPayload,
   ExtensionMessage,
+  OpenInEditorPayload,
   RunAsSlashCommandPayload,
   SaveWorkflowPayload,
   Workflow,
@@ -215,5 +217,51 @@ export function runAsSlashCommand(workflow: Workflow): Promise<void> {
       window.removeEventListener('message', handler);
       reject(new Error('Request timed out'));
     }, 30000);
+  });
+}
+
+/**
+ * Open text content in VSCode's native editor
+ *
+ * Allows users to edit content with full editor features (vim keybindings, themes, etc.)
+ *
+ * @param content - Current text content to edit
+ * @param label - Optional label for the editor tab
+ * @param language - Language mode for syntax highlighting (default: 'markdown')
+ * @returns Promise that resolves with the updated content when user saves or closes
+ */
+export function openInEditor(
+  content: string,
+  label?: string,
+  language?: 'markdown' | 'plaintext'
+): Promise<EditorContentUpdatedPayload> {
+  return new Promise((resolve) => {
+    const sessionId = `editor-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+    // Register response handler
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.type === 'EDITOR_CONTENT_UPDATED' && message.payload?.sessionId === sessionId) {
+        window.removeEventListener('message', handler);
+        resolve(message.payload as EditorContentUpdatedPayload);
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    // Send request
+    const payload: OpenInEditorPayload = {
+      sessionId,
+      content,
+      label,
+      language,
+    };
+    vscode.postMessage({
+      type: 'OPEN_IN_EDITOR',
+      payload,
+    });
+
+    // No timeout - user may take as long as they want to edit
   });
 }

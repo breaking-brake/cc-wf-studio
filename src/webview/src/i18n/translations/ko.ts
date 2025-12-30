@@ -759,4 +759,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     '이 워크플로우를 가져오려면 원본 Slack 워크스페이스에 연결해야 합니다. 워크플로우 파일이 현재 연결되지 않은 워크스페이스에 있습니다.',
   'slack.import.connectionRequired.workspaceInfo': '원본 워크스페이스:',
   'slack.import.connectionRequired.connectButton': 'Slack에 연결',
+
+  // Edit in VSCode Editor
+  'editor.openInEditor': '에디터에서 편집',
+  'editor.openInEditor.tooltip':
+    'VSCode 에디터에서 열어 전체 편집 기능 사용 (vim 키바인딩, 테마 등)',
 };

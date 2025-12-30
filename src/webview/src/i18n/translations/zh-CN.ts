@@ -731,4 +731,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
     '要导入此工作流，请连接到源 Slack 工作区。工作流文件位于当前未连接的工作区中。',
   'slack.import.connectionRequired.workspaceInfo': '源工作区:',
   'slack.import.connectionRequired.connectButton': '连接到 Slack',
+
+  // Edit in VSCode Editor
+  'editor.openInEditor': '在编辑器中编辑',
+  'editor.openInEditor.tooltip': '在 VSCode 编辑器中打开以使用完整编辑功能（vim 键绑定、主题等）',
 };

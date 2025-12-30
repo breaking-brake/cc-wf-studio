@@ -731,4 +731,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
     '要匯入此工作流程，請連接到來源 Slack 工作區。工作流程檔案位於目前未連接的工作區中。',
   'slack.import.connectionRequired.workspaceInfo': '來源工作區:',
   'slack.import.connectionRequired.connectButton': '連接到 Slack',
+
+  // Edit in VSCode Editor
+  'editor.openInEditor': '在編輯器中編輯',
+  'editor.openInEditor.tooltip': '在 VSCode 編輯器中開啟以使用完整編輯功能（vim 鍵綁定、主題等）',
 };

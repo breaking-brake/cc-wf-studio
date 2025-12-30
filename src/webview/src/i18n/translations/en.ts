@@ -766,4 +766,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Please connect to the source Slack workspace to import this workflow. The workflow file is hosted in a workspace that you are not currently connected to.',
   'slack.import.connectionRequired.workspaceInfo': 'Source Workspace:',
   'slack.import.connectionRequired.connectButton': 'Connect to Slack',
+
+  // Edit in VSCode Editor
+  'editor.openInEditor': 'Edit in Editor',
+  'editor.openInEditor.tooltip':
+    'Open in VSCode editor for full editing features (vim keybindings, themes, etc.)',
 };

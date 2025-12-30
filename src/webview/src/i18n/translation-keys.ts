@@ -692,4 +692,8 @@ export interface WebviewTranslationKeys {
   'slack.import.connectionRequired.message': string;
   'slack.import.connectionRequired.workspaceInfo': string;
   'slack.import.connectionRequired.connectButton': string;
+
+  // Edit in VSCode Editor
+  'editor.openInEditor': string;
+  'editor.openInEditor.tooltip': string;
 }
