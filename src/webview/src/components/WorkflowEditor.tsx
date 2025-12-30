@@ -21,6 +21,8 @@ import ReactFlow, {
 } from 'reactflow';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useWorkflowStore } from '../stores/workflow-store';
+// Custom edge with delete button
+import { DeletableEdge } from './edges/DeletableEdge';
 import { InteractionModeToggle } from './InteractionModeToggle';
 import { MinimapContainer } from './MinimapContainer';
 import { AskUserQuestionNodeComponent } from './nodes/AskUserQuestionNode';
@@ -66,9 +68,11 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 };
 
 /**
- * Edge types (can be customized later)
+ * Edge types - custom edge with delete button
  */
-const edgeTypes: EdgeTypes = {};
+const edgeTypes: EdgeTypes = {
+  default: DeletableEdge,
+};
 
 /**
  * WorkflowEditor Component Props

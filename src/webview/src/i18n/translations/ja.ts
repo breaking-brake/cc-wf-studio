@@ -303,6 +303,12 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.confirm': '削除',
   'dialog.deleteNode.cancel': 'キャンセル',
 
+  // Delete Edge Confirmation Dialog
+  'dialog.deleteEdge.title': '接続を削除',
+  'dialog.deleteEdge.message': 'この接続を削除してもよろしいですか？',
+  'dialog.deleteEdge.confirm': '削除',
+  'dialog.deleteEdge.cancel': 'キャンセル',
+
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': 'ワークフローをリセット',
   'toolbar.focusMode': '集中モード',

@@ -303,6 +303,12 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.confirm': 'Delete',
   'dialog.deleteNode.cancel': 'Cancel',
 
+  // Delete Edge Confirmation Dialog
+  'dialog.deleteEdge.title': 'Delete Connection',
+  'dialog.deleteEdge.message': 'Are you sure you want to delete this connection?',
+  'dialog.deleteEdge.confirm': 'Delete',
+  'dialog.deleteEdge.cancel': 'Cancel',
+
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': 'Reset Workflow',
   'toolbar.focusMode': 'Focus Mode',

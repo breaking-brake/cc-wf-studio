@@ -305,6 +305,12 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.confirm': '삭제',
   'dialog.deleteNode.cancel': '취소',
 
+  // Delete Edge Confirmation Dialog
+  'dialog.deleteEdge.title': '연결 삭제',
+  'dialog.deleteEdge.message': '이 연결을 삭제하시겠습니까?',
+  'dialog.deleteEdge.confirm': '삭제',
+  'dialog.deleteEdge.cancel': '취소',
+
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '워크플로우 초기화',
   'toolbar.focusMode': '집중 모드',

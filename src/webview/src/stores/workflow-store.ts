@@ -42,6 +42,7 @@ interface WorkflowStore {
   edges: Edge[];
   selectedNodeId: string | null;
   pendingDeleteNodeIds: string[];
+  pendingDeleteEdgeIds: string[];
   activeWorkflow: Workflow | null;
   interactionMode: InteractionMode;
   workflowName: string;
@@ -78,6 +79,9 @@ interface WorkflowStore {
   requestDeleteNode: (nodeId: string) => void;
   confirmDeleteNodes: () => void;
   cancelDeleteNodes: () => void;
+  requestDeleteEdge: (edgeId: string) => void;
+  confirmDeleteEdges: () => void;
+  cancelDeleteEdges: () => void;
   clearWorkflow: () => void;
   addGeneratedWorkflow: (workflow: Workflow) => void;
   updateWorkflow: (workflow: Workflow) => void;
@@ -225,6 +229,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   edges: [],
   selectedNodeId: null,
   pendingDeleteNodeIds: [],
+  pendingDeleteEdgeIds: [],
   activeWorkflow: null,
   interactionMode: 'pan', // Default: pan mode
   workflowName: 'my-workflow', // Default workflow name
@@ -391,6 +396,26 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   cancelDeleteNodes: () => {
     set({ pendingDeleteNodeIds: [] });
+  },
+
+  requestDeleteEdge: (edgeId: string) => {
+    // Request edge deletion (show confirmation dialog)
+    set({ pendingDeleteEdgeIds: [edgeId] });
+  },
+
+  confirmDeleteEdges: () => {
+    const edgeIds = get().pendingDeleteEdgeIds;
+    if (edgeIds.length === 0) return;
+
+    // Delete all pending edges
+    set({
+      edges: get().edges.filter((edge) => !edgeIds.includes(edge.id)),
+      pendingDeleteEdgeIds: [],
+    });
+  },
+
+  cancelDeleteEdges: () => {
+    set({ pendingDeleteEdgeIds: [] });
   },
 
   clearWorkflow: () => {

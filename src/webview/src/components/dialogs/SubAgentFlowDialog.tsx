@@ -33,6 +33,8 @@ import {
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { EditableNameField } from '../common/EditableNameField';
 import { StyledTooltip } from '../common/StyledTooltip';
+// Custom edge with delete button
+import { DeletableEdge } from '../edges/DeletableEdge';
 import { InteractionModeToggle } from '../InteractionModeToggle';
 import { MinimapContainer } from '../MinimapContainer';
 import { NodePalette } from '../NodePalette';
@@ -48,6 +50,7 @@ import { SubAgentFlowNodeComponent } from '../nodes/SubAgentFlowNode';
 import { SubAgentNodeComponent } from '../nodes/SubAgentNode';
 import { SwitchNodeComponent } from '../nodes/SwitchNode';
 import { PropertyOverlay } from '../PropertyOverlay';
+import { ConfirmDialog } from './ConfirmDialog';
 import { RefinementChatPanel } from './RefinementChatPanel';
 
 /**
@@ -76,9 +79,11 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 };
 
 /**
- * Edge types
+ * Edge types - custom edge with delete button
  */
-const edgeTypes: EdgeTypes = {};
+const edgeTypes: EdgeTypes = {
+  default: DeletableEdge,
+};
 
 interface SubAgentFlowDialogProps {
   isOpen: boolean;
@@ -107,6 +112,9 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
     mainWorkflowSnapshot,
     updateActiveWorkflowMetadata,
     ensureActiveWorkflow,
+    pendingDeleteEdgeIds,
+    confirmDeleteEdges,
+    cancelDeleteEdges,
   } = useWorkflowStore();
 
   // Local state for panel display (independent from main canvas)
@@ -706,6 +714,17 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
                 </Collapsible.Content>
               </Collapsible.Root>
             </div>
+
+            {/* Delete Edge Confirmation Dialog */}
+            <ConfirmDialog
+              isOpen={pendingDeleteEdgeIds.length > 0}
+              title={t('dialog.deleteEdge.title')}
+              message={t('dialog.deleteEdge.message')}
+              confirmLabel={t('dialog.deleteEdge.confirm')}
+              cancelLabel={t('dialog.deleteEdge.cancel')}
+              onConfirm={confirmDeleteEdges}
+              onCancel={cancelDeleteEdges}
+            />
           </Dialog.Content>
         </Dialog.Overlay>
       </Dialog.Portal>

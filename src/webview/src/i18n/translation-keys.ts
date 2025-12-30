@@ -275,6 +275,12 @@ export interface WebviewTranslationKeys {
   'dialog.deleteNode.confirm': string;
   'dialog.deleteNode.cancel': string;
 
+  // Delete Edge Confirmation Dialog
+  'dialog.deleteEdge.title': string;
+  'dialog.deleteEdge.message': string;
+  'dialog.deleteEdge.confirm': string;
+  'dialog.deleteEdge.cancel': string;
+
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': string;
   'toolbar.focusMode': string;

@@ -293,6 +293,12 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.confirm': '刪除',
   'dialog.deleteNode.cancel': '取消',
 
+  // Delete Edge Confirmation Dialog
+  'dialog.deleteEdge.title': '刪除連接',
+  'dialog.deleteEdge.message': '確定要刪除此連接嗎？',
+  'dialog.deleteEdge.confirm': '刪除',
+  'dialog.deleteEdge.cancel': '取消',
+
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '重設工作流程',
   'toolbar.focusMode': '專注模式',
