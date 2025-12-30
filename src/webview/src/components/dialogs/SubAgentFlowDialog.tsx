@@ -50,7 +50,6 @@ import { SubAgentFlowNodeComponent } from '../nodes/SubAgentFlowNode';
 import { SubAgentNodeComponent } from '../nodes/SubAgentNode';
 import { SwitchNodeComponent } from '../nodes/SwitchNode';
 import { PropertyOverlay } from '../PropertyOverlay';
-import { ConfirmDialog } from './ConfirmDialog';
 import { RefinementChatPanel } from './RefinementChatPanel';
 
 /**
@@ -112,9 +111,6 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
     mainWorkflowSnapshot,
     updateActiveWorkflowMetadata,
     ensureActiveWorkflow,
-    pendingDeleteEdgeIds,
-    confirmDeleteEdges,
-    cancelDeleteEdges,
   } = useWorkflowStore();
 
   // Local state for panel display (independent from main canvas)
@@ -714,17 +710,6 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
                 </Collapsible.Content>
               </Collapsible.Root>
             </div>
-
-            {/* Delete Edge Confirmation Dialog */}
-            <ConfirmDialog
-              isOpen={pendingDeleteEdgeIds.length > 0}
-              title={t('dialog.deleteEdge.title')}
-              message={t('dialog.deleteEdge.message')}
-              confirmLabel={t('dialog.deleteEdge.confirm')}
-              cancelLabel={t('dialog.deleteEdge.cancel')}
-              onConfirm={confirmDeleteEdges}
-              onCancel={cancelDeleteEdges}
-            />
           </Dialog.Content>
         </Dialog.Overlay>
       </Dialog.Portal>

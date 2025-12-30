@@ -6,8 +6,7 @@
  */
 
 import type React from 'react';
-import { BaseEdge, type EdgeProps, getBezierPath } from 'reactflow';
-import { useWorkflowStore } from '../../stores/workflow-store';
+import { BaseEdge, type EdgeProps, getBezierPath, useReactFlow } from 'reactflow';
 
 /**
  * Deletable edge component
@@ -26,7 +25,7 @@ export const DeletableEdge: React.FC<EdgeProps> = ({
   style,
   markerEnd,
 }) => {
-  const { requestDeleteEdge } = useWorkflowStore();
+  const { setEdges } = useReactFlow();
 
   // Calculate bezier curve path and center coordinates
   const [edgePath, labelX, labelY] = getBezierPath({
@@ -38,10 +37,10 @@ export const DeletableEdge: React.FC<EdgeProps> = ({
     targetPosition,
   });
 
-  // Delete button click handler
+  // Delete button click handler - delete immediately without confirmation
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent edge selection event
-    requestDeleteEdge(id);
+    setEdges((edges) => edges.filter((edge) => edge.id !== id));
   };
 
   return (
