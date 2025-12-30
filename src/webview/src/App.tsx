@@ -44,9 +44,6 @@ const App: React.FC = () => {
     pendingDeleteNodeIds,
     confirmDeleteNodes,
     cancelDeleteNodes,
-    pendingDeleteEdgeIds,
-    confirmDeleteEdges,
-    cancelDeleteEdges,
     activeWorkflow,
     setNodes,
     setEdges,
@@ -327,17 +324,6 @@ const App: React.FC = () => {
         cancelLabel={t('dialog.deleteNode.cancel')}
         onConfirm={confirmDeleteNodes}
         onCancel={cancelDeleteNodes}
-      />
-
-      {/* Delete Edge Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={pendingDeleteEdgeIds.length > 0}
-        title={t('dialog.deleteEdge.title')}
-        message={t('dialog.deleteEdge.message')}
-        confirmLabel={t('dialog.deleteEdge.confirm')}
-        cancelLabel={t('dialog.deleteEdge.cancel')}
-        onConfirm={confirmDeleteEdges}
-        onCancel={cancelDeleteEdges}
       />
 
       {/* Slack Share Dialog */}
