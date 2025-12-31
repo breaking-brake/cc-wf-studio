@@ -433,7 +433,6 @@ export async function executeClaudeCodeCLIStreaming(
   try {
     // Build CLI arguments
     // Note: --verbose MUST come before --output-format when using -p (print) mode
-    // See: https://github.com/breaking-brake/cc-wf-studio/issues - CLI parameter ordering
     const args = [
       'claude',
       '-p',
@@ -454,7 +453,6 @@ export async function executeClaudeCodeCLIStreaming(
     }
 
     // Spawn Claude Code CLI with streaming output format
-    // Note: --verbose is required when using --output-format=stream-json with -p (print mode)
     const subprocess = spawn('npx', args, {
       cwd: workingDirectory,
       timeout: timeoutMs,
