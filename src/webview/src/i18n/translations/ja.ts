@@ -762,5 +762,5 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Edit in VSCode Editor
   'editor.openInEditor': 'エディタで編集',
-  'editor.openInEditor.tooltip': 'VSCodeエディタで開いて編集（vimキーバインド、テーマなど）',
+  'editor.openInEditor.tooltip': 'VSCodeエディタで開いて編集',
 };

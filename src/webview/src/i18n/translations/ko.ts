@@ -762,6 +762,5 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Edit in VSCode Editor
   'editor.openInEditor': '에디터에서 편집',
-  'editor.openInEditor.tooltip':
-    'VSCode 에디터에서 열어 전체 편집 기능 사용 (vim 키바인딩, 테마 등)',
+  'editor.openInEditor.tooltip': 'VSCode 에디터에서 열어 전체 편집 기능 사용',
 };

@@ -734,5 +734,5 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
 
   // Edit in VSCode Editor
   'editor.openInEditor': '在編輯器中編輯',
-  'editor.openInEditor.tooltip': '在 VSCode 編輯器中開啟以使用完整編輯功能（vim 鍵綁定、主題等）',
+  'editor.openInEditor.tooltip': '在 VSCode 編輯器中開啟以使用完整編輯功能',
 };

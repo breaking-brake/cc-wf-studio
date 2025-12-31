@@ -769,6 +769,5 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Edit in VSCode Editor
   'editor.openInEditor': 'Edit in Editor',
-  'editor.openInEditor.tooltip':
-    'Open in VSCode editor for full editing features (vim keybindings, themes, etc.)',
+  'editor.openInEditor.tooltip': 'Open in VSCode editor for full editing features',
 };
