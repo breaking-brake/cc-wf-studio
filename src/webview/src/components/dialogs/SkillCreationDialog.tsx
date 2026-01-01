@@ -15,6 +15,7 @@ import {
   type SkillValidationErrors,
   validateCreateSkillPayload,
 } from '../../utils/skill-validation';
+import { EditInEditorButton } from '../common/EditInEditorButton';
 
 interface SkillCreationDialogProps {
   isOpen: boolean;
@@ -46,6 +47,8 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
   const [errors, setErrors] = useState<SkillValidationErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [isEditingInstructions, setIsEditingInstructions] = useState(false);
 
   // Reset form when dialog opens
   useEffect(() => {
@@ -236,24 +239,40 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
 
               {/* Description */}
               <div>
-                <label
-                  htmlFor="skill-description"
+                <div
                   style={{
-                    display: 'block',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
                     marginBottom: '6px',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    color: 'var(--vscode-foreground)',
                   }}
                 >
-                  {t('skill.creation.descriptionLabel')} *
-                </label>
+                  <label
+                    htmlFor="skill-description"
+                    style={{
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      color: 'var(--vscode-foreground)',
+                    }}
+                  >
+                    {t('skill.creation.descriptionLabel')} *
+                  </label>
+                  <EditInEditorButton
+                    content={formData.description}
+                    onContentUpdated={(newContent) => handleFieldChange('description', newContent)}
+                    label={t('skill.creation.descriptionLabel')}
+                    language="markdown"
+                    disabled={isSubmitting}
+                    onEditingStateChange={setIsEditingDescription}
+                  />
+                </div>
                 <textarea
                   id={descriptionId}
                   value={formData.description}
                   onChange={(e) => handleFieldChange('description', e.target.value)}
                   placeholder={t('skill.creation.descriptionPlaceholder')}
                   disabled={isSubmitting}
+                  readOnly={isEditingDescription}
                   rows={3}
                   style={{
                     width: '100%',
@@ -266,6 +285,8 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
                     outline: 'none',
                     resize: 'vertical',
                     fontFamily: 'inherit',
+                    opacity: isEditingDescription ? 0.5 : 1,
+                    cursor: isEditingDescription ? 'not-allowed' : 'text',
                   }}
                 />
                 {errors.description && (
@@ -283,24 +304,40 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
 
               {/* Instructions */}
               <div>
-                <label
-                  htmlFor="skill-instructions"
+                <div
                   style={{
-                    display: 'block',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
                     marginBottom: '6px',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    color: 'var(--vscode-foreground)',
                   }}
                 >
-                  {t('skill.creation.instructionsLabel')} *
-                </label>
+                  <label
+                    htmlFor="skill-instructions"
+                    style={{
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      color: 'var(--vscode-foreground)',
+                    }}
+                  >
+                    {t('skill.creation.instructionsLabel')} *
+                  </label>
+                  <EditInEditorButton
+                    content={formData.instructions}
+                    onContentUpdated={(newContent) => handleFieldChange('instructions', newContent)}
+                    label={t('skill.creation.instructionsLabel')}
+                    language="markdown"
+                    disabled={isSubmitting}
+                    onEditingStateChange={setIsEditingInstructions}
+                  />
+                </div>
                 <textarea
                   id={instructionsId}
                   value={formData.instructions}
                   onChange={(e) => handleFieldChange('instructions', e.target.value)}
                   placeholder={t('skill.creation.instructionsPlaceholder')}
                   disabled={isSubmitting}
+                  readOnly={isEditingInstructions}
                   rows={8}
                   style={{
                     width: '100%',
@@ -313,6 +350,8 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
                     outline: 'none',
                     resize: 'vertical',
                     fontFamily: 'var(--vscode-editor-font-family)',
+                    opacity: isEditingInstructions ? 0.5 : 1,
+                    cursor: isEditingInstructions ? 'not-allowed' : 'text',
                   }}
                 />
                 {errors.instructions && (

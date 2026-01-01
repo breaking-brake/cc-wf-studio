@@ -28,6 +28,7 @@ import {
 import { serializeWorkflow } from '../../services/workflow-service';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { AiGenerateButton } from '../common/AiGenerateButton';
+import { EditInEditorButton } from '../common/EditInEditorButton';
 import { IndeterminateProgressBar } from '../common/IndeterminateProgressBar';
 import { SlackManualTokenDialog } from './SlackManualTokenDialog';
 
@@ -83,6 +84,7 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
   const [isManualTokenDialogOpen, setIsManualTokenDialogOpen] = useState(false);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [isEditingInEditor, setIsEditingInEditor] = useState(false);
   const generationRequestIdRef = useRef<string | null>(null);
 
   // Load workspace when dialog opens (single workspace only)
@@ -723,14 +725,24 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
             >
               {t('description')} ({t('optional')})
             </label>
-            <AiGenerateButton
-              isGenerating={isGeneratingDescription}
-              onGenerate={handleGenerateDescription}
-              onCancel={handleCancelGeneration}
-              generateTooltip={t('slack.description.generateWithAI')}
-              cancelTooltip={t('cancel')}
-              disabled={loading}
-            />
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <EditInEditorButton
+                content={description}
+                onContentUpdated={setDescription}
+                label={t('description')}
+                language="markdown"
+                disabled={loading || isGeneratingDescription}
+                onEditingStateChange={setIsEditingInEditor}
+              />
+              <AiGenerateButton
+                isGenerating={isGeneratingDescription}
+                onGenerate={handleGenerateDescription}
+                onCancel={handleCancelGeneration}
+                generateTooltip={t('slack.description.generateWithAI')}
+                cancelTooltip={t('cancel')}
+                disabled={loading || isEditingInEditor}
+              />
+            </div>
           </div>
           {generationError && (
             <div
@@ -748,6 +760,7 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             disabled={loading || isGeneratingDescription}
+            readOnly={isEditingInEditor}
             maxLength={500}
             rows={3}
             style={{
@@ -760,6 +773,8 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
               fontSize: '13px',
               fontFamily: 'inherit',
               resize: 'vertical',
+              opacity: isEditingInEditor ? 0.5 : 1,
+              cursor: isEditingInEditor ? 'not-allowed' : 'text',
             }}
             placeholder={t('slack.share.descriptionPlaceholder')}
           />
