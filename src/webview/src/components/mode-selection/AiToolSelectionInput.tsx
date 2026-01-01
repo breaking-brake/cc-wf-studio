@@ -13,6 +13,7 @@ import {
   useDebouncedValidation,
   validateTaskDescription,
 } from '../../utils/natural-language-validator';
+import { EditInEditorButton } from '../common/EditInEditorButton';
 
 interface AiToolSelectionInputProps {
   value: string;
@@ -50,19 +51,32 @@ export function AiToolSelectionInput({
 
   return (
     <div>
-      {/* Label */}
-      <label
-        htmlFor="nl-task-input"
+      {/* Label with Edit in Editor button */}
+      <div
         style={{
-          display: 'block',
-          fontSize: '13px',
-          fontWeight: 'bold',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           marginBottom: '8px',
-          color: 'var(--vscode-foreground)',
         }}
       >
-        {t('mcp.naturalLanguage.taskDescription.label')}
-      </label>
+        <label
+          htmlFor="nl-task-input"
+          style={{
+            fontSize: '13px',
+            fontWeight: 'bold',
+            color: 'var(--vscode-foreground)',
+          }}
+        >
+          {t('mcp.naturalLanguage.taskDescription.label')}
+        </label>
+        <EditInEditorButton
+          content={value}
+          onContentUpdated={onChange}
+          label={t('mcp.naturalLanguage.taskDescription.label')}
+          language="plaintext"
+        />
+      </div>
 
       {/* Text Area */}
       <textarea

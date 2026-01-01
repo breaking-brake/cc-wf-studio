@@ -13,6 +13,7 @@ import {
   useDebouncedValidation,
   validateParameterDescription,
 } from '../../utils/natural-language-validator';
+import { EditInEditorButton } from '../common/EditInEditorButton';
 
 interface AiParameterConfigInputProps {
   value: string;
@@ -50,19 +51,32 @@ export function AiParameterConfigInput({
 
   return (
     <div>
-      {/* Label */}
-      <label
-        htmlFor="nl-param-input"
+      {/* Label with Edit in Editor button */}
+      <div
         style={{
-          display: 'block',
-          fontSize: '13px',
-          fontWeight: 'bold',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           marginBottom: '8px',
-          color: 'var(--vscode-foreground)',
         }}
       >
-        {t('mcp.naturalLanguage.paramDescription.label')}
-      </label>
+        <label
+          htmlFor="nl-param-input"
+          style={{
+            fontSize: '13px',
+            fontWeight: 'bold',
+            color: 'var(--vscode-foreground)',
+          }}
+        >
+          {t('mcp.naturalLanguage.paramDescription.label')}
+        </label>
+        <EditInEditorButton
+          content={value}
+          onContentUpdated={onChange}
+          label={t('mcp.naturalLanguage.paramDescription.label')}
+          language="plaintext"
+        />
+      </div>
 
       {/* Text Area */}
       <textarea
