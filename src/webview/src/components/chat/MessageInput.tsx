@@ -10,7 +10,7 @@
  */
 
 import type React from 'react';
-import { useId } from 'react';
+import { useId, useState } from 'react';
 import { useResponsiveFonts } from '../../contexts/ResponsiveFontContext';
 import { useTranslation } from '../../i18n/i18n-context';
 import { cancelWorkflowRefinement } from '../../services/refinement-service';
@@ -40,6 +40,7 @@ export function MessageInput({ onSend, inputState }: MessageInputProps) {
   const textareaId = useId();
   const fontSizes = useResponsiveFonts();
   const storeState = useRefinementStore();
+  const [isEditingInEditor, setIsEditingInEditor] = useState(false);
 
   // Use props if provided (controlled mode), otherwise use store (uncontrolled mode)
   const currentInput = inputState?.currentInput ?? storeState.currentInput;
@@ -87,6 +88,7 @@ export function MessageInput({ onSend, inputState }: MessageInputProps) {
         onKeyDown={handleKeyDown}
         placeholder={t('refinement.inputPlaceholder')}
         disabled={isProcessing}
+        readOnly={isEditingInEditor}
         style={{
           width: '100%',
           minHeight: '80px',
@@ -98,6 +100,8 @@ export function MessageInput({ onSend, inputState }: MessageInputProps) {
           fontSize: `${fontSizes.base}px`,
           fontFamily: 'var(--vscode-font-family)',
           resize: 'vertical',
+          opacity: isEditingInEditor ? 0.5 : 1,
+          cursor: isEditingInEditor ? 'not-allowed' : 'text',
         }}
         aria-label={t('refinement.inputPlaceholder')}
       />
@@ -134,6 +138,7 @@ export function MessageInput({ onSend, inputState }: MessageInputProps) {
             label={t('refinement.inputPlaceholder')}
             language="markdown"
             disabled={isProcessing}
+            onEditingStateChange={setIsEditingInEditor}
           />
         </div>
 

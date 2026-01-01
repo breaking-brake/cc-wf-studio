@@ -338,6 +338,7 @@ const SubAgentProperties: React.FC<{
 }> = ({ node, updateNodeData }) => {
   const { t } = useTranslation();
   const data = node.data;
+  const [isEditingPrompt, setIsEditingPrompt] = useState(false);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -399,6 +400,7 @@ const SubAgentProperties: React.FC<{
             onContentUpdated={(newContent) => updateNodeData(node.id, { prompt: newContent })}
             label={t('property.prompt')}
             language="markdown"
+            onEditingStateChange={setIsEditingPrompt}
           />
         </div>
         <textarea
@@ -407,6 +409,7 @@ const SubAgentProperties: React.FC<{
           onChange={(e) => updateNodeData(node.id, { prompt: e.target.value })}
           className="nodrag"
           rows={6}
+          readOnly={isEditingPrompt}
           style={{
             width: '100%',
             padding: '6px 8px',
@@ -417,6 +420,8 @@ const SubAgentProperties: React.FC<{
             fontSize: '13px',
             fontFamily: 'var(--vscode-editor-font-family)',
             resize: 'vertical',
+            opacity: isEditingPrompt ? 0.5 : 1,
+            cursor: isEditingPrompt ? 'not-allowed' : 'text',
           }}
         />
       </div>
@@ -525,6 +530,7 @@ const AskUserQuestionProperties: React.FC<{
 }> = ({ node, updateNodeData }) => {
   const { t } = useTranslation();
   const data = node.data;
+  const [isEditingQuestion, setIsEditingQuestion] = useState(false);
 
   // Ensure all options have IDs (for backward compatibility)
   const normalizedOptions = data.options.map((opt) => ({
@@ -596,6 +602,7 @@ const AskUserQuestionProperties: React.FC<{
             onContentUpdated={(newContent) => updateNodeData(node.id, { questionText: newContent })}
             label={t('property.questionText')}
             language="markdown"
+            onEditingStateChange={setIsEditingQuestion}
           />
         </div>
         <textarea
@@ -604,6 +611,7 @@ const AskUserQuestionProperties: React.FC<{
           onChange={(e) => updateNodeData(node.id, { questionText: e.target.value })}
           className="nodrag"
           rows={3}
+          readOnly={isEditingQuestion}
           style={{
             width: '100%',
             padding: '6px 8px',
@@ -613,6 +621,8 @@ const AskUserQuestionProperties: React.FC<{
             borderRadius: '2px',
             fontSize: '13px',
             resize: 'vertical',
+            opacity: isEditingQuestion ? 0.5 : 1,
+            cursor: isEditingQuestion ? 'not-allowed' : 'text',
           }}
         />
       </div>
@@ -831,6 +841,7 @@ const PromptProperties: React.FC<{
 }> = ({ node, updateNodeData }) => {
   const { t } = useTranslation();
   const data = node.data;
+  const [isEditingPrompt, setIsEditingPrompt] = useState(false);
 
   // プロンプトから変数を抽出
   const variables = extractVariables(data.prompt);
@@ -896,6 +907,7 @@ const PromptProperties: React.FC<{
             onContentUpdated={(newContent) => updateNodeData(node.id, { prompt: newContent })}
             label={t('property.prompt.label')}
             language="markdown"
+            onEditingStateChange={setIsEditingPrompt}
           />
         </div>
         <textarea
@@ -905,6 +917,7 @@ const PromptProperties: React.FC<{
           className="nodrag"
           rows={8}
           placeholder={t('property.prompt.placeholder')}
+          readOnly={isEditingPrompt}
           style={{
             width: '100%',
             padding: '6px 8px',
@@ -915,6 +928,8 @@ const PromptProperties: React.FC<{
             fontSize: '13px',
             fontFamily: 'var(--vscode-editor-font-family)',
             resize: 'vertical',
+            opacity: isEditingPrompt ? 0.5 : 1,
+            cursor: isEditingPrompt ? 'not-allowed' : 'text',
           }}
         />
         <div

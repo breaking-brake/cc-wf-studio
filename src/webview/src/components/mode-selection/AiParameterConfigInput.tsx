@@ -7,6 +7,7 @@
  * Based on: specs/001-mcp-natural-language-mode/tasks.md T015, T035
  */
 
+import { useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
 import {
@@ -41,6 +42,7 @@ export function AiParameterConfigInput({
   showValidation = false,
 }: AiParameterConfigInputProps) {
   const { t } = useTranslation();
+  const [isEditingInEditor, setIsEditingInEditor] = useState(false);
 
   // Real-time debounced validation (300ms delay)
   const debouncedError = useDebouncedValidation(value, validateParameterDescription, 300);
@@ -75,6 +77,7 @@ export function AiParameterConfigInput({
           onContentUpdated={onChange}
           label={t('mcp.naturalLanguage.paramDescription.label')}
           language="plaintext"
+          onEditingStateChange={setIsEditingInEditor}
         />
       </div>
 
@@ -84,6 +87,7 @@ export function AiParameterConfigInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={t('mcp.naturalLanguage.paramDescription.placeholder')}
+        readOnly={isEditingInEditor}
         style={{
           width: '100%',
           minHeight: '80px',
@@ -98,6 +102,8 @@ export function AiParameterConfigInput({
           borderRadius: '4px',
           resize: 'vertical',
           outline: 'none',
+          opacity: isEditingInEditor ? 0.5 : 1,
+          cursor: isEditingInEditor ? 'not-allowed' : 'text',
         }}
         onFocus={(e) => {
           if (!showError) {

@@ -7,7 +7,7 @@
 
 import { FileEdit } from 'lucide-react';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { openInEditor } from '../../services/vscode-bridge';
 
@@ -22,6 +22,8 @@ interface EditInEditorButtonProps {
   language?: 'markdown' | 'plaintext';
   /** Whether the button is disabled */
   disabled?: boolean;
+  /** Callback when editing state changes (true = editor is open) */
+  onEditingStateChange?: (isEditing: boolean) => void;
   /** Additional CSS styles */
   style?: React.CSSProperties;
 }
@@ -38,10 +40,16 @@ export function EditInEditorButton({
   label,
   language = 'markdown',
   disabled = false,
+  onEditingStateChange,
   style,
 }: EditInEditorButtonProps) {
   const { t } = useTranslation();
   const [isOpening, setIsOpening] = useState(false);
+
+  // Notify parent when editing state changes
+  useEffect(() => {
+    onEditingStateChange?.(isOpening);
+  }, [isOpening, onEditingStateChange]);
 
   const handleClick = async () => {
     if (isOpening) return;
