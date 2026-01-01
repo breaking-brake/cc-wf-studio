@@ -39,6 +39,24 @@ function getExtension(language: string): string {
 }
 
 /**
+ * Get temporary directory for editor files.
+ * Prefers .vscode/ in workspace for cross-platform path consistency,
+ * falls back to OS temp directory if no workspace is open.
+ */
+function getTempDirectory(): string {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (workspaceFolders && workspaceFolders.length > 0) {
+    const vscodeDir = path.join(workspaceFolders[0].uri.fsPath, '.vscode');
+    // Ensure .vscode directory exists
+    if (!fs.existsSync(vscodeDir)) {
+      fs.mkdirSync(vscodeDir, { recursive: true });
+    }
+    return vscodeDir;
+  }
+  return os.tmpdir();
+}
+
+/**
  * Handle OPEN_IN_EDITOR message from webview
  *
  * Opens the provided content in a new VSCode text editor using a temporary file,
@@ -52,15 +70,18 @@ export async function handleOpenInEditor(
 
   try {
     // Create a temporary file with the content
-    const tmpDir = os.tmpdir();
-    const fileName = `cc-wf-studio-${sessionId}${getExtension(language)}`;
+    // Use .vscode/ in workspace for cross-platform path consistency (Windows path normalization)
+    const tmpDir = getTempDirectory();
+    const fileName = `tmp-cc-wf-studio-${sessionId}${getExtension(language)}`;
     const filePath = path.join(tmpDir, fileName);
 
     // Write content to temporary file
     fs.writeFileSync(filePath, content, 'utf-8');
 
     // Open the file in editor
+    // Use URI's fsPath for cross-platform path normalization (Windows case sensitivity, drive letter, etc.)
     const uri = vscode.Uri.file(filePath);
+    const normalizedFilePath = uri.fsPath;
     const doc = await vscode.workspace.openTextDocument(uri);
     await vscode.window.showTextDocument(doc, {
       preview: false,
@@ -71,7 +92,7 @@ export async function handleOpenInEditor(
 
     // Set up save listener - this works for :w, Ctrl+S, menu save, etc.
     const saveDisposable = vscode.workspace.onDidSaveTextDocument((savedDoc) => {
-      if (savedDoc.uri.fsPath !== filePath) return;
+      if (savedDoc.uri.fsPath !== normalizedFilePath) return;
 
       // Send content to webview
       webview.postMessage({
@@ -96,7 +117,10 @@ export async function handleOpenInEditor(
       if (!session) return; // Already cleaned up by save handler
 
       // Check if our file is still open in any visible editor
-      const isStillOpen = editors.some((editor) => editor.document.uri.fsPath === filePath);
+      // Use normalizedFilePath for cross-platform path comparison
+      const isStillOpen = editors.some(
+        (editor) => editor.document.uri.fsPath === normalizedFilePath
+      );
 
       if (!isStillOpen) {
         // Editor was closed without saving
@@ -124,8 +148,8 @@ export async function handleOpenInEditor(
     });
     disposables.push(editorChangeDisposable);
 
-    // Store session
-    activeSessions.set(sessionId, { filePath, webview, disposables });
+    // Store session with normalized file path for cross-platform consistency
+    activeSessions.set(sessionId, { filePath: normalizedFilePath, webview, disposables });
   } catch (error) {
     // Send error back to webview
     webview.postMessage({
