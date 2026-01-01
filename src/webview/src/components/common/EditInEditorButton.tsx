@@ -5,6 +5,7 @@
  * Feature: Edit in VSCode Editor functionality
  */
 
+import { FileEdit } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
@@ -81,7 +82,7 @@ export function EditInEditorButton({
         ...style,
       }}
     >
-      <span style={{ fontSize: '12px' }}>📝</span>
+      <FileEdit size={12} />
       {t('editor.openInEditor')}
     </button>
   );

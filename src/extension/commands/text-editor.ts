@@ -5,19 +5,43 @@
  * Feature: Edit in VSCode Editor functionality
  */
 
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { OpenInEditorPayload } from '../../shared/types/messages';
 
 /**
  * Active editor sessions tracking
- * Maps sessionId to { uri, latestContent } for cleanup and response handling
+ * Maps sessionId to session data for cleanup and response handling
  */
-const activeSessions = new Map<string, { uri: vscode.Uri; latestContent: string }>();
+const activeSessions = new Map<
+  string,
+  {
+    filePath: string;
+    webview: vscode.Webview;
+    disposables: vscode.Disposable[];
+  }
+>();
+
+/**
+ * Get file extension based on language
+ */
+function getExtension(language: string): string {
+  switch (language) {
+    case 'markdown':
+      return '.md';
+    case 'plaintext':
+      return '.txt';
+    default:
+      return '.txt';
+  }
+}
 
 /**
  * Handle OPEN_IN_EDITOR message from webview
  *
- * Opens the provided content in a new VSCode text editor,
+ * Opens the provided content in a new VSCode text editor using a temporary file,
  * allowing users to edit with their full editor customizations.
  */
 export async function handleOpenInEditor(
@@ -27,76 +51,82 @@ export async function handleOpenInEditor(
   const { sessionId, content, label, language = 'markdown' } = payload;
 
   try {
-    // Create an untitled document with the content
-    const doc = await vscode.workspace.openTextDocument({
-      content,
-      language,
-    });
+    // Create a temporary file with the content
+    const tmpDir = os.tmpdir();
+    const fileName = `cc-wf-studio-${sessionId}${getExtension(language)}`;
+    const filePath = path.join(tmpDir, fileName);
 
-    // Store the session mapping with initial content
-    activeSessions.set(sessionId, { uri: doc.uri, latestContent: content });
+    // Write content to temporary file
+    fs.writeFileSync(filePath, content, 'utf-8');
 
-    // Show the document in editor
+    // Open the file in editor
+    const uri = vscode.Uri.file(filePath);
+    const doc = await vscode.workspace.openTextDocument(uri);
     await vscode.window.showTextDocument(doc, {
       preview: false,
       viewColumn: vscode.ViewColumn.Beside,
     });
 
-    // Set up document change listener to track latest content
-    const changeDisposable = vscode.workspace.onDidChangeTextDocument((event) => {
-      if (event.document.uri.toString() === doc.uri.toString()) {
-        // Track latest content for use when document is closed
-        const session = activeSessions.get(sessionId);
-        if (session) {
-          session.latestContent = event.document.getText();
-        }
-      }
-    });
+    const disposables: vscode.Disposable[] = [];
 
-    // Set up save listener
+    // Set up save listener - this works for :w, Ctrl+S, menu save, etc.
     const saveDisposable = vscode.workspace.onDidSaveTextDocument((savedDoc) => {
-      if (savedDoc.uri.toString() === doc.uri.toString()) {
-        // Send updated content back to webview
-        const updatedContent = savedDoc.getText();
-        webview.postMessage({
-          type: 'EDITOR_CONTENT_UPDATED',
-          payload: {
-            sessionId,
-            content: updatedContent,
-            saved: true,
-          },
-        });
-      }
-    });
+      if (savedDoc.uri.fsPath !== filePath) return;
 
-    // Set up close listener
+      // Send content to webview
+      webview.postMessage({
+        type: 'EDITOR_CONTENT_UPDATED',
+        payload: {
+          sessionId,
+          content: savedDoc.getText(),
+          saved: true,
+        },
+      });
+
+      // Cleanup and close editor
+      cleanupSession(sessionId);
+      vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+      vscode.window.showInformationMessage('Content applied successfully');
+    });
+    disposables.push(saveDisposable);
+
+    // Set up close listener for when user closes without saving
     const closeDisposable = vscode.workspace.onDidCloseTextDocument((closedDoc) => {
-      if (closedDoc.uri.toString() === doc.uri.toString()) {
-        // Use tracked content since closedDoc.getText() may not be available
-        const session = activeSessions.get(sessionId);
-        const finalContent = session?.latestContent ?? content;
+      if (closedDoc.uri.fsPath !== filePath) return;
 
-        webview.postMessage({
-          type: 'EDITOR_CONTENT_UPDATED',
-          payload: {
-            sessionId,
-            content: finalContent,
-            saved: false,
-          },
-        });
+      const session = activeSessions.get(sessionId);
+      if (!session) return; // Already cleaned up by save handler
 
-        // Cleanup
-        activeSessions.delete(sessionId);
-        changeDisposable.dispose();
-        saveDisposable.dispose();
-        closeDisposable.dispose();
+      // Read final content from file (may have unsaved changes lost)
+      let finalContent = content;
+      try {
+        if (fs.existsSync(filePath)) {
+          finalContent = fs.readFileSync(filePath, 'utf-8');
+        }
+      } catch {
+        // Use original content if file read fails
       }
+
+      webview.postMessage({
+        type: 'EDITOR_CONTENT_UPDATED',
+        payload: {
+          sessionId,
+          content: finalContent,
+          saved: false,
+        },
+      });
+
+      cleanupSession(sessionId);
     });
+    disposables.push(closeDisposable);
+
+    // Store session
+    activeSessions.set(sessionId, { filePath, webview, disposables });
 
     // Show info message with instructions
     const tabLabel = label || 'Edit Text';
     vscode.window.showInformationMessage(
-      `Editing "${tabLabel}". Save (Ctrl+S) to apply changes, or close the tab to cancel.`
+      `Editing "${tabLabel}". Save (Ctrl+S / :w) to apply changes, or close the tab to cancel.`
     );
   } catch (error) {
     // Send error back to webview
@@ -113,4 +143,29 @@ export async function handleOpenInEditor(
       `Failed to open editor: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
   }
+}
+
+/**
+ * Cleanup a session: dispose listeners, delete temp file, clear context
+ */
+function cleanupSession(sessionId: string): void {
+  const session = activeSessions.get(sessionId);
+  if (!session) return;
+
+  // Dispose all listeners
+  for (const disposable of session.disposables) {
+    disposable.dispose();
+  }
+
+  // Delete temporary file
+  try {
+    if (fs.existsSync(session.filePath)) {
+      fs.unlinkSync(session.filePath);
+    }
+  } catch {
+    // Ignore file deletion errors
+  }
+
+  // Remove from active sessions
+  activeSessions.delete(sessionId);
 }
