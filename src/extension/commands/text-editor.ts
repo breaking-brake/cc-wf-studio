@@ -90,35 +90,39 @@ export async function handleOpenInEditor(
     });
     disposables.push(saveDisposable);
 
-    // Set up close listener for when user closes without saving
-    const closeDisposable = vscode.workspace.onDidCloseTextDocument((closedDoc) => {
-      if (closedDoc.uri.fsPath !== filePath) return;
-
+    // Set up listener to detect when our editor is no longer visible (closed)
+    const editorChangeDisposable = vscode.window.onDidChangeVisibleTextEditors((editors) => {
       const session = activeSessions.get(sessionId);
       if (!session) return; // Already cleaned up by save handler
 
-      // Read final content from file (may have unsaved changes lost)
-      let finalContent = content;
-      try {
-        if (fs.existsSync(filePath)) {
-          finalContent = fs.readFileSync(filePath, 'utf-8');
+      // Check if our file is still open in any visible editor
+      const isStillOpen = editors.some((editor) => editor.document.uri.fsPath === filePath);
+
+      if (!isStillOpen) {
+        // Editor was closed without saving
+        // Read final content from file
+        let finalContent = content;
+        try {
+          if (fs.existsSync(filePath)) {
+            finalContent = fs.readFileSync(filePath, 'utf-8');
+          }
+        } catch {
+          // Use original content if file read fails
         }
-      } catch {
-        // Use original content if file read fails
+
+        webview.postMessage({
+          type: 'EDITOR_CONTENT_UPDATED',
+          payload: {
+            sessionId,
+            content: finalContent,
+            saved: false,
+          },
+        });
+
+        cleanupSession(sessionId);
       }
-
-      webview.postMessage({
-        type: 'EDITOR_CONTENT_UPDATED',
-        payload: {
-          sessionId,
-          content: finalContent,
-          saved: false,
-        },
-      });
-
-      cleanupSession(sessionId);
     });
-    disposables.push(closeDisposable);
+    disposables.push(editorChangeDisposable);
 
     // Store session
     activeSessions.set(sessionId, { filePath, webview, disposables });
