@@ -48,7 +48,7 @@ export async function handleOpenInEditor(
   payload: OpenInEditorPayload,
   webview: vscode.Webview
 ): Promise<void> {
-  const { sessionId, content, label, language = 'markdown' } = payload;
+  const { sessionId, content, language = 'markdown' } = payload;
 
   try {
     // Create a temporary file with the content
@@ -126,12 +126,6 @@ export async function handleOpenInEditor(
 
     // Store session
     activeSessions.set(sessionId, { filePath, webview, disposables });
-
-    // Show info message with instructions
-    const tabLabel = label || 'Edit Text';
-    vscode.window.showInformationMessage(
-      `Editing "${tabLabel}". Save (Ctrl+S / :w) to apply changes, or close the tab to cancel.`
-    );
   } catch (error) {
     // Send error back to webview
     webview.postMessage({
