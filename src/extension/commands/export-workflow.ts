@@ -74,7 +74,7 @@ export async function handleExportWorkflow(
     for (const filePath of exportedFiles) {
       try {
         const content = await fileService.readFile(filePath);
-        const fileType = filePath.includes('/agents/') ? 'subAgent' : 'slashCommand';
+        const fileType = /[/\\]agents[/\\]/.test(filePath) ? 'subAgent' : 'slashCommand';
         validateClaudeFileFormat(content, fileType);
       } catch (error) {
         const fileName = path.basename(filePath);
@@ -188,7 +188,7 @@ export async function handleExportWorkflowForExecution(
     for (const filePath of exportedFiles) {
       try {
         const content = await fileService.readFile(filePath);
-        const fileType = filePath.includes('/agents/') ? 'subAgent' : 'slashCommand';
+        const fileType = /[/\\]agents[/\\]/.test(filePath) ? 'subAgent' : 'slashCommand';
         validateClaudeFileFormat(content, fileType);
       } catch (error) {
         const fileName = path.basename(filePath);
