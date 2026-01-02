@@ -73,12 +73,32 @@ interface AISubAgentFlowResponse {
 /**
  * Parse AI refinement response with structured format
  *
+ * Includes fallback handling for non-JSON text responses:
+ * When AI responds with conversational text instead of JSON
+ * (especially common when user sends vague/initial messages),
+ * treat it as a clarification response to maintain UX.
+ *
  * @param output - Raw CLI output string
  * @returns Parsed AIRefinementResponse or null if parsing fails
  */
 function parseRefinementResponse(output: string): AIRefinementResponse | null {
   const parsed = parseClaudeCodeOutput(output);
+
+  // Fallback: If parsing fails but we have text content, treat it as clarification
+  // This handles cases where AI responds with conversational text instead of JSON
+  // (common with non-English locales or vague initial user messages)
   if (!parsed || typeof parsed !== 'object') {
+    const trimmedOutput = output.trim();
+    if (trimmedOutput.length > 0) {
+      log('INFO', 'Treating non-JSON AI response as clarification message', {
+        outputLength: trimmedOutput.length,
+        outputPreview: trimmedOutput.substring(0, 100),
+      });
+      return {
+        status: 'clarification',
+        message: trimmedOutput,
+      };
+    }
     return null;
   }
 
@@ -95,12 +115,27 @@ function parseRefinementResponse(output: string): AIRefinementResponse | null {
 /**
  * Parse AI SubAgentFlow refinement response with structured format
  *
+ * Includes fallback handling for non-JSON text responses (same as parseRefinementResponse).
+ *
  * @param output - Raw CLI output string
  * @returns Parsed AISubAgentFlowResponse or null if parsing fails
  */
 function parseSubAgentFlowResponse(output: string): AISubAgentFlowResponse | null {
   const parsed = parseClaudeCodeOutput(output);
+
+  // Fallback: If parsing fails but we have text content, treat it as clarification
   if (!parsed || typeof parsed !== 'object') {
+    const trimmedOutput = output.trim();
+    if (trimmedOutput.length > 0) {
+      log('INFO', 'Treating non-JSON SubAgentFlow AI response as clarification message', {
+        outputLength: trimmedOutput.length,
+        outputPreview: trimmedOutput.substring(0, 100),
+      });
+      return {
+        status: 'clarification',
+        message: trimmedOutput,
+      };
+    }
     return null;
   }
 
