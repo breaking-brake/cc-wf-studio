@@ -581,9 +581,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               {isCompact ? (
                 <SquareSlash size={16} />
               ) : isExporting ? (
-                t('toolbar.converting')
+                t('toolbar.exporting')
               ) : (
-                t('toolbar.convert')
+                t('toolbar.export')
               )}
             </button>
 

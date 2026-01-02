@@ -16,9 +16,9 @@ export interface WebviewTranslationKeys {
   'toolbar.workflowNamePlaceholder': string;
   'toolbar.save': string;
   'toolbar.saving': string;
-  'toolbar.convert': string;
-  'toolbar.convert.tooltip': string;
-  'toolbar.converting': string;
+  'toolbar.export': string;
+  'toolbar.export.tooltip': string;
+  'toolbar.exporting': string;
   'toolbar.refineWithAI': string;
   'toolbar.selectWorkflow': string;
   'toolbar.load': string;
