@@ -58,6 +58,41 @@ const spawn =
  */
 const activeProcesses = new Map<string, { subprocess: Subprocess; startTime: number }>();
 
+/**
+ * Check if claude command is directly available in PATH
+ * Checks every time to handle dynamic PATH changes
+ *
+ * @returns true if claude is available, false if npx should be used
+ */
+async function isClaudeCommandAvailable(): Promise<boolean> {
+  try {
+    const result = await spawn('claude', ['--version'], { timeout: 5000 });
+    log('INFO', 'Claude CLI check: using claude directly', {
+      version: result.stdout.trim().substring(0, 50),
+    });
+    return true;
+  } catch {
+    log('INFO', 'Claude CLI check: using npx fallback');
+    return false;
+  }
+}
+
+/**
+ * Get the command and args for spawning Claude CLI
+ * Uses 'claude' directly if available, otherwise falls back to 'npx claude'
+ *
+ * @param args - CLI arguments (without 'claude' command itself)
+ * @returns command and args for spawn
+ */
+async function getClaudeSpawnCommand(args: string[]): Promise<{ command: string; args: string[] }> {
+  const useDirectClaude = await isClaudeCommandAvailable();
+
+  if (useDirectClaude) {
+    return { command: 'claude', args };
+  }
+  return { command: 'npx', args: ['claude', ...args] };
+}
+
 export interface ClaudeCodeExecutionResult {
   success: boolean;
   output?: string;
@@ -112,7 +147,7 @@ export async function executeClaudeCodeCLI(
 
   try {
     // Build CLI arguments
-    const args = ['claude', '-p', '-', '--model', modelName];
+    const args = ['-p', '-', '--model', modelName];
 
     // Add --tools and --allowed-tools flags if provided
     // --tools: whitelist restriction (only these tools available)
@@ -124,8 +159,9 @@ export async function executeClaudeCodeCLI(
 
     // Spawn Claude Code CLI process using nano-spawn (cross-platform compatible)
     // Use stdin for prompt instead of -p argument to avoid Windows command line length limits
-    // Use npx to ensure cross-platform compatibility (Windows PATH issues with global npm installs)
-    const subprocess = spawn('npx', args, {
+    // Use claude directly if available, otherwise fall back to npx
+    const spawnCmd = await getClaudeSpawnCommand(args);
+    const subprocess = spawn(spawnCmd.command, spawnCmd.args, {
       cwd: workingDirectory,
       timeout: timeoutMs,
       stdin: { string: prompt },
@@ -432,16 +468,7 @@ export async function executeClaudeCodeCLIStreaming(
 
   try {
     // Build CLI arguments
-    const args = [
-      'claude',
-      '-p',
-      '-',
-      '--output-format',
-      'stream-json',
-      '--verbose',
-      '--model',
-      modelName,
-    ];
+    const args = ['-p', '-', '--output-format', 'stream-json', '--verbose', '--model', modelName];
 
     // Add --tools and --allowed-tools flags if provided
     // --tools: whitelist restriction (only these tools available)
@@ -453,7 +480,9 @@ export async function executeClaudeCodeCLIStreaming(
 
     // Spawn Claude Code CLI with streaming output format
     // Note: --verbose is required when using --output-format=stream-json with -p (print mode)
-    const subprocess = spawn('npx', args, {
+    // Use claude directly if available, otherwise fall back to npx
+    const spawnCmd = await getClaudeSpawnCommand(args);
+    const subprocess = spawn(spawnCmd.command, spawnCmd.args, {
       cwd: workingDirectory,
       timeout: timeoutMs,
       stdin: { string: prompt },
