@@ -887,3 +887,53 @@ export function registerOpenEditorCommand(
 
   return currentPanel || null;
 }
+
+/**
+ * Prepare the editor for loading a new workflow
+ * Sends a message to show loading state
+ *
+ * @param workflowId - The workflow ID being loaded
+ */
+export function prepareEditorForLoad(workflowId: string): boolean {
+  if (!currentPanel) {
+    return false;
+  }
+
+  currentPanel.webview.postMessage({
+    type: 'PREPARE_WORKFLOW_LOAD',
+    payload: { workflowId },
+  });
+  return true;
+}
+
+/**
+ * Load a workflow into the main editor panel
+ * Used by preview panel to open workflow in editor mode
+ *
+ * @param workflowId - The workflow ID (filename without extension)
+ */
+export async function loadWorkflowIntoEditor(workflowId: string): Promise<boolean> {
+  if (!currentPanel) {
+    return false;
+  }
+
+  if (!fileService) {
+    return false;
+  }
+
+  try {
+    // Load the workflow using the existing loadWorkflow function
+    await loadWorkflow(fileService, currentPanel.webview, workflowId, `preview-load-${Date.now()}`);
+    return true;
+  } catch (error) {
+    console.error('Failed to load workflow into editor:', error);
+    return false;
+  }
+}
+
+/**
+ * Check if the main editor panel exists
+ */
+export function hasEditorPanel(): boolean {
+  return currentPanel !== undefined;
+}

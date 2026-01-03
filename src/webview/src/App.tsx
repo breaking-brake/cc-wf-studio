@@ -10,6 +10,7 @@ import type {
   ErrorPayload,
   ImportWorkflowFromSlackPayload,
   InitialStatePayload,
+  PreviewModeInitPayload,
   Workflow,
 } from '@shared/types/messages';
 import type React from 'react';
@@ -26,6 +27,7 @@ import { TermsOfUseDialog } from './components/dialogs/TermsOfUseDialog';
 import { ErrorNotification } from './components/ErrorNotification';
 import { NodePalette } from './components/NodePalette';
 import { PropertyOverlay } from './components/PropertyOverlay';
+import { PreviewCanvas } from './components/preview/PreviewCanvas';
 import { Toolbar } from './components/Toolbar';
 import { Tour } from './components/Tour';
 import { WorkflowEditor } from './components/WorkflowEditor';
@@ -88,11 +90,20 @@ const App: React.FC = () => {
     refinementStore.closeChat();
   }, [refinementStore]);
 
+  // App mode: null = loading, 'edit' = full editor, 'preview' = read-only preview
+  // Start with null to prevent flashing the wrong UI
+  const [mode, setMode] = useState<'edit' | 'preview' | null>(null);
+  // Preview mode state
+  const [previewWorkflow, setPreviewWorkflow] = useState<Workflow | null>(null);
+  const [previewIsHistoricalVersion, setPreviewIsHistoricalVersion] = useState<boolean>(false);
+  const [previewHasGitChanges, setPreviewHasGitChanges] = useState<boolean>(false);
+
   const [error, setError] = useState<ErrorPayload | null>(null);
   const [runTour, setRunTour] = useState(false);
   const [tourKey, setTourKey] = useState(0); // Used to force Tour component remount
   const [isSlackShareDialogOpen, setIsSlackShareDialogOpen] = useState(false);
   const [isLoadingImportedWorkflow, setIsLoadingImportedWorkflow] = useState(false);
+  const [isLoadingWorkflowFromPreview, setIsLoadingWorkflowFromPreview] = useState(false);
   const [showTermsDialog, setShowTermsDialog] = useState(false);
   const [isSlackConnectionRequiredDialogOpen, setIsSlackConnectionRequiredDialogOpen] =
     useState(false);
@@ -153,7 +164,16 @@ const App: React.FC = () => {
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.type === 'INITIAL_STATE') {
+      if (message.type === 'PREVIEW_MODE_INIT') {
+        // Switch to preview mode with workflow data
+        const payload = message.payload as PreviewModeInitPayload;
+        setPreviewWorkflow(payload.workflow);
+        setPreviewIsHistoricalVersion(payload.isHistoricalVersion ?? false);
+        setPreviewHasGitChanges(payload.hasGitChanges ?? false);
+        setMode('preview');
+      } else if (message.type === 'INITIAL_STATE') {
+        // Switch to edit mode
+        setMode('edit');
         const payload = message.payload as InitialStatePayload;
         if (!payload.hasAcceptedTerms) {
           // Show terms dialog if not accepted
@@ -212,6 +232,12 @@ const App: React.FC = () => {
       } else if (message.type === 'IMPORT_WORKFLOW_CANCELLED') {
         // Hide loading overlay when user cancels
         setIsLoadingImportedWorkflow(false);
+      } else if (message.type === 'PREPARE_WORKFLOW_LOAD') {
+        // Show loading overlay while loading new workflow from preview
+        setIsLoadingWorkflowFromPreview(true);
+      } else if (message.type === 'LOAD_WORKFLOW') {
+        // Hide loading overlay when workflow is loaded from preview
+        setIsLoadingWorkflowFromPreview(false);
       }
     };
 
@@ -222,6 +248,42 @@ const App: React.FC = () => {
     };
   }, [setNodes, setEdges, setWorkflowName, setActiveWorkflow]);
 
+  // Render loading state (waiting for mode to be determined)
+  if (mode === null) {
+    return (
+      <div
+        style={{
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: 'var(--vscode-editor-background)',
+        }}
+      />
+    );
+  }
+
+  // Render preview mode
+  if (mode === 'preview') {
+    return (
+      <div
+        className="app preview-mode"
+        style={{
+          width: '100vw',
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        <PreviewCanvas
+          initialWorkflow={previewWorkflow}
+          initialIsHistoricalVersion={previewIsHistoricalVersion}
+          initialHasGitChanges={previewHasGitChanges}
+        />
+      </div>
+    );
+  }
+
+  // Render editor mode
   return (
     <div
       className="app"
@@ -395,6 +457,50 @@ const App: React.FC = () => {
             />
             <span style={{ color: 'var(--vscode-foreground)', fontSize: '14px' }}>
               {t('loading.importWorkflow')}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Loading Workflow from Preview Overlay */}
+      {isLoadingWorkflowFromPreview && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              padding: '24px 32px',
+              backgroundColor: 'var(--vscode-editor-background)',
+              border: '1px solid var(--vscode-panel-border)',
+              borderRadius: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+            }}
+          >
+            <div
+              style={{
+                width: '16px',
+                height: '16px',
+                border: '2px solid var(--vscode-progressBar-background)',
+                borderTopColor: 'transparent',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+              }}
+            />
+            <span style={{ color: 'var(--vscode-foreground)', fontSize: '14px' }}>
+              {t('loading.openWorkflow')}
             </span>
           </div>
         </div>

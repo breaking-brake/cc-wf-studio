@@ -11,6 +11,15 @@ export interface WebviewTranslationKeys {
   'common.close': string;
   'common.cancel': string;
   'loading.importWorkflow': string;
+  'loading.openWorkflow': string;
+
+  // Preview mode
+  'preview.label': string;
+  'preview.loading': string;
+  'preview.parseError': string;
+  'preview.openInEditor': string;
+  'preview.versionBefore': string;
+  'preview.versionAfter': string;
 
   // Toolbar
   'toolbar.workflowNamePlaceholder': string;
@@ -274,6 +283,12 @@ export interface WebviewTranslationKeys {
   'dialog.deleteNode.message': string;
   'dialog.deleteNode.confirm': string;
   'dialog.deleteNode.cancel': string;
+
+  // Load Workflow Confirmation Dialog (when opening from preview with unsaved changes)
+  'dialog.loadWorkflow.title': string;
+  'dialog.loadWorkflow.message': string;
+  'dialog.loadWorkflow.confirm': string;
+  'dialog.loadWorkflow.cancel': string;
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': string;

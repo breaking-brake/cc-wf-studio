@@ -13,6 +13,15 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'common.close': '關閉',
   'common.cancel': '取消',
   'loading.importWorkflow': '正在匯入工作流程...',
+  'loading.openWorkflow': '正在開啟工作流程...',
+
+  // Preview mode
+  'preview.label': '預覽',
+  'preview.loading': '正在載入工作流程...',
+  'preview.parseError': '工作流程解析失敗',
+  'preview.openInEditor': '編輯',
+  'preview.versionBefore': '修改前',
+  'preview.versionAfter': '修改後',
 
   // Toolbar
   'toolbar.workflowNamePlaceholder': '工作流名稱',
@@ -292,6 +301,12 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': '確定要刪除此節點嗎？',
   'dialog.deleteNode.confirm': '刪除',
   'dialog.deleteNode.cancel': '取消',
+
+  // Load Workflow Confirmation Dialog (when opening from preview with unsaved changes)
+  'dialog.loadWorkflow.title': '未儲存的變更',
+  'dialog.loadWorkflow.message': '您有未儲存的變更。載入新工作流程將會丟失這些變更。是否繼續？',
+  'dialog.loadWorkflow.confirm': '捨棄並載入',
+  'dialog.loadWorkflow.cancel': '取消',
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '重設工作流程',
