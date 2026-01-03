@@ -5,7 +5,7 @@
  * instead of the default JSON text editor.
  */
 
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { Workflow } from '../../shared/types/workflow-definition';
@@ -23,7 +23,8 @@ function hasGitChanges(filePath: string): boolean {
     const dir = path.dirname(filePath);
     const fileName = path.basename(filePath);
     // Check for both staged and unstaged changes
-    const result = execSync(`git diff --name-only HEAD -- "${fileName}"`, {
+    // Use execFileSync with array args to avoid shell escaping issues on Windows
+    const result = execFileSync('git', ['diff', '--name-only', 'HEAD', '--', fileName], {
       cwd: dir,
       encoding: 'utf-8',
       timeout: 5000,
