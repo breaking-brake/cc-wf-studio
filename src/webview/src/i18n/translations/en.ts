@@ -14,6 +14,14 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'common.cancel': 'Cancel',
   'loading.importWorkflow': 'Importing workflow...',
 
+  // Preview mode
+  'preview.label': 'Preview',
+  'preview.loading': 'Loading workflow...',
+  'preview.parseError': 'Failed to parse workflow',
+  'preview.openInEditor': 'Edit',
+  'preview.versionBefore': 'Before',
+  'preview.versionAfter': 'After',
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': 'Workflow name',
   'toolbar.save': 'Save',

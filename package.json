@@ -50,6 +50,18 @@
         }
       ]
     },
+    "customEditors": [
+      {
+        "viewType": "cc-wf-studio.workflowPreview",
+        "displayName": "Workflow Preview",
+        "selector": [
+          {
+            "filenamePattern": "**/.vscode/workflows/*.json"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
     "configuration": {
       "title": "Claude Code Workflow Studio",
       "properties": {
@@ -71,7 +83,8 @@
     }
   },
   "activationEvents": [
-    "onUri"
+    "onUri",
+    "onCustomEditor:cc-wf-studio.workflowPreview"
   ],
   "scripts": {
     "vscode:prepublish": "npm run build",

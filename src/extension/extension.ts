@@ -9,6 +9,7 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { registerOpenEditorCommand } from './commands/open-editor';
 import { handleConnectSlackManual } from './commands/slack-connect-manual';
+import { WorkflowPreviewEditorProvider } from './editors/workflow-preview-editor-provider';
 import { SlackApiService } from './services/slack-api-service';
 import { SlackTokenManager } from './utils/slack-token-manager';
 
@@ -106,6 +107,9 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Register commands
   registerOpenEditorCommand(context);
+
+  // Register custom editor provider for workflow preview
+  context.subscriptions.push(WorkflowPreviewEditorProvider.register(context));
 
   // Register Slack import command (T031)
   context.subscriptions.push(

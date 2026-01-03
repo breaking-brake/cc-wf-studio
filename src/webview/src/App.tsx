@@ -10,6 +10,7 @@ import type {
   ErrorPayload,
   ImportWorkflowFromSlackPayload,
   InitialStatePayload,
+  PreviewModeInitPayload,
   Workflow,
 } from '@shared/types/messages';
 import type React from 'react';
@@ -26,6 +27,7 @@ import { TermsOfUseDialog } from './components/dialogs/TermsOfUseDialog';
 import { ErrorNotification } from './components/ErrorNotification';
 import { NodePalette } from './components/NodePalette';
 import { PropertyOverlay } from './components/PropertyOverlay';
+import { PreviewCanvas } from './components/preview/PreviewCanvas';
 import { Toolbar } from './components/Toolbar';
 import { Tour } from './components/Tour';
 import { WorkflowEditor } from './components/WorkflowEditor';
@@ -87,6 +89,14 @@ const App: React.FC = () => {
   const handleCloseRefinementPanel = useCallback(() => {
     refinementStore.closeChat();
   }, [refinementStore]);
+
+  // App mode: null = loading, 'edit' = full editor, 'preview' = read-only preview
+  // Start with null to prevent flashing the wrong UI
+  const [mode, setMode] = useState<'edit' | 'preview' | null>(null);
+  // Preview mode state
+  const [previewWorkflow, setPreviewWorkflow] = useState<Workflow | null>(null);
+  const [previewIsHistoricalVersion, setPreviewIsHistoricalVersion] = useState<boolean>(false);
+  const [previewHasGitChanges, setPreviewHasGitChanges] = useState<boolean>(false);
 
   const [error, setError] = useState<ErrorPayload | null>(null);
   const [runTour, setRunTour] = useState(false);
@@ -153,7 +163,16 @@ const App: React.FC = () => {
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.type === 'INITIAL_STATE') {
+      if (message.type === 'PREVIEW_MODE_INIT') {
+        // Switch to preview mode with workflow data
+        const payload = message.payload as PreviewModeInitPayload;
+        setPreviewWorkflow(payload.workflow);
+        setPreviewIsHistoricalVersion(payload.isHistoricalVersion ?? false);
+        setPreviewHasGitChanges(payload.hasGitChanges ?? false);
+        setMode('preview');
+      } else if (message.type === 'INITIAL_STATE') {
+        // Switch to edit mode
+        setMode('edit');
         const payload = message.payload as InitialStatePayload;
         if (!payload.hasAcceptedTerms) {
           // Show terms dialog if not accepted
@@ -222,6 +241,42 @@ const App: React.FC = () => {
     };
   }, [setNodes, setEdges, setWorkflowName, setActiveWorkflow]);
 
+  // Render loading state (waiting for mode to be determined)
+  if (mode === null) {
+    return (
+      <div
+        style={{
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: 'var(--vscode-editor-background)',
+        }}
+      />
+    );
+  }
+
+  // Render preview mode
+  if (mode === 'preview') {
+    return (
+      <div
+        className="app preview-mode"
+        style={{
+          width: '100vw',
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        <PreviewCanvas
+          initialWorkflow={previewWorkflow}
+          initialIsHistoricalVersion={previewIsHistoricalVersion}
+          initialHasGitChanges={previewHasGitChanges}
+        />
+      </div>
+    );
+  }
+
+  // Render editor mode
   return (
     <div
       className="app"

@@ -14,6 +14,14 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'common.cancel': '취소',
   'loading.importWorkflow': '워크플로 가져오는 중...',
 
+  // Preview mode
+  'preview.label': '미리보기',
+  'preview.loading': '워크플로 로딩 중...',
+  'preview.parseError': '워크플로 파싱에 실패했습니다',
+  'preview.openInEditor': '편집',
+  'preview.versionBefore': '수정 전',
+  'preview.versionAfter': '수정 후',
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': '워크플로 이름',
   'toolbar.save': '저장',

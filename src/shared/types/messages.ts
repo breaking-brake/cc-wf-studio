@@ -57,6 +57,41 @@ export interface InitialStatePayload {
 }
 
 // ============================================================================
+// Workflow Preview Payloads
+// ============================================================================
+
+/**
+ * Preview mode initialization payload
+ * Sent when opening a workflow file in preview mode
+ */
+export interface PreviewModeInitPayload {
+  /** Workflow to display in preview */
+  workflow: Workflow;
+  /** Whether this is a historical version (git diff "before" side) */
+  isHistoricalVersion?: boolean;
+  /** Whether the file has uncommitted git changes (for showing "After" badge) */
+  hasGitChanges?: boolean;
+}
+
+/**
+ * Preview update payload
+ * Sent when the source JSON file is modified
+ */
+export interface PreviewUpdatePayload {
+  /** Updated workflow to display */
+  workflow: Workflow;
+}
+
+/**
+ * Preview parse error payload
+ * Sent when the source JSON cannot be parsed
+ */
+export interface PreviewParseErrorPayload {
+  /** Error message describing the parse failure */
+  error: string;
+}
+
+// ============================================================================
 // Webview → Extension Payloads
 // ============================================================================
 
@@ -569,6 +604,9 @@ export type ExtensionMessage =
   | Message<ErrorPayload, 'ERROR'>
   | Message<WorkflowListPayload, 'WORKFLOW_LIST_LOADED'>
   | Message<InitialStatePayload, 'INITIAL_STATE'>
+  | Message<PreviewModeInitPayload, 'PREVIEW_MODE_INIT'>
+  | Message<PreviewUpdatePayload, 'PREVIEW_UPDATE'>
+  | Message<PreviewParseErrorPayload, 'PREVIEW_PARSE_ERROR'>
   | Message<void, 'SAVE_CANCELLED'>
   | Message<void, 'EXPORT_CANCELLED'>
   | Message<SkillListLoadedPayload, 'SKILL_LIST_LOADED'>

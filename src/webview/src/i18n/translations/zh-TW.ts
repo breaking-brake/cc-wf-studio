@@ -14,6 +14,14 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'common.cancel': '取消',
   'loading.importWorkflow': '正在匯入工作流程...',
 
+  // Preview mode
+  'preview.label': '預覽',
+  'preview.loading': '正在載入工作流程...',
+  'preview.parseError': '工作流程解析失敗',
+  'preview.openInEditor': '編輯',
+  'preview.versionBefore': '修改前',
+  'preview.versionAfter': '修改後',
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': '工作流名稱',
   'toolbar.save': '儲存',

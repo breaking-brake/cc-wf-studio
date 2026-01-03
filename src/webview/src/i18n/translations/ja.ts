@@ -14,6 +14,14 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'common.cancel': 'キャンセル',
   'loading.importWorkflow': 'ワークフローをインポート中...',
 
+  // Preview mode
+  'preview.label': 'プレビュー',
+  'preview.loading': 'ワークフローを読み込み中...',
+  'preview.parseError': 'ワークフローの解析に失敗しました',
+  'preview.openInEditor': '編集',
+  'preview.versionBefore': '修正前',
+  'preview.versionAfter': '修正後',
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': 'ワークフロー名',
   'toolbar.save': '保存',

@@ -12,6 +12,14 @@ export interface WebviewTranslationKeys {
   'common.cancel': string;
   'loading.importWorkflow': string;
 
+  // Preview mode
+  'preview.label': string;
+  'preview.loading': string;
+  'preview.parseError': string;
+  'preview.openInEditor': string;
+  'preview.versionBefore': string;
+  'preview.versionAfter': string;
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': string;
   'toolbar.save': string;
