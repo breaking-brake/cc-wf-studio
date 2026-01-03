@@ -9,7 +9,7 @@ import { execSync } from 'node:child_process';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { Workflow } from '../../shared/types/workflow-definition';
-import { loadWorkflowIntoEditor } from '../commands/open-editor';
+import { loadWorkflowIntoEditor, prepareEditorForLoad } from '../commands/open-editor';
 import { log } from '../extension';
 import { migrateWorkflow } from '../utils/migrate-workflow';
 import { validateWorkflowFile } from '../utils/workflow-validator';
@@ -141,7 +141,10 @@ export class WorkflowPreviewEditorProvider implements vscode.CustomTextEditorPro
         // Open the main Workflow Studio editor
         await vscode.commands.executeCommand('cc-wf-studio.openEditor');
 
-        // Load the workflow after a delay
+        // Prepare editor for loading (show loading state)
+        prepareEditorForLoad(workflowId);
+
+        // Load the workflow after a delay to allow webview to initialize
         setTimeout(async () => {
           const success = await loadWorkflowIntoEditor(workflowId);
           if (success) {

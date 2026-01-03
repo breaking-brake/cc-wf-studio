@@ -91,6 +91,15 @@ export interface PreviewParseErrorPayload {
   error: string;
 }
 
+/**
+ * Prepare workflow load payload
+ * Sent before loading a new workflow to show loading state
+ */
+export interface PrepareWorkflowLoadPayload {
+  /** Workflow ID being loaded */
+  workflowId: string;
+}
+
 // ============================================================================
 // Webview → Extension Payloads
 // ============================================================================
@@ -116,6 +125,14 @@ export interface StateUpdatePayload {
 }
 
 export interface LoadWorkflowRequestPayload {
+  workflowId: string;
+}
+
+/**
+ * Confirm workflow load payload
+ * Sent from Webview to Extension after user confirms loading (or no unsaved changes)
+ */
+export interface ConfirmWorkflowLoadPayload {
   workflowId: string;
 }
 

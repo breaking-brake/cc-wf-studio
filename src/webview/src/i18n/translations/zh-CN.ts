@@ -13,6 +13,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'common.close': '关闭',
   'common.cancel': '取消',
   'loading.importWorkflow': '正在导入工作流...',
+  'loading.openWorkflow': '正在打开工作流...',
 
   // Preview mode
   'preview.label': '预览',
@@ -300,6 +301,12 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': '确定要删除此节点吗？',
   'dialog.deleteNode.confirm': '删除',
   'dialog.deleteNode.cancel': '取消',
+
+  // Load Workflow Confirmation Dialog (when opening from preview with unsaved changes)
+  'dialog.loadWorkflow.title': '未保存的更改',
+  'dialog.loadWorkflow.message': '您有未保存的更改。加载新工作流将丢失这些更改。是否继续？',
+  'dialog.loadWorkflow.confirm': '放弃并加载',
+  'dialog.loadWorkflow.cancel': '取消',
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '重置工作流',

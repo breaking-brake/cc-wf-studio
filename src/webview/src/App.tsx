@@ -103,6 +103,7 @@ const App: React.FC = () => {
   const [tourKey, setTourKey] = useState(0); // Used to force Tour component remount
   const [isSlackShareDialogOpen, setIsSlackShareDialogOpen] = useState(false);
   const [isLoadingImportedWorkflow, setIsLoadingImportedWorkflow] = useState(false);
+  const [isLoadingWorkflowFromPreview, setIsLoadingWorkflowFromPreview] = useState(false);
   const [showTermsDialog, setShowTermsDialog] = useState(false);
   const [isSlackConnectionRequiredDialogOpen, setIsSlackConnectionRequiredDialogOpen] =
     useState(false);
@@ -231,6 +232,12 @@ const App: React.FC = () => {
       } else if (message.type === 'IMPORT_WORKFLOW_CANCELLED') {
         // Hide loading overlay when user cancels
         setIsLoadingImportedWorkflow(false);
+      } else if (message.type === 'PREPARE_WORKFLOW_LOAD') {
+        // Show loading overlay while loading new workflow from preview
+        setIsLoadingWorkflowFromPreview(true);
+      } else if (message.type === 'LOAD_WORKFLOW') {
+        // Hide loading overlay when workflow is loaded from preview
+        setIsLoadingWorkflowFromPreview(false);
       }
     };
 
@@ -450,6 +457,50 @@ const App: React.FC = () => {
             />
             <span style={{ color: 'var(--vscode-foreground)', fontSize: '14px' }}>
               {t('loading.importWorkflow')}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Loading Workflow from Preview Overlay */}
+      {isLoadingWorkflowFromPreview && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              padding: '24px 32px',
+              backgroundColor: 'var(--vscode-editor-background)',
+              border: '1px solid var(--vscode-panel-border)',
+              borderRadius: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+            }}
+          >
+            <div
+              style={{
+                width: '16px',
+                height: '16px',
+                border: '2px solid var(--vscode-progressBar-background)',
+                borderTopColor: 'transparent',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+              }}
+            />
+            <span style={{ color: 'var(--vscode-foreground)', fontSize: '14px' }}>
+              {t('loading.openWorkflow')}
             </span>
           </div>
         </div>

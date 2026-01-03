@@ -13,6 +13,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'common.close': 'Close',
   'common.cancel': 'Cancel',
   'loading.importWorkflow': 'Importing workflow...',
+  'loading.openWorkflow': 'Opening workflow...',
 
   // Preview mode
   'preview.label': 'Preview',
@@ -310,6 +311,13 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': 'Are you sure you want to delete this node?',
   'dialog.deleteNode.confirm': 'Delete',
   'dialog.deleteNode.cancel': 'Cancel',
+
+  // Load Workflow Confirmation Dialog (when opening from preview with unsaved changes)
+  'dialog.loadWorkflow.title': 'Unsaved Changes',
+  'dialog.loadWorkflow.message':
+    'You have unsaved changes. Loading a new workflow will discard them. Do you want to continue?',
+  'dialog.loadWorkflow.confirm': 'Discard & Load',
+  'dialog.loadWorkflow.cancel': 'Cancel',
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': 'Reset Workflow',

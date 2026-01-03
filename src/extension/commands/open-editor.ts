@@ -889,6 +889,24 @@ export function registerOpenEditorCommand(
 }
 
 /**
+ * Prepare the editor for loading a new workflow
+ * Sends a message to show loading state
+ *
+ * @param workflowId - The workflow ID being loaded
+ */
+export function prepareEditorForLoad(workflowId: string): boolean {
+  if (!currentPanel) {
+    return false;
+  }
+
+  currentPanel.webview.postMessage({
+    type: 'PREPARE_WORKFLOW_LOAD',
+    payload: { workflowId },
+  });
+  return true;
+}
+
+/**
  * Load a workflow into the main editor panel
  * Used by preview panel to open workflow in editor mode
  *

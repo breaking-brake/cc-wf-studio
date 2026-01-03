@@ -13,6 +13,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'common.close': '閉じる',
   'common.cancel': 'キャンセル',
   'loading.importWorkflow': 'ワークフローをインポート中...',
+  'loading.openWorkflow': 'ワークフローを開いています...',
 
   // Preview mode
   'preview.label': 'プレビュー',
@@ -310,6 +311,13 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': 'このノードを削除してもよろしいですか？',
   'dialog.deleteNode.confirm': '削除',
   'dialog.deleteNode.cancel': 'キャンセル',
+
+  // Load Workflow Confirmation Dialog (when opening from preview with unsaved changes)
+  'dialog.loadWorkflow.title': '未保存の変更',
+  'dialog.loadWorkflow.message':
+    '未保存の変更があります。新しいワークフローを読み込むと、現在の変更は失われます。続行しますか？',
+  'dialog.loadWorkflow.confirm': '破棄して読み込む',
+  'dialog.loadWorkflow.cancel': 'キャンセル',
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': 'ワークフローをリセット',

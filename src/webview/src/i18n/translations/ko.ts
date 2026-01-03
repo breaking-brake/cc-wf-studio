@@ -13,6 +13,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'common.close': '닫기',
   'common.cancel': '취소',
   'loading.importWorkflow': '워크플로 가져오는 중...',
+  'loading.openWorkflow': '워크플로 여는 중...',
 
   // Preview mode
   'preview.label': '미리보기',
@@ -312,6 +313,13 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'dialog.deleteNode.message': '이 노드를 삭제하시겠습니까?',
   'dialog.deleteNode.confirm': '삭제',
   'dialog.deleteNode.cancel': '취소',
+
+  // Load Workflow Confirmation Dialog (when opening from preview with unsaved changes)
+  'dialog.loadWorkflow.title': '저장되지 않은 변경 사항',
+  'dialog.loadWorkflow.message':
+    '저장되지 않은 변경 사항이 있습니다. 새 워크플로를 로드하면 변경 사항이 손실됩니다. 계속하시겠습니까?',
+  'dialog.loadWorkflow.confirm': '삭제 후 로드',
+  'dialog.loadWorkflow.cancel': '취소',
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '워크플로우 초기화',
