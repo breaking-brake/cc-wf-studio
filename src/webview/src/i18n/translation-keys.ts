@@ -711,4 +711,11 @@ export interface WebviewTranslationKeys {
   // Edit in VSCode Editor
   'editor.openInEditor': string;
   'editor.openInEditor.tooltip': string;
+
+  // Workflow Settings Dialog
+  'workflow.settings.title': string;
+  'workflow.settings.description.label': string;
+  'workflow.settings.description.placeholder': string;
+  'workflow.settings.generateWithAI': string;
+  'workflow.settings.tooltip': string;
 }
