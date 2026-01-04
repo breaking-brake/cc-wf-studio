@@ -21,17 +21,18 @@ interface SkillBrowserDialogProps {
   onClose: () => void;
 }
 
-type TabType = 'personal' | 'project';
+type TabType = 'user' | 'project' | 'local';
 
 export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [personalSkills, setPersonalSkills] = useState<SkillReference[]>([]);
+  const [userSkills, setUserSkills] = useState<SkillReference[]>([]);
   const [projectSkills, setProjectSkills] = useState<SkillReference[]>([]);
+  const [localSkills, setLocalSkills] = useState<SkillReference[]>([]);
   const [selectedSkill, setSelectedSkill] = useState<SkillReference | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>('personal');
+  const [activeTab, setActiveTab] = useState<TabType>('user');
   const [isSkillCreationOpen, setIsSkillCreationOpen] = useState(false);
 
   const { addNode, nodes } = useWorkflowStore();
@@ -83,15 +84,21 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
 
       try {
         const skills = await browseSkills();
-        const personal = skills.filter((s) => s.scope === 'personal');
+        const user = skills.filter((s) => s.scope === 'user');
         const project = skills.filter((s) => s.scope === 'project');
+        const local = skills.filter((s) => s.scope === 'local');
 
-        setPersonalSkills(personal);
+        setUserSkills(user);
         setProjectSkills(project);
+        setLocalSkills(local);
 
-        // Switch to project tab if no personal skills
-        if (personal.length === 0 && project.length > 0) {
-          setActiveTab('project');
+        // Switch to tab with skills if current tab is empty
+        if (user.length === 0) {
+          if (project.length > 0) {
+            setActiveTab('project');
+          } else if (local.length > 0) {
+            setActiveTab('local');
+          }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : t('skill.error.loadFailed'));
@@ -112,11 +119,13 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
 
     try {
       const skills = await browseSkills();
-      const personal = skills.filter((s) => s.scope === 'personal');
+      const user = skills.filter((s) => s.scope === 'user');
       const project = skills.filter((s) => s.scope === 'project');
+      const local = skills.filter((s) => s.scope === 'local');
 
-      setPersonalSkills(personal);
+      setUserSkills(user);
       setProjectSkills(project);
+      setLocalSkills(local);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('skill.error.refreshFailed'));
     } finally {
@@ -167,17 +176,20 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
       description: formData.description,
       instructions: formData.instructions,
       allowedTools: formData.allowedTools,
-      scope: formData.scope as 'personal' | 'project',
+      scope: formData.scope as 'user' | 'project',
     });
     // Refresh skill list after creation
     const skills = await browseSkills();
-    const personal = skills.filter((s) => s.scope === 'personal');
+    const user = skills.filter((s) => s.scope === 'user');
     const project = skills.filter((s) => s.scope === 'project');
-    setPersonalSkills(personal);
+    const local = skills.filter((s) => s.scope === 'local');
+    setUserSkills(user);
     setProjectSkills(project);
+    setLocalSkills(local);
   };
 
-  const currentSkills = activeTab === 'personal' ? personalSkills : projectSkills;
+  const currentSkills =
+    activeTab === 'user' ? userSkills : activeTab === 'project' ? projectSkills : localSkills;
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -237,23 +249,23 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
             >
               <button
                 type="button"
-                onClick={() => setActiveTab('personal')}
+                onClick={() => setActiveTab('user')}
                 style={{
                   padding: '8px 16px',
                   fontSize: '13px',
                   background: 'none',
                   border: 'none',
                   borderBottom:
-                    activeTab === 'personal' ? '2px solid var(--vscode-focusBorder)' : 'none',
+                    activeTab === 'user' ? '2px solid var(--vscode-focusBorder)' : 'none',
                   color:
-                    activeTab === 'personal'
+                    activeTab === 'user'
                       ? 'var(--vscode-foreground)'
                       : 'var(--vscode-descriptionForeground)',
                   cursor: 'pointer',
-                  fontWeight: activeTab === 'personal' ? 600 : 400,
+                  fontWeight: activeTab === 'user' ? 600 : 400,
                 }}
               >
-                {t('skill.browser.personalTab')} ({personalSkills.length})
+                {t('skill.browser.userTab')} ({userSkills.length})
               </button>
               <button
                 type="button"
@@ -275,6 +287,44 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
               >
                 {t('skill.browser.projectTab')} ({projectSkills.length})
               </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('local')}
+                style={{
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom:
+                    activeTab === 'local' ? '2px solid var(--vscode-focusBorder)' : 'none',
+                  color:
+                    activeTab === 'local'
+                      ? 'var(--vscode-foreground)'
+                      : 'var(--vscode-descriptionForeground)',
+                  cursor: 'pointer',
+                  fontWeight: activeTab === 'local' ? 600 : 400,
+                }}
+              >
+                {t('skill.browser.localTab')} ({localSkills.length})
+              </button>
+            </div>
+
+            {/* Scope Description */}
+            <div
+              style={{
+                padding: '12px',
+                marginBottom: '16px',
+                backgroundColor: 'var(--vscode-textBlockQuote-background)',
+                borderLeft: '3px solid var(--vscode-textBlockQuote-border)',
+                borderRadius: '0 4px 4px 0',
+                fontSize: '12px',
+                color: 'var(--vscode-descriptionForeground)',
+                lineHeight: '1.5',
+              }}
+            >
+              {activeTab === 'user' && t('skill.browser.userDescription')}
+              {activeTab === 'project' && t('skill.browser.projectDescription')}
+              {activeTab === 'local' && t('skill.browser.localDescription')}
             </div>
 
             {/* Refresh Button */}
@@ -410,19 +460,25 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                             padding: '2px 6px',
                             borderRadius: '3px',
                             backgroundColor:
-                              skill.scope === 'personal'
+                              skill.scope === 'user'
                                 ? 'var(--vscode-badge-background)'
-                                : 'var(--vscode-button-secondaryBackground)',
+                                : skill.scope === 'local'
+                                  ? 'var(--vscode-terminal-ansiBlue)'
+                                  : 'var(--vscode-button-secondaryBackground)',
                             color:
-                              skill.scope === 'personal'
+                              skill.scope === 'user'
                                 ? 'var(--vscode-badge-foreground)'
-                                : 'var(--vscode-button-secondaryForeground)',
+                                : skill.scope === 'local'
+                                  ? 'var(--vscode-editor-background)'
+                                  : 'var(--vscode-button-secondaryForeground)',
                             fontWeight: 500,
                           }}
                         >
-                          {skill.scope === 'personal'
-                            ? t('skill.browser.personalTab')
-                            : t('skill.browser.projectTab')}
+                          {skill.scope === 'user'
+                            ? t('skill.browser.userTab')
+                            : skill.scope === 'local'
+                              ? t('skill.browser.localTab')
+                              : t('skill.browser.projectTab')}
                         </span>
                       </div>
                       <span

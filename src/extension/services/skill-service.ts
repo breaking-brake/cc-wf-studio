@@ -10,7 +10,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { CreateSkillPayload, SkillReference } from '../../shared/types/messages';
-import { getPersonalSkillsDir, getProjectSkillsDir, toRelativePath } from '../utils/path-utils';
+import {
+  getInstalledPluginsJsonPath,
+  getKnownMarketplacesJsonPath,
+  getProjectSkillsDir,
+  getUserSkillsDir,
+  getWorkspaceRoot,
+  toRelativePath,
+} from '../utils/path-utils';
 import { generateSkillFileContent } from './skill-file-generator';
 import { parseSkillFrontmatter, type SkillMetadata } from './yaml-parser';
 
@@ -18,18 +25,18 @@ import { parseSkillFrontmatter, type SkillMetadata } from './yaml-parser';
  * Scan a Skills directory and return available Skills
  *
  * @param baseDir - Base directory to scan (e.g., ~/.claude/skills/)
- * @param scope - Skill scope ('personal' or 'project')
+ * @param scope - Skill scope ('user', 'project', or 'local')
  * @returns Array of Skill references
  *
  * @example
  * ```typescript
- * const personalSkills = await scanSkills('/Users/alice/.claude/skills', 'personal');
- * // [{ name: 'my-skill', description: '...', scope: 'personal', ... }]
+ * const userSkills = await scanSkills('/Users/alice/.claude/skills', 'user');
+ * // [{ name: 'my-skill', description: '...', scope: 'user', ... }]
  * ```
  */
 export async function scanSkills(
   baseDir: string,
-  scope: 'personal' | 'project'
+  scope: 'user' | 'project' | 'local'
 ): Promise<SkillReference[]> {
   const skills: SkillReference[] = [];
 
@@ -77,23 +84,319 @@ export async function scanSkills(
 }
 
 /**
- * Scan both personal and project Skills
+ * Structure of ~/.claude/plugins/installed_plugins.json
+ */
+interface InstalledPluginsJson {
+  version?: number;
+  plugins?: Record<
+    string,
+    Array<{
+      scope?: string;
+      installPath?: string;
+      projectPath?: string; // Only for project scope - indicates which project this plugin belongs to
+      version?: string;
+    }>
+  >;
+}
+
+/**
+ * Structure of ~/.claude/plugins/known_marketplaces.json
+ */
+interface KnownMarketplaces {
+  [marketplaceName: string]: {
+    source?: {
+      source?: string;
+      url?: string;
+      repo?: string;
+      path?: string;
+    };
+    installLocation?: string;
+  };
+}
+
+/**
+ * Structure of .claude-plugin/marketplace.json
+ */
+interface MarketplaceConfig {
+  name?: string;
+  plugins?: Array<{
+    name?: string;
+    skills?: string[];
+  }>;
+}
+
+/**
+ * Load known marketplaces from known_marketplaces.json
+ */
+async function loadKnownMarketplaces(): Promise<KnownMarketplaces> {
+  const marketplacesPath = getKnownMarketplacesJsonPath();
+
+  try {
+    const content = await fs.readFile(marketplacesPath, 'utf-8');
+    return JSON.parse(content) as KnownMarketplaces;
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Parse plugin ID to extract plugin name and marketplace name
+ * Format: "{plugin-name}@{marketplace-name}"
+ */
+function parsePluginId(pluginId: string): { pluginName: string; marketplaceName: string } | null {
+  const atIndex = pluginId.lastIndexOf('@');
+  if (atIndex === -1) return null;
+
+  return {
+    pluginName: pluginId.substring(0, atIndex),
+    marketplaceName: pluginId.substring(atIndex + 1),
+  };
+}
+
+/**
+ * Map plugin scope string to SkillReference scope
+ */
+function mapPluginScope(pluginScope: string | undefined): 'user' | 'project' | 'local' {
+  switch (pluginScope) {
+    case 'user':
+      return 'user';
+    case 'project':
+      return 'project';
+    case 'local':
+      return 'local';
+    default:
+      // Default to 'user' if scope is undefined or unknown
+      return 'user';
+  }
+}
+
+/**
+ * Scan all Plugin Skills using marketplaces path
  *
- * @returns Object containing personal and project Skills
+ * Uses stable marketplaces path instead of cache path to avoid
+ * path invalidation when plugins are updated.
+ *
+ * Flow:
+ * 1. Read installed_plugins.json to get installed plugin IDs
+ * 2. Read settings.json to filter enabled plugins
+ * 3. Read known_marketplaces.json to get marketplace install locations
+ * 4. For each enabled plugin, scan skills from marketplaces path
+ * 5. Filter project-scoped plugins by projectPath matching current workspace
+ *
+ * @returns Array of Plugin Skill references with their installation scope
+ */
+export async function scanPluginSkills(): Promise<SkillReference[]> {
+  const installedPluginsPath = getInstalledPluginsJsonPath();
+  const skills: SkillReference[] = [];
+  const currentWorkspace = getWorkspaceRoot();
+
+  try {
+    // Load configuration files
+    // Note: enabledPlugins in settings.json is NOT used to filter plugin skills
+    // Plugin presence in installed_plugins.json indicates it's installed and available
+    const [knownMarketplaces, installedPluginsContent] = await Promise.all([
+      loadKnownMarketplaces(),
+      fs.readFile(installedPluginsPath, 'utf-8'),
+    ]);
+
+    const installedPlugins: InstalledPluginsJson = JSON.parse(installedPluginsContent);
+
+    if (!installedPlugins.plugins) {
+      return skills;
+    }
+
+    // Process each installed plugin
+    for (const pluginId of Object.keys(installedPlugins.plugins)) {
+      // Get the plugin's installations (may have multiple with different scopes)
+      const installations = installedPlugins.plugins[pluginId];
+      if (!installations || installations.length === 0) continue;
+
+      // Find the best matching installation for current workspace
+      // Priority: project (matching projectPath) > local > user
+      let selectedInstallation = installations[0];
+      let skillScope = mapPluginScope(selectedInstallation.scope);
+
+      for (const installation of installations) {
+        const installScope = mapPluginScope(installation.scope);
+
+        // For project-scoped installations, check if projectPath matches current workspace
+        if (installScope === 'project') {
+          if (installation.projectPath && currentWorkspace) {
+            // Normalize paths for comparison
+            const normalizedProjectPath = path.normalize(installation.projectPath);
+            const normalizedWorkspace = path.normalize(currentWorkspace);
+
+            if (normalizedProjectPath === normalizedWorkspace) {
+              // Found a project-scoped installation for this workspace
+              selectedInstallation = installation;
+              skillScope = 'project';
+              break; // Project scope has highest priority
+            }
+          }
+          // Skip project-scoped installations that don't match current workspace
+          continue;
+        }
+
+        // Prefer local over user
+        if (installScope === 'local' && skillScope === 'user') {
+          selectedInstallation = installation;
+          skillScope = 'local';
+        }
+      }
+
+      // If the selected installation is project-scoped but doesn't match, skip it
+      if (skillScope === 'project' && selectedInstallation.projectPath) {
+        if (!currentWorkspace) continue;
+        const normalizedProjectPath = path.normalize(selectedInstallation.projectPath);
+        const normalizedWorkspace = path.normalize(currentWorkspace);
+        if (normalizedProjectPath !== normalizedWorkspace) continue;
+      }
+
+      // Parse plugin ID to get marketplace name
+      const parsed = parsePluginId(pluginId);
+      if (!parsed) continue;
+
+      // Get marketplace install location
+      const marketplace = knownMarketplaces[parsed.marketplaceName];
+      if (!marketplace?.installLocation) continue;
+
+      // Scan skills from marketplace path
+      await scanMarketplacePlugin(
+        marketplace.installLocation,
+        parsed.pluginName,
+        skillScope,
+        skills
+      );
+    }
+  } catch (_err) {
+    console.warn(`[Skill Service] Could not read installed_plugins.json: ${installedPluginsPath}`);
+  }
+
+  return skills;
+}
+
+/**
+ * Scan skills from a specific plugin within a marketplace
+ */
+async function scanMarketplacePlugin(
+  marketplaceLocation: string,
+  pluginName: string,
+  scope: 'user' | 'project' | 'local',
+  skills: SkillReference[]
+): Promise<void> {
+  const marketplaceJsonPath = path.join(marketplaceLocation, '.claude-plugin', 'marketplace.json');
+
+  try {
+    const marketplaceContent = await fs.readFile(marketplaceJsonPath, 'utf-8');
+    const marketplace: MarketplaceConfig = JSON.parse(marketplaceContent);
+
+    // Find the specific plugin in marketplace.json
+    const pluginConfig = marketplace.plugins?.find((p) => p.name === pluginName);
+
+    if (pluginConfig?.skills && Array.isArray(pluginConfig.skills)) {
+      // Scan skills listed in plugin config
+      for (const skillRelPath of pluginConfig.skills) {
+        const skillDir = path.resolve(marketplaceLocation, skillRelPath);
+        const skillPath = path.join(skillDir, 'SKILL.md');
+
+        try {
+          const content = await fs.readFile(skillPath, 'utf-8');
+          const metadata = parseSkillFrontmatter(content);
+
+          if (metadata) {
+            // Skip if skill with same name already exists (name-based dedup)
+            if (skills.some((s) => s.name === metadata.name)) continue;
+
+            skills.push({
+              skillPath,
+              name: metadata.name,
+              description: metadata.description,
+              scope,
+              validationStatus: 'valid',
+              allowedTools: metadata.allowedTools,
+            });
+          }
+        } catch {
+          // Skill file not found or invalid - skip
+        }
+      }
+    } else {
+      // Fallback: scan default 'skills/' directory
+      const defaultSkillsDir = path.join(marketplaceLocation, 'skills');
+      try {
+        const skillDirs = await fs.readdir(defaultSkillsDir, { withFileTypes: true });
+        for (const skillDir of skillDirs) {
+          if (!skillDir.isDirectory()) continue;
+
+          const skillPath = path.join(defaultSkillsDir, skillDir.name, 'SKILL.md');
+
+          try {
+            const content = await fs.readFile(skillPath, 'utf-8');
+            const metadata = parseSkillFrontmatter(content);
+
+            if (metadata) {
+              if (skills.some((s) => s.name === metadata.name)) continue;
+
+              skills.push({
+                skillPath,
+                name: metadata.name,
+                description: metadata.description,
+                scope,
+                validationStatus: 'valid',
+                allowedTools: metadata.allowedTools,
+              });
+            }
+          } catch {
+            // Skill file not found or invalid - skip
+          }
+        }
+      } catch {
+        // No default skills directory
+      }
+    }
+  } catch {
+    // No marketplace.json or invalid - skip
+  }
+}
+
+/**
+ * Scan user, project, and plugin Skills
+ *
+ * @returns Object containing user, project, and local Skills
  */
 export async function scanAllSkills(): Promise<{
-  personal: SkillReference[];
+  user: SkillReference[];
   project: SkillReference[];
+  local: SkillReference[];
 }> {
-  const personalDir = getPersonalSkillsDir();
+  const userDir = getUserSkillsDir();
   const projectDir = getProjectSkillsDir();
 
-  const [personal, project] = await Promise.all([
-    scanSkills(personalDir, 'personal'),
+  const [user, project, pluginSkills] = await Promise.all([
+    scanSkills(userDir, 'user'),
     projectDir ? scanSkills(projectDir, 'project') : Promise.resolve([]),
+    scanPluginSkills(),
   ]);
 
-  return { personal, project };
+  // Separate plugin skills by their scope
+  const local: SkillReference[] = [];
+  for (const skill of pluginSkills) {
+    if (skill.scope === 'local') {
+      local.push(skill);
+    } else if (skill.scope === 'user') {
+      // Add to user skills, but avoid duplicates by name
+      if (!user.some((s) => s.name === skill.name)) {
+        user.push(skill);
+      }
+    } else if (skill.scope === 'project') {
+      // Add to project skills, but avoid duplicates by name
+      if (!project.some((s) => s.name === skill.name)) {
+        project.push(skill);
+      }
+    }
+  }
+
+  return { user, project, local };
 }
 
 /**
@@ -134,7 +437,7 @@ export async function validateSkillFile(skillPath: string): Promise<SkillMetadat
  */
 export async function createSkill(payload: CreateSkillPayload): Promise<string> {
   // 1. Get base directory for scope
-  const baseDir = payload.scope === 'personal' ? getPersonalSkillsDir() : getProjectSkillsDir();
+  const baseDir = payload.scope === 'user' ? getUserSkillsDir() : getProjectSkillsDir();
 
   if (!baseDir) {
     throw new Error('No workspace folder is open. Cannot create project Skill.');

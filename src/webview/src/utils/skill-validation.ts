@@ -89,13 +89,13 @@ export function validateSkillInstructions(instructions: string): string | null {
  * Validate Skill scope selection
  *
  * Rules:
- * - Must be either 'personal' or 'project'
+ * - Must be either 'user' or 'project' (for new skill creation)
  *
  * @param scope - Skill scope to validate
  * @returns Error message or null if valid
  */
-export function validateSkillScope(scope: 'personal' | 'project' | ''): string | null {
-  if (!scope || (scope !== 'personal' && scope !== 'project')) {
+export function validateSkillScope(scope: 'user' | 'project' | ''): string | null {
+  if (!scope || (scope !== 'user' && scope !== 'project')) {
     return 'skill.validation.scopeRequired';
   }
 
@@ -112,7 +112,7 @@ export function validateCreateSkillPayload(payload: {
   name: string;
   description: string;
   instructions: string;
-  scope: 'personal' | 'project' | '';
+  scope: 'user' | 'project' | '';
 }): SkillValidationErrors {
   const errors: SkillValidationErrors = {};
 

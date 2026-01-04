@@ -28,7 +28,7 @@ export interface CreateSkillFormData {
   description: string;
   instructions: string;
   allowedTools?: string;
-  scope: 'personal' | 'project' | '';
+  scope: 'user' | 'project' | '';
 }
 
 export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreationDialogProps) {
@@ -446,13 +446,13 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
                     <input
                       type="radio"
                       name="scope"
-                      value="personal"
-                      checked={formData.scope === 'personal'}
+                      value="user"
+                      checked={formData.scope === 'user'}
                       onChange={(e) => handleFieldChange('scope', e.target.value)}
                       disabled={isSubmitting}
                       style={{ cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
                     />
-                    {t('skill.creation.scopePersonal')}
+                    {t('skill.creation.scopeUser')}
                   </label>
                   <label
                     style={{

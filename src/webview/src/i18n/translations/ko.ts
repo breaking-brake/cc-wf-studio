@@ -169,8 +169,11 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Skill properties
   'property.skillPath': 'Skill 경로',
   'property.scope': '범위',
-  'property.scope.personal': '개인',
+  'property.scope.user': '사용자',
   'property.scope.project': '프로젝트',
+  'property.scope.local': '로컬',
+  // Legacy key for backward compatibility
+  'property.scope.personal': '개인',
   'property.validationStatus': '검증 상태',
   'property.validationStatus.valid': '유효함',
   'property.validationStatus.missing': '찾을 수 없음',
@@ -333,8 +336,15 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.title': 'Skill 탐색',
   'skill.browser.description':
     '워크플로에 추가할 Claude Code Skill을 선택하세요.\nSkill은 Claude Code가 자동으로 활용하는 전문적인 능력입니다.',
-  'skill.browser.personalTab': '개인',
+  'skill.browser.userTab': '사용자',
   'skill.browser.projectTab': '프로젝트',
+  'skill.browser.localTab': '로컬',
+  // Scope descriptions for beginners
+  'skill.browser.userDescription': '모든 프로젝트에서 사용 가능.',
+  'skill.browser.projectDescription': '이 프로젝트에서만 사용 가능 (공유용).',
+  'skill.browser.localDescription': '이 프로젝트에서만 사용 가능 (개인용).',
+  // Legacy key for backward compatibility
+  'skill.browser.personalTab': '개인',
   'skill.browser.noSkills': '이 디렉터리에서 Skill을 찾을 수 없습니다',
   'skill.browser.loading': 'Skill 로드 중...',
   'skill.browser.selectButton': '워크플로에 추가',
@@ -369,8 +379,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'skill.creation.allowedToolsLabel': '허용된 도구 (선택사항)',
   'skill.creation.allowedToolsHint': '쉼표로 구분된 도구 이름 목록 (예: Read, Grep, Glob)',
   'skill.creation.scopeLabel': '범위',
-  'skill.creation.scopePersonal': '개인용 (~/.claude/skills/)',
+  'skill.creation.scopeUser': '사용자 (~/.claude/skills/)',
   'skill.creation.scopeProject': '프로젝트용 (.claude/skills/)',
+  // Legacy key for backward compatibility
+  'skill.creation.scopePersonal': '개인용 (~/.claude/skills/)',
   'skill.creation.cancelButton': '취소',
   'skill.creation.createButton': '스킬 만들기',
   'skill.creation.creatingButton': '만드는 중...',

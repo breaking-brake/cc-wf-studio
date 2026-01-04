@@ -1922,9 +1922,11 @@ const SkillProperties: React.FC<{
             fontSize: '12px',
             color: 'var(--vscode-descriptionForeground)',
             backgroundColor:
-              data.scope === 'personal'
+              data.scope === 'user'
                 ? 'var(--vscode-badge-background)'
-                : 'var(--vscode-button-secondaryBackground)',
+                : data.scope === 'local'
+                  ? 'var(--vscode-terminal-ansiBlue)'
+                  : 'var(--vscode-button-secondaryBackground)',
             padding: '4px 8px',
             borderRadius: '3px',
             display: 'inline-block',
@@ -1933,7 +1935,11 @@ const SkillProperties: React.FC<{
             letterSpacing: '0.3px',
           }}
         >
-          {data.scope === 'personal' ? t('property.scope.personal') : t('property.scope.project')}
+          {data.scope === 'user'
+            ? t('property.scope.user')
+            : data.scope === 'local'
+              ? t('property.scope.local')
+              : t('property.scope.project')}
         </div>
       </div>
 

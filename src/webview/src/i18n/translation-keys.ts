@@ -162,8 +162,11 @@ export interface WebviewTranslationKeys {
   // Skill properties
   'property.skillPath': string;
   'property.scope': string;
-  'property.scope.personal': string;
+  'property.scope.user': string;
   'property.scope.project': string;
+  'property.scope.local': string;
+  // Legacy key for backward compatibility
+  'property.scope.personal': string;
   'property.validationStatus': string;
   'property.validationStatus.valid': string;
   'property.validationStatus.missing': string;
@@ -300,8 +303,15 @@ export interface WebviewTranslationKeys {
   // Skill Browser Dialog
   'skill.browser.title': string;
   'skill.browser.description': string;
-  'skill.browser.personalTab': string;
+  'skill.browser.userTab': string;
   'skill.browser.projectTab': string;
+  'skill.browser.localTab': string;
+  // Scope descriptions for beginners
+  'skill.browser.userDescription': string;
+  'skill.browser.projectDescription': string;
+  'skill.browser.localDescription': string;
+  // Legacy key for backward compatibility
+  'skill.browser.personalTab': string;
   'skill.browser.noSkills': string;
   'skill.browser.loading': string;
   'skill.browser.selectButton': string;
@@ -334,8 +344,10 @@ export interface WebviewTranslationKeys {
   'skill.creation.allowedToolsLabel': string;
   'skill.creation.allowedToolsHint': string;
   'skill.creation.scopeLabel': string;
-  'skill.creation.scopePersonal': string;
+  'skill.creation.scopeUser': string;
   'skill.creation.scopeProject': string;
+  // Legacy key for backward compatibility
+  'skill.creation.scopePersonal': string;
   'skill.creation.cancelButton': string;
   'skill.creation.createButton': string;
   'skill.creation.creatingButton': string;

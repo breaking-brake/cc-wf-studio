@@ -176,8 +176,8 @@ export interface SkillReference {
   name: string;
   /** Skill description (from YAML frontmatter) */
   description: string;
-  /** Skill scope: personal or project */
-  scope: 'personal' | 'project';
+  /** Skill scope: user, project, or local */
+  scope: 'user' | 'project' | 'local';
   /** Validation status */
   validationStatus: 'valid' | 'missing' | 'invalid';
   /** Optional: Allowed tools (from YAML frontmatter) */
@@ -193,8 +193,8 @@ export interface CreateSkillPayload {
   instructions: string;
   /** Optional: Comma-separated allowed tools */
   allowedTools?: string;
-  /** Scope: personal or project */
-  scope: 'personal' | 'project';
+  /** Scope: user or project */
+  scope: 'user' | 'project';
 }
 
 export interface SkillCreationSuccessPayload {
@@ -205,7 +205,7 @@ export interface SkillCreationSuccessPayload {
   /** Skill description */
   description: string;
   /** Scope */
-  scope: 'personal' | 'project';
+  scope: 'user' | 'project';
   /** Timestamp of creation */
   timestamp: string; // ISO 8601
 }
@@ -230,14 +230,16 @@ export interface SkillValidationErrorPayload {
 }
 
 export interface SkillListLoadedPayload {
-  /** Array of available Skills (personal + project) */
+  /** Array of available Skills (user + project + local) */
   skills: SkillReference[];
   /** Timestamp of scan */
   timestamp: string; // ISO 8601
-  /** Number of personal Skills found */
-  personalCount: number;
-  /** Number of project Skills found */
+  /** Number of user-scope Skills found */
+  userCount: number;
+  /** Number of project-scope Skills found */
   projectCount: number;
+  /** Number of local-scope Skills found (from plugins) */
+  localCount: number;
 }
 
 export interface ValidateSkillFilePayload {

@@ -141,9 +141,11 @@ export const SkillNodeComponent: React.FC<NodeProps<SkillNodeData>> = React.memo
             fontSize: '10px',
             color: 'var(--vscode-badge-foreground)',
             backgroundColor:
-              data.scope === 'personal'
+              data.scope === 'user'
                 ? 'var(--vscode-badge-background)'
-                : 'var(--vscode-button-secondaryBackground)',
+                : data.scope === 'local'
+                  ? 'var(--vscode-terminal-ansiBlue)'
+                  : 'var(--vscode-button-secondaryBackground)',
             padding: '2px 6px',
             borderRadius: '3px',
             display: 'inline-block',

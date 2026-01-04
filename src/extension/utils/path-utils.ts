@@ -12,7 +12,7 @@ import path from 'node:path';
 import * as vscode from 'vscode';
 
 /**
- * Get the personal Skills directory path
+ * Get the user-scope Skills directory path
  *
  * @returns Absolute path to ~/.claude/skills/
  *
@@ -20,8 +20,28 @@ import * as vscode from 'vscode';
  * // Unix: /Users/username/.claude/skills
  * // Windows: C:\Users\username\.claude\skills
  */
-export function getPersonalSkillsDir(): string {
+export function getUserSkillsDir(): string {
   return path.join(os.homedir(), '.claude', 'skills');
+}
+
+/**
+ * @deprecated Use getUserSkillsDir() instead. Kept for backward compatibility.
+ */
+export function getPersonalSkillsDir(): string {
+  return getUserSkillsDir();
+}
+
+/**
+ * Get the current workspace root path
+ *
+ * @returns Absolute path to workspace root, or null if no workspace is open
+ *
+ * @example
+ * // Unix: /workspace/myproject
+ * // Windows: C:\workspace\myproject
+ */
+export function getWorkspaceRoot(): string | null {
+  return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? null;
 }
 
 /**
@@ -34,7 +54,7 @@ export function getPersonalSkillsDir(): string {
  * // Windows: C:\workspace\myproject\.claude\skills
  */
 export function getProjectSkillsDir(): string | null {
-  const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+  const workspaceRoot = getWorkspaceRoot();
   if (!workspaceRoot) {
     return null;
   }
@@ -42,25 +62,68 @@ export function getProjectSkillsDir(): string | null {
 }
 
 /**
+ * Get the installed plugins JSON path
+ *
+ * @returns Absolute path to ~/.claude/plugins/installed_plugins.json
+ *
+ * @example
+ * // Unix: /Users/username/.claude/plugins/installed_plugins.json
+ * // Windows: C:\Users\username\.claude\plugins\installed_plugins.json
+ */
+export function getInstalledPluginsJsonPath(): string {
+  return path.join(os.homedir(), '.claude', 'plugins', 'installed_plugins.json');
+}
+
+/**
+ * Get the Claude settings JSON path
+ *
+ * @returns Absolute path to ~/.claude/settings.json
+ *
+ * @example
+ * // Unix: /Users/username/.claude/settings.json
+ * // Windows: C:\Users\username\.claude\settings.json
+ */
+export function getClaudeSettingsJsonPath(): string {
+  return path.join(os.homedir(), '.claude', 'settings.json');
+}
+
+/**
+ * Get the known marketplaces JSON path
+ *
+ * @returns Absolute path to ~/.claude/plugins/known_marketplaces.json
+ *
+ * @example
+ * // Unix: /Users/username/.claude/plugins/known_marketplaces.json
+ * // Windows: C:\Users\username\.claude\plugins\known_marketplaces.json
+ */
+export function getKnownMarketplacesJsonPath(): string {
+  return path.join(os.homedir(), '.claude', 'plugins', 'known_marketplaces.json');
+}
+
+/**
  * Resolve a Skill path to absolute path
  *
- * @param skillPath - Skill path (absolute for personal, relative for project)
- * @param scope - Skill scope ('personal' or 'project')
+ * @param skillPath - Skill path (absolute for user/local, relative for project)
+ * @param scope - Skill scope ('user', 'project', or 'local')
  * @returns Absolute path to SKILL.md file
  * @throws Error if scope is 'project' but no workspace folder exists
  *
  * @example
- * // Personal Skill (already absolute)
- * resolveSkillPath('/Users/alice/.claude/skills/my-skill/SKILL.md', 'personal');
+ * // User Skill (already absolute)
+ * resolveSkillPath('/Users/alice/.claude/skills/my-skill/SKILL.md', 'user');
  * // => '/Users/alice/.claude/skills/my-skill/SKILL.md'
  *
  * // Project Skill (relative → absolute)
  * resolveSkillPath('.claude/skills/team-skill/SKILL.md', 'project');
  * // => '/workspace/myproject/.claude/skills/team-skill/SKILL.md'
+ *
+ * // Local Skill (already absolute, from plugin)
+ * resolveSkillPath('/path/to/plugin/skills/my-skill/SKILL.md', 'local');
+ * // => '/path/to/plugin/skills/my-skill/SKILL.md'
  */
-export function resolveSkillPath(skillPath: string, scope: 'personal' | 'project'): string {
-  if (scope === 'personal') {
-    // Personal Skills use absolute paths
+export function resolveSkillPath(skillPath: string, scope: 'user' | 'project' | 'local'): string {
+  if (scope === 'user' || scope === 'local') {
+    // User and Local Skills use absolute paths
     return skillPath;
   }
 
@@ -87,21 +150,25 @@ export function resolveSkillPath(skillPath: string, scope: 'personal' | 'project
  * Convert absolute Skill path to relative path (for project Skills)
  *
  * @param absolutePath - Absolute path to SKILL.md file
- * @param scope - Skill scope ('personal' or 'project')
- * @returns Relative path for project Skills, absolute path for personal Skills
+ * @param scope - Skill scope ('user', 'project', or 'local')
+ * @returns Relative path for project Skills, absolute path for user/local Skills
  *
  * @example
  * // Project Skill (absolute → relative)
  * toRelativePath('/workspace/myproject/.claude/skills/team-skill/SKILL.md', 'project');
  * // => '.claude/skills/team-skill/SKILL.md'
  *
- * // Personal Skill (keep absolute)
- * toRelativePath('/Users/alice/.claude/skills/my-skill/SKILL.md', 'personal');
+ * // User Skill (keep absolute)
+ * toRelativePath('/Users/alice/.claude/skills/my-skill/SKILL.md', 'user');
  * // => '/Users/alice/.claude/skills/my-skill/SKILL.md'
+ *
+ * // Local Skill (keep absolute, from plugin)
+ * toRelativePath('/path/to/plugin/skills/my-skill/SKILL.md', 'local');
+ * // => '/path/to/plugin/skills/my-skill/SKILL.md'
  */
-export function toRelativePath(absolutePath: string, scope: 'personal' | 'project'): string {
-  if (scope === 'personal') {
-    // Personal Skills always use absolute paths
+export function toRelativePath(absolutePath: string, scope: 'user' | 'project' | 'local'): string {
+  if (scope === 'user' || scope === 'local') {
+    // User and Local Skills always use absolute paths
     return absolutePath;
   }
 

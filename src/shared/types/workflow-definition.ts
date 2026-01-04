@@ -128,10 +128,10 @@ export interface SkillNodeData {
   name: string;
   /** Skill description (extracted from SKILL.md frontmatter) */
   description: string;
-  /** Path to SKILL.md file (absolute for personal, relative for project) */
+  /** Path to SKILL.md file (absolute for user/local, relative for project) */
   skillPath: string;
-  /** Skill scope: personal or project */
-  scope: 'personal' | 'project';
+  /** Skill scope: user, project, or local */
+  scope: 'user' | 'project' | 'local';
   /** Optional: Allowed tools (extracted from SKILL.md frontmatter) */
   allowedTools?: string;
   /** Validation status (checked when workflow loads) */

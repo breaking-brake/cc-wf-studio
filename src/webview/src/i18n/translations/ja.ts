@@ -168,8 +168,11 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Skill properties
   'property.skillPath': 'Skillパス',
   'property.scope': 'スコープ',
-  'property.scope.personal': 'パーソナル',
+  'property.scope.user': 'ユーザー',
   'property.scope.project': 'プロジェクト',
+  'property.scope.local': 'ローカル',
+  // Legacy key for backward compatibility
+  'property.scope.personal': 'パーソナル',
   'property.validationStatus': '検証ステータス',
   'property.validationStatus.valid': '有効',
   'property.validationStatus.missing': '見つかりません',
@@ -331,8 +334,15 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.title': 'Skillを参照',
   'skill.browser.description':
     'ワークフローに追加するClaude Code Skillを選択してください。\nSkillはClaude Codeが自動的に活用する専門的な能力です。',
-  'skill.browser.personalTab': 'パーソナル',
+  'skill.browser.userTab': 'ユーザー',
   'skill.browser.projectTab': 'プロジェクト',
+  'skill.browser.localTab': 'ローカル',
+  // Scope descriptions for beginners
+  'skill.browser.userDescription': 'すべてのプロジェクトで利用可能。',
+  'skill.browser.projectDescription': 'このプロジェクトでのみ利用可能（共有用）。',
+  'skill.browser.localDescription': 'このプロジェクトでのみ利用可能（個人用）。',
+  // Legacy key for backward compatibility
+  'skill.browser.personalTab': 'パーソナル',
   'skill.browser.noSkills': 'このディレクトリにSkillが見つかりません',
   'skill.browser.loading': 'Skillを読み込み中...',
   'skill.browser.selectButton': 'ワークフローに追加',
@@ -367,8 +377,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'skill.creation.allowedToolsLabel': '許可ツール（オプション）',
   'skill.creation.allowedToolsHint': 'カンマ区切りのツール名リスト（例：Read, Grep, Glob）',
   'skill.creation.scopeLabel': 'スコープ',
-  'skill.creation.scopePersonal': 'パーソナル (~/.claude/skills/)',
+  'skill.creation.scopeUser': 'ユーザー (~/.claude/skills/)',
   'skill.creation.scopeProject': 'プロジェクト (.claude/skills/)',
+  // Legacy key for backward compatibility
+  'skill.creation.scopePersonal': 'パーソナル (~/.claude/skills/)',
   'skill.creation.cancelButton': 'キャンセル',
   'skill.creation.createButton': 'Skillを作成',
   'skill.creation.creatingButton': '作成中...',

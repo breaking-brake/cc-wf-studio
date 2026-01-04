@@ -139,11 +139,20 @@ export function calculateSkillRelevance(
 }
 
 /**
+ * Scope priority for sorting (higher number = higher priority)
+ */
+const SCOPE_PRIORITY: Record<string, number> = {
+  project: 3,
+  local: 2,
+  user: 1,
+};
+
+/**
  * Filter and rank Skills by relevance to user description
  *
  * Sorting order:
  * 1. Score (descending)
- * 2. Scope (project > personal)
+ * 2. Scope (project > local > user)
  * 3. Name (alphabetical)
  *
  * @param userDescription - User's workflow description
@@ -177,19 +186,21 @@ export function filterSkillsByRelevance(
   // Filter by threshold
   const filtered = scored.filter((item) => item.score >= threshold);
 
-  // Handle duplicate Skill names: prefer project scope over personal (T012)
+  // Handle duplicate Skill names: prefer higher-priority scope (T012)
   const deduped = deduplicateSkills(filtered);
 
-  // Sort by: score (desc), scope (project first), name (alpha)
+  // Sort by: score (desc), scope (project > local > user), name (alpha)
   const sorted = deduped.sort((a, b) => {
     // 1. Score (descending)
     if (a.score !== b.score) {
       return b.score - a.score;
     }
 
-    // 2. Scope (project > personal)
-    if (a.skill.scope !== b.skill.scope) {
-      return a.skill.scope === 'project' ? -1 : 1;
+    // 2. Scope priority (project > local > user)
+    const aPriority = SCOPE_PRIORITY[a.skill.scope] ?? 0;
+    const bPriority = SCOPE_PRIORITY[b.skill.scope] ?? 0;
+    if (aPriority !== bPriority) {
+      return bPriority - aPriority;
     }
 
     // 3. Name (alphabetical)
@@ -201,10 +212,10 @@ export function filterSkillsByRelevance(
 }
 
 /**
- * Remove duplicate Skills by name, preferring project scope
+ * Remove duplicate Skills by name, preferring higher-priority scope
  *
  * @param skills - Skills with relevance scores
- * @returns Deduplicated Skills (project scope preferred)
+ * @returns Deduplicated Skills (higher-priority scope preferred)
  *
  * Implementation: T012
  */
@@ -217,11 +228,14 @@ function deduplicateSkills(skills: SkillRelevanceScore[]): SkillRelevanceScore[]
     if (!existing) {
       // First occurrence
       seen.set(item.skill.name, item);
-    } else if (item.skill.scope === 'project' && existing.skill.scope === 'personal') {
-      // Prefer project scope over personal (even if score is lower)
-      seen.set(item.skill.name, item);
+    } else {
+      // Prefer higher-priority scope (project > local > user)
+      const existingPriority = SCOPE_PRIORITY[existing.skill.scope] ?? 0;
+      const itemPriority = SCOPE_PRIORITY[item.skill.scope] ?? 0;
+      if (itemPriority > existingPriority) {
+        seen.set(item.skill.name, item);
+      }
     }
-    // Otherwise, keep existing (first occurrence or already project scope)
   }
 
   return Array.from(seen.values());

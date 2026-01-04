@@ -164,8 +164,11 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   // Skill properties
   'property.skillPath': 'Skill路徑',
   'property.scope': '範圍',
-  'property.scope.personal': '個人',
+  'property.scope.user': '使用者',
   'property.scope.project': '專案',
+  'property.scope.local': '本地',
+  // Legacy key for backward compatibility
+  'property.scope.personal': '個人',
   'property.validationStatus': '驗證狀態',
   'property.validationStatus.valid': '有效',
   'property.validationStatus.missing': '缺失',
@@ -319,8 +322,15 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.title': '瀏覽Skill',
   'skill.browser.description':
     '選擇要新增到工作流的Claude Code Skill。\nSkill是Claude Code自動利用的專業能力。',
-  'skill.browser.personalTab': '個人',
+  'skill.browser.userTab': '使用者',
   'skill.browser.projectTab': '專案',
+  'skill.browser.localTab': '本機',
+  // Scope descriptions for beginners
+  'skill.browser.userDescription': '可在所有專案中使用。',
+  'skill.browser.projectDescription': '僅在此專案中可用（共享用）。',
+  'skill.browser.localDescription': '僅在此專案中可用（個人用）。',
+  // Legacy key for backward compatibility
+  'skill.browser.personalTab': '個人',
   'skill.browser.noSkills': '在此目錄中未找到Skill',
   'skill.browser.loading': '正在載入Skill...',
   'skill.browser.selectButton': '新增到工作流',
@@ -355,8 +365,10 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'skill.creation.allowedToolsLabel': '允許的工具（可選）',
   'skill.creation.allowedToolsHint': '逗號分隔的工具名稱列表（例如：Read, Grep, Glob）',
   'skill.creation.scopeLabel': '範圍',
-  'skill.creation.scopePersonal': '個人 (~/.claude/skills/)',
+  'skill.creation.scopeUser': '使用者 (~/.claude/skills/)',
   'skill.creation.scopeProject': '專案 (.claude/skills/)',
+  // Legacy key for backward compatibility
+  'skill.creation.scopePersonal': '個人 (~/.claude/skills/)',
   'skill.creation.cancelButton': '取消',
   'skill.creation.createButton': '建立技能',
   'skill.creation.creatingButton': '建立中...',

@@ -19,8 +19,11 @@ const outputChannel = vscode.window.createOutputChannel('Claude Code Workflow St
 /**
  * Handle BROWSE_SKILLS request from Webview
  *
- * Scans both personal (~/.claude/skills/) and project (.claude/skills/) directories
+ * Scans user (~/.claude/skills/), project (.claude/skills/),
+ * and plugin (via installed_plugins.json) directories
  * and returns all available Skills.
+ *
+ * Plugin skills are loaded from enabled plugins only (checked via settings.json).
  *
  * @param webview - VSCode Webview instance
  * @param requestId - Request ID for response matching
@@ -33,12 +36,12 @@ export async function handleBrowseSkills(
   outputChannel.appendLine(`[Skill Browse] Starting scan (requestId: ${requestId})`);
 
   try {
-    const { personal, project } = await scanAllSkills();
-    const allSkills = [...personal, ...project];
+    const { user, project, local } = await scanAllSkills();
+    const allSkills = [...user, ...project, ...local];
 
     const executionTime = Date.now() - startTime;
     outputChannel.appendLine(
-      `[Skill Browse] Scan completed in ${executionTime}ms - Found ${personal.length} personal, ${project.length} project Skills`
+      `[Skill Browse] Scan completed in ${executionTime}ms - Found ${user.length} user, ${project.length} project, ${local.length} local Skills`
     );
 
     webview.postMessage({
@@ -47,8 +50,9 @@ export async function handleBrowseSkills(
       payload: {
         skills: allSkills,
         timestamp: new Date().toISOString(),
-        personalCount: personal.length,
+        userCount: user.length,
         projectCount: project.length,
+        localCount: local.length,
       },
     });
   } catch (error) {
@@ -70,13 +74,11 @@ export async function handleBrowseSkills(
 /**
  * Handle CREATE_SKILL request from Webview
  *
- * Creates a new SKILL.md file in the specified directory (personal or project).
+ * Creates a new SKILL.md file in the specified directory (user or project).
  *
  * @param payload - Skill creation payload
  * @param webview - VSCode Webview instance
  * @param requestId - Request ID for response matching
- *
- * NOTE: Full implementation will be added in Phase 5 (T024-T025)
  */
 export async function handleCreateSkill(
   payload: CreateSkillPayload,
@@ -148,8 +150,11 @@ export async function handleValidateSkillFile(
       `[Skill Validate] Validation completed in ${executionTime}ms - Skill "${metadata.name}" is valid`
     );
 
-    // Determine scope based on path
-    const scope = payload.skillPath.includes('.claude/skills') ? 'project' : 'personal';
+    // Determine scope based on path (normalize for Windows compatibility)
+    const normalizedPath = payload.skillPath.replace(/\\/g, '/');
+    const scope: 'user' | 'project' | 'local' = normalizedPath.includes('/.claude/skills')
+      ? 'project'
+      : 'user';
 
     webview.postMessage({
       type: 'SKILL_VALIDATION_SUCCESS',
