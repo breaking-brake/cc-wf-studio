@@ -2,12 +2,13 @@
  * Slack Share Dialog Component
  *
  * Dialog for sharing workflow to Slack channels.
- * Includes channel selection, description input, and sensitive data warning handling.
+ * Includes channel selection and sensitive data warning handling.
+ * Description is taken from the DescriptionPanel (workflowDescription in store).
  *
  * Based on specs/001-slack-workflow-sharing/plan.md
  */
 
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
 import type {
@@ -16,8 +17,6 @@ import type {
   SlackWorkspace,
 } from '../../services/slack-integration-service';
 import {
-  cancelSlackDescriptionGeneration,
-  generateSlackDescription,
   getLastSharedChannel,
   getSlackChannels,
   listSlackWorkspaces,
@@ -27,8 +26,6 @@ import {
 } from '../../services/slack-integration-service';
 import { serializeWorkflow } from '../../services/workflow-service';
 import { useWorkflowStore } from '../../stores/workflow-store';
-import { AiGenerateButton } from '../common/AiGenerateButton';
-import { EditInEditorButton } from '../common/EditInEditorButton';
 import { IndeterminateProgressBar } from '../common/IndeterminateProgressBar';
 import { SlackManualTokenDialog } from './SlackManualTokenDialog';
 
@@ -39,7 +36,7 @@ interface SlackShareDialogProps {
 }
 
 export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDialogProps) {
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
 
@@ -67,7 +64,8 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
   };
 
   // Get current canvas state for workflow generation
-  const { nodes, edges, activeWorkflow, workflowName, subAgentFlows } = useWorkflowStore();
+  const { nodes, edges, activeWorkflow, workflowName, workflowDescription, subAgentFlows } =
+    useWorkflowStore();
 
   // State management
   const [loading, setLoading] = useState(false);
@@ -77,15 +75,10 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
   const [workspace, setWorkspace] = useState<SlackWorkspace | null>(null);
   const [channels, setChannels] = useState<SlackChannel[]>([]);
   const [selectedChannelId, setSelectedChannelId] = useState<string>('');
-  const [description, setDescription] = useState('');
   const [sensitiveDataWarning, setSensitiveDataWarning] = useState<SensitiveDataFinding[] | null>(
     null
   );
   const [isManualTokenDialogOpen, setIsManualTokenDialogOpen] = useState(false);
-  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
-  const [generationError, setGenerationError] = useState<string | null>(null);
-  const [isEditingInEditor, setIsEditingInEditor] = useState(false);
-  const generationRequestIdRef = useRef<string | null>(null);
 
   // Load workspace when dialog opens (single workspace only)
   useEffect(() => {
@@ -195,73 +188,6 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
     setIsManualTokenDialogOpen(false);
   };
 
-  // Handle AI description generation
-  const handleGenerateDescription = useCallback(async () => {
-    const currentRequestId = `gen-${Date.now()}`;
-    generationRequestIdRef.current = currentRequestId;
-    setIsGeneratingDescription(true);
-    setGenerationError(null);
-
-    try {
-      // Serialize current workflow state
-      const workflow = serializeWorkflow(
-        nodes,
-        edges,
-        workflowName || 'Untitled Workflow',
-        'Created with Workflow Studio',
-        activeWorkflow?.conversationHistory,
-        subAgentFlows
-      );
-      const workflowJson = JSON.stringify(workflow, null, 2);
-
-      // Determine target language from locale
-      // Map locale to supported languages (en, ja, ko, zh-CN, zh-TW)
-      let targetLanguage = locale;
-      if (locale.startsWith('zh-')) {
-        // Keep zh-CN or zh-TW as is
-        targetLanguage = locale === 'zh-TW' || locale === 'zh-HK' ? 'zh-TW' : 'zh-CN';
-      } else {
-        // For other locales, use the language code
-        targetLanguage = locale.split('-')[0];
-      }
-
-      // Generate description with AI (pass requestId for cancellation support)
-      const generatedDescription = await generateSlackDescription(
-        workflowJson,
-        targetLanguage,
-        30000,
-        currentRequestId
-      );
-
-      // Only update if not cancelled
-      if (generationRequestIdRef.current === currentRequestId) {
-        setDescription(generatedDescription);
-      }
-    } catch {
-      // Only show error if not cancelled
-      if (generationRequestIdRef.current === currentRequestId) {
-        setGenerationError(t('slack.description.generateFailed'));
-      }
-    } finally {
-      // Only reset state if not cancelled
-      if (generationRequestIdRef.current === currentRequestId) {
-        setIsGeneratingDescription(false);
-        generationRequestIdRef.current = null;
-      }
-    }
-  }, [nodes, edges, workflowName, activeWorkflow?.conversationHistory, locale, t, subAgentFlows]);
-
-  // Handle cancel AI description generation
-  const handleCancelGeneration = useCallback(() => {
-    const requestId = generationRequestIdRef.current;
-    if (requestId) {
-      cancelSlackDescriptionGeneration(requestId);
-    }
-    generationRequestIdRef.current = null;
-    setIsGeneratingDescription(false);
-    setGenerationError(null);
-  }, []);
-
   const handleShare = async () => {
     if (!workspace) {
       setError(t('slack.error.noWorkspaces'));
@@ -283,7 +209,7 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
         nodes,
         edges,
         workflowName,
-        'Created with Workflow Studio',
+        workflowDescription || undefined,
         activeWorkflow?.conversationHistory,
         subAgentFlows
       );
@@ -294,7 +220,7 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
         workflowName,
         workflow,
         channelId: selectedChannelId,
-        description: description || undefined,
+        description: workflowDescription || undefined,
         overrideSensitiveWarning: false,
       });
 
@@ -329,7 +255,7 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
         nodes,
         edges,
         workflowName,
-        'Created with Workflow Studio',
+        workflowDescription || undefined,
         activeWorkflow?.conversationHistory,
         subAgentFlows
       );
@@ -340,7 +266,7 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
         workflowName,
         workflow,
         channelId: selectedChannelId,
-        description: description || undefined,
+        description: workflowDescription || undefined,
         overrideSensitiveWarning: true,
       });
 
@@ -358,7 +284,6 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
 
   const handleClose = () => {
     setSelectedChannelId('');
-    setDescription('');
     setError(null);
     setSensitiveDataWarning(null);
     setLoading(false);
@@ -703,91 +628,6 @@ export function SlackShareDialog({ isOpen, onClose, workflowId }: SlackShareDial
               ))
             )}
           </select>
-        </div>
-
-        {/* Description Input */}
-        <div style={{ marginBottom: '0' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '8px',
-            }}
-          >
-            <label
-              htmlFor="description-input"
-              style={{
-                fontSize: '13px',
-                color: 'var(--vscode-foreground)',
-                fontWeight: 500,
-              }}
-            >
-              {t('description')} ({t('optional')})
-            </label>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <EditInEditorButton
-                content={description}
-                onContentUpdated={setDescription}
-                label={t('description')}
-                language="markdown"
-                disabled={loading || isGeneratingDescription}
-                onEditingStateChange={setIsEditingInEditor}
-              />
-              <AiGenerateButton
-                isGenerating={isGeneratingDescription}
-                onGenerate={handleGenerateDescription}
-                onCancel={handleCancelGeneration}
-                generateTooltip={t('slack.description.generateWithAI')}
-                cancelTooltip={t('cancel')}
-                disabled={loading || isEditingInEditor}
-              />
-            </div>
-          </div>
-          {generationError && (
-            <div
-              style={{
-                fontSize: '12px',
-                color: 'var(--vscode-errorForeground)',
-                marginBottom: '8px',
-              }}
-            >
-              {generationError}
-            </div>
-          )}
-          <textarea
-            id="description-input"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            disabled={loading || isGeneratingDescription}
-            readOnly={isEditingInEditor}
-            maxLength={500}
-            rows={3}
-            style={{
-              width: '100%',
-              padding: '8px',
-              backgroundColor: 'var(--vscode-input-background)',
-              color: 'var(--vscode-input-foreground)',
-              border: '1px solid var(--vscode-input-border)',
-              borderRadius: '2px',
-              fontSize: '13px',
-              fontFamily: 'inherit',
-              resize: 'vertical',
-              opacity: isEditingInEditor ? 0.5 : 1,
-              cursor: isEditingInEditor ? 'not-allowed' : 'text',
-            }}
-            placeholder={t('slack.share.descriptionPlaceholder')}
-          />
-          <div
-            style={{
-              fontSize: '11px',
-              color: 'var(--vscode-descriptionForeground)',
-              marginTop: '4px',
-              textAlign: 'right',
-            }}
-          >
-            {description.length} / 500
-          </div>
         </div>
 
         {/* Error Message */}

@@ -21,6 +21,7 @@ import ReactFlow, {
 } from 'reactflow';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useWorkflowStore } from '../stores/workflow-store';
+import { DescriptionPanel } from './DescriptionPanel';
 // Custom edge with delete button
 import { DeletableEdge } from './edges/DeletableEdge';
 import { InteractionModeToggle } from './InteractionModeToggle';
@@ -265,6 +266,11 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         {/* Interaction Mode Toggle */}
         <Panel position="top-left">
           <InteractionModeToggle />
+        </Panel>
+
+        {/* Description Panel for workflow description */}
+        <Panel position="top-right">
+          <DescriptionPanel />
         </Panel>
 
         {/* Expand Node Palette Button (when collapsed) */}

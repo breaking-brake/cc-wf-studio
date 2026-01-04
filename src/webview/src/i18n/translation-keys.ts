@@ -582,17 +582,12 @@ export interface WebviewTranslationKeys {
   // Slack Share
   'slack.share.button': string;
   'slack.share.title': string;
-  'slack.share.selectWorkspace': string;
-  'slack.share.selectWorkspacePlaceholder': string;
   'slack.share.selectChannel': string;
   'slack.share.selectChannelPlaceholder': string;
-  'slack.share.descriptionPlaceholder': string;
   'slack.share.sharing': string;
-  'slack.share.success': string;
   'slack.share.failed': string;
 
   // Slack Description AI Generation
-  'slack.description.generateWithAI': string;
   'slack.description.generateFailed': string;
 
   // Slack Connect
@@ -712,10 +707,14 @@ export interface WebviewTranslationKeys {
   'editor.openInEditor': string;
   'editor.openInEditor.tooltip': string;
 
-  // Workflow Settings Dialog
+  // Workflow Settings / Memo Panel
   'workflow.settings.title': string;
   'workflow.settings.description.label': string;
   'workflow.settings.description.placeholder': string;
   'workflow.settings.generateWithAI': string;
-  'workflow.settings.tooltip': string;
+
+  // Description Panel (Canvas)
+  'description.panel.title': string;
+  'description.panel.show': string;
+  'description.panel.hide': string;
 }

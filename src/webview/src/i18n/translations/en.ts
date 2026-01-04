@@ -679,17 +679,12 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Slack Share
   'slack.share.button': 'Share',
   'slack.share.title': 'Share to Slack',
-  'slack.share.selectWorkspace': 'Select workspace',
-  'slack.share.selectWorkspacePlaceholder': 'Choose a workspace...',
   'slack.share.selectChannel': 'Select channel',
   'slack.share.selectChannelPlaceholder': 'Choose a channel...',
-  'slack.share.descriptionPlaceholder': 'Add a description (optional)...',
   'slack.share.sharing': 'Sharing...',
-  'slack.share.success': 'Workflow shared successfully',
   'slack.share.failed': 'Failed to share workflow',
 
   // Slack Description AI Generation
-  'slack.description.generateWithAI': 'Generate with AI',
   'slack.description.generateFailed':
     'Failed to generate description. Please try again or write manually.',
 
@@ -787,11 +782,15 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'editor.openInEditor': 'Edit in Editor',
   'editor.openInEditor.tooltip': 'Open in VSCode editor for full editing features',
 
-  // Workflow Settings Dialog
+  // Workflow Settings / Memo Panel
   'workflow.settings.title': 'Workflow Settings',
   'workflow.settings.description.label': 'Description',
   'workflow.settings.description.placeholder':
     'Enter a description for this workflow (e.g., what it does, when to use it)...',
   'workflow.settings.generateWithAI': 'Generate with AI',
-  'workflow.settings.tooltip': 'Workflow Settings',
+
+  // Description Panel (Canvas)
+  'description.panel.title': 'Description',
+  'description.panel.show': 'Show description panel',
+  'description.panel.hide': 'Hide description panel',
 };

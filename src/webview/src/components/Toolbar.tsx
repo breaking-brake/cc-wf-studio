@@ -5,7 +5,7 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
-import { FileDown, NotepadText, Play, Save, Sparkles, SquareSlash } from 'lucide-react';
+import { FileDown, Play, Save, Sparkles, SquareSlash } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
@@ -25,9 +25,8 @@ import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { EditableNameField } from './common/EditableNameField';
 import { ProcessingOverlay } from './common/ProcessingOverlay';
-import { StyledTooltip, StyledTooltipProvider } from './common/StyledTooltip';
+import { StyledTooltipProvider } from './common/StyledTooltip';
 import { ConfirmDialog } from './dialogs/ConfirmDialog';
-import { WorkflowSettingsDialog } from './dialogs/WorkflowSettingsDialog';
 import { MoreActionsDropdown } from './toolbar/MoreActionsDropdown';
 
 interface ToolbarProps {
@@ -78,7 +77,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isGeneratingName, setIsGeneratingName] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const generationNameRequestIdRef = useRef<string | null>(null);
 
   // Handle reset workflow
@@ -526,29 +524,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 t('toolbar.load')
               )}
             </button>
-
-            {/* Settings Button */}
-            <StyledTooltip content={t('workflow.settings.tooltip')}>
-              <button
-                type="button"
-                onClick={() => setShowSettingsDialog(true)}
-                data-tour="settings-button"
-                style={{
-                  padding: '4px 8px',
-                  backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                  color: 'var(--vscode-button-secondaryForeground)',
-                  border: 'none',
-                  borderRadius: '2px',
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <NotepadText size={16} />
-              </button>
-            </StyledTooltip>
           </div>
         </div>
 
@@ -728,14 +703,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           cancelLabel={t('common.cancel')}
           onConfirm={handleResetWorkflow}
           onCancel={() => setShowResetConfirm(false)}
-        />
-
-        {/* Workflow Settings Dialog */}
-        <WorkflowSettingsDialog
-          isOpen={showSettingsDialog}
-          onClose={() => setShowSettingsDialog(false)}
-          description={workflowDescription}
-          onDescriptionChange={setWorkflowDescription}
         />
       </div>
     </StyledTooltipProvider>

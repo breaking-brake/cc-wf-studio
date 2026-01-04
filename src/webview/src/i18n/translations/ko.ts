@@ -673,17 +673,12 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Slack Share
   'slack.share.button': '공유',
   'slack.share.title': 'Slack에 공유',
-  'slack.share.selectWorkspace': '워크스페이스 선택',
-  'slack.share.selectWorkspacePlaceholder': '워크스페이스를 선택하세요...',
   'slack.share.selectChannel': '채널 선택',
   'slack.share.selectChannelPlaceholder': '채널을 선택하세요...',
   'slack.share.sharing': '공유 중...',
-  'slack.share.success': '워크플로우를 공유했습니다',
   'slack.share.failed': '워크플로우 공유에 실패했습니다',
-  'slack.share.descriptionPlaceholder': '설명을 추가하세요 (선택 사항)...',
 
   // Slack Description AI Generation
-  'slack.description.generateWithAI': 'AI로 생성',
   'slack.description.generateFailed':
     '설명 생성에 실패했습니다. 다시 시도하거나 직접 작성해 주세요.',
 
@@ -780,11 +775,15 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'editor.openInEditor': '에디터에서 편집',
   'editor.openInEditor.tooltip': 'VSCode 에디터에서 열어 전체 편집 기능 사용',
 
-  // Workflow Settings Dialog
+  // Workflow Settings / Memo Panel
   'workflow.settings.title': '워크플로우 설정',
   'workflow.settings.description.label': '설명',
   'workflow.settings.description.placeholder':
     '이 워크플로우에 대한 설명을 입력하세요 (예: 무엇을 하는지, 언제 사용하는지)...',
   'workflow.settings.generateWithAI': 'AI로 생성',
-  'workflow.settings.tooltip': '워크플로우 설정',
+
+  // Description Panel (Canvas)
+  'description.panel.title': '설명',
+  'description.panel.show': '설명 패널 표시',
+  'description.panel.hide': '설명 패널 숨기기',
 };

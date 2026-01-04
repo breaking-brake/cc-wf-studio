@@ -646,17 +646,12 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   // Slack Share
   'slack.share.button': '分享',
   'slack.share.title': '分享到 Slack',
-  'slack.share.selectWorkspace': '選擇工作區',
-  'slack.share.selectWorkspacePlaceholder': '選擇一個工作區...',
   'slack.share.selectChannel': '選擇頻道',
   'slack.share.selectChannelPlaceholder': '選擇一個頻道...',
   'slack.share.sharing': '分享中...',
-  'slack.share.success': '工作流分享成功',
   'slack.share.failed': '工作流分享失敗',
-  'slack.share.descriptionPlaceholder': '新增描述（選填）...',
 
   // Slack Description AI Generation
-  'slack.description.generateWithAI': 'AI產生',
   'slack.description.generateFailed': '產生描述失敗。請重試或手動輸入。',
 
   // Slack Connect
@@ -751,11 +746,15 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'editor.openInEditor': '在編輯器中編輯',
   'editor.openInEditor.tooltip': '在 VSCode 編輯器中開啟以使用完整編輯功能',
 
-  // Workflow Settings Dialog
+  // Workflow Settings / Memo Panel
   'workflow.settings.title': '工作流程設定',
   'workflow.settings.description.label': '描述',
   'workflow.settings.description.placeholder':
     '輸入此工作流程的描述（例如：它做什麼、何時使用）...',
   'workflow.settings.generateWithAI': 'AI生成',
-  'workflow.settings.tooltip': '工作流程設定',
+
+  // Description Panel (Canvas)
+  'description.panel.title': '描述',
+  'description.panel.show': '顯示描述面板',
+  'description.panel.hide': '隱藏描述面板',
 };

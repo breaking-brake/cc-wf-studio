@@ -674,17 +674,12 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Slack Share
   'slack.share.button': '共有',
   'slack.share.title': 'Slack共有',
-  'slack.share.selectWorkspace': 'ワークスペース選択',
-  'slack.share.selectWorkspacePlaceholder': 'ワークスペースを選択...',
   'slack.share.selectChannel': 'チャンネル選択',
   'slack.share.selectChannelPlaceholder': 'チャンネルを選択...',
   'slack.share.sharing': '共有中...',
-  'slack.share.success': 'ワークフローを共有しました',
   'slack.share.failed': 'ワークフローの共有に失敗しました',
-  'slack.share.descriptionPlaceholder': '説明を追加（任意）...',
 
   // Slack Description AI Generation
-  'slack.description.generateWithAI': 'AIで生成',
   'slack.description.generateFailed':
     '説明の生成に失敗しました。再度お試しいただくか、手動で入力してください。',
 
@@ -780,11 +775,15 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'editor.openInEditor': 'エディタで編集',
   'editor.openInEditor.tooltip': 'VSCodeエディタで開いて編集',
 
-  // Workflow Settings Dialog
+  // Workflow Settings / Memo Panel
   'workflow.settings.title': 'ワークフロー設定',
   'workflow.settings.description.label': '説明',
   'workflow.settings.description.placeholder':
     'このワークフローの説明を入力してください（例：何をするか、いつ使うか）...',
   'workflow.settings.generateWithAI': 'AIで生成',
-  'workflow.settings.tooltip': 'ワークフロー設定',
+
+  // Description Panel (Canvas)
+  'description.panel.title': '説明',
+  'description.panel.show': '説明パネルを表示',
+  'description.panel.hide': '説明パネルを非表示',
 };

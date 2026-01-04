@@ -10,8 +10,9 @@ import type {
   PreviewParseErrorPayload,
   Workflow,
 } from '@shared/types/messages';
+import { Minus, NotepadText } from 'lucide-react';
 import type React from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactFlow, {
   Background,
   type DefaultEdgeOptions,
@@ -23,6 +24,7 @@ import 'reactflow/dist/style.css';
 import { useTranslation } from '../../i18n/i18n-context';
 import { vscode } from '../../main';
 import { deserializeWorkflow } from '../../services/workflow-service';
+import { StyledTooltip } from '../common/StyledTooltip';
 import { DeletableEdge } from '../edges/DeletableEdge';
 import { AskUserQuestionNodeComponent } from '../nodes/AskUserQuestionNode';
 import { BranchNodeComponent } from '../nodes/BranchNode';
@@ -92,6 +94,81 @@ const PreviewCanvasInner: React.FC<PreviewCanvasProps> = ({
   hasGitChanges,
 }) => {
   const { t } = useTranslation();
+  const [isDescriptionVisible, setIsDescriptionVisible] = useState(false);
+
+  // Panel size state with localStorage persistence
+  const [panelWidth, setPanelWidth] = useState(() => {
+    const saved = localStorage.getItem('cc-wf-studio.previewMemoPanelWidth');
+    return saved ? Number.parseInt(saved, 10) : 280;
+  });
+  const [panelHeight, setPanelHeight] = useState(() => {
+    const saved = localStorage.getItem('cc-wf-studio.previewMemoPanelHeight');
+    return saved ? Number.parseInt(saved, 10) : 120;
+  });
+
+  // Resize state
+  const isResizingRef = useRef<'left' | 'bottom' | 'corner' | null>(null);
+  const startPosRef = useRef({ x: 0, y: 0 });
+  const startSizeRef = useRef({ width: 0, height: 0 });
+
+  // Size constraints
+  const MIN_WIDTH = 200;
+  const MAX_WIDTH = 500;
+  const MIN_HEIGHT = 80;
+  const MAX_HEIGHT = 300;
+
+  // Save size to localStorage when changed
+  useEffect(() => {
+    localStorage.setItem('cc-wf-studio.previewMemoPanelWidth', panelWidth.toString());
+  }, [panelWidth]);
+
+  useEffect(() => {
+    localStorage.setItem('cc-wf-studio.previewMemoPanelHeight', panelHeight.toString());
+  }, [panelHeight]);
+
+  // Handle resize mouse events
+  const handleResizeStart = useCallback(
+    (e: React.MouseEvent, direction: 'left' | 'bottom' | 'corner') => {
+      e.preventDefault();
+      e.stopPropagation();
+      isResizingRef.current = direction;
+      startPosRef.current = { x: e.clientX, y: e.clientY };
+      startSizeRef.current = { width: panelWidth, height: panelHeight };
+
+      const handleMouseMove = (moveEvent: MouseEvent) => {
+        if (!isResizingRef.current) return;
+
+        const deltaX = startPosRef.current.x - moveEvent.clientX;
+        const deltaY = moveEvent.clientY - startPosRef.current.y;
+
+        if (isResizingRef.current === 'left' || isResizingRef.current === 'corner') {
+          const newWidth = Math.min(
+            MAX_WIDTH,
+            Math.max(MIN_WIDTH, startSizeRef.current.width + deltaX)
+          );
+          setPanelWidth(newWidth);
+        }
+
+        if (isResizingRef.current === 'bottom' || isResizingRef.current === 'corner') {
+          const newHeight = Math.min(
+            MAX_HEIGHT,
+            Math.max(MIN_HEIGHT, startSizeRef.current.height + deltaY)
+          );
+          setPanelHeight(newHeight);
+        }
+      };
+
+      const handleMouseUp = () => {
+        isResizingRef.current = null;
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    },
+    [panelWidth, panelHeight]
+  );
 
   // Deserialize workflow to React Flow format
   const { nodes, edges } = useMemo(() => {
@@ -221,16 +298,22 @@ const PreviewCanvasInner: React.FC<PreviewCanvasProps> = ({
         )}
       </div>
 
-      {/* Floating Edit button - right side (hidden for historical version) */}
-      {!isHistoricalVersion && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '12px',
-            right: '12px',
-            zIndex: 10,
-          }}
-        >
+      {/* Floating info panel - right side */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '12px',
+          right: '12px',
+          zIndex: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          gap: '8px',
+          maxWidth: '300px',
+        }}
+      >
+        {/* Edit button (hidden for historical version) */}
+        {!isHistoricalVersion && (
           <button
             type="button"
             onClick={handleOpenInEditor}
@@ -245,8 +328,158 @@ const PreviewCanvasInner: React.FC<PreviewCanvasProps> = ({
           >
             {t('preview.openInEditor')}
           </button>
-        </div>
-      )}
+        )}
+
+        {/* Workflow description panel (if description exists) */}
+        {workflow.description &&
+          (!isDescriptionVisible ? (
+            /* Collapsed: show expand button */
+            <StyledTooltip content={t('description.panel.show')} side="left">
+              <button
+                type="button"
+                onClick={() => setIsDescriptionVisible(true)}
+                aria-label={t('description.panel.show')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '28px',
+                  height: '28px',
+                  backgroundColor:
+                    'color-mix(in srgb, var(--vscode-editor-background) 30%, transparent)',
+                  border:
+                    '1px solid color-mix(in srgb, var(--vscode-panel-border) 30%, transparent)',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  color: 'var(--vscode-foreground)',
+                }}
+              >
+                <NotepadText size={14} />
+              </button>
+            </StyledTooltip>
+          ) : (
+            /* Expanded: show description panel */
+            <div
+              style={{
+                position: 'relative',
+                padding: '8px 12px',
+                backgroundColor:
+                  'color-mix(in srgb, var(--vscode-editor-background) 85%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--vscode-panel-border) 50%, transparent)',
+                borderRadius: '6px',
+                backdropFilter: 'blur(8px)',
+                width: `${panelWidth}px`,
+                minHeight: `${panelHeight}px`,
+              }}
+            >
+              {/* Resize handle - Left edge */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  width: '6px',
+                  height: '100%',
+                  cursor: 'ew-resize',
+                  backgroundColor: 'transparent',
+                }}
+                onMouseDown={(e) => handleResizeStart(e, 'left')}
+              />
+
+              {/* Resize handle - Bottom edge */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  bottom: 0,
+                  width: '100%',
+                  height: '6px',
+                  cursor: 'ns-resize',
+                  backgroundColor: 'transparent',
+                }}
+                onMouseDown={(e) => handleResizeStart(e, 'bottom')}
+              />
+
+              {/* Resize handle - Bottom-left corner */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  bottom: 0,
+                  width: '12px',
+                  height: '12px',
+                  cursor: 'nesw-resize',
+                  backgroundColor: 'transparent',
+                }}
+                onMouseDown={(e) => handleResizeStart(e, 'corner')}
+              />
+
+              {/* Header with title and minimize button */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '8px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <NotepadText
+                    size={14}
+                    style={{ color: 'var(--vscode-foreground)', opacity: 0.8 }}
+                  />
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      color: 'var(--vscode-foreground)',
+                    }}
+                  >
+                    {t('description.panel.title')}
+                  </span>
+                </div>
+                <StyledTooltip content={t('description.panel.hide')} side="left">
+                  <button
+                    type="button"
+                    onClick={() => setIsDescriptionVisible(false)}
+                    aria-label={t('description.panel.hide')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      borderRadius: '2px',
+                      cursor: 'pointer',
+                      color: 'var(--vscode-foreground)',
+                      padding: '2px',
+                      opacity: 0.7,
+                    }}
+                  >
+                    <Minus size={14} />
+                  </button>
+                </StyledTooltip>
+              </div>
+              {/* Description content */}
+              <div
+                style={{
+                  fontSize: '12px',
+                  color: 'var(--vscode-foreground)',
+                  lineHeight: 1.4,
+                  wordBreak: 'break-word',
+                }}
+              >
+                {workflow.description}
+              </div>
+            </div>
+          ))}
+      </div>
 
       {/* React Flow Canvas */}
       <ReactFlow
