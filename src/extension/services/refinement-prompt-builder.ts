@@ -45,6 +45,18 @@ export class RefinementPromptBuilder {
           name: n.name,
           'position.x': n.position.x,
           'position.y': n.position.y,
+          // Include data for skill nodes to preserve exact skill information
+          ...(n.type === 'skill' && n.data
+            ? {
+                data: {
+                  name: (n.data as { name?: string }).name,
+                  description: (n.data as { description?: string }).description,
+                  scope: (n.data as { scope?: string }).scope,
+                  validationStatus: (n.data as { validationStatus?: string }).validationStatus,
+                  outputPorts: (n.data as { outputPorts?: number }).outputPorts,
+                },
+              }
+            : {}),
         })),
         connections: this.currentWorkflow.connections.map((c) => ({
           id: c.id,
@@ -80,6 +92,9 @@ export class RefinementPromptBuilder {
         'Must have exactly 1 output port',
         'If branching needed, add ifElse/switch after Skill',
         'Never modify outputPorts field',
+        'PRESERVE existing skill node data exactly - do not change name, description, scope',
+        'When skill node exists in currentWorkflow, copy its data field exactly',
+        'Only use skill names from availableSkills list for NEW skill nodes',
       ],
       branchingNodeSelection: {
         ifElse: '2-way conditional branching (true/false)',

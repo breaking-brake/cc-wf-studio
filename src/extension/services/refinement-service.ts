@@ -282,14 +282,18 @@ export async function refineWorkflow(
         };
       }
 
-      // Combine personal and project skills
-      availableSkills = [...skillsResult.personal, ...skillsResult.project];
+      // Combine user, project, and local skills
+      availableSkills = [...skillsResult.user, ...skillsResult.project, ...skillsResult.local];
 
       log('INFO', 'Skills scanned successfully', {
         requestId,
-        personalCount: skillsResult.personal.length,
+        userCount: skillsResult.user.length,
         projectCount: skillsResult.project.length,
+        localCount: skillsResult.local.length,
         totalCount: availableSkills.length,
+        userSkills: skillsResult.user.map((s) => s.name),
+        projectSkills: skillsResult.project.map((s) => s.name),
+        localSkills: skillsResult.local.map((s) => s.name),
       });
 
       // Step 2: Filter skills by relevance to user's message
@@ -478,6 +482,16 @@ export async function refineWorkflow(
 
     let refinedWorkflow = aiResponse.values.workflow;
 
+    // Fill in missing metadata from current workflow
+    refinedWorkflow = {
+      ...refinedWorkflow,
+      id: refinedWorkflow.id || currentWorkflow.id,
+      name: refinedWorkflow.name || currentWorkflow.name,
+      version: refinedWorkflow.version || currentWorkflow.version || '1.0.0',
+      createdAt: refinedWorkflow.createdAt || currentWorkflow.createdAt || new Date(),
+      updatedAt: new Date(),
+    };
+
     if (!refinedWorkflow.id || !refinedWorkflow.nodes || !refinedWorkflow.connections) {
       log('ERROR', 'Parsed workflow is not valid', {
         requestId,
@@ -611,28 +625,37 @@ async function resolveSkillPaths(
 
     const skillData = node.data as SkillNodeData;
 
-    // Find matching skill by name and scope
-    const matchedSkill = availableSkills.find(
+    // First try: Find matching skill by name and scope
+    let matchedSkill = availableSkills.find(
       (skill) => skill.name === skillData.name && skill.scope === skillData.scope
     );
 
+    // Second try: Match by name only (AI may generate wrong scope)
+    if (!matchedSkill) {
+      matchedSkill = availableSkills.find((skill) => skill.name === skillData.name);
+    }
+
     if (matchedSkill) {
-      // Skill found - resolve path
+      // Skill found - resolve path and correct scope if necessary
       return {
         ...node,
         data: {
           ...skillData,
+          name: matchedSkill.name,
+          description: matchedSkill.description,
+          scope: matchedSkill.scope, // Use actual scope from matched skill
           skillPath: matchedSkill.skillPath,
           validationStatus: matchedSkill.validationStatus,
         } as SkillNodeData,
       };
     }
 
-    // Skill not found - mark as missing
+    // Skill not found - mark as missing with empty skillPath
     return {
       ...node,
       data: {
         ...skillData,
+        skillPath: '', // Set empty to avoid validation error
         validationStatus: 'missing' as const,
       } as SkillNodeData,
     };
@@ -1044,7 +1067,7 @@ export async function refineSubAgentFlow(
         };
       }
 
-      availableSkills = [...skillsResult.personal, ...skillsResult.project];
+      availableSkills = [...skillsResult.user, ...skillsResult.project, ...skillsResult.local];
       filteredSkills = filterSkillsByRelevance(userMessage, availableSkills);
 
       log('INFO', 'Skills filtered for SubAgentFlow refinement', {

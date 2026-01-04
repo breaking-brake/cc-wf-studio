@@ -186,9 +186,9 @@ nodeTypes:
         description: Exact description from available Skills list
       scope:
         type: string
-        enum[2]: personal,project
+        enum[3]: user,project,local
         required: true
-        description: Skill scope (personal or project)
+        description: "Skill scope: user (all projects), project (this project, shared), local (this project, private)"
       skillPath:
         type: string
         required: false

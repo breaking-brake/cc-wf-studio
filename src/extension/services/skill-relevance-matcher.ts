@@ -119,17 +119,26 @@ export function calculateSkillRelevance(
   skill: SkillReference
 ): SkillRelevanceScore {
   const userTokens = tokenize(userDescription);
-  const skillTokens = tokenize(skill.description);
+  // Include skill name in tokenization for matching
+  const skillTokens = tokenize(`${skill.name} ${skill.description}`);
 
   // Calculate intersection (matched keywords)
   const userTokenSet = new Set(userTokens);
   const matchedKeywords = skillTokens.filter((token) => userTokenSet.has(token));
 
   // Calculate score using formula from data-model.md
-  const score =
+  let score =
     userTokens.length === 0 || skillTokens.length === 0
       ? 0.0
       : matchedKeywords.length / Math.sqrt(userTokens.length * skillTokens.length);
+
+  // Bonus: If user explicitly mentions the skill name, boost the score significantly
+  const skillNameLower = skill.name.toLowerCase();
+  const userDescLower = userDescription.toLowerCase();
+  if (userDescLower.includes(skillNameLower)) {
+    // Direct name mention = high relevance (minimum 0.8)
+    score = Math.max(score, 0.8);
+  }
 
   return {
     skill,

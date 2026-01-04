@@ -448,10 +448,10 @@ function validateSkillNode(node: WorkflowNode): ValidationError[] {
   const skillData = node.data as Partial<SkillNodeData>;
 
   // Required fields check
+  // Note: skillPath is optional when validationStatus is 'missing' (skill not found)
   const requiredFields: (keyof SkillNodeData)[] = [
     'name',
     'description',
-    'skillPath',
     'scope',
     'validationStatus',
     'outputPorts',
@@ -465,6 +465,15 @@ function validateSkillNode(node: WorkflowNode): ValidationError[] {
         field: `nodes[${node.id}].data.${field}`,
       });
     }
+  }
+
+  // skillPath is required only when skill is valid (not missing)
+  if (skillData.validationStatus !== 'missing' && !skillData.skillPath) {
+    errors.push({
+      code: 'SKILL_MISSING_FIELD',
+      message: 'Skill node missing required field: skillPath',
+      field: `nodes[${node.id}].data.skillPath`,
+    });
   }
 
   // Name validation
