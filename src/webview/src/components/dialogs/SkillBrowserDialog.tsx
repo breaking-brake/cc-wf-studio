@@ -34,6 +34,7 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
   const [selectedSkill, setSelectedSkill] = useState<SkillReference | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('user');
   const [isSkillCreationOpen, setIsSkillCreationOpen] = useState(false);
+  const [filterText, setFilterText] = useState('');
 
   const { addNode, nodes } = useWorkflowStore();
 
@@ -167,6 +168,7 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
     setSelectedSkill(null);
     setError(null);
     setLoading(false);
+    setFilterText('');
     onClose();
   };
 
@@ -188,8 +190,15 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
     setLocalSkills(local);
   };
 
-  const currentSkills =
+  // Get skills for current tab and apply filter
+  const allCurrentSkills =
     activeTab === 'user' ? userSkills : activeTab === 'project' ? projectSkills : localSkills;
+
+  const currentSkills = filterText.trim()
+    ? allCurrentSkills.filter((skill) =>
+        skill.name.toLowerCase().includes(filterText.toLowerCase().trim())
+      )
+    : allCurrentSkills;
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -325,6 +334,26 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
               {activeTab === 'user' && t('skill.browser.userDescription')}
               {activeTab === 'project' && t('skill.browser.projectDescription')}
               {activeTab === 'local' && t('skill.browser.localDescription')}
+            </div>
+
+            {/* Filter Input */}
+            <div style={{ marginBottom: '16px' }}>
+              <input
+                type="text"
+                placeholder={t('skill.browser.filterPlaceholder')}
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  fontSize: '13px',
+                  backgroundColor: 'var(--vscode-input-background)',
+                  color: 'var(--vscode-input-foreground)',
+                  border: '1px solid var(--vscode-input-border)',
+                  borderRadius: '4px',
+                  outline: 'none',
+                }}
+              />
             </div>
 
             {/* Refresh Button */}

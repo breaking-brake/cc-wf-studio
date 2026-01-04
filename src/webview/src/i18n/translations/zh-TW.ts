@@ -329,6 +329,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.userDescription': '可在所有專案中使用。',
   'skill.browser.projectDescription': '僅在此專案中可用（共享用）。',
   'skill.browser.localDescription': '僅在此專案中可用（個人用）。',
+  'skill.browser.filterPlaceholder': '按Skill名稱篩選...',
   // Legacy key for backward compatibility
   'skill.browser.personalTab': '個人',
   'skill.browser.noSkills': '在此目錄中未找到Skill',

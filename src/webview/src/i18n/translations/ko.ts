@@ -343,6 +343,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.userDescription': '모든 프로젝트에서 사용 가능.',
   'skill.browser.projectDescription': '이 프로젝트에서만 사용 가능 (공유용).',
   'skill.browser.localDescription': '이 프로젝트에서만 사용 가능 (개인용).',
+  'skill.browser.filterPlaceholder': 'Skill 이름으로 필터...',
   // Legacy key for backward compatibility
   'skill.browser.personalTab': '개인',
   'skill.browser.noSkills': '이 디렉터리에서 Skill을 찾을 수 없습니다',

@@ -341,6 +341,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.userDescription': 'Available in all projects.',
   'skill.browser.projectDescription': 'Available only in this project (shared).',
   'skill.browser.localDescription': 'Available only in this project (private).',
+  'skill.browser.filterPlaceholder': 'Filter by skill name...',
   // Legacy key for backward compatibility
   'skill.browser.personalTab': 'Personal',
   'skill.browser.noSkills': 'No Skills found in this directory',

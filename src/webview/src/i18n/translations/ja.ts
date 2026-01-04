@@ -341,6 +341,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.userDescription': 'すべてのプロジェクトで利用可能。',
   'skill.browser.projectDescription': 'このプロジェクトでのみ利用可能（共有用）。',
   'skill.browser.localDescription': 'このプロジェクトでのみ利用可能（個人用）。',
+  'skill.browser.filterPlaceholder': 'Skill名でフィルタ...',
   // Legacy key for backward compatibility
   'skill.browser.personalTab': 'パーソナル',
   'skill.browser.noSkills': 'このディレクトリにSkillが見つかりません',

@@ -310,6 +310,7 @@ export interface WebviewTranslationKeys {
   'skill.browser.userDescription': string;
   'skill.browser.projectDescription': string;
   'skill.browser.localDescription': string;
+  'skill.browser.filterPlaceholder': string;
   // Legacy key for backward compatibility
   'skill.browser.personalTab': string;
   'skill.browser.noSkills': string;
