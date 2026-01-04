@@ -5,7 +5,7 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
-import { FileDown, Play, Save, Sparkles, SquareSlash } from 'lucide-react';
+import { FileDown, NotepadText, Play, Save, Sparkles, SquareSlash } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
@@ -25,8 +25,9 @@ import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { EditableNameField } from './common/EditableNameField';
 import { ProcessingOverlay } from './common/ProcessingOverlay';
-import { StyledTooltipProvider } from './common/StyledTooltip';
+import { StyledTooltip, StyledTooltipProvider } from './common/StyledTooltip';
 import { ConfirmDialog } from './dialogs/ConfirmDialog';
+import { WorkflowSettingsDialog } from './dialogs/WorkflowSettingsDialog';
 import { MoreActionsDropdown } from './toolbar/MoreActionsDropdown';
 
 interface ToolbarProps {
@@ -55,6 +56,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setActiveWorkflow,
     workflowName,
     setWorkflowName,
+    workflowDescription,
+    setWorkflowDescription,
     clearWorkflow,
     subAgentFlows,
     isFocusMode,
@@ -75,6 +78,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isGeneratingName, setIsGeneratingName] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const generationNameRequestIdRef = useRef<string | null>(null);
 
   // Handle reset workflow
@@ -96,14 +100,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setIsSaving(true);
     try {
       // Issue #89: Get subAgentFlows from store
-      const { subAgentFlows } = useWorkflowStore.getState();
+      const { subAgentFlows, workflowDescription } = useWorkflowStore.getState();
 
       // Phase 5 (T024): Serialize workflow with conversation history and subAgentFlows
       const workflow = serializeWorkflow(
         nodes,
         edges,
         workflowName,
-        'Created with Workflow Studio',
+        workflowDescription || undefined,
         activeWorkflow?.conversationHistory,
         subAgentFlows
       );
@@ -149,6 +153,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           setNodes(loadedNodes);
           setEdges(loadedEdges);
           setWorkflowName(workflow.name);
+          // Load description from workflow (default to empty string if not present)
+          setWorkflowDescription(workflow.description || '');
           // Set as active workflow to preserve conversation history
           setActiveWorkflow(workflow);
         }
@@ -175,7 +181,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, [setNodes, setEdges, setActiveWorkflow, setWorkflowName]);
+  }, [setNodes, setEdges, setActiveWorkflow, setWorkflowName, setWorkflowDescription]);
 
   const handleLoadWorkflow = () => {
     setIsLoadingFile(true);
@@ -197,14 +203,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setIsExporting(true);
     try {
       // Issue #89: Get subAgentFlows from store for export
-      const { subAgentFlows } = useWorkflowStore.getState();
+      const { subAgentFlows, workflowDescription } = useWorkflowStore.getState();
 
       // Serialize workflow with subAgentFlows
       const workflow = serializeWorkflow(
         nodes,
         edges,
         workflowName,
-        'Created with Workflow Studio',
+        workflowDescription || undefined,
         undefined, // conversationHistory not needed for export
         subAgentFlows
       );
@@ -249,14 +255,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setIsRunning(true);
     try {
       // Issue #89: Get subAgentFlows from store for run
-      const { subAgentFlows } = useWorkflowStore.getState();
+      const { subAgentFlows, workflowDescription } = useWorkflowStore.getState();
 
       // Serialize workflow with subAgentFlows
       const workflow = serializeWorkflow(
         nodes,
         edges,
         workflowName,
-        'Created with Workflow Studio',
+        workflowDescription || undefined,
         undefined, // conversationHistory not needed for run
         subAgentFlows
       );
@@ -299,7 +305,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         nodes,
         edges,
         workflowName || 'Untitled',
-        'Created with Workflow Studio',
+        workflowDescription || undefined,
         activeWorkflow?.conversationHistory
       );
       const workflowJson = JSON.stringify(workflow, null, 2);
@@ -343,6 +349,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     nodes,
     edges,
     workflowName,
+    workflowDescription,
     activeWorkflow?.conversationHistory,
     locale,
     onError,
@@ -374,7 +381,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       nodes,
       edges,
       workflowName || 'Untitled',
-      'Created with Workflow Studio',
+      workflowDescription || undefined,
       activeWorkflow?.conversationHistory,
       subAgentFlows
     );
@@ -395,6 +402,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     nodes,
     edges,
     workflowName,
+    workflowDescription,
     activeWorkflow?.conversationHistory,
     subAgentFlows,
     setActiveWorkflow,
@@ -518,6 +526,29 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 t('toolbar.load')
               )}
             </button>
+
+            {/* Settings Button */}
+            <StyledTooltip content={t('workflow.settings.tooltip')}>
+              <button
+                type="button"
+                onClick={() => setShowSettingsDialog(true)}
+                data-tour="settings-button"
+                style={{
+                  padding: '4px 8px',
+                  backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                  color: 'var(--vscode-button-secondaryForeground)',
+                  border: 'none',
+                  borderRadius: '2px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <NotepadText size={16} />
+              </button>
+            </StyledTooltip>
           </div>
         </div>
 
@@ -697,6 +728,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           cancelLabel={t('common.cancel')}
           onConfirm={handleResetWorkflow}
           onCancel={() => setShowResetConfirm(false)}
+        />
+
+        {/* Workflow Settings Dialog */}
+        <WorkflowSettingsDialog
+          isOpen={showSettingsDialog}
+          onClose={() => setShowSettingsDialog(false)}
+          description={workflowDescription}
+          onDescriptionChange={setWorkflowDescription}
         />
       </div>
     </StyledTooltipProvider>

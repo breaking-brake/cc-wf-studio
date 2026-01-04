@@ -779,4 +779,12 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Edit in VSCode Editor
   'editor.openInEditor': 'エディタで編集',
   'editor.openInEditor.tooltip': 'VSCodeエディタで開いて編集',
+
+  // Workflow Settings Dialog
+  'workflow.settings.title': 'ワークフロー設定',
+  'workflow.settings.description.label': '説明',
+  'workflow.settings.description.placeholder':
+    'このワークフローの説明を入力してください（例：何をするか、いつ使うか）...',
+  'workflow.settings.generateWithAI': 'AIで生成',
+  'workflow.settings.tooltip': 'ワークフロー設定',
 };

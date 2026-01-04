@@ -750,4 +750,11 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // Edit in VSCode Editor
   'editor.openInEditor': '在编辑器中编辑',
   'editor.openInEditor.tooltip': '在 VSCode 编辑器中打开以使用完整编辑功能',
+
+  // Workflow Settings Dialog
+  'workflow.settings.title': '工作流设置',
+  'workflow.settings.description.label': '描述',
+  'workflow.settings.description.placeholder': '输入此工作流的描述（例如：它做什么、何时使用）...',
+  'workflow.settings.generateWithAI': 'AI生成',
+  'workflow.settings.tooltip': '工作流设置',
 };

@@ -45,6 +45,7 @@ interface WorkflowStore {
   activeWorkflow: Workflow | null;
   interactionMode: InteractionMode;
   workflowName: string;
+  workflowDescription: string;
   isPropertyOverlayOpen: boolean;
   isMinimapVisible: boolean;
   isFocusMode: boolean;
@@ -66,6 +67,7 @@ interface WorkflowStore {
   setInteractionMode: (mode: InteractionMode) => void;
   toggleInteractionMode: () => void;
   setWorkflowName: (name: string) => void;
+  setWorkflowDescription: (description: string) => void;
   openPropertyOverlay: () => void;
   closePropertyOverlay: () => void;
   toggleMinimapVisibility: () => void;
@@ -228,6 +230,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   activeWorkflow: null,
   interactionMode: 'pan', // Default: pan mode
   workflowName: 'my-workflow', // Default workflow name
+  workflowDescription: '', // Default workflow description
   isPropertyOverlayOpen: true, // Property overlay is open by default
   isMinimapVisible: (() => {
     const saved = localStorage.getItem('cc-wf-studio.minimapVisible');
@@ -316,6 +319,8 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   setWorkflowName: (workflowName) => set({ workflowName }),
 
+  setWorkflowDescription: (workflowDescription) => set({ workflowDescription }),
+
   openPropertyOverlay: () => set({ isPropertyOverlayOpen: true }),
 
   closePropertyOverlay: () => set({ isPropertyOverlayOpen: false }),
@@ -401,6 +406,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       nodes: [DEFAULT_START_NODE, DEFAULT_END_NODE],
       edges: [],
       selectedNodeId: null,
+      workflowDescription: '', // Reset description
       // Sub-Agent Flow関連の状態をクリア
       subAgentFlows: [],
       activeSubAgentFlowId: null,

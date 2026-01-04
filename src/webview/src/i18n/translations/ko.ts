@@ -779,4 +779,12 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Edit in VSCode Editor
   'editor.openInEditor': '에디터에서 편집',
   'editor.openInEditor.tooltip': 'VSCode 에디터에서 열어 전체 편집 기능 사용',
+
+  // Workflow Settings Dialog
+  'workflow.settings.title': '워크플로우 설정',
+  'workflow.settings.description.label': '설명',
+  'workflow.settings.description.placeholder':
+    '이 워크플로우에 대한 설명을 입력하세요 (예: 무엇을 하는지, 언제 사용하는지)...',
+  'workflow.settings.generateWithAI': 'AI로 생성',
+  'workflow.settings.tooltip': '워크플로우 설정',
 };
