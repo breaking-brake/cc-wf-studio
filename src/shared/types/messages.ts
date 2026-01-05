@@ -287,6 +287,12 @@ export interface RefineWorkflowPayload {
   model?: ClaudeModel;
   /** Allowed tools for Claude Code CLI (optional, e.g., ['Read', 'Grep', 'Glob', 'WebSearch', 'WebFetch']) */
   allowedTools?: string[];
+  /** Previous validation errors from failed refinement attempt (for retry with error context) */
+  previousValidationErrors?: Array<{
+    code: string;
+    message: string;
+    field?: string;
+  }>;
 }
 
 export interface RefinementSuccessPayload {
@@ -326,6 +332,12 @@ export interface RefinementFailedPayload {
   executionTimeMs: number;
   /** Error timestamp */
   timestamp: string; // ISO 8601
+  /** Validation errors for VALIDATION_ERROR code (used for retry with error context) */
+  validationErrors?: Array<{
+    code: string;
+    message: string;
+    field?: string;
+  }>;
 }
 
 export interface ClearConversationPayload {

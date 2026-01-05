@@ -33,6 +33,13 @@ import { loadWorkflowSchemaByFormat, type SchemaLoadResult } from './schema-load
 import { filterSkillsByRelevance, type SkillRelevanceScore } from './skill-relevance-matcher';
 import { scanAllSkills } from './skill-service';
 
+/** Validation error structure */
+export interface ValidationErrorInfo {
+  code: string;
+  message: string;
+  field?: string;
+}
+
 export interface RefinementResult {
   success: boolean;
   refinedWorkflow?: Workflow;
@@ -43,6 +50,8 @@ export interface RefinementResult {
     message: string;
     details?: string;
   };
+  /** Validation errors when code is VALIDATION_ERROR */
+  validationErrors?: ValidationErrorInfo[];
   executionTimeMs: number;
 }
 
@@ -157,6 +166,7 @@ function parseSubAgentFlowResponse(output: string): AISubAgentFlowResponse | nul
  * @param userMessage - User's current refinement request
  * @param schemaResult - Schema load result (JSON or TOON)
  * @param filteredSkills - Skills filtered by relevance (optional)
+ * @param previousValidationErrors - Validation errors from previous failed attempt (optional, for retry)
  * @returns Object with prompt string and schema size
  */
 export function constructRefinementPrompt(
@@ -164,7 +174,8 @@ export function constructRefinementPrompt(
   conversationHistory: ConversationHistory,
   userMessage: string,
   schemaResult: SchemaLoadResult,
-  filteredSkills: SkillRelevanceScore[] = []
+  filteredSkills: SkillRelevanceScore[] = [],
+  previousValidationErrors?: ValidationErrorInfo[]
 ): { prompt: string; schemaSize: number } {
   const schemaFormat = getConfiguredSchemaFormat();
 
@@ -174,6 +185,8 @@ export function constructRefinementPrompt(
     userMessageLength: userMessage.length,
     conversationHistoryLength: conversationHistory.messages.length,
     filteredSkillsCount: filteredSkills.length,
+    hasPreviousErrors: !!previousValidationErrors && previousValidationErrors.length > 0,
+    previousErrorCount: previousValidationErrors?.length ?? 0,
   });
 
   const builder = new RefinementPromptBuilder(
@@ -181,7 +194,8 @@ export function constructRefinementPrompt(
     conversationHistory,
     userMessage,
     schemaResult,
-    filteredSkills
+    filteredSkills,
+    previousValidationErrors
   );
 
   const prompt = builder.buildPrompt();
@@ -216,6 +230,7 @@ export const DEFAULT_REFINEMENT_TIMEOUT_MS = 90000;
  * @param onProgress - Optional callback for streaming progress updates
  * @param model - Claude model to use (default: 'sonnet')
  * @param allowedTools - Array of allowed tool names for CLI (optional)
+ * @param previousValidationErrors - Validation errors from previous failed attempt (for retry with error context)
  * @returns Refinement result with success status and refined workflow or error
  */
 export async function refineWorkflow(
@@ -229,7 +244,8 @@ export async function refineWorkflow(
   workspaceRoot?: string,
   onProgress?: StreamingProgressCallback,
   model: ClaudeModel = 'sonnet',
-  allowedTools?: string[]
+  allowedTools?: string[],
+  previousValidationErrors?: ValidationErrorInfo[]
 ): Promise<RefinementResult> {
   const startTime = Date.now();
 
@@ -334,13 +350,14 @@ export async function refineWorkflow(
       sizeBytes: schemaResult.sizeBytes,
     });
 
-    // Step 3: Construct refinement prompt (with or without skills)
+    // Step 3: Construct refinement prompt (with or without skills, and error context if retrying)
     const { prompt, schemaSize } = constructRefinementPrompt(
       currentWorkflow,
       conversationHistory,
       userMessage,
       schemaResult,
-      filteredSkills
+      filteredSkills,
+      previousValidationErrors
     );
 
     // Record prompt size for metrics
@@ -550,6 +567,11 @@ export async function refineWorkflow(
           message: 'Refined workflow failed validation - please try again',
           details: validation.errors.map((e) => e.message).join('; '),
         },
+        validationErrors: validation.errors.map((e) => ({
+          code: e.code,
+          message: e.message,
+          field: e.field,
+        })),
         executionTimeMs: cliResult.executionTimeMs,
       };
     }

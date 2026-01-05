@@ -12,7 +12,7 @@
  */
 
 import { PanelRightClose } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ResponsiveFontProvider } from '../../contexts/ResponsiveFontContext';
 import { useResponsiveFontSizes } from '../../hooks/useResponsiveFontSizes';
 import { useIsCompactMode } from '../../hooks/useWindowWidth';
@@ -22,6 +22,7 @@ import {
   type RefinementProgressCallback,
   refineSubAgentFlow,
   refineWorkflow,
+  type ValidationErrorInfo,
   WorkflowRefinementError,
 } from '../../services/refinement-service';
 import { useRefinementStore } from '../../stores/refinement-store';
@@ -89,6 +90,9 @@ export function RefinementChatPanel({
     useWorkflowStore();
 
   const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
+
+  // Store validation errors by message ID for retry with error context
+  const validationErrorsRef = useRef<Map<string, ValidationErrorInfo[]>>(new Map());
 
   // Get SubAgentFlow for subAgentFlow mode
   const subAgentFlow =
@@ -309,6 +313,16 @@ export function RefinementChatPanel({
       return;
     }
 
+    // Get and clear validation errors for retry context
+    const previousValidationErrors = validationErrorsRef.current.get(messageId);
+    if (previousValidationErrors) {
+      validationErrorsRef.current.delete(messageId);
+      console.log('[RefinementChatPanel] Using validation errors for retry:', {
+        messageId,
+        errorCount: previousValidationErrors.length,
+      });
+    }
+
     // Reuse existing AI message for retry
     const aiMessageId = messageId;
     updateMessageErrorState(aiMessageId, false);
@@ -416,7 +430,8 @@ export function RefinementChatPanel({
           timeoutSeconds * 1000,
           onProgress,
           selectedModel,
-          allowedTools
+          allowedTools,
+          previousValidationErrors
         );
 
         if (result.type === 'success') {
@@ -490,6 +505,15 @@ export function RefinementChatPanel({
           | 'PROHIBITED_NODE_TYPE'
           | 'UNKNOWN_ERROR'
       );
+
+      // Store validation errors for retry with error context
+      if (error.code === 'VALIDATION_ERROR' && error.validationErrors) {
+        validationErrorsRef.current.set(aiMessageId, error.validationErrors);
+        console.log('[RefinementChatPanel] Stored validation errors for retry:', {
+          messageId: aiMessageId,
+          errorCount: error.validationErrors.length,
+        });
+      }
     } else {
       updateMessageErrorState(aiMessageId, true, 'UNKNOWN_ERROR');
     }

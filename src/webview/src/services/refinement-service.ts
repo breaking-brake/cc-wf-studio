@@ -35,6 +35,13 @@ function calculateClientTimeout(serverTimeoutMs?: number): number {
   return MAX_CLIENT_TIMEOUT_MS;
 }
 
+/** Validation error info for retry context */
+export interface ValidationErrorInfo {
+  code: string;
+  message: string;
+  field?: string;
+}
+
 /**
  * Error class for workflow refinement failures
  */
@@ -42,7 +49,8 @@ export class WorkflowRefinementError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: string
+    public details?: string,
+    public validationErrors?: ValidationErrorInfo[]
   ) {
     super(message);
     this.name = 'WorkflowRefinementError';
@@ -80,6 +88,8 @@ export type RefinementProgressCallback = (payload: RefinementProgressPayload) =>
  * @param serverTimeoutMs - Server-side timeout in milliseconds (default: undefined, uses settings)
  * @param onProgress - Optional callback for streaming progress updates
  * @param model - Claude model to use (default: 'sonnet')
+ * @param allowedTools - Optional array of allowed tool names
+ * @param previousValidationErrors - Validation errors from previous failed attempt (for retry)
  * @returns Promise that resolves to the refinement result (success or clarification)
  * @throws {WorkflowRefinementError} If refinement fails
  */
@@ -93,7 +103,8 @@ export function refineWorkflow(
   serverTimeoutMs?: number,
   onProgress?: RefinementProgressCallback,
   model: ClaudeModel = 'sonnet',
-  allowedTools?: string[]
+  allowedTools?: string[],
+  previousValidationErrors?: ValidationErrorInfo[]
 ): Promise<RefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
@@ -122,7 +133,8 @@ export function refineWorkflow(
             new WorkflowRefinementError(
               message.payload.error.message,
               message.payload.error.code,
-              message.payload.error.details
+              message.payload.error.details,
+              message.payload.validationErrors
             )
           );
         } else if (message.type === 'ERROR') {
@@ -148,6 +160,7 @@ export function refineWorkflow(
       timeoutMs: serverTimeoutMs, // Pass timeout to server (undefined = use settings)
       model,
       allowedTools,
+      previousValidationErrors,
     };
 
     vscode.postMessage({
@@ -270,7 +283,8 @@ export function refineSubAgentFlow(
             new WorkflowRefinementError(
               message.payload.error.message,
               message.payload.error.code,
-              message.payload.error.details
+              message.payload.error.details,
+              message.payload.validationErrors
             )
           );
         } else if (message.type === 'ERROR') {

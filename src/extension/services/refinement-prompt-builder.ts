@@ -8,6 +8,7 @@
 import { encode } from '@toon-format/toon';
 import type { ConversationHistory, Workflow } from '../../shared/types/workflow-definition';
 import { getCurrentLocale } from '../i18n/i18n-service';
+import type { ValidationErrorInfo } from './refinement-service';
 import type { SchemaLoadResult } from './schema-loader-service';
 import type { SkillRelevanceScore } from './skill-relevance-matcher';
 
@@ -20,7 +21,8 @@ export class RefinementPromptBuilder {
     private conversationHistory: ConversationHistory,
     private userMessage: string,
     private schemaResult: SchemaLoadResult,
-    private filteredSkills: SkillRelevanceScore[]
+    private filteredSkills: SkillRelevanceScore[],
+    private previousValidationErrors?: ValidationErrorInfo[]
   ) {}
 
   buildPrompt(): string {
@@ -130,6 +132,23 @@ export class RefinementPromptBuilder {
         'If you need clarification, use { status: "clarification", message: "..." } format',
         'NEVER ask questions in plain text - use clarification JSON format',
       ],
+      // Include previous validation errors for retry context
+      ...(this.previousValidationErrors &&
+        this.previousValidationErrors.length > 0 && {
+          previousAttemptFailed: true,
+          previousValidationErrors: this.previousValidationErrors.map((e) => ({
+            code: e.code,
+            message: e.message,
+            field: e.field,
+          })),
+          errorRecoveryInstructions: [
+            'The previous attempt failed validation with the errors listed above',
+            'Please carefully review the errors and fix them in your output',
+            'Pay special attention to node naming patterns and field requirements',
+            'Node names must match pattern /^[a-zA-Z0-9_-]+$/ (no spaces, Japanese characters, or special chars)',
+            'Ensure all required fields are present with valid values',
+          ],
+        }),
     };
   }
 }
