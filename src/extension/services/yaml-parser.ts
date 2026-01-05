@@ -42,7 +42,8 @@ export interface SkillMetadata {
  */
 export function parseSkillFrontmatter(content: string): SkillMetadata | null {
   // Extract frontmatter block (delimited by ---)
-  const frontmatterRegex = /^---\n([\s\S]*?)\n---/;
+  // Support both LF (\n) and CRLF (\r\n) line endings for cross-platform compatibility
+  const frontmatterRegex = /^---\r?\n([\s\S]*?)\r?\n---/;
   const match = content.match(frontmatterRegex);
 
   if (!match) {
