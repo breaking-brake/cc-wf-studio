@@ -373,9 +373,13 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       return;
     }
 
+    // Clear selection if the deleted node is currently selected
+    const shouldClearSelection = get().selectedNodeId === nodeId;
+
     set({
       nodes: get().nodes.filter((node) => node.id !== nodeId),
       edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+      ...(shouldClearSelection && { selectedNodeId: null }),
     });
   },
 
@@ -396,6 +400,11 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     const nodeIds = get().pendingDeleteNodeIds;
     if (nodeIds.length === 0) return;
 
+    // Clear selection if the deleted node is currently selected
+    const currentSelectedNodeId = get().selectedNodeId;
+    const shouldClearSelection =
+      currentSelectedNodeId !== null && nodeIds.includes(currentSelectedNodeId);
+
     // Delete all pending nodes
     set({
       nodes: get().nodes.filter((node) => !nodeIds.includes(node.id)),
@@ -403,6 +412,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         (edge) => !nodeIds.includes(edge.source) && !nodeIds.includes(edge.target)
       ),
       pendingDeleteNodeIds: [],
+      ...(shouldClearSelection && { selectedNodeId: null }),
     });
   },
 
