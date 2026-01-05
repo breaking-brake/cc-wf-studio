@@ -211,6 +211,7 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            zIndex: 9999,
           }}
         >
           <Dialog.Content

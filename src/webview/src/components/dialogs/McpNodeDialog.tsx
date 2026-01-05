@@ -366,6 +366,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            zIndex: 9999,
           }}
         >
           <Dialog.Content
