@@ -935,6 +935,7 @@ ${userMessage}
 5. Respect node IDs - do not regenerate IDs for unchanged nodes
 6. Update only what the user requested - minimize unnecessary changes
 7. **NEVER add subAgent, subAgentFlow, or askUserQuestion nodes**
+8. **Node names must match pattern /^[a-zA-Z0-9_-]+$/** (ASCII alphanumeric, hyphens, underscores only - NO spaces or non-ASCII characters)
 
 **Node Positioning Guidelines**:
 1. Horizontal spacing between regular nodes: Use 300px (e.g., x: 350, 650, 950, 1250, 1550)

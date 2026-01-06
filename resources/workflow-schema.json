@@ -394,7 +394,11 @@
   },
   "validationRules": {
     "workflow": { "maxNodes": 50, "nameMaxLength": 100, "versionPattern": "^\\d+\\.\\d+\\.\\d+$" },
-    "node": { "nameMaxLength": 50, "namePattern": "^[a-zA-Z0-9_-]+$" }
+    "node": {
+      "nameMaxLength": 50,
+      "namePattern": "^[a-zA-Z0-9_-]+$",
+      "namePatternDescription": "IMPORTANT: Node names must use ASCII alphanumeric characters, hyphens, and underscores only. NO spaces or non-ASCII characters allowed."
+    }
   },
   "subAgentFlowConstraints": {
     "description": "Constraints specific to Sub-Agent Flow editing. When refining a Sub-Agent Flow, these rules MUST be followed.",

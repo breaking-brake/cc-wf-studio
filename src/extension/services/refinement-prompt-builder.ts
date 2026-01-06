@@ -80,6 +80,7 @@ export class RefinementPromptBuilder {
         'Maintain workflow connectivity and validity',
         'Respect node IDs - do not regenerate IDs for unchanged nodes',
         'Update only what the user requested',
+        'Node names must match pattern /^[a-zA-Z0-9_-]+$/ (ASCII alphanumeric, hyphens, underscores only - NO spaces or non-ASCII characters)',
       ],
       nodePositioningGuidelines: [
         'Horizontal spacing: 300px',
