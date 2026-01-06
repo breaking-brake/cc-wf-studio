@@ -14,6 +14,7 @@
 import nanoSpawn from 'nano-spawn';
 import type { McpServerReference, McpToolReference } from '../../shared/types/mcp-node';
 import { log } from '../extension';
+import { getClaudeSpawnCommand } from './claude-cli-path';
 import { getCachedTools, setCachedTools } from './mcp-cache-service';
 
 /**
@@ -125,8 +126,11 @@ async function executeClaudeMcpCommand(
 
   try {
     // Spawn 'claude' CLI process using nano-spawn (cross-platform compatible)
-    // Use npx to ensure cross-platform compatibility (Windows PATH issues with global npm installs)
-    const result = await spawn('npx', ['claude', ...args], {
+    // Use claude directly if available (from known paths or PATH), otherwise fall back to npx
+    // This handles GUI-launched VSCode where Extension Host doesn't inherit shell PATH
+    // See: Issue #375, PR #376
+    const spawnCmd = await getClaudeSpawnCommand(args);
+    const result = await spawn(spawnCmd.command, spawnCmd.args, {
       cwd,
       timeout: timeoutMs,
       stdin: 'ignore',
