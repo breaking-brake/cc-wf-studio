@@ -50,6 +50,7 @@ interface WorkflowStore {
   isMinimapVisible: boolean;
   isDescriptionPanelVisible: boolean;
   isFocusMode: boolean;
+  lastAddedNodeId: string | null;
 
   // Sub-Agent Flow State (Feature: 089-subworkflow)
   subAgentFlows: SubAgentFlow[];
@@ -78,6 +79,7 @@ interface WorkflowStore {
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
   addNode: (node: Node) => void;
+  clearLastAddedNodeId: () => void;
   removeNode: (nodeId: string) => void;
   requestDeleteNode: (nodeId: string) => void;
   confirmDeleteNodes: () => void;
@@ -246,6 +248,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     const saved = localStorage.getItem('cc-wf-studio.focusMode');
     return saved !== null ? saved === 'true' : false; // Default: off
   })(),
+  lastAddedNodeId: null,
 
   // Sub-Agent Flow Initial State (Feature: 089-subworkflow)
   subAgentFlows: [],
@@ -361,7 +364,14 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   addNode: (node: Node) => {
     set({
       nodes: [...get().nodes, node],
+      lastAddedNodeId: node.id,
+      selectedNodeId: node.id,
+      isPropertyOverlayOpen: true,
     });
+  },
+
+  clearLastAddedNodeId: () => {
+    set({ lastAddedNodeId: null });
   },
 
   removeNode: (nodeId: string) => {

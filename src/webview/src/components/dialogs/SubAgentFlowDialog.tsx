@@ -23,6 +23,7 @@ import ReactFlow, {
   Panel,
   ReactFlowProvider,
 } from 'reactflow';
+import { useAutoFocusNode } from '../../hooks/useAutoFocusNode';
 import { useLocalRefinementChatState } from '../../hooks/useLocalRefinementChatState';
 import { useIsCompactMode } from '../../hooks/useWindowWidth';
 import { useTranslation } from '../../i18n/i18n-context';
@@ -96,6 +97,9 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
   const { t, locale } = useTranslation();
   const isCompact = useIsCompactMode();
   const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Auto-focus on newly added nodes
+  useAutoFocusNode();
 
   const {
     nodes,

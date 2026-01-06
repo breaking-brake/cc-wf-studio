@@ -19,6 +19,7 @@ import ReactFlow, {
   type NodeTypes,
   Panel,
 } from 'reactflow';
+import { useAutoFocusNode } from '../hooks/useAutoFocusNode';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { DescriptionPanel } from './DescriptionPanel';
@@ -91,6 +92,9 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   onExpandNodePalette,
 }) => {
   const isCompact = useIsCompactMode();
+
+  // Auto-focus on newly added nodes
+  useAutoFocusNode();
 
   // Get state and handlers from Zustand store
   const {
