@@ -190,15 +190,35 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
     setLocalSkills(local);
   };
 
-  // Get skills for current tab and apply filter
-  const allCurrentSkills =
-    activeTab === 'user' ? userSkills : activeTab === 'project' ? projectSkills : localSkills;
+  // Compute filtered skills for ALL tabs simultaneously
+  const filterLower = filterText.toLowerCase().trim();
 
-  const currentSkills = filterText.trim()
-    ? allCurrentSkills.filter((skill) =>
-        skill.name.toLowerCase().includes(filterText.toLowerCase().trim())
-      )
-    : allCurrentSkills;
+  const filteredUserSkills = filterLower
+    ? userSkills.filter((skill) => skill.name.toLowerCase().includes(filterLower))
+    : userSkills;
+
+  const filteredProjectSkills = filterLower
+    ? projectSkills.filter((skill) => skill.name.toLowerCase().includes(filterLower))
+    : projectSkills;
+
+  const filteredLocalSkills = filterLower
+    ? localSkills.filter((skill) => skill.name.toLowerCase().includes(filterLower))
+    : localSkills;
+
+  // Get skills for current tab (for list rendering)
+  const currentSkills =
+    activeTab === 'user'
+      ? filteredUserSkills
+      : activeTab === 'project'
+        ? filteredProjectSkills
+        : filteredLocalSkills;
+
+  // Clear selection when selected skill is filtered out
+  useEffect(() => {
+    if (selectedSkill && !currentSkills.some((s) => s.skillPath === selectedSkill.skillPath)) {
+      setSelectedSkill(null);
+    }
+  }, [currentSkills, selectedSkill]);
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -248,6 +268,26 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
               {t('skill.browser.description')}
             </Dialog.Description>
 
+            {/* Filter Input */}
+            <div style={{ marginBottom: '16px' }}>
+              <input
+                type="text"
+                placeholder={t('skill.browser.filterPlaceholder')}
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  fontSize: '13px',
+                  backgroundColor: 'var(--vscode-input-background)',
+                  color: 'var(--vscode-input-foreground)',
+                  border: '1px solid var(--vscode-input-border)',
+                  borderRadius: '4px',
+                  outline: 'none',
+                }}
+              />
+            </div>
+
             {/* Tabs */}
             <div
               style={{
@@ -275,7 +315,7 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                   fontWeight: activeTab === 'user' ? 600 : 400,
                 }}
               >
-                {t('skill.browser.userTab')} ({userSkills.length})
+                {t('skill.browser.userTab')} ({filteredUserSkills.length})
               </button>
               <button
                 type="button"
@@ -295,7 +335,7 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                   fontWeight: activeTab === 'project' ? 600 : 400,
                 }}
               >
-                {t('skill.browser.projectTab')} ({projectSkills.length})
+                {t('skill.browser.projectTab')} ({filteredProjectSkills.length})
               </button>
               <button
                 type="button"
@@ -315,7 +355,7 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                   fontWeight: activeTab === 'local' ? 600 : 400,
                 }}
               >
-                {t('skill.browser.localTab')} ({localSkills.length})
+                {t('skill.browser.localTab')} ({filteredLocalSkills.length})
               </button>
             </div>
 
@@ -335,26 +375,6 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
               {activeTab === 'user' && t('skill.browser.userDescription')}
               {activeTab === 'project' && t('skill.browser.projectDescription')}
               {activeTab === 'local' && t('skill.browser.localDescription')}
-            </div>
-
-            {/* Filter Input */}
-            <div style={{ marginBottom: '16px' }}>
-              <input
-                type="text"
-                placeholder={t('skill.browser.filterPlaceholder')}
-                value={filterText}
-                onChange={(e) => setFilterText(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  fontSize: '13px',
-                  backgroundColor: 'var(--vscode-input-background)',
-                  color: 'var(--vscode-input-foreground)',
-                  border: '1px solid var(--vscode-input-border)',
-                  borderRadius: '4px',
-                  outline: 'none',
-                }}
-              />
             </div>
 
             {/* Refresh Button */}
