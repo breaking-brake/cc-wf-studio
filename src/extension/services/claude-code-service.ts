@@ -284,15 +284,35 @@ function isSubprocessError(error: unknown): error is SubprocessError {
 }
 
 /**
+ * Extract all JSON code blocks from text
+ * Handles multiple ```json...``` blocks in AI responses
+ *
+ * @param text - Text containing JSON code blocks
+ * @returns Array of JSON content strings (without the ```json markers)
+ */
+function extractAllJsonBlocks(text: string): string[] {
+  const blocks: string[] = [];
+  // Non-greedy regex to match each ```json...``` block individually
+  const regex = /```json\s*([\s\S]*?)```/g;
+  let match: RegExpExecArray | null = regex.exec(text);
+  while (match !== null) {
+    const content = match[1].trim();
+    if (content.length > 0) {
+      blocks.push(content);
+    }
+    match = regex.exec(text);
+  }
+  return blocks;
+}
+
+/**
  * Parse JSON output from Claude Code CLI
  *
  * Handles multiple output formats:
  * 1. Markdown-wrapped: ```json { ... } ```
  * 2. Raw JSON: { ... }
- * 3. Text with embedded JSON block: "Some text...\n```json\n{...}\n```"
- *
- * Note: Uses string position-based extraction (not regex) to handle cases
- * where the JSON content itself contains markdown code blocks.
+ * 3. Text with embedded JSON block(s): "Some text...\n```json\n{...}\n```"
+ *    - Supports multiple JSON blocks, prioritizing those with 'status' field
  *
  * @param output - Raw output string from CLI
  * @returns Parsed JSON object or null if parsing fails
@@ -315,15 +335,36 @@ export function parseClaudeCodeOutput(output: string): unknown {
       return JSON.parse(trimmed);
     }
 
-    // Strategy 3: Find ```json block within text (e.g., explanation + JSON)
-    const jsonBlockStart = trimmed.indexOf('```json');
-    if (jsonBlockStart !== -1) {
-      // Find the closing ``` after the json block
-      const contentStart = jsonBlockStart + 7; // Skip ```json
-      const jsonBlockEnd = trimmed.lastIndexOf('```');
-      if (jsonBlockEnd > contentStart) {
-        const jsonContent = trimmed.slice(contentStart, jsonBlockEnd).trim();
-        return JSON.parse(jsonContent);
+    // Strategy 3: Extract all JSON blocks and find structured response
+    // This handles cases where AI returns multiple JSON blocks (e.g., raw data + structured response)
+    const jsonBlocks = extractAllJsonBlocks(trimmed);
+    if (jsonBlocks.length > 0) {
+      // Priority: Find block with 'status' field (structured AI response format)
+      // Search from end since structured response is typically last
+      for (let i = jsonBlocks.length - 1; i >= 0; i--) {
+        try {
+          const parsed = JSON.parse(jsonBlocks[i]);
+          if (parsed && typeof parsed === 'object' && 'status' in parsed) {
+            log('DEBUG', 'Found structured response with status field', {
+              blockIndex: i,
+              totalBlocks: jsonBlocks.length,
+              status: (parsed as Record<string, unknown>).status,
+            });
+            return parsed;
+          }
+        } catch {
+          // Continue to next block if parse fails
+        }
+      }
+
+      // Fallback: Try last block if no status field found
+      log('DEBUG', 'No status field found, using last JSON block', {
+        totalBlocks: jsonBlocks.length,
+      });
+      try {
+        return JSON.parse(jsonBlocks[jsonBlocks.length - 1]);
+      } catch {
+        // Fall through to Strategy 4
       }
     }
 
