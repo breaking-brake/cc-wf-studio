@@ -514,6 +514,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // MCP Tool Search
   'mcp.search.placeholder': '이름이나 설명으로 도구 검색...',
   'mcp.search.noResults': '"{query}"와 일치하는 도구를 찾을 수 없습니다',
+  'mcp.search.serverPlaceholder': '서버 이름으로 필터...',
+  'mcp.search.noServers': '"{query}"와 일치하는 서버를 찾을 수 없습니다',
 
   // MCP Node Dialog
   'mcp.dialog.title': 'MCP Tool 설정',

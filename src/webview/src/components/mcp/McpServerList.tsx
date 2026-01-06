@@ -30,6 +30,7 @@ export function McpServerList({
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [servers, setServers] = useState<McpServerReference[]>([]);
+  const [filterText, setFilterText] = useState('');
 
   const loadServers = async () => {
     setLoading(true);
@@ -155,8 +156,32 @@ export function McpServerList({
     );
   }
 
+  // Filter servers by name
+  const filterLower = filterText.toLowerCase().trim();
+  const filteredServers = filterLower
+    ? servers.filter((server) => server.name.toLowerCase().includes(filterLower))
+    : servers;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {/* Filter Input */}
+      <input
+        type="text"
+        placeholder={t('mcp.search.serverPlaceholder')}
+        value={filterText}
+        onChange={(e) => setFilterText(e.target.value)}
+        style={{
+          width: '100%',
+          padding: '8px 12px',
+          fontSize: '13px',
+          backgroundColor: 'var(--vscode-input-background)',
+          color: 'var(--vscode-input-foreground)',
+          border: '1px solid var(--vscode-input-border)',
+          borderRadius: '4px',
+          outline: 'none',
+        }}
+      />
+
       {/* Refresh Button */}
       <button
         type="button"
@@ -179,8 +204,21 @@ export function McpServerList({
         <span>{refreshing ? t('mcp.refreshing') : t('mcp.action.refresh')}</span>
       </button>
 
+      {/* No results message */}
+      {filteredServers.length === 0 && filterText && (
+        <div
+          style={{
+            padding: '16px',
+            textAlign: 'center',
+            color: 'var(--vscode-descriptionForeground)',
+          }}
+        >
+          {t('mcp.search.noServers', { query: filterText })}
+        </div>
+      )}
+
       {/* Server List */}
-      {servers.map((server) => (
+      {filteredServers.map((server) => (
         <button
           key={server.id}
           type="button"
