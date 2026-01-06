@@ -35,7 +35,7 @@ import { useCollapsiblePanel } from './hooks/useCollapsiblePanel';
 import { useIsCompactMode } from './hooks/useWindowWidth';
 import { useTranslation } from './i18n/i18n-context';
 import { vscode } from './main';
-import { deserializeWorkflow } from './services/workflow-service';
+import { deserializeWorkflow, serializeWorkflow } from './services/workflow-service';
 import { useRefinementStore } from './stores/refinement-store';
 import { useWorkflowStore } from './stores/workflow-store';
 import type { RefinementChatState } from './types/refinement-chat-state';
@@ -47,6 +47,11 @@ const App: React.FC = () => {
     confirmDeleteNodes,
     cancelDeleteNodes,
     activeWorkflow,
+    nodes,
+    edges,
+    workflowName,
+    workflowDescription,
+    subAgentFlows,
     setNodes,
     setEdges,
     setWorkflowName,
@@ -109,6 +114,46 @@ const App: React.FC = () => {
       updateActiveWorkflowMetadata({ conversationHistory });
     }
   }, [refinementStore.conversationHistory, activeWorkflow, updateActiveWorkflowMetadata]);
+
+  // Issue #388: Sync activeWorkflow when canvas (nodes/edges) changes
+  // This ensures that AI refinement always sees the current canvas state,
+  // not a stale snapshot from when the panel was opened.
+  // Note: Use updateActiveWorkflowMetadata (not setActiveWorkflow) to avoid
+  // updating nodes/edges which would cause an infinite loop.
+  const prevNodesRef = useRef(nodes);
+  const prevEdgesRef = useRef(edges);
+  useEffect(() => {
+    // Skip if nodes/edges haven't changed (same reference)
+    if (nodes === prevNodesRef.current && edges === prevEdgesRef.current) {
+      return;
+    }
+    prevNodesRef.current = nodes;
+    prevEdgesRef.current = edges;
+
+    // Only sync if we have an activeWorkflow and nodes (non-empty canvas)
+    if (activeWorkflow && nodes.length > 0) {
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName || 'Untitled',
+        workflowDescription || undefined,
+        activeWorkflow.conversationHistory,
+        subAgentFlows
+      );
+      // Preserve original ID
+      workflow.id = activeWorkflow.id;
+      // Update only activeWorkflow without touching nodes/edges
+      updateActiveWorkflowMetadata(workflow);
+    }
+  }, [
+    nodes,
+    edges,
+    workflowName,
+    workflowDescription,
+    subAgentFlows,
+    activeWorkflow,
+    updateActiveWorkflowMetadata,
+  ]);
 
   // App mode: null = loading, 'edit' = full editor, 'preview' = read-only preview
   // Start with null to prevent flashing the wrong UI
