@@ -14,7 +14,7 @@ import type {
   Workflow,
 } from '@shared/types/messages';
 import type React from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ProcessingOverlay } from './components/common/ProcessingOverlay';
 import { SimpleOverlay } from './components/common/SimpleOverlay';
 import { ConfirmDialog } from './components/dialogs/ConfirmDialog';
@@ -51,6 +51,7 @@ const App: React.FC = () => {
     setEdges,
     setWorkflowName,
     setActiveWorkflow,
+    updateActiveWorkflowMetadata,
     isPropertyOverlayOpen,
     selectedNodeId,
     activeSubAgentFlowId,
@@ -89,6 +90,25 @@ const App: React.FC = () => {
   const handleCloseRefinementPanel = useCallback(() => {
     refinementStore.closeChat();
   }, [refinementStore]);
+
+  // Issue #384: Sync conversation history from refinement-store to workflow-store
+  // This ensures that conversation history is preserved when the refinement panel
+  // is collapsed/expanded, and is included when the workflow is saved.
+  const prevHistoryRef = useRef(refinementStore.conversationHistory);
+  useEffect(() => {
+    const conversationHistory = refinementStore.conversationHistory;
+
+    // Skip if history hasn't changed (same reference)
+    if (conversationHistory === prevHistoryRef.current) {
+      return;
+    }
+    prevHistoryRef.current = conversationHistory;
+
+    // Only sync if we have both an activeWorkflow and conversation history
+    if (activeWorkflow && conversationHistory) {
+      updateActiveWorkflowMetadata({ conversationHistory });
+    }
+  }, [refinementStore.conversationHistory, activeWorkflow, updateActiveWorkflowMetadata]);
 
   // App mode: null = loading, 'edit' = full editor, 'preview' = read-only preview
   // Start with null to prevent flashing the wrong UI
