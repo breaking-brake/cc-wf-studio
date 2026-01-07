@@ -150,29 +150,9 @@ export function registerOpenEditorCommand(
       // Check if user has accepted terms of use
       const hasAcceptedTerms = context.globalState.get<boolean>('hasAcceptedTerms', false);
 
-      // Send initial state to webview after a short delay to ensure webview is ready
-      setTimeout(() => {
-        if (currentPanel) {
-          currentPanel.webview.postMessage({
-            type: 'INITIAL_STATE',
-            payload: {
-              hasAcceptedTerms,
-            },
-          });
-
-          // If import parameters are provided, trigger import after initial state
-          if (actualImportParams) {
-            setTimeout(() => {
-              if (currentPanel) {
-                currentPanel.webview.postMessage({
-                  type: 'IMPORT_WORKFLOW_FROM_SLACK',
-                  payload: actualImportParams,
-                });
-              }
-            }, 500);
-          }
-        }
-      }, 500);
+      // Store import params for use when WEBVIEW_READY is received
+      // This replaces the unreliable setTimeout-based approach (fixes Issue #396)
+      let pendingImportParams = actualImportParams;
 
       // Handle messages from webview
       currentPanel.webview.onDidReceiveMessage(
@@ -184,6 +164,31 @@ export function registerOpenEditorCommand(
           const webview = currentPanel.webview;
 
           switch (message.type) {
+            case 'WEBVIEW_READY':
+              // Webview is fully initialized and ready to receive messages
+              // This is more reliable than setTimeout (fixes Issue #396)
+              webview.postMessage({
+                type: 'INITIAL_STATE',
+                payload: {
+                  hasAcceptedTerms,
+                },
+              });
+
+              // If import parameters were provided, trigger import after initial state
+              if (pendingImportParams) {
+                // Small delay to ensure INITIAL_STATE is processed first
+                setTimeout(() => {
+                  if (currentPanel && pendingImportParams) {
+                    currentPanel.webview.postMessage({
+                      type: 'IMPORT_WORKFLOW_FROM_SLACK',
+                      payload: pendingImportParams,
+                    });
+                    pendingImportParams = undefined;
+                  }
+                }, 100);
+              }
+              break;
+
             case 'SAVE_WORKFLOW':
               // Save workflow
               if (message.payload?.workflow) {

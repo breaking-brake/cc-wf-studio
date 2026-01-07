@@ -76,3 +76,8 @@ root.render(
     </I18nProvider>
   </React.StrictMode>
 );
+
+// Notify Extension Host that Webview is ready to receive messages
+// This ensures INITIAL_STATE is sent only after React is fully initialized
+// Fixes: Issue #396 - blank page when Webview loads slowly
+vscode.postMessage({ type: 'WEBVIEW_READY' });

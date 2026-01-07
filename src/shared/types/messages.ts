@@ -1183,7 +1183,8 @@ export type WebviewMessage =
   | Message<GenerateWorkflowNamePayload, 'GENERATE_WORKFLOW_NAME'>
   | Message<void, 'OPEN_FILE_PICKER'>
   | Message<RunAsSlashCommandPayload, 'RUN_AS_SLASH_COMMAND'>
-  | Message<OpenInEditorPayload, 'OPEN_IN_EDITOR'>;
+  | Message<OpenInEditorPayload, 'OPEN_IN_EDITOR'>
+  | Message<void, 'WEBVIEW_READY'>;
 
 // ============================================================================
 // Error Codes
