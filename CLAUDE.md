@@ -142,6 +142,7 @@ The version bump is determined by commit message prefixes:
 
 - `feat:` → **Minor** version bump (e.g., 2.0.0 → 2.1.0)
 - `fix:` → **Patch** version bump (e.g., 2.1.0 → 2.1.1)
+- `improvement:` → **Patch** version bump (minor enhancements to existing features)
 - `perf:` → **Patch** version bump
 - `revert:` → **Patch** version bump
 - **BREAKING CHANGE** in commit body → **Major** version bump (e.g., 2.1.0 → 3.0.0)
@@ -160,6 +161,7 @@ Generated changelog groups commits by type:
 
 - **Features** (`feat:`)
 - **Bug Fixes** (`fix:`)
+- **Improvements** (`improvement:`)
 - **Performance Improvements** (`perf:`)
 - **Reverts** (`revert:`)
 - **Code Refactoring** (`refactor:`) - visible
