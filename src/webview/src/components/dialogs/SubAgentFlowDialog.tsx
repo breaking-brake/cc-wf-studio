@@ -702,9 +702,7 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
 
               {/* Refinement Panel with Radix Collapsible for slide animation */}
               <Collapsible.Root open={isLocalRefinementPanelOpen}>
-                <Collapsible.Content
-                  className={`refinement-panel-collapsible${isCompact ? ' compact' : ''}`}
-                >
+                <Collapsible.Content className="refinement-panel-collapsible">
                   <RefinementChatPanel
                     chatState={localChatState}
                     mode="subAgentFlow"

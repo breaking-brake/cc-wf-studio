@@ -421,9 +421,7 @@ const App: React.FC = () => {
 
         {/* Refinement Panel with Radix Collapsible for slide animation */}
         <Collapsible.Root open={isRefinementPanelOpen}>
-          <Collapsible.Content
-            className={`refinement-panel-collapsible${isCompact ? ' compact' : ''}`}
-          >
+          <Collapsible.Content className="refinement-panel-collapsible">
             <RefinementChatPanel chatState={mainChatState} onClose={handleCloseRefinementPanel} />
           </Collapsible.Content>
         </Collapsible.Root>
@@ -618,40 +616,34 @@ const App: React.FC = () => {
 
           /* Refinement Panel Collapsible Animation */
           .refinement-panel-collapsible {
-            --refinement-width: 320px;
             overflow: hidden;
             height: 100%;
-          }
-
-          .refinement-panel-collapsible.compact {
-            --refinement-width: 280px;
+            flex-shrink: 0;
           }
 
           .refinement-panel-collapsible[data-state='open'] {
-            width: var(--refinement-width);
-            animation: slideOpenFromRight 150ms ease-out;
+            animation: slideOpenFromRight 150ms ease-out forwards;
           }
 
           .refinement-panel-collapsible[data-state='closed'] {
-            width: 0px;
-            animation: slideCloseToRight 150ms ease-out;
+            animation: slideCloseToRight 150ms ease-out forwards;
           }
 
           @keyframes slideOpenFromRight {
             from {
-              width: 0px;
+              transform: translateX(100%);
             }
             to {
-              width: var(--refinement-width);
+              transform: translateX(0);
             }
           }
 
           @keyframes slideCloseToRight {
             from {
-              width: var(--refinement-width);
+              transform: translateX(0);
             }
             to {
-              width: 0px;
+              transform: translateX(100%);
             }
           }
         `}

@@ -14,8 +14,8 @@
 import { PanelRightClose } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { ResponsiveFontProvider } from '../../contexts/ResponsiveFontContext';
+import { useResizablePanel } from '../../hooks/useResizablePanel';
 import { useResponsiveFontSizes } from '../../hooks/useResponsiveFontSizes';
-import { useIsCompactMode } from '../../hooks/useWindowWidth';
 import { useTranslation } from '../../i18n/i18n-context';
 import {
   clearConversation,
@@ -32,11 +32,14 @@ import { MessageInput } from '../chat/MessageInput';
 import { MessageList } from '../chat/MessageList';
 import { SettingsDropdown } from '../chat/SettingsDropdown';
 import { WarningBanner } from '../chat/WarningBanner';
+import { ResizeHandle } from '../common/ResizeHandle';
 import { ConfirmDialog } from './ConfirmDialog';
 
-// Fixed panel widths (like Node Palette)
-const PANEL_WIDTH_NORMAL = 320;
-const PANEL_WIDTH_COMPACT = 280;
+// Resizable panel configuration
+const PANEL_MIN_WIDTH = 280;
+const PANEL_MAX_WIDTH = 600;
+const PANEL_DEFAULT_WIDTH = 320;
+const PANEL_STORAGE_KEY = 'cc-wf-studio.refinementPanelWidth';
 
 /**
  * Props for RefinementChatPanel
@@ -60,8 +63,12 @@ export function RefinementChatPanel({
   onClose,
 }: RefinementChatPanelProps) {
   const { t } = useTranslation();
-  const isCompact = useIsCompactMode();
-  const width = isCompact ? PANEL_WIDTH_COMPACT : PANEL_WIDTH_NORMAL;
+  const { width, handleMouseDown } = useResizablePanel({
+    minWidth: PANEL_MIN_WIDTH,
+    maxWidth: PANEL_MAX_WIDTH,
+    defaultWidth: PANEL_DEFAULT_WIDTH,
+    storageKey: PANEL_STORAGE_KEY,
+  });
   const fontSizes = useResponsiveFontSizes(width);
 
   // Destructure chatState for easier access
@@ -579,6 +586,9 @@ export function RefinementChatPanel({
         overflow: 'hidden',
       }}
     >
+      {/* Resize Handle - draggable left edge */}
+      <ResizeHandle onMouseDown={handleMouseDown} />
+
       <ResponsiveFontProvider width={width}>
         {/* Header - Single row layout (simplified after Settings dropdown consolidation) */}
         <div

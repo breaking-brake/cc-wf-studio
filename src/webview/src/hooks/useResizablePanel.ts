@@ -7,10 +7,17 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-const MIN_WIDTH = 200;
-const MAX_WIDTH = 600;
+const DEFAULT_MIN_WIDTH = 200;
+const DEFAULT_MAX_WIDTH = 600;
 const DEFAULT_WIDTH = 300;
-const STORAGE_KEY = 'cc-wf-studio.sidebarWidth';
+const DEFAULT_STORAGE_KEY = 'cc-wf-studio.sidebarWidth';
+
+interface UseResizablePanelOptions {
+  minWidth?: number;
+  maxWidth?: number;
+  defaultWidth?: number;
+  storageKey?: string;
+}
 
 interface UseResizablePanelReturn {
   width: number;
@@ -23,23 +30,29 @@ interface UseResizablePanelReturn {
  *
  * Features:
  * - Drag-to-resize with mouse events
- * - Width constraints (200px - 600px)
+ * - Configurable width constraints
  * - localStorage persistence
  * - Visual feedback during resize
  *
+ * @param options - Optional configuration for min/max width, default width, and storage key
  * @returns {UseResizablePanelReturn} Panel width, resizing state, and mouse down handler
  */
-export function useResizablePanel(): UseResizablePanelReturn {
+export function useResizablePanel(options?: UseResizablePanelOptions): UseResizablePanelReturn {
+  const minWidth = options?.minWidth ?? DEFAULT_MIN_WIDTH;
+  const maxWidth = options?.maxWidth ?? DEFAULT_MAX_WIDTH;
+  const defaultWidth = options?.defaultWidth ?? DEFAULT_WIDTH;
+  const storageKey = options?.storageKey ?? DEFAULT_STORAGE_KEY;
+
   // Initialize width from localStorage or use default
   const [width, setWidth] = useState<number>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = localStorage.getItem(storageKey);
     if (saved) {
       const parsed = Number.parseInt(saved, 10);
-      if (!Number.isNaN(parsed) && parsed >= MIN_WIDTH && parsed <= MAX_WIDTH) {
+      if (!Number.isNaN(parsed) && parsed >= minWidth && parsed <= maxWidth) {
         return parsed;
       }
     }
-    return DEFAULT_WIDTH;
+    return defaultWidth;
   });
 
   const [isResizing, setIsResizing] = useState(false);
@@ -47,14 +60,17 @@ export function useResizablePanel(): UseResizablePanelReturn {
   const startWidthRef = useRef<number>(0);
 
   // Handle mouse move during resize
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    const deltaX = startXRef.current - e.clientX;
-    const newWidth = startWidthRef.current + deltaX;
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      const deltaX = startXRef.current - e.clientX;
+      const newWidth = startWidthRef.current + deltaX;
 
-    // Apply constraints
-    const constrainedWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newWidth));
-    setWidth(constrainedWidth);
-  }, []);
+      // Apply constraints
+      const constrainedWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
+      setWidth(constrainedWidth);
+    },
+    [minWidth, maxWidth]
+  );
 
   // Handle mouse up to end resize
   const handleMouseUp = useCallback(() => {
@@ -97,8 +113,8 @@ export function useResizablePanel(): UseResizablePanelReturn {
 
   // Persist width to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, width.toString());
-  }, [width]);
+    localStorage.setItem(storageKey, width.toString());
+  }, [width, storageKey]);
 
   return {
     width,
