@@ -17,6 +17,7 @@ import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ProcessingOverlay } from './components/common/ProcessingOverlay';
 import { SimpleOverlay } from './components/common/SimpleOverlay';
+import { Spinner } from './components/common/Spinner';
 import { ConfirmDialog } from './components/dialogs/ConfirmDialog';
 import { RefinementChatPanel } from './components/dialogs/RefinementChatPanel';
 import { SlackConnectionRequiredDialog } from './components/dialogs/SlackConnectionRequiredDialog';
@@ -314,6 +315,7 @@ const App: React.FC = () => {
   }, [setNodes, setEdges, setWorkflowName, setActiveWorkflow]);
 
   // Render loading state (waiting for mode to be determined)
+  // Shows spinner while waiting for INITIAL_STATE or PREVIEW_MODE_INIT from Extension Host
   if (mode === null) {
     return (
       <div
@@ -321,8 +323,13 @@ const App: React.FC = () => {
           width: '100vw',
           height: '100vh',
           backgroundColor: 'var(--vscode-editor-background)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
-      />
+      >
+        <Spinner size={32} thickness={3} />
+      </div>
     );
   }
 
