@@ -7,6 +7,7 @@
  * Based on: specs/001-mcp-natural-language-mode/tasks.md T022-T023
  */
 
+import * as Dialog from '@radix-ui/react-dialog';
 import type { McpNodeData, ToolParameter } from '@shared/types/mcp-node';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
@@ -98,14 +99,14 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
     initializeDialog();
   }, [isOpen, nodeData, currentMode, t]);
 
-  if (!isOpen || !node || !nodeData) {
-    return null;
-  }
-
   /**
    * Handle save button click
    */
   const handleSave = () => {
+    if (!node || !nodeData) {
+      return;
+    }
+
     // Enable validation display
     setShowValidation(true);
 
@@ -225,228 +226,231 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-      }}
-      onClick={handleClose}
-      role="presentation"
-    >
-      {/* biome-ignore lint/a11y/useKeyWithClickEvents: onClick is only used to stop event propagation, not for click actions */}
-      <div
-        style={{
-          backgroundColor: 'var(--vscode-editor-background)',
-          border: '1px solid var(--vscode-panel-border)',
-          borderRadius: '6px',
-          padding: '24px',
-          maxWidth: '700px',
-          width: '90%',
-          maxHeight: '80vh',
-          overflow: 'auto',
-        }}
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-      >
-        {/* Dialog Header */}
-        <div
+    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay
           style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
             display: 'flex',
-            justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '16px',
+            justifyContent: 'center',
+            zIndex: 9999,
           }}
         >
-          <div
+          <Dialog.Content
             style={{
-              fontSize: '16px',
-              fontWeight: 'bold',
-              color: 'var(--vscode-foreground)',
+              backgroundColor: 'var(--vscode-editor-background)',
+              border: '1px solid var(--vscode-panel-border)',
+              borderRadius: '6px',
+              padding: '24px',
+              maxWidth: '700px',
+              width: '90%',
+              maxHeight: '80vh',
+              overflow: 'auto',
             }}
           >
-            {t('mcp.editDialog.title')}
-          </div>
-          {/* Mode Badge */}
-          <ModeIndicatorBadge mode={currentMode} />
-        </div>
-
-        {/* Tool Information */}
-        <div
-          style={{
-            marginBottom: '16px',
-            padding: '12px',
-            backgroundColor: 'var(--vscode-list-inactiveSelectionBackground)',
-            border: '1px solid var(--vscode-panel-border)',
-            borderRadius: '4px',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
-              marginBottom: '8px',
-            }}
-          >
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '13px', color: 'var(--vscode-disabledForeground)' }}>
-                <strong>{t('property.mcp.serverId')}:</strong> {nodeData.serverId}
-              </div>
-              {(currentMode === 'manualParameterConfig' || currentMode === 'aiParameterConfig') && (
-                <div
-                  style={{
-                    fontSize: '13px',
-                    color: 'var(--vscode-disabledForeground)',
-                    marginTop: '4px',
-                  }}
-                >
-                  <strong>{t('property.mcp.toolName')}:</strong> {nodeData.toolName}
-                </div>
-              )}
-            </div>
-            {/* Refresh Button */}
-            {currentMode !== 'aiToolSelection' && (
-              <button
-                type="button"
-                onClick={handleRefresh}
-                disabled={refreshing || loading}
-                style={{
-                  padding: '4px 8px',
-                  fontSize: '12px',
-                  backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                  color: 'var(--vscode-button-secondaryForeground)',
-                  border: '1px solid var(--vscode-panel-border)',
-                  borderRadius: '3px',
-                  cursor: refreshing || loading ? 'wait' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  flexShrink: 0,
-                }}
-                title={t('mcp.action.refresh')}
-              >
-                <span>{refreshing ? t('mcp.refreshing') : t('mcp.action.refresh')}</span>
-              </button>
-            )}
-          </div>
-          {nodeData.toolDescription && currentMode === 'manualParameterConfig' && (
+            {/* Dialog Header */}
             <div
               style={{
-                fontSize: '12px',
-                color: 'var(--vscode-disabledForeground)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '16px',
               }}
             >
-              {nodeData.toolDescription}
+              <Dialog.Title
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  color: 'var(--vscode-foreground)',
+                }}
+              >
+                {t('mcp.editDialog.title')}
+              </Dialog.Title>
+              {/* Mode Badge */}
+              <ModeIndicatorBadge mode={currentMode} />
             </div>
-          )}
-        </div>
 
-        {/* Loading State */}
-        {loading && <IndeterminateProgressBar label={t('mcp.editDialog.loading')} />}
+            {/* Hidden description for accessibility */}
+            <Dialog.Description style={{ display: 'none' }}>
+              {t('mcp.editDialog.title')}
+            </Dialog.Description>
 
-        {/* Error State */}
-        {error && !loading && (
-          <div
-            style={{
-              padding: '16px',
-              marginBottom: '16px',
-              color: 'var(--vscode-errorForeground)',
-              backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
-              border: '1px solid var(--vscode-inputValidation-errorBorder)',
-              borderRadius: '4px',
-            }}
-          >
-            {error}
-          </div>
-        )}
-
-        {/* Mode-specific Edit UI */}
-        {!loading && !error && (
-          <>
-            {currentMode === 'manualParameterConfig' && (
-              <ParameterFormGenerator
-                parameters={parameters}
-                parameterValues={parameterValues}
-                onChange={setParameterValues}
-                showValidation={showValidation}
-              />
+            {/* Tool Information */}
+            {nodeData && (
+              <div
+                style={{
+                  marginBottom: '16px',
+                  padding: '12px',
+                  backgroundColor: 'var(--vscode-list-inactiveSelectionBackground)',
+                  border: '1px solid var(--vscode-panel-border)',
+                  borderRadius: '4px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    marginBottom: '8px',
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '13px', color: 'var(--vscode-disabledForeground)' }}>
+                      <strong>{t('property.mcp.serverId')}:</strong> {nodeData.serverId}
+                    </div>
+                    {(currentMode === 'manualParameterConfig' ||
+                      currentMode === 'aiParameterConfig') && (
+                      <div
+                        style={{
+                          fontSize: '13px',
+                          color: 'var(--vscode-disabledForeground)',
+                          marginTop: '4px',
+                        }}
+                      >
+                        <strong>{t('property.mcp.toolName')}:</strong> {nodeData.toolName}
+                      </div>
+                    )}
+                  </div>
+                  {/* Refresh Button */}
+                  {currentMode !== 'aiToolSelection' && (
+                    <button
+                      type="button"
+                      onClick={handleRefresh}
+                      disabled={refreshing || loading}
+                      style={{
+                        padding: '4px 8px',
+                        fontSize: '12px',
+                        backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                        color: 'var(--vscode-button-secondaryForeground)',
+                        border: '1px solid var(--vscode-panel-border)',
+                        borderRadius: '3px',
+                        cursor: refreshing || loading ? 'wait' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        flexShrink: 0,
+                      }}
+                      title={t('mcp.action.refresh')}
+                    >
+                      <span>{refreshing ? t('mcp.refreshing') : t('mcp.action.refresh')}</span>
+                    </button>
+                  )}
+                </div>
+                {nodeData.toolDescription && currentMode === 'manualParameterConfig' && (
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      color: 'var(--vscode-disabledForeground)',
+                    }}
+                  >
+                    {nodeData.toolDescription}
+                  </div>
+                )}
+              </div>
             )}
 
-            {currentMode === 'aiParameterConfig' && (
-              <AiParameterConfigInput
-                value={aiParameterConfigDescription}
-                onChange={setAiParameterConfigDescription}
-                showValidation={showValidation}
-              />
+            {/* Loading State */}
+            {loading && <IndeterminateProgressBar label={t('mcp.editDialog.loading')} />}
+
+            {/* Error State */}
+            {error && !loading && (
+              <div
+                style={{
+                  padding: '16px',
+                  marginBottom: '16px',
+                  color: 'var(--vscode-errorForeground)',
+                  backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
+                  border: '1px solid var(--vscode-inputValidation-errorBorder)',
+                  borderRadius: '4px',
+                }}
+              >
+                {error}
+              </div>
             )}
 
-            {currentMode === 'aiToolSelection' && (
-              <AiToolSelectionInput
-                value={naturalLanguageTaskDescription}
-                onChange={setNaturalLanguageTaskDescription}
-                showValidation={showValidation}
-              />
-            )}
-          </>
-        )}
+            {/* Mode-specific Edit UI */}
+            {!loading && !error && (
+              <>
+                {currentMode === 'manualParameterConfig' && (
+                  <ParameterFormGenerator
+                    parameters={parameters}
+                    parameterValues={parameterValues}
+                    onChange={setParameterValues}
+                    showValidation={showValidation}
+                  />
+                )}
 
-        {/* Dialog Actions */}
-        <div
-          style={{
-            marginTop: '24px',
-            display: 'flex',
-            gap: '12px',
-            justifyContent: 'flex-end',
-          }}
-        >
-          <button
-            type="button"
-            onClick={handleClose}
-            style={{
-              padding: '8px 16px',
-              fontSize: '13px',
-              backgroundColor: 'var(--vscode-button-secondaryBackground)',
-              color: 'var(--vscode-button-secondaryForeground)',
-              border: 'none',
-              borderRadius: '2px',
-              cursor: 'pointer',
-            }}
-          >
-            {t('mcp.editDialog.cancelButton')}
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={loading || !!error}
-            style={{
-              padding: '8px 16px',
-              fontSize: '13px',
-              backgroundColor:
-                loading || error
-                  ? 'var(--vscode-button-secondaryBackground)'
-                  : 'var(--vscode-button-background)',
-              color:
-                loading || error
-                  ? 'var(--vscode-button-secondaryForeground)'
-                  : 'var(--vscode-button-foreground)',
-              border: 'none',
-              borderRadius: '2px',
-              cursor: loading || error ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {t('mcp.editDialog.saveButton')}
-          </button>
-        </div>
-      </div>
-    </div>
+                {currentMode === 'aiParameterConfig' && (
+                  <AiParameterConfigInput
+                    value={aiParameterConfigDescription}
+                    onChange={setAiParameterConfigDescription}
+                    showValidation={showValidation}
+                  />
+                )}
+
+                {currentMode === 'aiToolSelection' && (
+                  <AiToolSelectionInput
+                    value={naturalLanguageTaskDescription}
+                    onChange={setNaturalLanguageTaskDescription}
+                    showValidation={showValidation}
+                  />
+                )}
+              </>
+            )}
+
+            {/* Dialog Actions */}
+            <div
+              style={{
+                marginTop: '24px',
+                display: 'flex',
+                gap: '12px',
+                justifyContent: 'flex-end',
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleClose}
+                style={{
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                  color: 'var(--vscode-button-secondaryForeground)',
+                  border: 'none',
+                  borderRadius: '2px',
+                  cursor: 'pointer',
+                }}
+              >
+                {t('mcp.editDialog.cancelButton')}
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={loading || !!error}
+                style={{
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  backgroundColor:
+                    loading || error
+                      ? 'var(--vscode-button-secondaryBackground)'
+                      : 'var(--vscode-button-background)',
+                  color:
+                    loading || error
+                      ? 'var(--vscode-button-secondaryForeground)'
+                      : 'var(--vscode-button-foreground)',
+                  border: 'none',
+                  borderRadius: '2px',
+                  cursor: loading || error ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {t('mcp.editDialog.saveButton')}
+              </button>
+            </div>
+          </Dialog.Content>
+        </Dialog.Overlay>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

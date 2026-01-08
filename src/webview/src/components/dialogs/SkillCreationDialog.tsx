@@ -119,6 +119,7 @@ export function SkillCreationDialog({ isOpen, onClose, onSubmit }: SkillCreation
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            zIndex: 10000,
           }}
         >
           <Dialog.Content

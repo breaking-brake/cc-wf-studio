@@ -8,7 +8,8 @@
  * Based on specs/001-slack-workflow-sharing OAuth implementation plan
  */
 
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import {
   cancelSlackOAuth,
@@ -18,6 +19,7 @@ import {
   listSlackWorkspaces,
   openExternalUrl,
 } from '../../services/slack-integration-service';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface SlackManualTokenDialogProps {
   isOpen: boolean;
@@ -34,8 +36,6 @@ export function SlackManualTokenDialog({
   onSuccess,
 }: SlackManualTokenDialogProps) {
   const { t } = useTranslation();
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const titleId = useId();
 
   // Tab state
   const [activeTab, setActiveTab] = useState<AuthTab>('oauth');
@@ -74,33 +74,6 @@ export function SlackManualTokenDialog({
         .catch(() => {
           setHasStoredToken(false);
         });
-    }
-  }, [isOpen]);
-
-  // Handle Escape key to close dialog
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (oauthStatus === 'polling') {
-          handleCancelOAuth();
-        } else {
-          onClose();
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose, oauthStatus, handleCancelOAuth]);
-
-  // Focus dialog when opened
-  useEffect(() => {
-    if (isOpen && dialogRef.current) {
-      dialogRef.current.focus();
     }
   }, [isOpen]);
 
@@ -189,751 +162,669 @@ export function SlackManualTokenDialog({
     }
   };
 
-  if (!isOpen) {
-    return null;
-  }
+  const handleClose = () => {
+    if (oauthStatus === 'polling' || oauthStatus === 'initiated') {
+      handleCancelOAuth();
+    }
+    onClose();
+  };
 
   const isOAuthLoading = oauthStatus === 'initiated' || oauthStatus === 'polling';
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 9999,
-      }}
-      onClick={() => {
-        if (isOAuthLoading) {
-          // Cancel OAuth and close dialog when clicking outside during loading
-          handleCancelOAuth();
-        }
-        onClose();
-      }}
-      role="presentation"
-    >
-      {/* biome-ignore lint/a11y/useKeyWithClickEvents: onClick is only used to stop event propagation, not for click actions */}
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-labelledby={titleId}
-        aria-modal="true"
-        tabIndex={-1}
-        style={{
-          backgroundColor: 'var(--vscode-editor-background)',
-          border: '1px solid var(--vscode-panel-border)',
-          borderRadius: '4px',
-          padding: '24px',
-          minWidth: '500px',
-          maxWidth: '600px',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
-          outline: 'none',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Title */}
-        <div
-          id={titleId}
+    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay
           style={{
-            fontSize: '16px',
-            fontWeight: 600,
-            color: 'var(--vscode-foreground)',
-            marginBottom: '16px',
-          }}
-        >
-          {t('slack.connect.title')}
-        </div>
-
-        {/* Tab Buttons */}
-        <div
-          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
             display: 'flex',
-            gap: '4px',
-            marginBottom: '16px',
-            borderBottom: '1px solid var(--vscode-panel-border)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
           }}
         >
-          <button
-            type="button"
-            onClick={() => setActiveTab('oauth')}
-            disabled={loading || isOAuthLoading}
+          <Dialog.Content
             style={{
-              padding: '8px 16px',
-              backgroundColor: 'transparent',
-              color:
-                activeTab === 'oauth'
-                  ? 'var(--vscode-foreground)'
-                  : 'var(--vscode-descriptionForeground)',
-              border: 'none',
-              borderBottom:
-                activeTab === 'oauth'
-                  ? '2px solid var(--vscode-focusBorder)'
-                  : '2px solid transparent',
-              cursor: loading || isOAuthLoading ? 'not-allowed' : 'pointer',
-              fontSize: '13px',
-              fontWeight: activeTab === 'oauth' ? 600 : 400,
-              opacity: loading || isOAuthLoading ? 0.5 : 1,
+              backgroundColor: 'var(--vscode-editor-background)',
+              border: '1px solid var(--vscode-panel-border)',
+              borderRadius: '4px',
+              padding: '24px',
+              minWidth: '500px',
+              maxWidth: '600px',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
+              outline: 'none',
             }}
           >
-            {t('slack.connect.tab.oauth')}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('manual')}
-            disabled={loading || isOAuthLoading}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: 'transparent',
-              color:
-                activeTab === 'manual'
-                  ? 'var(--vscode-foreground)'
-                  : 'var(--vscode-descriptionForeground)',
-              border: 'none',
-              borderBottom:
-                activeTab === 'manual'
-                  ? '2px solid var(--vscode-focusBorder)'
-                  : '2px solid transparent',
-              cursor: loading || isOAuthLoading ? 'not-allowed' : 'pointer',
-              fontSize: '13px',
-              fontWeight: activeTab === 'manual' ? 600 : 400,
-              opacity: loading || isOAuthLoading ? 0.5 : 1,
-            }}
-          >
-            {t('slack.connect.tab.manual')}
-          </button>
-        </div>
-
-        {/* OAuth Tab Content */}
-        {activeTab === 'oauth' && (
-          <div>
-            {/* Review Notice */}
-            <div
+            {/* Title */}
+            <Dialog.Title
               style={{
-                marginBottom: '12px',
-                padding: '12px',
-                backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
-                border: '1px solid var(--vscode-panel-border)',
-                borderRadius: '4px',
-                fontSize: '11px',
-                color: 'var(--vscode-descriptionForeground)',
-                lineHeight: '1.6',
-                whiteSpace: 'pre-line',
-              }}
-            >
-              {t('slack.oauth.reviewNotice.message')}
-            </div>
-
-            {/* Description */}
-            <div
-              style={{
-                fontSize: '13px',
-                color: 'var(--vscode-descriptionForeground)',
-                marginBottom: '12px',
-                whiteSpace: 'pre-line',
-              }}
-            >
-              {t('slack.oauth.description')}
-            </div>
-
-            {/* Links */}
-            <ul
-              style={{
-                listStyle: 'disc',
-                paddingLeft: '20px',
+                fontSize: '16px',
+                fontWeight: 600,
+                color: 'var(--vscode-foreground)',
                 marginBottom: '16px',
-                fontSize: '12px',
               }}
             >
-              <li>
-                <button
-                  type="button"
-                  onClick={() => openExternalUrl('https://cc-wf-studio.com/terms')}
-                  style={{
-                    fontSize: '12px',
-                    color: 'var(--vscode-textLink-foreground)',
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.textDecoration = 'underline';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.textDecoration = 'none';
-                  }}
-                >
-                  {t('slack.oauth.termsOfService')}
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => openExternalUrl('https://cc-wf-studio.com/privacy')}
-                  style={{
-                    fontSize: '12px',
-                    color: 'var(--vscode-textLink-foreground)',
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.textDecoration = 'underline';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.textDecoration = 'none';
-                  }}
-                >
-                  {t('slack.oauth.privacyPolicy')}
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() =>
-                    openExternalUrl(
-                      'https://github.com/breaking-brake/cc-wf-studio/issues/new/choose'
-                    )
-                  }
-                  style={{
-                    fontSize: '12px',
-                    color: 'var(--vscode-textLink-foreground)',
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.textDecoration = 'underline';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.textDecoration = 'none';
-                  }}
-                >
-                  {t('slack.oauth.supportPage')}
-                </button>
-              </li>
-            </ul>
+              {t('slack.connect.title')}
+            </Dialog.Title>
 
-            {/* OAuth Status Display */}
-            {isOAuthLoading && (
-              <div
-                style={{
-                  padding: '16px',
-                  backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
-                  border: '1px solid var(--vscode-panel-border)',
-                  borderRadius: '4px',
-                  marginBottom: '16px',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    fontSize: '14px',
-                    color: 'var(--vscode-foreground)',
-                    marginBottom: '8px',
-                  }}
-                >
-                  {/* Spinner */}
-                  <div
-                    style={{
-                      width: '16px',
-                      height: '16px',
-                      border: '2px solid var(--vscode-progressBar-background)',
-                      borderTopColor: 'transparent',
-                      borderRadius: '50%',
-                      animation: 'oauth-spinner 1s linear infinite',
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span>
-                    {oauthStatus === 'initiated'
-                      ? t('slack.oauth.status.initiated')
-                      : t('slack.oauth.status.polling')}
-                  </span>
-                </div>
-                <div
-                  style={{
-                    fontSize: '12px',
-                    color: 'var(--vscode-descriptionForeground)',
-                    textAlign: 'center',
-                  }}
-                >
-                  {t('slack.oauth.status.waitingHint')}
-                </div>
-                <style>
-                  {`
-                    @keyframes oauth-spinner {
-                      0% { transform: rotate(0deg); }
-                      100% { transform: rotate(360deg); }
-                    }
-                  `}
-                </style>
-              </div>
-            )}
+            {/* Hidden description for accessibility */}
+            <Dialog.Description style={{ display: 'none' }}>
+              {t('slack.connect.title')}
+            </Dialog.Description>
 
-            {/* OAuth Error */}
-            {oauthError && (
-              <div
-                style={{
-                  padding: '8px 12px',
-                  backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
-                  border: '1px solid var(--vscode-inputValidation-errorBorder)',
-                  borderRadius: '2px',
-                  marginBottom: '16px',
-                  fontSize: '12px',
-                  color: 'var(--vscode-errorForeground)',
-                }}
-              >
-                {oauthError}
-              </div>
-            )}
-
-            {/* OAuth Buttons */}
+            {/* Tab Buttons */}
             <div
               style={{
                 display: 'flex',
-                gap: '8px',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                gap: '4px',
+                marginBottom: '16px',
+                borderBottom: '1px solid var(--vscode-panel-border)',
               }}
             >
-              {/* Delete Token Button (left side) */}
-              {hasStoredToken && !isOAuthLoading && (
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  disabled={loading}
+              <button
+                type="button"
+                onClick={() => setActiveTab('oauth')}
+                disabled={loading || isOAuthLoading}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: 'transparent',
+                  color:
+                    activeTab === 'oauth'
+                      ? 'var(--vscode-foreground)'
+                      : 'var(--vscode-descriptionForeground)',
+                  border: 'none',
+                  borderBottom:
+                    activeTab === 'oauth'
+                      ? '2px solid var(--vscode-focusBorder)'
+                      : '2px solid transparent',
+                  cursor: loading || isOAuthLoading ? 'not-allowed' : 'pointer',
+                  fontSize: '13px',
+                  fontWeight: activeTab === 'oauth' ? 600 : 400,
+                  opacity: loading || isOAuthLoading ? 0.5 : 1,
+                }}
+              >
+                {t('slack.connect.tab.oauth')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('manual')}
+                disabled={loading || isOAuthLoading}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: 'transparent',
+                  color:
+                    activeTab === 'manual'
+                      ? 'var(--vscode-foreground)'
+                      : 'var(--vscode-descriptionForeground)',
+                  border: 'none',
+                  borderBottom:
+                    activeTab === 'manual'
+                      ? '2px solid var(--vscode-focusBorder)'
+                      : '2px solid transparent',
+                  cursor: loading || isOAuthLoading ? 'not-allowed' : 'pointer',
+                  fontSize: '13px',
+                  fontWeight: activeTab === 'manual' ? 600 : 400,
+                  opacity: loading || isOAuthLoading ? 0.5 : 1,
+                }}
+              >
+                {t('slack.connect.tab.manual')}
+              </button>
+            </div>
+
+            {/* OAuth Tab Content */}
+            {activeTab === 'oauth' && (
+              <div>
+                {/* Review Notice */}
+                <div
                   style={{
-                    padding: '6px 12px',
-                    backgroundColor: 'transparent',
-                    color: 'var(--vscode-errorForeground)',
-                    border: '1px solid var(--vscode-errorForeground)',
-                    borderRadius: '2px',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    fontSize: '12px',
-                    opacity: loading ? 0.5 : 1,
+                    marginBottom: '12px',
+                    padding: '12px',
+                    backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
+                    border: '1px solid var(--vscode-panel-border)',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    color: 'var(--vscode-descriptionForeground)',
+                    lineHeight: '1.6',
+                    whiteSpace: 'pre-line',
                   }}
                 >
-                  {t('slack.manualToken.deleteButton')}
-                </button>
-              )}
+                  {t('slack.oauth.reviewNotice.message')}
+                </div>
 
-              {/* Right side buttons */}
-              <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
-                {isOAuthLoading ? (
-                  <button
-                    type="button"
-                    onClick={handleCancelOAuth}
+                {/* Description */}
+                <div
+                  style={{
+                    fontSize: '13px',
+                    color: 'var(--vscode-descriptionForeground)',
+                    marginBottom: '12px',
+                    whiteSpace: 'pre-line',
+                  }}
+                >
+                  {t('slack.oauth.description')}
+                </div>
+
+                {/* Links */}
+                <ul
+                  style={{
+                    listStyle: 'disc',
+                    paddingLeft: '20px',
+                    marginBottom: '16px',
+                    fontSize: '12px',
+                  }}
+                >
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => openExternalUrl('https://cc-wf-studio.com/terms')}
+                      style={{
+                        fontSize: '12px',
+                        color: 'var(--vscode-textLink-foreground)',
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.textDecoration = 'underline';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.textDecoration = 'none';
+                      }}
+                    >
+                      {t('slack.oauth.termsOfService')}
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => openExternalUrl('https://cc-wf-studio.com/privacy')}
+                      style={{
+                        fontSize: '12px',
+                        color: 'var(--vscode-textLink-foreground)',
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.textDecoration = 'underline';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.textDecoration = 'none';
+                      }}
+                    >
+                      {t('slack.oauth.privacyPolicy')}
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openExternalUrl(
+                          'https://github.com/breaking-brake/cc-wf-studio/issues/new/choose'
+                        )
+                      }
+                      style={{
+                        fontSize: '12px',
+                        color: 'var(--vscode-textLink-foreground)',
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.textDecoration = 'underline';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.textDecoration = 'none';
+                      }}
+                    >
+                      {t('slack.oauth.supportPage')}
+                    </button>
+                  </li>
+                </ul>
+
+                {/* OAuth Status Display */}
+                {isOAuthLoading && (
+                  <div
                     style={{
-                      padding: '6px 16px',
-                      backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                      color: 'var(--vscode-button-secondaryForeground)',
-                      border: 'none',
-                      borderRadius: '2px',
-                      cursor: 'pointer',
-                      fontSize: '13px',
+                      padding: '16px',
+                      backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
+                      border: '1px solid var(--vscode-panel-border)',
+                      borderRadius: '4px',
+                      marginBottom: '16px',
                     }}
                   >
-                    {t('cancel')}
-                  </button>
-                ) : (
-                  <>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        fontSize: '14px',
+                        color: 'var(--vscode-foreground)',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      {/* Spinner */}
+                      <div
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          border: '2px solid var(--vscode-progressBar-background)',
+                          borderTopColor: 'transparent',
+                          borderRadius: '50%',
+                          animation: 'oauth-spinner 1s linear infinite',
+                          flexShrink: 0,
+                        }}
+                      />
+                      <span>
+                        {oauthStatus === 'initiated'
+                          ? t('slack.oauth.status.initiated')
+                          : t('slack.oauth.status.polling')}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '12px',
+                        color: 'var(--vscode-descriptionForeground)',
+                        textAlign: 'center',
+                      }}
+                    >
+                      {t('slack.oauth.status.waitingHint')}
+                    </div>
+                    <style>
+                      {`
+                        @keyframes oauth-spinner {
+                          0% { transform: rotate(0deg); }
+                          100% { transform: rotate(360deg); }
+                        }
+                      `}
+                    </style>
+                  </div>
+                )}
+
+                {/* OAuth Error */}
+                {oauthError && (
+                  <div
+                    style={{
+                      padding: '8px 12px',
+                      backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
+                      border: '1px solid var(--vscode-inputValidation-errorBorder)',
+                      borderRadius: '2px',
+                      marginBottom: '16px',
+                      fontSize: '12px',
+                      color: 'var(--vscode-errorForeground)',
+                    }}
+                  >
+                    {oauthError}
+                  </div>
+                )}
+
+                {/* OAuth Buttons */}
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '8px',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  {/* Delete Token Button (left side) */}
+                  {hasStoredToken && !isOAuthLoading && (
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteConfirm(true)}
+                      disabled={loading}
+                      style={{
+                        padding: '6px 12px',
+                        backgroundColor: 'transparent',
+                        color: 'var(--vscode-errorForeground)',
+                        border: '1px solid var(--vscode-errorForeground)',
+                        borderRadius: '2px',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        fontSize: '12px',
+                        opacity: loading ? 0.5 : 1,
+                      }}
+                    >
+                      {t('slack.manualToken.deleteButton')}
+                    </button>
+                  )}
+
+                  {/* Right side buttons */}
+                  <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+                    {isOAuthLoading ? (
+                      <button
+                        type="button"
+                        onClick={handleCancelOAuth}
+                        style={{
+                          padding: '6px 16px',
+                          backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                          color: 'var(--vscode-button-secondaryForeground)',
+                          border: 'none',
+                          borderRadius: '2px',
+                          cursor: 'pointer',
+                          fontSize: '13px',
+                        }}
+                      >
+                        {t('cancel')}
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={onClose}
+                          style={{
+                            padding: '6px 16px',
+                            backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                            color: 'var(--vscode-button-secondaryForeground)',
+                            border: 'none',
+                            borderRadius: '2px',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                          }}
+                        >
+                          {t('cancel')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleOAuthConnect}
+                          style={{
+                            padding: '6px 16px',
+                            backgroundColor: 'var(--vscode-button-background)',
+                            color: 'var(--vscode-button-foreground)',
+                            border: 'none',
+                            borderRadius: '2px',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                          }}
+                        >
+                          {t('slack.oauth.connectButton')}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Manual Token Tab Content */}
+            {activeTab === 'manual' && (
+              <div>
+                {/* Description */}
+                <div
+                  style={{
+                    fontSize: '13px',
+                    color: 'var(--vscode-descriptionForeground)',
+                    marginBottom: '16px',
+                  }}
+                >
+                  {t('slack.manualToken.description')}
+                </div>
+
+                {/* How to Get User Token Box */}
+                <div
+                  style={{
+                    marginBottom: '12px',
+                    padding: '12px',
+                    backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
+                    border: '1px solid var(--vscode-panel-border)',
+                    borderRadius: '4px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: 'var(--vscode-foreground)',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    {t('slack.manualToken.howToGet.title')}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '11px',
+                      color: 'var(--vscode-descriptionForeground)',
+                      lineHeight: '1.6',
+                    }}
+                  >
+                    <div>1. {t('slack.manualToken.howToGet.step1')}</div>
+                    <div>
+                      2. {t('slack.manualToken.howToGet.step2')}
+                      <ul style={{ margin: '4px 0 4px 20px', paddingLeft: '0', listStyle: 'disc' }}>
+                        <li>chat:write ({t('slack.scopes.chatWrite.reason')})</li>
+                        <li>files:read ({t('slack.scopes.filesRead.reason')})</li>
+                        <li>files:write ({t('slack.scopes.filesWrite.reason')})</li>
+                        <li>channels:read ({t('slack.scopes.channelsRead.reason')})</li>
+                        <li>groups:read ({t('slack.scopes.groupsRead.reason')})</li>
+                      </ul>
+                    </div>
+                    <div>3. {t('slack.manualToken.howToGet.step3')}</div>
+                    <div>4. {t('slack.manualToken.howToGet.step4')}</div>
+                  </div>
+                </div>
+
+                {/* Links */}
+                <ul
+                  style={{
+                    listStyle: 'disc',
+                    paddingLeft: '20px',
+                    marginBottom: '16px',
+                    fontSize: '12px',
+                  }}
+                >
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => openExternalUrl('https://cc-wf-studio.com/terms')}
+                      style={{
+                        fontSize: '12px',
+                        color: 'var(--vscode-textLink-foreground)',
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.textDecoration = 'underline';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.textDecoration = 'none';
+                      }}
+                    >
+                      {t('slack.oauth.termsOfService')}
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => openExternalUrl('https://cc-wf-studio.com/privacy')}
+                      style={{
+                        fontSize: '12px',
+                        color: 'var(--vscode-textLink-foreground)',
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.textDecoration = 'underline';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.textDecoration = 'none';
+                      }}
+                    >
+                      {t('slack.oauth.privacyPolicy')}
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openExternalUrl(
+                          'https://github.com/breaking-brake/cc-wf-studio/issues/new/choose'
+                        )
+                      }
+                      style={{
+                        fontSize: '12px',
+                        color: 'var(--vscode-textLink-foreground)',
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.textDecoration = 'underline';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.textDecoration = 'none';
+                      }}
+                    >
+                      {t('slack.oauth.supportPage')}
+                    </button>
+                  </li>
+                </ul>
+
+                {/* User Token Input */}
+                <div style={{ marginBottom: '16px' }}>
+                  <label
+                    htmlFor="user-token"
+                    style={{
+                      display: 'block',
+                      fontSize: '13px',
+                      color: 'var(--vscode-foreground)',
+                      marginBottom: '8px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {t('slack.manualToken.userToken.label')}
+                  </label>
+                  <input
+                    id="user-token"
+                    type="password"
+                    value={userToken}
+                    onChange={(e) => setUserToken(e.target.value)}
+                    placeholder="xoxp-..."
+                    disabled={loading}
+                    style={{
+                      width: '100%',
+                      padding: '6px 8px',
+                      backgroundColor: 'var(--vscode-input-background)',
+                      color: 'var(--vscode-input-foreground)',
+                      border: '1px solid var(--vscode-input-border)',
+                      borderRadius: '2px',
+                      fontSize: '13px',
+                      fontFamily: 'monospace',
+                    }}
+                  />
+                </div>
+
+                {/* Error Message */}
+                {error && (
+                  <div
+                    style={{
+                      padding: '8px 12px',
+                      backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
+                      border: '1px solid var(--vscode-inputValidation-errorBorder)',
+                      borderRadius: '2px',
+                      marginBottom: '16px',
+                      fontSize: '12px',
+                      color: 'var(--vscode-errorForeground)',
+                    }}
+                  >
+                    {error}
+                  </div>
+                )}
+
+                {/* Buttons */}
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '8px',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  {/* Delete Token Button (left side) */}
+                  {hasStoredToken && (
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteConfirm(true)}
+                      disabled={loading}
+                      style={{
+                        padding: '6px 12px',
+                        backgroundColor: 'transparent',
+                        color: 'var(--vscode-errorForeground)',
+                        border: '1px solid var(--vscode-errorForeground)',
+                        borderRadius: '2px',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        fontSize: '12px',
+                        opacity: loading ? 0.5 : 1,
+                      }}
+                    >
+                      {t('slack.manualToken.deleteButton')}
+                    </button>
+                  )}
+
+                  {/* Right side buttons */}
+                  <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
                     <button
                       type="button"
                       onClick={onClose}
+                      disabled={loading}
                       style={{
                         padding: '6px 16px',
                         backgroundColor: 'var(--vscode-button-secondaryBackground)',
                         color: 'var(--vscode-button-secondaryForeground)',
                         border: 'none',
                         borderRadius: '2px',
-                        cursor: 'pointer',
+                        cursor: loading ? 'not-allowed' : 'pointer',
                         fontSize: '13px',
+                        opacity: loading ? 0.5 : 1,
                       }}
                     >
                       {t('cancel')}
                     </button>
                     <button
                       type="button"
-                      onClick={handleOAuthConnect}
+                      onClick={handleConnect}
+                      disabled={loading || !userToken.trim()}
                       style={{
                         padding: '6px 16px',
                         backgroundColor: 'var(--vscode-button-background)',
                         color: 'var(--vscode-button-foreground)',
                         border: 'none',
                         borderRadius: '2px',
-                        cursor: 'pointer',
+                        cursor: loading || !userToken.trim() ? 'not-allowed' : 'pointer',
                         fontSize: '13px',
                         fontWeight: 500,
+                        opacity: loading || !userToken.trim() ? 0.5 : 1,
                       }}
                     >
-                      {t('slack.oauth.connectButton')}
+                      {loading ? t('slack.manualToken.connecting') : t('slack.manualToken.connect')}
                     </button>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Manual Token Tab Content */}
-        {activeTab === 'manual' && (
-          <div>
-            {/* Description */}
-            <div
-              style={{
-                fontSize: '13px',
-                color: 'var(--vscode-descriptionForeground)',
-                marginBottom: '16px',
-              }}
-            >
-              {t('slack.manualToken.description')}
-            </div>
-
-            {/* How to Get User Token Box */}
-            <div
-              style={{
-                marginBottom: '12px',
-                padding: '12px',
-                backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
-                border: '1px solid var(--vscode-panel-border)',
-                borderRadius: '4px',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: 'var(--vscode-foreground)',
-                  marginBottom: '8px',
-                }}
-              >
-                {t('slack.manualToken.howToGet.title')}
-              </div>
-              <div
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--vscode-descriptionForeground)',
-                  lineHeight: '1.6',
-                }}
-              >
-                <div>1. {t('slack.manualToken.howToGet.step1')}</div>
-                <div>
-                  2. {t('slack.manualToken.howToGet.step2')}
-                  <ul style={{ margin: '4px 0 4px 20px', paddingLeft: '0', listStyle: 'disc' }}>
-                    <li>chat:write ({t('slack.scopes.chatWrite.reason')})</li>
-                    <li>files:read ({t('slack.scopes.filesRead.reason')})</li>
-                    <li>files:write ({t('slack.scopes.filesWrite.reason')})</li>
-                    <li>channels:read ({t('slack.scopes.channelsRead.reason')})</li>
-                    <li>groups:read ({t('slack.scopes.groupsRead.reason')})</li>
-                  </ul>
+                  </div>
                 </div>
-                <div>3. {t('slack.manualToken.howToGet.step3')}</div>
-                <div>4. {t('slack.manualToken.howToGet.step4')}</div>
-              </div>
-            </div>
-
-            {/* Links */}
-            <ul
-              style={{
-                listStyle: 'disc',
-                paddingLeft: '20px',
-                marginBottom: '16px',
-                fontSize: '12px',
-              }}
-            >
-              <li>
-                <button
-                  type="button"
-                  onClick={() => openExternalUrl('https://cc-wf-studio.com/terms')}
-                  style={{
-                    fontSize: '12px',
-                    color: 'var(--vscode-textLink-foreground)',
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.textDecoration = 'underline';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.textDecoration = 'none';
-                  }}
-                >
-                  {t('slack.oauth.termsOfService')}
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => openExternalUrl('https://cc-wf-studio.com/privacy')}
-                  style={{
-                    fontSize: '12px',
-                    color: 'var(--vscode-textLink-foreground)',
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.textDecoration = 'underline';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.textDecoration = 'none';
-                  }}
-                >
-                  {t('slack.oauth.privacyPolicy')}
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() =>
-                    openExternalUrl(
-                      'https://github.com/breaking-brake/cc-wf-studio/issues/new/choose'
-                    )
-                  }
-                  style={{
-                    fontSize: '12px',
-                    color: 'var(--vscode-textLink-foreground)',
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.textDecoration = 'underline';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.textDecoration = 'none';
-                  }}
-                >
-                  {t('slack.oauth.supportPage')}
-                </button>
-              </li>
-            </ul>
-
-            {/* User Token Input */}
-            <div style={{ marginBottom: '16px' }}>
-              <label
-                htmlFor="user-token"
-                style={{
-                  display: 'block',
-                  fontSize: '13px',
-                  color: 'var(--vscode-foreground)',
-                  marginBottom: '8px',
-                  fontWeight: 500,
-                }}
-              >
-                {t('slack.manualToken.userToken.label')}
-              </label>
-              <input
-                id="user-token"
-                type="password"
-                value={userToken}
-                onChange={(e) => setUserToken(e.target.value)}
-                placeholder="xoxp-..."
-                disabled={loading}
-                style={{
-                  width: '100%',
-                  padding: '6px 8px',
-                  backgroundColor: 'var(--vscode-input-background)',
-                  color: 'var(--vscode-input-foreground)',
-                  border: '1px solid var(--vscode-input-border)',
-                  borderRadius: '2px',
-                  fontSize: '13px',
-                  fontFamily: 'monospace',
-                }}
-              />
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div
-                style={{
-                  padding: '8px 12px',
-                  backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
-                  border: '1px solid var(--vscode-inputValidation-errorBorder)',
-                  borderRadius: '2px',
-                  marginBottom: '16px',
-                  fontSize: '12px',
-                  color: 'var(--vscode-errorForeground)',
-                }}
-              >
-                {error}
               </div>
             )}
+          </Dialog.Content>
+        </Dialog.Overlay>
+      </Dialog.Portal>
 
-            {/* Buttons */}
-            <div
-              style={{
-                display: 'flex',
-                gap: '8px',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              {/* Delete Token Button (left side) */}
-              {hasStoredToken && (
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  disabled={loading}
-                  style={{
-                    padding: '6px 12px',
-                    backgroundColor: 'transparent',
-                    color: 'var(--vscode-errorForeground)',
-                    border: '1px solid var(--vscode-errorForeground)',
-                    borderRadius: '2px',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    fontSize: '12px',
-                    opacity: loading ? 0.5 : 1,
-                  }}
-                >
-                  {t('slack.manualToken.deleteButton')}
-                </button>
-              )}
-
-              {/* Right side buttons */}
-              <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  disabled={loading}
-                  style={{
-                    padding: '6px 16px',
-                    backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                    color: 'var(--vscode-button-secondaryForeground)',
-                    border: 'none',
-                    borderRadius: '2px',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    fontSize: '13px',
-                    opacity: loading ? 0.5 : 1,
-                  }}
-                >
-                  {t('cancel')}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleConnect}
-                  disabled={loading || !userToken.trim()}
-                  style={{
-                    padding: '6px 16px',
-                    backgroundColor: 'var(--vscode-button-background)',
-                    color: 'var(--vscode-button-foreground)',
-                    border: 'none',
-                    borderRadius: '2px',
-                    cursor: loading || !userToken.trim() ? 'not-allowed' : 'pointer',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    opacity: loading || !userToken.trim() ? 0.5 : 1,
-                  }}
-                >
-                  {loading ? t('slack.manualToken.connecting') : t('slack.manualToken.connect')}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Delete Confirmation Dialog */}
-        {showDeleteConfirm && (
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.6)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 10000,
-            }}
-            onClick={() => setShowDeleteConfirm(false)}
-            role="presentation"
-          >
-            {/* biome-ignore lint/a11y/useKeyWithClickEvents: onClick is only used to stop event propagation */}
-            <div
-              style={{
-                backgroundColor: 'var(--vscode-editor-background)',
-                border: '1px solid var(--vscode-panel-border)',
-                borderRadius: '4px',
-                padding: '20px',
-                minWidth: '400px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div
-                style={{
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: 'var(--vscode-foreground)',
-                  marginBottom: '12px',
-                }}
-              >
-                {t('slack.manualToken.deleteConfirm.title')}
-              </div>
-              <div
-                style={{
-                  fontSize: '13px',
-                  color: 'var(--vscode-descriptionForeground)',
-                  marginBottom: '16px',
-                }}
-              >
-                {t('slack.manualToken.deleteConfirm.message')}
-              </div>
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteConfirm(false)}
-                  style={{
-                    padding: '6px 16px',
-                    backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                    color: 'var(--vscode-button-secondaryForeground)',
-                    border: 'none',
-                    borderRadius: '2px',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                  }}
-                >
-                  {t('slack.manualToken.deleteConfirm.cancel')}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDeleteToken}
-                  style={{
-                    padding: '6px 16px',
-                    backgroundColor: 'var(--vscode-errorForeground)',
-                    color: 'var(--vscode-editor-background)',
-                    border: 'none',
-                    borderRadius: '2px',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                  }}
-                >
-                  {t('slack.manualToken.deleteConfirm.confirm')}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+      {/* Delete Confirmation Dialog - using ConfirmDialog component with z-index 10001 */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title={t('slack.manualToken.deleteConfirm.title')}
+        message={t('slack.manualToken.deleteConfirm.message')}
+        confirmLabel={t('slack.manualToken.deleteConfirm.confirm')}
+        cancelLabel={t('slack.manualToken.deleteConfirm.cancel')}
+        onConfirm={handleDeleteToken}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
+    </Dialog.Root>
   );
 }
