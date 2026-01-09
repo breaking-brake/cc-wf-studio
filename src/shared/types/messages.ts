@@ -308,6 +308,8 @@ export interface RefinementSuccessPayload {
   executionTimeMs: number;
   /** Response timestamp */
   timestamp: string; // ISO 8601
+  /** Whether session was reconnected due to session expiration (fallback occurred) */
+  sessionReconnected?: boolean;
 }
 
 export interface RefinementFailedPayload {
@@ -366,6 +368,8 @@ export interface RefinementClarificationPayload {
   executionTimeMs: number;
   /** Response timestamp */
   timestamp: string; // ISO 8601
+  /** Whether session was reconnected due to session expiration (fallback occurred) */
+  sessionReconnected?: boolean;
 }
 
 export interface RefinementProgressPayload {
@@ -401,6 +405,8 @@ export interface SubAgentFlowRefinementSuccessPayload {
   executionTimeMs: number;
   /** Response timestamp */
   timestamp: string; // ISO 8601
+  /** Whether session was reconnected due to session expiration (fallback occurred) */
+  sessionReconnected?: boolean;
 }
 
 // ============================================================================

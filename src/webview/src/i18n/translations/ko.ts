@@ -458,6 +458,12 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Refinement Success Messages
   'refinement.success.defaultMessage': '워크플로를 편집했습니다.',
 
+  // Refinement Session Status
+  'refinement.session.warningDialog.title': 'AI 편집 세션이 재연결되었습니다',
+  'refinement.session.warningDialog.message':
+    '다른 사용자가 공유한 워크플로우를 불러오거나 세션 만료 등의 이유로 AI 대화 세션을 계속할 수 없어 새 대화 세션을 시작했습니다.\n\n이전 대화 세션에서 AI가 기억하고 있던 추가 컨텍스트(파일 내용, 도구 실행 결과 등)는 손실되었을 수 있습니다.\n\n필요한 경우 관련 정보를 메시지로 다시 전달해 주세요.',
+  'refinement.session.warningDialog.ok': 'OK',
+
   // Refinement Errors
   'refinement.error.emptyMessage': '메시지를 입력하세요',
   'refinement.error.messageTooLong': '메시지가 너무 깁니다 (최대 {max}자)',

@@ -416,6 +416,11 @@ export interface WebviewTranslationKeys {
   // Refinement Success Messages
   'refinement.success.defaultMessage': string;
 
+  // Refinement Session Status
+  'refinement.session.warningDialog.title': string;
+  'refinement.session.warningDialog.message': string;
+  'refinement.session.warningDialog.ok': string;
+
   // Refinement Errors
   'refinement.error.emptyMessage': string;
   'refinement.error.messageTooLong': string;

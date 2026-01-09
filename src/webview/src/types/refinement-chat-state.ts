@@ -6,6 +6,7 @@
  */
 
 import type { ConversationHistory, ConversationMessage } from '@shared/types/workflow-definition';
+import type { SessionStatus } from '../stores/refinement-store';
 
 /** Error codes for refinement failures */
 export type RefinementErrorCode =
@@ -26,6 +27,7 @@ export interface RefinementChatState {
   // State
   conversationHistory: ConversationHistory | null;
   isProcessing: boolean;
+  sessionStatus: SessionStatus;
   currentInput: string;
   currentRequestId: string | null;
 
@@ -45,7 +47,7 @@ export interface RefinementChatState {
   removeMessage: (messageId: string) => void;
   clearHistory: () => void;
   startProcessing: (requestId: string) => void;
-  finishProcessing: (sessionId?: string) => void;
+  finishProcessing: (sessionId?: string, sessionReconnected?: boolean) => void;
   handleRefinementSuccess: (
     aiMessage: ConversationMessage,
     updatedHistory: ConversationHistory

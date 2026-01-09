@@ -442,6 +442,12 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // Refinement Success Messages
   'refinement.success.defaultMessage': '已编辑工作流。',
 
+  // Refinement Session Status
+  'refinement.session.warningDialog.title': 'AI编辑会话已重新连接',
+  'refinement.session.warningDialog.message':
+    '由于加载他人共享的工作流或会话过期等原因，无法继续AI对话会话，已开始新的对话会话。\n\n之前对话会话中AI记住的额外上下文（文件内容、工具执行结果等）可能已丢失。\n\n如有需要，请在消息中重新分享相关信息。',
+  'refinement.session.warningDialog.ok': 'OK',
+
   // Refinement Errors
   'refinement.error.emptyMessage': '请输入消息',
   'refinement.error.messageTooLong': '消息太长（最多{max}个字符）',

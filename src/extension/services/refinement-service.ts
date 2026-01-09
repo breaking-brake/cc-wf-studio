@@ -55,6 +55,8 @@ export interface RefinementResult {
   executionTimeMs: number;
   /** New session ID from CLI (for session continuation) */
   newSessionId?: string;
+  /** Whether session was reconnected due to session expiration (fallback occurred) */
+  sessionReconnected?: boolean;
 }
 
 /**
@@ -386,6 +388,9 @@ export async function refineWorkflow(
           allowedTools
         );
 
+    // Track whether session was reconnected due to fallback
+    let sessionReconnected = false;
+
     // Fallback: Retry without session ID if session resume failed
     if (!cliResult.success && conversationHistory.sessionId) {
       const errorDetails = cliResult.error?.details?.toLowerCase() || '';
@@ -395,6 +400,8 @@ export async function refineWorkflow(
         'session expired',
         'invalid session',
         'no such session',
+        'no conversation found with session id',
+        'not a valid uuid',
       ].some((pattern) => errorDetails.includes(pattern) || errorMessage.includes(pattern));
 
       if (isSessionError) {
@@ -404,6 +411,9 @@ export async function refineWorkflow(
           errorCode: cliResult.error?.code,
           errorMessage: cliResult.error?.message,
         });
+
+        // Mark that session reconnection occurred
+        sessionReconnected = true;
 
         // Retry without session ID
         cliResult = onProgress
@@ -426,6 +436,22 @@ export async function refineWorkflow(
               allowedTools
             );
       }
+    }
+
+    // Detect silent session switch (CLI started new session without returning error)
+    // This happens when CLI-side session was cleared (e.g., via /clear command)
+    if (
+      cliResult.success &&
+      conversationHistory.sessionId &&
+      cliResult.sessionId &&
+      cliResult.sessionId !== conversationHistory.sessionId
+    ) {
+      log('WARN', 'Session was silently replaced by CLI', {
+        requestId,
+        previousSessionId: conversationHistory.sessionId,
+        newSessionId: cliResult.sessionId,
+      });
+      sessionReconnected = true;
     }
 
     if (!cliResult.success || !cliResult.output) {
@@ -460,6 +486,7 @@ export async function refineWorkflow(
         },
         executionTimeMs: cliResult.executionTimeMs,
         newSessionId: cliResult.sessionId,
+        sessionReconnected,
       };
     }
 
@@ -489,6 +516,7 @@ export async function refineWorkflow(
         },
         executionTimeMs: cliResult.executionTimeMs,
         newSessionId: cliResult.sessionId,
+        sessionReconnected,
       };
     }
 
@@ -505,6 +533,7 @@ export async function refineWorkflow(
         clarificationMessage: aiResponse.message || 'Please provide more details',
         executionTimeMs: cliResult.executionTimeMs,
         newSessionId: cliResult.sessionId,
+        sessionReconnected,
       };
     }
 
@@ -524,6 +553,7 @@ export async function refineWorkflow(
         },
         executionTimeMs: cliResult.executionTimeMs,
         newSessionId: cliResult.sessionId,
+        sessionReconnected,
       };
     }
 
@@ -544,6 +574,7 @@ export async function refineWorkflow(
         },
         executionTimeMs: cliResult.executionTimeMs,
         newSessionId: cliResult.sessionId,
+        sessionReconnected,
       };
     }
 
@@ -577,6 +608,7 @@ export async function refineWorkflow(
         },
         executionTimeMs: cliResult.executionTimeMs,
         newSessionId: cliResult.sessionId,
+        sessionReconnected,
       };
     }
 
@@ -625,6 +657,7 @@ export async function refineWorkflow(
         })),
         executionTimeMs: cliResult.executionTimeMs,
         newSessionId: cliResult.sessionId,
+        sessionReconnected,
       };
     }
 
@@ -660,6 +693,7 @@ export async function refineWorkflow(
       aiMessage: aiResponse.message,
       executionTimeMs,
       newSessionId: cliResult.sessionId,
+      sessionReconnected,
     };
   } catch (error) {
     const executionTimeMs = Date.now() - startTime;
@@ -876,6 +910,10 @@ export interface SubAgentFlowRefinementResult {
     details?: string;
   };
   executionTimeMs: number;
+  /** New session ID from CLI (for session continuation) */
+  newSessionId?: string;
+  /** Whether session was reconnected due to session expiration (fallback occurred) */
+  sessionReconnected?: boolean;
 }
 
 /**
@@ -1268,6 +1306,8 @@ export async function refineSubAgentFlow(
         success: true,
         clarificationMessage: aiResponse.message || 'Please provide more details',
         executionTimeMs: cliResult.executionTimeMs,
+        newSessionId: cliResult.sessionId,
+        sessionReconnected: false,
       };
     }
 
@@ -1409,6 +1449,8 @@ export async function refineSubAgentFlow(
       refinedInnerWorkflow,
       aiMessage: aiResponse.message,
       executionTimeMs,
+      newSessionId: cliResult.sessionId,
+      sessionReconnected: false, // SubAgentFlow doesn't have session continuation yet
     };
   } catch (error) {
     const executionTimeMs = Date.now() - startTime;

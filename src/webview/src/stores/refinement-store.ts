@@ -103,6 +103,18 @@ function saveAllowedToolsToStorage(tools: string[]): void {
 }
 
 // ============================================================================
+// Session Status Type
+// ============================================================================
+
+/**
+ * Session status for display in UI
+ * - 'none': No session (new conversation, no prior context)
+ * - 'connected': sessionId exists and is valid (session continuing)
+ * - 'reconnected': Session fallback occurred (previous session expired)
+ */
+export type SessionStatus = 'none' | 'connected' | 'reconnected';
+
+// ============================================================================
 // Store State Interface
 // ============================================================================
 
@@ -117,6 +129,9 @@ interface RefinementStore {
   timeoutSeconds: number;
   selectedModel: ClaudeModel;
   allowedTools: string[];
+
+  // Session Status
+  sessionStatus: SessionStatus;
 
   // SubAgentFlow Refinement State
   targetType: 'workflow' | 'subAgentFlow';
@@ -150,9 +165,21 @@ interface RefinementStore {
    * Finish processing without replacing conversation history.
    * Use this when frontend has already managed messages (e.g., streaming with explanatory text).
    * Optionally accepts sessionId to persist for session continuation.
+   * @param sessionId - New session ID from CLI
+   * @param sessionReconnected - Whether session fallback occurred
    */
-  finishProcessing: (sessionId?: string) => void;
+  finishProcessing: (sessionId?: string, sessionReconnected?: boolean) => void;
   clearHistory: () => void;
+
+  // Session Status Actions
+  /**
+   * Set session status to 'reconnected' (called when session fallback occurred)
+   */
+  setSessionReconnected: () => void;
+  /**
+   * Clear session status (called when history is cleared)
+   */
+  clearSessionStatus: () => void;
 
   // Phase 3.7: Message operations for loading state
   addLoadingAiMessage: (messageId: string) => void;
@@ -181,6 +208,12 @@ interface RefinementStore {
   // Computed
   canSend: () => boolean;
   shouldShowWarning: () => boolean;
+
+  // ============================================================================
+  // DEBUG: Temporary sessionId editor for testing session reconnection
+  // TODO: Remove this before merging to main
+  // ============================================================================
+  debugSetSessionId: (sessionId: string | undefined) => void;
 }
 
 // ============================================================================
@@ -201,6 +234,9 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   timeoutSeconds: 0, // Default timeout: None (0 = use system guard)
   selectedModel: loadModelFromStorage(), // Load from localStorage, default: 'haiku'
   allowedTools: loadAllowedToolsFromStorage(), // Load from localStorage, default: DEFAULT_ALLOWED_TOOLS
+
+  // Session Status Initial State
+  sessionStatus: 'none',
 
   // SubAgentFlow Refinement Initial State
   targetType: 'workflow',
@@ -265,10 +301,13 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
 
   loadConversationHistory: (history: ConversationHistory | undefined) => {
     if (history) {
-      set({ conversationHistory: history });
+      // Set sessionStatus based on whether sessionId exists
+      const sessionStatus = history.sessionId ? 'connected' : 'none';
+      set({ conversationHistory: history, sessionStatus });
     } else {
       // Initialize new conversation if no history exists
       get().initConversation();
+      set({ sessionStatus: 'none' });
     }
   },
 
@@ -325,9 +364,13 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     set({ isProcessing: false, currentRequestId: null });
   },
 
-  finishProcessing: (sessionId?: string) => {
+  finishProcessing: (sessionId?: string, sessionReconnected?: boolean) => {
     const history = get().conversationHistory;
     if (sessionId && history) {
+      // Determine session status
+      // If sessionReconnected is true, set to 'reconnected', otherwise 'connected'
+      const newSessionStatus = sessionReconnected ? 'reconnected' : 'connected';
+
       // Update sessionId in conversationHistory for session continuation
       set({
         conversationHistory: {
@@ -337,6 +380,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
         },
         isProcessing: false,
         currentRequestId: null,
+        sessionStatus: newSessionStatus,
       });
     } else {
       set({ isProcessing: false, currentRequestId: null });
@@ -354,8 +398,18 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
           updatedAt: new Date().toISOString(),
           sessionId: undefined, // Clear session for fresh start
         },
+        sessionStatus: 'none', // Clear session status for fresh start
       });
     }
+  },
+
+  // Session Status Actions
+  setSessionReconnected: () => {
+    set({ sessionStatus: 'reconnected' });
+  },
+
+  clearSessionStatus: () => {
+    set({ sessionStatus: 'none' });
   },
 
   // Phase 3.7: Message operations
@@ -519,5 +573,24 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
 
     // Show warning when 20 or more iterations have been completed
     return conversationHistory.currentIteration >= 20;
+  },
+
+  // ============================================================================
+  // DEBUG: Temporary sessionId editor for testing session reconnection
+  // TODO: Remove this before merging to main
+  // ============================================================================
+  debugSetSessionId: (sessionId: string | undefined) => {
+    const history = get().conversationHistory;
+    if (history) {
+      console.log('[DEBUG] Setting sessionId:', { previous: history.sessionId, new: sessionId });
+      set({
+        conversationHistory: {
+          ...history,
+          sessionId: sessionId || undefined,
+          updatedAt: new Date().toISOString(),
+        },
+        sessionStatus: sessionId ? 'connected' : 'none',
+      });
+    }
   },
 }));

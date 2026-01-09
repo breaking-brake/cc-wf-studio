@@ -457,6 +457,12 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Refinement Success Messages
   'refinement.success.defaultMessage': 'ワークフローを編集しました。',
 
+  // Refinement Session Status
+  'refinement.session.warningDialog.title': 'AI編集のセッションが再接続されました',
+  'refinement.session.warningDialog.message':
+    '他者から共有されたワークフローの読み込みや、セッションの有効期限切れなどの理由で、AI会話セッションを継続できなかったため、新しい会話セッションを開始しました。\n\n前の会話セッションでAIが記憶していた追加のコンテキスト（ファイルの内容、ツール実行結果など）は失われている可能性があります。\n\n必要に応じて、関連する情報を改めてメッセージで伝えてください。',
+  'refinement.session.warningDialog.ok': 'OK',
+
   // Refinement Errors
   'refinement.error.emptyMessage': 'メッセージを入力してください',
   'refinement.error.messageTooLong': 'メッセージが長すぎます（最大{max}文字）',

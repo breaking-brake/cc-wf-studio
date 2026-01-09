@@ -458,6 +458,12 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Refinement Success Messages
   'refinement.success.defaultMessage': 'Workflow has been updated.',
 
+  // Refinement Session Status
+  'refinement.session.warningDialog.title': 'AI Editing Session Reconnected',
+  'refinement.session.warningDialog.message':
+    'The AI conversation session could not be continued due to reasons such as loading a workflow shared by others or session expiration, so a new conversation session was started.\n\nAdditional context that the AI remembered in the previous conversation session (file contents, tool execution results, etc.) may have been lost.\n\nPlease re-share any relevant information in your message if needed.',
+  'refinement.session.warningDialog.ok': 'OK',
+
   // Refinement Errors
   'refinement.error.emptyMessage': 'Please enter a message',
   'refinement.error.messageTooLong': 'Message is too long (max {max} characters)',

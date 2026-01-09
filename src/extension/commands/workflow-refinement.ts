@@ -191,6 +191,7 @@ export async function handleRefineWorkflow(
         updatedConversationHistory: updatedHistory,
         executionTimeMs: result.executionTimeMs,
         timestamp: new Date().toISOString(),
+        sessionReconnected: result.sessionReconnected,
       });
       return;
     }
@@ -261,6 +262,7 @@ export async function handleRefineWorkflow(
       updatedConversationHistory: updatedHistory,
       executionTimeMs: result.executionTimeMs,
       timestamp: new Date().toISOString(),
+      sessionReconnected: result.sessionReconnected,
     });
   } catch (error) {
     const executionTimeMs = Date.now() - startTime;
@@ -451,6 +453,7 @@ async function handleRefineSubAgentFlow(
         updatedConversationHistory: updatedHistory,
         executionTimeMs: result.executionTimeMs,
         timestamp: new Date().toISOString(),
+        sessionReconnected: result.sessionReconnected,
       });
       return;
     }
@@ -522,6 +525,7 @@ async function handleRefineSubAgentFlow(
       updatedConversationHistory: updatedHistory,
       executionTimeMs: result.executionTimeMs,
       timestamp: new Date().toISOString(),
+      sessionReconnected: result.sessionReconnected,
     });
   } catch (error) {
     const executionTimeMs = Date.now() - startTime;

@@ -33,6 +33,7 @@ import { MessageList } from '../chat/MessageList';
 import { SettingsDropdown } from '../chat/SettingsDropdown';
 import { WarningBanner } from '../chat/WarningBanner';
 import { ResizeHandle } from '../common/ResizeHandle';
+import { AlertDialog } from './AlertDialog';
 import { ConfirmDialog } from './ConfirmDialog';
 
 // Resizable panel configuration
@@ -75,6 +76,7 @@ export function RefinementChatPanel({
   const {
     conversationHistory,
     isProcessing,
+    sessionStatus,
     addUserMessage,
     addLoadingAiMessage,
     updateMessageContent,
@@ -97,6 +99,10 @@ export function RefinementChatPanel({
     useWorkflowStore();
 
   const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
+  const [isSessionWarningOpen, setIsSessionWarningOpen] = useState(false);
+
+  // Track previous sessionStatus to detect changes to 'reconnected'
+  const prevSessionStatusRef = useRef(sessionStatus);
 
   // Store validation errors by message ID for retry with error context
   const validationErrorsRef = useRef<Map<string, ValidationErrorInfo[]>>(new Map());
@@ -120,6 +126,14 @@ export function RefinementChatPanel({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose, isProcessing]);
+
+  // Show warning dialog when sessionStatus changes to 'reconnected'
+  useEffect(() => {
+    if (sessionStatus === 'reconnected' && prevSessionStatusRef.current !== 'reconnected') {
+      setIsSessionWarningOpen(true);
+    }
+    prevSessionStatusRef.current = sessionStatus;
+  }, [sessionStatus]);
 
   // Handle sending refinement request
   const handleSend = async (message: string) => {
@@ -253,8 +267,11 @@ export function RefinementChatPanel({
             updateMessageLoadingState(completionMessageId, false);
 
             // Preserve frontend messages (don't overwrite with server history)
-            // Pass sessionId for session continuation support
-            finishProcessing(result.payload.updatedConversationHistory?.sessionId);
+            // Pass sessionId and sessionReconnected for session status tracking
+            finishProcessing(
+              result.payload.updatedConversationHistory?.sessionId,
+              result.payload.sessionReconnected
+            );
           } else {
             // No streaming or no explanatory text: just show completion message
             updateMessageContent(aiMessageId, result.payload.aiMessage.content);
@@ -272,8 +289,11 @@ export function RefinementChatPanel({
 
           if (hasReceivedProgress) {
             // Streaming occurred, use finishProcessing to preserve frontend messages
-            // Pass sessionId for session continuation support
-            finishProcessing(result.payload.updatedConversationHistory?.sessionId);
+            // Pass sessionId and sessionReconnected for session status tracking
+            finishProcessing(
+              result.payload.updatedConversationHistory?.sessionId,
+              result.payload.sessionReconnected
+            );
           } else {
             // No streaming, update conversation history normally
             handleRefinementSuccess(
@@ -439,7 +459,10 @@ export function RefinementChatPanel({
 
             // Preserve frontend messages (don't overwrite with server history)
             // Pass sessionId for session continuation support
-            finishProcessing(result.payload.updatedConversationHistory?.sessionId);
+            finishProcessing(
+              result.payload.updatedConversationHistory?.sessionId,
+              result.payload.sessionReconnected
+            );
           } else {
             // No streaming or no explanatory text: just show completion message
             updateMessageContent(aiMessageId, result.payload.aiMessage.content);
@@ -457,8 +480,11 @@ export function RefinementChatPanel({
 
           if (hasReceivedProgress) {
             // Streaming occurred, use finishProcessing to preserve frontend messages
-            // Pass sessionId for session continuation support
-            finishProcessing(result.payload.updatedConversationHistory?.sessionId);
+            // Pass sessionId and sessionReconnected for session status tracking
+            finishProcessing(
+              result.payload.updatedConversationHistory?.sessionId,
+              result.payload.sessionReconnected
+            );
           } else {
             // No streaming, update conversation history normally
             handleRefinementSuccess(
@@ -584,19 +610,21 @@ export function RefinementChatPanel({
             flexShrink: 0,
           }}
         >
-          <h2
-            id="refinement-title"
-            style={{
-              margin: 0,
-              fontSize: `${fontSizes.title}px`,
-              fontWeight: 600,
-              color: 'var(--vscode-foreground)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-            }}
-          >
-            {panelTitle}
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h2
+              id="refinement-title"
+              style={{
+                margin: 0,
+                fontSize: `${fontSizes.title}px`,
+                fontWeight: 600,
+                color: 'var(--vscode-foreground)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+              }}
+            >
+              {panelTitle}
+            </h2>
+          </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <SettingsDropdown
@@ -666,6 +694,16 @@ export function RefinementChatPanel({
           cancelLabel={t('refinement.clearDialog.cancel')}
           onConfirm={handleConfirmClear}
           onCancel={handleCancelClear}
+        />
+
+        {/* Session Reconnection Warning Dialog */}
+        <AlertDialog
+          isOpen={isSessionWarningOpen}
+          title={t('refinement.session.warningDialog.title')}
+          message={t('refinement.session.warningDialog.message')}
+          okLabel={t('refinement.session.warningDialog.ok')}
+          onClose={() => setIsSessionWarningOpen(false)}
+          icon={<span style={{ color: '#f59e0b', fontSize: '18px' }}>&#9888;</span>}
         />
       </ResponsiveFontProvider>
     </div>

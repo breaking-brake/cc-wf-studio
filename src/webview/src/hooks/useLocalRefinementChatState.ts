@@ -7,6 +7,7 @@
 
 import type { ConversationHistory, ConversationMessage } from '@shared/types/workflow-definition';
 import { useCallback, useMemo, useState } from 'react';
+import type { SessionStatus } from '../stores/refinement-store';
 import type { RefinementChatState, RefinementErrorCode } from '../types/refinement-chat-state';
 
 interface UseLocalRefinementChatStateOptions {
@@ -63,13 +64,17 @@ export function useLocalRefinementChatState(
   // Local state
   const [conversationHistory, setConversationHistory] = useState<ConversationHistory | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [sessionStatus, setSessionStatus] = useState<SessionStatus>('none');
   const [currentInput, setCurrentInput] = useState('');
   const [currentRequestId, setCurrentRequestId] = useState<string | null>(null);
 
   // Initialize or reset history
   const initializeHistory = useCallback((history: ConversationHistory | null) => {
-    setConversationHistory(history ?? createEmptyConversationHistory());
+    const historyToUse = history ?? createEmptyConversationHistory();
+    setConversationHistory(historyToUse);
     setIsProcessing(false);
+    // Set session status based on whether sessionId exists
+    setSessionStatus(historyToUse.sessionId ? 'connected' : 'none');
     setCurrentInput('');
     setCurrentRequestId(null);
   }, []);
@@ -78,6 +83,7 @@ export function useLocalRefinementChatState(
   const reset = useCallback(() => {
     setConversationHistory(null);
     setIsProcessing(false);
+    setSessionStatus('none');
     setCurrentInput('');
     setCurrentRequestId(null);
   }, []);
@@ -185,6 +191,7 @@ export function useLocalRefinementChatState(
 
   const clearHistory = useCallback(() => {
     setConversationHistory(createEmptyConversationHistory());
+    setSessionStatus('none');
   }, []);
 
   const startProcessing = useCallback((requestId: string) => {
@@ -192,9 +199,23 @@ export function useLocalRefinementChatState(
     setCurrentRequestId(requestId);
   }, []);
 
-  const finishProcessing = useCallback(() => {
+  const finishProcessing = useCallback((sessionId?: string, sessionReconnected?: boolean) => {
     setIsProcessing(false);
     setCurrentRequestId(null);
+
+    // Update session status and sessionId in history
+    if (sessionId) {
+      const newSessionStatus: SessionStatus = sessionReconnected ? 'reconnected' : 'connected';
+      setSessionStatus(newSessionStatus);
+      setConversationHistory((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          sessionId,
+          updatedAt: new Date().toISOString(),
+        };
+      });
+    }
   }, []);
 
   const handleRefinementSuccess = useCallback(
@@ -223,6 +244,7 @@ export function useLocalRefinementChatState(
     () => ({
       conversationHistory,
       isProcessing,
+      sessionStatus,
       currentInput,
       currentRequestId,
       setInput: setCurrentInput,
@@ -244,6 +266,7 @@ export function useLocalRefinementChatState(
     [
       conversationHistory,
       isProcessing,
+      sessionStatus,
       currentInput,
       currentRequestId,
       canSend,

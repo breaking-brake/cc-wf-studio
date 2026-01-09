@@ -72,6 +72,7 @@ const App: React.FC = () => {
     () => ({
       conversationHistory: refinementStore.conversationHistory,
       isProcessing: refinementStore.isProcessing,
+      sessionStatus: refinementStore.sessionStatus,
       currentInput: refinementStore.currentInput,
       currentRequestId: refinementStore.currentRequestId,
       setInput: refinementStore.setInput,
