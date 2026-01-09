@@ -53,6 +53,8 @@ export interface RefinementResult {
   /** Validation errors when code is VALIDATION_ERROR */
   validationErrors?: ValidationErrorInfo[];
   executionTimeMs: number;
+  /** New session ID from CLI (for session continuation) */
+  newSessionId?: string;
 }
 
 /**
@@ -364,7 +366,7 @@ export async function refineWorkflow(
     const promptSizeChars = prompt.length;
 
     // Step 4: Execute Claude Code CLI (streaming if onProgress callback provided)
-    const cliResult = onProgress
+    let cliResult = onProgress
       ? await executeClaudeCodeCLIStreaming(
           prompt,
           onProgress,
@@ -372,7 +374,8 @@ export async function refineWorkflow(
           requestId,
           workspaceRoot,
           model,
-          allowedTools
+          allowedTools,
+          conversationHistory.sessionId
         )
       : await executeClaudeCodeCLI(
           prompt,
@@ -382,6 +385,48 @@ export async function refineWorkflow(
           model,
           allowedTools
         );
+
+    // Fallback: Retry without session ID if session resume failed
+    if (!cliResult.success && conversationHistory.sessionId) {
+      const errorDetails = cliResult.error?.details?.toLowerCase() || '';
+      const errorMessage = cliResult.error?.message?.toLowerCase() || '';
+      const isSessionError = [
+        'session not found',
+        'session expired',
+        'invalid session',
+        'no such session',
+      ].some((pattern) => errorDetails.includes(pattern) || errorMessage.includes(pattern));
+
+      if (isSessionError) {
+        log('WARN', 'Session resume failed, retrying without session ID', {
+          requestId,
+          previousSessionId: conversationHistory.sessionId,
+          errorCode: cliResult.error?.code,
+          errorMessage: cliResult.error?.message,
+        });
+
+        // Retry without session ID
+        cliResult = onProgress
+          ? await executeClaudeCodeCLIStreaming(
+              prompt,
+              onProgress,
+              timeoutMs,
+              requestId,
+              workspaceRoot,
+              model,
+              allowedTools,
+              undefined // No session ID for retry
+            )
+          : await executeClaudeCodeCLI(
+              prompt,
+              timeoutMs,
+              requestId,
+              workspaceRoot,
+              model,
+              allowedTools
+            );
+      }
+    }
 
     if (!cliResult.success || !cliResult.output) {
       // CLI execution failed - record metrics
@@ -414,6 +459,7 @@ export async function refineWorkflow(
           message: 'Unknown error occurred during CLI execution',
         },
         executionTimeMs: cliResult.executionTimeMs,
+        newSessionId: cliResult.sessionId,
       };
     }
 
@@ -442,6 +488,7 @@ export async function refineWorkflow(
           details: 'AI response does not match expected structured format',
         },
         executionTimeMs: cliResult.executionTimeMs,
+        newSessionId: cliResult.sessionId,
       };
     }
 
@@ -457,6 +504,7 @@ export async function refineWorkflow(
         success: true,
         clarificationMessage: aiResponse.message || 'Please provide more details',
         executionTimeMs: cliResult.executionTimeMs,
+        newSessionId: cliResult.sessionId,
       };
     }
 
@@ -475,6 +523,7 @@ export async function refineWorkflow(
           details: 'AI returned error status in response',
         },
         executionTimeMs: cliResult.executionTimeMs,
+        newSessionId: cliResult.sessionId,
       };
     }
 
@@ -494,6 +543,7 @@ export async function refineWorkflow(
           details: 'Success response does not contain workflow in values',
         },
         executionTimeMs: cliResult.executionTimeMs,
+        newSessionId: cliResult.sessionId,
       };
     }
 
@@ -526,6 +576,7 @@ export async function refineWorkflow(
           details: 'Missing required workflow fields (id, nodes, or connections)',
         },
         executionTimeMs: cliResult.executionTimeMs,
+        newSessionId: cliResult.sessionId,
       };
     }
 
@@ -573,6 +624,7 @@ export async function refineWorkflow(
           field: e.field,
         })),
         executionTimeMs: cliResult.executionTimeMs,
+        newSessionId: cliResult.sessionId,
       };
     }
 
@@ -607,6 +659,7 @@ export async function refineWorkflow(
       refinedWorkflow,
       aiMessage: aiResponse.message,
       executionTimeMs,
+      newSessionId: cliResult.sessionId,
     };
   } catch (error) {
     const executionTimeMs = Date.now() - startTime;

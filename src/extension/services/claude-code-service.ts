@@ -71,6 +71,8 @@ export interface ClaudeCodeExecutionResult {
     details?: string;
   };
   executionTimeMs: number;
+  /** Session ID extracted from CLI output (for session continuation) */
+  sessionId?: string;
 }
 
 /**
@@ -451,6 +453,7 @@ export type StreamingProgressCallback = (
  * @param workingDirectory - Working directory for CLI execution
  * @param model - Claude model to use (default: 'sonnet')
  * @param allowedTools - Array of allowed tool names for CLI (optional)
+ * @param resumeSessionId - Session ID to resume (for context continuation)
  * @returns Execution result with success status and output/error
  */
 export async function executeClaudeCodeCLIStreaming(
@@ -460,10 +463,12 @@ export async function executeClaudeCodeCLIStreaming(
   requestId?: string,
   workingDirectory?: string,
   model: ClaudeModel = 'sonnet',
-  allowedTools?: string[]
+  allowedTools?: string[],
+  resumeSessionId?: string
 ): Promise<ClaudeCodeExecutionResult> {
   const startTime = Date.now();
   let accumulated = '';
+  let extractedSessionId: string | undefined;
 
   const modelName = getCliModelName(model);
 
@@ -473,12 +478,19 @@ export async function executeClaudeCodeCLIStreaming(
     model,
     modelName,
     allowedTools,
+    resumeSessionId,
     cwd: workingDirectory ?? process.cwd(),
   });
 
   try {
     // Build CLI arguments
     const args = ['-p', '-', '--output-format', 'stream-json', '--verbose', '--model', modelName];
+
+    // Add --resume flag for session continuation
+    if (resumeSessionId) {
+      args.push('--resume', resumeSessionId);
+      log('INFO', 'Resuming Claude Code CLI session', { sessionId: resumeSessionId });
+    }
 
     // Add --tools and --allowed-tools flags if provided
     // --tools: whitelist restriction (only these tools available)
@@ -534,6 +546,14 @@ export async function executeClaudeCodeCLIStreaming(
                     .join('')
                 : JSON.stringify(parsed).substring(0, 500),
           });
+
+          // Extract session ID from init message (for session continuation)
+          if (parsed.type === 'system' && parsed.subtype === 'init' && parsed.session_id) {
+            extractedSessionId = parsed.session_id;
+            log('INFO', 'Extracted session ID from CLI init message', {
+              sessionId: extractedSessionId,
+            });
+          }
 
           // Extract content from assistant messages
           if (parsed.type === 'assistant' && parsed.message?.content) {
@@ -662,12 +682,14 @@ export async function executeClaudeCodeCLIStreaming(
       executionTimeMs,
       accumulatedLength: accumulated.length,
       rawOutputLength: result.stdout.length,
+      sessionId: extractedSessionId,
     });
 
     return {
       success: true,
       output: accumulated || result.stdout.trim(),
       executionTimeMs,
+      sessionId: extractedSessionId,
     };
   } catch (error) {
     // Remove from active processes
@@ -712,6 +734,7 @@ export async function executeClaudeCodeCLIStreaming(
             details: `Timeout after ${timeoutMs}ms`,
           },
           executionTimeMs,
+          sessionId: extractedSessionId,
         };
       }
 
@@ -725,6 +748,7 @@ export async function executeClaudeCodeCLIStreaming(
             details: error.message,
           },
           executionTimeMs,
+          sessionId: extractedSessionId,
         };
       }
 
@@ -738,6 +762,7 @@ export async function executeClaudeCodeCLIStreaming(
           details: `Exit code: ${error.exitCode ?? 'unknown'}, stderr: ${error.stderr ?? 'none'}`,
         },
         executionTimeMs,
+        sessionId: extractedSessionId,
       };
     }
 
@@ -751,6 +776,7 @@ export async function executeClaudeCodeCLIStreaming(
         details: error instanceof Error ? error.message : String(error),
       },
       executionTimeMs,
+      sessionId: extractedSessionId,
     };
   }
 }

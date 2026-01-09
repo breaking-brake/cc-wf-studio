@@ -170,12 +170,13 @@ export async function handleRefineWorkflow(
         timestamp: new Date().toISOString(),
       };
 
-      // Update conversation history
+      // Update conversation history with session ID for continuity
       const updatedHistory = {
         ...conversationHistory,
         messages: [...conversationHistory.messages, userMessageObj, aiMessage],
         currentIteration: conversationHistory.currentIteration + 1,
         updatedAt: new Date().toISOString(),
+        sessionId: result.newSessionId || conversationHistory.sessionId,
       };
 
       log('INFO', 'Sending clarification request to webview', {
@@ -234,12 +235,13 @@ export async function handleRefineWorkflow(
       timestamp: new Date().toISOString(),
     };
 
-    // Update conversation history
+    // Update conversation history with session ID for continuity
     const updatedHistory = {
       ...conversationHistory,
       messages: [...conversationHistory.messages, userMessageObj, aiMessage],
       currentIteration: conversationHistory.currentIteration + 1,
       updatedAt: new Date().toISOString(),
+      sessionId: result.newSessionId || conversationHistory.sessionId,
     };
 
     // Attach updated conversation history to refined workflow
@@ -427,12 +429,13 @@ async function handleRefineSubAgentFlow(
         timestamp: new Date().toISOString(),
       };
 
-      // Update conversation history
+      // Update conversation history with session ID for continuity
       const updatedHistory = {
         ...conversationHistory,
         messages: [...conversationHistory.messages, userMessageObj, aiMessage],
         currentIteration: conversationHistory.currentIteration + 1,
         updatedAt: new Date().toISOString(),
+        sessionId: result.newSessionId || conversationHistory.sessionId,
       };
 
       log('INFO', 'Sending clarification request for SubAgentFlow to webview', {
@@ -493,12 +496,13 @@ async function handleRefineSubAgentFlow(
       timestamp: new Date().toISOString(),
     };
 
-    // Update conversation history
+    // Update conversation history with session ID for continuity
     const updatedHistory = {
       ...conversationHistory,
       messages: [...conversationHistory.messages, userMessageObj, aiMessage],
       currentIteration: conversationHistory.currentIteration + 1,
       updatedAt: new Date().toISOString(),
+      sessionId: result.newSessionId || conversationHistory.sessionId,
     };
 
     log('INFO', 'SubAgentFlow refinement successful', {

@@ -404,6 +404,8 @@ export interface ConversationHistory {
   createdAt: string;
   /** Last update timestamp (ISO 8601) */
   updatedAt: string;
+  /** Claude Code CLI session ID for context continuation (optional) */
+  sessionId?: string;
 }
 
 // ============================================================================

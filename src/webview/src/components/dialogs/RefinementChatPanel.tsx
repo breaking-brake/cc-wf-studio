@@ -222,12 +222,6 @@ export function RefinementChatPanel({
           if (payload.explanatoryText !== undefined) {
             latestExplanatoryText = payload.explanatoryText;
           }
-          console.log('[RefinementChatPanel] onProgress:', {
-            hasReceivedProgress,
-            accumulatedTextLength: payload.accumulatedText.length,
-            explanatoryTextLength: payload.explanatoryText?.length ?? 0,
-            latestExplanatoryTextLength: latestExplanatoryText.length,
-          });
         };
 
         const result = await refineWorkflow(
@@ -246,13 +240,6 @@ export function RefinementChatPanel({
         if (result.type === 'success') {
           updateWorkflow(result.payload.refinedWorkflow);
 
-          console.log('[RefinementChatPanel] handleSend success:', {
-            hasReceivedProgress,
-            latestExplanatoryTextLength: latestExplanatoryText.length,
-            latestExplanatoryTextPreview: latestExplanatoryText.substring(0, 100),
-            willUseFinishProcessing: hasReceivedProgress && latestExplanatoryText.length > 0,
-          });
-
           if (hasReceivedProgress && latestExplanatoryText) {
             // Streaming occurred with explanatory text
             // Replace display text with explanatory text only (remove tool info)
@@ -266,11 +253,10 @@ export function RefinementChatPanel({
             updateMessageLoadingState(completionMessageId, false);
 
             // Preserve frontend messages (don't overwrite with server history)
-            console.log('[RefinementChatPanel] handleSend: Using finishProcessing');
-            finishProcessing();
+            // Pass sessionId for session continuation support
+            finishProcessing(result.payload.updatedConversationHistory?.sessionId);
           } else {
             // No streaming or no explanatory text: just show completion message
-            console.log('[RefinementChatPanel] handleSend: Using handleRefinementSuccess');
             updateMessageContent(aiMessageId, result.payload.aiMessage.content);
             updateMessageLoadingState(aiMessageId, false);
 
@@ -286,7 +272,8 @@ export function RefinementChatPanel({
 
           if (hasReceivedProgress) {
             // Streaming occurred, use finishProcessing to preserve frontend messages
-            finishProcessing();
+            // Pass sessionId for session continuation support
+            finishProcessing(result.payload.updatedConversationHistory?.sessionId);
           } else {
             // No streaming, update conversation history normally
             handleRefinementSuccess(
@@ -419,12 +406,6 @@ export function RefinementChatPanel({
           if (payload.explanatoryText !== undefined) {
             latestExplanatoryText = payload.explanatoryText;
           }
-          console.log('[RefinementChatPanel] onProgress:', {
-            hasReceivedProgress,
-            accumulatedTextLength: payload.accumulatedText.length,
-            explanatoryTextLength: payload.explanatoryText?.length ?? 0,
-            latestExplanatoryTextLength: latestExplanatoryText.length,
-          });
         };
 
         const result = await refineWorkflow(
@@ -457,7 +438,8 @@ export function RefinementChatPanel({
             updateMessageLoadingState(completionMessageId, false);
 
             // Preserve frontend messages (don't overwrite with server history)
-            finishProcessing();
+            // Pass sessionId for session continuation support
+            finishProcessing(result.payload.updatedConversationHistory?.sessionId);
           } else {
             // No streaming or no explanatory text: just show completion message
             updateMessageContent(aiMessageId, result.payload.aiMessage.content);
@@ -475,7 +457,8 @@ export function RefinementChatPanel({
 
           if (hasReceivedProgress) {
             // Streaming occurred, use finishProcessing to preserve frontend messages
-            finishProcessing();
+            // Pass sessionId for session continuation support
+            finishProcessing(result.payload.updatedConversationHistory?.sessionId);
           } else {
             // No streaming, update conversation history normally
             handleRefinementSuccess(

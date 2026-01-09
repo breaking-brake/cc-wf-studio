@@ -149,8 +149,9 @@ interface RefinementStore {
   /**
    * Finish processing without replacing conversation history.
    * Use this when frontend has already managed messages (e.g., streaming with explanatory text).
+   * Optionally accepts sessionId to persist for session continuation.
    */
-  finishProcessing: () => void;
+  finishProcessing: (sessionId?: string) => void;
   clearHistory: () => void;
 
   // Phase 3.7: Message operations for loading state
@@ -324,8 +325,22 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     set({ isProcessing: false, currentRequestId: null });
   },
 
-  finishProcessing: () => {
-    set({ isProcessing: false, currentRequestId: null });
+  finishProcessing: (sessionId?: string) => {
+    const history = get().conversationHistory;
+    if (sessionId && history) {
+      // Update sessionId in conversationHistory for session continuation
+      set({
+        conversationHistory: {
+          ...history,
+          sessionId,
+          updatedAt: new Date().toISOString(),
+        },
+        isProcessing: false,
+        currentRequestId: null,
+      });
+    } else {
+      set({ isProcessing: false, currentRequestId: null });
+    }
   },
 
   clearHistory: () => {
@@ -337,6 +352,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
           messages: [],
           currentIteration: 0,
           updatedAt: new Date().toISOString(),
+          sessionId: undefined, // Clear session for fresh start
         },
       });
     }

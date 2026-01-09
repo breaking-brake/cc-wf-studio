@@ -45,7 +45,7 @@ export interface RefinementChatState {
   removeMessage: (messageId: string) => void;
   clearHistory: () => void;
   startProcessing: (requestId: string) => void;
-  finishProcessing: () => void;
+  finishProcessing: (sessionId?: string) => void;
   handleRefinementSuccess: (
     aiMessage: ConversationMessage,
     updatedHistory: ConversationHistory
