@@ -118,12 +118,9 @@ export async function executeClaudeCodeCLI(
     // Build CLI arguments
     const args = ['-p', '-', '--model', modelName];
 
-    // Add --tools and --allowed-tools flags if provided
-    // --tools: whitelist restriction (only these tools available)
-    // --allowed-tools: no permission prompt for these tools
+    // Add --allowedTools flag if provided (no permission prompt for these tools)
     if (allowedTools && allowedTools.length > 0) {
-      args.push('--tools', allowedTools.join(','));
-      args.push('--allowed-tools', allowedTools.join(','));
+      args.push('--allowedTools', allowedTools.join(','));
     }
 
     // Spawn Claude Code CLI process using nano-spawn (cross-platform compatible)
@@ -480,12 +477,9 @@ export async function executeClaudeCodeCLIStreaming(
     // Build CLI arguments
     const args = ['-p', '-', '--output-format', 'stream-json', '--verbose', '--model', modelName];
 
-    // Add --tools and --allowed-tools flags if provided
-    // --tools: whitelist restriction (only these tools available)
-    // --allowed-tools: no permission prompt for these tools
+    // Add --allowedTools flag if provided (no permission prompt for these tools)
     if (allowedTools && allowedTools.length > 0) {
-      args.push('--tools', allowedTools.join(','));
-      args.push('--allowed-tools', allowedTools.join(','));
+      args.push('--allowedTools', allowedTools.join(','));
     }
 
     // Spawn Claude Code CLI with streaming output format
