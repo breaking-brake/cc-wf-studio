@@ -50,6 +50,8 @@ interface WorkflowStore {
   isMinimapVisible: boolean;
   isDescriptionPanelVisible: boolean;
   isFocusMode: boolean;
+  /** If true, exports Slash Command with context: fork for isolated execution */
+  contextFork: boolean;
   lastAddedNodeId: string | null;
 
   // Sub-Agent Flow State (Feature: 089-subworkflow)
@@ -75,6 +77,7 @@ interface WorkflowStore {
   toggleMinimapVisibility: () => void;
   toggleDescriptionPanelVisibility: () => void;
   toggleFocusMode: () => void;
+  setContextFork: (value: boolean) => void;
 
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
@@ -248,6 +251,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     const saved = localStorage.getItem('cc-wf-studio.focusMode');
     return saved !== null ? saved === 'true' : false; // Default: off
   })(),
+  contextFork: false,
   lastAddedNodeId: null,
 
   // Sub-Agent Flow Initial State (Feature: 089-subworkflow)
@@ -352,6 +356,8 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set({ isFocusMode: newValue });
   },
 
+  setContextFork: (contextFork: boolean) => set({ contextFork }),
+
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => {
     set({
@@ -439,6 +445,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       edges: [],
       selectedNodeId: null,
       workflowDescription: '', // Reset description
+      contextFork: false, // Reset context fork setting
       // Sub-Agent Flow関連の状態をクリア
       subAgentFlows: [],
       activeSubAgentFlowId: null,

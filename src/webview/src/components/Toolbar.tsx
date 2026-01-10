@@ -28,6 +28,7 @@ import { ProcessingOverlay } from './common/ProcessingOverlay';
 import { StyledTooltipProvider } from './common/StyledTooltip';
 import { ConfirmDialog } from './dialogs/ConfirmDialog';
 import { MoreActionsDropdown } from './toolbar/MoreActionsDropdown';
+import { SlashCommandOptionsDropdown } from './toolbar/SlashCommandOptionsDropdown';
 
 interface ToolbarProps {
   onError: (error: { code: string; message: string; details?: unknown }) => void;
@@ -61,6 +62,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     subAgentFlows,
     isFocusMode,
     toggleFocusMode,
+    contextFork,
+    setContextFork,
   } = useWorkflowStore();
   const {
     isProcessing,
@@ -124,7 +127,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setIsSaving(true);
     try {
       // Issue #89: Get subAgentFlows from store
-      const { subAgentFlows, workflowDescription } = useWorkflowStore.getState();
+      const { subAgentFlows, workflowDescription, contextFork } = useWorkflowStore.getState();
 
       // Phase 5 (T024): Serialize workflow with conversation history and subAgentFlows
       const workflow = serializeWorkflow(
@@ -133,7 +136,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         workflowName,
         workflowDescription || undefined,
         activeWorkflow?.conversationHistory,
-        subAgentFlows
+        subAgentFlows,
+        contextFork
       );
 
       // Validate workflow before saving
@@ -179,6 +183,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           setWorkflowName(workflow.name);
           // Load description from workflow (default to empty string if not present)
           setWorkflowDescription(workflow.description || '');
+          // Load contextFork from slashCommandOptions (default to false if not present)
+          setContextFork(workflow.slashCommandOptions?.contextFork ?? false);
           // Set as active workflow to preserve conversation history
           setActiveWorkflow(workflow);
         }
@@ -205,7 +211,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, [setNodes, setEdges, setActiveWorkflow, setWorkflowName, setWorkflowDescription]);
+  }, [
+    setNodes,
+    setEdges,
+    setActiveWorkflow,
+    setWorkflowName,
+    setWorkflowDescription,
+    setContextFork,
+  ]);
 
   const handleLoadWorkflow = () => {
     setIsLoadingFile(true);
@@ -236,16 +249,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setIsExporting(true);
     try {
       // Issue #89: Get subAgentFlows from store for export
-      const { subAgentFlows, workflowDescription } = useWorkflowStore.getState();
+      const { subAgentFlows, workflowDescription, contextFork } = useWorkflowStore.getState();
 
-      // Serialize workflow with subAgentFlows
+      // Serialize workflow with subAgentFlows and contextFork
       const workflow = serializeWorkflow(
         nodes,
         edges,
         workflowName,
         workflowDescription || undefined,
         undefined, // conversationHistory not needed for export
-        subAgentFlows
+        subAgentFlows,
+        contextFork
       );
 
       // Validate workflow before export
@@ -297,16 +311,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setIsRunning(true);
     try {
       // Issue #89: Get subAgentFlows from store for run
-      const { subAgentFlows, workflowDescription } = useWorkflowStore.getState();
+      const { subAgentFlows, workflowDescription, contextFork } = useWorkflowStore.getState();
 
-      // Serialize workflow with subAgentFlows
+      // Serialize workflow with subAgentFlows and contextFork
       const workflow = serializeWorkflow(
         nodes,
         edges,
         workflowName,
         workflowDescription || undefined,
         undefined, // conversationHistory not needed for run
-        subAgentFlows
+        subAgentFlows,
+        contextFork
       );
 
       // Validate workflow before run
@@ -602,65 +617,83 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           </span>
 
           {/* Button Group */}
+          {/* Slash Command Group: Export + Run + Options */}
           <div
             style={{
               display: 'flex',
-              gap: '8px',
+              gap: '4px',
+              alignItems: 'center',
             }}
           >
-            {/* Convert Button */}
-            <button
-              type="button"
-              onClick={handleExport}
-              disabled={isExporting}
-              data-tour="export-button"
-              style={{
-                padding: isCompact ? '4px 8px' : '4px 12px',
-                backgroundColor: 'var(--vscode-button-background)',
-                color: 'var(--vscode-button-foreground)',
-                border: 'none',
-                borderRadius: '2px',
-                cursor: isExporting ? 'not-allowed' : 'pointer',
-                fontSize: '13px',
-                opacity: isExporting ? 0.6 : 1,
-                whiteSpace: 'nowrap',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}
-            >
-              {isCompact ? (
-                <SquareSlash size={16} />
-              ) : isExporting ? (
-                t('toolbar.exporting')
-              ) : (
-                t('toolbar.export')
-              )}
-            </button>
+            {/* Export + Run buttons (connected) */}
+            <div style={{ display: 'flex' }}>
+              {/* Export Button */}
+              <button
+                type="button"
+                onClick={handleExport}
+                disabled={isExporting}
+                data-tour="export-button"
+                style={{
+                  padding: isCompact ? '4px 8px' : '4px 12px',
+                  backgroundColor: 'var(--vscode-button-background)',
+                  color: 'var(--vscode-button-foreground)',
+                  border: 'none',
+                  borderRadius: '2px 0 0 2px',
+                  cursor: isExporting ? 'not-allowed' : 'pointer',
+                  fontSize: '13px',
+                  opacity: isExporting ? 0.6 : 1,
+                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  borderRight: '1px solid var(--vscode-button-foreground)',
+                }}
+              >
+                {isCompact ? (
+                  <SquareSlash size={16} />
+                ) : isExporting ? (
+                  t('toolbar.exporting')
+                ) : (
+                  t('toolbar.export')
+                )}
+              </button>
 
-            {/* Run Button */}
-            <button
-              type="button"
-              onClick={handleRunAsSlashCommand}
-              disabled={isRunning}
-              data-tour="run-button"
-              style={{
-                padding: isCompact ? '4px 8px' : '4px 12px',
-                backgroundColor: 'var(--vscode-button-background)',
-                color: 'var(--vscode-button-foreground)',
-                border: 'none',
-                borderRadius: '2px',
-                cursor: isRunning ? 'not-allowed' : 'pointer',
-                fontSize: '13px',
-                opacity: isRunning ? 0.6 : 1,
-                whiteSpace: 'nowrap',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}
-            >
-              {isCompact ? <Play size={16} /> : isRunning ? t('toolbar.running') : t('toolbar.run')}
-            </button>
+              {/* Run Button */}
+              <button
+                type="button"
+                onClick={handleRunAsSlashCommand}
+                disabled={isRunning}
+                data-tour="run-button"
+                style={{
+                  padding: isCompact ? '4px 8px' : '4px 12px',
+                  backgroundColor: 'var(--vscode-button-background)',
+                  color: 'var(--vscode-button-foreground)',
+                  border: 'none',
+                  borderRadius: '0 2px 2px 0',
+                  cursor: isRunning ? 'not-allowed' : 'pointer',
+                  fontSize: '13px',
+                  opacity: isRunning ? 0.6 : 1,
+                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                {isCompact ? (
+                  <Play size={16} />
+                ) : isRunning ? (
+                  t('toolbar.running')
+                ) : (
+                  t('toolbar.run')
+                )}
+              </button>
+            </div>
+
+            {/* Options Dropdown (separate with small gap) */}
+            <SlashCommandOptionsDropdown
+              contextFork={contextFork}
+              onToggleContextFork={() => setContextFork(!contextFork)}
+            />
           </div>
         </div>
 

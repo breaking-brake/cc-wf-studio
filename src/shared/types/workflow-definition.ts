@@ -37,6 +37,16 @@ export interface WorkflowMetadata {
   [key: string]: unknown;
 }
 
+/**
+ * Slash Command export options
+ *
+ * Options that affect how the workflow is exported as a Slash Command (.md file)
+ */
+export interface SlashCommandOptions {
+  /** If true, exports with context: fork for isolated sub-agent execution (Claude Code v2.1.0+) */
+  contextFork?: boolean;
+}
+
 // ============================================================================
 // Node Data Types
 // ============================================================================
@@ -437,6 +447,8 @@ export interface Workflow {
   conversationHistory?: ConversationHistory;
   /** Optional sub-agent flows defined within this workflow */
   subAgentFlows?: SubAgentFlow[];
+  /** Optional Slash Command export options */
+  slashCommandOptions?: SlashCommandOptions;
 }
 
 // ============================================================================

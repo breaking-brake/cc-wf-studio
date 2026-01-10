@@ -23,6 +23,7 @@ import type { Edge, Node } from 'reactflow';
  * @param workflowDescription - Workflow description
  * @param conversationHistory - Optional conversation history to preserve
  * @param subAgentFlows - Optional sub-agent flows to include
+ * @param contextFork - Optional flag to export with context: fork for isolated execution
  * @returns Workflow definition
  */
 export function serializeWorkflow(
@@ -31,7 +32,8 @@ export function serializeWorkflow(
   workflowName: string,
   workflowDescription?: string,
   conversationHistory?: ConversationHistory,
-  subAgentFlows?: SubAgentFlow[]
+  subAgentFlows?: SubAgentFlow[],
+  contextFork?: boolean
 ): Workflow {
   // Convert React Flow nodes to WorkflowNodes
   const workflowNodes: WorkflowNode[] = nodes.map((node) => ({
@@ -66,6 +68,8 @@ export function serializeWorkflow(
     conversationHistory,
     // Issue #89: Include subAgentFlows if provided
     subAgentFlows,
+    // Include slashCommandOptions if contextFork is enabled
+    slashCommandOptions: contextFork ? { contextFork: true } : undefined,
   };
 
   return workflow;
