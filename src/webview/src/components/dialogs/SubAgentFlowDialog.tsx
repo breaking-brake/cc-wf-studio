@@ -554,6 +554,7 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
                 <button
                   type="button"
                   onClick={handleSubmit}
+                  disabled={!!nameError}
                   title={t('subAgentFlow.dialog.submit')}
                   style={{
                     display: 'flex',
@@ -565,11 +566,15 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
                     color: 'var(--vscode-button-foreground)',
                     border: 'none',
                     borderRadius: '4px',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s',
+                    cursor: nameError ? 'not-allowed' : 'pointer',
+                    opacity: nameError ? 0.5 : 1,
+                    transition: 'background-color 0.2s, opacity 0.2s',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+                    if (!nameError) {
+                      e.currentTarget.style.backgroundColor =
+                        'var(--vscode-button-hoverBackground)';
+                    }
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
