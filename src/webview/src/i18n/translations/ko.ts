@@ -65,7 +65,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.running': '실행 중...',
 
   // Toolbar slash command options dropdown
-  'toolbar.slashCommandOptions': 'Slash Command 옵션',
+  'toolbar.model.tooltip': '실행에 사용할 모델 지정',
   'toolbar.contextFork.tooltip': '분리된 서브 에이전트 컨텍스트에서 실행 (Claude Code v2.1.0+)',
 
   // Toolbar more actions dropdown

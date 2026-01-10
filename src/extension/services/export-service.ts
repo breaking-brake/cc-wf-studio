@@ -499,6 +499,11 @@ function generateSlashCommandFile(workflow: Workflow): string {
     'allowed-tools: Task,AskUserQuestion',
   ];
 
+  // Add model if specified and not 'default'
+  if (workflow.slashCommandOptions?.model && workflow.slashCommandOptions.model !== 'default') {
+    frontmatterLines.push(`model: ${workflow.slashCommandOptions.model}`);
+  }
+
   // Add context: fork if enabled (Claude Code v2.1.0+ feature)
   if (workflow.slashCommandOptions?.contextFork) {
     frontmatterLines.push('context: fork');
