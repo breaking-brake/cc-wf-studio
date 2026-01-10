@@ -47,6 +47,8 @@ export interface SubAgentData {
   tools?: string;
   model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
   color?: 'red' | 'blue' | 'green' | 'yellow' | 'purple' | 'orange' | 'pink' | 'cyan';
+  /** Context mode for sub-agent execution. 'fork' runs in an isolated sub-agent context (Claude Code v2.1.0+). */
+  context?: 'fork';
   outputPorts: number;
 }
 
@@ -215,6 +217,8 @@ export interface SubAgentFlowNodeData {
   tools?: string;
   /** Visual color for the node */
   color?: keyof typeof SUB_AGENT_COLORS;
+  /** Context mode for sub-agent flow execution. 'fork' runs in an isolated sub-agent context (Claude Code v2.1.0+). */
+  context?: 'fork';
 }
 
 export interface McpNodeData {

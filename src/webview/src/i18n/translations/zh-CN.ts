@@ -161,6 +161,10 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'properties.subAgent.colorPlaceholder': '选择颜色...',
   'properties.subAgent.colorNone': '无',
   'properties.subAgent.colorHelp': '此子代理的视觉标识颜色',
+  'properties.subAgent.context': '上下文',
+  'properties.subAgent.contextDefault': '默认',
+  'properties.subAgent.contextFork': '分叉',
+  'properties.subAgent.contextHelp': '分叉在独立的子代理上下文中运行（Claude Code v2.1.0+）',
 
   // Skill properties
   'property.skillPath': 'Skill路径',

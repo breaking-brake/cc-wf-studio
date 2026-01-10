@@ -510,6 +510,53 @@ const SubAgentProperties: React.FC<{
 
       {/* Color */}
       <ColorPicker value={data.color} onChange={(color) => updateNodeData(node.id, { color })} />
+
+      {/* Context */}
+      <div>
+        <label
+          htmlFor="context-select"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('properties.subAgent.context')}
+        </label>
+        <select
+          id="context-select"
+          value={data.context || ''}
+          onChange={(e) =>
+            updateNodeData(node.id, {
+              context: e.target.value === 'fork' ? 'fork' : undefined,
+            })
+          }
+          className="nodrag"
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+          }}
+        >
+          <option value="">{t('properties.subAgent.contextDefault')}</option>
+          <option value="fork">{t('properties.subAgent.contextFork')}</option>
+        </select>
+        <div
+          style={{
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+            marginTop: '4px',
+          }}
+        >
+          {t('properties.subAgent.contextHelp')}
+        </div>
+      </div>
     </div>
   );
 };
@@ -2582,6 +2629,53 @@ const SubAgentFlowProperties: React.FC<{
 
       {/* Color */}
       <ColorPicker value={data.color} onChange={(color) => updateNodeData(node.id, { color })} />
+
+      {/* Context */}
+      <div>
+        <label
+          htmlFor="subagentflow-context-select"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('properties.subAgent.context')}
+        </label>
+        <select
+          id="subagentflow-context-select"
+          value={data.context || ''}
+          onChange={(e) =>
+            updateNodeData(node.id, {
+              context: e.target.value === 'fork' ? 'fork' : undefined,
+            })
+          }
+          className="nodrag"
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+          }}
+        >
+          <option value="">{t('properties.subAgent.contextDefault')}</option>
+          <option value="fork">{t('properties.subAgent.contextFork')}</option>
+        </select>
+        <div
+          style={{
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+            marginTop: '4px',
+          }}
+        >
+          {t('properties.subAgent.contextHelp')}
+        </div>
+      </div>
     </div>
   );
 };

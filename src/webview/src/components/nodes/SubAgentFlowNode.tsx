@@ -144,6 +144,23 @@ export const SubAgentFlowNodeComponent: React.FC<NodeProps<SubAgentFlowNodeData>
               {data.color}
             </div>
           )}
+
+          {/* Context Fork Badge */}
+          {data.context === 'fork' && (
+            <div
+              style={{
+                fontSize: '10px',
+                color: '#ffffff',
+                backgroundColor: '#6366f1',
+                padding: '2px 6px',
+                borderRadius: '3px',
+                display: 'inline-block',
+                fontWeight: 600,
+              }}
+            >
+              Fork
+            </div>
+          )}
         </div>
 
         {/* Not linked warning */}

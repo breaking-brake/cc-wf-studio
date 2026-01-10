@@ -167,6 +167,11 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'properties.subAgent.colorPlaceholder': '색상 선택...',
   'properties.subAgent.colorNone': '없음',
   'properties.subAgent.colorHelp': '이 서브 에이전트의 시각적 식별 색상',
+  'properties.subAgent.context': '컨텍스트',
+  'properties.subAgent.contextDefault': '기본',
+  'properties.subAgent.contextFork': '포크',
+  'properties.subAgent.contextHelp':
+    '포크는 독립된 서브 에이전트 컨텍스트에서 실행됩니다 (Claude Code v2.1.0+)',
 
   // Skill properties
   'property.skillPath': 'Skill 경로',

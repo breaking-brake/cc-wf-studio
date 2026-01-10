@@ -167,6 +167,11 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'properties.subAgent.colorPlaceholder': '色を選択...',
   'properties.subAgent.colorNone': 'なし',
   'properties.subAgent.colorHelp': 'このサブエージェントの視覚的な識別色',
+  'properties.subAgent.context': 'コンテキスト',
+  'properties.subAgent.contextDefault': 'デフォルト',
+  'properties.subAgent.contextFork': 'フォーク',
+  'properties.subAgent.contextHelp':
+    'フォークは独立したサブエージェントコンテキストで実行されます（Claude Code v2.1.0以降）',
 
   // Skill properties
   'property.skillPath': 'Skillパス',

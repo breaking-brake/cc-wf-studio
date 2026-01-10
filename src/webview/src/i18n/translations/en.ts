@@ -167,6 +167,11 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'properties.subAgent.colorPlaceholder': 'Select color...',
   'properties.subAgent.colorNone': 'None',
   'properties.subAgent.colorHelp': 'Visual indicator color for this sub-agent',
+  'properties.subAgent.context': 'Context',
+  'properties.subAgent.contextDefault': 'Default',
+  'properties.subAgent.contextFork': 'Fork',
+  'properties.subAgent.contextHelp':
+    'Fork runs in an isolated sub-agent context (Claude Code v2.1.0+)',
 
   // Skill properties
   'property.skillPath': 'Skill Path',

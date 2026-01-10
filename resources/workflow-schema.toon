@@ -61,12 +61,22 @@ nodeTypes:
         required: false
         enum[8]: red,blue,green,yellow,purple,orange,pink,cyan
         description: Visual indicator color for this sub-agent (optional)
+      context:
+        type: string
+        required: false
+        enum[1]: fork
+        description: Context mode for sub-agent execution. 'fork' runs in an isolated sub-agent context (Claude Code v2.1.0+)
       outputPorts:
         type: number
         required: true
         value: 1
     inputPorts: 1
     outputPorts: 1
+    aiGenerationGuidance:
+      context:
+        description: "Use 'context: fork' when the sub-agent should run in an isolated context"
+        useCases[3]: Handling sensitive/confidential data that should not leak to subsequent agents,Resetting conversation history to reduce token consumption,Ensuring isolated execution without inheriting parent context
+        default: Omit context field for default behavior (shared context with parent)
   askUserQuestion:
     description: Present a question with multiple-choice options
     fields:
@@ -305,6 +315,26 @@ nodeTypes:
         required: false
         maxLength: 200
         description: Optional description of what this sub-agent flow does
+      model:
+        type: string
+        required: false
+        enum[4]: sonnet,opus,haiku,inherit
+        default: sonnet
+        description: Model to use for this sub-agent flow execution
+      tools:
+        type: string
+        required: false
+        description: Comma-separated list of allowed tools
+      color:
+        type: string
+        required: false
+        enum[8]: red,blue,green,yellow,purple,orange,pink,cyan
+        description: Visual indicator color for this sub-agent flow (optional)
+      context:
+        type: string
+        required: false
+        enum[1]: fork
+        description: Context mode for sub-agent flow execution. 'fork' runs in an isolated sub-agent context (Claude Code v2.1.0+)
       outputPorts:
         type: number
         required: true
