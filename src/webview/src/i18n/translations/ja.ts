@@ -66,7 +66,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.running': '実行中...',
 
   // Toolbar slash command options dropdown
-  'toolbar.slashCommandOptions': 'Slash Commandオプション',
+  'toolbar.model.tooltip': '実行に使用するモデルを指定',
   'toolbar.contextFork.tooltip':
     '分離されたサブエージェントコンテキストで実行 (Claude Code v2.1.0+)',
 

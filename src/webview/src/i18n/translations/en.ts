@@ -66,7 +66,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.running': 'Running...',
 
   // Toolbar slash command options dropdown
-  'toolbar.slashCommandOptions': 'Slash Command Options',
+  'toolbar.model.tooltip': 'Specify the model to use for execution',
   'toolbar.contextFork.tooltip': 'Run in isolated sub-agent context (Claude Code v2.1.0+)',
 
   // Toolbar more actions dropdown

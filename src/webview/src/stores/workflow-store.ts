@@ -8,7 +8,11 @@
 import type { McpNodeData } from '@shared/types/mcp-node';
 import { normalizeMcpNodeData } from '@shared/types/mcp-node';
 import type { Workflow } from '@shared/types/messages';
-import type { SubAgentFlow, WorkflowNode } from '@shared/types/workflow-definition';
+import type {
+  SlashCommandModel,
+  SubAgentFlow,
+  WorkflowNode,
+} from '@shared/types/workflow-definition';
 import { NodeType } from '@shared/types/workflow-definition';
 import type { Edge, Node, OnConnect, OnEdgesChange, OnNodesChange } from 'reactflow';
 import { addEdge, applyEdgeChanges, applyNodeChanges } from 'reactflow';
@@ -52,6 +56,8 @@ interface WorkflowStore {
   isFocusMode: boolean;
   /** If true, exports Slash Command with context: fork for isolated execution */
   contextFork: boolean;
+  /** Model to use for Slash Command execution */
+  slashCommandModel: SlashCommandModel;
   lastAddedNodeId: string | null;
 
   // Sub-Agent Flow State (Feature: 089-subworkflow)
@@ -78,6 +84,7 @@ interface WorkflowStore {
   toggleDescriptionPanelVisibility: () => void;
   toggleFocusMode: () => void;
   setContextFork: (value: boolean) => void;
+  setSlashCommandModel: (value: SlashCommandModel) => void;
 
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
@@ -252,6 +259,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     return saved !== null ? saved === 'true' : false; // Default: off
   })(),
   contextFork: false,
+  slashCommandModel: 'default',
   lastAddedNodeId: null,
 
   // Sub-Agent Flow Initial State (Feature: 089-subworkflow)
@@ -358,6 +366,8 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   setContextFork: (contextFork: boolean) => set({ contextFork }),
 
+  setSlashCommandModel: (slashCommandModel: SlashCommandModel) => set({ slashCommandModel }),
+
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => {
     set({
@@ -446,6 +456,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       selectedNodeId: null,
       workflowDescription: '', // Reset description
       contextFork: false, // Reset context fork setting
+      slashCommandModel: 'default', // Reset model setting
       // Sub-Agent Flow関連の状態をクリア
       subAgentFlows: [],
       activeSubAgentFlowId: null,

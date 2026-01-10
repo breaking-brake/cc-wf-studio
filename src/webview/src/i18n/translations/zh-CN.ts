@@ -63,7 +63,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.running': '执行中...',
 
   // Toolbar slash command options dropdown
-  'toolbar.slashCommandOptions': 'Slash Command 选项',
+  'toolbar.model.tooltip': '指定执行时使用的模型',
   'toolbar.contextFork.tooltip': '在隔离的子代理上下文中运行 (Claude Code v2.1.0+)',
 
   // Toolbar more actions dropdown

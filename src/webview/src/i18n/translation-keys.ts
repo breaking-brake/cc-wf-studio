@@ -61,7 +61,7 @@ export interface WebviewTranslationKeys {
   'toolbar.running': string;
 
   // Toolbar slash command options dropdown
-  'toolbar.slashCommandOptions': string;
+  'toolbar.model.tooltip': string;
   'toolbar.contextFork.tooltip': string;
 
   // Toolbar more actions dropdown
