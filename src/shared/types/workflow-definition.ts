@@ -42,12 +42,15 @@ export interface WorkflowMetadata {
  *
  * Options that affect how the workflow is exported as a Slash Command (.md file)
  */
+/** Context options for Slash Command execution */
+export type SlashCommandContext = 'default' | 'fork';
+
 /** Model options for Slash Command execution */
 export type SlashCommandModel = 'default' | 'sonnet' | 'opus' | 'haiku' | 'inherit';
 
 export interface SlashCommandOptions {
-  /** If true, exports with context: fork for isolated sub-agent execution (Claude Code v2.1.0+) */
-  contextFork?: boolean;
+  /** Context mode for execution. 'default' means no context line in output */
+  context?: SlashCommandContext;
   /** Model to use for Slash Command execution. 'default' means no model line in output */
   model?: SlashCommandModel;
 }

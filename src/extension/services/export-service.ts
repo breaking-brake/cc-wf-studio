@@ -504,9 +504,9 @@ function generateSlashCommandFile(workflow: Workflow): string {
     frontmatterLines.push(`model: ${workflow.slashCommandOptions.model}`);
   }
 
-  // Add context: fork if enabled (Claude Code v2.1.0+ feature)
-  if (workflow.slashCommandOptions?.contextFork) {
-    frontmatterLines.push('context: fork');
+  // Add context if specified and not 'default' (Claude Code v2.1.0+ feature)
+  if (workflow.slashCommandOptions?.context && workflow.slashCommandOptions.context !== 'default') {
+    frontmatterLines.push(`context: ${workflow.slashCommandOptions.context}`);
   }
 
   frontmatterLines.push('---', '');

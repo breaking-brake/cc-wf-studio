@@ -9,6 +9,7 @@ import type { McpNodeData } from '@shared/types/mcp-node';
 import { normalizeMcpNodeData } from '@shared/types/mcp-node';
 import type { Workflow } from '@shared/types/messages';
 import type {
+  SlashCommandContext,
   SlashCommandModel,
   SubAgentFlow,
   WorkflowNode,
@@ -54,8 +55,8 @@ interface WorkflowStore {
   isMinimapVisible: boolean;
   isDescriptionPanelVisible: boolean;
   isFocusMode: boolean;
-  /** If true, exports Slash Command with context: fork for isolated execution */
-  contextFork: boolean;
+  /** Context mode for Slash Command execution */
+  slashCommandContext: SlashCommandContext;
   /** Model to use for Slash Command execution */
   slashCommandModel: SlashCommandModel;
   lastAddedNodeId: string | null;
@@ -83,7 +84,7 @@ interface WorkflowStore {
   toggleMinimapVisibility: () => void;
   toggleDescriptionPanelVisibility: () => void;
   toggleFocusMode: () => void;
-  setContextFork: (value: boolean) => void;
+  setSlashCommandContext: (value: SlashCommandContext) => void;
   setSlashCommandModel: (value: SlashCommandModel) => void;
 
   // Custom Actions
@@ -258,7 +259,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     const saved = localStorage.getItem('cc-wf-studio.focusMode');
     return saved !== null ? saved === 'true' : false; // Default: off
   })(),
-  contextFork: false,
+  slashCommandContext: 'default',
   slashCommandModel: 'default',
   lastAddedNodeId: null,
 
@@ -364,7 +365,8 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set({ isFocusMode: newValue });
   },
 
-  setContextFork: (contextFork: boolean) => set({ contextFork }),
+  setSlashCommandContext: (slashCommandContext: SlashCommandContext) =>
+    set({ slashCommandContext }),
 
   setSlashCommandModel: (slashCommandModel: SlashCommandModel) => set({ slashCommandModel }),
 
@@ -455,7 +457,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       edges: [],
       selectedNodeId: null,
       workflowDescription: '', // Reset description
-      contextFork: false, // Reset context fork setting
+      slashCommandContext: 'default', // Reset context setting
       slashCommandModel: 'default', // Reset model setting
       // Sub-Agent Flow関連の状態をクリア
       subAgentFlows: [],

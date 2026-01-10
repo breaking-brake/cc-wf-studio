@@ -7,7 +7,7 @@
  */
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import type { SlashCommandModel } from '@shared/types/workflow-definition';
+import type { SlashCommandContext, SlashCommandModel } from '@shared/types/workflow-definition';
 import { Check, ChevronDown, ChevronLeft, Cpu, GitFork } from 'lucide-react';
 import { useTranslation } from '../../i18n/i18n-context';
 
@@ -15,6 +15,11 @@ import { useTranslation } from '../../i18n/i18n-context';
 const FONT_SIZES = {
   small: 11,
 } as const;
+
+const CONTEXT_PRESETS: { value: SlashCommandContext; label: string }[] = [
+  { value: 'default', label: 'default' },
+  { value: 'fork', label: 'fork' },
+];
 
 const MODEL_PRESETS: { value: SlashCommandModel; label: string }[] = [
   { value: 'default', label: 'default' },
@@ -25,20 +30,21 @@ const MODEL_PRESETS: { value: SlashCommandModel; label: string }[] = [
 ];
 
 interface SlashCommandOptionsDropdownProps {
-  contextFork: boolean;
-  onToggleContextFork: () => void;
+  context: SlashCommandContext;
+  onContextChange: (context: SlashCommandContext) => void;
   model: SlashCommandModel;
   onModelChange: (model: SlashCommandModel) => void;
 }
 
 export function SlashCommandOptionsDropdown({
-  contextFork,
-  onToggleContextFork,
+  context,
+  onContextChange,
   model,
   onModelChange,
 }: SlashCommandOptionsDropdownProps) {
   const { t } = useTranslation();
 
+  const currentContextLabel = CONTEXT_PRESETS.find((p) => p.value === context)?.label || 'default';
   const currentModelLabel = MODEL_PRESETS.find((p) => p.value === model)?.label || 'default';
 
   return (
@@ -182,7 +188,7 @@ export function SlashCommandOptionsDropdown({
             }}
           />
 
-          {/* Context Fork Sub-menu */}
+          {/* Context Sub-menu */}
           <DropdownMenu.Sub>
             <DropdownMenu.SubTrigger
               style={{
@@ -201,7 +207,7 @@ export function SlashCommandOptionsDropdown({
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <ChevronLeft size={14} />
                 <span style={{ color: 'var(--vscode-descriptionForeground)' }}>
-                  {contextFork ? 'fork' : 'default'}
+                  {currentContextLabel}
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -223,76 +229,46 @@ export function SlashCommandOptionsDropdown({
                   padding: '4px',
                 }}
               >
-                <DropdownMenu.RadioGroup value={contextFork ? 'fork' : 'default'}>
-                  <DropdownMenu.RadioItem
-                    value="default"
-                    onSelect={(event) => {
-                      event.preventDefault();
-                      if (contextFork) onToggleContextFork();
-                    }}
-                    style={{
-                      padding: '6px 12px',
-                      fontSize: `${FONT_SIZES.small}px`,
-                      color: 'var(--vscode-foreground)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      outline: 'none',
-                      borderRadius: '2px',
-                    }}
-                  >
-                    <div
+                <DropdownMenu.RadioGroup value={context}>
+                  {CONTEXT_PRESETS.map((preset) => (
+                    <DropdownMenu.RadioItem
+                      key={preset.value}
+                      value={preset.value}
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        onContextChange(preset.value);
+                      }}
                       style={{
-                        width: '12px',
-                        height: '12px',
+                        padding: '6px 12px',
+                        fontSize: `${FONT_SIZES.small}px`,
+                        color: 'var(--vscode-foreground)',
+                        cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
+                        gap: '8px',
+                        outline: 'none',
+                        borderRadius: '2px',
                       }}
                     >
-                      <DropdownMenu.ItemIndicator>
-                        <Check size={12} />
-                      </DropdownMenu.ItemIndicator>
-                    </div>
-                    <span>default</span>
-                  </DropdownMenu.RadioItem>
-                  <DropdownMenu.RadioItem
-                    value="fork"
-                    onSelect={(event) => {
-                      event.preventDefault();
-                      if (!contextFork) onToggleContextFork();
-                    }}
-                    style={{
-                      padding: '6px 12px',
-                      fontSize: `${FONT_SIZES.small}px`,
-                      color: 'var(--vscode-foreground)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      outline: 'none',
-                      borderRadius: '2px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: '12px',
-                        height: '12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <DropdownMenu.ItemIndicator>
-                        <Check size={12} />
-                      </DropdownMenu.ItemIndicator>
-                    </div>
-                    <span>fork</span>
-                  </DropdownMenu.RadioItem>
+                      <div
+                        style={{
+                          width: '12px',
+                          height: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <DropdownMenu.ItemIndicator>
+                          <Check size={12} />
+                        </DropdownMenu.ItemIndicator>
+                      </div>
+                      <span>{preset.label}</span>
+                    </DropdownMenu.RadioItem>
+                  ))}
                 </DropdownMenu.RadioGroup>
 
-                {/* Context Fork Description */}
+                {/* Context Description */}
                 <div
                   style={{
                     padding: '6px 12px',

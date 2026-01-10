@@ -62,8 +62,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     subAgentFlows,
     isFocusMode,
     toggleFocusMode,
-    contextFork,
-    setContextFork,
+    slashCommandContext,
+    setSlashCommandContext,
     slashCommandModel,
     setSlashCommandModel,
   } = useWorkflowStore();
@@ -129,7 +129,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setIsSaving(true);
     try {
       // Issue #89: Get subAgentFlows from store
-      const { subAgentFlows, workflowDescription, contextFork, slashCommandModel } =
+      const { subAgentFlows, workflowDescription, slashCommandContext, slashCommandModel } =
         useWorkflowStore.getState();
 
       // Phase 5 (T024): Serialize workflow with conversation history and subAgentFlows
@@ -140,7 +140,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         workflowDescription || undefined,
         activeWorkflow?.conversationHistory,
         subAgentFlows,
-        contextFork,
+        slashCommandContext,
         slashCommandModel
       );
 
@@ -187,8 +187,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           setWorkflowName(workflow.name);
           // Load description from workflow (default to empty string if not present)
           setWorkflowDescription(workflow.description || '');
-          // Load contextFork from slashCommandOptions (default to false if not present)
-          setContextFork(workflow.slashCommandOptions?.contextFork ?? false);
+          // Load context from slashCommandOptions (default to 'default' if not present)
+          setSlashCommandContext(workflow.slashCommandOptions?.context ?? 'default');
           // Load model from slashCommandOptions (default to 'default' if not present)
           setSlashCommandModel(workflow.slashCommandOptions?.model ?? 'default');
           // Set as active workflow to preserve conversation history
@@ -223,7 +223,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setActiveWorkflow,
     setWorkflowName,
     setWorkflowDescription,
-    setContextFork,
+    setSlashCommandContext,
     setSlashCommandModel,
   ]);
 
@@ -256,10 +256,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setIsExporting(true);
     try {
       // Issue #89: Get subAgentFlows from store for export
-      const { subAgentFlows, workflowDescription, contextFork, slashCommandModel } =
+      const { subAgentFlows, workflowDescription, slashCommandContext, slashCommandModel } =
         useWorkflowStore.getState();
 
-      // Serialize workflow with subAgentFlows and contextFork
+      // Serialize workflow with subAgentFlows and context
       const workflow = serializeWorkflow(
         nodes,
         edges,
@@ -267,7 +267,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         workflowDescription || undefined,
         undefined, // conversationHistory not needed for export
         subAgentFlows,
-        contextFork,
+        slashCommandContext,
         slashCommandModel
       );
 
@@ -320,10 +320,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setIsRunning(true);
     try {
       // Issue #89: Get subAgentFlows from store for run
-      const { subAgentFlows, workflowDescription, contextFork, slashCommandModel } =
+      const { subAgentFlows, workflowDescription, slashCommandContext, slashCommandModel } =
         useWorkflowStore.getState();
 
-      // Serialize workflow with subAgentFlows and contextFork
+      // Serialize workflow with subAgentFlows and context
       const workflow = serializeWorkflow(
         nodes,
         edges,
@@ -331,7 +331,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         workflowDescription || undefined,
         undefined, // conversationHistory not needed for run
         subAgentFlows,
-        contextFork,
+        slashCommandContext,
         slashCommandModel
       );
 
@@ -452,7 +452,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       workflowDescription || undefined,
       activeWorkflow?.conversationHistory,
       subAgentFlows,
-      contextFork,
+      slashCommandContext,
       slashCommandModel
     );
     setActiveWorkflow(currentWorkflow);
@@ -475,7 +475,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     workflowDescription,
     activeWorkflow?.conversationHistory,
     subAgentFlows,
-    contextFork,
+    slashCommandContext,
     slashCommandModel,
     setActiveWorkflow,
     loadConversationHistory,
@@ -706,8 +706,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
             {/* Options Dropdown (separate with small gap) */}
             <SlashCommandOptionsDropdown
-              contextFork={contextFork}
-              onToggleContextFork={() => setContextFork(!contextFork)}
+              context={slashCommandContext}
+              onContextChange={setSlashCommandContext}
               model={slashCommandModel}
               onModelChange={setSlashCommandModel}
             />
