@@ -48,6 +48,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Toolbar errors
   'toolbar.error.workflowNameRequired': 'Workflow name is required',
+  'toolbar.error.workflowNameInvalid':
+    'Use only lowercase letters (a-z), numbers, hyphens, and underscores',
   'toolbar.error.workflowNameRequiredForExport': 'Workflow name is required for export',
   'toolbar.error.selectWorkflowToLoad': 'Please select a workflow to load',
   'toolbar.error.validationFailed': 'Workflow validation failed',
@@ -125,7 +127,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'error.subAgentFlow.nameRequired': 'Name is required',
   'error.subAgentFlow.nameTooLong': 'Name must be 50 characters or less',
   'error.subAgentFlow.invalidName':
-    'Name must contain only letters, numbers, hyphens, and underscores',
+    'Name must contain only lowercase letters (a-z), numbers, hyphens, and underscores',
 
   // Quick start instructions
   'palette.nestedNotAllowed': 'Not available in Sub-Agent Flow (nesting not supported)',

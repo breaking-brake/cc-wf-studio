@@ -242,8 +242,8 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
   const [isGeneratingName, setIsGeneratingName] = useState(false);
   const generationNameRequestIdRef = useRef<string | null>(null);
 
-  // Sub-Agent Flow name pattern validation
-  const SUBAGENTFLOW_NAME_PATTERN = /^[a-zA-Z0-9_-]+$/;
+  // Sub-Agent Flow name pattern validation (lowercase only for cross-platform compatibility)
+  const SUBAGENTFLOW_NAME_PATTERN = /^[a-z0-9_-]+$/;
 
   // Handle name change with validation (local state only, saved on submit)
   const handleNameChange = useCallback(

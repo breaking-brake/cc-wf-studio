@@ -448,6 +448,7 @@ export const VALIDATION_RULES = {
     MAX_NODES: 50,
     NAME_MIN_LENGTH: 1,
     NAME_MAX_LENGTH: 100,
+    NAME_PATTERN: /^[a-z0-9_-]+$/, // Lowercase only (for cross-platform file system compatibility)
     VERSION_PATTERN: /^\d+\.\d+\.\d+$/,
   },
   NODE: {
@@ -518,7 +519,7 @@ export const VALIDATION_RULES = {
   SUB_AGENT_FLOW: {
     NAME_MIN_LENGTH: 1,
     NAME_MAX_LENGTH: 50,
-    NAME_PATTERN: /^[a-zA-Z0-9_-]+$/, // Alphanumeric, hyphens, underscores only
+    NAME_PATTERN: /^[a-z0-9_-]+$/, // Lowercase only (for cross-platform file system compatibility)
     DESCRIPTION_MAX_LENGTH: 200,
     MAX_NODES: 30, // Smaller than main workflow
     // Node-specific validation (for SubAgentFlow reference nodes)

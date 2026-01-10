@@ -48,6 +48,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
 
   // Toolbar errors
   'toolbar.error.workflowNameRequired': '工作流名称必填',
+  'toolbar.error.workflowNameInvalid': '只能使用英文小写字母(a-z)、数字、连字符和下划线',
   'toolbar.error.workflowNameRequiredForExport': '导出需要工作流名称',
   'toolbar.error.selectWorkflowToLoad': '请选择要加载的工作流',
   'toolbar.error.validationFailed': '工作流验证失败',
@@ -122,7 +123,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // SubAgentFlow validation errors
   'error.subAgentFlow.nameRequired': '名称为必填项',
   'error.subAgentFlow.nameTooLong': '名称不能超过50个字符',
-  'error.subAgentFlow.invalidName': '名称只能包含字母、数字、连字符和下划线',
+  'error.subAgentFlow.invalidName': '名称只能包含英文小写字母(a-z)、数字、连字符和下划线',
 
   // Quick start instructions
   'palette.nestedNotAllowed': '在子代理流程中不可用（不支持嵌套）',

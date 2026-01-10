@@ -77,7 +77,24 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isGeneratingName, setIsGeneratingName] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [workflowNameError, setWorkflowNameError] = useState<string | null>(null);
   const generationNameRequestIdRef = useRef<string | null>(null);
+
+  // Workflow name validation pattern (lowercase, numbers, hyphens, underscores only)
+  const WORKFLOW_NAME_PATTERN = /^[a-z0-9_-]*$/;
+
+  // Handle workflow name change with validation
+  const handleWorkflowNameChange = useCallback(
+    (value: string) => {
+      setWorkflowName(value);
+      if (value && !WORKFLOW_NAME_PATTERN.test(value)) {
+        setWorkflowNameError(t('toolbar.error.workflowNameInvalid'));
+      } else {
+        setWorkflowNameError(null);
+      }
+    },
+    [setWorkflowName, t]
+  );
 
   // Handle reset workflow
   const handleResetWorkflow = useCallback(() => {
@@ -91,6 +108,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       onError({
         code: 'VALIDATION_ERROR',
         message: t('toolbar.error.workflowNameRequired'),
+      });
+      return;
+    }
+
+    // Validate workflow name pattern (lowercase only)
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
       });
       return;
     }
@@ -198,6 +224,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       return;
     }
 
+    // Validate workflow name pattern (lowercase only)
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
+      });
+      return;
+    }
+
     setIsExporting(true);
     try {
       // Issue #89: Get subAgentFlows from store for export
@@ -246,6 +281,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       onError({
         code: 'VALIDATION_ERROR',
         message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    // Validate workflow name pattern (lowercase only)
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
       });
       return;
     }
@@ -457,9 +501,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <div style={{ flex: 1, minWidth: 0 }}>
               <EditableNameField
                 value={workflowName}
-                onChange={setWorkflowName}
+                onChange={handleWorkflowNameChange}
                 placeholder={t('toolbar.workflowNamePlaceholder')}
                 disabled={isGeneratingName}
+                error={workflowNameError}
                 dataTour="workflow-name-input"
                 aiGeneration={{
                   isGenerating: isGeneratingName,

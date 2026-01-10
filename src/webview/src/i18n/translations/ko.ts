@@ -48,6 +48,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Toolbar errors
   'toolbar.error.workflowNameRequired': '워크플로 이름이 필요합니다',
+  'toolbar.error.workflowNameInvalid': '영문 소문자(a-z), 숫자, 하이픈, 밑줄만 사용할 수 있습니다',
   'toolbar.error.workflowNameRequiredForExport': '내보내기에는 워크플로 이름이 필요합니다',
   'toolbar.error.selectWorkflowToLoad': '불러올 워크플로를 선택하세요',
   'toolbar.error.validationFailed': '워크플로 검증에 실패했습니다',
@@ -125,7 +126,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // SubAgentFlow validation errors
   'error.subAgentFlow.nameRequired': '이름은 필수입니다',
   'error.subAgentFlow.nameTooLong': '이름은 50자 이하여야 합니다',
-  'error.subAgentFlow.invalidName': '이름은 영문자, 숫자, 하이픈, 밑줄만 사용할 수 있습니다',
+  'error.subAgentFlow.invalidName':
+    '이름은 영문 소문자(a-z), 숫자, 하이픈, 밑줄만 사용할 수 있습니다',
 
   // Quick start instructions
   'palette.nestedNotAllowed': '서브 에이전트 플로우에서 사용할 수 없습니다 (중첩 미지원)',

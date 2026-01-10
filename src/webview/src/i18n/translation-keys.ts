@@ -46,6 +46,7 @@ export interface WebviewTranslationKeys {
 
   // Toolbar errors
   'toolbar.error.workflowNameRequired': string;
+  'toolbar.error.workflowNameInvalid': string;
   'toolbar.error.workflowNameRequiredForExport': string;
   'toolbar.error.selectWorkflowToLoad': string;
   'toolbar.error.validationFailed': string;

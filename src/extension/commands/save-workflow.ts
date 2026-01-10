@@ -111,11 +111,11 @@ function validateWorkflow(workflow: Workflow): void {
     throw new Error('Workflow name is required');
   }
 
-  // Validate name format (alphanumeric, hyphen, underscore only)
-  const namePattern = /^[a-zA-Z0-9_-]+$/;
+  // Validate name format (lowercase, numbers, hyphen, underscore only)
+  const namePattern = /^[a-z0-9_-]+$/;
   if (!namePattern.test(workflow.name)) {
     throw new Error(
-      'Workflow name must contain only alphanumeric characters, hyphens, and underscores'
+      'Workflow name must contain only lowercase letters, numbers, hyphens, and underscores'
     );
   }
 
