@@ -64,6 +64,25 @@ export interface WebviewTranslationKeys {
   'toolbar.model.tooltip': string;
   'toolbar.contextFork.tooltip': string;
 
+  // Toolbar hooks configuration dropdown
+  'hooks.title': string;
+  'hooks.tooltip': string;
+  'hooks.preToolUse': string;
+  'hooks.preToolUse.description': string;
+  'hooks.postToolUse': string;
+  'hooks.postToolUse.description': string;
+  'hooks.stop': string;
+  'hooks.stop.description': string;
+  'hooks.addEntry': string;
+  'hooks.removeEntry': string;
+  'hooks.matcher.description': string;
+  'hooks.once.description': string;
+  'hooks.noEntries': string;
+  'hooks.entryCount': string;
+  'hooks.validation.commandRequired': string;
+  'hooks.validation.commandTooLong': string;
+  'hooks.validation.matcherRequired': string;
+
   // Toolbar more actions dropdown
   'toolbar.moreActions': string;
   'toolbar.help': string;

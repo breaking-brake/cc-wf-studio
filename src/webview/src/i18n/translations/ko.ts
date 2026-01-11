@@ -68,6 +68,25 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.model.tooltip': '실행에 사용할 모델 지정',
   'toolbar.contextFork.tooltip': '분리된 서브 에이전트 컨텍스트에서 실행 (Claude Code v2.1.0+)',
 
+  // Toolbar hooks configuration dropdown
+  'hooks.title': 'Hooks',
+  'hooks.tooltip': '특정 실행 시점에 실행할 명령 구성',
+  'hooks.preToolUse': 'PreToolUse',
+  'hooks.preToolUse.description': '도구가 실행되기 전에 실행되는 명령',
+  'hooks.postToolUse': 'PostToolUse',
+  'hooks.postToolUse.description': '도구가 실행된 후에 실행되는 명령',
+  'hooks.stop': 'Stop',
+  'hooks.stop.description': '에이전트가 중지될 때 실행되는 명령',
+  'hooks.addEntry': '추가',
+  'hooks.removeEntry': '삭제',
+  'hooks.matcher.description': '일치할 도구 이름 패턴',
+  'hooks.once.description': '세션당 한 번만 실행',
+  'hooks.noEntries': '구성된 훅 없음',
+  'hooks.entryCount': '{count}개의 훅',
+  'hooks.validation.commandRequired': 'command는 필수입니다',
+  'hooks.validation.commandTooLong': 'command가 최대 길이를 초과했습니다',
+  'hooks.validation.matcherRequired': '이 훅 유형에는 matcher가 필수입니다',
+
   // Toolbar more actions dropdown
   'toolbar.moreActions': '더보기',
   'toolbar.help': '도움말',

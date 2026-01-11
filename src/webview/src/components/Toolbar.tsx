@@ -62,10 +62,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     subAgentFlows,
     isFocusMode,
     toggleFocusMode,
-    slashCommandContext,
+    slashCommandOptions,
+    setSlashCommandOptions,
     setSlashCommandContext,
-    slashCommandModel,
     setSlashCommandModel,
+    addHookEntry,
+    removeHookEntry,
+    updateHookEntry,
   } = useWorkflowStore();
   const {
     isProcessing,
@@ -129,10 +132,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setIsSaving(true);
     try {
       // Issue #89: Get subAgentFlows from store
-      const { subAgentFlows, workflowDescription, slashCommandContext, slashCommandModel } =
+      // Issue #413: Get slashCommandOptions from store
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
         useWorkflowStore.getState();
 
       // Phase 5 (T024): Serialize workflow with conversation history and subAgentFlows
+      // Issue #413: Include slashCommandOptions (context, model, hooks)
       const workflow = serializeWorkflow(
         nodes,
         edges,
@@ -140,8 +145,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         workflowDescription || undefined,
         activeWorkflow?.conversationHistory,
         subAgentFlows,
-        slashCommandContext,
-        slashCommandModel
+        slashCommandOptions
       );
 
       // Validate workflow before saving
@@ -187,10 +191,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           setWorkflowName(workflow.name);
           // Load description from workflow (default to empty string if not present)
           setWorkflowDescription(workflow.description || '');
-          // Load context from slashCommandOptions (default to 'default' if not present)
-          setSlashCommandContext(workflow.slashCommandOptions?.context ?? 'default');
-          // Load model from slashCommandOptions (default to 'default' if not present)
-          setSlashCommandModel(workflow.slashCommandOptions?.model ?? 'default');
+          // Issue #413: Load slashCommandOptions (context, model, hooks) as unified object
+          setSlashCommandOptions({
+            context: workflow.slashCommandOptions?.context ?? 'default',
+            model: workflow.slashCommandOptions?.model ?? 'default',
+            hooks: workflow.slashCommandOptions?.hooks,
+          });
           // Set as active workflow to preserve conversation history
           setActiveWorkflow(workflow);
         }
@@ -223,8 +229,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setActiveWorkflow,
     setWorkflowName,
     setWorkflowDescription,
-    setSlashCommandContext,
-    setSlashCommandModel,
+    setSlashCommandOptions,
   ]);
 
   const handleLoadWorkflow = () => {
@@ -256,10 +261,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setIsExporting(true);
     try {
       // Issue #89: Get subAgentFlows from store for export
-      const { subAgentFlows, workflowDescription, slashCommandContext, slashCommandModel } =
+      // Issue #413: Get slashCommandOptions from store for export
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
         useWorkflowStore.getState();
 
-      // Serialize workflow with subAgentFlows and context
+      // Serialize workflow with subAgentFlows and slashCommandOptions
       const workflow = serializeWorkflow(
         nodes,
         edges,
@@ -267,8 +273,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         workflowDescription || undefined,
         undefined, // conversationHistory not needed for export
         subAgentFlows,
-        slashCommandContext,
-        slashCommandModel
+        slashCommandOptions
       );
 
       // Validate workflow before export
@@ -320,10 +325,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setIsRunning(true);
     try {
       // Issue #89: Get subAgentFlows from store for run
-      const { subAgentFlows, workflowDescription, slashCommandContext, slashCommandModel } =
+      // Issue #413: Get slashCommandOptions from store for run
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
         useWorkflowStore.getState();
 
-      // Serialize workflow with subAgentFlows and context
+      // Serialize workflow with subAgentFlows and slashCommandOptions
       const workflow = serializeWorkflow(
         nodes,
         edges,
@@ -331,8 +337,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         workflowDescription || undefined,
         undefined, // conversationHistory not needed for run
         subAgentFlows,
-        slashCommandContext,
-        slashCommandModel
+        slashCommandOptions
       );
 
       // Validate workflow before run
@@ -445,6 +450,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
     // Serialize current workflow state to set as active workflow
     // Include subAgentFlows to preserve SubAgentFlow references
+    // Issue #413: Include slashCommandOptions configuration
     const currentWorkflow = serializeWorkflow(
       nodes,
       edges,
@@ -452,8 +458,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       workflowDescription || undefined,
       activeWorkflow?.conversationHistory,
       subAgentFlows,
-      slashCommandContext,
-      slashCommandModel
+      slashCommandOptions
     );
     setActiveWorkflow(currentWorkflow);
 
@@ -475,8 +480,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     workflowDescription,
     activeWorkflow?.conversationHistory,
     subAgentFlows,
-    slashCommandContext,
-    slashCommandModel,
+    slashCommandOptions,
     setActiveWorkflow,
     loadConversationHistory,
     initConversation,
@@ -705,11 +709,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             </div>
 
             {/* Options Dropdown (separate with small gap) */}
+            {/* Issue #413: Hooks are now integrated into SlashCommandOptionsDropdown */}
             <SlashCommandOptionsDropdown
-              context={slashCommandContext}
+              context={slashCommandOptions.context ?? 'default'}
               onContextChange={setSlashCommandContext}
-              model={slashCommandModel}
+              model={slashCommandOptions.model ?? 'default'}
               onModelChange={setSlashCommandModel}
+              hooks={slashCommandOptions.hooks ?? {}}
+              onAddHookEntry={addHookEntry}
+              onRemoveHookEntry={removeHookEntry}
+              onUpdateHookEntry={updateHookEntry}
             />
           </div>
         </div>

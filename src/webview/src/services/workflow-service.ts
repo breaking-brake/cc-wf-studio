@@ -8,8 +8,7 @@
 import type {
   Connection,
   ConversationHistory,
-  SlashCommandContext,
-  SlashCommandModel,
+  SlashCommandOptions,
   SubAgentFlow,
   Workflow,
   WorkflowNode,
@@ -25,8 +24,7 @@ import type { Edge, Node } from 'reactflow';
  * @param workflowDescription - Workflow description
  * @param conversationHistory - Optional conversation history to preserve
  * @param subAgentFlows - Optional sub-agent flows to include
- * @param context - Optional context mode for Slash Command execution
- * @param model - Optional model to use for Slash Command execution
+ * @param slashCommandOptions - Optional slash command options (context, model, hooks)
  * @returns Workflow definition
  */
 export function serializeWorkflow(
@@ -36,8 +34,7 @@ export function serializeWorkflow(
   workflowDescription?: string,
   conversationHistory?: ConversationHistory,
   subAgentFlows?: SubAgentFlow[],
-  context?: SlashCommandContext,
-  model?: SlashCommandModel
+  slashCommandOptions?: SlashCommandOptions
 ): Workflow {
   // Convert React Flow nodes to WorkflowNodes
   const workflowNodes: WorkflowNode[] = nodes.map((node) => ({
@@ -58,6 +55,15 @@ export function serializeWorkflow(
     condition: edge.data?.condition,
   }));
 
+  // Build slashCommandOptions only if any non-default value is set
+  const context = slashCommandOptions?.context;
+  const model = slashCommandOptions?.model;
+  const hooks = slashCommandOptions?.hooks;
+  const hasNonDefaultOptions =
+    (context && context !== 'default') ||
+    (model && model !== 'default') ||
+    (hooks && Object.keys(hooks).length > 0);
+
   // Create workflow object
   const workflow: Workflow = {
     id: `workflow-${Date.now()}`,
@@ -72,14 +78,14 @@ export function serializeWorkflow(
     conversationHistory,
     // Issue #89: Include subAgentFlows if provided
     subAgentFlows,
-    // Include slashCommandOptions if any option is set
-    slashCommandOptions:
-      (context && context !== 'default') || (model && model !== 'default')
-        ? {
-            ...(context && context !== 'default' && { context }),
-            ...(model && model !== 'default' && { model }),
-          }
-        : undefined,
+    // Issue #413: Include slashCommandOptions if any non-default option is set
+    slashCommandOptions: hasNonDefaultOptions
+      ? {
+          ...(context && context !== 'default' && { context }),
+          ...(model && model !== 'default' && { model }),
+          ...(hooks && Object.keys(hooks).length > 0 && { hooks }),
+        }
+      : undefined,
   };
 
   return workflow;

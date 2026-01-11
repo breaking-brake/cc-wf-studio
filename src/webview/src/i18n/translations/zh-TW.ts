@@ -66,6 +66,25 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.model.tooltip': '指定執行時使用的模型',
   'toolbar.contextFork.tooltip': '在隔離的子代理上下文中運行 (Claude Code v2.1.0+)',
 
+  // Toolbar hooks configuration dropdown
+  'hooks.title': 'Hooks',
+  'hooks.tooltip': '配置在特定執行點運行的命令',
+  'hooks.preToolUse': 'PreToolUse',
+  'hooks.preToolUse.description': '在工具執行前運行的命令',
+  'hooks.postToolUse': 'PostToolUse',
+  'hooks.postToolUse.description': '在工具執行後運行的命令',
+  'hooks.stop': 'Stop',
+  'hooks.stop.description': '代理停止時運行的命令',
+  'hooks.addEntry': '新增',
+  'hooks.removeEntry': '刪除',
+  'hooks.matcher.description': '要匹配的工具名稱模式',
+  'hooks.once.description': '每個會話只運行一次',
+  'hooks.noEntries': '未配置鉤子',
+  'hooks.entryCount': '{count} 個鉤子',
+  'hooks.validation.commandRequired': 'command 是必填項',
+  'hooks.validation.commandTooLong': 'command 超過最大長度',
+  'hooks.validation.matcherRequired': '此鉤子類型需要 matcher',
+
   // Toolbar more actions dropdown
   'toolbar.moreActions': '更多',
   'toolbar.help': '說明',

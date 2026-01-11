@@ -7,6 +7,7 @@
 
 import {
   type Connection,
+  type HookType,
   type McpNodeData,
   NodeType,
   type SkillNodeData,
@@ -15,6 +16,7 @@ import {
   type SwitchNodeData,
   VALIDATION_RULES,
   type Workflow,
+  type WorkflowHooks,
   type WorkflowNode,
 } from '../../shared/types/workflow-definition';
 
@@ -136,6 +138,12 @@ export function validateAIGeneratedWorkflow(workflow: unknown): ValidationResult
   // SubAgentFlow reference validation
   const subAgentFlowErrors = validateSubAgentFlowReferences(wf as Workflow);
   errors.push(...subAgentFlowErrors);
+
+  // Issue #413: Hooks validation
+  if (wf.hooks) {
+    const hooksErrors = validateHooks(wf.hooks);
+    errors.push(...hooksErrors);
+  }
 
   return {
     valid: errors.length === 0,
@@ -832,6 +840,172 @@ function validateConnections(connections: Connection[], nodes: WorkflowNode[]): 
 
   // Check for cycles (simplified check - full cycle detection would be more complex)
   // For MVP, we'll rely on the AI to generate acyclic workflows
+
+  return errors;
+}
+
+/**
+ * Validate hooks configuration
+ *
+ * Issue #413: Hooks configuration for workflow execution
+ * See: https://code.claude.com/docs/en/hooks
+ *
+ * @param hooks - Hooks configuration to validate
+ * @returns Array of validation errors
+ */
+function validateHooks(hooks: WorkflowHooks): ValidationError[] {
+  const errors: ValidationError[] = [];
+
+  const validHookTypes: HookType[] = ['PreToolUse', 'PostToolUse', 'Stop'];
+  const validActionTypes = ['command', 'prompt'];
+
+  for (const [hookType, entries] of Object.entries(hooks)) {
+    // Validate hook type
+    if (!validHookTypes.includes(hookType as HookType)) {
+      errors.push({
+        code: 'HOOKS_INVALID_TYPE',
+        message: `Invalid hook type: ${hookType}. Must be one of: ${validHookTypes.join(', ')}`,
+        field: `hooks.${hookType}`,
+      });
+      continue;
+    }
+
+    // Validate entries array
+    if (!Array.isArray(entries)) {
+      errors.push({
+        code: 'HOOKS_INVALID_ENTRIES',
+        message: `Hook ${hookType} entries must be an array`,
+        field: `hooks.${hookType}`,
+      });
+      continue;
+    }
+
+    // Validate max entries per hook
+    if (entries.length > VALIDATION_RULES.HOOKS.MAX_ENTRIES_PER_HOOK) {
+      errors.push({
+        code: 'HOOKS_TOO_MANY_ENTRIES',
+        message: `Hook ${hookType} exceeds maximum of ${VALIDATION_RULES.HOOKS.MAX_ENTRIES_PER_HOOK} entries`,
+        field: `hooks.${hookType}`,
+      });
+    }
+
+    // Validate each entry
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+
+      if (!entry || typeof entry !== 'object') {
+        errors.push({
+          code: 'HOOKS_INVALID_ENTRY',
+          message: `Hook ${hookType}[${i}] must be an object`,
+          field: `hooks.${hookType}[${i}]`,
+        });
+        continue;
+      }
+
+      // Validate matcher (optional for all hook types, but check length if provided)
+      if (entry.matcher) {
+        if (typeof entry.matcher !== 'string') {
+          errors.push({
+            code: 'HOOKS_INVALID_MATCHER',
+            message: `Hook ${hookType}[${i}] matcher must be a string`,
+            field: `hooks.${hookType}[${i}].matcher`,
+          });
+        } else if (entry.matcher.length > VALIDATION_RULES.HOOKS.MATCHER_MAX_LENGTH) {
+          errors.push({
+            code: 'HOOKS_MATCHER_TOO_LONG',
+            message: `Hook ${hookType}[${i}] matcher exceeds ${VALIDATION_RULES.HOOKS.MATCHER_MAX_LENGTH} characters`,
+            field: `hooks.${hookType}[${i}].matcher`,
+          });
+        }
+      }
+
+      // Validate hooks array (actions)
+      if (!entry.hooks || !Array.isArray(entry.hooks)) {
+        errors.push({
+          code: 'HOOKS_MISSING_ACTIONS',
+          message: `Hook ${hookType}[${i}] must have a hooks array`,
+          field: `hooks.${hookType}[${i}].hooks`,
+        });
+        continue;
+      }
+
+      if (entry.hooks.length === 0) {
+        errors.push({
+          code: 'HOOKS_EMPTY_ACTIONS',
+          message: `Hook ${hookType}[${i}].hooks cannot be empty`,
+          field: `hooks.${hookType}[${i}].hooks`,
+        });
+      }
+
+      if (entry.hooks.length > VALIDATION_RULES.HOOKS.MAX_ACTIONS_PER_ENTRY) {
+        errors.push({
+          code: 'HOOKS_TOO_MANY_ACTIONS',
+          message: `Hook ${hookType}[${i}].hooks exceeds maximum of ${VALIDATION_RULES.HOOKS.MAX_ACTIONS_PER_ENTRY} actions`,
+          field: `hooks.${hookType}[${i}].hooks`,
+        });
+      }
+
+      // Validate each action
+      for (let j = 0; j < entry.hooks.length; j++) {
+        const action = entry.hooks[j];
+
+        if (!action || typeof action !== 'object') {
+          errors.push({
+            code: 'HOOKS_INVALID_ACTION',
+            message: `Hook ${hookType}[${i}].hooks[${j}] must be an object`,
+            field: `hooks.${hookType}[${i}].hooks[${j}]`,
+          });
+          continue;
+        }
+
+        // Validate action type
+        if (!action.type || !validActionTypes.includes(action.type)) {
+          errors.push({
+            code: 'HOOKS_INVALID_ACTION_TYPE',
+            message: `Hook ${hookType}[${i}].hooks[${j}].type must be one of: ${validActionTypes.join(', ')}`,
+            field: `hooks.${hookType}[${i}].hooks[${j}].type`,
+          });
+        }
+
+        // Validate command (required for type: 'command')
+        if (action.type === 'command') {
+          if (!action.command || typeof action.command !== 'string') {
+            errors.push({
+              code: 'HOOKS_MISSING_COMMAND',
+              message: `Hook ${hookType}[${i}].hooks[${j}] requires a command string`,
+              field: `hooks.${hookType}[${i}].hooks[${j}].command`,
+            });
+          } else {
+            // Validate command length
+            if (action.command.length < VALIDATION_RULES.HOOKS.COMMAND_MIN_LENGTH) {
+              errors.push({
+                code: 'HOOKS_COMMAND_EMPTY',
+                message: `Hook ${hookType}[${i}].hooks[${j}].command cannot be empty`,
+                field: `hooks.${hookType}[${i}].hooks[${j}].command`,
+              });
+            }
+
+            if (action.command.length > VALIDATION_RULES.HOOKS.COMMAND_MAX_LENGTH) {
+              errors.push({
+                code: 'HOOKS_COMMAND_TOO_LONG',
+                message: `Hook ${hookType}[${i}].hooks[${j}].command exceeds ${VALIDATION_RULES.HOOKS.COMMAND_MAX_LENGTH} characters`,
+                field: `hooks.${hookType}[${i}].hooks[${j}].command`,
+              });
+            }
+          }
+        }
+
+        // Validate once (optional boolean)
+        if (action.once !== undefined && typeof action.once !== 'boolean') {
+          errors.push({
+            code: 'HOOKS_INVALID_ONCE',
+            message: `Hook ${hookType}[${i}].hooks[${j}].once must be a boolean`,
+            field: `hooks.${hookType}[${i}].hooks[${j}].once`,
+          });
+        }
+      }
+    }
+  }
 
   return errors;
 }

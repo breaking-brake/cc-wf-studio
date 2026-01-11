@@ -69,6 +69,25 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.model.tooltip': 'Specify the model to use for execution',
   'toolbar.contextFork.tooltip': 'Run in isolated sub-agent context (Claude Code v2.1.0+)',
 
+  // Toolbar hooks configuration dropdown
+  'hooks.title': 'Hooks',
+  'hooks.tooltip': 'Configure commands to run at specific execution points',
+  'hooks.preToolUse': 'PreToolUse',
+  'hooks.preToolUse.description': 'Commands to run before a tool is executed',
+  'hooks.postToolUse': 'PostToolUse',
+  'hooks.postToolUse.description': 'Commands to run after a tool is executed',
+  'hooks.stop': 'Stop',
+  'hooks.stop.description': 'Commands to run when the agent stops',
+  'hooks.addEntry': 'Add',
+  'hooks.removeEntry': 'Remove',
+  'hooks.matcher.description': 'Tool name pattern to match',
+  'hooks.once.description': 'Run only once per session',
+  'hooks.noEntries': 'No hooks configured',
+  'hooks.entryCount': '{count} hook(s)',
+  'hooks.validation.commandRequired': 'command is required',
+  'hooks.validation.commandTooLong': 'command exceeds maximum length',
+  'hooks.validation.matcherRequired': 'matcher is required for this hook type',
+
   // Toolbar more actions dropdown
   'toolbar.moreActions': 'More',
   'toolbar.help': 'Help',

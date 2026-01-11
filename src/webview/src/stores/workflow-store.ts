@@ -9,9 +9,13 @@ import type { McpNodeData } from '@shared/types/mcp-node';
 import { normalizeMcpNodeData } from '@shared/types/mcp-node';
 import type { Workflow } from '@shared/types/messages';
 import type {
+  HookEntry,
+  HookType,
   SlashCommandContext,
   SlashCommandModel,
+  SlashCommandOptions,
   SubAgentFlow,
+  WorkflowHooks,
   WorkflowNode,
 } from '@shared/types/workflow-definition';
 import { NodeType } from '@shared/types/workflow-definition';
@@ -55,10 +59,8 @@ interface WorkflowStore {
   isMinimapVisible: boolean;
   isDescriptionPanelVisible: boolean;
   isFocusMode: boolean;
-  /** Context mode for Slash Command execution */
-  slashCommandContext: SlashCommandContext;
-  /** Model to use for Slash Command execution */
-  slashCommandModel: SlashCommandModel;
+  /** Slash Command export options (context, model, hooks) */
+  slashCommandOptions: SlashCommandOptions;
   lastAddedNodeId: string | null;
 
   // Sub-Agent Flow State (Feature: 089-subworkflow)
@@ -84,8 +86,13 @@ interface WorkflowStore {
   toggleMinimapVisibility: () => void;
   toggleDescriptionPanelVisibility: () => void;
   toggleFocusMode: () => void;
+  setSlashCommandOptions: (options: SlashCommandOptions) => void;
   setSlashCommandContext: (value: SlashCommandContext) => void;
   setSlashCommandModel: (value: SlashCommandModel) => void;
+  setHooks: (hooks: WorkflowHooks) => void;
+  addHookEntry: (hookType: HookType, matcher: string, command: string, once?: boolean) => void;
+  removeHookEntry: (hookType: HookType, entryIndex: number) => void;
+  updateHookEntry: (hookType: HookType, entryIndex: number, entry: Partial<HookEntry>) => void;
 
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
@@ -259,8 +266,11 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     const saved = localStorage.getItem('cc-wf-studio.focusMode');
     return saved !== null ? saved === 'true' : false; // Default: off
   })(),
-  slashCommandContext: 'default',
-  slashCommandModel: 'default',
+  slashCommandOptions: {
+    context: 'default',
+    model: 'default',
+    hooks: undefined,
+  },
   lastAddedNodeId: null,
 
   // Sub-Agent Flow Initial State (Feature: 089-subworkflow)
@@ -365,10 +375,78 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set({ isFocusMode: newValue });
   },
 
-  setSlashCommandContext: (slashCommandContext: SlashCommandContext) =>
-    set({ slashCommandContext }),
+  setSlashCommandOptions: (options: SlashCommandOptions) => set({ slashCommandOptions: options }),
 
-  setSlashCommandModel: (slashCommandModel: SlashCommandModel) => set({ slashCommandModel }),
+  setSlashCommandContext: (context: SlashCommandContext) =>
+    set((state) => ({
+      slashCommandOptions: { ...state.slashCommandOptions, context },
+    })),
+
+  setSlashCommandModel: (model: SlashCommandModel) =>
+    set((state) => ({
+      slashCommandOptions: { ...state.slashCommandOptions, model },
+    })),
+
+  setHooks: (hooks: WorkflowHooks) =>
+    set((state) => ({
+      slashCommandOptions: { ...state.slashCommandOptions, hooks },
+    })),
+
+  addHookEntry: (hookType: HookType, matcher: string, command: string, once?: boolean) => {
+    const currentHooks = get().slashCommandOptions.hooks || {};
+    const existing = currentHooks[hookType] || [];
+    const newEntry: HookEntry = {
+      matcher: matcher || undefined,
+      hooks: [
+        {
+          type: 'command',
+          command,
+          once: once || undefined,
+        },
+      ],
+    };
+    set((state) => ({
+      slashCommandOptions: {
+        ...state.slashCommandOptions,
+        hooks: {
+          ...currentHooks,
+          [hookType]: [...existing, newEntry],
+        },
+      },
+    }));
+  },
+
+  removeHookEntry: (hookType: HookType, entryIndex: number) => {
+    const currentHooks = get().slashCommandOptions.hooks || {};
+    const existing = currentHooks[hookType] || [];
+    const updated = existing.filter((_, i) => i !== entryIndex);
+    if (updated.length === 0) {
+      const { [hookType]: _, ...rest } = currentHooks;
+      const newHooks = Object.keys(rest).length > 0 ? rest : undefined;
+      set((state) => ({
+        slashCommandOptions: { ...state.slashCommandOptions, hooks: newHooks },
+      }));
+    } else {
+      set((state) => ({
+        slashCommandOptions: {
+          ...state.slashCommandOptions,
+          hooks: { ...currentHooks, [hookType]: updated },
+        },
+      }));
+    }
+  },
+
+  updateHookEntry: (hookType: HookType, entryIndex: number, entry: Partial<HookEntry>) => {
+    const currentHooks = get().slashCommandOptions.hooks || {};
+    const existing = currentHooks[hookType] || [];
+    const updated = existing.map((h, i) => (i === entryIndex ? { ...h, ...entry } : h));
+    set((state) => ({
+      slashCommandOptions: {
+        ...state.slashCommandOptions,
+        hooks: { ...currentHooks, [hookType]: updated },
+      },
+    }));
+  },
 
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => {
@@ -457,8 +535,11 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       edges: [],
       selectedNodeId: null,
       workflowDescription: '', // Reset description
-      slashCommandContext: 'default', // Reset context setting
-      slashCommandModel: 'default', // Reset model setting
+      slashCommandOptions: {
+        context: 'default',
+        model: 'default',
+        hooks: undefined,
+      },
       // Sub-Agent Flow関連の状態をクリア
       subAgentFlows: [],
       activeSubAgentFlowId: null,

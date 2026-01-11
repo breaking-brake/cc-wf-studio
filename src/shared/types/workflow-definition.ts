@@ -53,6 +53,45 @@ export interface SlashCommandOptions {
   context?: SlashCommandContext;
   /** Model to use for Slash Command execution. 'default' means no model line in output */
   model?: SlashCommandModel;
+  /** Hooks configuration for workflow execution */
+  hooks?: WorkflowHooks;
+}
+
+// ============================================================================
+// Hooks Configuration Types (Claude Code Docs compliant)
+// https://code.claude.com/docs/en/hooks
+// ============================================================================
+
+/** Supported hook types for workflow execution (frontmatter-compatible only) */
+export type HookType = 'PreToolUse' | 'PostToolUse' | 'Stop';
+
+/** Single hook action definition */
+export interface HookAction {
+  /** Hook type: 'command' for shell commands, 'prompt' for LLM-based (Stop only) */
+  type: 'command' | 'prompt';
+  /** Shell command to execute (required for type: 'command') */
+  command: string;
+  /** Run hook only once per session (optional) */
+  once?: boolean;
+}
+
+/** Hook entry with matcher and actions */
+export interface HookEntry {
+  /** Tool name pattern to match (e.g., "Bash", "Edit|Write", "*")
+   *  Required for PreToolUse/PostToolUse, optional for Stop */
+  matcher?: string;
+  /** Array of hook actions to execute */
+  hooks: HookAction[];
+}
+
+/** Hooks configuration for workflow execution */
+export interface WorkflowHooks {
+  /** Hooks to execute before a tool is used */
+  PreToolUse?: HookEntry[];
+  /** Hooks to execute after a tool is used */
+  PostToolUse?: HookEntry[];
+  /** Hooks to execute when the agent stops */
+  Stop?: HookEntry[];
 }
 
 // ============================================================================
@@ -455,7 +494,7 @@ export interface Workflow {
   conversationHistory?: ConversationHistory;
   /** Optional sub-agent flows defined within this workflow */
   subAgentFlows?: SubAgentFlow[];
-  /** Optional Slash Command export options */
+  /** Optional Slash Command export options (includes hooks) */
   slashCommandOptions?: SlashCommandOptions;
 }
 
@@ -546,5 +585,12 @@ export const VALIDATION_RULES = {
     LABEL_MIN_LENGTH: 1,
     LABEL_MAX_LENGTH: 50,
     OUTPUT_PORTS: 1, // Fixed: 1 output port
+  },
+  HOOKS: {
+    COMMAND_MIN_LENGTH: 1,
+    COMMAND_MAX_LENGTH: 2000,
+    MATCHER_MAX_LENGTH: 200,
+    MAX_ENTRIES_PER_HOOK: 10,
+    MAX_ACTIONS_PER_ENTRY: 5,
   },
 } as const;

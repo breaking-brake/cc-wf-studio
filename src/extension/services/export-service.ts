@@ -486,6 +486,31 @@ function escapeLabel(label: string): string {
 }
 
 /**
+ * Format YAML string values
+ *
+ * Issue #413: Used for hooks command values in frontmatter
+ * Note: We wrap with double quotes but don't escape internal quotes.
+ * YAML parsers handle this correctly when the string contains shell commands.
+ *
+ * @param value - String value to format
+ * @param alwaysQuote - Always wrap in double quotes
+ * @returns YAML string value
+ */
+function escapeYamlString(value: string, alwaysQuote = false): string {
+  // Always quote if requested, or if the string contains special characters
+  if (
+    alwaysQuote ||
+    /[:[\]{}&*?|<>=!%@#`'",\n\r\\]/.test(value) ||
+    value.startsWith(' ') ||
+    value.endsWith(' ')
+  ) {
+    // Just wrap in double quotes - no internal escaping
+    return `"${value}"`;
+  }
+  return value;
+}
+
+/**
  * Generate SlashCommand file content
  *
  * @param workflow - Workflow definition
@@ -507,6 +532,35 @@ function generateSlashCommandFile(workflow: Workflow): string {
   // Add context if specified and not 'default' (Claude Code v2.1.0+ feature)
   if (workflow.slashCommandOptions?.context && workflow.slashCommandOptions.context !== 'default') {
     frontmatterLines.push(`context: ${workflow.slashCommandOptions.context}`);
+  }
+
+  // Issue #413: Add hooks if configured (Claude Code Docs compliant format)
+  // See: https://code.claude.com/docs/en/hooks
+  const hooks = workflow.slashCommandOptions?.hooks;
+  if (hooks && Object.keys(hooks).length > 0) {
+    frontmatterLines.push('hooks:');
+    for (const [hookType, entries] of Object.entries(hooks)) {
+      if (entries && entries.length > 0) {
+        frontmatterLines.push(`  ${hookType}:`);
+        for (const entry of entries) {
+          // matcher is optional for all hook types
+          if (entry.matcher) {
+            frontmatterLines.push(`    - matcher: ${escapeYamlString(entry.matcher, true)}`);
+            frontmatterLines.push('      hooks:');
+          } else {
+            // No matcher - start with hooks directly on the same line as -
+            frontmatterLines.push('    - hooks:');
+          }
+          for (const action of entry.hooks) {
+            frontmatterLines.push(`        - type: ${action.type}`);
+            frontmatterLines.push(`          command: ${escapeYamlString(action.command, true)}`);
+            if (action.once) {
+              frontmatterLines.push('          once: true');
+            }
+          }
+        }
+      }
+    }
   }
 
   frontmatterLines.push('---', '');

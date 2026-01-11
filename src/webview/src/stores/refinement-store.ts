@@ -13,7 +13,7 @@ import { create } from 'zustand';
 const MODEL_STORAGE_KEY = 'cc-wf-studio.refinement.selectedModel';
 const ALLOWED_TOOLS_STORAGE_KEY = 'cc-wf-studio.refinement.allowedTools';
 
-// Available tools for Claude Code CLI
+// Available tools for Claude Code CLI (used in AI editing allowed tools)
 export const AVAILABLE_TOOLS = [
   'AskUserQuestion',
   'Bash',
@@ -27,6 +27,26 @@ export const AVAILABLE_TOOLS = [
   'NotebookEdit',
   'Read',
   'Skill',
+  'SlashCommand',
+  'Task',
+  'TodoWrite',
+  'WebFetch',
+  'WebSearch',
+  'Write',
+] as const;
+
+// Official Claude Code tools for hooks matcher (PreToolUse, PostToolUse)
+// Based on: https://code.claude.com/docs/en/hooks
+export const HOOKS_MATCHER_TOOLS = [
+  'Bash',
+  'BashOutput',
+  'Edit',
+  'ExitPlanMode',
+  'Glob',
+  'Grep',
+  'KillShell',
+  'NotebookEdit',
+  'Read',
   'SlashCommand',
   'Task',
   'TodoWrite',

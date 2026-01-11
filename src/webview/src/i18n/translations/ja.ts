@@ -70,6 +70,25 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.contextFork.tooltip':
     '分離されたサブエージェントコンテキストで実行 (Claude Code v2.1.0+)',
 
+  // Toolbar hooks configuration dropdown
+  'hooks.title': 'Hooks',
+  'hooks.tooltip': '特定の実行タイミングで実行するコマンドを設定',
+  'hooks.preToolUse': 'PreToolUse',
+  'hooks.preToolUse.description': 'ツールが実行される前に実行されるコマンド',
+  'hooks.postToolUse': 'PostToolUse',
+  'hooks.postToolUse.description': 'ツールが実行された後に実行されるコマンド',
+  'hooks.stop': 'Stop',
+  'hooks.stop.description': 'エージェントが停止したときに実行されるコマンド',
+  'hooks.addEntry': '追加',
+  'hooks.removeEntry': '削除',
+  'hooks.matcher.description': 'マッチするツール名パターン',
+  'hooks.once.description': 'セッションごとに一度だけ実行',
+  'hooks.noEntries': 'フックが設定されていません',
+  'hooks.entryCount': '{count} 件のフック',
+  'hooks.validation.commandRequired': 'command は必須です',
+  'hooks.validation.commandTooLong': 'command が最大長を超えています',
+  'hooks.validation.matcherRequired': 'このフックタイプには matcher が必須です',
+
   // Toolbar more actions dropdown
   'toolbar.moreActions': 'その他',
   'toolbar.help': 'ヘルプ',
