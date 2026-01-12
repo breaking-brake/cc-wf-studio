@@ -55,6 +55,8 @@ export interface SlashCommandOptions {
   model?: SlashCommandModel;
   /** Hooks configuration for workflow execution */
   hooks?: WorkflowHooks;
+  /** Comma-separated list of allowed tools for Slash Command execution */
+  allowedTools?: string;
 }
 
 // ============================================================================

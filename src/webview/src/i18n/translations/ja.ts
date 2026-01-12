@@ -66,7 +66,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.running': '実行中...',
 
   // Toolbar slash command options dropdown
-  'toolbar.model.tooltip': '実行に使用するモデルを指定',
   'toolbar.contextFork.tooltip':
     '分離されたサブエージェントコンテキストで実行 (Claude Code v2.1.0+)',
 
@@ -83,8 +82,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'hooks.removeEntry': '削除',
   'hooks.matcher.description': 'マッチするツール名パターン',
   'hooks.once.description': 'セッションごとに一度だけ実行',
-  'hooks.noEntries': 'フックが設定されていません',
-  'hooks.entryCount': '{count} 件のフック',
   'hooks.validation.commandRequired': 'command は必須です',
   'hooks.validation.commandTooLong': 'command が最大長を超えています',
   'hooks.validation.matcherRequired': 'このフックタイプには matcher が必須です',

@@ -61,7 +61,6 @@ export interface WebviewTranslationKeys {
   'toolbar.running': string;
 
   // Toolbar slash command options dropdown
-  'toolbar.model.tooltip': string;
   'toolbar.contextFork.tooltip': string;
 
   // Toolbar hooks configuration dropdown
@@ -77,8 +76,6 @@ export interface WebviewTranslationKeys {
   'hooks.removeEntry': string;
   'hooks.matcher.description': string;
   'hooks.once.description': string;
-  'hooks.noEntries': string;
-  'hooks.entryCount': string;
   'hooks.validation.commandRequired': string;
   'hooks.validation.commandTooLong': string;
   'hooks.validation.matcherRequired': string;

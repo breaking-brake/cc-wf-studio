@@ -59,10 +59,12 @@ export function serializeWorkflow(
   const context = slashCommandOptions?.context;
   const model = slashCommandOptions?.model;
   const hooks = slashCommandOptions?.hooks;
+  const allowedTools = slashCommandOptions?.allowedTools;
   const hasNonDefaultOptions =
     (context && context !== 'default') ||
     (model && model !== 'default') ||
-    (hooks && Object.keys(hooks).length > 0);
+    (hooks && Object.keys(hooks).length > 0) ||
+    (allowedTools && allowedTools.length > 0);
 
   // Create workflow object
   const workflow: Workflow = {
@@ -79,11 +81,13 @@ export function serializeWorkflow(
     // Issue #89: Include subAgentFlows if provided
     subAgentFlows,
     // Issue #413: Include slashCommandOptions if any non-default option is set
+    // Issue #424: Include allowedTools
     slashCommandOptions: hasNonDefaultOptions
       ? {
           ...(context && context !== 'default' && { context }),
           ...(model && model !== 'default' && { model }),
           ...(hooks && Object.keys(hooks).length > 0 && { hooks }),
+          ...(allowedTools && allowedTools.length > 0 && { allowedTools }),
         }
       : undefined,
   };

@@ -65,7 +65,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.running': '실행 중...',
 
   // Toolbar slash command options dropdown
-  'toolbar.model.tooltip': '실행에 사용할 모델 지정',
   'toolbar.contextFork.tooltip': '분리된 서브 에이전트 컨텍스트에서 실행 (Claude Code v2.1.0+)',
 
   // Toolbar hooks configuration dropdown
@@ -81,8 +80,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'hooks.removeEntry': '삭제',
   'hooks.matcher.description': '일치할 도구 이름 패턴',
   'hooks.once.description': '세션당 한 번만 실행',
-  'hooks.noEntries': '구성된 훅 없음',
-  'hooks.entryCount': '{count}개의 훅',
   'hooks.validation.commandRequired': 'command는 필수입니다',
   'hooks.validation.commandTooLong': 'command가 최대 길이를 초과했습니다',
   'hooks.validation.matcherRequired': '이 훅 유형에는 matcher가 필수입니다',

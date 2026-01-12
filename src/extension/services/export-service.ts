@@ -187,9 +187,7 @@ export function validateClaudeFileFormat(
     if (!frontmatterContent.includes('description:')) {
       throw new Error('SlashCommand file missing required field: description');
     }
-    if (!frontmatterContent.includes('allowed-tools:')) {
-      throw new Error('SlashCommand file missing required field: allowed-tools');
-    }
+    // Issue #424: allowed-tools is optional (omit = use Claude Code default)
   }
 
   // Check that there's content after frontmatter (prompt body)
@@ -518,11 +516,12 @@ function escapeYamlString(value: string, alwaysQuote = false): string {
  */
 function generateSlashCommandFile(workflow: Workflow): string {
   // YAML frontmatter
-  const frontmatterLines = [
-    '---',
-    `description: ${workflow.description || workflow.name}`,
-    'allowed-tools: Task,AskUserQuestion',
-  ];
+  const frontmatterLines = ['---', `description: ${workflow.description || workflow.name}`];
+
+  // Issue #424: Add allowed-tools only if explicitly configured (omit = use Claude Code default)
+  if (workflow.slashCommandOptions?.allowedTools) {
+    frontmatterLines.push(`allowed-tools: ${workflow.slashCommandOptions.allowedTools}`);
+  }
 
   // Add model if specified and not 'default'
   if (workflow.slashCommandOptions?.model && workflow.slashCommandOptions.model !== 'default') {

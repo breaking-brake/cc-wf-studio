@@ -63,7 +63,6 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.running': '執行中...',
 
   // Toolbar slash command options dropdown
-  'toolbar.model.tooltip': '指定執行時使用的模型',
   'toolbar.contextFork.tooltip': '在隔離的子代理上下文中運行 (Claude Code v2.1.0+)',
 
   // Toolbar hooks configuration dropdown
@@ -79,8 +78,6 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'hooks.removeEntry': '刪除',
   'hooks.matcher.description': '要匹配的工具名稱模式',
   'hooks.once.description': '每個會話只運行一次',
-  'hooks.noEntries': '未配置鉤子',
-  'hooks.entryCount': '{count} 個鉤子',
   'hooks.validation.commandRequired': 'command 是必填項',
   'hooks.validation.commandTooLong': 'command 超過最大長度',
   'hooks.validation.matcherRequired': '此鉤子類型需要 matcher',

@@ -66,6 +66,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setSlashCommandOptions,
     setSlashCommandContext,
     setSlashCommandModel,
+    setSlashCommandAllowedTools,
     addHookEntry,
     removeHookEntry,
     updateHookEntry,
@@ -191,11 +192,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           setWorkflowName(workflow.name);
           // Load description from workflow (default to empty string if not present)
           setWorkflowDescription(workflow.description || '');
-          // Issue #413: Load slashCommandOptions (context, model, hooks) as unified object
+          // Issue #413: Load slashCommandOptions (context, model, hooks, allowedTools) as unified object
           setSlashCommandOptions({
             context: workflow.slashCommandOptions?.context ?? 'default',
             model: workflow.slashCommandOptions?.model ?? 'default',
             hooks: workflow.slashCommandOptions?.hooks,
+            allowedTools: workflow.slashCommandOptions?.allowedTools,
           });
           // Set as active workflow to preserve conversation history
           setActiveWorkflow(workflow);
@@ -710,6 +712,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
             {/* Options Dropdown (separate with small gap) */}
             {/* Issue #413: Hooks are now integrated into SlashCommandOptionsDropdown */}
+            {/* Issue #424: Allowed Tools configuration added */}
             <SlashCommandOptionsDropdown
               context={slashCommandOptions.context ?? 'default'}
               onContextChange={setSlashCommandContext}
@@ -719,6 +722,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onAddHookEntry={addHookEntry}
               onRemoveHookEntry={removeHookEntry}
               onUpdateHookEntry={updateHookEntry}
+              allowedTools={slashCommandOptions.allowedTools ?? ''}
+              onAllowedToolsChange={setSlashCommandAllowedTools}
             />
           </div>
         </div>

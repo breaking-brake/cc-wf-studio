@@ -66,7 +66,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.running': 'Running...',
 
   // Toolbar slash command options dropdown
-  'toolbar.model.tooltip': 'Specify the model to use for execution',
   'toolbar.contextFork.tooltip': 'Run in isolated sub-agent context (Claude Code v2.1.0+)',
 
   // Toolbar hooks configuration dropdown
@@ -82,8 +81,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'hooks.removeEntry': 'Remove',
   'hooks.matcher.description': 'Tool name pattern to match',
   'hooks.once.description': 'Run only once per session',
-  'hooks.noEntries': 'No hooks configured',
-  'hooks.entryCount': '{count} hook(s)',
   'hooks.validation.commandRequired': 'command is required',
   'hooks.validation.commandTooLong': 'command exceeds maximum length',
   'hooks.validation.matcherRequired': 'matcher is required for this hook type',

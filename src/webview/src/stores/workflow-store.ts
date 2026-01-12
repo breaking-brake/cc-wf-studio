@@ -89,6 +89,7 @@ interface WorkflowStore {
   setSlashCommandOptions: (options: SlashCommandOptions) => void;
   setSlashCommandContext: (value: SlashCommandContext) => void;
   setSlashCommandModel: (value: SlashCommandModel) => void;
+  setSlashCommandAllowedTools: (allowedTools: string) => void;
   setHooks: (hooks: WorkflowHooks) => void;
   addHookEntry: (hookType: HookType, matcher: string, command: string, once?: boolean) => void;
   removeHookEntry: (hookType: HookType, entryIndex: number) => void;
@@ -385,6 +386,11 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   setSlashCommandModel: (model: SlashCommandModel) =>
     set((state) => ({
       slashCommandOptions: { ...state.slashCommandOptions, model },
+    })),
+
+  setSlashCommandAllowedTools: (allowedTools: string) =>
+    set((state) => ({
+      slashCommandOptions: { ...state.slashCommandOptions, allowedTools },
     })),
 
   setHooks: (hooks: WorkflowHooks) =>
