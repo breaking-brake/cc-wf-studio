@@ -299,6 +299,7 @@ export function SlashCommandOptionsDropdown({
             <DropdownMenu.Portal>
               <DropdownMenu.SubContent
                 sideOffset={4}
+                collisionPadding={{ right: 300 }}
                 style={{
                   backgroundColor: 'var(--vscode-dropdown-background)',
                   border: '1px solid var(--vscode-dropdown-border)',
@@ -425,6 +426,7 @@ export function SlashCommandOptionsDropdown({
             <DropdownMenu.Portal>
               <DropdownMenu.SubContent
                 sideOffset={4}
+                collisionPadding={{ right: 300 }}
                 style={{
                   backgroundColor: 'var(--vscode-dropdown-background)',
                   border: '1px solid var(--vscode-dropdown-border)',
@@ -516,6 +518,7 @@ export function SlashCommandOptionsDropdown({
             <DropdownMenu.Portal>
               <DropdownMenu.SubContent
                 sideOffset={4}
+                collisionPadding={{ right: 300 }}
                 style={{
                   backgroundColor: 'var(--vscode-dropdown-background)',
                   border: '1px solid var(--vscode-dropdown-border)',
@@ -611,6 +614,7 @@ export function SlashCommandOptionsDropdown({
             <DropdownMenu.Portal>
               <DropdownMenu.SubContent
                 sideOffset={4}
+                collisionPadding={{ right: 300 }}
                 style={{
                   backgroundColor: 'var(--vscode-dropdown-background)',
                   border: '1px solid var(--vscode-dropdown-border)',
@@ -746,6 +750,7 @@ const HookTypeSubMenu = memo(function HookTypeSubMenu({
       <DropdownMenu.Portal>
         <DropdownMenu.SubContent
           sideOffset={4}
+          collisionPadding={{ right: 300 }}
           style={{
             backgroundColor: 'var(--vscode-dropdown-background)',
             border: '1px solid var(--vscode-dropdown-border)',
