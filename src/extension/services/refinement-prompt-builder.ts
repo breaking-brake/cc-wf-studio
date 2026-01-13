@@ -8,6 +8,12 @@
 import { encode } from '@toon-format/toon';
 import type { ConversationHistory, Workflow } from '../../shared/types/workflow-definition';
 import { getCurrentLocale } from '../i18n/i18n-service';
+import {
+  CLARIFICATION_TRIGGERS,
+  EDITING_PROCESS_MERMAID_DIAGRAM,
+  EDITING_PROCESS_STEPS,
+  REQUEST_TYPE_GUIDELINES,
+} from './editing-flow-constants.generated';
 import type { ValidationErrorInfo } from './refinement-service';
 import type { SchemaLoadResult } from './schema-loader-service';
 import type { SkillRelevanceScore } from './skill-relevance-matcher';
@@ -38,27 +44,26 @@ export class RefinementPromptBuilder {
       responseLocale: locale,
       role: 'expert workflow designer for Claude Code Workflow Studio',
       task: 'Refine the existing workflow based on user feedback',
+      // AI Editing Process Flow - MUST follow this process strictly
+      // Generated from: resources/ai-editing-process-flow.md
+      editingProcessFlow: {
+        description: 'You MUST follow this editing process step by step. Do NOT skip any steps.',
+        mermaidDiagram: EDITING_PROCESS_MERMAID_DIAGRAM,
+        steps: EDITING_PROCESS_STEPS,
+        requestTypeGuidelines: REQUEST_TYPE_GUIDELINES,
+        clarificationTriggers: CLARIFICATION_TRIGGERS,
+      },
       currentWorkflow: {
         id: this.currentWorkflow.id,
         name: this.currentWorkflow.name,
+        // Include COMPLETE node data for ALL node types to enable precise editing
         nodes: this.currentWorkflow.nodes.map((n) => ({
           id: n.id,
           type: n.type,
           name: n.name,
-          'position.x': n.position.x,
-          'position.y': n.position.y,
-          // Include data for skill nodes to preserve exact skill information
-          ...(n.type === 'skill' && n.data
-            ? {
-                data: {
-                  name: (n.data as { name?: string }).name,
-                  description: (n.data as { description?: string }).description,
-                  scope: (n.data as { scope?: string }).scope,
-                  validationStatus: (n.data as { validationStatus?: string }).validationStatus,
-                  outputPorts: (n.data as { outputPorts?: number }).outputPorts,
-                },
-              }
-            : {}),
+          position: { x: n.position.x, y: n.position.y },
+          // Include data for ALL node types - this is CRITICAL for preserving existing content
+          data: n.data,
         })),
         connections: this.currentWorkflow.connections.map((c) => ({
           id: c.id,
@@ -67,6 +72,11 @@ export class RefinementPromptBuilder {
           fromPort: c.fromPort,
           toPort: c.toPort,
         })),
+        // Include subAgentFlows if present
+        ...(this.currentWorkflow.subAgentFlows &&
+          this.currentWorkflow.subAgentFlows.length > 0 && {
+            subAgentFlows: this.currentWorkflow.subAgentFlows,
+          }),
       },
       conversationHistory: recentMessages.map((m) => ({
         sender: m.sender,
@@ -74,13 +84,12 @@ export class RefinementPromptBuilder {
       })),
       userRequest: this.userMessage,
       refinementGuidelines: [
-        'Preserve existing nodes unless explicitly requested to remove',
-        'Add new nodes ONLY if user asks for new functionality',
-        'Modify node properties based on feedback',
+        'CRITICAL: Preserve ALL unchanged nodes with their EXACT original data - do not modify or regenerate',
+        'Only modify nodes that are explicitly requested to change',
+        'Add new nodes ONLY if user explicitly asks for new functionality',
         'Maintain workflow connectivity and validity',
         'Respect node IDs - do not regenerate IDs for unchanged nodes',
-        'Update only what the user requested',
-        'Node names must match pattern /^[a-zA-Z0-9_-]+$/ (ASCII alphanumeric, hyphens, underscores only - NO spaces or non-ASCII characters)',
+        'Node names must match pattern /^[a-zA-Z0-9_-]+$/ (ASCII alphanumeric, hyphens, underscores only)',
       ],
       nodePositioningGuidelines: [
         'Horizontal spacing: 300px',
@@ -92,12 +101,10 @@ export class RefinementPromptBuilder {
         'Branch nodes: offset vertically by 150px',
       ],
       skillNodeConstraints: [
-        'Must have exactly 1 output port',
-        'If branching needed, add ifElse/switch after Skill',
-        'Never modify outputPorts field',
-        'PRESERVE existing skill node data exactly - do not change name, description, scope',
-        'When skill node exists in currentWorkflow, copy its data field exactly',
-        'Only use skill names from availableSkills list for NEW skill nodes',
+        'Must have exactly 1 output port (outputPorts: 1)',
+        'If branching needed, add ifElse/switch node after the Skill node',
+        'For existing skill nodes: COPY data field exactly from currentWorkflow',
+        'For NEW skill nodes: only use names from availableSkills list',
       ],
       branchingNodeSelection: {
         ifElse: '2-way conditional branching (true/false)',
@@ -113,25 +120,28 @@ export class RefinementPromptBuilder {
       outputFormat: {
         success: {
           status: 'success',
-          message: 'Brief description of changes',
-          'values.workflow': '{...}',
+          message: 'Brief description of what was changed',
+          'values.workflow': '{complete workflow JSON with all nodes}',
         },
         clarification: {
           status: 'clarification',
-          message: 'Your question here',
+          message:
+            'Use for: (1) answering questions about the workflow, (2) asking for more details when request is unclear',
         },
         error: {
           status: 'error',
-          message: 'Error description',
+          message: 'Error description when request cannot be fulfilled',
         },
       },
       criticalRules: [
-        'ALWAYS output valid JSON',
-        'NEVER include markdown code blocks',
-        'Even if no changes, wrap in success response',
-        'status and message fields REQUIRED',
-        'If you need clarification, use { status: "clarification", message: "..." } format',
-        'NEVER ask questions in plain text - use clarification JSON format',
+        'ALWAYS output valid JSON - no markdown code blocks or plain text',
+        'Follow the editingProcessFlow steps in order - do NOT skip steps',
+        'For questions/understanding requests: use clarification status with your answer',
+        'For unclear edit requests: use clarification status to ask for details',
+        'For clear edit requests: use success status with the modified workflow',
+        'CRITICAL: When outputting workflow, COPY unchanged nodes with their EXACT original data',
+        'NEVER regenerate or modify data for nodes that were not explicitly requested to change',
+        'status and message fields are REQUIRED in every response',
       ],
       // Include previous validation errors for retry context
       ...(this.previousValidationErrors &&

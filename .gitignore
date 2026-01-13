@@ -6,6 +6,9 @@ out/
 dist/
 *.vsix
 
+# Generated files
+*.generated.ts
+
 # IDE
 .idea/
 

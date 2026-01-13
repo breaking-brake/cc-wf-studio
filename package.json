@@ -89,7 +89,8 @@
   "scripts": {
     "vscode:prepublish": "npm run build",
     "generate:toon": "npx tsx scripts/generate-toon-schema.ts",
-    "build": "npm run generate:toon && npm run build:webview && npm run build:extension",
+    "generate:editing-flow": "npx tsx scripts/generate-editing-flow.ts",
+    "build": "npm run generate:toon && npm run generate:editing-flow && npm run build:webview && npm run build:extension",
     "build:dev": "npm run build:webview:dev && npm run build:extension:dev",
     "build:webview": "cd src/webview && npm run build",
     "build:webview:dev": "cd src/webview && npm run build:dev",
