@@ -202,6 +202,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             hooks: workflow.slashCommandOptions?.hooks,
             allowedTools: workflow.slashCommandOptions?.allowedTools,
             disableModelInvocation: workflow.slashCommandOptions?.disableModelInvocation,
+            argumentHint: workflow.slashCommandOptions?.argumentHint,
           });
           // Set as active workflow to preserve conversation history
           setActiveWorkflow(workflow);
