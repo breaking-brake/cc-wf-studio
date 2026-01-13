@@ -118,27 +118,38 @@ export class RefinementPromptBuilder {
       })),
       workflowSchema: this.schemaResult.schemaString || JSON.stringify(this.schemaResult.schema),
       outputFormat: {
-        success: {
+        description:
+          'You MUST output exactly ONE JSON object. Do NOT output multiple JSON blocks or explanatory text.',
+        successExample: {
           status: 'success',
           message: 'Brief description of what was changed',
-          'values.workflow': '{complete workflow JSON with all nodes}',
+          values: {
+            workflow: {
+              id: 'workflow-id',
+              name: 'workflow-name',
+              nodes: ['... all nodes with data ...'],
+              connections: ['... all connections ...'],
+            },
+          },
         },
-        clarification: {
+        clarificationExample: {
           status: 'clarification',
-          message:
-            'Use for: (1) answering questions about the workflow, (2) asking for more details when request is unclear',
+          message: 'Your answer or question here',
         },
-        error: {
+        errorExample: {
           status: 'error',
-          message: 'Error description when request cannot be fulfilled',
+          message: 'Error description',
         },
       },
       criticalRules: [
-        'ALWAYS output valid JSON - no markdown code blocks or plain text',
+        'OUTPUT FORMAT: You MUST output exactly ONE JSON object - no explanatory text, no multiple JSON blocks',
+        'DO NOT output workflow JSON separately from status JSON - they must be combined in ONE response',
+        'DO NOT wrap JSON in markdown code blocks (```json) - output raw JSON only',
+        'For success: workflow MUST be nested inside values.workflow, not as a separate JSON block',
         'Follow the editingProcessFlow steps in order - do NOT skip steps',
         'For questions/understanding requests: use clarification status with your answer',
         'For unclear edit requests: use clarification status to ask for details',
-        'For clear edit requests: use success status with the modified workflow',
+        'For clear edit requests: use success status with the modified workflow inside values.workflow',
         'CRITICAL: When outputting workflow, COPY unchanged nodes with their EXACT original data',
         'NEVER regenerate or modify data for nodes that were not explicitly requested to change',
         'status and message fields are REQUIRED in every response',
