@@ -81,6 +81,12 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'hooks.validation.commandTooLong': 'command가 최대 길이를 초과했습니다',
   'hooks.validation.matcherRequired': '이 훅 유형에는 matcher가 필수입니다',
 
+  // Argument Hint configuration
+  'argumentHint.example': '예:',
+  'argumentHint.exampleAdd': '태그 추가',
+  'argumentHint.exampleRemove': '태그 삭제',
+  'argumentHint.exampleList': '목록 표시',
+
   // Toolbar more actions dropdown
   'toolbar.moreActions': '더보기',
   'toolbar.help': '도움말',

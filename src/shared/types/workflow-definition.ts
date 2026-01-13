@@ -60,6 +60,8 @@ export interface SlashCommandOptions {
   allowedTools?: string;
   /** Disable model invocation. When true, prevents the Skill tool from invoking this command. */
   disableModelInvocation?: boolean;
+  /** Argument hint for Slash Command auto-completion. Format: "[arg1] [arg2] | [alt1] | [alt2]" */
+  argumentHint?: string;
 }
 
 // ============================================================================

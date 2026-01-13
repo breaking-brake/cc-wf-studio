@@ -538,6 +538,11 @@ function generateSlashCommandFile(workflow: Workflow): string {
     frontmatterLines.push('disable-model-invocation: true');
   }
 
+  // Issue #425: Add argument-hint if configured
+  if (workflow.slashCommandOptions?.argumentHint) {
+    frontmatterLines.push(`argument-hint: ${workflow.slashCommandOptions.argumentHint}`);
+  }
+
   // Issue #413: Add hooks if configured (Claude Code Docs compliant format)
   // See: https://code.claude.com/docs/en/hooks
   const hooks = workflow.slashCommandOptions?.hooks;

@@ -68,6 +68,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setSlashCommandModel,
     setSlashCommandAllowedTools,
     setSlashCommandDisableModelInvocation,
+    setSlashCommandArgumentHint,
     addHookEntry,
     removeHookEntry,
     updateHookEntry,
@@ -730,6 +731,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onAllowedToolsChange={setSlashCommandAllowedTools}
               disableModelInvocation={slashCommandOptions.disableModelInvocation ?? false}
               onDisableModelInvocationChange={setSlashCommandDisableModelInvocation}
+              argumentHint={slashCommandOptions.argumentHint ?? ''}
+              onArgumentHintChange={setSlashCommandArgumentHint}
             />
           </div>
         </div>

@@ -91,6 +91,7 @@ interface WorkflowStore {
   setSlashCommandModel: (value: SlashCommandModel) => void;
   setSlashCommandAllowedTools: (allowedTools: string) => void;
   setSlashCommandDisableModelInvocation: (disableModelInvocation: boolean) => void;
+  setSlashCommandArgumentHint: (argumentHint: string) => void;
   setHooks: (hooks: WorkflowHooks) => void;
   addHookEntry: (hookType: HookType, matcher: string, command: string, once?: boolean) => void;
   removeHookEntry: (hookType: HookType, entryIndex: number) => void;
@@ -397,6 +398,14 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   setSlashCommandDisableModelInvocation: (disableModelInvocation: boolean) =>
     set((state) => ({
       slashCommandOptions: { ...state.slashCommandOptions, disableModelInvocation },
+    })),
+
+  setSlashCommandArgumentHint: (argumentHint: string) =>
+    set((state) => ({
+      slashCommandOptions: {
+        ...state.slashCommandOptions,
+        argumentHint: argumentHint || undefined,
+      },
     })),
 
   setHooks: (hooks: WorkflowHooks) =>

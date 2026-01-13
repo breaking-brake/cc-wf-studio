@@ -82,6 +82,12 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'hooks.validation.commandTooLong': 'command exceeds maximum length',
   'hooks.validation.matcherRequired': 'matcher is required for this hook type',
 
+  // Argument Hint configuration
+  'argumentHint.example': 'Example:',
+  'argumentHint.exampleAdd': 'add tag',
+  'argumentHint.exampleRemove': 'remove tag',
+  'argumentHint.exampleList': 'list all',
+
   // Toolbar more actions dropdown
   'toolbar.moreActions': 'More',
   'toolbar.help': 'Help',

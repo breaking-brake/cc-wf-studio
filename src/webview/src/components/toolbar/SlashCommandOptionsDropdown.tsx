@@ -22,6 +22,7 @@ import {
   ChevronLeft,
   Cpu,
   ExternalLink,
+  FileQuestion,
   GitFork,
   Plus,
   RotateCcw,
@@ -35,6 +36,7 @@ import { useTranslation } from '../../i18n/i18n-context';
 import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
 import { openExternalUrl } from '../../services/slack-integration-service';
 import { AVAILABLE_TOOLS } from '../../stores/refinement-store';
+import { ArgumentHintTagInput } from '../common/ArgumentHintTagInput';
 import { ToolSelectTagInput } from '../common/ToolSelectTagInput';
 
 // Fixed font sizes for dropdown menu (not responsive)
@@ -121,6 +123,8 @@ interface SlashCommandOptionsDropdownProps {
   onAllowedToolsChange: (tools: string) => void;
   disableModelInvocation: boolean;
   onDisableModelInvocationChange: (value: boolean) => void;
+  argumentHint: string;
+  onArgumentHintChange: (hint: string) => void;
 }
 
 interface NewEntryState {
@@ -142,6 +146,8 @@ export function SlashCommandOptionsDropdown({
   onAllowedToolsChange,
   disableModelInvocation,
   onDisableModelInvocationChange,
+  argumentHint,
+  onArgumentHintChange,
 }: SlashCommandOptionsDropdownProps) {
   const { t } = useTranslation();
   const [newEntry, setNewEntry] = useState<Record<HookType, NewEntryState>>({
@@ -398,7 +404,7 @@ export function SlashCommandOptionsDropdown({
             }}
           />
 
-          {/* Model Sub-menu */}
+          {/* Argument Hint Sub-menu */}
           <DropdownMenu.Sub>
             <DropdownMenu.SubTrigger
               style={{
@@ -414,15 +420,23 @@ export function SlashCommandOptionsDropdown({
                 borderRadius: '2px',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <ChevronLeft size={14} />
-                <span style={{ color: 'var(--vscode-descriptionForeground)' }}>
-                  {currentModelLabel}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0 }}>
+                <ChevronLeft size={14} style={{ flexShrink: 0 }} />
+                <span
+                  style={{
+                    color: 'var(--vscode-descriptionForeground)',
+                    maxWidth: '120px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {argumentHint || 'none'}
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Cpu size={14} />
-                <span>Model</span>
+                <FileQuestion size={14} />
+                <span>Argument Hint</span>
               </div>
             </DropdownMenu.SubTrigger>
 
@@ -436,48 +450,11 @@ export function SlashCommandOptionsDropdown({
                   borderRadius: '4px',
                   boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
                   zIndex: 10000,
-                  minWidth: '180px',
+                  minWidth: '320px',
                   padding: '4px',
                 }}
               >
-                <DropdownMenu.RadioGroup value={model}>
-                  {MODEL_PRESETS.map((preset) => (
-                    <DropdownMenu.RadioItem
-                      key={preset.value}
-                      value={preset.value}
-                      onSelect={(event) => {
-                        event.preventDefault();
-                        onModelChange(preset.value);
-                      }}
-                      style={{
-                        padding: '6px 12px',
-                        fontSize: `${FONT_SIZES.small}px`,
-                        color: 'var(--vscode-foreground)',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        outline: 'none',
-                        borderRadius: '2px',
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: '12px',
-                          height: '12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <DropdownMenu.ItemIndicator>
-                          <Check size={12} />
-                        </DropdownMenu.ItemIndicator>
-                      </div>
-                      <span>{preset.label}</span>
-                    </DropdownMenu.RadioItem>
-                  ))}
-                </DropdownMenu.RadioGroup>
+                <ArgumentHintTagInput value={argumentHint} onChange={onArgumentHintChange} />
               </DropdownMenu.SubContent>
             </DropdownMenu.Portal>
           </DropdownMenu.Sub>
@@ -540,6 +517,98 @@ export function SlashCommandOptionsDropdown({
                       onSelect={(event) => {
                         event.preventDefault();
                         onContextChange(preset.value);
+                      }}
+                      style={{
+                        padding: '6px 12px',
+                        fontSize: `${FONT_SIZES.small}px`,
+                        color: 'var(--vscode-foreground)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        outline: 'none',
+                        borderRadius: '2px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '12px',
+                          height: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <DropdownMenu.ItemIndicator>
+                          <Check size={12} />
+                        </DropdownMenu.ItemIndicator>
+                      </div>
+                      <span>{preset.label}</span>
+                    </DropdownMenu.RadioItem>
+                  ))}
+                </DropdownMenu.RadioGroup>
+              </DropdownMenu.SubContent>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Sub>
+
+          <DropdownMenu.Separator
+            style={{
+              height: '1px',
+              backgroundColor: 'var(--vscode-dropdown-border)',
+              margin: '4px 0',
+            }}
+          />
+
+          {/* Model Sub-menu */}
+          <DropdownMenu.Sub>
+            <DropdownMenu.SubTrigger
+              style={{
+                padding: '8px 12px',
+                fontSize: `${FONT_SIZES.small}px`,
+                color: 'var(--vscode-foreground)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px',
+                outline: 'none',
+                borderRadius: '2px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <ChevronLeft size={14} />
+                <span style={{ color: 'var(--vscode-descriptionForeground)' }}>
+                  {currentModelLabel}
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Cpu size={14} />
+                <span>Model</span>
+              </div>
+            </DropdownMenu.SubTrigger>
+
+            <DropdownMenu.Portal>
+              <DropdownMenu.SubContent
+                sideOffset={4}
+                collisionPadding={{ right: 300 }}
+                style={{
+                  backgroundColor: 'var(--vscode-dropdown-background)',
+                  border: '1px solid var(--vscode-dropdown-border)',
+                  borderRadius: '4px',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+                  zIndex: 10000,
+                  minWidth: '180px',
+                  padding: '4px',
+                }}
+              >
+                <DropdownMenu.RadioGroup value={model}>
+                  {MODEL_PRESETS.map((preset) => (
+                    <DropdownMenu.RadioItem
+                      key={preset.value}
+                      value={preset.value}
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        onModelChange(preset.value);
                       }}
                       style={{
                         padding: '6px 12px',

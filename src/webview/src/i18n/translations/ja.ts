@@ -82,6 +82,12 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'hooks.validation.commandTooLong': 'command が最大長を超えています',
   'hooks.validation.matcherRequired': 'このフックタイプには matcher が必須です',
 
+  // Argument Hint configuration
+  'argumentHint.example': '例:',
+  'argumentHint.exampleAdd': 'タグを追加',
+  'argumentHint.exampleRemove': 'タグを削除',
+  'argumentHint.exampleList': '一覧を表示',
+
   // Toolbar more actions dropdown
   'toolbar.moreActions': 'その他',
   'toolbar.help': 'ヘルプ',

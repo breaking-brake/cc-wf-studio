@@ -76,6 +76,12 @@ export interface WebviewTranslationKeys {
   'hooks.validation.commandTooLong': string;
   'hooks.validation.matcherRequired': string;
 
+  // Argument Hint configuration
+  'argumentHint.example': string;
+  'argumentHint.exampleAdd': string;
+  'argumentHint.exampleRemove': string;
+  'argumentHint.exampleList': string;
+
   // Toolbar more actions dropdown
   'toolbar.moreActions': string;
   'toolbar.help': string;

@@ -79,6 +79,12 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'hooks.validation.commandTooLong': 'command 超过最大长度',
   'hooks.validation.matcherRequired': '此钩子类型需要 matcher',
 
+  // Argument Hint configuration
+  'argumentHint.example': '示例:',
+  'argumentHint.exampleAdd': '添加标签',
+  'argumentHint.exampleRemove': '删除标签',
+  'argumentHint.exampleList': '显示列表',
+
   // Toolbar more actions dropdown
   'toolbar.moreActions': '更多',
   'toolbar.help': '帮助',
