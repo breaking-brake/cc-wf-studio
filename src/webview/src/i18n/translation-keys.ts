@@ -61,18 +61,13 @@ export interface WebviewTranslationKeys {
   'toolbar.running': string;
 
   // Toolbar slash command options dropdown
-  'toolbar.contextFork.tooltip': string;
-  'toolbar.disableModelInvocation.tooltip': string;
+  'toolbar.slashCommandOptions.frontmatterReferenceUrl': string;
 
   // Toolbar hooks configuration dropdown
   'hooks.title': string;
-  'hooks.tooltip': string;
   'hooks.preToolUse': string;
-  'hooks.preToolUse.description': string;
   'hooks.postToolUse': string;
-  'hooks.postToolUse.description': string;
   'hooks.stop': string;
-  'hooks.stop.description': string;
   'hooks.addEntry': string;
   'hooks.removeEntry': string;
   'hooks.matcher.description': string;

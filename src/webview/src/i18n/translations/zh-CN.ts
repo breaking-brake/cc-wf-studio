@@ -63,18 +63,14 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.running': '执行中...',
 
   // Toolbar slash command options dropdown
-  'toolbar.contextFork.tooltip': '在隔离的子代理上下文中运行 (Claude Code v2.1.0+)',
-  'toolbar.disableModelInvocation.tooltip': '设为 true 时，阻止 Skill 工具调用此命令',
+  'toolbar.slashCommandOptions.frontmatterReferenceUrl':
+    'https://code.claude.com/docs/zh-CN/slash-commands#前置事项',
 
   // Toolbar hooks configuration dropdown
   'hooks.title': 'Hooks',
-  'hooks.tooltip': '配置在特定执行点运行的命令',
   'hooks.preToolUse': 'PreToolUse',
-  'hooks.preToolUse.description': '在工具执行前运行的命令',
   'hooks.postToolUse': 'PostToolUse',
-  'hooks.postToolUse.description': '在工具执行后运行的命令',
   'hooks.stop': 'Stop',
-  'hooks.stop.description': '代理停止时运行的命令',
   'hooks.addEntry': '添加',
   'hooks.removeEntry': '删除',
   'hooks.matcher.description': '要匹配的工具名称模式',

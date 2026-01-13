@@ -65,19 +65,14 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.running': '실행 중...',
 
   // Toolbar slash command options dropdown
-  'toolbar.contextFork.tooltip': '분리된 서브 에이전트 컨텍스트에서 실행 (Claude Code v2.1.0+)',
-  'toolbar.disableModelInvocation.tooltip':
-    'true인 경우, Skill 도구가 이 명령을 호출하는 것을 방지합니다',
+  'toolbar.slashCommandOptions.frontmatterReferenceUrl':
+    'https://code.claude.com/docs/ko/slash-commands#프론트매터',
 
   // Toolbar hooks configuration dropdown
   'hooks.title': 'Hooks',
-  'hooks.tooltip': '특정 실행 시점에 실행할 명령 구성',
   'hooks.preToolUse': 'PreToolUse',
-  'hooks.preToolUse.description': '도구가 실행되기 전에 실행되는 명령',
   'hooks.postToolUse': 'PostToolUse',
-  'hooks.postToolUse.description': '도구가 실행된 후에 실행되는 명령',
   'hooks.stop': 'Stop',
-  'hooks.stop.description': '에이전트가 중지될 때 실행되는 명령',
   'hooks.addEntry': '추가',
   'hooks.removeEntry': '삭제',
   'hooks.matcher.description': '일치할 도구 이름 패턴',

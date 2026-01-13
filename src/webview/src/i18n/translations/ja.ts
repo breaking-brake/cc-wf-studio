@@ -66,20 +66,14 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.running': '実行中...',
 
   // Toolbar slash command options dropdown
-  'toolbar.contextFork.tooltip':
-    '分離されたサブエージェントコンテキストで実行 (Claude Code v2.1.0+)',
-  'toolbar.disableModelInvocation.tooltip':
-    'trueの場合、Skillツールからこのコマンドの呼び出しを防止します',
+  'toolbar.slashCommandOptions.frontmatterReferenceUrl':
+    'https://code.claude.com/docs/ja/slash-commands#フロントマター',
 
   // Toolbar hooks configuration dropdown
   'hooks.title': 'Hooks',
-  'hooks.tooltip': '特定の実行タイミングで実行するコマンドを設定',
   'hooks.preToolUse': 'PreToolUse',
-  'hooks.preToolUse.description': 'ツールが実行される前に実行されるコマンド',
   'hooks.postToolUse': 'PostToolUse',
-  'hooks.postToolUse.description': 'ツールが実行された後に実行されるコマンド',
   'hooks.stop': 'Stop',
-  'hooks.stop.description': 'エージェントが停止したときに実行されるコマンド',
   'hooks.addEntry': '追加',
   'hooks.removeEntry': '削除',
   'hooks.matcher.description': 'マッチするツール名パターン',

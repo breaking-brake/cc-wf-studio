@@ -66,19 +66,14 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.running': 'Running...',
 
   // Toolbar slash command options dropdown
-  'toolbar.contextFork.tooltip': 'Run in isolated sub-agent context (Claude Code v2.1.0+)',
-  'toolbar.disableModelInvocation.tooltip':
-    'When true, prevents the Skill tool from invoking this command',
+  'toolbar.slashCommandOptions.frontmatterReferenceUrl':
+    'https://code.claude.com/docs/en/slash-commands#frontmatter',
 
   // Toolbar hooks configuration dropdown
   'hooks.title': 'Hooks',
-  'hooks.tooltip': 'Configure commands to run at specific execution points',
   'hooks.preToolUse': 'PreToolUse',
-  'hooks.preToolUse.description': 'Commands to run before a tool is executed',
   'hooks.postToolUse': 'PostToolUse',
-  'hooks.postToolUse.description': 'Commands to run after a tool is executed',
   'hooks.stop': 'Stop',
-  'hooks.stop.description': 'Commands to run when the agent stops',
   'hooks.addEntry': 'Add',
   'hooks.removeEntry': 'Remove',
   'hooks.matcher.description': 'Tool name pattern to match',
