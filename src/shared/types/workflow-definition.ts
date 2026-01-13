@@ -41,6 +41,7 @@ export interface WorkflowMetadata {
  * Slash Command export options
  *
  * Options that affect how the workflow is exported as a Slash Command (.md file)
+ * @see https://code.claude.com/docs/en/slash-commands#frontmatter
  */
 /** Context options for Slash Command execution */
 export type SlashCommandContext = 'default' | 'fork';
@@ -57,6 +58,8 @@ export interface SlashCommandOptions {
   hooks?: WorkflowHooks;
   /** Comma-separated list of allowed tools for Slash Command execution */
   allowedTools?: string;
+  /** Disable model invocation. When true, prevents the Skill tool from invoking this command. */
+  disableModelInvocation?: boolean;
 }
 
 // ============================================================================

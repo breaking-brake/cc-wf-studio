@@ -67,6 +67,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Toolbar slash command options dropdown
   'toolbar.contextFork.tooltip': 'Run in isolated sub-agent context (Claude Code v2.1.0+)',
+  'toolbar.disableModelInvocation.tooltip':
+    'When true, prevents the Skill tool from invoking this command',
 
   // Toolbar hooks configuration dropdown
   'hooks.title': 'Hooks',

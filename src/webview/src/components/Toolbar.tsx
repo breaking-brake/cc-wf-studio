@@ -67,6 +67,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setSlashCommandContext,
     setSlashCommandModel,
     setSlashCommandAllowedTools,
+    setSlashCommandDisableModelInvocation,
     addHookEntry,
     removeHookEntry,
     updateHookEntry,
@@ -193,11 +194,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           // Load description from workflow (default to empty string if not present)
           setWorkflowDescription(workflow.description || '');
           // Issue #413: Load slashCommandOptions (context, model, hooks, allowedTools) as unified object
+          // Issue #426: Load disableModelInvocation
           setSlashCommandOptions({
             context: workflow.slashCommandOptions?.context ?? 'default',
             model: workflow.slashCommandOptions?.model ?? 'default',
             hooks: workflow.slashCommandOptions?.hooks,
             allowedTools: workflow.slashCommandOptions?.allowedTools,
+            disableModelInvocation: workflow.slashCommandOptions?.disableModelInvocation,
           });
           // Set as active workflow to preserve conversation history
           setActiveWorkflow(workflow);
@@ -713,6 +716,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             {/* Options Dropdown (separate with small gap) */}
             {/* Issue #413: Hooks are now integrated into SlashCommandOptionsDropdown */}
             {/* Issue #424: Allowed Tools configuration added */}
+            {/* Issue #426: Added disableModelInvocation props */}
             <SlashCommandOptionsDropdown
               context={slashCommandOptions.context ?? 'default'}
               onContextChange={setSlashCommandContext}
@@ -724,6 +728,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onUpdateHookEntry={updateHookEntry}
               allowedTools={slashCommandOptions.allowedTools ?? ''}
               onAllowedToolsChange={setSlashCommandAllowedTools}
+              disableModelInvocation={slashCommandOptions.disableModelInvocation ?? false}
+              onDisableModelInvocationChange={setSlashCommandDisableModelInvocation}
             />
           </div>
         </div>

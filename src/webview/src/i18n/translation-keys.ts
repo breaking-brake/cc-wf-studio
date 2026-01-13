@@ -62,6 +62,7 @@ export interface WebviewTranslationKeys {
 
   // Toolbar slash command options dropdown
   'toolbar.contextFork.tooltip': string;
+  'toolbar.disableModelInvocation.tooltip': string;
 
   // Toolbar hooks configuration dropdown
   'hooks.title': string;

@@ -64,6 +64,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
 
   // Toolbar slash command options dropdown
   'toolbar.contextFork.tooltip': '在隔離的子代理上下文中運行 (Claude Code v2.1.0+)',
+  'toolbar.disableModelInvocation.tooltip': '設為 true 時，阻止 Skill 工具調用此命令',
 
   // Toolbar hooks configuration dropdown
   'hooks.title': 'Hooks',

@@ -66,6 +66,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Toolbar slash command options dropdown
   'toolbar.contextFork.tooltip': '분리된 서브 에이전트 컨텍스트에서 실행 (Claude Code v2.1.0+)',
+  'toolbar.disableModelInvocation.tooltip':
+    'true인 경우, Skill 도구가 이 명령을 호출하는 것을 방지합니다',
 
   // Toolbar hooks configuration dropdown
   'hooks.title': 'Hooks',

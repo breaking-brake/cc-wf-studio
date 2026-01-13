@@ -24,6 +24,7 @@ import {
   GitFork,
   Plus,
   RotateCcw,
+  Shield,
   Terminal,
   Wrench,
   X,
@@ -120,6 +121,8 @@ interface SlashCommandOptionsDropdownProps {
   onUpdateHookEntry: (hookType: HookType, entryIndex: number, entry: Partial<HookEntry>) => void;
   allowedTools: string;
   onAllowedToolsChange: (tools: string) => void;
+  disableModelInvocation: boolean;
+  onDisableModelInvocationChange: (value: boolean) => void;
 }
 
 interface NewEntryState {
@@ -139,6 +142,8 @@ export function SlashCommandOptionsDropdown({
   onUpdateHookEntry,
   allowedTools,
   onAllowedToolsChange,
+  disableModelInvocation,
+  onDisableModelInvocationChange,
 }: SlashCommandOptionsDropdownProps) {
   const { t } = useTranslation();
   const [newEntry, setNewEntry] = useState<Record<HookType, NewEntryState>>({
@@ -676,6 +681,142 @@ export function SlashCommandOptionsDropdown({
                   }}
                 >
                   {t('toolbar.contextFork.tooltip')}
+                </div>
+              </DropdownMenu.SubContent>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Sub>
+
+          <DropdownMenu.Separator
+            style={{
+              height: '1px',
+              backgroundColor: 'var(--vscode-dropdown-border)',
+              margin: '4px 0',
+            }}
+          />
+
+          {/* Disable Model Invocation Sub-menu */}
+          <DropdownMenu.Sub>
+            <DropdownMenu.SubTrigger
+              style={{
+                padding: '8px 12px',
+                fontSize: `${FONT_SIZES.small}px`,
+                color: 'var(--vscode-foreground)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px',
+                outline: 'none',
+                borderRadius: '2px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <ChevronLeft size={14} />
+                <span style={{ color: 'var(--vscode-descriptionForeground)' }}>
+                  {disableModelInvocation ? 'true' : 'default'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Shield size={14} />
+                <span>Disable Model Invocation</span>
+              </div>
+            </DropdownMenu.SubTrigger>
+
+            <DropdownMenu.Portal>
+              <DropdownMenu.SubContent
+                sideOffset={4}
+                collisionPadding={{ right: 300 }}
+                style={{
+                  backgroundColor: 'var(--vscode-dropdown-background)',
+                  border: '1px solid var(--vscode-dropdown-border)',
+                  borderRadius: '4px',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+                  zIndex: 10000,
+                  minWidth: '180px',
+                  padding: '4px',
+                }}
+              >
+                <DropdownMenu.RadioGroup value={disableModelInvocation ? 'true' : 'default'}>
+                  <DropdownMenu.RadioItem
+                    value="default"
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      onDisableModelInvocationChange(false);
+                    }}
+                    style={{
+                      padding: '6px 12px',
+                      fontSize: `${FONT_SIZES.small}px`,
+                      color: 'var(--vscode-foreground)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      outline: 'none',
+                      borderRadius: '2px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '12px',
+                        height: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <DropdownMenu.ItemIndicator>
+                        <Check size={12} />
+                      </DropdownMenu.ItemIndicator>
+                    </div>
+                    <span>default</span>
+                  </DropdownMenu.RadioItem>
+                  <DropdownMenu.RadioItem
+                    value="true"
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      onDisableModelInvocationChange(true);
+                    }}
+                    style={{
+                      padding: '6px 12px',
+                      fontSize: `${FONT_SIZES.small}px`,
+                      color: 'var(--vscode-foreground)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      outline: 'none',
+                      borderRadius: '2px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '12px',
+                        height: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <DropdownMenu.ItemIndicator>
+                        <Check size={12} />
+                      </DropdownMenu.ItemIndicator>
+                    </div>
+                    <span>true</span>
+                  </DropdownMenu.RadioItem>
+                </DropdownMenu.RadioGroup>
+
+                {/* Description */}
+                <div
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '10px',
+                    color: 'var(--vscode-descriptionForeground)',
+                    lineHeight: '1.4',
+                    borderTop: '1px solid var(--vscode-dropdown-border)',
+                    marginTop: '4px',
+                  }}
+                >
+                  {t('toolbar.disableModelInvocation.tooltip')}
                 </div>
               </DropdownMenu.SubContent>
             </DropdownMenu.Portal>

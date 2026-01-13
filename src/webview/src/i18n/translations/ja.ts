@@ -68,6 +68,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Toolbar slash command options dropdown
   'toolbar.contextFork.tooltip':
     '分離されたサブエージェントコンテキストで実行 (Claude Code v2.1.0+)',
+  'toolbar.disableModelInvocation.tooltip':
+    'trueの場合、Skillツールからこのコマンドの呼び出しを防止します',
 
   // Toolbar hooks configuration dropdown
   'hooks.title': 'Hooks',
