@@ -7,10 +7,14 @@
 
 import type {
   EditorContentUpdatedPayload,
+  ExportForCopilotPayload,
+  ExportForCopilotSuccessPayload,
   ExportWorkflowPayload,
   ExtensionMessage,
   OpenInEditorPayload,
   RunAsSlashCommandPayload,
+  RunForCopilotPayload,
+  RunForCopilotSuccessPayload,
   SaveWorkflowPayload,
   Workflow,
 } from '@shared/types/messages';
@@ -263,5 +267,102 @@ export function openInEditor(
     });
 
     // No timeout - user may take as long as they want to edit
+  });
+}
+
+// ============================================================================
+// Copilot Integration Functions (Beta)
+// ============================================================================
+
+/**
+ * Export workflow for Copilot (Beta)
+ *
+ * Exports the workflow to Copilot Prompts format (.github/prompts/*.prompt.md)
+ *
+ * @param workflow - Workflow to export
+ * @returns Promise that resolves with export result
+ */
+export function exportForCopilot(workflow: Workflow): Promise<ExportForCopilotSuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'EXPORT_FOR_COPILOT_SUCCESS') {
+          resolve(message.payload as ExportForCopilotSuccessPayload);
+        } else if (message.type === 'EXPORT_FOR_COPILOT_CANCELLED') {
+          // User cancelled - resolve with empty result
+          resolve({
+            exportedFiles: [],
+            timestamp: new Date().toISOString(),
+          });
+        } else if (message.type === 'EXPORT_FOR_COPILOT_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to export for Copilot'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: ExportForCopilotPayload = { workflow };
+    vscode.postMessage({
+      type: 'EXPORT_FOR_COPILOT',
+      requestId,
+      payload,
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
+/**
+ * Run workflow for Copilot (Beta)
+ *
+ * Exports the workflow to Copilot Prompts format and opens Copilot Chat
+ * with the generated prompt
+ *
+ * @param workflow - Workflow to run
+ * @returns Promise that resolves with run result
+ */
+export function runForCopilot(workflow: Workflow): Promise<RunForCopilotSuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'RUN_FOR_COPILOT_SUCCESS') {
+          resolve(message.payload as RunForCopilotSuccessPayload);
+        } else if (message.type === 'RUN_FOR_COPILOT_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to run for Copilot'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: RunForCopilotPayload = { workflow };
+    vscode.postMessage({
+      type: 'RUN_FOR_COPILOT',
+      requestId,
+      payload,
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
   });
 }

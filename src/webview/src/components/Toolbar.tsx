@@ -15,7 +15,12 @@ import {
   cancelWorkflowNameGeneration,
   generateWorkflowName,
 } from '../services/ai-generation-service';
-import { runAsSlashCommand, saveWorkflow } from '../services/vscode-bridge';
+import {
+  exportForCopilot,
+  runAsSlashCommand,
+  runForCopilot,
+  saveWorkflow,
+} from '../services/vscode-bridge';
 import {
   deserializeWorkflow,
   serializeWorkflow,
@@ -89,6 +94,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [isGeneratingName, setIsGeneratingName] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [workflowNameError, setWorkflowNameError] = useState<string | null>(null);
+  // Copilot integration (Beta)
+  const [isCopilotExporting, setIsCopilotExporting] = useState(false);
+  const [isCopilotRunning, setIsCopilotRunning] = useState(false);
+  // Copilot Beta feature toggle (persisted in localStorage)
+  const [isCopilotBetaEnabled, setIsCopilotBetaEnabled] = useState(() => {
+    const stored = localStorage.getItem('cc-wf-studio:copilot-beta-enabled');
+    return stored === 'true';
+  });
   const generationNameRequestIdRef = useRef<string | null>(null);
 
   // Workflow name validation pattern (lowercase, numbers, hyphens, underscores only)
@@ -113,6 +126,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     clearHistory(); // Clear AI refinement chat history
     setShowResetConfirm(false);
   }, [clearWorkflow, clearHistory]);
+
+  // Handle toggle Copilot Beta feature
+  const handleToggleCopilotBeta = useCallback(() => {
+    setIsCopilotBetaEnabled((prev) => {
+      const newValue = !prev;
+      localStorage.setItem('cc-wf-studio:copilot-beta-enabled', String(newValue));
+      return newValue;
+    });
+  }, []);
 
   const handleSave = async () => {
     if (!workflowName.trim()) {
@@ -373,6 +395,104 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     }
   };
 
+  // ============================================================================
+  // Copilot Integration Handlers (Beta)
+  // ============================================================================
+
+  const handleCopilotExport = async () => {
+    if (!workflowName.trim()) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
+      });
+      return;
+    }
+
+    setIsCopilotExporting(true);
+    try {
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
+        useWorkflowStore.getState();
+
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        workflowDescription || undefined,
+        undefined,
+        subAgentFlows,
+        slashCommandOptions
+      );
+
+      validateWorkflow(workflow);
+
+      const result = await exportForCopilot(workflow);
+      console.log('Workflow exported for Copilot:', result.exportedFiles);
+    } catch (error) {
+      onError({
+        code: 'EXPORT_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to export for Copilot',
+        details: error,
+      });
+    } finally {
+      setIsCopilotExporting(false);
+    }
+  };
+
+  const handleCopilotRun = async () => {
+    if (!workflowName.trim()) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
+      });
+      return;
+    }
+
+    setIsCopilotRunning(true);
+    try {
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
+        useWorkflowStore.getState();
+
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        workflowDescription || undefined,
+        undefined,
+        subAgentFlows,
+        slashCommandOptions
+      );
+
+      validateWorkflow(workflow);
+
+      const result = await runForCopilot(workflow);
+      console.log('Workflow run for Copilot:', result.workflowName);
+    } catch (error) {
+      onError({
+        code: 'RUN_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to run for Copilot',
+        details: error,
+      });
+    } finally {
+      setIsCopilotRunning(false);
+    }
+  };
+
   // Handle AI workflow name generation
   const handleGenerateWorkflowName = useCallback(async () => {
     const currentRequestId = `gen-name-${Date.now()}`;
@@ -500,7 +620,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         style={{
           position: 'relative',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-end',
           gap: '8px',
           padding: '8px 12px',
           borderBottom: '1px solid var(--vscode-panel-border)',
@@ -617,132 +737,337 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <div
           style={{
             width: '1px',
-            height: '32px',
+            alignSelf: 'stretch',
             backgroundColor: 'var(--vscode-panel-border)',
           }}
         />
 
-        {/* Slash Command Button Group */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-start',
-            gap: '2px',
-          }}
-        >
-          {/* Group Label */}
-          <span
-            style={{
-              fontSize: '10px',
-              color: 'var(--vscode-descriptionForeground)',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            Slash Command
-          </span>
-
-          {/* Button Group */}
-          {/* Slash Command Group: Export + Run + Options */}
+        {/* Slash Command Section - Layout changes based on Copilot Beta enabled */}
+        {isCopilotBetaEnabled ? (
+          /* Combined layout when Copilot Beta is enabled */
           <div
             style={{
               display: 'flex',
-              gap: '4px',
-              alignItems: 'center',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              gap: '2px',
             }}
           >
-            {/* Export + Run buttons (connected) */}
-            <div style={{ display: 'flex' }}>
-              {/* Export Button */}
-              <button
-                type="button"
-                onClick={handleExport}
-                disabled={isExporting}
-                data-tour="export-button"
-                style={{
-                  padding: isCompact ? '4px 8px' : '4px 12px',
-                  backgroundColor: 'var(--vscode-button-background)',
-                  color: 'var(--vscode-button-foreground)',
-                  border: 'none',
-                  borderRadius: '2px 0 0 2px',
-                  cursor: isExporting ? 'not-allowed' : 'pointer',
-                  fontSize: '13px',
-                  opacity: isExporting ? 0.6 : 1,
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  borderRight: '1px solid var(--vscode-button-foreground)',
-                }}
-              >
-                {isCompact ? (
-                  <SquareSlash size={16} />
-                ) : isExporting ? (
-                  t('toolbar.exporting')
-                ) : (
-                  t('toolbar.export')
-                )}
-              </button>
+            {/* Group Label */}
+            <span
+              style={{
+                fontSize: '10px',
+                color: 'var(--vscode-descriptionForeground)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Slash Command
+            </span>
 
-              {/* Run Button */}
-              <button
-                type="button"
-                onClick={handleRunAsSlashCommand}
-                disabled={isRunning}
-                data-tour="run-button"
+            {/* Two-column layout with divider */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'stretch',
+                gap: '0',
+              }}
+            >
+              {/* Claude Code Column */}
+              <div
                 style={{
-                  padding: isCompact ? '4px 8px' : '4px 12px',
-                  backgroundColor: 'var(--vscode-button-background)',
-                  color: 'var(--vscode-button-foreground)',
-                  border: 'none',
-                  borderRadius: '0 2px 2px 0',
-                  cursor: isRunning ? 'not-allowed' : 'pointer',
-                  fontSize: '13px',
-                  opacity: isRunning ? 0.6 : 1,
-                  whiteSpace: 'nowrap',
                   display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
+                  flexDirection: 'column',
+                  gap: '2px',
                 }}
               >
-                {isCompact ? (
-                  <Play size={16} />
-                ) : isRunning ? (
-                  t('toolbar.running')
-                ) : (
-                  t('toolbar.run')
-                )}
-              </button>
+                <span
+                  style={{
+                    fontSize: '9px',
+                    color: 'var(--vscode-descriptionForeground)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Claude Code
+                </span>
+                <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                  <div style={{ display: 'flex' }}>
+                    <button
+                      type="button"
+                      onClick={handleExport}
+                      disabled={isExporting}
+                      data-tour="export-button"
+                      style={{
+                        padding: isCompact ? '4px 8px' : '4px 12px',
+                        backgroundColor: 'var(--vscode-button-background)',
+                        color: 'var(--vscode-button-foreground)',
+                        border: 'none',
+                        borderRadius: '2px 0 0 2px',
+                        cursor: isExporting ? 'not-allowed' : 'pointer',
+                        fontSize: '13px',
+                        opacity: isExporting ? 0.6 : 1,
+                        whiteSpace: 'nowrap',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        borderRight: '1px solid var(--vscode-button-foreground)',
+                      }}
+                    >
+                      {isCompact ? (
+                        <SquareSlash size={16} />
+                      ) : isExporting ? (
+                        t('toolbar.exporting')
+                      ) : (
+                        t('toolbar.export')
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRunAsSlashCommand}
+                      disabled={isRunning}
+                      data-tour="run-button"
+                      style={{
+                        padding: isCompact ? '4px 8px' : '4px 12px',
+                        backgroundColor: 'var(--vscode-button-background)',
+                        color: 'var(--vscode-button-foreground)',
+                        border: 'none',
+                        borderRadius: '0 2px 2px 0',
+                        cursor: isRunning ? 'not-allowed' : 'pointer',
+                        fontSize: '13px',
+                        opacity: isRunning ? 0.6 : 1,
+                        whiteSpace: 'nowrap',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      {isCompact ? (
+                        <Play size={16} />
+                      ) : isRunning ? (
+                        t('toolbar.running')
+                      ) : (
+                        t('toolbar.run')
+                      )}
+                    </button>
+                  </div>
+                  <SlashCommandOptionsDropdown
+                    context={slashCommandOptions.context ?? 'default'}
+                    onContextChange={setSlashCommandContext}
+                    model={slashCommandOptions.model ?? 'default'}
+                    onModelChange={setSlashCommandModel}
+                    hooks={slashCommandOptions.hooks ?? {}}
+                    onAddHookEntry={addHookEntry}
+                    onRemoveHookEntry={removeHookEntry}
+                    onUpdateHookEntry={updateHookEntry}
+                    allowedTools={slashCommandOptions.allowedTools ?? ''}
+                    onAllowedToolsChange={setSlashCommandAllowedTools}
+                    disableModelInvocation={slashCommandOptions.disableModelInvocation ?? false}
+                    onDisableModelInvocationChange={setSlashCommandDisableModelInvocation}
+                    argumentHint={slashCommandOptions.argumentHint ?? ''}
+                    onArgumentHintChange={setSlashCommandArgumentHint}
+                  />
+                </div>
+              </div>
+
+              {/* Vertical Divider */}
+              <div
+                style={{
+                  width: '1px',
+                  backgroundColor: 'var(--vscode-panel-border)',
+                  margin: '0 8px',
+                  alignSelf: 'stretch',
+                }}
+              />
+
+              {/* Copilot Column */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2px',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '9px',
+                    color: 'var(--vscode-descriptionForeground)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Copilot
+                </span>
+                <div style={{ display: 'flex' }}>
+                  <button
+                    type="button"
+                    onClick={handleCopilotExport}
+                    disabled={isCopilotExporting}
+                    style={{
+                      padding: isCompact ? '4px 8px' : '4px 12px',
+                      backgroundColor: 'var(--vscode-button-background)',
+                      color: 'var(--vscode-button-foreground)',
+                      border: 'none',
+                      borderRadius: '2px 0 0 2px',
+                      cursor: isCopilotExporting ? 'not-allowed' : 'pointer',
+                      fontSize: '13px',
+                      opacity: isCopilotExporting ? 0.6 : 1,
+                      whiteSpace: 'nowrap',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      borderRight: '1px solid var(--vscode-button-foreground)',
+                    }}
+                  >
+                    {isCompact ? (
+                      <FileDown size={16} />
+                    ) : isCopilotExporting ? (
+                      t('toolbar.exporting')
+                    ) : (
+                      t('toolbar.export')
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopilotRun}
+                    disabled={isCopilotRunning}
+                    style={{
+                      padding: isCompact ? '4px 8px' : '4px 12px',
+                      backgroundColor: 'var(--vscode-button-background)',
+                      color: 'var(--vscode-button-foreground)',
+                      border: 'none',
+                      borderRadius: '0 2px 2px 0',
+                      cursor: isCopilotRunning ? 'not-allowed' : 'pointer',
+                      fontSize: '13px',
+                      opacity: isCopilotRunning ? 0.6 : 1,
+                      whiteSpace: 'nowrap',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                  >
+                    {isCompact ? (
+                      <Play size={16} />
+                    ) : isCopilotRunning ? (
+                      t('toolbar.running')
+                    ) : (
+                      t('toolbar.run')
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
-
-            {/* Options Dropdown (separate with small gap) */}
-            {/* Issue #413: Hooks are now integrated into SlashCommandOptionsDropdown */}
-            {/* Issue #424: Allowed Tools configuration added */}
-            {/* Issue #426: Added disableModelInvocation props */}
-            <SlashCommandOptionsDropdown
-              context={slashCommandOptions.context ?? 'default'}
-              onContextChange={setSlashCommandContext}
-              model={slashCommandOptions.model ?? 'default'}
-              onModelChange={setSlashCommandModel}
-              hooks={slashCommandOptions.hooks ?? {}}
-              onAddHookEntry={addHookEntry}
-              onRemoveHookEntry={removeHookEntry}
-              onUpdateHookEntry={updateHookEntry}
-              allowedTools={slashCommandOptions.allowedTools ?? ''}
-              onAllowedToolsChange={setSlashCommandAllowedTools}
-              disableModelInvocation={slashCommandOptions.disableModelInvocation ?? false}
-              onDisableModelInvocationChange={setSlashCommandDisableModelInvocation}
-              argumentHint={slashCommandOptions.argumentHint ?? ''}
-              onArgumentHintChange={setSlashCommandArgumentHint}
-            />
           </div>
-        </div>
+        ) : (
+          /* Original layout when Copilot Beta is disabled */
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              gap: '2px',
+            }}
+          >
+            {/* Group Label */}
+            <span
+              style={{
+                fontSize: '10px',
+                color: 'var(--vscode-descriptionForeground)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Slash Command
+            </span>
+
+            {/* Button Group */}
+            <div
+              style={{
+                display: 'flex',
+                gap: '4px',
+                alignItems: 'center',
+              }}
+            >
+              <div style={{ display: 'flex' }}>
+                <button
+                  type="button"
+                  onClick={handleExport}
+                  disabled={isExporting}
+                  data-tour="export-button"
+                  style={{
+                    padding: isCompact ? '4px 8px' : '4px 12px',
+                    backgroundColor: 'var(--vscode-button-background)',
+                    color: 'var(--vscode-button-foreground)',
+                    border: 'none',
+                    borderRadius: '2px 0 0 2px',
+                    cursor: isExporting ? 'not-allowed' : 'pointer',
+                    fontSize: '13px',
+                    opacity: isExporting ? 0.6 : 1,
+                    whiteSpace: 'nowrap',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    borderRight: '1px solid var(--vscode-button-foreground)',
+                  }}
+                >
+                  {isCompact ? (
+                    <SquareSlash size={16} />
+                  ) : isExporting ? (
+                    t('toolbar.exporting')
+                  ) : (
+                    t('toolbar.export')
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRunAsSlashCommand}
+                  disabled={isRunning}
+                  data-tour="run-button"
+                  style={{
+                    padding: isCompact ? '4px 8px' : '4px 12px',
+                    backgroundColor: 'var(--vscode-button-background)',
+                    color: 'var(--vscode-button-foreground)',
+                    border: 'none',
+                    borderRadius: '0 2px 2px 0',
+                    cursor: isRunning ? 'not-allowed' : 'pointer',
+                    fontSize: '13px',
+                    opacity: isRunning ? 0.6 : 1,
+                    whiteSpace: 'nowrap',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  {isCompact ? (
+                    <Play size={16} />
+                  ) : isRunning ? (
+                    t('toolbar.running')
+                  ) : (
+                    t('toolbar.run')
+                  )}
+                </button>
+              </div>
+              <SlashCommandOptionsDropdown
+                context={slashCommandOptions.context ?? 'default'}
+                onContextChange={setSlashCommandContext}
+                model={slashCommandOptions.model ?? 'default'}
+                onModelChange={setSlashCommandModel}
+                hooks={slashCommandOptions.hooks ?? {}}
+                onAddHookEntry={addHookEntry}
+                onRemoveHookEntry={removeHookEntry}
+                onUpdateHookEntry={updateHookEntry}
+                allowedTools={slashCommandOptions.allowedTools ?? ''}
+                onAllowedToolsChange={setSlashCommandAllowedTools}
+                disableModelInvocation={slashCommandOptions.disableModelInvocation ?? false}
+                onDisableModelInvocationChange={setSlashCommandDisableModelInvocation}
+                argumentHint={slashCommandOptions.argumentHint ?? ''}
+                onArgumentHintChange={setSlashCommandArgumentHint}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Divider */}
         <div
           style={{
             width: '1px',
-            height: '32px',
+            alignSelf: 'stretch',
             backgroundColor: 'var(--vscode-panel-border)',
           }}
         />
@@ -804,6 +1129,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onStartTour={onStartTour}
               isFocusMode={isFocusMode}
               onToggleFocusMode={toggleFocusMode}
+              isCopilotBetaEnabled={isCopilotBetaEnabled}
+              onToggleCopilotBeta={handleToggleCopilotBeta}
               open={moreActionsOpen}
               onOpenChange={onMoreActionsOpenChange}
             />
