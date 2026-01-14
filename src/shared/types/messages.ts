@@ -696,7 +696,12 @@ export type ExtensionMessage =
   | Message<void, 'FILE_PICKER_CANCELLED'>
   | Message<RunAsSlashCommandSuccessPayload, 'RUN_AS_SLASH_COMMAND_SUCCESS'>
   | Message<void, 'RUN_AS_SLASH_COMMAND_CANCELLED'>
-  | Message<EditorContentUpdatedPayload, 'EDITOR_CONTENT_UPDATED'>;
+  | Message<EditorContentUpdatedPayload, 'EDITOR_CONTENT_UPDATED'>
+  | Message<ExportForCopilotSuccessPayload, 'EXPORT_FOR_COPILOT_SUCCESS'>
+  | Message<void, 'EXPORT_FOR_COPILOT_CANCELLED'>
+  | Message<CopilotOperationFailedPayload, 'EXPORT_FOR_COPILOT_FAILED'>
+  | Message<RunForCopilotSuccessPayload, 'RUN_FOR_COPILOT_SUCCESS'>
+  | Message<CopilotOperationFailedPayload, 'RUN_FOR_COPILOT_FAILED'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -1089,6 +1094,60 @@ export interface ShareWorkflowFailedPayload {
 }
 
 // ============================================================================
+// Copilot Integration Payloads (Beta)
+// ============================================================================
+
+/**
+ * Export workflow for Copilot payload
+ */
+export interface ExportForCopilotPayload {
+  /** Workflow to export */
+  workflow: Workflow;
+}
+
+/**
+ * Export for Copilot success payload
+ */
+export interface ExportForCopilotSuccessPayload {
+  /** Exported file paths */
+  exportedFiles: string[];
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Run workflow for Copilot payload
+ */
+export interface RunForCopilotPayload {
+  /** Workflow to run */
+  workflow: Workflow;
+}
+
+/**
+ * Run for Copilot success payload
+ */
+export interface RunForCopilotSuccessPayload {
+  /** Workflow name */
+  workflowName: string;
+  /** Whether Copilot Chat was opened */
+  copilotChatOpened: boolean;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Export/Run for Copilot failed payload
+ */
+export interface CopilotOperationFailedPayload {
+  /** Error code */
+  errorCode: 'COPILOT_NOT_INSTALLED' | 'EXPORT_FAILED' | 'CHAT_OPEN_FAILED' | 'UNKNOWN_ERROR';
+  /** Error message */
+  errorMessage: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+// ============================================================================
 // Edit in VSCode Editor Payloads
 // ============================================================================
 
@@ -1190,7 +1249,9 @@ export type WebviewMessage =
   | Message<void, 'OPEN_FILE_PICKER'>
   | Message<RunAsSlashCommandPayload, 'RUN_AS_SLASH_COMMAND'>
   | Message<OpenInEditorPayload, 'OPEN_IN_EDITOR'>
-  | Message<void, 'WEBVIEW_READY'>;
+  | Message<void, 'WEBVIEW_READY'>
+  | Message<ExportForCopilotPayload, 'EXPORT_FOR_COPILOT'>
+  | Message<RunForCopilotPayload, 'RUN_FOR_COPILOT'>;
 
 // ============================================================================
 // Error Codes
