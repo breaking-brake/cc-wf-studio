@@ -17,7 +17,9 @@ import type {
 import {
   type CopilotExportOptions,
   checkExistingCopilotFiles,
+  executeMcpSyncForCopilot,
   exportWorkflowForCopilot,
+  previewMcpSyncForCopilot,
 } from '../services/copilot-export-service';
 import { nodeNameToFileName } from '../services/export-service';
 import type { FileService } from '../services/file-service';
@@ -59,10 +61,26 @@ export async function handleExportForCopilot(
       }
     }
 
-    // Export to Copilot format (all options are fixed defaults)
+    // Check if MCP servers need to be synced
+    const mcpSyncPreview = await previewMcpSyncForCopilot(workflow, fileService);
+    let mcpSyncConfirmed = false;
+
+    if (mcpSyncPreview.serversToAdd.length > 0) {
+      const serverList = mcpSyncPreview.serversToAdd.map((s) => `  • ${s}`).join('\n');
+      const result = await vscode.window.showInformationMessage(
+        `The following MCP servers will be added to .vscode/mcp.json for GitHub Copilot:\n\n${serverList}\n\nProceed?`,
+        { modal: true },
+        'Yes',
+        'No'
+      );
+      mcpSyncConfirmed = result === 'Yes';
+    }
+
+    // Export to Copilot format (skip MCP sync here, we'll do it separately if confirmed)
     const copilotOptions: CopilotExportOptions = {
       destination: 'copilot',
       agent: 'agent',
+      skipMcpSync: true,
     };
 
     const copilotResult = await exportWorkflowForCopilot(workflow, fileService, copilotOptions);
@@ -81,6 +99,12 @@ export async function handleExportForCopilot(
       return;
     }
 
+    // Execute MCP sync if user confirmed
+    let syncedMcpServers: string[] = [];
+    if (mcpSyncConfirmed) {
+      syncedMcpServers = await executeMcpSyncForCopilot(workflow, fileService);
+    }
+
     // Send success response
     const successPayload: ExportForCopilotSuccessPayload = {
       exportedFiles: copilotResult.exportedFiles,
@@ -93,9 +117,11 @@ export async function handleExportForCopilot(
       payload: successPayload,
     });
 
-    // Show notification
+    // Show notification with MCP sync info
+    const syncInfo =
+      syncedMcpServers.length > 0 ? ` (MCP servers synced: ${syncedMcpServers.join(', ')})` : '';
     vscode.window.showInformationMessage(
-      `Exported workflow for Copilot (${copilotResult.exportedFiles.length} files)`
+      `Exported workflow for Copilot (${copilotResult.exportedFiles.length} files)${syncInfo}`
     );
   } catch (error) {
     const failedPayload: CopilotOperationFailedPayload = {
@@ -130,10 +156,26 @@ export async function handleRunForCopilot(
   try {
     const { workflow } = payload;
 
-    // First, export the workflow to Copilot format (all options are fixed defaults)
+    // Check if MCP servers need to be synced
+    const mcpSyncPreview = await previewMcpSyncForCopilot(workflow, fileService);
+    let mcpSyncConfirmed = false;
+
+    if (mcpSyncPreview.serversToAdd.length > 0) {
+      const serverList = mcpSyncPreview.serversToAdd.map((s) => `  • ${s}`).join('\n');
+      const result = await vscode.window.showInformationMessage(
+        `The following MCP servers will be added to .vscode/mcp.json for GitHub Copilot:\n\n${serverList}\n\nProceed?`,
+        { modal: true },
+        'Yes',
+        'No'
+      );
+      mcpSyncConfirmed = result === 'Yes';
+    }
+
+    // First, export the workflow to Copilot format (skip MCP sync, we'll do it separately)
     const copilotOptions: CopilotExportOptions = {
       destination: 'copilot',
       agent: 'agent',
+      skipMcpSync: true,
     };
 
     const exportResult = await exportWorkflowForCopilot(workflow, fileService, copilotOptions);
@@ -150,6 +192,11 @@ export async function handleRunForCopilot(
         payload: failedPayload,
       });
       return;
+    }
+
+    // Execute MCP sync if user confirmed
+    if (mcpSyncConfirmed) {
+      await executeMcpSyncForCopilot(workflow, fileService);
     }
 
     // Try to open Copilot Chat with the prompt

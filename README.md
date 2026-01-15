@@ -89,7 +89,7 @@ All operations run locally within VSCode. **Note:** MCP Tool nodes may require n
 
 💬 **Slack Workflow Sharing (β)** - Share workflows directly to Slack channels with preview cards and one-click import links for seamless team collaboration
 
-🤖 **GitHub Copilot Export (β)** - Export workflows to GitHub Copilot Prompts format (`.github/prompts/*.prompt.md`) and run them directly in Copilot Chat. Enable from **More** menu in the toolbar. **Note:** This is an experimental feature with limited support. Some features (e.g., Skill nodes, MCP nodes) are not yet supported in Copilot export
+🤖 **GitHub Copilot Export (β)** - Export workflows to GitHub Copilot Prompts format (`.github/prompts/*.prompt.md`) and run them directly in Copilot Chat. Enable from **More** menu in the toolbar. **Note:** This is an experimental feature with limited support. Some features (e.g., Skill nodes) are not yet supported in Copilot export
 
 🧩 **Rich Node Types** - Build complex workflows with diverse node types: Prompt (templates), Sub-Agent (AI tasks), Skill (Claude Code Skills), MCP (external tools), IfElse/Switch (conditional branching), and AskUserQuestion (user decisions)
 
