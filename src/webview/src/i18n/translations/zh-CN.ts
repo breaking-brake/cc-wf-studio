@@ -89,6 +89,11 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.moreActions': '更多',
   'toolbar.help': '帮助',
 
+  // Copilot Execution Mode
+  'copilot.mode.tooltip': '选择 Copilot 执行模式',
+  'copilot.mode.cli': 'Copilot CLI',
+  'copilot.mode.vscode': 'VSCode Copilot',
+
   // Node Palette
   'palette.title': '节点面板',
   'palette.basicNodes': '基本节点',

@@ -59,3 +59,45 @@ export function executeSlashCommandInTerminal(
     terminal,
   };
 }
+
+/**
+ * Options for executing Copilot CLI skill command
+ */
+export interface CopilotCliExecutionOptions {
+  /** Skill name (the workflow name as .github/skills/{name}/SKILL.md) */
+  skillName: string;
+  /** Working directory for the terminal */
+  workingDirectory: string;
+}
+
+/**
+ * Execute Copilot CLI with skill in a new VSCode integrated terminal
+ *
+ * Creates a new terminal and executes:
+ *   copilot -i ":skill {skillName}" --allow-all-tools
+ *
+ * @param options - Copilot CLI execution options
+ * @returns Terminal execution result
+ */
+export function executeCopilotCliInTerminal(
+  options: CopilotCliExecutionOptions
+): TerminalExecutionResult {
+  const terminalName = `Copilot: ${options.skillName}`;
+
+  // Create a new terminal
+  const terminal = vscode.window.createTerminal({
+    name: terminalName,
+    cwd: options.workingDirectory,
+  });
+
+  // Show the terminal and focus on it
+  terminal.show(true);
+
+  // Execute: copilot -i ":skill {skillName}" --allow-all-tools
+  terminal.sendText(`copilot -i ":skill ${options.skillName}" --allow-all-tools`);
+
+  return {
+    terminalName,
+    terminal,
+  };
+}

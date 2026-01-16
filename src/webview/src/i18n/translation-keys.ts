@@ -86,6 +86,11 @@ export interface WebviewTranslationKeys {
   'toolbar.moreActions': string;
   'toolbar.help': string;
 
+  // Copilot Execution Mode
+  'copilot.mode.tooltip': string;
+  'copilot.mode.cli': string;
+  'copilot.mode.vscode': string;
+
   // Node Palette
   'palette.title': string;
   'palette.basicNodes': string;

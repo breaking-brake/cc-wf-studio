@@ -7,12 +7,16 @@
 
 import type {
   EditorContentUpdatedPayload,
+  ExportForCopilotCliPayload,
+  ExportForCopilotCliSuccessPayload,
   ExportForCopilotPayload,
   ExportForCopilotSuccessPayload,
   ExportWorkflowPayload,
   ExtensionMessage,
   OpenInEditorPayload,
   RunAsSlashCommandPayload,
+  RunForCopilotCliPayload,
+  RunForCopilotCliSuccessPayload,
   RunForCopilotPayload,
   RunForCopilotSuccessPayload,
   SaveWorkflowPayload,
@@ -324,6 +328,58 @@ export function exportForCopilot(workflow: Workflow): Promise<ExportForCopilotSu
 }
 
 /**
+ * Export workflow for Copilot CLI (Beta)
+ *
+ * Exports the workflow to Skills format (.github/skills/name/SKILL.md)
+ *
+ * @param workflow - Workflow to export
+ * @returns Promise that resolves with export result
+ */
+export function exportForCopilotCli(
+  workflow: Workflow
+): Promise<ExportForCopilotCliSuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'EXPORT_FOR_COPILOT_CLI_SUCCESS') {
+          resolve(message.payload as ExportForCopilotCliSuccessPayload);
+        } else if (message.type === 'EXPORT_FOR_COPILOT_CLI_CANCELLED') {
+          // User cancelled - resolve with empty result
+          resolve({
+            skillName: '',
+            skillPath: '',
+            timestamp: new Date().toISOString(),
+          });
+        } else if (message.type === 'EXPORT_FOR_COPILOT_CLI_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to export for Copilot CLI'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: ExportForCopilotCliPayload = { workflow };
+    vscode.postMessage({
+      type: 'EXPORT_FOR_COPILOT_CLI',
+      requestId,
+      payload,
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
+/**
  * Run workflow for Copilot (Beta)
  *
  * Exports the workflow to Copilot Prompts format and opens Copilot Chat
@@ -355,6 +411,50 @@ export function runForCopilot(workflow: Workflow): Promise<RunForCopilotSuccessP
     const payload: RunForCopilotPayload = { workflow };
     vscode.postMessage({
       type: 'RUN_FOR_COPILOT',
+      requestId,
+      payload,
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
+/**
+ * Run workflow for Copilot CLI (Beta)
+ *
+ * Exports the workflow to Copilot Prompts format and runs it via
+ * Claude Code terminal using the copilot-cli-slash-command Skill
+ *
+ * @param workflow - Workflow to run
+ * @returns Promise that resolves with run result
+ */
+export function runForCopilotCli(workflow: Workflow): Promise<RunForCopilotCliSuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'RUN_FOR_COPILOT_CLI_SUCCESS') {
+          resolve(message.payload as RunForCopilotCliSuccessPayload);
+        } else if (message.type === 'RUN_FOR_COPILOT_CLI_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to run for Copilot CLI'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: RunForCopilotCliPayload = { workflow };
+    vscode.postMessage({
+      type: 'RUN_FOR_COPILOT_CLI',
       requestId,
       payload,
     });

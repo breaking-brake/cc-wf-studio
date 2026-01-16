@@ -701,7 +701,14 @@ export type ExtensionMessage =
   | Message<void, 'EXPORT_FOR_COPILOT_CANCELLED'>
   | Message<CopilotOperationFailedPayload, 'EXPORT_FOR_COPILOT_FAILED'>
   | Message<RunForCopilotSuccessPayload, 'RUN_FOR_COPILOT_SUCCESS'>
-  | Message<CopilotOperationFailedPayload, 'RUN_FOR_COPILOT_FAILED'>;
+  | Message<void, 'RUN_FOR_COPILOT_CANCELLED'>
+  | Message<CopilotOperationFailedPayload, 'RUN_FOR_COPILOT_FAILED'>
+  | Message<RunForCopilotCliSuccessPayload, 'RUN_FOR_COPILOT_CLI_SUCCESS'>
+  | Message<void, 'RUN_FOR_COPILOT_CLI_CANCELLED'>
+  | Message<CopilotOperationFailedPayload, 'RUN_FOR_COPILOT_CLI_FAILED'>
+  | Message<ExportForCopilotCliSuccessPayload, 'EXPORT_FOR_COPILOT_CLI_SUCCESS'>
+  | Message<void, 'EXPORT_FOR_COPILOT_CLI_CANCELLED'>
+  | Message<CopilotOperationFailedPayload, 'EXPORT_FOR_COPILOT_CLI_FAILED'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -1098,6 +1105,13 @@ export interface ShareWorkflowFailedPayload {
 // ============================================================================
 
 /**
+ * Copilot execution mode selection
+ * - vscode: Opens VSCode Copilot Chat panel and sends command
+ * - cli: Uses Claude Code terminal with copilot-cli-slash-command skill
+ */
+export type CopilotExecutionMode = 'vscode' | 'cli';
+
+/**
  * Export workflow for Copilot payload
  */
 export interface ExportForCopilotPayload {
@@ -1143,6 +1157,47 @@ export interface CopilotOperationFailedPayload {
   errorCode: 'COPILOT_NOT_INSTALLED' | 'EXPORT_FAILED' | 'CHAT_OPEN_FAILED' | 'UNKNOWN_ERROR';
   /** Error message */
   errorMessage: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Run workflow for Copilot CLI payload
+ * Uses Claude Code terminal with copilot-cli-slash-command skill
+ */
+export interface RunForCopilotCliPayload {
+  /** Workflow to run */
+  workflow: Workflow;
+}
+
+/**
+ * Run for Copilot CLI success payload
+ */
+export interface RunForCopilotCliSuccessPayload {
+  /** Workflow name */
+  workflowName: string;
+  /** Terminal name where command is running */
+  terminalName: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Export workflow for Copilot CLI payload (Skills format)
+ */
+export interface ExportForCopilotCliPayload {
+  /** Workflow to export */
+  workflow: Workflow;
+}
+
+/**
+ * Export for Copilot CLI success payload
+ */
+export interface ExportForCopilotCliSuccessPayload {
+  /** Skill name */
+  skillName: string;
+  /** Skill file path */
+  skillPath: string;
   /** Timestamp */
   timestamp: string; // ISO 8601
 }
@@ -1251,7 +1306,9 @@ export type WebviewMessage =
   | Message<OpenInEditorPayload, 'OPEN_IN_EDITOR'>
   | Message<void, 'WEBVIEW_READY'>
   | Message<ExportForCopilotPayload, 'EXPORT_FOR_COPILOT'>
-  | Message<RunForCopilotPayload, 'RUN_FOR_COPILOT'>;
+  | Message<RunForCopilotPayload, 'RUN_FOR_COPILOT'>
+  | Message<RunForCopilotCliPayload, 'RUN_FOR_COPILOT_CLI'>
+  | Message<ExportForCopilotCliPayload, 'EXPORT_FOR_COPILOT_CLI'>;
 
 // ============================================================================
 // Error Codes

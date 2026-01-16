@@ -92,6 +92,11 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.moreActions': 'More',
   'toolbar.help': 'Help',
 
+  // Copilot Execution Mode
+  'copilot.mode.tooltip': 'Select Copilot execution mode',
+  'copilot.mode.cli': 'Copilot CLI',
+  'copilot.mode.vscode': 'VSCode Copilot',
+
   // Node Palette
   'palette.title': 'Node Palette',
   'palette.basicNodes': 'Basic Nodes',

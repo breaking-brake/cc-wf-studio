@@ -16,7 +16,12 @@ import { migrateWorkflow } from '../utils/migrate-workflow';
 import { SlackTokenManager } from '../utils/slack-token-manager';
 import { validateWorkflowFile } from '../utils/workflow-validator';
 import { getWebviewContent } from '../webview-content';
-import { handleExportForCopilot, handleRunForCopilot } from './copilot-handlers';
+import {
+  handleExportForCopilot,
+  handleExportForCopilotCli,
+  handleRunForCopilot,
+  handleRunForCopilotCli,
+} from './copilot-handlers';
 import { handleExportWorkflow, handleExportWorkflowForExecution } from './export-workflow';
 import { loadWorkflow } from './load-workflow';
 import { loadWorkflowList } from './load-workflow-list';
@@ -325,12 +330,56 @@ export function registerOpenEditorCommand(
               break;
 
             case 'RUN_FOR_COPILOT':
-              // Run workflow for Copilot (Beta)
+              // Run workflow for Copilot (Beta) - VSCode Copilot Chat mode
               if (message.payload?.workflow) {
                 await handleRunForCopilot(fileService, webview, message.payload, message.requestId);
               } else {
                 webview.postMessage({
                   type: 'RUN_FOR_COPILOT_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorCode: 'UNKNOWN_ERROR',
+                    errorMessage: 'Workflow is required',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+
+            case 'RUN_FOR_COPILOT_CLI':
+              // Run workflow for Copilot CLI mode (via Claude Code terminal)
+              if (message.payload?.workflow) {
+                await handleRunForCopilotCli(
+                  fileService,
+                  webview,
+                  message.payload,
+                  message.requestId
+                );
+              } else {
+                webview.postMessage({
+                  type: 'RUN_FOR_COPILOT_CLI_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorCode: 'UNKNOWN_ERROR',
+                    errorMessage: 'Workflow is required',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+
+            case 'EXPORT_FOR_COPILOT_CLI':
+              // Export workflow for Copilot CLI (Skills format)
+              if (message.payload?.workflow) {
+                await handleExportForCopilotCli(
+                  fileService,
+                  webview,
+                  message.payload,
+                  message.requestId
+                );
+              } else {
+                webview.postMessage({
+                  type: 'EXPORT_FOR_COPILOT_CLI_FAILED',
                   requestId: message.requestId,
                   payload: {
                     errorCode: 'UNKNOWN_ERROR',

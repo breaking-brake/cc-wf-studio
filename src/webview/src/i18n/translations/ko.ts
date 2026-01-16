@@ -91,6 +91,11 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.moreActions': '더보기',
   'toolbar.help': '도움말',
 
+  // Copilot Execution Mode
+  'copilot.mode.tooltip': 'Copilot 실행 모드 선택',
+  'copilot.mode.cli': 'Copilot CLI',
+  'copilot.mode.vscode': 'VSCode Copilot',
+
   // Node Palette
   'palette.title': '노드 팔레트',
   'palette.basicNodes': '기본 노드',
