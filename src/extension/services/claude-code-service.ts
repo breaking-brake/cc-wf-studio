@@ -525,8 +525,12 @@ export async function executeClaudeCodeCLIStreaming(
 
     // Process streaming output using AsyncIterable
     for await (const chunk of subprocess.stdout) {
+      // Normalize CRLF to LF for cross-platform compatibility (Windows support)
       // Split by newlines (JSON Lines format)
-      const lines = chunk.split('\n').filter((line: string) => line.trim());
+      const lines = chunk
+        .replace(/\r\n/g, '\n')
+        .split('\n')
+        .filter((line: string) => line.trim());
 
       for (const line of lines) {
         try {

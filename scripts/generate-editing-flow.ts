@@ -127,19 +127,26 @@ function extractTopLevelBulletList(content: string, heading: string): string[] {
  * Parse the markdown file and extract all data
  */
 function parseMarkdown(content: string): EditingFlowData {
+  // Normalize CRLF to LF for cross-platform compatibility (Windows support)
+  const normalizedContent = content.replace(/\r\n/g, '\n');
+
   return {
-    mermaidDiagram: extractMermaidDiagram(content),
-    steps: extractNumberedList(content, 'Process Steps'),
+    mermaidDiagram: extractMermaidDiagram(normalizedContent),
+    steps: extractNumberedList(normalizedContent, 'Process Steps'),
     requestTypeGuidelines: {
       questionOrUnderstanding: extractBulletList(
-        content,
+        normalizedContent,
         'Request Type Guidelines',
         'Question or Understanding Request'
       ),
-      editRequest: extractBulletList(content, 'Request Type Guidelines', 'Edit Request'),
-      unclearRequest: extractBulletList(content, 'Request Type Guidelines', 'Unclear Request'),
+      editRequest: extractBulletList(normalizedContent, 'Request Type Guidelines', 'Edit Request'),
+      unclearRequest: extractBulletList(
+        normalizedContent,
+        'Request Type Guidelines',
+        'Unclear Request'
+      ),
     },
-    clarificationTriggers: extractTopLevelBulletList(content, 'Clarification Triggers'),
+    clarificationTriggers: extractTopLevelBulletList(normalizedContent, 'Clarification Triggers'),
   };
 }
 
