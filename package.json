@@ -113,7 +113,7 @@
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^10.0.1",
     "@types/node": "^25.0.3",
-    "@types/vscode": "^1.80.0",
+    "@types/vscode": "^1.108.1",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.3.8",
     "conventional-changelog-conventionalcommits": "^9.1.0",
