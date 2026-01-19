@@ -467,6 +467,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Model selector
   'refinement.model.label': 'Model',
 
+  // Provider selector
+  'refinement.provider.label': 'AI Provider',
+
   // Settings dropdown
   'refinement.settings.title': 'Settings',
 
@@ -491,7 +494,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Refinement Session Status
   'refinement.session.warningDialog.title': 'AI Editing Session Reconnected',
   'refinement.session.warningDialog.message':
-    'The AI conversation session could not be continued due to reasons such as loading a workflow shared by others or session expiration, so a new conversation session was started.\n\nAdditional context that the AI remembered in the previous conversation session (file contents, tool execution results, etc.) may have been lost.\n\nPlease re-share any relevant information in your message if needed.',
+    'The AI conversation session could not be continued due to reasons such as switching AI providers, loading a workflow shared by others, or session expiration, so a new conversation session was started.\n\nAdditional context that the AI remembered in the previous conversation session (file contents, tool execution results, etc.) may have been lost.\n\nPlease re-share any relevant information in your message if needed.',
   'refinement.session.warningDialog.ok': 'OK',
 
   // Refinement Errors
@@ -499,6 +502,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'refinement.error.messageTooLong': 'Message is too long (max {max} characters)',
   'refinement.error.commandNotFound':
     'Claude Code CLI not found. Please install Claude Code to use AI refinement.',
+  'refinement.error.modelNotSupported':
+    'The selected model is not supported or access is not enabled. You can enable access by selecting and using the model in Copilot Chat once.',
   'refinement.error.timeout':
     'AI refinement timed out. Please adjust the timeout value and try again. Simplifying the request is also recommended.',
   'refinement.error.parseError':

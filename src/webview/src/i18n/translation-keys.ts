@@ -425,6 +425,9 @@ export interface WebviewTranslationKeys {
   // Model selector
   'refinement.model.label': string;
 
+  // Provider selector
+  'refinement.provider.label': string;
+
   // Settings dropdown
   'refinement.settings.title': string;
 
@@ -453,6 +456,7 @@ export interface WebviewTranslationKeys {
   'refinement.error.emptyMessage': string;
   'refinement.error.messageTooLong': string;
   'refinement.error.commandNotFound': string;
+  'refinement.error.modelNotSupported': string;
   'refinement.error.timeout': string;
   'refinement.error.parseError': string;
   'refinement.error.validationError': string;

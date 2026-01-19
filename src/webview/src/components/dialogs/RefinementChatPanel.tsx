@@ -93,7 +93,14 @@ export function RefinementChatPanel({
   } = chatState;
 
   // Settings from refinement store (shared across all panels)
-  const { useSkills, timeoutSeconds, selectedModel, allowedTools } = useRefinementStore();
+  const {
+    useSkills,
+    timeoutSeconds,
+    selectedModel,
+    selectedCopilotModel,
+    allowedTools,
+    selectedProvider,
+  } = useRefinementStore();
 
   const { activeWorkflow, updateWorkflow, subAgentFlows, updateSubAgentFlow, setNodes, setEdges } =
     useWorkflowStore();
@@ -164,7 +171,9 @@ export function RefinementChatPanel({
           useSkills,
           timeoutSeconds * 1000,
           selectedModel,
-          allowedTools
+          allowedTools,
+          selectedProvider,
+          selectedCopilotModel
         );
 
         if (result.type === 'success') {
@@ -248,7 +257,10 @@ export function RefinementChatPanel({
           timeoutSeconds * 1000,
           onProgress,
           selectedModel,
-          allowedTools
+          allowedTools,
+          undefined, // previousValidationErrors
+          selectedProvider,
+          selectedCopilotModel
         );
 
         if (result.type === 'success') {
@@ -358,7 +370,9 @@ export function RefinementChatPanel({
           useSkills,
           timeoutSeconds * 1000,
           selectedModel,
-          allowedTools
+          allowedTools,
+          selectedProvider,
+          selectedCopilotModel
         );
 
         if (result.type === 'success') {
@@ -439,7 +453,9 @@ export function RefinementChatPanel({
           onProgress,
           selectedModel,
           allowedTools,
-          previousValidationErrors
+          previousValidationErrors,
+          selectedProvider,
+          selectedCopilotModel
         );
 
         if (result.type === 'success') {

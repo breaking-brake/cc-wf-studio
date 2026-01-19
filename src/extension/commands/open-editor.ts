@@ -12,6 +12,7 @@ import { cancelGeneration } from '../services/claude-code-service';
 import { FileService } from '../services/file-service';
 import { SlackApiService } from '../services/slack-api-service';
 import { executeSlashCommandInTerminal } from '../services/terminal-execution-service';
+import { listCopilotModels } from '../services/vscode-lm-service';
 import { migrateWorkflow } from '../utils/migrate-workflow';
 import { SlackTokenManager } from '../utils/slack-token-manager';
 import { validateWorkflowFile } from '../utils/workflow-validator';
@@ -325,6 +326,18 @@ export function registerOpenEditorCommand(
                     errorMessage: 'Workflow is required',
                     timestamp: new Date().toISOString(),
                   },
+                });
+              }
+              break;
+
+            case 'LIST_COPILOT_MODELS':
+              // List available Copilot models from VS Code LM API
+              {
+                const result = await listCopilotModels();
+                webview.postMessage({
+                  type: 'COPILOT_MODELS_LIST',
+                  requestId: message.requestId,
+                  payload: result,
                 });
               }
               break;

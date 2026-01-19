@@ -467,6 +467,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Model selector
   'refinement.model.label': '모델',
 
+  // Provider selector
+  'refinement.provider.label': 'AI 프로바이더',
+
   // Settings dropdown
   'refinement.settings.title': '설정',
 
@@ -491,7 +494,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Refinement Session Status
   'refinement.session.warningDialog.title': 'AI 편집 세션이 재연결되었습니다',
   'refinement.session.warningDialog.message':
-    '다른 사용자가 공유한 워크플로우를 불러오거나 세션 만료 등의 이유로 AI 대화 세션을 계속할 수 없어 새 대화 세션을 시작했습니다.\n\n이전 대화 세션에서 AI가 기억하고 있던 추가 컨텍스트(파일 내용, 도구 실행 결과 등)는 손실되었을 수 있습니다.\n\n필요한 경우 관련 정보를 메시지로 다시 전달해 주세요.',
+    'AI 프로바이더 전환, 다른 사용자가 공유한 워크플로우 불러오기, 세션 만료 등의 이유로 AI 대화 세션을 계속할 수 없어 새 대화 세션을 시작했습니다.\n\n이전 대화 세션에서 AI가 기억하고 있던 추가 컨텍스트(파일 내용, 도구 실행 결과 등)는 손실되었을 수 있습니다.\n\n필요한 경우 관련 정보를 메시지로 다시 전달해 주세요.',
   'refinement.session.warningDialog.ok': 'OK',
 
   // Refinement Errors
@@ -499,6 +502,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.error.messageTooLong': '메시지가 너무 깁니다 (최대 {max}자)',
   'refinement.error.commandNotFound':
     'Claude Code CLI를 찾을 수 없습니다. AI 개선 기능을 사용하려면 Claude Code를 설치하세요.',
+  'refinement.error.modelNotSupported':
+    '선택한 모델이 지원되지 않거나 액세스가 활성화되어 있지 않습니다. Copilot Chat에서 해당 모델을 선택하고 한 번 사용하면 액세스 권한을 활성화할 수 있습니다.',
   'refinement.error.timeout':
     'AI 개선 시간이 초과되었습니다. 타임아웃 설정값을 조정하고 다시 시도해 보세요. 요청 내용을 단순화하는 것도 권장됩니다.',
   'refinement.error.parseError':

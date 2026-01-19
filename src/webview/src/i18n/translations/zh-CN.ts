@@ -451,6 +451,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // Model selector
   'refinement.model.label': '模型',
 
+  // Provider selector
+  'refinement.provider.label': 'AI提供商',
+
   // Settings dropdown
   'refinement.settings.title': '设置',
 
@@ -474,13 +477,15 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // Refinement Session Status
   'refinement.session.warningDialog.title': 'AI编辑会话已重新连接',
   'refinement.session.warningDialog.message':
-    '由于加载他人共享的工作流或会话过期等原因，无法继续AI对话会话，已开始新的对话会话。\n\n之前对话会话中AI记住的额外上下文（文件内容、工具执行结果等）可能已丢失。\n\n如有需要，请在消息中重新分享相关信息。',
+    '由于切换AI提供商、加载他人共享的工作流或会话过期等原因，无法继续AI对话会话，已开始新的对话会话。\n\n之前对话会话中AI记住的额外上下文（文件内容、工具执行结果等）可能已丢失。\n\n如有需要，请在消息中重新分享相关信息。',
   'refinement.session.warningDialog.ok': 'OK',
 
   // Refinement Errors
   'refinement.error.emptyMessage': '请输入消息',
   'refinement.error.messageTooLong': '消息太长（最多{max}个字符）',
   'refinement.error.commandNotFound': '未找到Claude Code CLI。请安装Claude Code以使用AI优化功能。',
+  'refinement.error.modelNotSupported':
+    '所选模型不受支持或访问未启用。您可以在Copilot Chat中选择并使用该模型一次来启用访问权限。',
   'refinement.error.timeout': 'AI优化超时。请调整超时设定值后重试。建议您也可以考虑简化请求内容。',
   'refinement.error.parseError': '无法解析AI响应。请重试或重新表述您的请求。',
   'refinement.error.validationError': '优化后的工作流验证失败。请尝试不同的请求。',

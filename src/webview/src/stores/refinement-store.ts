@@ -5,13 +5,23 @@
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.1
  */
 
-import type { ClaudeModel } from '@shared/types/messages';
+import type {
+  AiCliProvider,
+  ClaudeModel,
+  CopilotModel,
+  CopilotModelInfo,
+} from '@shared/types/messages';
 import type { ConversationHistory, ConversationMessage } from '@shared/types/workflow-definition';
 import { create } from 'zustand';
+import { listCopilotModels } from '../services/refinement-service';
 
 // localStorage keys
 const MODEL_STORAGE_KEY = 'cc-wf-studio.refinement.selectedModel';
+const COPILOT_MODEL_STORAGE_KEY = 'cc-wf-studio.refinement.selectedCopilotModel';
 const ALLOWED_TOOLS_STORAGE_KEY = 'cc-wf-studio.refinement.allowedTools';
+const PROVIDER_STORAGE_KEY = 'cc-wf-studio.refinement.selectedProvider';
+// Note: This key is shared with Toolbar.tsx for the "Copilot (Beta)" toggle
+const COPILOT_ENABLED_STORAGE_KEY = 'cc-wf-studio:copilot-beta-enabled';
 
 // Available tools for Claude Code CLI (used in AI editing allowed tools)
 export const AVAILABLE_TOOLS = [
@@ -93,6 +103,34 @@ function saveModelToStorage(model: ClaudeModel): void {
 }
 
 /**
+ * Load selected Copilot model from localStorage
+ * Returns 'claude-haiku-4.5' as default if no value is stored
+ * Note: CopilotModel is now a dynamic string type, so any non-empty string is valid
+ */
+function loadCopilotModelFromStorage(): CopilotModel {
+  try {
+    const saved = localStorage.getItem(COPILOT_MODEL_STORAGE_KEY);
+    if (saved && saved.trim() !== '') {
+      return saved;
+    }
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+  return 'claude-haiku-4.5'; // Default fallback
+}
+
+/**
+ * Save selected Copilot model to localStorage
+ */
+function saveCopilotModelToStorage(model: CopilotModel): void {
+  try {
+    localStorage.setItem(COPILOT_MODEL_STORAGE_KEY, model);
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+}
+
+/**
  * Load allowed tools from localStorage
  * Returns DEFAULT_ALLOWED_TOOLS if no value is stored or value is invalid
  */
@@ -117,6 +155,58 @@ function loadAllowedToolsFromStorage(): string[] {
 function saveAllowedToolsToStorage(tools: string[]): void {
   try {
     localStorage.setItem(ALLOWED_TOOLS_STORAGE_KEY, JSON.stringify(tools));
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+}
+
+/**
+ * Load selected provider from localStorage
+ * Returns 'claude-code' as default if no value is stored or value is invalid
+ */
+function loadProviderFromStorage(): AiCliProvider {
+  try {
+    const saved = localStorage.getItem(PROVIDER_STORAGE_KEY);
+    if (saved === 'claude-code' || saved === 'copilot') {
+      return saved;
+    }
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+  return 'claude-code'; // Default
+}
+
+/**
+ * Save selected provider to localStorage
+ */
+function saveProviderToStorage(provider: AiCliProvider): void {
+  try {
+    localStorage.setItem(PROVIDER_STORAGE_KEY, provider);
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+}
+
+/**
+ * Load Copilot enabled state from localStorage
+ * Returns false as default if no value is stored
+ */
+function loadCopilotEnabledFromStorage(): boolean {
+  try {
+    const saved = localStorage.getItem(COPILOT_ENABLED_STORAGE_KEY);
+    return saved === 'true';
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+  return false;
+}
+
+/**
+ * Save Copilot enabled state to localStorage
+ */
+function saveCopilotEnabledToStorage(enabled: boolean): void {
+  try {
+    localStorage.setItem(COPILOT_ENABLED_STORAGE_KEY, String(enabled));
   } catch {
     // localStorage may not be available in some contexts
   }
@@ -148,7 +238,15 @@ interface RefinementStore {
   useSkills: boolean;
   timeoutSeconds: number;
   selectedModel: ClaudeModel;
+  selectedCopilotModel: CopilotModel;
   allowedTools: string[];
+  selectedProvider: AiCliProvider;
+  isCopilotEnabled: boolean;
+
+  // Dynamic Copilot Models State
+  availableCopilotModels: CopilotModelInfo[];
+  isFetchingCopilotModels: boolean;
+  copilotModelsError: string | null;
 
   // Session Status
   sessionStatus: SessionStatus;
@@ -164,9 +262,13 @@ interface RefinementStore {
   toggleUseSkills: () => void;
   setTimeoutSeconds: (seconds: number) => void;
   setSelectedModel: (model: ClaudeModel) => void;
+  setSelectedCopilotModel: (model: CopilotModel) => void;
   setAllowedTools: (tools: string[]) => void;
   toggleAllowedTool: (toolName: string) => void;
   resetAllowedTools: () => void;
+  setSelectedProvider: (provider: AiCliProvider) => void;
+  toggleCopilotEnabled: () => void;
+  fetchCopilotModels: () => Promise<void>;
   initConversation: () => void;
   loadConversationHistory: (history: ConversationHistory | undefined) => void;
   setTargetContext: (
@@ -253,7 +355,15 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   useSkills: true,
   timeoutSeconds: 0, // Default timeout: None (0 = use system guard)
   selectedModel: loadModelFromStorage(), // Load from localStorage, default: 'haiku'
+  selectedCopilotModel: loadCopilotModelFromStorage(), // Load from localStorage, default: 'gpt-4o'
   allowedTools: loadAllowedToolsFromStorage(), // Load from localStorage, default: DEFAULT_ALLOWED_TOOLS
+  selectedProvider: loadProviderFromStorage(), // Load from localStorage, default: 'claude-code'
+  isCopilotEnabled: loadCopilotEnabledFromStorage(), // Load from localStorage, default: false
+
+  // Dynamic Copilot Models Initial State
+  availableCopilotModels: [],
+  isFetchingCopilotModels: false,
+  copilotModelsError: null,
 
   // Session Status Initial State
   sessionStatus: 'none',
@@ -288,6 +398,11 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     saveModelToStorage(model);
   },
 
+  setSelectedCopilotModel: (model: CopilotModel) => {
+    set({ selectedCopilotModel: model });
+    saveCopilotModelToStorage(model);
+  },
+
   setAllowedTools: (tools: string[]) => {
     set({ allowedTools: tools });
     saveAllowedToolsToStorage(tools);
@@ -305,6 +420,68 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   resetAllowedTools: () => {
     set({ allowedTools: DEFAULT_ALLOWED_TOOLS });
     saveAllowedToolsToStorage(DEFAULT_ALLOWED_TOOLS);
+  },
+
+  setSelectedProvider: (provider: AiCliProvider) => {
+    set({ selectedProvider: provider });
+    saveProviderToStorage(provider);
+  },
+
+  toggleCopilotEnabled: () => {
+    const currentEnabled = get().isCopilotEnabled;
+    const newEnabled = !currentEnabled;
+    saveCopilotEnabledToStorage(newEnabled);
+
+    // When disabling Copilot, reset provider to 'claude-code'
+    if (!newEnabled && get().selectedProvider === 'copilot') {
+      set({ isCopilotEnabled: newEnabled, selectedProvider: 'claude-code' });
+      saveProviderToStorage('claude-code');
+    } else {
+      set({ isCopilotEnabled: newEnabled });
+    }
+  },
+
+  fetchCopilotModels: async () => {
+    // Avoid fetching if already in progress
+    if (get().isFetchingCopilotModels) {
+      return;
+    }
+
+    set({ isFetchingCopilotModels: true, copilotModelsError: null });
+
+    try {
+      const result = await listCopilotModels();
+
+      if (result.available) {
+        set({
+          availableCopilotModels: result.models,
+          isFetchingCopilotModels: false,
+          copilotModelsError: null,
+        });
+
+        // If current selected model is not in the list, select the first available
+        const currentModel = get().selectedCopilotModel;
+        const modelExists = result.models.some((m) => m.family === currentModel);
+        if (!modelExists && result.models.length > 0) {
+          const firstModel = result.models[0].family;
+          set({ selectedCopilotModel: firstModel });
+          saveCopilotModelToStorage(firstModel);
+        }
+      } else {
+        set({
+          availableCopilotModels: [],
+          isFetchingCopilotModels: false,
+          copilotModelsError: result.unavailableReason || 'Copilot models not available',
+        });
+      }
+    } catch (error) {
+      set({
+        availableCopilotModels: [],
+        isFetchingCopilotModels: false,
+        copilotModelsError:
+          error instanceof Error ? error.message : 'Failed to fetch Copilot models',
+      });
+    }
   },
 
   initConversation: () => {

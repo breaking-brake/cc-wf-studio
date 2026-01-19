@@ -23,7 +23,7 @@ interface MoreActionsDropdownProps {
   onStartTour: () => void;
   isFocusMode: boolean;
   onToggleFocusMode: () => void;
-  isCopilotBetaEnabled: boolean;
+  isCopilotEnabled: boolean;
   onToggleCopilotBeta: () => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -35,7 +35,7 @@ export function MoreActionsDropdown({
   onStartTour,
   isFocusMode,
   onToggleFocusMode,
-  isCopilotBetaEnabled,
+  isCopilotEnabled,
   onToggleCopilotBeta,
   open,
   onOpenChange,
@@ -171,7 +171,7 @@ export function MoreActionsDropdown({
                 Beta
               </span>
             </span>
-            {isCopilotBetaEnabled && <Check size={14} />}
+            {isCopilotEnabled && <Check size={14} />}
           </DropdownMenu.Item>
 
           <DropdownMenu.Separator

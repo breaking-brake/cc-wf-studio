@@ -679,18 +679,6 @@ export function getOAuthRedirectUri(): Promise<{ redirectUri: string }> {
 }
 
 /**
- * Open external URL in browser
- *
- * @param url - URL to open
- */
-export function openExternalUrl(url: string): void {
-  vscode.postMessage({
-    type: 'OPEN_EXTERNAL_URL',
-    payload: { url },
-  });
-}
-
-/**
  * Get last shared channel ID
  *
  * Retrieves the channel ID that was last used for sharing.

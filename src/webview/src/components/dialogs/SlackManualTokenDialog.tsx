@@ -17,8 +17,8 @@ import {
   connectSlackOAuth,
   disconnectFromSlack,
   listSlackWorkspaces,
-  openExternalUrl,
 } from '../../services/slack-integration-service';
+import { openExternalUrl } from '../../services/vscode-bridge';
 import { ConfirmDialog } from './ConfirmDialog';
 
 interface SlackManualTokenDialogProps {

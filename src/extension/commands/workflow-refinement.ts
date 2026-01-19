@@ -20,7 +20,7 @@ import type {
 } from '../../shared/types/messages';
 import type { ConversationMessage } from '../../shared/types/workflow-definition';
 import { log } from '../extension';
-import { cancelRefinement } from '../services/claude-code-service';
+import { cancelAiRequest } from '../services/ai-provider';
 import {
   DEFAULT_REFINEMENT_TIMEOUT_MS,
   refineSubAgentFlow,
@@ -55,6 +55,8 @@ export async function handleRefineWorkflow(
     model = 'sonnet',
     allowedTools,
     previousValidationErrors,
+    provider = 'claude-code',
+    copilotModel = 'gpt-4o',
   } = payload;
   const startTime = Date.now();
 
@@ -75,6 +77,8 @@ export async function handleRefineWorkflow(
     allowedTools,
     hasPreviousErrors: !!previousValidationErrors && previousValidationErrors.length > 0,
     previousErrorCount: previousValidationErrors?.length ?? 0,
+    provider,
+    copilotModel,
   });
 
   // Route to SubAgentFlow refinement if targetType is 'subAgentFlow'
@@ -141,7 +145,9 @@ export async function handleRefineWorkflow(
       onProgress,
       model,
       allowedTools,
-      previousValidationErrors
+      previousValidationErrors,
+      provider,
+      copilotModel
     );
 
     // Check if AI is asking for clarification
@@ -311,6 +317,8 @@ async function handleRefineSubAgentFlow(
     subAgentFlowId,
     model = 'sonnet',
     allowedTools,
+    provider = 'claude-code',
+    copilotModel = 'gpt-4o',
   } = payload;
   const startTime = Date.now();
 
@@ -328,6 +336,8 @@ async function handleRefineSubAgentFlow(
     timeoutMs: effectiveTimeoutMs,
     model,
     allowedTools,
+    provider,
+    copilotModel,
   });
 
   // Validate subAgentFlowId
@@ -402,7 +412,9 @@ async function handleRefineSubAgentFlow(
       requestId,
       workspaceRoot,
       model,
-      allowedTools
+      allowedTools,
+      provider,
+      copilotModel
     );
 
     // Check if AI is asking for clarification
@@ -706,18 +718,26 @@ export async function handleCancelRefinement(
 
   try {
     // Cancel the active refinement process
-    const result = await cancelRefinement(targetRequestId);
+    // Try both providers since we don't know which one is active
+    const [claudeResult, copilotResult] = await Promise.all([
+      cancelAiRequest('claude-code', targetRequestId),
+      cancelAiRequest('copilot', targetRequestId),
+    ]);
 
-    if (result.cancelled) {
+    const cancelled = claudeResult.cancelled || copilotResult.cancelled;
+    const executionTimeMs = claudeResult.executionTimeMs ?? copilotResult.executionTimeMs ?? 0;
+
+    if (cancelled) {
       log('INFO', 'Refinement cancelled successfully', {
         requestId,
         targetRequestId,
-        executionTimeMs: result.executionTimeMs,
+        executionTimeMs,
+        cancelledBy: claudeResult.cancelled ? 'claude-code' : 'copilot',
       });
 
       // Send cancellation confirmation
       sendRefinementCancelled(webview, targetRequestId, {
-        executionTimeMs: result.executionTimeMs ?? 0,
+        executionTimeMs,
         timestamp: new Date().toISOString(),
       });
     } else {

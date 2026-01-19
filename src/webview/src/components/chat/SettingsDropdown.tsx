@@ -9,16 +9,34 @@
  */
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import type { ClaudeModel } from '@shared/types/messages';
+import type { AiCliProvider, ClaudeModel } from '@shared/types/messages';
 // Edit3 is commented out with Iteration Counter - uncomment when re-enabling
-import { Check, ChevronLeft, Cpu, RotateCcw, Trash2, UserCog, Wrench } from 'lucide-react';
+import {
+  Bot,
+  Check,
+  ChevronLeft,
+  Cpu,
+  ExternalLink,
+  Loader2,
+  RotateCcw,
+  Trash2,
+  UserCog,
+  Wrench,
+} from 'lucide-react';
+import { useEffect } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
+import { openExternalUrl } from '../../services/vscode-bridge';
 import { AVAILABLE_TOOLS, useRefinementStore } from '../../stores/refinement-store';
 
 const MODEL_PRESETS: { value: ClaudeModel; label: string }[] = [
   { value: 'sonnet', label: 'Sonnet' },
   { value: 'opus', label: 'Opus' },
   { value: 'haiku', label: 'Haiku' },
+];
+
+const PROVIDER_PRESETS: { value: AiCliProvider; label: string }[] = [
+  { value: 'claude-code', label: 'Claude Code' },
+  { value: 'copilot', label: 'Copilot' },
 ];
 
 // Fixed font sizes for dropdown menu (not responsive)
@@ -40,13 +58,46 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
     isProcessing,
     selectedModel,
     setSelectedModel,
+    selectedCopilotModel,
+    setSelectedCopilotModel,
     allowedTools,
     toggleAllowedTool,
     resetAllowedTools,
+    selectedProvider,
+    setSelectedProvider,
+    isCopilotEnabled,
+    availableCopilotModels,
+    isFetchingCopilotModels,
+    copilotModelsError,
+    fetchCopilotModels,
     // conversationHistory, // Uncomment when re-enabling Iteration Counter
   } = useRefinementStore();
 
+  // Fetch Copilot models when provider is set to copilot and models are not loaded
+  useEffect(() => {
+    if (
+      selectedProvider === 'copilot' &&
+      availableCopilotModels.length === 0 &&
+      !isFetchingCopilotModels &&
+      !copilotModelsError
+    ) {
+      fetchCopilotModels();
+    }
+  }, [
+    selectedProvider,
+    availableCopilotModels.length,
+    isFetchingCopilotModels,
+    copilotModelsError,
+    fetchCopilotModels,
+  ]);
+
   const currentModelLabel = MODEL_PRESETS.find((p) => p.value === selectedModel)?.label || 'Sonnet';
+  const currentCopilotModelLabel =
+    availableCopilotModels.find((m) => m.family === selectedCopilotModel)?.name ||
+    selectedCopilotModel ||
+    'Loading...';
+  const currentProviderLabel =
+    PROVIDER_PRESETS.find((p) => p.value === selectedProvider)?.label || 'Claude Code';
 
   return (
     <DropdownMenu.Root>
@@ -170,7 +221,94 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
             }}
           />
 
-          {/* Model Sub-menu */}
+          {/* Provider Sub-menu - Only shown when Copilot is enabled via More Actions */}
+          {isCopilotEnabled && (
+            <DropdownMenu.Sub>
+              <DropdownMenu.SubTrigger
+                disabled={isProcessing}
+                style={{
+                  padding: '8px 12px',
+                  fontSize: `${FONT_SIZES.small}px`,
+                  color: 'var(--vscode-foreground)',
+                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px',
+                  outline: 'none',
+                  borderRadius: '2px',
+                  opacity: isProcessing ? 0.5 : 1,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <ChevronLeft size={14} />
+                  <span style={{ color: 'var(--vscode-descriptionForeground)' }}>
+                    {currentProviderLabel}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Bot size={14} />
+                  <span>{t('refinement.provider.label')}</span>
+                </div>
+              </DropdownMenu.SubTrigger>
+
+              <DropdownMenu.Portal>
+                <DropdownMenu.SubContent
+                  sideOffset={4}
+                  style={{
+                    backgroundColor: 'var(--vscode-dropdown-background)',
+                    border: '1px solid var(--vscode-dropdown-border)',
+                    borderRadius: '4px',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+                    zIndex: 10000,
+                    minWidth: '120px',
+                    padding: '4px',
+                  }}
+                >
+                  <DropdownMenu.RadioGroup value={selectedProvider}>
+                    {PROVIDER_PRESETS.map((preset) => (
+                      <DropdownMenu.RadioItem
+                        key={preset.value}
+                        value={preset.value}
+                        onSelect={(event) => {
+                          event.preventDefault();
+                          setSelectedProvider(preset.value);
+                        }}
+                        style={{
+                          padding: '6px 12px',
+                          fontSize: `${FONT_SIZES.small}px`,
+                          color: 'var(--vscode-foreground)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          outline: 'none',
+                          borderRadius: '2px',
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '12px',
+                            height: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <DropdownMenu.ItemIndicator>
+                            <Check size={12} />
+                          </DropdownMenu.ItemIndicator>
+                        </div>
+                        <span>{preset.label}</span>
+                      </DropdownMenu.RadioItem>
+                    ))}
+                  </DropdownMenu.RadioGroup>
+                </DropdownMenu.SubContent>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Sub>
+          )}
+
+          {/* Model Sub-menu - Shows different models based on selected provider */}
           <DropdownMenu.Sub>
             <DropdownMenu.SubTrigger
               disabled={isProcessing}
@@ -191,7 +329,9 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <ChevronLeft size={14} />
                 <span style={{ color: 'var(--vscode-descriptionForeground)' }}>
-                  {currentModelLabel}
+                  {selectedProvider === 'claude-code'
+                    ? currentModelLabel
+                    : currentCopilotModelLabel}
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -209,18 +349,212 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                   borderRadius: '4px',
                   boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
                   zIndex: 10000,
-                  minWidth: '100px',
+                  minWidth: '140px',
                   padding: '4px',
                 }}
               >
-                <DropdownMenu.RadioGroup value={selectedModel}>
-                  {MODEL_PRESETS.map((preset) => (
-                    <DropdownMenu.RadioItem
-                      key={preset.value}
-                      value={preset.value}
+                {selectedProvider === 'claude-code' ? (
+                  <DropdownMenu.RadioGroup value={selectedModel}>
+                    {MODEL_PRESETS.map((preset) => (
+                      <DropdownMenu.RadioItem
+                        key={preset.value}
+                        value={preset.value}
+                        onSelect={(event) => {
+                          event.preventDefault();
+                          setSelectedModel(preset.value);
+                        }}
+                        style={{
+                          padding: '6px 12px',
+                          fontSize: `${FONT_SIZES.small}px`,
+                          color: 'var(--vscode-foreground)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          outline: 'none',
+                          borderRadius: '2px',
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '12px',
+                            height: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <DropdownMenu.ItemIndicator>
+                            <Check size={12} />
+                          </DropdownMenu.ItemIndicator>
+                        </div>
+                        <span>{preset.label}</span>
+                      </DropdownMenu.RadioItem>
+                    ))}
+                  </DropdownMenu.RadioGroup>
+                ) : isFetchingCopilotModels ? (
+                  <div
+                    style={{
+                      padding: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      color: 'var(--vscode-descriptionForeground)',
+                      fontSize: `${FONT_SIZES.small}px`,
+                    }}
+                  >
+                    <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                    <span>Loading models...</span>
+                  </div>
+                ) : copilotModelsError ? (
+                  <div
+                    style={{
+                      padding: '12px',
+                      color: 'var(--vscode-errorForeground)',
+                      fontSize: `${FONT_SIZES.small}px`,
+                    }}
+                  >
+                    {copilotModelsError}
+                  </div>
+                ) : availableCopilotModels.length === 0 ? (
+                  <div
+                    style={{
+                      padding: '12px',
+                      color: 'var(--vscode-descriptionForeground)',
+                      fontSize: `${FONT_SIZES.small}px`,
+                    }}
+                  >
+                    No models available
+                  </div>
+                ) : (
+                  <>
+                    {/* Premium Request multiplier link */}
+                    <DropdownMenu.Item
+                      onSelect={() => {
+                        openExternalUrl(
+                          'https://docs.github.com/en/copilot/concepts/billing/copilot-requests#model-multipliers'
+                        );
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        padding: '6px 12px',
+                        fontSize: '10px',
+                        color: 'var(--vscode-textLink-foreground)',
+                        cursor: 'pointer',
+                        outline: 'none',
+                        borderRadius: '2px',
+                      }}
+                    >
+                      <ExternalLink size={10} />
+                      <span>Premium Request multiplier</span>
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Separator
+                      style={{
+                        height: '1px',
+                        backgroundColor: 'var(--vscode-panel-border)',
+                        margin: '4px 0',
+                      }}
+                    />
+                    <DropdownMenu.RadioGroup value={selectedCopilotModel}>
+                      {availableCopilotModels.map((model) => (
+                        <DropdownMenu.RadioItem
+                          key={model.id}
+                          value={model.family}
+                          onSelect={(event) => {
+                            event.preventDefault();
+                            setSelectedCopilotModel(model.family);
+                          }}
+                          style={{
+                            padding: '6px 12px',
+                            fontSize: `${FONT_SIZES.small}px`,
+                            color: 'var(--vscode-foreground)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            outline: 'none',
+                            borderRadius: '2px',
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: '12px',
+                              height: '12px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <DropdownMenu.ItemIndicator>
+                              <Check size={12} />
+                            </DropdownMenu.ItemIndicator>
+                          </div>
+                          <span>{model.name}</span>
+                        </DropdownMenu.RadioItem>
+                      ))}
+                    </DropdownMenu.RadioGroup>
+                  </>
+                )}
+              </DropdownMenu.SubContent>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Sub>
+
+          {/* Allowed Tools Sub-menu - Only show for Claude Code (Copilot doesn't support tools) */}
+          {selectedProvider === 'claude-code' && (
+            <DropdownMenu.Sub>
+              <DropdownMenu.SubTrigger
+                disabled={isProcessing}
+                style={{
+                  padding: '8px 12px',
+                  fontSize: `${FONT_SIZES.small}px`,
+                  color: 'var(--vscode-foreground)',
+                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px',
+                  outline: 'none',
+                  borderRadius: '2px',
+                  opacity: isProcessing ? 0.5 : 1,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <ChevronLeft size={14} />
+                  <span style={{ color: 'var(--vscode-descriptionForeground)' }}>
+                    {allowedTools.length} tools
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Wrench size={14} />
+                  <span>Allowed Tools</span>
+                </div>
+              </DropdownMenu.SubTrigger>
+
+              <DropdownMenu.Portal>
+                <DropdownMenu.SubContent
+                  sideOffset={4}
+                  style={{
+                    backgroundColor: 'var(--vscode-dropdown-background)',
+                    border: '1px solid var(--vscode-dropdown-border)',
+                    borderRadius: '4px',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+                    zIndex: 10000,
+                    minWidth: '150px',
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                    padding: '4px',
+                  }}
+                >
+                  {AVAILABLE_TOOLS.map((tool) => (
+                    <DropdownMenu.CheckboxItem
+                      key={tool}
+                      checked={allowedTools.includes(tool)}
                       onSelect={(event) => {
-                        event.preventDefault();
-                        setSelectedModel(preset.value);
+                        event.preventDefault(); // Prevent menu from closing
+                        toggleAllowedTool(tool);
                       }}
                       style={{
                         padding: '6px 12px',
@@ -232,10 +566,14 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                         gap: '8px',
                         outline: 'none',
                         borderRadius: '2px',
+                        position: 'relative',
+                        paddingLeft: '28px',
                       }}
                     >
                       <div
                         style={{
+                          position: 'absolute',
+                          left: '8px',
                           width: '12px',
                           height: '12px',
                           display: 'flex',
@@ -247,66 +585,41 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                           <Check size={12} />
                         </DropdownMenu.ItemIndicator>
                       </div>
-                      <span>{preset.label}</span>
-                    </DropdownMenu.RadioItem>
+                      <span
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          opacity: tool === 'AskUserQuestion' ? 0.7 : 1,
+                        }}
+                      >
+                        {tool}
+                        {tool === 'AskUserQuestion' && (
+                          <span
+                            style={{
+                              fontSize: '10px',
+                              color: 'var(--vscode-editorWarning-foreground)',
+                            }}
+                          >
+                            ⚠️ Not recommended
+                          </span>
+                        )}
+                      </span>
+                    </DropdownMenu.CheckboxItem>
                   ))}
-                </DropdownMenu.RadioGroup>
-              </DropdownMenu.SubContent>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Sub>
 
-          {/* Allowed Tools Sub-menu */}
-          <DropdownMenu.Sub>
-            <DropdownMenu.SubTrigger
-              disabled={isProcessing}
-              style={{
-                padding: '8px 12px',
-                fontSize: `${FONT_SIZES.small}px`,
-                color: 'var(--vscode-foreground)',
-                cursor: isProcessing ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '8px',
-                outline: 'none',
-                borderRadius: '2px',
-                opacity: isProcessing ? 0.5 : 1,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <ChevronLeft size={14} />
-                <span style={{ color: 'var(--vscode-descriptionForeground)' }}>
-                  {allowedTools.length} tools
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Wrench size={14} />
-                <span>Allowed Tools</span>
-              </div>
-            </DropdownMenu.SubTrigger>
+                  <DropdownMenu.Separator
+                    style={{
+                      height: '1px',
+                      backgroundColor: 'var(--vscode-panel-border)',
+                      margin: '4px 0',
+                    }}
+                  />
 
-            <DropdownMenu.Portal>
-              <DropdownMenu.SubContent
-                sideOffset={4}
-                style={{
-                  backgroundColor: 'var(--vscode-dropdown-background)',
-                  border: '1px solid var(--vscode-dropdown-border)',
-                  borderRadius: '4px',
-                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
-                  zIndex: 10000,
-                  minWidth: '150px',
-                  maxHeight: '300px',
-                  overflowY: 'auto',
-                  padding: '4px',
-                }}
-              >
-                {AVAILABLE_TOOLS.map((tool) => (
-                  <DropdownMenu.CheckboxItem
-                    key={tool}
-                    checked={allowedTools.includes(tool)}
+                  <DropdownMenu.Item
                     onSelect={(event) => {
-                      event.preventDefault(); // Prevent menu from closing
-                      toggleAllowedTool(tool);
+                      event.preventDefault();
+                      resetAllowedTools();
                     }}
                     style={{
                       padding: '6px 12px',
@@ -318,79 +631,15 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                       gap: '8px',
                       outline: 'none',
                       borderRadius: '2px',
-                      position: 'relative',
-                      paddingLeft: '28px',
                     }}
                   >
-                    <div
-                      style={{
-                        position: 'absolute',
-                        left: '8px',
-                        width: '12px',
-                        height: '12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <DropdownMenu.ItemIndicator>
-                        <Check size={12} />
-                      </DropdownMenu.ItemIndicator>
-                    </div>
-                    <span
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        opacity: tool === 'AskUserQuestion' ? 0.7 : 1,
-                      }}
-                    >
-                      {tool}
-                      {tool === 'AskUserQuestion' && (
-                        <span
-                          style={{
-                            fontSize: '10px',
-                            color: 'var(--vscode-editorWarning-foreground)',
-                          }}
-                        >
-                          ⚠️ Not recommended
-                        </span>
-                      )}
-                    </span>
-                  </DropdownMenu.CheckboxItem>
-                ))}
-
-                <DropdownMenu.Separator
-                  style={{
-                    height: '1px',
-                    backgroundColor: 'var(--vscode-panel-border)',
-                    margin: '4px 0',
-                  }}
-                />
-
-                <DropdownMenu.Item
-                  onSelect={(event) => {
-                    event.preventDefault();
-                    resetAllowedTools();
-                  }}
-                  style={{
-                    padding: '6px 12px',
-                    fontSize: `${FONT_SIZES.small}px`,
-                    color: 'var(--vscode-foreground)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    outline: 'none',
-                    borderRadius: '2px',
-                  }}
-                >
-                  <RotateCcw size={12} />
-                  <span>Reset to Default</span>
-                </DropdownMenu.Item>
-              </DropdownMenu.SubContent>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Sub>
+                    <RotateCcw size={12} />
+                    <span>Reset to Default</span>
+                  </DropdownMenu.Item>
+                </DropdownMenu.SubContent>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Sub>
+          )}
 
           <DropdownMenu.Separator
             style={{

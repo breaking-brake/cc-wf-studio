@@ -34,7 +34,7 @@ import {
 import { memo, useCallback, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
-import { openExternalUrl } from '../../services/slack-integration-service';
+import { openExternalUrl } from '../../services/vscode-bridge';
 import { AVAILABLE_TOOLS } from '../../stores/refinement-store';
 import { ArgumentHintTagInput } from '../common/ArgumentHintTagInput';
 import { ToolSelectTagInput } from '../common/ToolSelectTagInput';

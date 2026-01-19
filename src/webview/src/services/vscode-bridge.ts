@@ -466,3 +466,22 @@ export function runForCopilotCli(workflow: Workflow): Promise<RunForCopilotCliSu
     }, 30000);
   });
 }
+
+// ============================================================================
+// Utility Functions
+// ============================================================================
+
+/**
+ * Open external URL in browser
+ *
+ * Sends a message to the extension host to open the URL in the user's default browser.
+ * This is necessary because webview content cannot directly open external URLs.
+ *
+ * @param url - URL to open
+ */
+export function openExternalUrl(url: string): void {
+  vscode.postMessage({
+    type: 'OPEN_EXTERNAL_URL',
+    payload: { url },
+  });
+}

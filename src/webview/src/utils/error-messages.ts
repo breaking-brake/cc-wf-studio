@@ -9,6 +9,7 @@ import type { WebviewTranslationKeys } from '../i18n/translation-keys';
 
 type ErrorCode =
   | 'COMMAND_NOT_FOUND'
+  | 'MODEL_NOT_SUPPORTED'
   | 'TIMEOUT'
   | 'PARSE_ERROR'
   | 'VALIDATION_ERROR'
@@ -31,6 +32,10 @@ interface ErrorMessageInfo {
 const ERROR_MESSAGE_MAP: Record<ErrorCode, ErrorMessageInfo> = {
   COMMAND_NOT_FOUND: {
     messageKey: 'refinement.error.commandNotFound',
+    isRetryable: false,
+  },
+  MODEL_NOT_SUPPORTED: {
+    messageKey: 'refinement.error.modelNotSupported',
     isRetryable: false,
   },
   TIMEOUT: {

@@ -266,6 +266,46 @@ import type { ConversationHistory, ConversationMessage } from './workflow-defini
  */
 export type ClaudeModel = 'sonnet' | 'opus' | 'haiku';
 
+/**
+ * AI CLI provider selection
+ * - claude-code: Claude Code CLI (default)
+ * - copilot: VS Code Language Model API (Copilot)
+ */
+export type AiCliProvider = 'claude-code' | 'copilot';
+
+/**
+ * Copilot model selection (for VS Code Language Model API)
+ * This type represents model family strings returned by vscode.lm API.
+ * The list is dynamic and fetched at runtime from vscode.lm.selectChatModels().
+ */
+export type CopilotModel = string;
+
+/**
+ * Information about a Copilot model available via VS Code LM API
+ */
+export interface CopilotModelInfo {
+  /** Model ID (e.g., 'gpt-4o') */
+  id: string;
+  /** Display name (e.g., 'GPT-4o') */
+  name: string;
+  /** Model family (e.g., 'gpt-4o') - used for selection */
+  family: string;
+  /** Vendor (always 'copilot' for Copilot models) */
+  vendor: string;
+}
+
+/**
+ * Payload for listing available Copilot models
+ */
+export interface CopilotModelsListPayload {
+  /** List of available Copilot models */
+  models: CopilotModelInfo[];
+  /** Whether the LM API is available */
+  available: boolean;
+  /** Error reason if not available */
+  unavailableReason?: string;
+}
+
 export interface RefineWorkflowPayload {
   /** ID of the workflow being refined */
   workflowId: string;
@@ -293,6 +333,10 @@ export interface RefineWorkflowPayload {
     message: string;
     field?: string;
   }>;
+  /** AI CLI provider to use (default: 'claude-code') */
+  provider?: AiCliProvider;
+  /** Copilot model to use when provider is 'copilot' (default: 'gpt-4o') */
+  copilotModel?: CopilotModel;
 }
 
 export interface RefinementSuccessPayload {
@@ -685,6 +729,7 @@ export type ExtensionMessage =
   | Message<SearchSlackWorkflowsSuccessPayload, 'SEARCH_SLACK_WORKFLOWS_SUCCESS'>
   | Message<SlackErrorPayload, 'SEARCH_SLACK_WORKFLOWS_FAILED'>
   | Message<SlackOAuthInitiatedPayload, 'SLACK_OAUTH_INITIATED'>
+  | Message<CopilotModelsListPayload, 'COPILOT_MODELS_LIST'>
   | Message<SlackOAuthSuccessPayload, 'SLACK_OAUTH_SUCCESS'>
   | Message<SlackErrorPayload, 'SLACK_OAUTH_FAILED'>
   | Message<void, 'SLACK_OAUTH_CANCELLED'>
@@ -1306,6 +1351,7 @@ export type WebviewMessage =
   | Message<OpenInEditorPayload, 'OPEN_IN_EDITOR'>
   | Message<void, 'WEBVIEW_READY'>
   | Message<ExportForCopilotPayload, 'EXPORT_FOR_COPILOT'>
+  | Message<void, 'LIST_COPILOT_MODELS'>
   | Message<RunForCopilotPayload, 'RUN_FOR_COPILOT'>
   | Message<RunForCopilotCliPayload, 'RUN_FOR_COPILOT_CLI'>
   | Message<ExportForCopilotCliPayload, 'EXPORT_FOR_COPILOT_CLI'>;

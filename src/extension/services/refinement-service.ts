@@ -5,7 +5,12 @@
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md
  */
 
-import type { ClaudeModel, SkillReference } from '../../shared/types/messages';
+import type {
+  AiCliProvider,
+  ClaudeModel,
+  CopilotModel,
+  SkillReference,
+} from '../../shared/types/messages';
 import {
   type ConversationHistory,
   NodeType,
@@ -22,12 +27,8 @@ import {
   isMetricsCollectionEnabled,
   recordMetrics,
 } from './ai-metrics-service';
-import {
-  executeClaudeCodeCLI,
-  executeClaudeCodeCLIStreaming,
-  parseClaudeCodeOutput,
-  type StreamingProgressCallback,
-} from './claude-code-service';
+import { executeAi, executeAiStreaming } from './ai-provider';
+import { parseClaudeCodeOutput, type StreamingProgressCallback } from './claude-code-service';
 import { RefinementPromptBuilder } from './refinement-prompt-builder';
 import { loadWorkflowSchemaByFormat, type SchemaLoadResult } from './schema-loader-service';
 import { filterSkillsByRelevance, type SkillRelevanceScore } from './skill-relevance-matcher';
@@ -46,7 +47,13 @@ export interface RefinementResult {
   clarificationMessage?: string;
   aiMessage?: string; // AI's response message for display in chat UI
   error?: {
-    code: 'COMMAND_NOT_FOUND' | 'TIMEOUT' | 'PARSE_ERROR' | 'VALIDATION_ERROR' | 'UNKNOWN_ERROR';
+    code:
+      | 'COMMAND_NOT_FOUND'
+      | 'MODEL_NOT_SUPPORTED'
+      | 'TIMEOUT'
+      | 'PARSE_ERROR'
+      | 'VALIDATION_ERROR'
+      | 'UNKNOWN_ERROR';
     message: string;
     details?: string;
   };
@@ -235,6 +242,8 @@ export const DEFAULT_REFINEMENT_TIMEOUT_MS = 90000;
  * @param model - Claude model to use (default: 'sonnet')
  * @param allowedTools - Array of allowed tool names for CLI (optional)
  * @param previousValidationErrors - Validation errors from previous failed attempt (for retry with error context)
+ * @param provider - AI CLI provider to use (default: 'claude-code')
+ * @param copilotModel - Copilot model to use when provider is 'copilot' (default: 'gpt-4o')
  * @returns Refinement result with success status and refined workflow or error
  */
 export async function refineWorkflow(
@@ -249,7 +258,9 @@ export async function refineWorkflow(
   onProgress?: StreamingProgressCallback,
   model: ClaudeModel = 'sonnet',
   allowedTools?: string[],
-  previousValidationErrors?: ValidationErrorInfo[]
+  previousValidationErrors?: ValidationErrorInfo[],
+  provider: AiCliProvider = 'claude-code',
+  copilotModel: CopilotModel = 'gpt-4o'
 ): Promise<RefinementResult> {
   const startTime = Date.now();
 
@@ -367,24 +378,28 @@ export async function refineWorkflow(
     // Record prompt size for metrics
     const promptSizeChars = prompt.length;
 
-    // Step 4: Execute Claude Code CLI (streaming if onProgress callback provided)
+    // Step 4: Execute AI (streaming if onProgress callback provided)
     let cliResult = onProgress
-      ? await executeClaudeCodeCLIStreaming(
+      ? await executeAiStreaming(
           prompt,
+          provider,
           onProgress,
           timeoutMs,
           requestId,
           workspaceRoot,
           model,
+          copilotModel,
           allowedTools,
           conversationHistory.sessionId
         )
-      : await executeClaudeCodeCLI(
+      : await executeAi(
           prompt,
+          provider,
           timeoutMs,
           requestId,
           workspaceRoot,
           model,
+          copilotModel,
           allowedTools
         );
 
@@ -417,22 +432,26 @@ export async function refineWorkflow(
 
         // Retry without session ID
         cliResult = onProgress
-          ? await executeClaudeCodeCLIStreaming(
+          ? await executeAiStreaming(
               prompt,
+              provider,
               onProgress,
               timeoutMs,
               requestId,
               workspaceRoot,
               model,
+              copilotModel,
               allowedTools,
               undefined // No session ID for retry
             )
-          : await executeClaudeCodeCLI(
+          : await executeAi(
               prompt,
+              provider,
               timeoutMs,
               requestId,
               workspaceRoot,
               model,
+              copilotModel,
               allowedTools
             );
       }
@@ -450,6 +469,16 @@ export async function refineWorkflow(
         requestId,
         previousSessionId: conversationHistory.sessionId,
         newSessionId: cliResult.sessionId,
+      });
+      sessionReconnected = true;
+    }
+
+    // Detect provider switch from Claude Code to Copilot
+    // Copilot doesn't support session continuation, so previous session is lost
+    if (provider === 'copilot' && conversationHistory.sessionId) {
+      log('WARN', 'Session discontinued due to provider switch to Copilot', {
+        requestId,
+        previousSessionId: conversationHistory.sessionId,
       });
       sessionReconnected = true;
     }
@@ -1117,6 +1146,8 @@ function validateSubAgentFlowNodes(innerWorkflow: InnerWorkflow): {
  * @param workspaceRoot - The workspace root path for CLI execution
  * @param model - Claude model to use (default: 'sonnet')
  * @param allowedTools - Optional array of allowed tool names (e.g., ['Read', 'Grep', 'Glob'])
+ * @param provider - AI CLI provider to use (default: 'claude-code')
+ * @param copilotModel - Copilot model to use when provider is 'copilot' (default: 'gpt-4o')
  * @returns SubAgentFlow refinement result
  */
 export async function refineSubAgentFlow(
@@ -1129,7 +1160,9 @@ export async function refineSubAgentFlow(
   requestId?: string,
   workspaceRoot?: string,
   model: ClaudeModel = 'sonnet',
-  allowedTools?: string[]
+  allowedTools?: string[],
+  provider: AiCliProvider = 'claude-code',
+  copilotModel: CopilotModel = 'gpt-4o'
 ): Promise<SubAgentFlowRefinementResult> {
   const startTime = Date.now();
 
@@ -1222,15 +1255,30 @@ export async function refineSubAgentFlow(
     // Record prompt size for metrics
     const promptSizeChars = prompt.length;
 
-    // Step 3: Execute Claude Code CLI
-    const cliResult = await executeClaudeCodeCLI(
+    // Step 3: Execute AI
+    const cliResult = await executeAi(
       prompt,
+      provider,
       timeoutMs,
       requestId,
       workspaceRoot,
       model,
+      copilotModel,
       allowedTools
     );
+
+    // Track whether session was reconnected due to provider switch
+    let sessionReconnected = false;
+
+    // Detect provider switch from Claude Code to Copilot
+    // Copilot doesn't support session continuation, so previous session is lost
+    if (provider === 'copilot' && conversationHistory.sessionId) {
+      log('WARN', 'Session discontinued due to provider switch to Copilot (SubAgentFlow)', {
+        requestId,
+        previousSessionId: conversationHistory.sessionId,
+      });
+      sessionReconnected = true;
+    }
 
     if (!cliResult.success || !cliResult.output) {
       // Record metrics for failed CLI execution
@@ -1307,7 +1355,7 @@ export async function refineSubAgentFlow(
         clarificationMessage: aiResponse.message || 'Please provide more details',
         executionTimeMs: cliResult.executionTimeMs,
         newSessionId: cliResult.sessionId,
-        sessionReconnected: false,
+        sessionReconnected,
       };
     }
 
@@ -1450,7 +1498,7 @@ export async function refineSubAgentFlow(
       aiMessage: aiResponse.message,
       executionTimeMs,
       newSessionId: cliResult.sessionId,
-      sessionReconnected: false, // SubAgentFlow doesn't have session continuation yet
+      sessionReconnected,
     };
   } catch (error) {
     const executionTimeMs = Date.now() - startTime;

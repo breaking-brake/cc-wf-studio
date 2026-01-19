@@ -467,6 +467,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Model selector
   'refinement.model.label': 'モデル',
 
+  // Provider selector
+  'refinement.provider.label': 'AIプロバイダー',
+
   // Settings dropdown
   'refinement.settings.title': '設定',
 
@@ -491,7 +494,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Refinement Session Status
   'refinement.session.warningDialog.title': 'AI編集のセッションが再接続されました',
   'refinement.session.warningDialog.message':
-    '他者から共有されたワークフローの読み込みや、セッションの有効期限切れなどの理由で、AI会話セッションを継続できなかったため、新しい会話セッションを開始しました。\n\n前の会話セッションでAIが記憶していた追加のコンテキスト（ファイルの内容、ツール実行結果など）は失われている可能性があります。\n\n必要に応じて、関連する情報を改めてメッセージで伝えてください。',
+    'AIプロバイダーの切り替え、他者から共有されたワークフローの読み込み、セッションの有効期限切れなどの理由で、AI会話セッションを継続できなかったため、新しい会話セッションを開始しました。\n\n前の会話セッションでAIが記憶していた追加のコンテキスト（ファイルの内容、ツール実行結果など）は失われている可能性があります。\n\n必要に応じて、関連する情報を改めてメッセージで伝えてください。',
   'refinement.session.warningDialog.ok': 'OK',
 
   // Refinement Errors
@@ -499,6 +502,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.error.messageTooLong': 'メッセージが長すぎます（最大{max}文字）',
   'refinement.error.commandNotFound':
     'Claude Code CLIが見つかりません。AI改善機能を使用するにはClaude Codeをインストールしてください。',
+  'refinement.error.modelNotSupported':
+    '選択されたモデルはサポートされていないか、アクセスが有効になっていません。Copilot Chatで該当モデルを一度選択して使用することで、アクセス許可を有効にできます。',
   'refinement.error.timeout':
     'AI改善がタイムアウトしました。タイムアウト設定値を調整してもう一度試してみてください。リクエスト内容の簡略化もご検討ください。',
   'refinement.error.parseError':

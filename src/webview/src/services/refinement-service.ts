@@ -6,7 +6,9 @@
  */
 
 import type {
+  AiCliProvider,
   ClaudeModel,
+  CopilotModel,
   ExtensionMessage,
   RefinementClarificationPayload,
   RefinementProgressPayload,
@@ -90,6 +92,8 @@ export type RefinementProgressCallback = (payload: RefinementProgressPayload) =>
  * @param model - Claude model to use (default: 'sonnet')
  * @param allowedTools - Optional array of allowed tool names
  * @param previousValidationErrors - Validation errors from previous failed attempt (for retry)
+ * @param provider - AI CLI provider to use (default: 'claude-code')
+ * @param copilotModel - Copilot model to use when provider is 'copilot' (default: 'gpt-4o')
  * @returns Promise that resolves to the refinement result (success or clarification)
  * @throws {WorkflowRefinementError} If refinement fails
  */
@@ -104,7 +108,9 @@ export function refineWorkflow(
   onProgress?: RefinementProgressCallback,
   model: ClaudeModel = 'sonnet',
   allowedTools?: string[],
-  previousValidationErrors?: ValidationErrorInfo[]
+  previousValidationErrors?: ValidationErrorInfo[],
+  provider: AiCliProvider = 'claude-code',
+  copilotModel: CopilotModel = 'gpt-4o'
 ): Promise<RefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
@@ -161,6 +167,8 @@ export function refineWorkflow(
       model,
       allowedTools,
       previousValidationErrors,
+      provider,
+      copilotModel,
     };
 
     vscode.postMessage({
@@ -248,6 +256,9 @@ export function cancelWorkflowRefinement(requestId: string): void {
  * @param useSkills - Whether to include skills in refinement (default: true)
  * @param serverTimeoutMs - Server-side timeout in milliseconds (default: undefined, uses settings)
  * @param model - Claude model to use (default: 'sonnet')
+ * @param allowedTools - Optional array of allowed tool names
+ * @param provider - AI CLI provider to use (default: 'claude-code')
+ * @param copilotModel - Copilot model to use when provider is 'copilot' (default: 'gpt-4o')
  * @returns Promise that resolves to the refinement result (success or clarification)
  * @throws {WorkflowRefinementError} If refinement fails
  */
@@ -261,7 +272,9 @@ export function refineSubAgentFlow(
   useSkills = true,
   serverTimeoutMs?: number,
   model: ClaudeModel = 'sonnet',
-  allowedTools?: string[]
+  allowedTools?: string[],
+  provider: AiCliProvider = 'claude-code',
+  copilotModel: CopilotModel = 'gpt-4o'
 ): Promise<SubAgentFlowRefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
@@ -312,6 +325,8 @@ export function refineSubAgentFlow(
       subAgentFlowId,
       model,
       allowedTools,
+      provider,
+      copilotModel,
     };
 
     vscode.postMessage({
@@ -330,5 +345,56 @@ export function refineSubAgentFlow(
         )
       );
     }, calculateClientTimeout(serverTimeoutMs));
+  });
+}
+
+/**
+ * Result type for listing Copilot models
+ */
+export interface CopilotModelsResult {
+  models: Array<{
+    id: string;
+    name: string;
+    family: string;
+    vendor: string;
+  }>;
+  available: boolean;
+  unavailableReason?: string;
+}
+
+/**
+ * List available Copilot models from VS Code LM API
+ *
+ * @returns Promise that resolves to the list of available models
+ */
+export function listCopilotModels(): Promise<CopilotModelsResult> {
+  return new Promise((resolve) => {
+    const requestId = `list-copilot-models-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId && message.type === 'COPILOT_MODELS_LIST') {
+        window.removeEventListener('message', handler);
+        resolve(message.payload as CopilotModelsResult);
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    vscode.postMessage({
+      type: 'LIST_COPILOT_MODELS',
+      requestId,
+    });
+
+    // Timeout after 5 seconds (should be fast)
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      resolve({
+        models: [],
+        available: false,
+        unavailableReason: 'Request timed out',
+      });
+    }, 5000);
   });
 }

@@ -92,6 +92,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     closeChat,
     initConversation,
     loadConversationHistory,
+    isCopilotEnabled,
+    toggleCopilotEnabled,
   } = useRefinementStore();
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -103,11 +105,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   // Copilot integration (Beta)
   const [isCopilotExporting, setIsCopilotExporting] = useState(false);
   const [isCopilotRunning, setIsCopilotRunning] = useState(false);
-  // Copilot Beta feature toggle (persisted in localStorage)
-  const [isCopilotBetaEnabled, setIsCopilotBetaEnabled] = useState(() => {
-    const stored = localStorage.getItem('cc-wf-studio:copilot-beta-enabled');
-    return stored === 'true';
-  });
+  // Copilot Beta feature toggle is now managed by refinement-store
   // Copilot execution mode (persisted in localStorage, default: 'cli')
   const [copilotExecutionMode, setCopilotExecutionMode] = useState<CopilotExecutionMode>(() => {
     const stored = localStorage.getItem('cc-wf-studio.copilotExecutionMode');
@@ -138,14 +136,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setShowResetConfirm(false);
   }, [clearWorkflow, clearHistory]);
 
-  // Handle toggle Copilot Beta feature
-  const handleToggleCopilotBeta = useCallback(() => {
-    setIsCopilotBetaEnabled((prev) => {
-      const newValue = !prev;
-      localStorage.setItem('cc-wf-studio:copilot-beta-enabled', String(newValue));
-      return newValue;
-    });
-  }, []);
+  // Handle toggle Copilot Beta feature - now uses refinement store
 
   // Handle Copilot execution mode change
   const handleCopilotExecutionModeChange = useCallback((mode: CopilotExecutionMode) => {
@@ -772,7 +763,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         />
 
         {/* Slash Command Section - Layout changes based on Copilot Beta enabled */}
-        {isCopilotBetaEnabled ? (
+        {isCopilotEnabled ? (
           /* Combined layout when Copilot Beta is enabled */
           <div
             style={{
@@ -1164,8 +1155,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onStartTour={onStartTour}
               isFocusMode={isFocusMode}
               onToggleFocusMode={toggleFocusMode}
-              isCopilotBetaEnabled={isCopilotBetaEnabled}
-              onToggleCopilotBeta={handleToggleCopilotBeta}
+              isCopilotEnabled={isCopilotEnabled}
+              onToggleCopilotBeta={toggleCopilotEnabled}
               open={moreActionsOpen}
               onOpenChange={onMoreActionsOpenChange}
             />

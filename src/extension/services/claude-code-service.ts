@@ -66,7 +66,7 @@ export interface ClaudeCodeExecutionResult {
   success: boolean;
   output?: string;
   error?: {
-    code: 'COMMAND_NOT_FOUND' | 'TIMEOUT' | 'PARSE_ERROR' | 'UNKNOWN_ERROR';
+    code: 'COMMAND_NOT_FOUND' | 'MODEL_NOT_SUPPORTED' | 'TIMEOUT' | 'PARSE_ERROR' | 'UNKNOWN_ERROR';
     message: string;
     details?: string;
   };
