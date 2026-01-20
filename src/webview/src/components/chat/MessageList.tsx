@@ -26,7 +26,7 @@ export function MessageList({
   conversationHistory: propsConversationHistory,
 }: MessageListProps) {
   const { t } = useTranslation();
-  const { conversationHistory: storeConversationHistory } = useRefinementStore();
+  const { conversationHistory: storeConversationHistory, selectedProvider } = useRefinementStore();
 
   // Use props if provided (controlled mode), otherwise use store (uncontrolled mode)
   const conversationHistory = propsConversationHistory ?? storeConversationHistory;
@@ -72,7 +72,9 @@ export function MessageList({
             textAlign: 'center',
           }}
         >
-          {t('refinement.initialMessage.note')}
+          {t('refinement.initialMessage.note', {
+            providerName: selectedProvider === 'copilot' ? 'GitHub Copilot' : 'Claude Code',
+          })}
         </div>
         <div
           style={{

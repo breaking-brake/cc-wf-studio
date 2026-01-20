@@ -534,8 +534,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Initial instructional message (Phase 3.12)
   'refinement.initialMessage.description':
     'Describe the workflow you want to achieve in natural language.',
-  'refinement.initialMessage.note':
-    '※ This feature uses Claude Code installed in your environment.',
+  'refinement.initialMessage.note': '※ This feature uses {{providerName}}.',
 
   // MCP Node (Feature: 001-mcp-node)
   'node.mcp.title': 'MCP Tool',

@@ -511,7 +511,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
 
   // Initial instructional message (Phase 3.12)
   'refinement.initialMessage.description': '用自然语言描述您要实现的工作流。',
-  'refinement.initialMessage.note': '※ 此功能使用您环境中安装的Claude Code。',
+  'refinement.initialMessage.note': '※ 此功能使用{{providerName}}。',
 
   // MCP Node (Feature: 001-mcp-node)
   'node.mcp.title': 'MCP Tool',
