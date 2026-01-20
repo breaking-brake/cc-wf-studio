@@ -145,7 +145,7 @@ export function constructRefinementPrompt(
   // Get last 6 messages (3 rounds)
   const recentMessages = conversationHistory.messages.slice(-6);
 
-  return `You are an expert workflow designer for Claude Code Workflow Studio.
+  return `You are an expert workflow designer for CC Workflow Studio.
 
 **Task**: Refine the existing workflow based on user's feedback.
 

@@ -270,7 +270,7 @@ AiGenerationResponse created
 {
   "schemaVersion": "1.0.0",
   "metadata": {
-    "description": "Workflow schema for Claude Code Workflow Studio",
+    "description": "Workflow schema for CC Workflow Studio",
     "maxNodes": 50,
     "supportedNodeTypes": ["start", "end", "prompt", "subAgent", "askUserQuestion", "ifElse", "switch"]
   },

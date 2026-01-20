@@ -590,7 +590,7 @@
     "errorRecovery": {
       "strategy": "All errors are communicated via McpError payload",
       "userFeedback": "UI should display error message to user with optional 'Retry' action",
-      "logging": "Extension logs all errors to 'Claude Code Workflow Studio' output channel"
+      "logging": "Extension logs all errors to 'CC Workflow Studio' output channel"
     }
   }
 }

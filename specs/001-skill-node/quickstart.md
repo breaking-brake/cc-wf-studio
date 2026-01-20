@@ -13,7 +13,7 @@ A **Skill Node** integrates Claude Code Skills into your visual workflows. Skill
 
 ## Prerequisites
 
-- Claude Code Workflow Studio extension installed
+- CC Workflow Studio extension installed
 - (Optional) Existing Skills in `~/.claude/skills/` or `.claude/skills/`
 
 ## Basic Usage: Add a Skill Node
@@ -22,7 +22,7 @@ A **Skill Node** integrates Claude Code Skills into your visual workflows. Skill
 
 1. Open VSCode
 2. Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (macOS)
-3. Type "Claude Code Workflow Studio: Open Editor"
+3. Type "CC Workflow Studio: Open Editor"
 4. Press Enter
 
 ### 2. Add a Skill Node to Canvas
@@ -182,9 +182,9 @@ If you need a Skill that doesn't exist yet, create it directly from the editor.
 - Extension not properly installed
 
 **Solutions**:
-1. **Update extension**: Ensure you're using Claude Code Workflow Studio v0.4.0 or later
+1. **Update extension**: Ensure you're using CC Workflow Studio v0.4.0 or later
 2. **Restart VSCode**: Close and reopen VSCode
-3. **Check extension status**: View → Extensions → Search "Claude Code Workflow Studio"
+3. **Check extension status**: View → Extensions → Search "CC Workflow Studio"
 
 ### Performance: Slow Skill Browsing
 
@@ -311,7 +311,7 @@ When exporting workflows with Skill nodes:
 ## Feedback
 
 If you encounter issues or have suggestions for improving Skill nodes:
-1. Open the Claude Code Workflow Studio repository
+1. Open the CC Workflow Studio repository
 2. Create a GitHub Issue with:
    - Steps to reproduce
    - Expected behavior

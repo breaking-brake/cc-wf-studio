@@ -19,7 +19,7 @@ This guide shows you how to use each mode effectively.
 
 ## Prerequisites
 
-- Claude Code Workflow Studio extension installed (v2.5.0 or later)
+- CC Workflow Studio extension installed (v2.5.0 or later)
 - At least one MCP server configured in Claude Code
   - Run `claude mcp list` to verify MCP servers are available
   - See [Claude Code MCP documentation](https://code.claude.com/docs) for setup

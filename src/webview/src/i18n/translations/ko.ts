@@ -1,5 +1,5 @@
 /**
- * Claude Code Workflow Studio - Webview Korean Translations
+ * CC Workflow Studio - Webview Korean Translations
  */
 
 import type { WebviewTranslationKeys } from '../translation-keys';
@@ -279,7 +279,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Tour
   'tour.welcome':
-    'Claude Code Workflow Studio에 오신 것을 환영합니다!\n\n이 투어에서는 주요 기능의 위치와 역할을 소개합니다. 첫 워크플로우를 만들기 전에 기본 사항을 익혀보세요.',
+    'CC Workflow Studio에 오신 것을 환영합니다!\n\n이 투어에서는 주요 기능의 위치와 역할을 소개합니다. 첫 워크플로우를 만들기 전에 기본 사항을 익혀보세요.',
   'tour.nodePalette':
     '노드 팔레트에는 워크플로우에서 사용할 수 있는 다양한 노드가 있습니다.\n\nPrompt, Sub-Agent, AskUserQuestion, If/Else, Switch 등의 노드를 클릭하여 캔버스에 추가할 수 있습니다.',
   'tour.addPrompt':
@@ -329,7 +329,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.skip': '건너뛰기',
 
   // Terms of Use
-  'terms.title': 'Claude Code Workflow Studio - 이용 약관',
+  'terms.title': 'CC Workflow Studio - 이용 약관',
   'terms.introduction': '이 도구는 정당한 목적의 워크플로우 생성을 지원합니다.',
   'terms.prohibitedUse': '다음 용도로 사용을 금지합니다:',
   'terms.cyberAttack': '사이버 공격 (DDoS 공격, 무단 접근 등)',
@@ -752,7 +752,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack OAuth
   'slack.oauth.description':
-    '워크스페이스에 연결 버튼을 클릭하면 "Claude Code Workflow Studio"가 Slack에 액세스할 수 있도록 허용하는 확인 화면이 표시됩니다.\n허용하면 워크스페이스에 연동용 Slack App이 설치됩니다.',
+    '워크스페이스에 연결 버튼을 클릭하면 "CC Workflow Studio"가 Slack에 액세스할 수 있도록 허용하는 확인 화면이 표시됩니다.\n허용하면 워크스페이스에 연동용 Slack App이 설치됩니다.',
   'slack.oauth.termsOfService': '이용약관',
   'slack.oauth.privacyPolicy': '개인정보처리방침',
   'slack.oauth.supportPage': '지원 페이지',

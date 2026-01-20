@@ -496,7 +496,7 @@ export function buildWorkflowMessageBlocks(workflow: Workflow, author: string): 
       elements: [
         {
           type: 'mrkdwn',
-          text: `Shared from Claude Code Workflow Studio`
+          text: `Shared from CC Workflow Studio`
         }
       ]
     }

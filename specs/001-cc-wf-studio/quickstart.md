@@ -1,4 +1,4 @@
-# Quickstart Guide: Claude Code Workflow Studio
+# Quickstart Guide: CC Workflow Studio
 
 **Branch**: 001-cc-wf-studio
 **Date**: 2025-11-01
@@ -6,7 +6,7 @@
 
 ## Overview
 
-このガイドでは、Claude Code Workflow Studio の開発環境を構築し、最初のワークフローを作成・実行するまでの手順を説明します。
+このガイドでは、CC Workflow Studio の開発環境を構築し、最初のワークフローを作成・実行するまでの手順を説明します。
 
 ---
 
@@ -134,7 +134,7 @@ npm run dev
 1. VSCode で `F5` キーを押す（または「Run > Start Debugging」）
 2. 新しい Extension Development Host ウィンドウが開く
 3. コマンドパレット（`Ctrl+Shift+P` / `Cmd+Shift+P`）を開く
-4. `Claude Code Workflow Studio: Open Editor` を実行
+4. `CC Workflow Studio: Open Editor` を実行
 
 ---
 
@@ -310,7 +310,7 @@ cc-wf-studio/
        "commands": [
          {
            "command": "cc-wf-studio.duplicateWorkflow",
-           "title": "Claude Code Workflow Studio: Duplicate Workflow"
+           "title": "CC Workflow Studio: Duplicate Workflow"
          }
        ]
      }
@@ -462,7 +462,7 @@ code --install-extension cc-wf-studio-1.0.0.vsix
 {
   "contributes": {
     "configuration": {
-      "title": "Claude Code Workflow Studio",
+      "title": "CC Workflow Studio",
       "properties": {
         "cc-wf-studio.workflowsDirectory": {
           "type": "string",

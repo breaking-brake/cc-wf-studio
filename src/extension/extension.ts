@@ -1,5 +1,5 @@
 /**
- * Claude Code Workflow Studio - Extension Entry Point
+ * CC Workflow Studio - Extension Entry Point
  *
  * Main activation and deactivation logic for the VSCode extension.
  */
@@ -95,10 +95,10 @@ async function cleanupLegacyBM25Index(context: vscode.ExtensionContext): Promise
  */
 export function activate(context: vscode.ExtensionContext): void {
   // Create output channel
-  outputChannel = vscode.window.createOutputChannel('Claude Code Workflow Studio');
+  outputChannel = vscode.window.createOutputChannel('CC Workflow Studio');
   context.subscriptions.push(outputChannel);
 
-  log('INFO', 'Claude Code Workflow Studio is now active');
+  log('INFO', 'CC Workflow Studio is now active');
 
   // Clean up legacy BM25 index data (fire-and-forget)
   cleanupLegacyBM25Index(context).catch((error) => {
@@ -220,7 +220,7 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   );
 
-  log('INFO', 'Claude Code Workflow Studio: All commands and handlers registered');
+  log('INFO', 'CC Workflow Studio: All commands and handlers registered');
 }
 
 /**
@@ -228,7 +228,7 @@ export function activate(context: vscode.ExtensionContext): void {
  * Called when the extension is deactivated
  */
 export function deactivate(): void {
-  log('INFO', 'Claude Code Workflow Studio is now deactivated');
+  log('INFO', 'CC Workflow Studio is now deactivated');
   outputChannel?.dispose();
   outputChannel = null;
 }

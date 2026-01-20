@@ -1,4 +1,4 @@
-# タスク一覧: Claude Code Workflow Studio
+# タスク一覧: CC Workflow Studio
 
 **入力**: `/specs/001-cc-wf-studio/` の設計ドキュメント
 **前提条件**: plan.md, spec.md, research.md, data-model.md, contracts/
@@ -55,7 +55,7 @@
 
 **目標**: VSCode上でビジュアルエディタを開き、Sub-AgentノードとAskUserQuestionノードをドラッグ&ドロップで配置・接続し、ワークフローを作成できる
 
-**独立テスト**: VSCode拡張機能をインストール後、コマンドパレットから「Claude Code Workflow Studio」を開き、新規ワークフローを作成。Sub-Agentノードを1つ配置して保存できることを確認すれば、基本的なエディタ機能が動作していると検証できる。
+**独立テスト**: VSCode拡張機能をインストール後、コマンドパレットから「CC Workflow Studio」を開き、新規ワークフローを作成。Sub-Agentノードを1つ配置して保存できることを確認すれば、基本的なエディタ機能が動作していると検証できる。
 
 ### ユーザーストーリー1の実装
 

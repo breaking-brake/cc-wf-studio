@@ -1,4 +1,4 @@
-# Research Report: Claude Code Workflow Studio
+# Research Report: CC Workflow Studio
 
 **Date**: 2025-11-01
 **Branch**: 001-cc-wf-studio

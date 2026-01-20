@@ -1,5 +1,5 @@
 /**
- * Claude Code Workflow Studio - Webview HTML Generator
+ * CC Workflow Studio - Webview HTML Generator
  *
  * Generates the HTML content for the Webview panel
  * Based on: /specs/001-cc-wf-studio/contracts/vscode-extension-api.md section 4.2
@@ -52,7 +52,7 @@ export function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.
 
     <link href="${styleUri}" rel="stylesheet">
 
-    <title>Claude Code Workflow Studio</title>
+    <title>CC Workflow Studio</title>
 </head>
 <body>
     <div id="root"></div>

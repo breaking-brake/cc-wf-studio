@@ -1,4 +1,4 @@
-# Implementation Plan: Claude Code Workflow Studio
+# Implementation Plan: CC Workflow Studio
 
 **Branch**: `001-cc-wf-studio` | **Date**: 2025-11-01 | **Spec**: [spec.md](/Users/se_nishikawa/chore/cc-wf-studio/specs/001-cc-wf-studio/spec.md)
 **Input**: Feature specification from `/specs/001-cc-wf-studio/spec.md` and user requirement: "webviewはReact with typescript で作成してviteでビルドする形で実装したい"

@@ -1,4 +1,4 @@
-# Data Model: Claude Code Workflow Studio
+# Data Model: CC Workflow Studio
 
 **Branch**: 001-cc-wf-studio
 **Date**: 2025-11-01
@@ -6,7 +6,7 @@
 
 ## Overview
 
-このドキュメントは、Claude Code Workflow Studio のデータモデル定義を記述します。主要なエンティティ、フィールド、関係性、バリデーションルール、状態遷移を定義します。
+このドキュメントは、CC Workflow Studio のデータモデル定義を記述します。主要なエンティティ、フィールド、関係性、バリデーションルール、状態遷移を定義します。
 
 ---
 

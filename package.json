@@ -1,7 +1,7 @@
 {
   "name": "cc-wf-studio",
-  "displayName": "Claude Code Workflow Studio",
-  "description": "Visual workflow editor for Claude Code Slash Commands, Sub Agents, Agent Skills, and MCP Tools",
+  "displayName": "CC Workflow Studio",
+  "description": "Accelerate Claude Code/GitHub Copilot automation with a visual workflow editor",
   "version": "3.16.1",
   "publisher": "breaking-brake",
   "icon": "resources/icon.png",
@@ -14,14 +14,13 @@
   "keywords": [
     "claude",
     "claude code",
-    "claudecode",
-    "code",
     "workflow",
-    "flow",
     "visual-editor",
     "automation",
     "ai",
-    "mcp"
+    "mcp",
+    "copilot",
+    "github copilot"
   ],
   "engines": {
     "vscode": "^1.80.0"
@@ -35,7 +34,7 @@
     "commands": [
       {
         "command": "cc-wf-studio.openEditor",
-        "title": "Claude Code Workflow Studio: Open Editor",
+        "title": "CC Workflow Studio: Open Editor",
         "icon": {
           "light": "resources/icon.png",
           "dark": "resources/icon.png"
@@ -63,7 +62,7 @@
       }
     ],
     "configuration": {
-      "title": "Claude Code Workflow Studio",
+      "title": "CC Workflow Studio",
       "properties": {
         "cc-wf-studio.ai.schemaFormat": {
           "type": "string",

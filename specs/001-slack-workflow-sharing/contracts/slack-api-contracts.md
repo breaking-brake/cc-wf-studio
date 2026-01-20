@@ -260,7 +260,7 @@ Content-Type: application/json
     "subtype": null,
     "text": "New workflow shared: My Workflow",
     "ts": "1234567890.123456",
-    "username": "Claude Code Workflow Studio",
+    "username": "CC Workflow Studio",
     "bot_id": "B01234EFGH",
     "blocks": [...]
   }
@@ -425,7 +425,7 @@ Content-Type: application/json
           "name": "general"
         },
         "user": "U01234EFGH",
-        "username": "Claude Code Workflow Studio",
+        "username": "CC Workflow Studio",
         "text": "New workflow shared: My Workflow",
         "permalink": "https://myteam.slack.com/archives/C01234ABCD/p1234567890123456",
         "files": [

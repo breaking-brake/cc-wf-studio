@@ -448,7 +448,7 @@ Webview (AiGenerationDialog)
 ### Error Handling
 - Skill not found → `validationStatus: 'missing'`
 - Skill file malformed → `validationStatus: 'invalid'`
-- All errors logged to "Claude Code Workflow Studio" Output Channel
+- All errors logged to "CC Workflow Studio" Output Channel
 
 ### Design Decisions & Lessons Learned
 
@@ -537,7 +537,7 @@ Webview (AiGenerationDialog)
 
 ### Error Handling
 - All errors mapped to specific error codes for i18n
-- Comprehensive logging to "Claude Code Workflow Studio" Output Channel
+- Comprehensive logging to "CC Workflow Studio" Output Channel
 - Execution time tracking for all operations (success and failure)
 
 ### Testing Notes

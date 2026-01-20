@@ -11,7 +11,7 @@ We release patches for security vulnerabilities. Currently supported versions:
 
 ## Reporting a Vulnerability
 
-We take the security of Claude Code Workflow Studio seriously. If you believe you have found a security vulnerability, please report it to us as described below.
+We take the security of CC Workflow Studio seriously. If you believe you have found a security vulnerability, please report it to us as described below.
 
 ### Reporting Process
 

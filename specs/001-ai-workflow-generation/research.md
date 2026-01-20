@@ -68,7 +68,7 @@ process.on('exit', (code) => {
 {
   "schemaVersion": "1.0.0",
   "metadata": {
-    "description": "Workflow schema for Claude Code Workflow Studio",
+    "description": "Workflow schema for CC Workflow Studio",
     "maxNodes": 50,
     "supportedNodeTypes": [...]
   },
@@ -163,7 +163,7 @@ function validateAiGeneratedWorkflow(workflow: unknown): { valid: boolean; error
 **Decision**: Structured prompt with clear sections: role, task, schema reference, output format, constraints
 
 **Rationale**:
-- **Clear role**: "You are an expert workflow designer for Claude Code Workflow Studio"
+- **Clear role**: "You are an expert workflow designer for CC Workflow Studio"
 - **Specific task**: "Generate a valid workflow JSON based on the user's description"
 - **Schema reference**: Embed or reference the complete schema documentation
 - **Output format**: "Output ONLY valid JSON matching the Workflow interface, no explanation"
@@ -177,7 +177,7 @@ function validateAiGeneratedWorkflow(workflow: unknown): { valid: boolean; error
 **Prompt Template** (pseudo-code):
 ```typescript
 const prompt = `
-You are an expert workflow designer for Claude Code Workflow Studio.
+You are an expert workflow designer for CC Workflow Studio.
 
 **Task**: Generate a valid workflow JSON based on the user's natural language description.
 

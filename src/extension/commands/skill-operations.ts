@@ -14,7 +14,7 @@ import { createSkill, scanAllSkills, validateSkillFile } from '../services/skill
 /**
  * Output channel for logging Skill operations
  */
-const outputChannel = vscode.window.createOutputChannel('Claude Code Workflow Studio');
+const outputChannel = vscode.window.createOutputChannel('CC Workflow Studio');
 
 /**
  * Handle BROWSE_SKILLS request from Webview

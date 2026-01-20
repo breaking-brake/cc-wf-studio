@@ -42,7 +42,7 @@ export class RefinementPromptBuilder {
 
     return {
       responseLocale: locale,
-      role: 'expert workflow designer for Claude Code Workflow Studio',
+      role: 'expert workflow designer for CC Workflow Studio',
       task: 'Refine the existing workflow based on user feedback',
       // AI Editing Process Flow - MUST follow this process strictly
       // Generated from: resources/ai-editing-process-flow.md

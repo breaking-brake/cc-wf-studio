@@ -1,4 +1,4 @@
-# Claude Code Workflow Studio
+# CC Workflow Studio
 
 <p align="center">
   <a href="https://github.com/breaking-brake/cc-wf-studio/stargazers"><img src="https://img.shields.io/github/stars/breaking-brake/cc-wf-studio" alt="GitHub Stars" /></a>
@@ -8,11 +8,11 @@
 </p>
 
 <p align="center">
-  <img src="./resources/hero.png" alt="Claude Code Workflow Studio" width="800">
+  <img src="./resources/hero.png" alt="CC Workflow Studio" width="800">
 </p>
 
 <p align="center">
-  <strong>Accelerate Claude Code automation with a visual workflow editor</strong>
+  <strong>Accelerate Claude Code/GitHub Copilot<a href="#github-copilot-support">(※)</a> automation with a visual workflow editor</strong>
 </p>
 
 <p align="center">
@@ -65,7 +65,7 @@
 
 ---
 
-## Why Claude Code Workflow Studio?
+## Why CC Workflow Studio?
 
 ### 🎯 No-Code Workflow Design
 No programming required. Connect Sub-Agent and user decision nodes visually to build sophisticated automation flows.
@@ -76,8 +76,8 @@ Designed workflows automatically export to `.claude/agents/` and `.claude/comman
 ### 🔄 Easy Iteration
 Save and load workflows as JSON. Experiment and refine your flows through trial and error.
 
-### 🔒 Fully Local & Secure
-All operations run locally within VSCode. **Note:** MCP Tool nodes may require network connectivity depending on the specific MCP server configuration (e.g., remote API servers). Non-MCP features operate entirely offline.
+### 🔒 Local & Secure
+The visual editor runs locally within VSCode. **Note:** Features using Claude Code or GitHub Copilot (e.g., Edit with AI, workflow execution) require network connectivity, as do some MCP Tool nodes depending on server configuration.
 
 ## Key Features
 
@@ -85,13 +85,13 @@ All operations run locally within VSCode. **Note:** MCP Tool nodes may require n
 
 🤖 **AI-Assisted Workflow Refinement** - Iteratively improve workflows through conversational AI - ask for changes, add features, or refine logic with natural language feedback
 
-📤 **One-Click Export** - Generate `.claude/agents/*.md` and `.claude/commands/*.md` files ready for immediate use with Claude Code
+⚡ **One-Click Export & Run** - Generate `.claude/agents/*.md` and `.claude/commands/*.md` files and run workflows directly from the editor
 
-💬 **Slack Workflow Sharing (β)** - Share workflows directly to Slack channels with preview cards and one-click import links for seamless team collaboration
+<span id="github-copilot-support">🤖</span> **GitHub Copilot Support (β)** - Export & Run workflows to Copilot Chat or Copilot CLI, and use Copilot as AI provider for Edit with AI.
 
-🤖 **GitHub Copilot Export (β)** - Export workflows to GitHub Copilot format with two execution modes: **VSCode Copilot** (`.github/prompts/*.prompt.md` for Copilot Chat) and **Copilot CLI** (`.github/skills/{name}/SKILL.md` for terminal execution). Select your preferred mode from the dropdown menu. **Note:** This is an experimental feature. Some workflows may not work as expected
-
-🧩 **Rich Node Types** - Build complex workflows with diverse node types: Prompt (templates), Sub-Agent (AI tasks), Skill (Claude Code Skills), MCP (external tools), IfElse/Switch (conditional branching), and AskUserQuestion (user decisions)
+  **Note:**
+  - Enable **Copilot** option in Toolbar's **More** menu to activate
+  - Experimental feature; some workflows may not work as expected
 
 ## AI-Assisted Workflow Refinement
 
@@ -112,7 +112,7 @@ claude --version
 ### How to Use
 
 1. **Open or Create a Workflow**
-   - Launch Claude Code Workflow Studio
+   - Launch CC Workflow Studio
    - Create a new workflow or open an existing one
 
 2. **Click "Edit with AI" Button**
@@ -215,7 +215,7 @@ Change the AskUserQuestion node to have 3 options instead of 2: High, Medium, Lo
 **From VSCode Marketplace** (Coming Soon)
 
 1. Open VSCode Extensions (`Ctrl+Shift+X` / `Cmd+Shift+X`)
-2. Search for "Claude Code Workflow Studio"
+2. Search for "CC Workflow Studio"
 3. Click **Install**
 
 **From Source**
@@ -247,7 +247,7 @@ Change the AskUserQuestion node to have 3 options instead of 2: High, Medium, Lo
 
 **1. Open the Editor**
    - Press `Ctrl+Shift+P` / `Cmd+Shift+P`
-   - Type "Claude Code Workflow Studio: Open Editor"
+   - Type "CC Workflow Studio: Open Editor"
    - Press Enter
 
 **2. Take the Interactive Tour** (First-time users)
@@ -480,4 +480,4 @@ Built with [React Flow](https://reactflow.dev/) • Powered by [Claude Code](htt
 
 ---
 
-**Made with Claude Code Workflow Studio**
+**Made with CC Workflow Studio**

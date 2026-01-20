@@ -188,7 +188,7 @@ function constructRefinementPrompt(
 ): string {
   const previousMessages = conversationHistory.messages.slice(-6); // 直近3往復
 
-  return `You are an expert workflow designer for Claude Code Workflow Studio.
+  return `You are an expert workflow designer for CC Workflow Studio.
 
 **Task**: Refine the existing workflow based on user's feedback.
 

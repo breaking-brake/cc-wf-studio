@@ -1,5 +1,5 @@
 /**
- * Claude Code Workflow Studio - Open Editor Command
+ * CC Workflow Studio - Open Editor Command
  *
  * Creates and manages the Webview panel for the workflow editor
  * Based on: /specs/001-cc-wf-studio/contracts/vscode-extension-api.md section 1.1
@@ -139,7 +139,7 @@ export function registerOpenEditorCommand(
       // Create new webview panel
       currentPanel = vscode.window.createWebviewPanel(
         'ccWorkflowStudio',
-        'Claude Code Workflow Studio',
+        'CC Workflow Studio',
         columnToShowIn || vscode.ViewColumn.One,
         {
           enableScripts: true,
@@ -986,7 +986,7 @@ export function registerOpenEditorCommand(
       );
 
       // Show information message
-      vscode.window.showInformationMessage('Claude Code Workflow Studio: Editor opened!');
+      vscode.window.showInformationMessage('CC Workflow Studio: Editor opened!');
     }
   );
 

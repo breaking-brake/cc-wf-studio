@@ -67,7 +67,7 @@ body:
     id: logs
     attributes:
       label: Relevant log output
-      description: Copy from Output panel > "Claude Code Workflow Studio"
+      description: Copy from Output panel > "CC Workflow Studio"
       render: shell
 
   - type: textarea

@@ -44,7 +44,7 @@ npm install --save-dev @types/node
 
 1. [Slack API](https://api.slack.com/apps) にアクセス
 2. 「Create New App」→ 「From scratch」を選択
-3. App Name: `Claude Code Workflow Studio` (例)
+3. App Name: `CC Workflow Studio` (例)
 4. Workspace: 開発用ワークスペースを選択
 
 ### 2.2 Bot Token Scopesの設定

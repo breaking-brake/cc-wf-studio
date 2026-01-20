@@ -494,7 +494,7 @@ log('DEBUG', 'Prompt token count', { tokens: estimateTokenCount(prompt) });
 ```
 
 **View Logs**:
-- VSCode: View → Output → "Claude Code Workflow Studio"
+- VSCode: View → Output → "CC Workflow Studio"
 
 ---
 

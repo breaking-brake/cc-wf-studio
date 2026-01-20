@@ -1312,7 +1312,7 @@ claude --system-prompt "あなたはワークフロー編集の専門家です�
     - workflow-schema.json の要約を含める（オプション）
     - プロンプト例:
       ```
-      あなたはClaude Code Workflow Studioのワークフロー編集専門家です。
+      あなたはCC Workflow Studioのワークフロー編集専門家です。
 
       現在のワークフローファイル: .vscode/workflows/workflow-123.json
 

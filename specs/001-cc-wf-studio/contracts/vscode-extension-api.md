@@ -6,7 +6,7 @@
 
 ## Overview
 
-このドキュメントは、Claude Code Workflow Studio 拡張機能が使用する VSCode Extension API の契約を定義します。すべての API 呼び出しは `vscode` モジュールを通じて行われます。
+このドキュメントは、CC Workflow Studio 拡張機能が使用する VSCode Extension API の契約を定義します。すべての API 呼び出しは `vscode` モジュールを通じて行われます。
 
 ---
 
@@ -20,7 +20,7 @@
 
 **Command ID**: `cc-wf-studio.openEditor`
 
-**Title**: `Claude Code Workflow Studio: Open Editor`
+**Title**: `CC Workflow Studio: Open Editor`
 
 **Trigger**:
 - コマンドパレットから実行
@@ -59,7 +59,7 @@ vscode.commands.registerCommand('cc-wf-studio.openEditor', () => {
 
 **Command ID**: `cc-wf-studio.newWorkflow`
 
-**Title**: `Claude Code Workflow Studio: New Workflow`
+**Title**: `CC Workflow Studio: New Workflow`
 
 **Trigger**: コマンドパレット
 
@@ -75,7 +75,7 @@ vscode.commands.registerCommand('cc-wf-studio.openEditor', () => {
 
 **Command ID**: `cc-wf-studio.saveWorkflow`
 
-**Title**: `Claude Code Workflow Studio: Save Workflow`
+**Title**: `CC Workflow Studio: Save Workflow`
 
 **Keybinding**: `Ctrl+S` (Windows/Linux), `Cmd+S` (macOS)
 
@@ -97,7 +97,7 @@ vscode.commands.registerCommand('cc-wf-studio.openEditor', () => {
 
 **Command ID**: `cc-wf-studio.exportWorkflow`
 
-**Title**: `Claude Code Workflow Studio: Export Workflow`
+**Title**: `CC Workflow Studio: Export Workflow`
 
 **Trigger**:
 - コマンドパレット

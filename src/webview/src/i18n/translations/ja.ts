@@ -1,5 +1,5 @@
 /**
- * Claude Code Workflow Studio - Webview Japanese Translations
+ * CC Workflow Studio - Webview Japanese Translations
  */
 
 import type { WebviewTranslationKeys } from '../translation-keys';
@@ -278,7 +278,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Tour
   'tour.welcome':
-    'Claude Code Workflow Studioへようこそ！\n\nこのツアーでは、各機能の場所と役割をご紹介します。基本的な使い方を理解して、ワークフロー作成を始めましょう。',
+    'CC Workflow Studioへようこそ！\n\nこのツアーでは、各機能の場所と役割をご紹介します。基本的な使い方を理解して、ワークフロー作成を始めましょう。',
   'tour.nodePalette':
     'ノードパレットには、ワークフローで使用できる様々なノードが用意されています。\n\nPrompt、Sub-Agent、AskUserQuestion、If/Else、Switchなどのノードをクリックしてキャンバスに追加できます。',
   'tour.addPrompt':
@@ -328,7 +328,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.skip': 'スキップ',
 
   // Terms of Use
-  'terms.title': 'Claude Code Workflow Studio - 利用規約',
+  'terms.title': 'CC Workflow Studio - 利用規約',
   'terms.introduction': '本ツールは正当な目的でのワークフロー作成を支援します。',
   'terms.prohibitedUse': '以下の用途での使用を禁止します：',
   'terms.cyberAttack': 'サイバー攻撃（DDoS攻撃、不正アクセス等）',
@@ -754,7 +754,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack OAuth
   'slack.oauth.description':
-    'ワークスペースに接続ボタンをクリックすると、「Claude Code Workflow Studio」にSlackへのアクセスを許可する確認画面が表示されます。\n許可を行うとワークスペースに連携用のSlack Appがインストールされます。',
+    'ワークスペースに接続ボタンをクリックすると、「CC Workflow Studio」にSlackへのアクセスを許可する確認画面が表示されます。\n許可を行うとワークスペースに連携用のSlack Appがインストールされます。',
   'slack.oauth.termsOfService': '利用規約',
   'slack.oauth.privacyPolicy': 'プライバシーポリシー',
   'slack.oauth.supportPage': 'サポートページ',

@@ -1,5 +1,5 @@
 /**
- * Claude Code Workflow Studio - Webview Traditional Chinese Translations
+ * CC Workflow Studio - Webview Traditional Chinese Translations
  */
 
 import type { WebviewTranslationKeys } from '../translation-keys';
@@ -271,7 +271,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
 
   // Tour
   'tour.welcome':
-    '歡迎使用Claude Code Workflow Studio！\n\n本導覽將介紹主要功能的位置和作用。在建立第一個工作流程之前，讓我們先熟悉基礎知識。',
+    '歡迎使用CC Workflow Studio！\n\n本導覽將介紹主要功能的位置和作用。在建立第一個工作流程之前，讓我們先熟悉基礎知識。',
   'tour.nodePalette':
     '節點面板包含可在工作流程中使用的各種節點。\n\n點擊Prompt、Sub-Agent、AskUserQuestion、If/Else、Switch等節點將其新增到畫布。',
   'tour.addPrompt':
@@ -316,7 +316,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.skip': '略過',
 
   // Terms of Use
-  'terms.title': 'Claude Code Workflow Studio - 使用條款',
+  'terms.title': 'CC Workflow Studio - 使用條款',
   'terms.introduction': '本工具支援合法目的的工作流創建。',
   'terms.prohibitedUse': '禁止以下用途：',
   'terms.cyberAttack': '網路攻擊（DDoS攻擊、未經授權的訪問等）',
@@ -723,7 +723,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
 
   // Slack OAuth
   'slack.oauth.description':
-    '點擊連接到工作區按鈕將顯示允許「Claude Code Workflow Studio」訪問 Slack 的確認畫面。\n授權後，連接用的 Slack App 將安裝到您的工作區。',
+    '點擊連接到工作區按鈕將顯示允許「CC Workflow Studio」訪問 Slack 的確認畫面。\n授權後，連接用的 Slack App 將安裝到您的工作區。',
   'slack.oauth.termsOfService': '服務條款',
   'slack.oauth.privacyPolicy': '隱私政策',
   'slack.oauth.supportPage': '支援頁面',

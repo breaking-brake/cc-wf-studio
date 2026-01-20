@@ -1,4 +1,4 @@
-# 仕様品質チェックリスト: Claude Code Workflow Studio
+# 仕様品質チェックリスト: CC Workflow Studio
 
 **目的**: 計画フェーズに進む前に仕様の完全性と品質を検証する
 **作成日**: 2025-11-01

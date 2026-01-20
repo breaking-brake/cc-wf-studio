@@ -1026,7 +1026,7 @@ ${JSON.stringify(
 `
       : '';
 
-  const prompt = `You are an expert workflow designer for Claude Code Workflow Studio.
+  const prompt = `You are an expert workflow designer for CC Workflow Studio.
 
 **Task**: Refine a Sub-Agent Flow based on user's feedback.
 
