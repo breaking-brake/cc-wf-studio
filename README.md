@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  Design complex AI agent workflows intuitively with drag-and-drop. Build Sub-Agent orchestrations and conditional branching without writing code, then export directly to <code>.claude</code> format for immediate execution.
+  Design complex AI agent workflows by conversing with AI – or use intuitive drag-and-drop. Build Sub-Agent orchestrations and conditional branching with natural language, then export directly to <code>.claude</code> format.
 </p>
 
 <!-- Hero image placeholder - recommended size: 1600x900px or 16:9 aspect ratio -->
