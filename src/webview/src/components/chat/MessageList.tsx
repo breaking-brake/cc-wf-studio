@@ -76,23 +76,25 @@ export function MessageList({
             providerName: selectedProvider === 'copilot' ? 'GitHub Copilot' : 'Claude Code',
           })}
         </div>
-        <div
-          style={{
-            marginTop: '16px',
-            padding: '8px 12px',
-            backgroundColor: 'var(--vscode-textBlockQuote-background)',
-            border: '1px solid var(--vscode-textBlockQuote-border)',
-            borderRadius: '4px',
-            fontSize: `${fontSizes.small}px`,
-            lineHeight: '1.6',
-            color: 'var(--vscode-foreground)',
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-            textAlign: 'left',
-          }}
-        >
-          {t('refinement.chat.claudeMdTip')}
-        </div>
+        {selectedProvider !== 'copilot' && (
+          <div
+            style={{
+              marginTop: '16px',
+              padding: '8px 12px',
+              backgroundColor: 'var(--vscode-textBlockQuote-background)',
+              border: '1px solid var(--vscode-textBlockQuote-border)',
+              borderRadius: '4px',
+              fontSize: `${fontSizes.small}px`,
+              lineHeight: '1.6',
+              color: 'var(--vscode-foreground)',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              textAlign: 'left',
+            }}
+          >
+            {t('refinement.chat.claudeMdTip')}
+          </div>
+        )}
       </div>
     );
   }
