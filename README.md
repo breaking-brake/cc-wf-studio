@@ -46,25 +46,6 @@
 
 ---
 
-<!-- Slack Sharing Demo GIFs -->
-<p align="center">
-  <img src="./resources/slack-export-demo.gif" alt="Export Workflow to Slack" width="800">
-</p>
-
-<p align="center">
-  <em>📤 Export workflows to Slack with preview cards</em>
-</p>
-
-<p align="center">
-  <img src="./resources/slack-import-demo.gif" alt="Import Workflow from Slack" width="800">
-</p>
-
-<p align="center">
-  <em>📥 Import workflows from Slack with one-click import</em>
-</p>
-
----
-
 ## Why CC Workflow Studio?
 
 ### 🎯 No-Code Workflow Design
