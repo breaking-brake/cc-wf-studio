@@ -480,6 +480,8 @@ export interface WebviewTranslationKeys {
   // Initial instructional message (Phase 3.12)
   'refinement.initialMessage.description': string;
   'refinement.initialMessage.note': string;
+  // Copilot-specific note with link
+  'refinement.initialMessage.noteCopilot': string;
 
   // MCP Node (Feature: 001-mcp-node)
   'node.mcp.title': string;

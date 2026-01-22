@@ -9,9 +9,11 @@
  */
 
 import type { ConversationHistory } from '@shared/types/workflow-definition';
+import { ExternalLink } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useResponsiveFonts } from '../../contexts/ResponsiveFontContext';
 import { useTranslation } from '../../i18n/i18n-context';
+import { openExternalUrl } from '../../services/vscode-bridge';
 import { useRefinementStore } from '../../stores/refinement-store';
 import { MessageBubble } from './MessageBubble';
 
@@ -72,10 +74,41 @@ export function MessageList({
             textAlign: 'center',
           }}
         >
-          {t('refinement.initialMessage.note', {
-            providerName: selectedProvider === 'copilot' ? 'GitHub Copilot' : 'Claude Code',
-          })}
+          {selectedProvider === 'copilot'
+            ? t('refinement.initialMessage.noteCopilot')
+            : t('refinement.initialMessage.note', { providerName: 'Claude Code' })}
         </div>
+        {selectedProvider === 'copilot' && (
+          <button
+            type="button"
+            onClick={() =>
+              openExternalUrl(
+                'https://code.visualstudio.com/api/extension-guides/ai/language-model'
+              )
+            }
+            style={{
+              marginTop: '8px',
+              color: 'var(--vscode-textLink-foreground)',
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              fontSize: `${fontSizes.small}px`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.textDecoration = 'underline';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.textDecoration = 'none';
+            }}
+          >
+            <ExternalLink size={12} />
+            <span>Learn more</span>
+          </button>
+        )}
         {selectedProvider !== 'copilot' && (
           <div
             style={{

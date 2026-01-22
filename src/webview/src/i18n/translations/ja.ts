@@ -534,6 +534,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Initial instructional message (Phase 3.12)
   'refinement.initialMessage.description': '実現したいワークフローを自然言語で説明してください。',
   'refinement.initialMessage.note': '※ この機能は{{providerName}}を使用します。',
+  // Copilot-specific note with link
+  'refinement.initialMessage.noteCopilot':
+    '※ この機能はVSCode Language Model APIを通じて、あなたのGitHub Copilotにリクエストします。',
 
   // MCP Node (Feature: 001-mcp-node)
   'node.mcp.title': 'MCP Tool',

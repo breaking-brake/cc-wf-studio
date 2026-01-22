@@ -535,6 +535,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'refinement.initialMessage.description':
     'Describe the workflow you want to achieve in natural language.',
   'refinement.initialMessage.note': '※ This feature uses {{providerName}}.',
+  // Copilot-specific note with link
+  'refinement.initialMessage.noteCopilot':
+    '※ This feature requests your GitHub Copilot through the VSCode Language Model API.',
 
   // MCP Node (Feature: 001-mcp-node)
   'node.mcp.title': 'MCP Tool',

@@ -533,6 +533,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Initial instructional message (Phase 3.12)
   'refinement.initialMessage.description': '실현하려는 워크플로를 자연어로 설명해주세요.',
   'refinement.initialMessage.note': '※ 이 기능은 {{providerName}}을(를) 사용합니다.',
+  // Copilot-specific note with link
+  'refinement.initialMessage.noteCopilot':
+    '※ 이 기능은 VSCode Language Model API를 통해 GitHub Copilot에 요청합니다.',
 
   // MCP Node (Feature: 001-mcp-node)
   'node.mcp.title': 'MCP Tool',
