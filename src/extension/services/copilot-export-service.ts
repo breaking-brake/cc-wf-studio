@@ -360,31 +360,14 @@ function generateCopilotPromptFile(workflow: Workflow, options: CopilotExportOpt
     frontmatterLines.push(`model: ${options.model}`);
   }
 
-  // Collect all tools from multiple sources
-  const allTools: string[] = [];
-
-  // 1. Add explicitly specified tools from export options
+  // Add tools if explicitly specified in export options
+  // Note: workflow.slashCommandOptions.allowedTools is NOT used here because
+  // those are Claude Code-specific tool names (Bash, Read, Edit, etc.) that
+  // have no meaning in GitHub Copilot. When tools: is omitted, Copilot allows
+  // all available tools including MCP servers.
   if (options.tools && options.tools.length > 0) {
-    allTools.push(...options.tools);
-  }
-
-  // 2. Add allowed tools from workflow slashCommandOptions
-  if (workflow.slashCommandOptions?.allowedTools) {
-    const allowedTools = workflow.slashCommandOptions.allowedTools
-      .split(',')
-      .map((t) => t.trim())
-      .filter((t) => t.length > 0);
-    allTools.push(...allowedTools);
-  }
-
-  // Note: MCP tools are NOT added to tools: frontmatter.
-  // When tools: is omitted, Copilot allows all available tools including MCP servers.
-
-  // De-duplicate and add to frontmatter
-  const uniqueTools = [...new Set(allTools)];
-  if (uniqueTools.length > 0) {
     frontmatterLines.push('tools:');
-    for (const tool of uniqueTools) {
+    for (const tool of options.tools) {
       frontmatterLines.push(`  - ${tool}`);
     }
   }
