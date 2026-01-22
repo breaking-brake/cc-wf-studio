@@ -2,10 +2,12 @@
  * MCP Configuration Reader Service
  *
  * Feature: 001-mcp-node
- * Purpose: Read MCP server configurations from .claude.json
+ * Purpose: Read MCP server configurations from .mcp.json and .claude.json
  *
- * This service reads MCP server configurations directly from the user's
- * .claude.json file instead of using 'claude mcp get' CLI command.
+ * This service reads MCP server configurations from multiple sources:
+ * - ~/.mcp.json (user-level)
+ * - <workspace>/.mcp.json (project-level)
+ * - ~/.claude.json (legacy)
  */
 
 import * as fs from 'node:fs';
@@ -41,6 +43,15 @@ function getLegacyClaudeConfigPath(): string {
  */
 function getProjectMcpConfigPath(workspacePath: string): string {
   return path.join(workspacePath, '.mcp.json');
+}
+
+/**
+ * Get the path to user-level ~/.mcp.json
+ *
+ * @returns Absolute path to ~/.mcp.json
+ */
+function getUserMcpConfigPath(): string {
+  return path.join(os.homedir(), '.mcp.json');
 }
 
 /**
@@ -178,7 +189,37 @@ export function getMcpServerConfig(
       }
     }
 
-    // Priority 2: Local scope - .claude.json.projects[<workspace>].mcpServers
+    // Priority 2: User-level ~/.mcp.json
+    const userMcpConfigPath = getUserMcpConfigPath();
+    const userMcpConfig = readMcpConfig(userMcpConfigPath);
+
+    if (userMcpConfig?.mcpServers?.[serverId]) {
+      const rawConfig = userMcpConfig.mcpServers[serverId];
+      const serverConfig = normalizeServerConfig(rawConfig);
+
+      if (!serverConfig) {
+        log('WARN', 'Invalid MCP server configuration in user mcp.json', {
+          serverId,
+          scope: 'user-mcp',
+          configPath: userMcpConfigPath,
+          rawConfig,
+        });
+        return null;
+      }
+
+      log('INFO', 'Retrieved MCP server configuration from user mcp.json', {
+        serverId,
+        scope: 'user-mcp',
+        configPath: userMcpConfigPath,
+        type: serverConfig.type,
+        hasCommand: !!serverConfig.command,
+        hasUrl: !!serverConfig.url,
+      });
+
+      return serverConfig;
+    }
+
+    // Priority 3: Local scope - .claude.json.projects[<workspace>].mcpServers
     if (legacyConfig && workspacePath) {
       const projectsConfig = legacyConfig.projects as
         | Record<string, { mcpServers?: Record<string, McpServerConfig> }>
@@ -211,7 +252,7 @@ export function getMcpServerConfig(
       }
     }
 
-    // Priority 3: User scope - .claude.json.mcpServers (top-level)
+    // Priority 4: User scope (legacy) - .claude.json.mcpServers (top-level)
     if (legacyConfig?.mcpServers?.[serverId]) {
       const rawConfig = legacyConfig.mcpServers[serverId];
       const serverConfig = normalizeServerConfig(rawConfig);
@@ -274,7 +315,15 @@ export function getAllMcpServerIds(workspacePath?: string): string[] {
       }
     }
 
-    // Collect from .claude.json
+    // Collect from user-level ~/.mcp.json
+    const userMcpConfig = readMcpConfig(getUserMcpConfigPath());
+    if (userMcpConfig?.mcpServers) {
+      for (const id of Object.keys(userMcpConfig.mcpServers)) {
+        serverIds.add(id);
+      }
+    }
+
+    // Collect from .claude.json (legacy)
     const legacyConfig = readLegacyClaudeConfig();
     if (legacyConfig) {
       // Local scope (project-specific)
