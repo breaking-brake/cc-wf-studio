@@ -309,17 +309,16 @@ function generateSubAgentFlowAgentFile(
 }
 
 /**
- * Format YAML string values
+ * Format YAML string values with proper escaping
  *
  * Issue #413: Used for hooks command values in frontmatter
- * Note: We wrap with double quotes but don't escape internal quotes.
- * YAML parsers handle this correctly when the string contains shell commands.
+ * Issue #485: Properly escape backslashes and quotes, remove newlines
  *
  * @param value - String value to format
  * @param alwaysQuote - Always wrap in double quotes
- * @returns YAML string value
+ * @returns YAML string value with proper escaping
  */
-function escapeYamlString(value: string, alwaysQuote = false): string {
+export function escapeYamlString(value: string, alwaysQuote = false): string {
   // Always quote if requested, or if the string contains special characters
   if (
     alwaysQuote ||
@@ -327,8 +326,12 @@ function escapeYamlString(value: string, alwaysQuote = false): string {
     value.startsWith(' ') ||
     value.endsWith(' ')
   ) {
-    // Just wrap in double quotes - no internal escaping
-    return `"${value}"`;
+    // Escape backslashes first, then double quotes, then remove newlines
+    const escaped = value
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"')
+      .replace(/[\n\r]/g, '');
+    return `"${escaped}"`;
   }
   return value;
 }
@@ -341,7 +344,10 @@ function escapeYamlString(value: string, alwaysQuote = false): string {
  */
 function generateSlashCommandFile(workflow: Workflow): string {
   // YAML frontmatter
-  const frontmatterLines = ['---', `description: ${workflow.description || workflow.name}`];
+  const frontmatterLines = [
+    '---',
+    `description: ${escapeYamlString(workflow.description || workflow.name)}`,
+  ];
 
   // Issue #424: Add allowed-tools only if explicitly configured (omit = use Claude Code default)
   if (workflow.slashCommandOptions?.allowedTools) {

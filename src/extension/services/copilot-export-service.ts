@@ -9,7 +9,7 @@
 
 import * as path from 'node:path';
 import type { Workflow } from '../../shared/types/workflow-definition';
-import { nodeNameToFileName } from './export-service';
+import { escapeYamlString, nodeNameToFileName } from './export-service';
 import type { FileService } from './file-service';
 import { getMcpServerConfig } from './mcp-config-reader';
 import {
@@ -338,16 +338,18 @@ function generateCopilotPromptFile(workflow: Workflow, options: CopilotExportOpt
   // YAML frontmatter
   const frontmatterLines = ['---', `name: ${workflowName}`];
 
-  // Add description
+  // Add description (with YAML escaping)
   if (workflow.description) {
-    frontmatterLines.push(`description: ${workflow.description}`);
+    frontmatterLines.push(`description: ${escapeYamlString(workflow.description)}`);
   } else {
-    frontmatterLines.push(`description: ${workflow.name}`);
+    frontmatterLines.push(`description: ${escapeYamlString(workflow.name)}`);
   }
 
-  // Add argument-hint if configured
+  // Add argument-hint if configured (with YAML escaping)
   if (workflow.slashCommandOptions?.argumentHint) {
-    frontmatterLines.push(`argument-hint: ${workflow.slashCommandOptions.argumentHint}`);
+    frontmatterLines.push(
+      `argument-hint: ${escapeYamlString(workflow.slashCommandOptions.argumentHint)}`
+    );
   }
 
   // Add agent mode
