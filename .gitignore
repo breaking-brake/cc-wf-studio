@@ -24,6 +24,10 @@ npm-debug.log*
 .env
 .env.local
 
+# Claude Code settings (contains private configuration)
+.claude/
+.vscode/workflows/
+
 # Temporary files
 *.tmp
 *.swp
