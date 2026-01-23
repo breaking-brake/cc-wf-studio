@@ -158,6 +158,7 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
         validationStatus: selectedSkill.validationStatus,
         allowedTools: selectedSkill.allowedTools,
         outputPorts: 1,
+        source: selectedSkill.source,
       },
     });
 

@@ -202,6 +202,13 @@ export interface SkillNodeData {
   validationStatus: 'valid' | 'missing' | 'invalid';
   /** Number of output ports (always 1 for Skill nodes) */
   outputPorts: 1;
+  /**
+   * Source directory for project-scope skills
+   * - 'claude': from .claude/skills/ (Claude Code skills)
+   * - 'copilot': from .github/skills/ (Copilot skills)
+   * - undefined: for user/local scope or legacy data
+   */
+  source?: 'claude' | 'copilot';
 }
 
 /**
