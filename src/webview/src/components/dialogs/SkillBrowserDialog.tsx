@@ -539,8 +539,8 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                               borderRadius: '3px',
                               backgroundColor:
                                 skill.source === 'copilot'
-                                  ? '#6366f1' // Copilot blue-purple
-                                  : '#c2410c', // Claude Code dark orange
+                                  ? '#BC3FBC' // Copilot purple
+                                  : '#DA7758', // Claude Code orange
                               color: '#ffffff',
                               fontWeight: 500,
                             }}
