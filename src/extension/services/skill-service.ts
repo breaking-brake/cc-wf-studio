@@ -27,6 +27,7 @@ import { parseSkillFrontmatter, type SkillMetadata } from './yaml-parser';
  *
  * @param baseDir - Base directory to scan (e.g., ~/.claude/skills/)
  * @param scope - Skill scope ('user', 'project', or 'local')
+ * @param source - Source directory type for project skills ('claude' or 'github')
  * @returns Array of Skill references
  *
  * @example
@@ -37,7 +38,8 @@ import { parseSkillFrontmatter, type SkillMetadata } from './yaml-parser';
  */
 export async function scanSkills(
   baseDir: string,
-  scope: 'user' | 'project' | 'local'
+  scope: 'user' | 'project' | 'local',
+  source?: 'claude' | 'github'
 ): Promise<SkillReference[]> {
   const skills: SkillReference[] = [];
 
@@ -66,6 +68,7 @@ export async function scanSkills(
             scope,
             validationStatus: 'valid',
             allowedTools: metadata.allowedTools,
+            source, // Track source for project skills (claude or github)
           });
         } else {
           // Invalid frontmatter - log and skip
@@ -365,9 +368,12 @@ async function scanMarketplacePlugin(
  *
  * Scans skills from multiple directories:
  * - User: ~/.claude/skills/
- * - Project: .claude/skills/ (takes precedence over .github/skills/)
- * - Project (alternative): .github/skills/
+ * - Project: .claude/skills/ (source: 'claude')
+ * - Project (alternative): .github/skills/ (source: 'github')
  * - Local: Plugin-provided skills
+ *
+ * Note: Same-named skills from both .claude/skills/ and .github/skills/
+ * are both included (no deduplication) so users can see all available skills.
  *
  * @returns Object containing user, project, and local Skills
  */
@@ -382,19 +388,14 @@ export async function scanAllSkills(): Promise<{
 
   const [user, claudeProjectSkills, githubProjectSkills, pluginSkills] = await Promise.all([
     scanSkills(userDir, 'user'),
-    projectDir ? scanSkills(projectDir, 'project') : Promise.resolve([]),
-    githubDir ? scanSkills(githubDir, 'project') : Promise.resolve([]),
+    projectDir ? scanSkills(projectDir, 'project', 'claude') : Promise.resolve([]),
+    githubDir ? scanSkills(githubDir, 'project', 'github') : Promise.resolve([]),
     scanPluginSkills(),
   ]);
 
-  // Merge project skills: .claude/skills/ takes precedence over .github/skills/
-  const project: SkillReference[] = [...claudeProjectSkills];
-  const existingProjectNames = new Set(claudeProjectSkills.map((s) => s.name));
-  for (const skill of githubProjectSkills) {
-    if (!existingProjectNames.has(skill.name)) {
-      project.push(skill);
-    }
-  }
+  // Merge project skills: include both .claude/skills/ and .github/skills/
+  // (no deduplication - show both even if same-named)
+  const project: SkillReference[] = [...claudeProjectSkills, ...githubProjectSkills];
 
   // Separate plugin skills by their scope
   const local: SkillReference[] = [];

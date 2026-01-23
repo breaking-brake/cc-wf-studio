@@ -530,6 +530,24 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                               ? t('skill.browser.localTab')
                               : t('skill.browser.projectTab')}
                         </span>
+                        {/* Source badge for project skills */}
+                        {skill.scope === 'project' && skill.source && (
+                          <span
+                            style={{
+                              fontSize: '10px',
+                              padding: '2px 6px',
+                              borderRadius: '3px',
+                              backgroundColor:
+                                skill.source === 'github'
+                                  ? '#238636' // GitHub green
+                                  : '#7c3aed', // Purple for Claude Code
+                              color: '#ffffff',
+                              fontWeight: 500,
+                            }}
+                          >
+                            {skill.source === 'github' ? 'GitHub' : 'Claude Code'}
+                          </span>
+                        )}
                       </div>
                       <span
                         style={{
