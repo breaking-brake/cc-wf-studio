@@ -52,6 +52,7 @@ resources/demo_edit_with_ai.gif
 resources/demo_run_workflow.gif
 resources/export-demo.gif
 resources/hero.png
+resources/icon-large.png
 
 # Build config
 biome.json

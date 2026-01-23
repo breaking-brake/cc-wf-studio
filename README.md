@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./resources/icon.png" alt="CC Workflow Studio Icon" width="128">
+  <img src="./resources/icon-large.png" alt="CC Workflow Studio Icon" width="128">
 </p>
 
 # CC Workflow Studio
