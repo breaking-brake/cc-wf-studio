@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./resources/icon.png" alt="CC Workflow Studio Icon" width="128">
+</p>
+
 # CC Workflow Studio
 
 <p align="center">
@@ -62,6 +66,11 @@
   **Note:**
   - Enable **Copilot** option in Toolbar's **More** menu to activate
   - Experimental feature; some workflows may not work as expected
+
+## Getting Started
+
+- Click the <img src="./resources/icon.png" alt="icon" height="16" style="vertical-align: middle"> icon in the top-right corner of the editor
+- Or open Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`) → **"CC Workflow Studio: Open Editor"**
 
 ## Usage Examples
 
