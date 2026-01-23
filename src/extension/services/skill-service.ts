@@ -27,7 +27,7 @@ import { parseSkillFrontmatter, type SkillMetadata } from './yaml-parser';
  *
  * @param baseDir - Base directory to scan (e.g., ~/.claude/skills/)
  * @param scope - Skill scope ('user', 'project', or 'local')
- * @param source - Source directory type for project skills ('claude' or 'github')
+ * @param source - Source directory type for project skills ('claude' or 'copilot')
  * @returns Array of Skill references
  *
  * @example
@@ -39,7 +39,7 @@ import { parseSkillFrontmatter, type SkillMetadata } from './yaml-parser';
 export async function scanSkills(
   baseDir: string,
   scope: 'user' | 'project' | 'local',
-  source?: 'claude' | 'github'
+  source?: 'claude' | 'copilot'
 ): Promise<SkillReference[]> {
   const skills: SkillReference[] = [];
 
@@ -369,7 +369,7 @@ async function scanMarketplacePlugin(
  * Scans skills from multiple directories:
  * - User: ~/.claude/skills/
  * - Project: .claude/skills/ (source: 'claude')
- * - Project (alternative): .github/skills/ (source: 'github')
+ * - Project (alternative): .github/skills/ (source: 'copilot')
  * - Local: Plugin-provided skills
  *
  * Note: Same-named skills from both .claude/skills/ and .github/skills/
@@ -389,7 +389,7 @@ export async function scanAllSkills(): Promise<{
   const [user, claudeProjectSkills, githubProjectSkills, pluginSkills] = await Promise.all([
     scanSkills(userDir, 'user'),
     projectDir ? scanSkills(projectDir, 'project', 'claude') : Promise.resolve([]),
-    githubDir ? scanSkills(githubDir, 'project', 'github') : Promise.resolve([]),
+    githubDir ? scanSkills(githubDir, 'project', 'copilot') : Promise.resolve([]),
     scanPluginSkills(),
   ]);
 

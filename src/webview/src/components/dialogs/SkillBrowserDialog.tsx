@@ -538,14 +538,14 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                               padding: '2px 6px',
                               borderRadius: '3px',
                               backgroundColor:
-                                skill.source === 'github'
-                                  ? '#238636' // GitHub green
-                                  : '#7c3aed', // Purple for Claude Code
+                                skill.source === 'copilot'
+                                  ? '#6366f1' // Copilot blue-purple
+                                  : '#c2410c', // Claude Code dark orange
                               color: '#ffffff',
                               fontWeight: 500,
                             }}
                           >
-                            {skill.source === 'github' ? 'GitHub' : 'Claude Code'}
+                            {skill.source === 'copilot' ? 'Copilot' : 'Claude Code'}
                           </span>
                         )}
                       </div>
