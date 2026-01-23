@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { browseSkills, createSkill } from '../../services/skill-browser-service';
 import { useWorkflowStore } from '../../stores/workflow-store';
+import { AIProviderBadge, type AIProviderType } from '../common/AIProviderBadge';
 import { type CreateSkillFormData, SkillCreationDialog } from './SkillCreationDialog';
 
 interface SkillBrowserDialogProps {
@@ -533,21 +534,7 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                         </span>
                         {/* Source badge for project skills */}
                         {skill.scope === 'project' && skill.source && (
-                          <span
-                            style={{
-                              fontSize: '10px',
-                              padding: '2px 6px',
-                              borderRadius: '3px',
-                              backgroundColor:
-                                skill.source === 'copilot'
-                                  ? '#BC3FBC' // Copilot purple
-                                  : '#DA7758', // Claude Code orange
-                              color: '#ffffff',
-                              fontWeight: 500,
-                            }}
-                          >
-                            {skill.source === 'copilot' ? 'Copilot' : 'Claude Code'}
-                          </span>
+                          <AIProviderBadge provider={skill.source as AIProviderType} size="small" />
                         )}
                       </div>
                       <span

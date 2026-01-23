@@ -11,6 +11,7 @@ import type { SkillNodeData } from '@shared/types/workflow-definition';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import { useTranslation } from '../../i18n/i18n-context';
+import { AIProviderBadge, type AIProviderType } from '../common/AIProviderBadge';
 import { DeleteButton } from './DeleteButton';
 
 /**
@@ -160,20 +161,7 @@ export const SkillNodeComponent: React.FC<NodeProps<SkillNodeData>> = React.memo
           </div>
           {/* Source Badge for project skills */}
           {data.scope === 'project' && data.source && (
-            <div
-              style={{
-                fontSize: '10px',
-                color: '#ffffff',
-                backgroundColor: data.source === 'copilot' ? '#BC3FBC' : '#DA7758',
-                padding: '2px 6px',
-                borderRadius: '3px',
-                display: 'inline-block',
-                fontWeight: 600,
-                letterSpacing: '0.3px',
-              }}
-            >
-              {data.source === 'copilot' ? 'Copilot' : 'Claude Code'}
-            </div>
+            <AIProviderBadge provider={data.source as AIProviderType} size="small" />
           )}
         </div>
 
