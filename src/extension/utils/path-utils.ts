@@ -62,6 +62,23 @@ export function getProjectSkillsDir(): string | null {
 }
 
 /**
+ * Get the GitHub Skills directory path
+ *
+ * @returns Absolute path to .github/skills/ in workspace root, or null if no workspace
+ *
+ * @example
+ * // Unix: /workspace/myproject/.github/skills
+ * // Windows: C:\workspace\myproject\.github\skills
+ */
+export function getGithubSkillsDir(): string | null {
+  const workspaceRoot = getWorkspaceRoot();
+  if (!workspaceRoot) {
+    return null;
+  }
+  return path.join(workspaceRoot, '.github', 'skills');
+}
+
+/**
  * Get the installed plugins JSON path
  *
  * @returns Absolute path to ~/.claude/plugins/installed_plugins.json

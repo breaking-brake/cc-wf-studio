@@ -11,6 +11,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { CreateSkillPayload, SkillReference } from '../../shared/types/messages';
 import {
+  getGithubSkillsDir,
   getInstalledPluginsJsonPath,
   getKnownMarketplacesJsonPath,
   getProjectSkillsDir,
@@ -362,6 +363,12 @@ async function scanMarketplacePlugin(
 /**
  * Scan user, project, and plugin Skills
  *
+ * Scans skills from multiple directories:
+ * - User: ~/.claude/skills/
+ * - Project: .claude/skills/ (takes precedence over .github/skills/)
+ * - Project (alternative): .github/skills/
+ * - Local: Plugin-provided skills
+ *
  * @returns Object containing user, project, and local Skills
  */
 export async function scanAllSkills(): Promise<{
@@ -371,12 +378,23 @@ export async function scanAllSkills(): Promise<{
 }> {
   const userDir = getUserSkillsDir();
   const projectDir = getProjectSkillsDir();
+  const githubDir = getGithubSkillsDir();
 
-  const [user, project, pluginSkills] = await Promise.all([
+  const [user, claudeProjectSkills, githubProjectSkills, pluginSkills] = await Promise.all([
     scanSkills(userDir, 'user'),
     projectDir ? scanSkills(projectDir, 'project') : Promise.resolve([]),
+    githubDir ? scanSkills(githubDir, 'project') : Promise.resolve([]),
     scanPluginSkills(),
   ]);
+
+  // Merge project skills: .claude/skills/ takes precedence over .github/skills/
+  const project: SkillReference[] = [...claudeProjectSkills];
+  const existingProjectNames = new Set(claudeProjectSkills.map((s) => s.name));
+  for (const skill of githubProjectSkills) {
+    if (!existingProjectNames.has(skill.name)) {
+      project.push(skill);
+    }
+  }
 
   // Separate plugin skills by their scope
   const local: SkillReference[] = [];
