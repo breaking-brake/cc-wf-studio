@@ -9,6 +9,7 @@ import type {
   AiCliProvider,
   ClaudeModel,
   CodexModel,
+  CodexReasoningEffort,
   CopilotModel,
   SkillReference,
 } from '../../shared/types/messages';
@@ -246,6 +247,7 @@ export const DEFAULT_REFINEMENT_TIMEOUT_MS = 90000;
  * @param provider - AI CLI provider to use (default: 'claude-code')
  * @param copilotModel - Copilot model to use when provider is 'copilot' (default: 'gpt-4o')
  * @param codexModel - Codex model to use when provider is 'codex' (default: '' = inherit)
+ * @param codexReasoningEffort - Reasoning effort level for Codex (default: 'minimal')
  * @returns Refinement result with success status and refined workflow or error
  */
 export async function refineWorkflow(
@@ -263,7 +265,8 @@ export async function refineWorkflow(
   previousValidationErrors?: ValidationErrorInfo[],
   provider: AiCliProvider = 'claude-code',
   copilotModel: CopilotModel = 'gpt-4o',
-  codexModel: CodexModel = ''
+  codexModel: CodexModel = '',
+  codexReasoningEffort: CodexReasoningEffort = 'low'
 ): Promise<RefinementResult> {
   const startTime = Date.now();
 
@@ -394,7 +397,8 @@ export async function refineWorkflow(
           copilotModel,
           allowedTools,
           conversationHistory.sessionId,
-          codexModel
+          codexModel,
+          codexReasoningEffort
         )
       : await executeAi(
           prompt,
@@ -405,7 +409,8 @@ export async function refineWorkflow(
           model,
           copilotModel,
           allowedTools,
-          codexModel
+          codexModel,
+          codexReasoningEffort
         );
 
     // Track whether session was reconnected due to fallback
@@ -448,7 +453,8 @@ export async function refineWorkflow(
               copilotModel,
               allowedTools,
               undefined, // No session ID for retry
-              codexModel
+              codexModel,
+              codexReasoningEffort
             )
           : await executeAi(
               prompt,
@@ -459,7 +465,8 @@ export async function refineWorkflow(
               model,
               copilotModel,
               allowedTools,
-              codexModel
+              codexModel,
+              codexReasoningEffort
             );
       }
     }
@@ -1156,6 +1163,7 @@ function validateSubAgentFlowNodes(innerWorkflow: InnerWorkflow): {
  * @param provider - AI CLI provider to use (default: 'claude-code')
  * @param copilotModel - Copilot model to use when provider is 'copilot' (default: 'gpt-4o')
  * @param codexModel - Codex model to use when provider is 'codex' (default: '' = inherit)
+ * @param codexReasoningEffort - Reasoning effort level for Codex (default: 'minimal')
  * @returns SubAgentFlow refinement result
  */
 export async function refineSubAgentFlow(
@@ -1171,7 +1179,8 @@ export async function refineSubAgentFlow(
   allowedTools?: string[],
   provider: AiCliProvider = 'claude-code',
   copilotModel: CopilotModel = 'gpt-4o',
-  codexModel: CodexModel = ''
+  codexModel: CodexModel = '',
+  codexReasoningEffort: CodexReasoningEffort = 'low'
 ): Promise<SubAgentFlowRefinementResult> {
   const startTime = Date.now();
 
@@ -1274,7 +1283,8 @@ export async function refineSubAgentFlow(
       model,
       copilotModel,
       allowedTools,
-      codexModel
+      codexModel,
+      codexReasoningEffort
     );
 
     // Track whether session was reconnected due to provider switch

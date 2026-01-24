@@ -9,6 +9,7 @@ import type {
   AiCliProvider,
   ClaudeModel,
   CodexModel,
+  CodexReasoningEffort,
   CopilotModel,
   ExtensionMessage,
   RefinementClarificationPayload,
@@ -113,7 +114,8 @@ export function refineWorkflow(
   previousValidationErrors?: ValidationErrorInfo[],
   provider: AiCliProvider = 'claude-code',
   copilotModel: CopilotModel = 'gpt-4o',
-  codexModel: CodexModel = ''
+  codexModel: CodexModel = '',
+  codexReasoningEffort: CodexReasoningEffort = 'low'
 ): Promise<RefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
@@ -173,6 +175,7 @@ export function refineWorkflow(
       provider,
       copilotModel,
       codexModel,
+      codexReasoningEffort,
     };
 
     vscode.postMessage({
@@ -280,7 +283,8 @@ export function refineSubAgentFlow(
   allowedTools?: string[],
   provider: AiCliProvider = 'claude-code',
   copilotModel: CopilotModel = 'gpt-4o',
-  codexModel: CodexModel = ''
+  codexModel: CodexModel = '',
+  codexReasoningEffort: CodexReasoningEffort = 'low'
 ): Promise<SubAgentFlowRefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
@@ -334,6 +338,7 @@ export function refineSubAgentFlow(
       provider,
       copilotModel,
       codexModel,
+      codexReasoningEffort,
     };
 
     vscode.postMessage({

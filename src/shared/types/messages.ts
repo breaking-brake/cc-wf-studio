@@ -296,6 +296,13 @@ export type CopilotModel = string;
 export type CodexModel = string;
 
 /**
+ * Codex CLI reasoning effort levels
+ * Controls how much reasoning effort the model applies
+ * Note: Only 'low', 'medium', 'high' are supported across all Codex models
+ */
+export type CodexReasoningEffort = 'low' | 'medium' | 'high';
+
+/**
  * Information about a Copilot model available via VS Code LM API
  */
 export interface CopilotModelInfo {
@@ -354,6 +361,8 @@ export interface RefineWorkflowPayload {
   copilotModel?: CopilotModel;
   /** Codex model to use when provider is 'codex' (default: '' = inherit from CLI config) */
   codexModel?: CodexModel;
+  /** Codex reasoning effort level (default: 'low') */
+  codexReasoningEffort?: CodexReasoningEffort;
 }
 
 export interface RefinementSuccessPayload {

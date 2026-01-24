@@ -9,7 +9,7 @@
  */
 
 import { type ChildProcess, spawn as nodeSpawn } from 'node:child_process';
-import type { CodexModel } from '../../shared/types/messages';
+import type { CodexModel, CodexReasoningEffort } from '../../shared/types/messages';
 import { log } from '../extension';
 import { clearCodexCliPathCache, getCodexSpawnCommand } from './codex-cli-path';
 
@@ -68,6 +68,7 @@ export async function isCodexCliAvailable(): Promise<{
  * @param requestId - Optional request ID for cancellation support
  * @param workingDirectory - Working directory for CLI execution
  * @param model - Codex model to use (default: '' = inherit from CLI config)
+ * @param reasoningEffort - Reasoning effort level (default: 'minimal')
  * @returns Execution result with success status and output/error
  */
 export async function executeCodexCLI(
@@ -75,7 +76,8 @@ export async function executeCodexCLI(
   timeoutMs = 60000,
   requestId?: string,
   workingDirectory?: string,
-  model: CodexModel = DEFAULT_CODEX_MODEL
+  model: CodexModel = DEFAULT_CODEX_MODEL,
+  reasoningEffort: CodexReasoningEffort = 'low'
 ): Promise<CodexExecutionResult> {
   const startTime = Date.now();
 
@@ -83,6 +85,7 @@ export async function executeCodexCLI(
     promptLength: prompt.length,
     timeoutMs,
     model,
+    reasoningEffort,
     cwd: workingDirectory ?? process.cwd(),
   });
 
@@ -107,6 +110,10 @@ export async function executeCodexCLI(
     const args = ['exec', '--json', '--skip-git-repo-check'];
     if (model) {
       args.push('-m', model);
+    }
+    // Add reasoning effort configuration
+    if (reasoningEffort) {
+      args.push('-c', `model_reasoning_effort="${reasoningEffort}"`);
     }
     args.push('--full-auto', '-');
 
@@ -276,6 +283,7 @@ export type StreamingProgressCallback = (
  * @param requestId - Optional request ID for cancellation support
  * @param workingDirectory - Working directory for CLI execution
  * @param model - Codex model to use (default: '' = inherit from CLI config)
+ * @param reasoningEffort - Reasoning effort level (default: 'minimal')
  * @returns Execution result with success status and output/error
  */
 export async function executeCodexCLIStreaming(
@@ -284,7 +292,8 @@ export async function executeCodexCLIStreaming(
   timeoutMs = 60000,
   requestId?: string,
   workingDirectory?: string,
-  model: CodexModel = DEFAULT_CODEX_MODEL
+  model: CodexModel = DEFAULT_CODEX_MODEL,
+  reasoningEffort: CodexReasoningEffort = 'low'
 ): Promise<CodexExecutionResult> {
   const startTime = Date.now();
 
@@ -292,6 +301,7 @@ export async function executeCodexCLIStreaming(
     promptLength: prompt.length,
     timeoutMs,
     model,
+    reasoningEffort,
     cwd: workingDirectory ?? process.cwd(),
   });
 
@@ -320,6 +330,10 @@ export async function executeCodexCLIStreaming(
     const args = ['exec', '--json', '--skip-git-repo-check'];
     if (model) {
       args.push('-m', model);
+    }
+    // Add reasoning effort configuration
+    if (reasoningEffort) {
+      args.push('-c', `model_reasoning_effort="${reasoningEffort}"`);
     }
     args.push('--full-auto', '-');
 
@@ -443,7 +457,7 @@ export async function executeCodexCLIStreaming(
             // Codex CLI uses item.text for agent_message type
             // item.text may be a JSON string containing the actual response
             if (item.text && typeof item.text === 'string') {
-              let textContent = item.text;
+              const textContent = item.text;
               let displayContent = item.text;
 
               // Try to parse item.text as JSON (Codex often returns JSON in text field)
@@ -697,9 +711,9 @@ function extractJsonResponse(text: string): string {
   // Find ALL occurrences of JSON objects with {"status": pattern
   const statusPattern = /\{"status"\s*:\s*"(?:success|clarification|error)"/g;
   let lastValidJson = '';
-  let match: RegExpExecArray | null;
+  let match: RegExpExecArray | null = statusPattern.exec(text);
 
-  while ((match = statusPattern.exec(text)) !== null) {
+  while (match !== null) {
     const jsonStart = match.index;
     const potentialJson = text.substring(jsonStart);
 
@@ -724,6 +738,7 @@ function extractJsonResponse(text: string): string {
         // Skip invalid JSON
       }
     }
+    match = statusPattern.exec(text);
   }
 
   if (lastValidJson) {

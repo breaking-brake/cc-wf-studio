@@ -58,6 +58,7 @@ export async function handleRefineWorkflow(
     provider = 'claude-code',
     copilotModel = 'gpt-4o',
     codexModel = '',
+    codexReasoningEffort = 'low',
   } = payload;
   const startTime = Date.now();
 
@@ -81,6 +82,7 @@ export async function handleRefineWorkflow(
     provider,
     copilotModel,
     codexModel,
+    codexReasoningEffort,
   });
 
   // Route to SubAgentFlow refinement if targetType is 'subAgentFlow'
@@ -150,7 +152,8 @@ export async function handleRefineWorkflow(
       previousValidationErrors,
       provider,
       copilotModel,
-      codexModel
+      codexModel,
+      codexReasoningEffort
     );
 
     // Check if AI is asking for clarification
@@ -323,6 +326,7 @@ async function handleRefineSubAgentFlow(
     provider = 'claude-code',
     copilotModel = 'gpt-4o',
     codexModel = '',
+    codexReasoningEffort = 'low',
   } = payload;
   const startTime = Date.now();
 
@@ -343,6 +347,7 @@ async function handleRefineSubAgentFlow(
     provider,
     copilotModel,
     codexModel,
+    codexReasoningEffort,
   });
 
   // Validate subAgentFlowId
@@ -420,7 +425,8 @@ async function handleRefineSubAgentFlow(
       allowedTools,
       provider,
       copilotModel,
-      codexModel
+      codexModel,
+      codexReasoningEffort
     );
 
     // Check if AI is asking for clarification

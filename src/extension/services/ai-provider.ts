@@ -13,6 +13,7 @@ import type {
   AiCliProvider,
   ClaudeModel,
   CodexModel,
+  CodexReasoningEffort,
   CopilotModel,
 } from '../../shared/types/messages';
 import { log } from '../extension';
@@ -92,6 +93,7 @@ export async function isProviderAvailable(provider: AiCliProvider): Promise<Prov
  * @param copilotModel - Copilot用モデル (provider='copilot'時のみ使用)
  * @param allowedTools - 許可ツールリスト（claude-code用）
  * @param codexModel - Codex用モデル (provider='codex'時のみ使用)
+ * @param codexReasoningEffort - Codex用推論努力レベル (provider='codex'時のみ使用)
  * @returns 実行結果
  */
 export async function executeAi(
@@ -103,13 +105,15 @@ export async function executeAi(
   model?: ClaudeModel,
   copilotModel?: CopilotModel,
   allowedTools?: string[],
-  codexModel?: CodexModel
+  codexModel?: CodexModel,
+  codexReasoningEffort?: CodexReasoningEffort
 ): Promise<ClaudeCodeExecutionResult> {
   log('INFO', 'executeAi called', {
     provider,
     model,
     copilotModel,
     codexModel,
+    codexReasoningEffort,
     promptLength: prompt.length,
     requestId,
   });
@@ -121,7 +125,14 @@ export async function executeAi(
 
   if (provider === 'codex') {
     // Codex CLIを使用
-    return executeCodexCLI(prompt, timeoutMs, requestId, workingDirectory, codexModel);
+    return executeCodexCLI(
+      prompt,
+      timeoutMs,
+      requestId,
+      workingDirectory,
+      codexModel,
+      codexReasoningEffort
+    );
   }
 
   // Default: claude-code - Claude Code用モデルを使用
@@ -142,6 +153,7 @@ export async function executeAi(
  * @param allowedTools - 許可ツールリスト（claude-code用）
  * @param resumeSessionId - セッション継続用ID（claude-code用、copilot/codexでは無視）
  * @param codexModel - Codex用モデル (provider='codex'時のみ使用)
+ * @param codexReasoningEffort - Codex用推論努力レベル (provider='codex'時のみ使用)
  * @returns 実行結果
  */
 export async function executeAiStreaming(
@@ -155,13 +167,15 @@ export async function executeAiStreaming(
   copilotModel?: CopilotModel,
   allowedTools?: string[],
   resumeSessionId?: string,
-  codexModel?: CodexModel
+  codexModel?: CodexModel,
+  codexReasoningEffort?: CodexReasoningEffort
 ): Promise<ClaudeCodeExecutionResult> {
   log('INFO', 'executeAiStreaming called', {
     provider,
     model,
     copilotModel,
     codexModel,
+    codexReasoningEffort,
     promptLength: prompt.length,
     requestId,
     resumeSessionId: resumeSessionId ? '(present)' : undefined,
@@ -188,7 +202,8 @@ export async function executeAiStreaming(
       timeoutMs,
       requestId,
       workingDirectory,
-      codexModel
+      codexModel,
+      codexReasoningEffort
     );
   }
 

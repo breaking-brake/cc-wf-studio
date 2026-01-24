@@ -99,6 +99,7 @@ export function RefinementChatPanel({
     selectedModel,
     selectedCopilotModel,
     selectedCodexModel,
+    selectedCodexReasoningEffort,
     allowedTools,
     selectedProvider,
   } = useRefinementStore();
@@ -175,7 +176,8 @@ export function RefinementChatPanel({
           allowedTools,
           selectedProvider,
           selectedCopilotModel,
-          selectedCodexModel
+          selectedCodexModel,
+          selectedCodexReasoningEffort
         );
 
         if (result.type === 'success') {
@@ -263,7 +265,8 @@ export function RefinementChatPanel({
           undefined, // previousValidationErrors
           selectedProvider,
           selectedCopilotModel,
-          selectedCodexModel
+          selectedCodexModel,
+          selectedCodexReasoningEffort
         );
 
         if (result.type === 'success') {
@@ -275,11 +278,14 @@ export function RefinementChatPanel({
             updateMessageContent(aiMessageId, latestExplanatoryText);
             updateMessageLoadingState(aiMessageId, false);
 
-            // Add completion message as new bubble
-            const completionMessageId = `ai-completion-${Date.now()}-${Math.random()}`;
-            addLoadingAiMessage(completionMessageId);
-            updateMessageContent(completionMessageId, result.payload.aiMessage.content);
-            updateMessageLoadingState(completionMessageId, false);
+            // Only add completion message as new bubble if it differs from explanatory text
+            // (Codex may return the same message for both, causing duplicates)
+            if (result.payload.aiMessage.content !== latestExplanatoryText) {
+              const completionMessageId = `ai-completion-${Date.now()}-${Math.random()}`;
+              addLoadingAiMessage(completionMessageId);
+              updateMessageContent(completionMessageId, result.payload.aiMessage.content);
+              updateMessageLoadingState(completionMessageId, false);
+            }
 
             // Preserve frontend messages (don't overwrite with server history)
             // Pass sessionId and sessionReconnected for session status tracking
@@ -376,7 +382,8 @@ export function RefinementChatPanel({
           allowedTools,
           selectedProvider,
           selectedCopilotModel,
-          selectedCodexModel
+          selectedCodexModel,
+          selectedCodexReasoningEffort
         );
 
         if (result.type === 'success') {
@@ -460,7 +467,8 @@ export function RefinementChatPanel({
           previousValidationErrors,
           selectedProvider,
           selectedCopilotModel,
-          selectedCodexModel
+          selectedCodexModel,
+          selectedCodexReasoningEffort
         );
 
         if (result.type === 'success') {
@@ -472,11 +480,14 @@ export function RefinementChatPanel({
             updateMessageContent(aiMessageId, latestExplanatoryText);
             updateMessageLoadingState(aiMessageId, false);
 
-            // Add completion message as new bubble
-            const completionMessageId = `ai-completion-${Date.now()}-${Math.random()}`;
-            addLoadingAiMessage(completionMessageId);
-            updateMessageContent(completionMessageId, result.payload.aiMessage.content);
-            updateMessageLoadingState(completionMessageId, false);
+            // Only add completion message as new bubble if it differs from explanatory text
+            // (Codex may return the same message for both, causing duplicates)
+            if (result.payload.aiMessage.content !== latestExplanatoryText) {
+              const completionMessageId = `ai-completion-${Date.now()}-${Math.random()}`;
+              addLoadingAiMessage(completionMessageId);
+              updateMessageContent(completionMessageId, result.payload.aiMessage.content);
+              updateMessageLoadingState(completionMessageId, false);
+            }
 
             // Preserve frontend messages (don't overwrite with server history)
             // Pass sessionId for session continuation support

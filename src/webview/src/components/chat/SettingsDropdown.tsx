@@ -26,7 +26,11 @@ import {
 import { useEffect } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { openExternalUrl } from '../../services/vscode-bridge';
-import { AVAILABLE_TOOLS, useRefinementStore } from '../../stores/refinement-store';
+import {
+  AVAILABLE_TOOLS,
+  CODEX_REASONING_EFFORT_OPTIONS,
+  useRefinementStore,
+} from '../../stores/refinement-store';
 
 const MODEL_PRESETS: { value: ClaudeModel; label: string }[] = [
   { value: 'sonnet', label: 'Sonnet' },
@@ -63,6 +67,8 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
     setSelectedCopilotModel,
     selectedCodexModel,
     setSelectedCodexModel,
+    selectedCodexReasoningEffort,
+    setSelectedCodexReasoningEffort,
     allowedTools,
     toggleAllowedTool,
     resetAllowedTools,
@@ -412,19 +418,48 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                       gap: '8px',
                     }}
                   >
-                    <span
+                    <div
                       style={{
-                        fontSize: `${FONT_SIZES.small}px`,
-                        color: 'var(--vscode-descriptionForeground)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
                       }}
                     >
-                      Model name (e.g., o3, o4-mini)
-                    </span>
+                      <span
+                        style={{
+                          fontSize: `${FONT_SIZES.small}px`,
+                          color: 'var(--vscode-descriptionForeground)',
+                        }}
+                      >
+                        Model
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openExternalUrl('https://developers.openai.com/codex/models/');
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '2px',
+                          fontSize: '10px',
+                          color: 'var(--vscode-textLink-foreground)',
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <ExternalLink size={10} />
+                        <span>Model list</span>
+                      </button>
+                    </div>
                     <input
                       type="text"
                       value={selectedCodexModel}
                       onChange={(e) => setSelectedCodexModel(e.target.value)}
-                      placeholder="o3"
+                      placeholder="gpt-5.1-codex-mini"
                       style={{
                         padding: '4px 8px',
                         fontSize: `${FONT_SIZES.small}px`,
@@ -433,10 +468,68 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                         border: '1px solid var(--vscode-input-border)',
                         borderRadius: '4px',
                         outline: 'none',
-                        width: '120px',
+                        width: '140px',
                       }}
                       onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => {
+                        // Prevent arrow keys from being captured by menu navigation
+                        if (
+                          [
+                            'ArrowLeft',
+                            'ArrowRight',
+                            'ArrowUp',
+                            'ArrowDown',
+                            'Home',
+                            'End',
+                          ].includes(e.key)
+                        ) {
+                          e.stopPropagation();
+                        }
+                      }}
                     />
+                    {/* Reasoning Effort Selector */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginTop: '8px',
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: `${FONT_SIZES.small}px`,
+                          color: 'var(--vscode-descriptionForeground)',
+                        }}
+                      >
+                        Reasoning
+                      </span>
+                      <select
+                        value={selectedCodexReasoningEffort}
+                        onChange={(e) =>
+                          setSelectedCodexReasoningEffort(
+                            e.target.value as typeof selectedCodexReasoningEffort
+                          )
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          padding: '4px 8px',
+                          fontSize: `${FONT_SIZES.small}px`,
+                          backgroundColor: 'var(--vscode-input-background)',
+                          color: 'var(--vscode-input-foreground)',
+                          border: '1px solid var(--vscode-input-border)',
+                          borderRadius: '4px',
+                          outline: 'none',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {CODEX_REASONING_EFFORT_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 ) : isFetchingCopilotModels ? (
                   <div
