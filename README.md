@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <strong>Accelerate Claude Code/GitHub Copilot<a href="#github-copilot-support">(※)</a> automation with a visual workflow editor</strong>
+  <strong>Accelerate Claude Code/GitHub Copilot<a href="#github-copilot-support">(※1)</a>/OpenAI Codex<a href="#openai-codex-support">(※2)</a> automation with a visual workflow editor</strong>
 </p>
 
 <p align="center">
@@ -58,13 +58,22 @@
 
 ⚡ **One-Click Export & Run** - Export workflows to ready-to-use formats and run directly from the editor:
   - **Claude Code**: `.claude/agents/` and `.claude/commands/`
-  - **GitHub Copilot Chat**<a href="#github-copilot-support">(※)</a>: `.github/prompts/`
-  - **GitHub Copilot CLI**<a href="#github-copilot-support">(※)</a>: `.github/skills/`
+  - **GitHub Copilot Chat**<a href="#github-copilot-support">(※1)</a>: `.github/prompts/`
+  - **GitHub Copilot CLI**<a href="#github-copilot-support">(※1)</a>: `.github/skills/`
+  - **OpenAI Codex CLI**<a href="#openai-codex-support">(※2)</a>: `.codex/skills/`
 
-<span id="github-copilot-support">🤖</span> **GitHub Copilot Support (β)** - Export & Run workflows to Copilot Chat or Copilot CLI, and use Copilot as AI provider for Edit with AI.
+<span id="github-copilot-support">🤖</span> **GitHub Copilot Support (※1 β)** - Export & Run workflows to Copilot Chat or Copilot CLI, and use Copilot as AI provider for Edit with AI.
 
   **Note:**
   - Enable **Copilot** option in Toolbar's **More** menu to activate
+  - Requires [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) extension or [Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli) to be installed
+  - Experimental feature; some workflows may not work as expected
+
+<span id="openai-codex-support">🤖</span> **OpenAI Codex CLI Support (※2 β)** - Export & Run workflows to Codex CLI (Skills format).
+
+  **Note:**
+  - Enable **Codex** option in Toolbar's **More** menu to activate
+  - Requires [Codex CLI](https://github.com/openai/codex) to be installed
   - Experimental feature; some workflows may not work as expected
 
 ## Getting Started
