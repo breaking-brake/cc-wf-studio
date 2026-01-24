@@ -101,3 +101,47 @@ export function executeCopilotCliInTerminal(
     terminal,
   };
 }
+
+/**
+ * Options for executing Codex CLI skill command
+ */
+export interface CodexCliExecutionOptions {
+  /** Skill name (the workflow name as .codex/skills/{name}/SKILL.md) */
+  skillName: string;
+  /** Working directory for the terminal */
+  workingDirectory: string;
+}
+
+/**
+ * Execute Codex CLI with skill in a new VSCode integrated terminal
+ *
+ * Creates a new terminal and executes:
+ *   codex "$skill-name"
+ *
+ * Note: Codex CLI uses $skill-name format to invoke skills in interactive mode
+ *
+ * @param options - Codex CLI execution options
+ * @returns Terminal execution result
+ */
+export function executeCodexCliInTerminal(
+  options: CodexCliExecutionOptions
+): TerminalExecutionResult {
+  const terminalName = `Codex: ${options.skillName}`;
+
+  // Create a new terminal
+  const terminal = vscode.window.createTerminal({
+    name: terminalName,
+    cwd: options.workingDirectory,
+  });
+
+  // Show the terminal and focus on it
+  terminal.show(true);
+
+  // Execute: codex "$skill-name" (interactive mode)
+  terminal.sendText(`codex "\\$${options.skillName}"`);
+
+  return {
+    terminalName,
+    terminal,
+  };
+}

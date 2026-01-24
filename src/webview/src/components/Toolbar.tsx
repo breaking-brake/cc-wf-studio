@@ -16,9 +16,11 @@ import {
   generateWorkflowName,
 } from '../services/ai-generation-service';
 import {
+  exportForCodexCli,
   exportForCopilot,
   exportForCopilotCli,
   runAsSlashCommand,
+  runForCodexCli,
   runForCopilot,
   runForCopilotCli,
   saveWorkflow,
@@ -94,6 +96,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     loadConversationHistory,
     isCopilotEnabled,
     toggleCopilotEnabled,
+    isCodexEnabled,
+    toggleCodexEnabled,
   } = useRefinementStore();
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -105,6 +109,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   // Copilot integration (Beta)
   const [isCopilotExporting, setIsCopilotExporting] = useState(false);
   const [isCopilotRunning, setIsCopilotRunning] = useState(false);
+  // Codex integration (Beta)
+  const [isCodexExporting, setIsCodexExporting] = useState(false);
+  const [isCodexRunning, setIsCodexRunning] = useState(false);
   // Copilot Beta feature toggle is now managed by refinement-store
   // Copilot execution mode (persisted in localStorage, default: 'cli')
   const [copilotExecutionMode, setCopilotExecutionMode] = useState<CopilotExecutionMode>(() => {
@@ -513,6 +520,104 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     }
   };
 
+  // ============================================================================
+  // Codex Integration Handlers (Beta)
+  // ============================================================================
+
+  const handleCodexExport = async () => {
+    if (!workflowName.trim()) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
+      });
+      return;
+    }
+
+    setIsCodexExporting(true);
+    try {
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
+        useWorkflowStore.getState();
+
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        workflowDescription || undefined,
+        undefined,
+        subAgentFlows,
+        slashCommandOptions
+      );
+
+      validateWorkflow(workflow);
+
+      const result = await exportForCodexCli(workflow);
+      console.log('Workflow exported as skill for Codex CLI:', result.skillPath);
+    } catch (error) {
+      onError({
+        code: 'EXPORT_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to export for Codex',
+        details: error,
+      });
+    } finally {
+      setIsCodexExporting(false);
+    }
+  };
+
+  const handleCodexRun = async () => {
+    if (!workflowName.trim()) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
+      });
+      return;
+    }
+
+    setIsCodexRunning(true);
+    try {
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
+        useWorkflowStore.getState();
+
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        workflowDescription || undefined,
+        undefined,
+        subAgentFlows,
+        slashCommandOptions
+      );
+
+      validateWorkflow(workflow);
+
+      const result = await runForCodexCli(workflow);
+      console.log('Workflow run for Codex CLI:', result.workflowName);
+    } catch (error) {
+      onError({
+        code: 'RUN_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to run for Codex',
+        details: error,
+      });
+    } finally {
+      setIsCodexRunning(false);
+    }
+  };
+
   // Handle AI workflow name generation
   const handleGenerateWorkflowName = useCallback(async () => {
     const currentRequestId = `gen-name-${Date.now()}`;
@@ -762,8 +867,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           }}
         />
 
-        {/* Slash Command Section - Layout changes based on Copilot Beta enabled */}
-        {isCopilotEnabled ? (
+        {/* Slash Command Section - Layout changes based on Copilot/Codex Beta enabled */}
+        {isCopilotEnabled || isCodexEnabled ? (
           /* Combined layout when Copilot Beta is enabled */
           <div
             style={{
@@ -888,97 +993,193 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 </div>
               </div>
 
-              {/* Vertical Divider */}
-              <div
-                style={{
-                  width: '1px',
-                  backgroundColor: 'var(--vscode-panel-border)',
-                  margin: '0 8px',
-                  alignSelf: 'stretch',
-                }}
-              />
-
-              {/* Copilot Column */}
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '2px',
-                }}
-              >
-                <span
+              {/* Vertical Divider - shown when Copilot is enabled */}
+              {isCopilotEnabled && (
+                <div
                   style={{
-                    fontSize: '9px',
-                    color: 'var(--vscode-descriptionForeground)',
-                    whiteSpace: 'nowrap',
+                    width: '1px',
+                    backgroundColor: 'var(--vscode-panel-border)',
+                    margin: '0 8px',
+                    alignSelf: 'stretch',
+                  }}
+                />
+              )}
+
+              {/* Copilot Column - shown when Copilot is enabled */}
+              {isCopilotEnabled && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
                   }}
                 >
-                  Copilot
-                </span>
-                <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                  <div style={{ display: 'flex' }}>
-                    <button
-                      type="button"
-                      onClick={handleCopilotExport}
-                      disabled={isCopilotExporting}
-                      style={{
-                        padding: isCompact ? '4px 8px' : '4px 12px',
-                        backgroundColor: 'var(--vscode-button-background)',
-                        color: 'var(--vscode-button-foreground)',
-                        border: 'none',
-                        borderRadius: '2px 0 0 2px',
-                        cursor: isCopilotExporting ? 'not-allowed' : 'pointer',
-                        fontSize: '13px',
-                        opacity: isCopilotExporting ? 0.6 : 1,
-                        whiteSpace: 'nowrap',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        borderRight: '1px solid var(--vscode-button-foreground)',
-                      }}
-                    >
-                      {isCompact ? (
-                        <FileDown size={16} />
-                      ) : isCopilotExporting ? (
-                        t('toolbar.exporting')
-                      ) : (
-                        t('toolbar.export')
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCopilotRun}
-                      disabled={isCopilotRunning}
-                      style={{
-                        padding: isCompact ? '4px 8px' : '4px 12px',
-                        backgroundColor: 'var(--vscode-button-background)',
-                        color: 'var(--vscode-button-foreground)',
-                        border: 'none',
-                        borderRadius: '0 2px 2px 0',
-                        cursor: isCopilotRunning ? 'not-allowed' : 'pointer',
-                        fontSize: '13px',
-                        opacity: isCopilotRunning ? 0.6 : 1,
-                        whiteSpace: 'nowrap',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                      }}
-                    >
-                      {isCompact ? (
-                        <Play size={16} />
-                      ) : isCopilotRunning ? (
-                        t('toolbar.running')
-                      ) : (
-                        t('toolbar.run')
-                      )}
-                    </button>
+                  <span
+                    style={{
+                      fontSize: '9px',
+                      color: 'var(--vscode-descriptionForeground)',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Copilot
+                  </span>
+                  <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex' }}>
+                      <button
+                        type="button"
+                        onClick={handleCopilotExport}
+                        disabled={isCopilotExporting}
+                        style={{
+                          padding: isCompact ? '4px 8px' : '4px 12px',
+                          backgroundColor: 'var(--vscode-button-background)',
+                          color: 'var(--vscode-button-foreground)',
+                          border: 'none',
+                          borderRadius: '2px 0 0 2px',
+                          cursor: isCopilotExporting ? 'not-allowed' : 'pointer',
+                          fontSize: '13px',
+                          opacity: isCopilotExporting ? 0.6 : 1,
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          borderRight: '1px solid var(--vscode-button-foreground)',
+                        }}
+                      >
+                        {isCompact ? (
+                          <FileDown size={16} />
+                        ) : isCopilotExporting ? (
+                          t('toolbar.exporting')
+                        ) : (
+                          t('toolbar.export')
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCopilotRun}
+                        disabled={isCopilotRunning}
+                        style={{
+                          padding: isCompact ? '4px 8px' : '4px 12px',
+                          backgroundColor: 'var(--vscode-button-background)',
+                          color: 'var(--vscode-button-foreground)',
+                          border: 'none',
+                          borderRadius: '0 2px 2px 0',
+                          cursor: isCopilotRunning ? 'not-allowed' : 'pointer',
+                          fontSize: '13px',
+                          opacity: isCopilotRunning ? 0.6 : 1,
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        {isCompact ? (
+                          <Play size={16} />
+                        ) : isCopilotRunning ? (
+                          t('toolbar.running')
+                        ) : (
+                          t('toolbar.run')
+                        )}
+                      </button>
+                    </div>
+                    <CopilotExecutionModeDropdown
+                      mode={copilotExecutionMode}
+                      onModeChange={handleCopilotExecutionModeChange}
+                    />
                   </div>
-                  <CopilotExecutionModeDropdown
-                    mode={copilotExecutionMode}
-                    onModeChange={handleCopilotExecutionModeChange}
-                  />
                 </div>
-              </div>
+              )}
+
+              {/* Vertical Divider - shown when Codex is enabled */}
+              {isCodexEnabled && (
+                <div
+                  style={{
+                    width: '1px',
+                    backgroundColor: 'var(--vscode-panel-border)',
+                    margin: '0 8px',
+                    alignSelf: 'stretch',
+                  }}
+                />
+              )}
+
+              {/* Codex Column - shown when Codex is enabled */}
+              {isCodexEnabled && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '9px',
+                      color: 'var(--vscode-descriptionForeground)',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Codex
+                  </span>
+                  <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex' }}>
+                      <button
+                        type="button"
+                        onClick={handleCodexExport}
+                        disabled={isCodexExporting}
+                        style={{
+                          padding: isCompact ? '4px 8px' : '4px 12px',
+                          backgroundColor: 'var(--vscode-button-background)',
+                          color: 'var(--vscode-button-foreground)',
+                          border: 'none',
+                          borderRadius: '2px 0 0 2px',
+                          cursor: isCodexExporting ? 'not-allowed' : 'pointer',
+                          fontSize: '13px',
+                          opacity: isCodexExporting ? 0.6 : 1,
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          borderRight: '1px solid var(--vscode-button-foreground)',
+                        }}
+                      >
+                        {isCompact ? (
+                          <FileDown size={16} />
+                        ) : isCodexExporting ? (
+                          t('toolbar.exporting')
+                        ) : (
+                          t('toolbar.export')
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCodexRun}
+                        disabled={isCodexRunning}
+                        style={{
+                          padding: isCompact ? '4px 8px' : '4px 12px',
+                          backgroundColor: 'var(--vscode-button-background)',
+                          color: 'var(--vscode-button-foreground)',
+                          border: 'none',
+                          borderRadius: '0 2px 2px 0',
+                          cursor: isCodexRunning ? 'not-allowed' : 'pointer',
+                          fontSize: '13px',
+                          opacity: isCodexRunning ? 0.6 : 1,
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        {isCompact ? (
+                          <Play size={16} />
+                        ) : isCodexRunning ? (
+                          t('toolbar.running')
+                        ) : (
+                          t('toolbar.run')
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -1157,6 +1358,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onToggleFocusMode={toggleFocusMode}
               isCopilotEnabled={isCopilotEnabled}
               onToggleCopilotBeta={toggleCopilotEnabled}
+              isCodexEnabled={isCodexEnabled}
+              onToggleCodexBeta={toggleCodexEnabled}
               open={moreActionsOpen}
               onOpenChange={onMoreActionsOpenChange}
             />

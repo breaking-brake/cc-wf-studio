@@ -8,7 +8,16 @@
  */
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { Bot, Check, Focus, HelpCircle, MoreHorizontal, Share2, Trash2 } from 'lucide-react';
+import {
+  Bot,
+  Check,
+  Focus,
+  HelpCircle,
+  MoreHorizontal,
+  Share2,
+  Terminal,
+  Trash2,
+} from 'lucide-react';
 import { useIsCompactMode } from '../../hooks/useWindowWidth';
 import { useTranslation } from '../../i18n/i18n-context';
 
@@ -25,6 +34,8 @@ interface MoreActionsDropdownProps {
   onToggleFocusMode: () => void;
   isCopilotEnabled: boolean;
   onToggleCopilotBeta: () => void;
+  isCodexEnabled: boolean;
+  onToggleCodexBeta: () => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -37,6 +48,8 @@ export function MoreActionsDropdown({
   onToggleFocusMode,
   isCopilotEnabled,
   onToggleCopilotBeta,
+  isCodexEnabled,
+  onToggleCodexBeta,
   open,
   onOpenChange,
 }: MoreActionsDropdownProps) {
@@ -172,6 +185,40 @@ export function MoreActionsDropdown({
               </span>
             </span>
             {isCopilotEnabled && <Check size={14} />}
+          </DropdownMenu.Item>
+
+          {/* Codex Beta Toggle */}
+          <DropdownMenu.Item
+            onSelect={onToggleCodexBeta}
+            style={{
+              padding: '8px 12px',
+              fontSize: `${FONT_SIZES.small}px`,
+              color: 'var(--vscode-foreground)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              outline: 'none',
+              borderRadius: '2px',
+            }}
+          >
+            <Terminal size={14} />
+            <span style={{ flex: 1 }}>
+              Codex
+              <span
+                style={{
+                  fontSize: '9px',
+                  backgroundColor: 'var(--vscode-badge-background)',
+                  color: 'var(--vscode-badge-foreground)',
+                  padding: '1px 4px',
+                  borderRadius: '2px',
+                  marginLeft: '4px',
+                }}
+              >
+                Beta
+              </span>
+            </span>
+            {isCodexEnabled && <Check size={14} />}
           </DropdownMenu.Item>
 
           <DropdownMenu.Separator

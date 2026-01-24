@@ -124,6 +124,7 @@
     "@modelcontextprotocol/sdk": "^1.25.2",
     "@slack/web-api": "^7.13.0",
     "@toon-format/toon": "^2.1.0",
-    "nano-spawn": "^2.0.0"
+    "nano-spawn": "^2.0.0",
+    "smol-toml": "^1.6.0"
   }
 }

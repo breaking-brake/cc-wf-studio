@@ -22,6 +22,8 @@ const ALLOWED_TOOLS_STORAGE_KEY = 'cc-wf-studio.refinement.allowedTools';
 const PROVIDER_STORAGE_KEY = 'cc-wf-studio.refinement.selectedProvider';
 // Note: This key is shared with Toolbar.tsx for the "Copilot (Beta)" toggle
 const COPILOT_ENABLED_STORAGE_KEY = 'cc-wf-studio:copilot-beta-enabled';
+// Note: This key is shared with Toolbar.tsx for the "Codex (Beta)" toggle
+const CODEX_ENABLED_STORAGE_KEY = 'cc-wf-studio:codex-beta-enabled';
 
 // Available tools for Claude Code CLI (used in AI editing allowed tools)
 export const AVAILABLE_TOOLS = [
@@ -212,6 +214,31 @@ function saveCopilotEnabledToStorage(enabled: boolean): void {
   }
 }
 
+/**
+ * Load Codex enabled state from localStorage
+ * Returns false as default if no value is stored
+ */
+function loadCodexEnabledFromStorage(): boolean {
+  try {
+    const saved = localStorage.getItem(CODEX_ENABLED_STORAGE_KEY);
+    return saved === 'true';
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+  return false;
+}
+
+/**
+ * Save Codex enabled state to localStorage
+ */
+function saveCodexEnabledToStorage(enabled: boolean): void {
+  try {
+    localStorage.setItem(CODEX_ENABLED_STORAGE_KEY, String(enabled));
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+}
+
 // ============================================================================
 // Session Status Type
 // ============================================================================
@@ -242,6 +269,7 @@ interface RefinementStore {
   allowedTools: string[];
   selectedProvider: AiCliProvider;
   isCopilotEnabled: boolean;
+  isCodexEnabled: boolean;
 
   // Dynamic Copilot Models State
   availableCopilotModels: CopilotModelInfo[];
@@ -268,6 +296,7 @@ interface RefinementStore {
   resetAllowedTools: () => void;
   setSelectedProvider: (provider: AiCliProvider) => void;
   toggleCopilotEnabled: () => void;
+  toggleCodexEnabled: () => void;
   fetchCopilotModels: () => Promise<void>;
   initConversation: () => void;
   loadConversationHistory: (history: ConversationHistory | undefined) => void;
@@ -359,6 +388,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   allowedTools: loadAllowedToolsFromStorage(), // Load from localStorage, default: DEFAULT_ALLOWED_TOOLS
   selectedProvider: loadProviderFromStorage(), // Load from localStorage, default: 'claude-code'
   isCopilotEnabled: loadCopilotEnabledFromStorage(), // Load from localStorage, default: false
+  isCodexEnabled: loadCodexEnabledFromStorage(), // Load from localStorage, default: false
 
   // Dynamic Copilot Models Initial State
   availableCopilotModels: [],
@@ -439,6 +469,13 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     } else {
       set({ isCopilotEnabled: newEnabled });
     }
+  },
+
+  toggleCodexEnabled: () => {
+    const currentEnabled = get().isCodexEnabled;
+    const newEnabled = !currentEnabled;
+    saveCodexEnabledToStorage(newEnabled);
+    set({ isCodexEnabled: newEnabled });
   },
 
   fetchCopilotModels: async () => {

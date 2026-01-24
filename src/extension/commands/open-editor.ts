@@ -17,6 +17,7 @@ import { migrateWorkflow } from '../utils/migrate-workflow';
 import { SlackTokenManager } from '../utils/slack-token-manager';
 import { validateWorkflowFile } from '../utils/workflow-validator';
 import { getWebviewContent } from '../webview-content';
+import { handleExportForCodexCli, handleRunForCodexCli } from './codex-handlers';
 import {
   handleExportForCopilot,
   handleExportForCopilotCli,
@@ -393,6 +394,50 @@ export function registerOpenEditorCommand(
               } else {
                 webview.postMessage({
                   type: 'EXPORT_FOR_COPILOT_CLI_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorCode: 'UNKNOWN_ERROR',
+                    errorMessage: 'Workflow is required',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+
+            case 'EXPORT_FOR_CODEX_CLI':
+              // Export workflow for Codex CLI (Skills format)
+              if (message.payload?.workflow) {
+                await handleExportForCodexCli(
+                  fileService,
+                  webview,
+                  message.payload,
+                  message.requestId
+                );
+              } else {
+                webview.postMessage({
+                  type: 'EXPORT_FOR_CODEX_CLI_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorCode: 'UNKNOWN_ERROR',
+                    errorMessage: 'Workflow is required',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+
+            case 'RUN_FOR_CODEX_CLI':
+              // Run workflow for Codex CLI mode (via Codex CLI terminal)
+              if (message.payload?.workflow) {
+                await handleRunForCodexCli(
+                  fileService,
+                  webview,
+                  message.payload,
+                  message.requestId
+                );
+              } else {
+                webview.postMessage({
+                  type: 'RUN_FOR_CODEX_CLI_FAILED',
                   requestId: message.requestId,
                   payload: {
                     errorCode: 'UNKNOWN_ERROR',

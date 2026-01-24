@@ -1,0 +1,243 @@
+/**
+ * Claude Code Workflow Studio - Codex CLI Integration Handlers
+ *
+ * Handles Export/Run for OpenAI Codex CLI integration
+ *
+ * @beta This is a PoC feature for OpenAI Codex CLI integration
+ */
+
+import * as vscode from 'vscode';
+import type {
+  CodexOperationFailedPayload,
+  ExportForCodexCliPayload,
+  ExportForCodexCliSuccessPayload,
+  RunForCodexCliPayload,
+  RunForCodexCliSuccessPayload,
+} from '../../shared/types/messages';
+import {
+  ensureProjectTrustedForCodexCli,
+  previewMcpSyncForCodexCli,
+  syncMcpConfigForCodexCli,
+} from '../services/codex-mcp-sync-service';
+import {
+  checkExistingCodexSkill,
+  exportWorkflowAsCodexSkill,
+} from '../services/codex-skill-export-service';
+import { extractMcpServerIdsFromWorkflow } from '../services/copilot-export-service';
+import type { FileService } from '../services/file-service';
+import { executeCodexCliInTerminal } from '../services/terminal-execution-service';
+
+/**
+ * Handle Export for Codex CLI request
+ *
+ * Exports workflow to Skills format (.codex/skills/name/SKILL.md)
+ *
+ * @param fileService - File service instance
+ * @param webview - Webview for sending responses
+ * @param payload - Export payload
+ * @param requestId - Optional request ID for response correlation
+ */
+export async function handleExportForCodexCli(
+  fileService: FileService,
+  webview: vscode.Webview,
+  payload: ExportForCodexCliPayload,
+  requestId?: string
+): Promise<void> {
+  try {
+    const { workflow } = payload;
+
+    // Check for existing skill and ask for confirmation
+    const existingSkillPath = await checkExistingCodexSkill(workflow, fileService);
+    if (existingSkillPath) {
+      const result = await vscode.window.showWarningMessage(
+        `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
+        { modal: true },
+        'Overwrite',
+        'Cancel'
+      );
+      if (result !== 'Overwrite') {
+        webview.postMessage({
+          type: 'EXPORT_FOR_CODEX_CLI_CANCELLED',
+          requestId,
+        });
+        return;
+      }
+    }
+
+    // Export workflow as skill to .codex/skills/{name}/SKILL.md
+    const exportResult = await exportWorkflowAsCodexSkill(workflow, fileService);
+
+    if (!exportResult.success) {
+      const failedPayload: CodexOperationFailedPayload = {
+        errorCode: 'EXPORT_FAILED',
+        errorMessage: exportResult.errors?.join(', ') || 'Failed to export workflow as skill',
+        timestamp: new Date().toISOString(),
+      };
+      webview.postMessage({
+        type: 'EXPORT_FOR_CODEX_CLI_FAILED',
+        requestId,
+        payload: failedPayload,
+      });
+      return;
+    }
+
+    // Send success response
+    const successPayload: ExportForCodexCliSuccessPayload = {
+      skillName: exportResult.skillName,
+      skillPath: exportResult.skillPath,
+      timestamp: new Date().toISOString(),
+    };
+
+    webview.postMessage({
+      type: 'EXPORT_FOR_CODEX_CLI_SUCCESS',
+      requestId,
+      payload: successPayload,
+    });
+
+    vscode.window.showInformationMessage(
+      `Exported workflow as Codex skill: ${exportResult.skillPath}`
+    );
+  } catch (error) {
+    const failedPayload: CodexOperationFailedPayload = {
+      errorCode: 'UNKNOWN_ERROR',
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString(),
+    };
+    webview.postMessage({
+      type: 'EXPORT_FOR_CODEX_CLI_FAILED',
+      requestId,
+      payload: failedPayload,
+    });
+  }
+}
+
+/**
+ * Handle Run for Codex CLI request
+ *
+ * Exports workflow to Skills format and runs it via Codex CLI
+ * using the $skill-name command format
+ *
+ * @param fileService - File service instance
+ * @param webview - Webview for sending responses
+ * @param payload - Run payload
+ * @param requestId - Optional request ID for response correlation
+ */
+export async function handleRunForCodexCli(
+  fileService: FileService,
+  webview: vscode.Webview,
+  payload: RunForCodexCliPayload,
+  requestId?: string
+): Promise<void> {
+  try {
+    const { workflow } = payload;
+    const workspacePath = fileService.getWorkspacePath();
+
+    // Step 0: Ensure project is trusted (workaround for openai/codex#9752)
+    // This is required for Codex CLI to recognize project-level skills
+    const projectTrustAdded = await ensureProjectTrustedForCodexCli(workspacePath);
+
+    // Step 1: Check if MCP servers need to be synced to $HOME/.codex/config.toml
+    const mcpServerIds = extractMcpServerIdsFromWorkflow(workflow);
+    let mcpSyncConfirmed = false;
+
+    if (mcpServerIds.length > 0) {
+      const mcpSyncPreview = await previewMcpSyncForCodexCli(mcpServerIds, workspacePath);
+
+      if (mcpSyncPreview.serversToAdd.length > 0) {
+        const serverList = mcpSyncPreview.serversToAdd.map((s) => `  • ${s}`).join('\n');
+        const result = await vscode.window.showInformationMessage(
+          `The following MCP servers will be added to $HOME/.codex/config.toml for Codex CLI:\n\n${serverList}\n\nProceed?`,
+          { modal: true },
+          'Yes',
+          'No'
+        );
+        mcpSyncConfirmed = result === 'Yes';
+      }
+    }
+
+    // Step 2: Check for existing skill and ask for confirmation
+    const existingSkillPath = await checkExistingCodexSkill(workflow, fileService);
+    if (existingSkillPath) {
+      const result = await vscode.window.showWarningMessage(
+        `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
+        { modal: true },
+        'Overwrite',
+        'Cancel'
+      );
+      if (result !== 'Overwrite') {
+        webview.postMessage({
+          type: 'RUN_FOR_CODEX_CLI_CANCELLED',
+          requestId,
+        });
+        return;
+      }
+    }
+
+    // Step 3: Export workflow as skill to .codex/skills/{name}/SKILL.md
+    const exportResult = await exportWorkflowAsCodexSkill(workflow, fileService);
+
+    if (!exportResult.success) {
+      const failedPayload: CodexOperationFailedPayload = {
+        errorCode: 'EXPORT_FAILED',
+        errorMessage: exportResult.errors?.join(', ') || 'Failed to export workflow as skill',
+        timestamp: new Date().toISOString(),
+      };
+      webview.postMessage({
+        type: 'RUN_FOR_CODEX_CLI_FAILED',
+        requestId,
+        payload: failedPayload,
+      });
+      return;
+    }
+
+    // Step 4: Sync MCP servers to $HOME/.codex/config.toml if confirmed
+    let syncedMcpServers: string[] = [];
+    if (mcpSyncConfirmed) {
+      syncedMcpServers = await syncMcpConfigForCodexCli(mcpServerIds, workspacePath);
+    }
+
+    // Step 5: Execute in terminal
+    const terminalResult = executeCodexCliInTerminal({
+      skillName: exportResult.skillName,
+      workingDirectory: workspacePath,
+    });
+
+    // Send success response
+    const successPayload: RunForCodexCliSuccessPayload = {
+      workflowName: workflow.name,
+      terminalName: terminalResult.terminalName,
+      timestamp: new Date().toISOString(),
+    };
+
+    webview.postMessage({
+      type: 'RUN_FOR_CODEX_CLI_SUCCESS',
+      requestId,
+      payload: successPayload,
+    });
+
+    // Show notification with config sync info
+    const configChanges: string[] = [];
+    if (projectTrustAdded) {
+      configChanges.push('project trust added');
+    }
+    if (syncedMcpServers.length > 0) {
+      configChanges.push(`MCP servers: ${syncedMcpServers.join(', ')}`);
+    }
+    const configInfo =
+      configChanges.length > 0 ? ` (${configChanges.join('; ')} to ~/.codex/config.toml)` : '';
+    vscode.window.showInformationMessage(
+      `Running workflow via Codex CLI: ${workflow.name}${configInfo}`
+    );
+  } catch (error) {
+    const failedPayload: CodexOperationFailedPayload = {
+      errorCode: 'UNKNOWN_ERROR',
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString(),
+    };
+    webview.postMessage({
+      type: 'RUN_FOR_CODEX_CLI_FAILED',
+      requestId,
+      payload: failedPayload,
+    });
+  }
+}

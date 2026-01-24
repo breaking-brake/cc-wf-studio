@@ -7,6 +7,8 @@
 
 import type {
   EditorContentUpdatedPayload,
+  ExportForCodexCliPayload,
+  ExportForCodexCliSuccessPayload,
   ExportForCopilotCliPayload,
   ExportForCopilotCliSuccessPayload,
   ExportForCopilotPayload,
@@ -15,6 +17,8 @@ import type {
   ExtensionMessage,
   OpenInEditorPayload,
   RunAsSlashCommandPayload,
+  RunForCodexCliPayload,
+  RunForCodexCliSuccessPayload,
   RunForCopilotCliPayload,
   RunForCopilotCliSuccessPayload,
   RunForCopilotPayload,
@@ -455,6 +459,111 @@ export function runForCopilotCli(workflow: Workflow): Promise<RunForCopilotCliSu
     const payload: RunForCopilotCliPayload = { workflow };
     vscode.postMessage({
       type: 'RUN_FOR_COPILOT_CLI',
+      requestId,
+      payload,
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
+// ============================================================================
+// Codex CLI Integration Functions (Beta)
+// ============================================================================
+
+/**
+ * Export workflow for Codex CLI (Beta)
+ *
+ * Exports the workflow to Skills format (.codex/skills/name/SKILL.md)
+ *
+ * @param workflow - Workflow to export
+ * @returns Promise that resolves with export result
+ */
+export function exportForCodexCli(workflow: Workflow): Promise<ExportForCodexCliSuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'EXPORT_FOR_CODEX_CLI_SUCCESS') {
+          resolve(message.payload as ExportForCodexCliSuccessPayload);
+        } else if (message.type === 'EXPORT_FOR_CODEX_CLI_CANCELLED') {
+          // User cancelled - resolve with empty result
+          resolve({
+            skillName: '',
+            skillPath: '',
+            timestamp: new Date().toISOString(),
+          });
+        } else if (message.type === 'EXPORT_FOR_CODEX_CLI_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to export for Codex CLI'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: ExportForCodexCliPayload = { workflow };
+    vscode.postMessage({
+      type: 'EXPORT_FOR_CODEX_CLI',
+      requestId,
+      payload,
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
+/**
+ * Run workflow for Codex CLI (Beta)
+ *
+ * Exports the workflow to Codex Skills format and runs it via
+ * Codex CLI terminal using $skill-name format
+ *
+ * @param workflow - Workflow to run
+ * @returns Promise that resolves with run result
+ */
+export function runForCodexCli(workflow: Workflow): Promise<RunForCodexCliSuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'RUN_FOR_CODEX_CLI_SUCCESS') {
+          resolve(message.payload as RunForCodexCliSuccessPayload);
+        } else if (message.type === 'RUN_FOR_CODEX_CLI_CANCELLED') {
+          // User cancelled - resolve with empty result
+          resolve({
+            workflowName: '',
+            terminalName: '',
+            timestamp: new Date().toISOString(),
+          });
+        } else if (message.type === 'RUN_FOR_CODEX_CLI_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to run for Codex CLI'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: RunForCodexCliPayload = { workflow };
+    vscode.postMessage({
+      type: 'RUN_FOR_CODEX_CLI',
       requestId,
       payload,
     });

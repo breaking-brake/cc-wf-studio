@@ -760,7 +760,13 @@ export type ExtensionMessage =
   | Message<CopilotOperationFailedPayload, 'RUN_FOR_COPILOT_CLI_FAILED'>
   | Message<ExportForCopilotCliSuccessPayload, 'EXPORT_FOR_COPILOT_CLI_SUCCESS'>
   | Message<void, 'EXPORT_FOR_COPILOT_CLI_CANCELLED'>
-  | Message<CopilotOperationFailedPayload, 'EXPORT_FOR_COPILOT_CLI_FAILED'>;
+  | Message<CopilotOperationFailedPayload, 'EXPORT_FOR_COPILOT_CLI_FAILED'>
+  | Message<ExportForCodexCliSuccessPayload, 'EXPORT_FOR_CODEX_CLI_SUCCESS'>
+  | Message<void, 'EXPORT_FOR_CODEX_CLI_CANCELLED'>
+  | Message<CodexOperationFailedPayload, 'EXPORT_FOR_CODEX_CLI_FAILED'>
+  | Message<RunForCodexCliSuccessPayload, 'RUN_FOR_CODEX_CLI_SUCCESS'>
+  | Message<void, 'RUN_FOR_CODEX_CLI_CANCELLED'>
+  | Message<CodexOperationFailedPayload, 'RUN_FOR_CODEX_CLI_FAILED'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -1255,6 +1261,64 @@ export interface ExportForCopilotCliSuccessPayload {
 }
 
 // ============================================================================
+// Codex CLI Integration Payloads (Beta)
+// ============================================================================
+
+/**
+ * Export workflow for Codex CLI payload (Skills format)
+ * Exports to .codex/skills/{name}/SKILL.md
+ */
+export interface ExportForCodexCliPayload {
+  /** Workflow to export */
+  workflow: Workflow;
+}
+
+/**
+ * Export for Codex CLI success payload
+ */
+export interface ExportForCodexCliSuccessPayload {
+  /** Skill name */
+  skillName: string;
+  /** Skill file path */
+  skillPath: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Run workflow for Codex CLI payload
+ * Uses Codex CLI with $skill-name format
+ */
+export interface RunForCodexCliPayload {
+  /** Workflow to run */
+  workflow: Workflow;
+}
+
+/**
+ * Run for Codex CLI success payload
+ */
+export interface RunForCodexCliSuccessPayload {
+  /** Workflow name */
+  workflowName: string;
+  /** Terminal name where command is running */
+  terminalName: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Codex operation failed payload
+ */
+export interface CodexOperationFailedPayload {
+  /** Error code */
+  errorCode: 'CODEX_NOT_INSTALLED' | 'EXPORT_FAILED' | 'UNKNOWN_ERROR';
+  /** Error message */
+  errorMessage: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+// ============================================================================
 // Edit in VSCode Editor Payloads
 // ============================================================================
 
@@ -1361,7 +1425,9 @@ export type WebviewMessage =
   | Message<void, 'LIST_COPILOT_MODELS'>
   | Message<RunForCopilotPayload, 'RUN_FOR_COPILOT'>
   | Message<RunForCopilotCliPayload, 'RUN_FOR_COPILOT_CLI'>
-  | Message<ExportForCopilotCliPayload, 'EXPORT_FOR_COPILOT_CLI'>;
+  | Message<ExportForCopilotCliPayload, 'EXPORT_FOR_COPILOT_CLI'>
+  | Message<ExportForCodexCliPayload, 'EXPORT_FOR_CODEX_CLI'>
+  | Message<RunForCodexCliPayload, 'RUN_FOR_CODEX_CLI'>;
 
 // ============================================================================
 // Error Codes
