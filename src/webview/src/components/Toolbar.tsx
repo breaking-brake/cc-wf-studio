@@ -886,7 +886,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 whiteSpace: 'nowrap',
               }}
             >
-              Slash Command
+              Slash Command / Skill
             </span>
 
             {/* Two-column layout with divider */}
