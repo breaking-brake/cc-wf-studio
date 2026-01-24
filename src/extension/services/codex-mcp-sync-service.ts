@@ -214,6 +214,17 @@ export async function syncMcpConfigForCodexCli(
 }
 
 /**
+ * Check if project trust needs to be added to Codex config
+ *
+ * @param workspacePath - Workspace path to check
+ * @returns true if trust needs to be added, false if already trusted
+ */
+export async function needsProjectTrustForCodexCli(workspacePath: string): Promise<boolean> {
+  const config = await readCodexConfig();
+  return config.projects?.[workspacePath]?.trust_level !== 'trusted';
+}
+
+/**
  * Ensure the workspace is marked as trusted in Codex config
  *
  * This is required for Codex CLI to recognize project-level skills.

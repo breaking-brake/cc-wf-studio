@@ -16,6 +16,7 @@ import type {
 } from '../../shared/types/messages';
 import {
   ensureProjectTrustedForCodexCli,
+  needsProjectTrustForCodexCli,
   previewMcpSyncForCodexCli,
   syncMcpConfigForCodexCli,
 } from '../services/codex-mcp-sync-service';
@@ -138,7 +139,26 @@ export async function handleRunForCodexCli(
 
     // Step 0: Ensure project is trusted (workaround for openai/codex#9752)
     // This is required for Codex CLI to recognize project-level skills
-    const projectTrustAdded = await ensureProjectTrustedForCodexCli(workspacePath);
+    let projectTrustAdded = false;
+
+    // Check if project trust needs to be added
+    const needsProjectTrust = await needsProjectTrustForCodexCli(workspacePath);
+    if (needsProjectTrust) {
+      const result = await vscode.window.showInformationMessage(
+        `To allow Codex CLI to recognize skills in this project, a project trust setting needs to be added to ~/.codex/config.toml.\n\nProceed?`,
+        { modal: true },
+        'Yes',
+        'No'
+      );
+      if (result !== 'Yes') {
+        webview.postMessage({
+          type: 'RUN_FOR_CODEX_CLI_CANCELLED',
+          requestId,
+        });
+        return;
+      }
+      projectTrustAdded = await ensureProjectTrustedForCodexCli(workspacePath);
+    }
 
     // Step 0.5: Normalize skills (copy non-.claude/skills/ to .claude/skills/)
     // This ensures skills from .github/skills/, .codex/skills/, etc. are available in .claude/skills/
