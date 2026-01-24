@@ -4,11 +4,12 @@
  * Executes OpenAI Codex CLI commands for AI-assisted workflow generation and refinement.
  * Based on Codex CLI documentation: https://developers.openai.com/codex/cli/reference/
  *
- * Uses Node.js child_process for stdin support.
+ * Uses nano-spawn for cross-platform compatibility (Windows/Unix).
  * Uses codex-cli-path.ts for cross-platform CLI path detection (handles GUI-launched VSCode).
  */
 
-import { type ChildProcess, spawn as nodeSpawn } from 'node:child_process';
+import type { ChildProcess } from 'node:child_process';
+import nanoSpawn from 'nano-spawn';
 import type { CodexModel, CodexReasoningEffort } from '../../shared/types/messages';
 import { log } from '../extension';
 import { clearCodexCliPathCache, getCodexSpawnCommand } from './codex-cli-path';
@@ -17,10 +18,47 @@ import { clearCodexCliPathCache, getCodexSpawnCommand } from './codex-cli-path';
 export { clearCodexCliPathCache };
 
 /**
- * Active generation processes
- * Key: requestId, Value: child process and start time
+ * nano-spawn type definitions (manually defined for compatibility)
  */
-const activeProcesses = new Map<string, { process: ChildProcess; startTime: number }>();
+interface SubprocessError extends Error {
+  stdout: string;
+  stderr: string;
+  output: string;
+  command: string;
+  durationMs: number;
+  exitCode?: number;
+  signalName?: string;
+  isTerminated?: boolean;
+  code?: string;
+}
+
+interface Result {
+  stdout: string;
+  stderr: string;
+  output: string;
+  command: string;
+  durationMs: number;
+}
+
+interface Subprocess extends Promise<Result> {
+  nodeChildProcess: Promise<ChildProcess>;
+  stdout: AsyncIterable<string>;
+  stderr: AsyncIterable<string>;
+}
+
+const spawn =
+  nanoSpawn.default ||
+  (nanoSpawn as (
+    file: string,
+    args?: readonly string[],
+    options?: Record<string, unknown>
+  ) => Subprocess);
+
+/**
+ * Active generation processes
+ * Key: requestId, Value: subprocess and start time
+ */
+const activeProcesses = new Map<string, { subprocess: Subprocess; startTime: number }>();
 
 export interface CodexExecutionResult {
   success: boolean;
@@ -37,6 +75,42 @@ export interface CodexExecutionResult {
 
 /** Default Codex model (empty = inherit from CLI config) */
 const DEFAULT_CODEX_MODEL: CodexModel = '';
+
+/**
+ * Type guard to check if an error is a SubprocessError from nano-spawn
+ */
+function isSubprocessError(error: unknown): error is SubprocessError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'exitCode' in error &&
+    'stderr' in error &&
+    'stdout' in error
+  );
+}
+
+/**
+ * Parse the codex command path returned by getCodexSpawnCommand.
+ * Handles both direct path and npx fallback (prefixed with "npx:").
+ *
+ * @param codexPath - Path from getCodexSpawnCommand
+ * @param args - CLI arguments
+ * @returns Command and args for spawn
+ */
+function parseCodexCommand(codexPath: string, args: string[]): { command: string; args: string[] } {
+  // Check for npx fallback (prefixed with "npx:")
+  if (codexPath.startsWith('npx:')) {
+    const npxPath = codexPath.slice(4); // Remove "npx:" prefix
+    // npx @openai/codex exec [args]
+    return {
+      command: npxPath,
+      args: ['@openai/codex', ...args],
+    };
+  }
+
+  // Direct codex path
+  return { command: codexPath, args };
+}
 
 /**
  * Check if Codex CLI is available
@@ -61,14 +135,14 @@ export async function isCodexCliAvailable(): Promise<{
 
 /**
  * Execute Codex CLI with a prompt and return the output (non-streaming)
- * Uses Node.js child_process.spawn with stdin piping to handle large prompts.
+ * Uses nano-spawn with stdin support for cross-platform compatibility.
  *
  * @param prompt - The prompt to send to Codex CLI via stdin
  * @param timeoutMs - Timeout in milliseconds (default: 60000)
  * @param requestId - Optional request ID for cancellation support
  * @param workingDirectory - Working directory for CLI execution
  * @param model - Codex model to use (default: '' = inherit from CLI config)
- * @param reasoningEffort - Reasoning effort level (default: 'minimal')
+ * @param reasoningEffort - Reasoning effort level (default: 'low')
  * @param resumeSessionId - Optional thread ID to resume a previous session
  * @returns Execution result with success status and output/error
  */
@@ -107,7 +181,7 @@ export async function executeCodexCLI(
     };
   }
 
-  return new Promise((resolve) => {
+  try {
     // Build CLI arguments with '-' to read prompt from stdin
     // --skip-git-repo-check: bypass trust check since user is explicitly using extension
     // For session resume: codex exec resume <thread_id> [options] -
@@ -123,64 +197,86 @@ export async function executeCodexCLI(
     }
     args.push('--full-auto', '-');
 
+    // Parse command (handles npx fallback)
+    const spawnCmd = parseCodexCommand(codexPath, args);
+
     log('DEBUG', 'Spawning Codex CLI process', {
-      command: codexPath,
-      args,
+      command: spawnCmd.command,
+      args: spawnCmd.args,
     });
 
-    const childProcess = nodeSpawn(codexPath, args, {
+    // Spawn using nano-spawn (cross-platform compatible)
+    const subprocess = spawn(spawnCmd.command, spawnCmd.args, {
       cwd: workingDirectory,
-      stdio: ['pipe', 'pipe', 'pipe'],
+      timeout: timeoutMs > 0 ? timeoutMs : undefined,
+      stdin: { string: prompt },
+      stdout: 'pipe',
+      stderr: 'pipe',
     });
 
     // Register as active process if requestId is provided
     if (requestId) {
-      activeProcesses.set(requestId, { process: childProcess, startTime });
+      activeProcesses.set(requestId, { subprocess, startTime });
       log('INFO', `Registered active Codex process for requestId: ${requestId}`);
     }
 
-    let stdout = '';
-    let stderr = '';
-    let timeoutId: NodeJS.Timeout | undefined;
-    let timedOut = false;
-    let extractedSessionId: string | undefined;
+    // Wait for subprocess to complete
+    const result = await subprocess;
 
-    // Set up timeout
-    if (timeoutMs > 0) {
-      timeoutId = setTimeout(() => {
-        timedOut = true;
-        // On Windows: kill() sends an unconditional termination
-        // On Unix: kill() sends SIGTERM (graceful termination)
-        childProcess.kill();
-        log('WARN', 'Codex CLI execution timed out', { timeoutMs });
-      }, timeoutMs);
+    // Remove from active processes
+    if (requestId) {
+      activeProcesses.delete(requestId);
+      log('INFO', `Removed active Codex process (success) for requestId: ${requestId}`);
     }
 
-    // Collect stdout
-    childProcess.stdout?.on('data', (data: Buffer) => {
-      stdout += data.toString();
+    const executionTimeMs = Date.now() - startTime;
+
+    // Parse output
+    const parsedOutput = parseCodexOutput(result.stdout);
+    const output = extractJsonResponse(parsedOutput);
+    const extractedSessionId = extractThreadIdFromOutput(result.stdout);
+
+    log('INFO', 'Codex CLI execution succeeded', {
+      executionTimeMs,
+      outputLength: output.length,
+      wasExtracted: output !== parsedOutput,
+      sessionId: extractedSessionId,
     });
 
-    // Collect stderr
-    childProcess.stderr?.on('data', (data: Buffer) => {
-      stderr += data.toString();
+    return {
+      success: true,
+      output: output.trim(),
+      executionTimeMs,
+      sessionId: extractedSessionId,
+    };
+  } catch (error) {
+    // Remove from active processes
+    if (requestId) {
+      activeProcesses.delete(requestId);
+      log('INFO', `Removed active Codex process (error) for requestId: ${requestId}`);
+    }
+
+    const executionTimeMs = Date.now() - startTime;
+
+    log('ERROR', 'Codex CLI error caught', {
+      errorType: typeof error,
+      errorConstructor: error?.constructor?.name,
+      executionTimeMs,
     });
 
-    // Handle process completion
-    childProcess.on('close', (code, signal) => {
-      if (timeoutId) clearTimeout(timeoutId);
+    // Handle SubprocessError from nano-spawn
+    if (isSubprocessError(error)) {
+      const isTimeout =
+        (error.isTerminated && error.signalName === 'SIGTERM') || error.exitCode === 143;
 
-      // Remove from active processes
-      if (requestId) {
-        activeProcesses.delete(requestId);
-        log('INFO', `Removed active Codex process for requestId: ${requestId}`);
-      }
+      if (isTimeout) {
+        log('WARN', 'Codex CLI execution timed out', {
+          timeoutMs,
+          executionTimeMs,
+          exitCode: error.exitCode,
+        });
 
-      const executionTimeMs = Date.now() - startTime;
-
-      // Check for timeout (use flag instead of signal for cross-platform compatibility)
-      if (timedOut) {
-        resolve({
+        return {
           success: false,
           error: {
             code: 'TIMEOUT',
@@ -188,65 +284,17 @@ export async function executeCodexCLI(
             details: `Timeout after ${timeoutMs}ms`,
           },
           executionTimeMs,
-        });
-        return;
+        };
       }
 
-      // Check for success
-      if (code === 0) {
-        const parsedOutput = parseCodexOutput(stdout);
-        // Extract JSON response from mixed output (may contain AI reasoning)
-        const output = extractJsonResponse(parsedOutput);
-
-        // Extract thread_id from JSONL output for session continuation
-        extractedSessionId = extractThreadIdFromOutput(stdout);
-
-        log('INFO', 'Codex CLI execution succeeded', {
-          executionTimeMs,
-          outputLength: output.length,
-          wasExtracted: output !== parsedOutput,
-          sessionId: extractedSessionId,
-        });
-        resolve({
-          success: true,
-          output: output.trim(),
-          executionTimeMs,
-          sessionId: extractedSessionId,
-        });
-      } else {
-        log('ERROR', 'Codex CLI execution failed', {
-          exitCode: code,
-          signal,
-          stderr: stderr.substring(0, 500),
-          stdout: stdout.substring(0, 500),
-          executionTimeMs,
-        });
-        resolve({
-          success: false,
-          error: {
-            code: 'UNKNOWN_ERROR',
-            message: 'Generation failed - please try again or rephrase your description',
-            details: `Exit code: ${code ?? 'unknown'}, stderr: ${stderr || 'none'}`,
-          },
-          executionTimeMs,
-        });
-      }
-    });
-
-    // Handle spawn errors
-    childProcess.on('error', (error: NodeJS.ErrnoException) => {
-      if (timeoutId) clearTimeout(timeoutId);
-
-      // Remove from active processes
-      if (requestId) {
-        activeProcesses.delete(requestId);
-      }
-
-      const executionTimeMs = Date.now() - startTime;
-
+      // Command not found (ENOENT)
       if (error.code === 'ENOENT') {
-        log('ERROR', 'Codex CLI not found', { error: error.message });
-        resolve({
+        log('ERROR', 'Codex CLI not found', {
+          errorCode: error.code,
+          errorMessage: error.message,
+        });
+
+        return {
           success: false,
           error: {
             code: 'COMMAND_NOT_FOUND',
@@ -254,25 +302,57 @@ export async function executeCodexCLI(
             details: error.message,
           },
           executionTimeMs,
+        };
+      }
+
+      // npx fallback failed
+      if (error.stderr?.includes('could not determine executable to run')) {
+        log('WARN', 'Codex CLI not installed (npx fallback failed)', {
+          stderr: error.stderr,
         });
-      } else {
-        log('ERROR', 'Codex CLI spawn error', { error: error.message });
-        resolve({
+        return {
           success: false,
           error: {
-            code: 'UNKNOWN_ERROR',
-            message: 'Failed to start Codex CLI',
-            details: error.message,
+            code: 'COMMAND_NOT_FOUND',
+            message: 'Codex CLI not found. Please install Codex CLI to use this provider.',
+            details: error.stderr,
           },
           executionTimeMs,
-        });
+        };
       }
+
+      // Non-zero exit code
+      log('ERROR', 'Codex CLI execution failed', {
+        exitCode: error.exitCode,
+        stderr: error.stderr?.substring(0, 200),
+      });
+
+      return {
+        success: false,
+        error: {
+          code: 'UNKNOWN_ERROR',
+          message: 'Generation failed - please try again or rephrase your description',
+          details: `Exit code: ${error.exitCode ?? 'unknown'}, stderr: ${error.stderr ?? 'none'}`,
+        },
+        executionTimeMs,
+      };
+    }
+
+    // Unknown error type
+    log('ERROR', 'Unexpected error during Codex CLI execution', {
+      errorMessage: error instanceof Error ? error.message : String(error),
     });
 
-    // Write prompt to stdin and close
-    childProcess.stdin?.write(prompt);
-    childProcess.stdin?.end();
-  });
+    return {
+      success: false,
+      error: {
+        code: 'UNKNOWN_ERROR',
+        message: 'An unexpected error occurred. Please try again.',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      executionTimeMs,
+    };
+  }
 }
 
 /**
@@ -287,7 +367,7 @@ export type StreamingProgressCallback = (
 
 /**
  * Execute Codex CLI with streaming output
- * Uses Node.js child_process.spawn with stdin piping to handle large prompts.
+ * Uses nano-spawn with stdin support for cross-platform compatibility.
  *
  * @param prompt - The prompt to send to Codex CLI via stdin
  * @param onProgress - Callback invoked with each text chunk
@@ -295,7 +375,7 @@ export type StreamingProgressCallback = (
  * @param requestId - Optional request ID for cancellation support
  * @param workingDirectory - Working directory for CLI execution
  * @param model - Codex model to use (default: '' = inherit from CLI config)
- * @param reasoningEffort - Reasoning effort level (default: 'minimal')
+ * @param reasoningEffort - Reasoning effort level (default: 'low')
  * @param resumeSessionId - Optional thread ID to resume a previous session
  * @returns Execution result with success status and output/error
  */
@@ -310,6 +390,8 @@ export async function executeCodexCLIStreaming(
   resumeSessionId?: string
 ): Promise<CodexExecutionResult> {
   const startTime = Date.now();
+  let accumulated = '';
+  let extractedSessionId: string | undefined;
 
   log('INFO', 'Starting Codex CLI streaming execution', {
     promptLength: prompt.length,
@@ -335,12 +417,7 @@ export async function executeCodexCLIStreaming(
     };
   }
 
-  return new Promise((resolve) => {
-    let accumulated = '';
-    let explanatoryText = '';
-    let currentToolInfo = '';
-    let extractedSessionId: string | undefined;
-
+  try {
     // Build CLI arguments with '-' to read prompt from stdin
     // --skip-git-repo-check: bypass trust check since user is explicitly using extension
     // For session resume: codex exec resume <thread_id> [options] -
@@ -356,88 +433,103 @@ export async function executeCodexCLIStreaming(
     }
     args.push('--full-auto', '-');
 
+    // Parse command (handles npx fallback)
+    const spawnCmd = parseCodexCommand(codexPath, args);
+
     log('DEBUG', 'Spawning Codex CLI streaming process', {
-      command: codexPath,
-      args,
+      command: spawnCmd.command,
+      args: spawnCmd.args,
     });
 
-    const childProcess = nodeSpawn(codexPath, args, {
+    // Spawn using nano-spawn (cross-platform compatible)
+    const subprocess = spawn(spawnCmd.command, spawnCmd.args, {
       cwd: workingDirectory,
-      stdio: ['pipe', 'pipe', 'pipe'],
+      timeout: timeoutMs > 0 ? timeoutMs : undefined,
+      stdin: { string: prompt },
+      stdout: 'pipe',
+      stderr: 'pipe',
     });
 
     // Register as active process if requestId is provided
     if (requestId) {
-      activeProcesses.set(requestId, { process: childProcess, startTime });
+      activeProcesses.set(requestId, { subprocess, startTime });
       log('INFO', `Registered active Codex streaming process for requestId: ${requestId}`);
     }
 
-    let stderr = '';
-    let timeoutId: NodeJS.Timeout | undefined;
+    // Track explanatory text (non-JSON text from AI, for chat history)
+    let explanatoryText = '';
+    // Track current tool info for display
+    let currentToolInfo = '';
+    // Line buffer for JSONL parsing
     let lineBuffer = '';
-    let timedOut = false;
+    // Collect stderr for debugging
+    let stderrOutput = '';
 
-    // Set up timeout
-    if (timeoutMs > 0) {
-      timeoutId = setTimeout(() => {
-        timedOut = true;
-        // On Windows: kill() sends an unconditional termination
-        // On Unix: kill() sends SIGTERM (graceful termination)
-        childProcess.kill();
-        log('WARN', 'Codex CLI streaming execution timed out', { timeoutMs });
-      }, timeoutMs);
-    }
+    // Start collecting stderr in background (for debugging)
+    const stderrPromise = (async () => {
+      for await (const chunk of subprocess.stderr) {
+        stderrOutput += chunk;
+        log('DEBUG', 'Codex stderr chunk received', {
+          chunkLength: chunk.length,
+          totalStderrLength: stderrOutput.length,
+          preview: chunk.substring(0, 200),
+        });
+      }
+    })();
 
-    // Process streaming stdout (JSONL format)
-    childProcess.stdout?.on('data', (data: Buffer) => {
-      const chunk = data.toString();
-      lineBuffer += chunk;
+    // Process streaming output using AsyncIterable
+    let stdoutChunkCount = 0;
+    for await (const chunk of subprocess.stdout) {
+      stdoutChunkCount++;
+      log('DEBUG', 'Codex stdout chunk received', {
+        chunkNumber: stdoutChunkCount,
+        chunkLength: chunk.length,
+        preview: chunk.substring(0, 200),
+        hasNewline: chunk.includes('\n'),
+      });
+      // Normalize CRLF to LF for cross-platform compatibility
+      const normalizedChunk = chunk.replace(/\r\n/g, '\n');
 
-      // Split by newlines (JSONL format)
-      const lines = lineBuffer.split('\n');
-      // Keep the last potentially incomplete line in buffer
-      lineBuffer = lines.pop() || '';
+      // Codex CLI may output complete JSON objects without trailing newlines
+      // Each chunk from nano-spawn might be a complete JSONL line
+      // Handle both cases: chunks with newlines (split normally) and without (treat as complete line)
+      let linesToProcess: string[];
 
-      for (const line of lines) {
+      if (normalizedChunk.includes('\n')) {
+        // Chunk contains newlines - use normal JSONL parsing
+        lineBuffer += normalizedChunk;
+        const lines = lineBuffer.split('\n');
+        // Keep the last potentially incomplete line in buffer
+        lineBuffer = lines.pop() || '';
+        linesToProcess = lines;
+      } else {
+        // No newlines - treat entire chunk as a complete JSON line
+        // But first check if we have buffered content to prepend
+        if (lineBuffer) {
+          lineBuffer += normalizedChunk;
+          linesToProcess = [lineBuffer];
+          lineBuffer = '';
+        } else {
+          linesToProcess = [normalizedChunk];
+        }
+      }
+
+      for (const line of linesToProcess) {
         if (!line.trim()) continue;
 
         try {
           const parsed = JSON.parse(line);
 
-          // Debug log with full structure for unknown event types
           log('DEBUG', 'Codex streaming JSON line parsed', {
             type: parsed.type,
             hasContent: !!parsed.content,
             hasItem: !!parsed.item,
-            keys: Object.keys(parsed).join(','),
           });
 
           // Handle Codex CLI JSONL event types
-          // Format: {"type": "item.completed", "item": {"type": "message", "content": [...]}}
           if (parsed.type === 'item.completed' && parsed.item) {
             const item = parsed.item;
 
-            // Enhanced logging to debug item structure
-            log('DEBUG', 'Codex item.completed payload', {
-              itemType: item.type,
-              itemRole: item.role,
-              itemKeys: Object.keys(item).join(','),
-              hasItemContent: !!item.content,
-              itemContentType: item.content
-                ? Array.isArray(item.content)
-                  ? 'array'
-                  : typeof item.content
-                : 'none',
-              itemContentLength: item.content
-                ? Array.isArray(item.content)
-                  ? item.content.length
-                  : String(item.content).length
-                : 0,
-              hasOutput: !!item.output,
-              hasOutputText: !!item.output_text,
-              hasText: !!item.text,
-              fullItemJson: JSON.stringify(item).substring(0, 1000),
-            });
             // Extract content from item
             if (item.content && Array.isArray(item.content)) {
               for (const block of item.content) {
@@ -466,25 +558,24 @@ export async function executeCodexCLIStreaming(
               currentToolInfo = '';
               onProgress(item.content, explanatoryText, explanatoryText, 'text');
             }
-            // Also check for output field (some Codex versions use this)
+
+            // Check for output field
             if (item.output && typeof item.output === 'string') {
               accumulated += item.output;
               explanatoryText = accumulated;
               currentToolInfo = '';
               onProgress(item.output, explanatoryText, explanatoryText, 'text');
             }
+
             // Codex CLI uses item.text for agent_message type
-            // item.text may be a JSON string containing the actual response
             if (item.text && typeof item.text === 'string') {
               const textContent = item.text;
               let displayContent = item.text;
 
-              // Try to parse item.text as JSON (Codex often returns JSON in text field)
+              // Try to parse item.text as JSON
               try {
                 const textJson = JSON.parse(item.text);
                 if (textJson.status && textJson.message) {
-                  // This is a structured response, keep the full JSON for parsing
-                  // but use the message for display
                   displayContent = textJson.message;
                   log('DEBUG', 'Parsed JSON from item.text', {
                     status: textJson.status,
@@ -548,44 +639,111 @@ export async function executeCodexCLIStreaming(
               });
             }
           } else if (parsed.type === 'turn.started' || parsed.type === 'turn.completed') {
-            // These are lifecycle events, no content to extract
             log('DEBUG', `Codex lifecycle event: ${parsed.type}`);
-          } else {
-            // Unknown event type - log for debugging
-            log('DEBUG', 'Codex unknown event type', {
-              type: parsed.type,
-              fullPayload: JSON.stringify(parsed).substring(0, 500),
-            });
           }
         } catch {
-          // Ignore JSON parse errors (partial chunks or non-JSON output)
           log('DEBUG', 'Skipping non-JSON line in Codex streaming output', {
             lineLength: line.length,
+            linePreview: line.substring(0, 100),
           });
         }
       }
-    });
+    }
 
-    // Collect stderr
-    childProcess.stderr?.on('data', (data: Buffer) => {
-      stderr += data.toString();
-    });
-
-    // Handle process completion
-    childProcess.on('close', (code, signal) => {
-      if (timeoutId) clearTimeout(timeoutId);
-
-      // Remove from active processes
-      if (requestId) {
-        activeProcesses.delete(requestId);
-        log('INFO', `Removed active Codex streaming process for requestId: ${requestId}`);
+    // Process any remaining content in lineBuffer
+    if (lineBuffer.trim()) {
+      log('DEBUG', 'Processing remaining lineBuffer content', {
+        bufferLength: lineBuffer.length,
+        bufferPreview: lineBuffer.substring(0, 200),
+      });
+      try {
+        const parsed = JSON.parse(lineBuffer);
+        // Handle remaining JSON (same logic as above, simplified)
+        if (parsed.type === 'item.completed' && parsed.item?.text) {
+          accumulated += parsed.item.text;
+        }
+      } catch {
+        log('DEBUG', 'Could not parse remaining lineBuffer as JSON');
       }
+    }
 
-      const executionTimeMs = Date.now() - startTime;
+    // Wait for subprocess to complete
+    const result = await subprocess;
 
-      // Check for timeout (use flag instead of signal for cross-platform compatibility)
-      if (timedOut) {
-        resolve({
+    // Wait for stderr collection to complete
+    await stderrPromise;
+
+    // Remove from active processes
+    if (requestId) {
+      activeProcesses.delete(requestId);
+      log('INFO', `Removed active Codex streaming process (success) for requestId: ${requestId}`);
+    }
+
+    const executionTimeMs = Date.now() - startTime;
+
+    // Extract JSON response from accumulated output
+    const extractedOutput = extractJsonResponse(accumulated);
+
+    log('INFO', 'Codex CLI streaming execution succeeded', {
+      executionTimeMs,
+      stdoutChunkCount,
+      accumulatedLength: accumulated.length,
+      extractedLength: extractedOutput.length,
+      wasExtracted: extractedOutput !== accumulated,
+      sessionId: extractedSessionId,
+      stderrLength: stderrOutput.length,
+      resultStdoutLength: result.stdout.length,
+      resultStderrLength: result.stderr.length,
+    });
+
+    // Debug: Log raw output if nothing was accumulated
+    if (accumulated.length === 0) {
+      log('WARN', 'No output accumulated from Codex streaming', {
+        resultStdout: result.stdout.substring(0, 1000),
+        resultStderr: result.stderr.substring(0, 1000),
+        stderrOutput: stderrOutput.substring(0, 1000),
+      });
+    }
+
+    return {
+      success: true,
+      output: extractedOutput || result.stdout.trim(),
+      executionTimeMs,
+      sessionId: extractedSessionId,
+    };
+  } catch (error) {
+    // Remove from active processes
+    if (requestId) {
+      activeProcesses.delete(requestId);
+      log('INFO', `Removed active Codex streaming process (error) for requestId: ${requestId}`);
+    }
+
+    const executionTimeMs = Date.now() - startTime;
+
+    log('ERROR', 'Codex CLI streaming error caught', {
+      errorType: typeof error,
+      errorConstructor: error?.constructor?.name,
+      executionTimeMs,
+      accumulatedLength: accumulated.length,
+      exitCode: isSubprocessError(error) ? error.exitCode : undefined,
+      stderr: isSubprocessError(error) ? error.stderr?.substring(0, 500) : undefined,
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
+
+    // Handle SubprocessError from nano-spawn
+    if (isSubprocessError(error)) {
+      const isTimeout =
+        (error.isTerminated && error.signalName === 'SIGTERM') || error.exitCode === 143;
+
+      if (isTimeout) {
+        log('WARN', 'Codex CLI streaming execution timed out', {
+          timeoutMs,
+          executionTimeMs,
+          exitCode: error.exitCode,
+          accumulatedLength: accumulated.length,
+        });
+
+        return {
           success: false,
           output: accumulated,
           error: {
@@ -594,63 +752,13 @@ export async function executeCodexCLIStreaming(
             details: `Timeout after ${timeoutMs}ms`,
           },
           executionTimeMs,
-        });
-        return;
-      }
-
-      // Check for success
-      if (code === 0) {
-        // Extract JSON response from mixed output (may contain AI reasoning)
-        const extractedOutput = extractJsonResponse(accumulated);
-
-        log('INFO', 'Codex CLI streaming execution succeeded', {
-          executionTimeMs,
-          accumulatedLength: accumulated.length,
-          extractedLength: extractedOutput.length,
-          wasExtracted: extractedOutput !== accumulated,
           sessionId: extractedSessionId,
-        });
-        resolve({
-          success: true,
-          output: extractedOutput,
-          executionTimeMs,
-          sessionId: extractedSessionId,
-        });
-      } else {
-        log('ERROR', 'Codex CLI streaming execution failed', {
-          exitCode: code,
-          signal,
-          stderr: stderr.substring(0, 500),
-          accumulatedLength: accumulated.length,
-          executionTimeMs,
-        });
-        resolve({
-          success: false,
-          output: accumulated,
-          error: {
-            code: 'UNKNOWN_ERROR',
-            message: 'Generation failed - please try again or rephrase your description',
-            details: `Exit code: ${code ?? 'unknown'}, stderr: ${stderr || 'none'}`,
-          },
-          executionTimeMs,
-        });
-      }
-    });
-
-    // Handle spawn errors
-    childProcess.on('error', (error: NodeJS.ErrnoException) => {
-      if (timeoutId) clearTimeout(timeoutId);
-
-      // Remove from active processes
-      if (requestId) {
-        activeProcesses.delete(requestId);
+        };
       }
 
-      const executionTimeMs = Date.now() - startTime;
-
+      // Command not found (ENOENT)
       if (error.code === 'ENOENT') {
-        log('ERROR', 'Codex CLI not found', { error: error.message });
-        resolve({
+        return {
           success: false,
           error: {
             code: 'COMMAND_NOT_FOUND',
@@ -658,25 +766,54 @@ export async function executeCodexCLIStreaming(
             details: error.message,
           },
           executionTimeMs,
+          sessionId: extractedSessionId,
+        };
+      }
+
+      // npx fallback failed
+      if (error.stderr?.includes('could not determine executable to run')) {
+        log('WARN', 'Codex CLI not installed (npx fallback failed)', {
+          stderr: error.stderr,
         });
-      } else {
-        log('ERROR', 'Codex CLI spawn error', { error: error.message });
-        resolve({
+        return {
           success: false,
           error: {
-            code: 'UNKNOWN_ERROR',
-            message: 'Failed to start Codex CLI',
-            details: error.message,
+            code: 'COMMAND_NOT_FOUND',
+            message: 'Codex CLI not found. Please install Codex CLI to use this provider.',
+            details: error.stderr,
           },
           executionTimeMs,
-        });
+          sessionId: extractedSessionId,
+        };
       }
-    });
 
-    // Write prompt to stdin and close
-    childProcess.stdin?.write(prompt);
-    childProcess.stdin?.end();
-  });
+      // Non-zero exit code
+      return {
+        success: false,
+        output: accumulated,
+        error: {
+          code: 'UNKNOWN_ERROR',
+          message: 'Generation failed - please try again or rephrase your description',
+          details: `Exit code: ${error.exitCode ?? 'unknown'}, stderr: ${error.stderr ?? 'none'}`,
+        },
+        executionTimeMs,
+        sessionId: extractedSessionId,
+      };
+    }
+
+    // Unknown error type
+    return {
+      success: false,
+      output: accumulated,
+      error: {
+        code: 'UNKNOWN_ERROR',
+        message: 'An unexpected error occurred. Please try again.',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      executionTimeMs,
+      sessionId: extractedSessionId,
+    };
+  }
 }
 
 /**
@@ -685,10 +822,10 @@ export async function executeCodexCLIStreaming(
  * @param requestId - Request ID of the process to cancel
  * @returns Result indicating if cancellation was successful
  */
-export function cancelCodexProcess(requestId: string): {
+export async function cancelCodexProcess(requestId: string): Promise<{
   cancelled: boolean;
   executionTimeMs?: number;
-} {
+}> {
   const activeGen = activeProcesses.get(requestId);
 
   if (!activeGen) {
@@ -696,23 +833,23 @@ export function cancelCodexProcess(requestId: string): {
     return { cancelled: false };
   }
 
-  const { process: childProcess, startTime } = activeGen;
+  const { subprocess, startTime } = activeGen;
   const executionTimeMs = Date.now() - startTime;
+
+  // nano-spawn v2.0.0: nodeChildProcess is a Promise that resolves to ChildProcess
+  const childProcess = await subprocess.nodeChildProcess;
 
   log('INFO', `Cancelling Codex process for requestId: ${requestId}`, {
     pid: childProcess.pid,
     elapsedMs: executionTimeMs,
   });
 
-  // Kill the process
-  // On Windows: kill() sends an unconditional termination
-  // On Unix: kill() sends SIGTERM (graceful termination)
+  // Kill the process (cross-platform compatible)
   childProcess.kill();
 
   // Force kill after 500ms if process doesn't terminate
   setTimeout(() => {
     if (!childProcess.killed) {
-      // On Unix: this would be SIGKILL, but kill() without signal works on both platforms
       childProcess.kill();
       log('WARN', `Forcefully killed Codex process for requestId: ${requestId}`);
     }
@@ -824,7 +961,6 @@ function parseCodexOutput(output: string): string {
       const parsed = JSON.parse(line);
 
       // Extract message content based on event type
-      // Handle Codex CLI format: {"type": "item.completed", "item": {"content": [...]}}
       if (parsed.type === 'item.completed' && parsed.item) {
         const item = parsed.item;
         if (item.content && Array.isArray(item.content)) {
@@ -841,7 +977,6 @@ function parseCodexOutput(output: string): string {
         if (item.output && typeof item.output === 'string') {
           finalContent += item.output;
         }
-        // Codex CLI uses item.text for agent_message type
         if (item.text && typeof item.text === 'string') {
           finalContent += item.text;
         }
@@ -870,6 +1005,5 @@ function parseCodexOutput(output: string): string {
     }
   }
 
-  // If no structured content found, return raw output
   return finalContent || output;
 }
