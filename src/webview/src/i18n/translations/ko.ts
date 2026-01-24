@@ -849,6 +849,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'description.panel.hide': '설명 패널 숨기기',
 
   // Feature Announcement Banner
-  'announcement.codexCli.title': '새 기능: OpenAI Codex CLI 내보내기 및 실행 지원이 추가되었습니다!',
+  'announcement.codexCli.title':
+    '새 기능: OpenAI Codex CLI 내보내기 및 실행 지원이 추가되었습니다!',
   'announcement.codexCli.description': '더보기 메뉴 → Codex에서 활성화',
 };

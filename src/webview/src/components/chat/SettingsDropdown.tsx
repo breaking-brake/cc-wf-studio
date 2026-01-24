@@ -37,6 +37,7 @@ const MODEL_PRESETS: { value: ClaudeModel; label: string }[] = [
 const PROVIDER_PRESETS: { value: AiCliProvider; label: string }[] = [
   { value: 'claude-code', label: 'Claude Code' },
   { value: 'copilot', label: 'Copilot' },
+  { value: 'codex', label: 'Codex' },
 ];
 
 // Fixed font sizes for dropdown menu (not responsive)
@@ -60,12 +61,15 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
     setSelectedModel,
     selectedCopilotModel,
     setSelectedCopilotModel,
+    selectedCodexModel,
+    setSelectedCodexModel,
     allowedTools,
     toggleAllowedTool,
     resetAllowedTools,
     selectedProvider,
     setSelectedProvider,
     isCopilotEnabled,
+    isCodexEnabled,
     availableCopilotModels,
     isFetchingCopilotModels,
     copilotModelsError,
@@ -221,8 +225,8 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
             }}
           />
 
-          {/* Provider Sub-menu - Only shown when Copilot is enabled via More Actions */}
-          {isCopilotEnabled && (
+          {/* Provider Sub-menu - Only shown when Copilot or Codex is enabled via More Actions */}
+          {(isCopilotEnabled || isCodexEnabled) && (
             <DropdownMenu.Sub>
               <DropdownMenu.SubTrigger
                 disabled={isProcessing}
@@ -266,7 +270,12 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                   }}
                 >
                   <DropdownMenu.RadioGroup value={selectedProvider}>
-                    {PROVIDER_PRESETS.map((preset) => (
+                    {PROVIDER_PRESETS.filter(
+                      (preset) =>
+                        preset.value === 'claude-code' ||
+                        (preset.value === 'copilot' && isCopilotEnabled) ||
+                        (preset.value === 'codex' && isCodexEnabled)
+                    ).map((preset) => (
                       <DropdownMenu.RadioItem
                         key={preset.value}
                         value={preset.value}
@@ -331,7 +340,9 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                 <span style={{ color: 'var(--vscode-descriptionForeground)' }}>
                   {selectedProvider === 'claude-code'
                     ? currentModelLabel
-                    : currentCopilotModelLabel}
+                    : selectedProvider === 'codex'
+                      ? selectedCodexModel
+                      : currentCopilotModelLabel}
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -392,6 +403,41 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                       </DropdownMenu.RadioItem>
                     ))}
                   </DropdownMenu.RadioGroup>
+                ) : selectedProvider === 'codex' ? (
+                  <div
+                    style={{
+                      padding: '8px 12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: `${FONT_SIZES.small}px`,
+                        color: 'var(--vscode-descriptionForeground)',
+                      }}
+                    >
+                      Model name (e.g., o3, o4-mini)
+                    </span>
+                    <input
+                      type="text"
+                      value={selectedCodexModel}
+                      onChange={(e) => setSelectedCodexModel(e.target.value)}
+                      placeholder="o3"
+                      style={{
+                        padding: '4px 8px',
+                        fontSize: `${FONT_SIZES.small}px`,
+                        backgroundColor: 'var(--vscode-input-background)',
+                        color: 'var(--vscode-input-foreground)',
+                        border: '1px solid var(--vscode-input-border)',
+                        borderRadius: '4px',
+                        outline: 'none',
+                        width: '120px',
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
                 ) : isFetchingCopilotModels ? (
                   <div
                     style={{

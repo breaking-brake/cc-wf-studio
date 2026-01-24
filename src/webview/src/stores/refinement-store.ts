@@ -8,6 +8,7 @@
 import type {
   AiCliProvider,
   ClaudeModel,
+  CodexModel,
   CopilotModel,
   CopilotModelInfo,
 } from '@shared/types/messages';
@@ -18,6 +19,7 @@ import { listCopilotModels } from '../services/refinement-service';
 // localStorage keys
 const MODEL_STORAGE_KEY = 'cc-wf-studio.refinement.selectedModel';
 const COPILOT_MODEL_STORAGE_KEY = 'cc-wf-studio.refinement.selectedCopilotModel';
+const CODEX_MODEL_STORAGE_KEY = 'cc-wf-studio.refinement.selectedCodexModel';
 const ALLOWED_TOOLS_STORAGE_KEY = 'cc-wf-studio.refinement.allowedTools';
 const PROVIDER_STORAGE_KEY = 'cc-wf-studio.refinement.selectedProvider';
 // Note: This key is shared with Toolbar.tsx for the "Copilot (Beta)" toggle
@@ -133,6 +135,33 @@ function saveCopilotModelToStorage(model: CopilotModel): void {
 }
 
 /**
+ * Load selected Codex model from localStorage
+ * Returns empty string as default (inherit from CLI config)
+ */
+function loadCodexModelFromStorage(): CodexModel {
+  try {
+    const saved = localStorage.getItem(CODEX_MODEL_STORAGE_KEY);
+    if (saved !== null) {
+      return saved;
+    }
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+  return ''; // Default: inherit from CLI config
+}
+
+/**
+ * Save selected Codex model to localStorage
+ */
+function saveCodexModelToStorage(model: CodexModel): void {
+  try {
+    localStorage.setItem(CODEX_MODEL_STORAGE_KEY, model);
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+}
+
+/**
  * Load allowed tools from localStorage
  * Returns DEFAULT_ALLOWED_TOOLS if no value is stored or value is invalid
  */
@@ -169,7 +198,7 @@ function saveAllowedToolsToStorage(tools: string[]): void {
 function loadProviderFromStorage(): AiCliProvider {
   try {
     const saved = localStorage.getItem(PROVIDER_STORAGE_KEY);
-    if (saved === 'claude-code' || saved === 'copilot') {
+    if (saved === 'claude-code' || saved === 'copilot' || saved === 'codex') {
       return saved;
     }
   } catch {
@@ -266,6 +295,7 @@ interface RefinementStore {
   timeoutSeconds: number;
   selectedModel: ClaudeModel;
   selectedCopilotModel: CopilotModel;
+  selectedCodexModel: CodexModel;
   allowedTools: string[];
   selectedProvider: AiCliProvider;
   isCopilotEnabled: boolean;
@@ -291,6 +321,7 @@ interface RefinementStore {
   setTimeoutSeconds: (seconds: number) => void;
   setSelectedModel: (model: ClaudeModel) => void;
   setSelectedCopilotModel: (model: CopilotModel) => void;
+  setSelectedCodexModel: (model: CodexModel) => void;
   setAllowedTools: (tools: string[]) => void;
   toggleAllowedTool: (toolName: string) => void;
   resetAllowedTools: () => void;
@@ -385,6 +416,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   timeoutSeconds: 0, // Default timeout: None (0 = use system guard)
   selectedModel: loadModelFromStorage(), // Load from localStorage, default: 'haiku'
   selectedCopilotModel: loadCopilotModelFromStorage(), // Load from localStorage, default: 'gpt-4o'
+  selectedCodexModel: loadCodexModelFromStorage(), // Load from localStorage, default: '' (inherit)
   allowedTools: loadAllowedToolsFromStorage(), // Load from localStorage, default: DEFAULT_ALLOWED_TOOLS
   selectedProvider: loadProviderFromStorage(), // Load from localStorage, default: 'claude-code'
   isCopilotEnabled: loadCopilotEnabledFromStorage(), // Load from localStorage, default: false
@@ -433,6 +465,11 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     saveCopilotModelToStorage(model);
   },
 
+  setSelectedCodexModel: (model: CodexModel) => {
+    set({ selectedCodexModel: model });
+    saveCodexModelToStorage(model);
+  },
+
   setAllowedTools: (tools: string[]) => {
     set({ allowedTools: tools });
     saveAllowedToolsToStorage(tools);
@@ -475,7 +512,14 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     const currentEnabled = get().isCodexEnabled;
     const newEnabled = !currentEnabled;
     saveCodexEnabledToStorage(newEnabled);
-    set({ isCodexEnabled: newEnabled });
+
+    // When disabling Codex, reset provider to 'claude-code'
+    if (!newEnabled && get().selectedProvider === 'codex') {
+      set({ isCodexEnabled: newEnabled, selectedProvider: 'claude-code' });
+      saveProviderToStorage('claude-code');
+    } else {
+      set({ isCodexEnabled: newEnabled });
+    }
   },
 
   fetchCopilotModels: async () => {

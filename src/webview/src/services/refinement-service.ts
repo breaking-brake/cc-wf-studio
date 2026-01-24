@@ -8,6 +8,7 @@
 import type {
   AiCliProvider,
   ClaudeModel,
+  CodexModel,
   CopilotModel,
   ExtensionMessage,
   RefinementClarificationPayload,
@@ -94,6 +95,7 @@ export type RefinementProgressCallback = (payload: RefinementProgressPayload) =>
  * @param previousValidationErrors - Validation errors from previous failed attempt (for retry)
  * @param provider - AI CLI provider to use (default: 'claude-code')
  * @param copilotModel - Copilot model to use when provider is 'copilot' (default: 'gpt-4o')
+ * @param codexModel - Codex model to use when provider is 'codex' (default: '' = inherit)
  * @returns Promise that resolves to the refinement result (success or clarification)
  * @throws {WorkflowRefinementError} If refinement fails
  */
@@ -110,7 +112,8 @@ export function refineWorkflow(
   allowedTools?: string[],
   previousValidationErrors?: ValidationErrorInfo[],
   provider: AiCliProvider = 'claude-code',
-  copilotModel: CopilotModel = 'gpt-4o'
+  copilotModel: CopilotModel = 'gpt-4o',
+  codexModel: CodexModel = ''
 ): Promise<RefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
@@ -169,6 +172,7 @@ export function refineWorkflow(
       previousValidationErrors,
       provider,
       copilotModel,
+      codexModel,
     };
 
     vscode.postMessage({
@@ -259,6 +263,7 @@ export function cancelWorkflowRefinement(requestId: string): void {
  * @param allowedTools - Optional array of allowed tool names
  * @param provider - AI CLI provider to use (default: 'claude-code')
  * @param copilotModel - Copilot model to use when provider is 'copilot' (default: 'gpt-4o')
+ * @param codexModel - Codex model to use when provider is 'codex' (default: '' = inherit)
  * @returns Promise that resolves to the refinement result (success or clarification)
  * @throws {WorkflowRefinementError} If refinement fails
  */
@@ -274,7 +279,8 @@ export function refineSubAgentFlow(
   model: ClaudeModel = 'sonnet',
   allowedTools?: string[],
   provider: AiCliProvider = 'claude-code',
-  copilotModel: CopilotModel = 'gpt-4o'
+  copilotModel: CopilotModel = 'gpt-4o',
+  codexModel: CodexModel = ''
 ): Promise<SubAgentFlowRefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
@@ -327,6 +333,7 @@ export function refineSubAgentFlow(
       allowedTools,
       provider,
       copilotModel,
+      codexModel,
     };
 
     vscode.postMessage({

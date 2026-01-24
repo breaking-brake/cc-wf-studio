@@ -9,7 +9,12 @@
  * - Copilot: CopilotModel ('gpt-4o' | 'gpt-4o-mini' | 'claude-3.5-sonnet')
  */
 
-import type { AiCliProvider, ClaudeModel, CopilotModel } from '../../shared/types/messages';
+import type {
+  AiCliProvider,
+  ClaudeModel,
+  CodexModel,
+  CopilotModel,
+} from '../../shared/types/messages';
 import { log } from '../extension';
 import {
   type ClaudeCodeExecutionResult,
@@ -18,6 +23,12 @@ import {
   executeClaudeCodeCLIStreaming,
   type StreamingProgressCallback,
 } from './claude-code-service';
+import {
+  cancelCodexProcess,
+  executeCodexCLI,
+  executeCodexCLIStreaming,
+  isCodexCliAvailable,
+} from './codex-cli-service';
 import {
   cancelLmRequest,
   checkLmApiAvailability,
@@ -54,6 +65,17 @@ export async function isProviderAvailable(provider: AiCliProvider): Promise<Prov
     return { available: true };
   }
 
+  if (provider === 'codex') {
+    const availability = await isCodexCliAvailable();
+    if (!availability.available) {
+      return {
+        available: false,
+        reason: 'Codex CLI not found. Please install Codex CLI to use this provider.',
+      };
+    }
+    return { available: true };
+  }
+
   // claude-code は常に利用可能（CLI が見つからない場合は実行時エラー）
   return { available: true };
 }
@@ -62,13 +84,14 @@ export async function isProviderAvailable(provider: AiCliProvider): Promise<Prov
  * AI を実行（非ストリーミング）
  *
  * @param prompt - プロンプト文字列
- * @param provider - 使用するプロバイダー ('claude-code' | 'copilot')
+ * @param provider - 使用するプロバイダー ('claude-code' | 'copilot' | 'codex')
  * @param timeoutMs - タイムアウト（ミリ秒）
  * @param requestId - リクエストID（キャンセル用）
- * @param workingDirectory - 作業ディレクトリ（claude-code用）
+ * @param workingDirectory - 作業ディレクトリ（claude-code/codex用）
  * @param model - Claude Code用モデル (provider='claude-code'時のみ使用)
  * @param copilotModel - Copilot用モデル (provider='copilot'時のみ使用)
  * @param allowedTools - 許可ツールリスト（claude-code用）
+ * @param codexModel - Codex用モデル (provider='codex'時のみ使用)
  * @returns 実行結果
  */
 export async function executeAi(
@@ -79,12 +102,14 @@ export async function executeAi(
   workingDirectory?: string,
   model?: ClaudeModel,
   copilotModel?: CopilotModel,
-  allowedTools?: string[]
+  allowedTools?: string[],
+  codexModel?: CodexModel
 ): Promise<ClaudeCodeExecutionResult> {
   log('INFO', 'executeAi called', {
     provider,
     model,
     copilotModel,
+    codexModel,
     promptLength: prompt.length,
     requestId,
   });
@@ -92,6 +117,11 @@ export async function executeAi(
   if (provider === 'copilot') {
     // Copilot用モデルを直接使用（マッピングなし）
     return executeVsCodeLm(prompt, timeoutMs, requestId, copilotModel);
+  }
+
+  if (provider === 'codex') {
+    // Codex CLIを使用
+    return executeCodexCLI(prompt, timeoutMs, requestId, workingDirectory, codexModel);
   }
 
   // Default: claude-code - Claude Code用モデルを使用
@@ -102,15 +132,16 @@ export async function executeAi(
  * AI を実行（ストリーミング）
  *
  * @param prompt - プロンプト文字列
- * @param provider - 使用するプロバイダー ('claude-code' | 'copilot')
+ * @param provider - 使用するプロバイダー ('claude-code' | 'copilot' | 'codex')
  * @param onProgress - ストリーミング進捗コールバック
  * @param timeoutMs - タイムアウト（ミリ秒）
  * @param requestId - リクエストID（キャンセル用）
- * @param workingDirectory - 作業ディレクトリ（claude-code用）
+ * @param workingDirectory - 作業ディレクトリ（claude-code/codex用）
  * @param model - Claude Code用モデル (provider='claude-code'時のみ使用)
  * @param copilotModel - Copilot用モデル (provider='copilot'時のみ使用)
  * @param allowedTools - 許可ツールリスト（claude-code用）
- * @param resumeSessionId - セッション継続用ID（claude-code用、copilotでは無視）
+ * @param resumeSessionId - セッション継続用ID（claude-code用、copilot/codexでは無視）
+ * @param codexModel - Codex用モデル (provider='codex'時のみ使用)
  * @returns 実行結果
  */
 export async function executeAiStreaming(
@@ -123,12 +154,14 @@ export async function executeAiStreaming(
   model?: ClaudeModel,
   copilotModel?: CopilotModel,
   allowedTools?: string[],
-  resumeSessionId?: string
+  resumeSessionId?: string,
+  codexModel?: CodexModel
 ): Promise<ClaudeCodeExecutionResult> {
   log('INFO', 'executeAiStreaming called', {
     provider,
     model,
     copilotModel,
+    codexModel,
     promptLength: prompt.length,
     requestId,
     resumeSessionId: resumeSessionId ? '(present)' : undefined,
@@ -141,6 +174,22 @@ export async function executeAiStreaming(
     }
     // Copilot用モデルを直接使用（マッピングなし）
     return executeVsCodeLmStreaming(prompt, onProgress, timeoutMs, requestId, copilotModel);
+  }
+
+  if (provider === 'codex') {
+    // Codex CLIはセッション継続をサポートしない
+    if (resumeSessionId) {
+      log('WARN', 'Session resume not supported with Codex provider, ignoring sessionId');
+    }
+    // Codex CLIを使用
+    return executeCodexCLIStreaming(
+      prompt,
+      onProgress,
+      timeoutMs,
+      requestId,
+      workingDirectory,
+      codexModel
+    );
   }
 
   // Default: claude-code - Claude Code用モデルを使用
@@ -171,6 +220,9 @@ export async function cancelAiRequest(
 
   if (provider === 'copilot') {
     return cancelLmRequest(requestId);
+  }
+  if (provider === 'codex') {
+    return cancelCodexProcess(requestId);
   }
   return cancelRefinement(requestId);
 }
