@@ -534,7 +534,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Initial instructional message (Phase 3.12)
   'refinement.initialMessage.description':
     'Describe the workflow you want to achieve in natural language.',
-  'refinement.initialMessage.note': '※ This feature uses {{providerName}}.',
+  // Provider-specific notes
+  'refinement.initialMessage.noteClaudeCode': '※ This feature uses Claude Code.',
+  'refinement.initialMessage.noteCodex': '※ This feature uses Codex CLI.',
   // Copilot-specific note with link
   'refinement.initialMessage.noteCopilot':
     '※ This feature requests your GitHub Copilot through the VSCode Language Model API.',

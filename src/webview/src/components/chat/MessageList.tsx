@@ -74,9 +74,9 @@ export function MessageList({
             textAlign: 'center',
           }}
         >
-          {selectedProvider === 'copilot'
-            ? t('refinement.initialMessage.noteCopilot')
-            : t('refinement.initialMessage.note', { providerName: 'Claude Code' })}
+          {selectedProvider === 'copilot' && t('refinement.initialMessage.noteCopilot')}
+          {selectedProvider === 'claude-code' && t('refinement.initialMessage.noteClaudeCode')}
+          {selectedProvider === 'codex' && t('refinement.initialMessage.noteCodex')}
         </div>
         {selectedProvider === 'copilot' && (
           <button
@@ -109,7 +109,7 @@ export function MessageList({
             <span>Learn more</span>
           </button>
         )}
-        {selectedProvider !== 'copilot' && (
+        {selectedProvider === 'claude-code' && (
           <div
             style={{
               marginTop: '16px',

@@ -511,7 +511,9 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
 
   // Initial instructional message (Phase 3.12)
   'refinement.initialMessage.description': '用自然語言描述您要實現的工作流。',
-  'refinement.initialMessage.note': '※ 此功能使用{{providerName}}。',
+  // Provider-specific notes
+  'refinement.initialMessage.noteClaudeCode': '※ 此功能使用Claude Code。',
+  'refinement.initialMessage.noteCodex': '※ 此功能使用Codex CLI。',
   // Copilot-specific note with link
   'refinement.initialMessage.noteCopilot':
     '※ 此功能透過 VSCode Language Model API 向您的 GitHub Copilot 發送請求。',
