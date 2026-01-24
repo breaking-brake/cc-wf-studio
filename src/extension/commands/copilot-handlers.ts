@@ -36,6 +36,10 @@ import {
 } from '../services/copilot-skill-export-service';
 import { nodeNameToFileName } from '../services/export-service';
 import type { FileService } from '../services/file-service';
+import {
+  hasNonStandardSkills,
+  promptAndNormalizeSkills,
+} from '../services/skill-normalization-service';
 import { executeCopilotCliInTerminal } from '../services/terminal-execution-service';
 
 /**
@@ -322,6 +326,30 @@ export async function handleRunForCopilotCli(
   try {
     const { workflow } = payload;
     const workspacePath = fileService.getWorkspacePath();
+
+    // Step 0.5: Normalize skills (copy non-.claude/skills/ to .claude/skills/)
+    // This ensures skills from .github/skills/, .codex/skills/, etc. are available in .claude/skills/
+    if (hasNonStandardSkills(workflow)) {
+      const normalizeResult = await promptAndNormalizeSkills(workflow);
+
+      if (!normalizeResult.success) {
+        if (normalizeResult.cancelled) {
+          webview.postMessage({
+            type: 'RUN_FOR_COPILOT_CLI_CANCELLED',
+            requestId,
+          });
+          return;
+        }
+        throw new Error(normalizeResult.error || 'Failed to copy skills to .claude/skills/');
+      }
+
+      // Log normalized skills
+      if (normalizeResult.normalizedSkills && normalizeResult.normalizedSkills.length > 0) {
+        console.log(
+          `[Copilot CLI] Copied ${normalizeResult.normalizedSkills.length} skill(s) to .claude/skills/`
+        );
+      }
+    }
 
     // Step 1: Check if MCP servers need to be synced to $HOME/.copilot/mcp-config.json
     const mcpServerIds = extractMcpServerIdsFromWorkflow(workflow);

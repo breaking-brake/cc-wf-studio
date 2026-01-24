@@ -25,6 +25,10 @@ import {
 } from '../services/codex-skill-export-service';
 import { extractMcpServerIdsFromWorkflow } from '../services/copilot-export-service';
 import type { FileService } from '../services/file-service';
+import {
+  hasNonStandardSkills,
+  promptAndNormalizeSkills,
+} from '../services/skill-normalization-service';
 import { executeCodexCliInTerminal } from '../services/terminal-execution-service';
 
 /**
@@ -135,6 +139,30 @@ export async function handleRunForCodexCli(
     // Step 0: Ensure project is trusted (workaround for openai/codex#9752)
     // This is required for Codex CLI to recognize project-level skills
     const projectTrustAdded = await ensureProjectTrustedForCodexCli(workspacePath);
+
+    // Step 0.5: Normalize skills (copy non-.claude/skills/ to .claude/skills/)
+    // This ensures skills from .github/skills/, .codex/skills/, etc. are available in .claude/skills/
+    if (hasNonStandardSkills(workflow)) {
+      const normalizeResult = await promptAndNormalizeSkills(workflow);
+
+      if (!normalizeResult.success) {
+        if (normalizeResult.cancelled) {
+          webview.postMessage({
+            type: 'RUN_FOR_CODEX_CLI_CANCELLED',
+            requestId,
+          });
+          return;
+        }
+        throw new Error(normalizeResult.error || 'Failed to copy skills to .claude/skills/');
+      }
+
+      // Log normalized skills
+      if (normalizeResult.normalizedSkills && normalizeResult.normalizedSkills.length > 0) {
+        console.log(
+          `[Codex CLI] Copied ${normalizeResult.normalizedSkills.length} skill(s) to .claude/skills/`
+        );
+      }
+    }
 
     // Step 1: Check if MCP servers need to be synced to $HOME/.codex/config.toml
     const mcpServerIds = extractMcpServerIdsFromWorkflow(workflow);

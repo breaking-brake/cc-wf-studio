@@ -18,7 +18,10 @@ import {
   validateClaudeFileFormat,
 } from '../services/export-service';
 import type { FileService } from '../services/file-service';
-import { hasGithubSkills, promptAndCopyGithubSkills } from '../services/github-skill-copy-service';
+import {
+  hasNonStandardSkills,
+  promptAndNormalizeSkills,
+} from '../services/skill-normalization-service';
 import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
 
 /**
@@ -43,26 +46,26 @@ export async function handleExportWorkflow(
       throw new Error(`Workflow validation failed:\n${errorMessages}`);
     }
 
-    // Check if workflow uses skills from .github/skills/ (Issue #493 Part 2)
+    // Check if workflow uses skills from non-standard directories (e.g., .github/skills/, .codex/skills/)
     // For Claude Code execution, skills must be in .claude/skills/
-    if (hasGithubSkills(payload.workflow)) {
-      const copyResult = await promptAndCopyGithubSkills(payload.workflow);
+    if (hasNonStandardSkills(payload.workflow)) {
+      const normalizeResult = await promptAndNormalizeSkills(payload.workflow);
 
-      if (!copyResult.success) {
-        if (copyResult.cancelled) {
+      if (!normalizeResult.success) {
+        if (normalizeResult.cancelled) {
           webview.postMessage({
             type: 'EXPORT_CANCELLED',
             requestId,
           });
           return;
         }
-        throw new Error(copyResult.error || 'Failed to copy skills from .github/skills/');
+        throw new Error(normalizeResult.error || 'Failed to copy skills to .claude/skills/');
       }
 
       // Log copied skills
-      if (copyResult.copiedSkills && copyResult.copiedSkills.length > 0) {
+      if (normalizeResult.normalizedSkills && normalizeResult.normalizedSkills.length > 0) {
         console.log(
-          `[Export] Copied ${copyResult.copiedSkills.length} skill(s) from .github/skills/ to .claude/skills/`
+          `[Export] Copied ${normalizeResult.normalizedSkills.length} skill(s) to .claude/skills/`
         );
       }
     }
@@ -187,13 +190,13 @@ export async function handleExportWorkflowForExecution(
       };
     }
 
-    // Check if workflow uses skills from .github/skills/ (Issue #493 Part 2)
+    // Check if workflow uses skills from non-standard directories (e.g., .github/skills/, .codex/skills/)
     // For Claude Code execution, skills must be in .claude/skills/
-    if (hasGithubSkills(workflow)) {
-      const copyResult = await promptAndCopyGithubSkills(workflow);
+    if (hasNonStandardSkills(workflow)) {
+      const normalizeResult = await promptAndNormalizeSkills(workflow);
 
-      if (!copyResult.success) {
-        if (copyResult.cancelled) {
+      if (!normalizeResult.success) {
+        if (normalizeResult.cancelled) {
           return {
             success: false,
             cancelled: true,
@@ -201,14 +204,14 @@ export async function handleExportWorkflowForExecution(
         }
         return {
           success: false,
-          error: copyResult.error || 'Failed to copy skills from .github/skills/',
+          error: normalizeResult.error || 'Failed to copy skills to .claude/skills/',
         };
       }
 
       // Log copied skills
-      if (copyResult.copiedSkills && copyResult.copiedSkills.length > 0) {
+      if (normalizeResult.normalizedSkills && normalizeResult.normalizedSkills.length > 0) {
         console.log(
-          `[Export] Copied ${copyResult.copiedSkills.length} skill(s) from .github/skills/ to .claude/skills/`
+          `[Export] Copied ${normalizeResult.normalizedSkills.length} skill(s) to .claude/skills/`
         );
       }
     }
