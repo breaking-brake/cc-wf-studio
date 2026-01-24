@@ -31,8 +31,8 @@ export interface CodexExecutionResult {
     details?: string;
   };
   executionTimeMs: number;
-  /** Session ID is not supported by Codex CLI */
-  sessionId?: undefined;
+  /** Thread ID for session continuation (extracted from thread.started event) */
+  sessionId?: string;
 }
 
 /** Default Codex model (empty = inherit from CLI config) */
@@ -69,6 +69,7 @@ export async function isCodexCliAvailable(): Promise<{
  * @param workingDirectory - Working directory for CLI execution
  * @param model - Codex model to use (default: '' = inherit from CLI config)
  * @param reasoningEffort - Reasoning effort level (default: 'minimal')
+ * @param resumeSessionId - Optional thread ID to resume a previous session
  * @returns Execution result with success status and output/error
  */
 export async function executeCodexCLI(
@@ -77,7 +78,8 @@ export async function executeCodexCLI(
   requestId?: string,
   workingDirectory?: string,
   model: CodexModel = DEFAULT_CODEX_MODEL,
-  reasoningEffort: CodexReasoningEffort = 'low'
+  reasoningEffort: CodexReasoningEffort = 'low',
+  resumeSessionId?: string
 ): Promise<CodexExecutionResult> {
   const startTime = Date.now();
 
@@ -87,6 +89,7 @@ export async function executeCodexCLI(
     model,
     reasoningEffort,
     cwd: workingDirectory ?? process.cwd(),
+    resumeSessionId: resumeSessionId ? '(present)' : undefined,
   });
 
   // Get Codex CLI path (handles GUI-launched VSCode where PATH is different)
@@ -107,7 +110,10 @@ export async function executeCodexCLI(
   return new Promise((resolve) => {
     // Build CLI arguments with '-' to read prompt from stdin
     // --skip-git-repo-check: bypass trust check since user is explicitly using extension
-    const args = ['exec', '--json', '--skip-git-repo-check'];
+    // For session resume: codex exec resume <thread_id> [options] -
+    const args = resumeSessionId
+      ? ['exec', 'resume', resumeSessionId, '--json', '--skip-git-repo-check']
+      : ['exec', '--json', '--skip-git-repo-check'];
     if (model) {
       args.push('-m', model);
     }
@@ -137,6 +143,7 @@ export async function executeCodexCLI(
     let stderr = '';
     let timeoutId: NodeJS.Timeout | undefined;
     let timedOut = false;
+    let extractedSessionId: string | undefined;
 
     // Set up timeout
     if (timeoutMs > 0) {
@@ -191,15 +198,20 @@ export async function executeCodexCLI(
         // Extract JSON response from mixed output (may contain AI reasoning)
         const output = extractJsonResponse(parsedOutput);
 
+        // Extract thread_id from JSONL output for session continuation
+        extractedSessionId = extractThreadIdFromOutput(stdout);
+
         log('INFO', 'Codex CLI execution succeeded', {
           executionTimeMs,
           outputLength: output.length,
           wasExtracted: output !== parsedOutput,
+          sessionId: extractedSessionId,
         });
         resolve({
           success: true,
           output: output.trim(),
           executionTimeMs,
+          sessionId: extractedSessionId,
         });
       } else {
         log('ERROR', 'Codex CLI execution failed', {
@@ -284,6 +296,7 @@ export type StreamingProgressCallback = (
  * @param workingDirectory - Working directory for CLI execution
  * @param model - Codex model to use (default: '' = inherit from CLI config)
  * @param reasoningEffort - Reasoning effort level (default: 'minimal')
+ * @param resumeSessionId - Optional thread ID to resume a previous session
  * @returns Execution result with success status and output/error
  */
 export async function executeCodexCLIStreaming(
@@ -293,7 +306,8 @@ export async function executeCodexCLIStreaming(
   requestId?: string,
   workingDirectory?: string,
   model: CodexModel = DEFAULT_CODEX_MODEL,
-  reasoningEffort: CodexReasoningEffort = 'low'
+  reasoningEffort: CodexReasoningEffort = 'low',
+  resumeSessionId?: string
 ): Promise<CodexExecutionResult> {
   const startTime = Date.now();
 
@@ -303,6 +317,7 @@ export async function executeCodexCLIStreaming(
     model,
     reasoningEffort,
     cwd: workingDirectory ?? process.cwd(),
+    resumeSessionId: resumeSessionId ? '(present)' : undefined,
   });
 
   // Get Codex CLI path (handles GUI-launched VSCode where PATH is different)
@@ -324,10 +339,14 @@ export async function executeCodexCLIStreaming(
     let accumulated = '';
     let explanatoryText = '';
     let currentToolInfo = '';
+    let extractedSessionId: string | undefined;
 
     // Build CLI arguments with '-' to read prompt from stdin
     // --skip-git-repo-check: bypass trust check since user is explicitly using extension
-    const args = ['exec', '--json', '--skip-git-repo-check'];
+    // For session resume: codex exec resume <thread_id> [options] -
+    const args = resumeSessionId
+      ? ['exec', 'resume', resumeSessionId, '--json', '--skip-git-repo-check']
+      : ['exec', '--json', '--skip-git-repo-check'];
     if (model) {
       args.push('-m', model);
     }
@@ -520,11 +539,15 @@ export async function executeCodexCLIStreaming(
               currentToolInfo = '';
               onProgress(text, explanatoryText, explanatoryText, 'text');
             }
-          } else if (
-            parsed.type === 'thread.started' ||
-            parsed.type === 'turn.started' ||
-            parsed.type === 'turn.completed'
-          ) {
+          } else if (parsed.type === 'thread.started') {
+            // Extract thread_id for session continuation
+            if (parsed.thread_id) {
+              extractedSessionId = parsed.thread_id;
+              log('INFO', 'Extracted thread ID from Codex thread.started event', {
+                threadId: extractedSessionId,
+              });
+            }
+          } else if (parsed.type === 'turn.started' || parsed.type === 'turn.completed') {
             // These are lifecycle events, no content to extract
             log('DEBUG', `Codex lifecycle event: ${parsed.type}`);
           } else {
@@ -585,11 +608,13 @@ export async function executeCodexCLIStreaming(
           accumulatedLength: accumulated.length,
           extractedLength: extractedOutput.length,
           wasExtracted: extractedOutput !== accumulated,
+          sessionId: extractedSessionId,
         });
         resolve({
           success: true,
           output: extractedOutput,
           executionTimeMs,
+          sessionId: extractedSessionId,
         });
       } else {
         log('ERROR', 'Codex CLI streaming execution failed', {
@@ -750,6 +775,36 @@ function extractJsonResponse(text: string): string {
   }
 
   return text;
+}
+
+/**
+ * Extract thread_id from Codex CLI JSONL output for session continuation
+ * Looks for the thread.started event which contains the thread_id
+ *
+ * @param output - Raw JSONL output from Codex CLI
+ * @returns Extracted thread_id or undefined if not found
+ */
+function extractThreadIdFromOutput(output: string): string | undefined {
+  const lines = output.trim().split('\n');
+
+  for (const line of lines) {
+    if (!line.trim()) continue;
+
+    try {
+      const parsed = JSON.parse(line);
+
+      if (parsed.type === 'thread.started' && parsed.thread_id) {
+        log('INFO', 'Extracted thread ID from Codex output (non-streaming)', {
+          threadId: parsed.thread_id,
+        });
+        return parsed.thread_id;
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }
+
+  return undefined;
 }
 
 /**

@@ -191,11 +191,7 @@ export async function executeAiStreaming(
   }
 
   if (provider === 'codex') {
-    // Codex CLIはセッション継続をサポートしない
-    if (resumeSessionId) {
-      log('WARN', 'Session resume not supported with Codex provider, ignoring sessionId');
-    }
-    // Codex CLIを使用
+    // Codex CLIを使用（セッション継続対応）
     return executeCodexCLIStreaming(
       prompt,
       onProgress,
@@ -203,7 +199,8 @@ export async function executeAiStreaming(
       requestId,
       workingDirectory,
       codexModel,
-      codexReasoningEffort
+      codexReasoningEffort,
+      resumeSessionId
     );
   }
 

@@ -421,12 +421,18 @@ export async function refineWorkflow(
       const errorDetails = cliResult.error?.details?.toLowerCase() || '';
       const errorMessage = cliResult.error?.message?.toLowerCase() || '';
       const isSessionError = [
+        // Claude Code specific patterns
         'session not found',
         'session expired',
         'invalid session',
         'no such session',
         'no conversation found with session id',
         'not a valid uuid',
+        // Codex CLI specific patterns (thread-based)
+        'thread not found',
+        'invalid thread',
+        'no thread with id',
+        'thread expired',
       ].some((pattern) => errorDetails.includes(pattern) || errorMessage.includes(pattern));
 
       if (isSessionError) {
@@ -487,10 +493,11 @@ export async function refineWorkflow(
       sessionReconnected = true;
     }
 
-    // Detect provider switch from Claude Code to Copilot or Codex
-    // Copilot and Codex don't support session continuation, so previous session is lost
-    if ((provider === 'copilot' || provider === 'codex') && conversationHistory.sessionId) {
-      log('WARN', `Session discontinued due to provider switch to ${provider}`, {
+    // Detect provider switch from Claude Code/Codex to Copilot
+    // Copilot doesn't support session continuation, so previous session is lost
+    // Note: Codex now supports session continuation via thread_id
+    if (provider === 'copilot' && conversationHistory.sessionId) {
+      log('WARN', 'Session discontinued due to provider switch to Copilot', {
         requestId,
         previousSessionId: conversationHistory.sessionId,
       });
@@ -1290,10 +1297,11 @@ export async function refineSubAgentFlow(
     // Track whether session was reconnected due to provider switch
     let sessionReconnected = false;
 
-    // Detect provider switch from Claude Code to Copilot or Codex
-    // Copilot and Codex don't support session continuation, so previous session is lost
-    if ((provider === 'copilot' || provider === 'codex') && conversationHistory.sessionId) {
-      log('WARN', `Session discontinued due to provider switch to ${provider} (SubAgentFlow)`, {
+    // Detect provider switch from Claude Code/Codex to Copilot
+    // Copilot doesn't support session continuation, so previous session is lost
+    // Note: Codex now supports session continuation via thread_id
+    if (provider === 'copilot' && conversationHistory.sessionId) {
+      log('WARN', 'Session discontinued due to provider switch to Copilot (SubAgentFlow)', {
         requestId,
         previousSessionId: conversationHistory.sessionId,
       });
