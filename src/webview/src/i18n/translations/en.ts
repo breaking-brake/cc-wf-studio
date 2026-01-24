@@ -853,4 +853,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'description.panel.title': 'Description',
   'description.panel.show': 'Show description panel',
   'description.panel.hide': 'Hide description panel',
+
+  // Feature Announcement Banner
+  'announcement.codexCli.title': 'New: OpenAI Codex CLI Export & Run support is now available!',
+  'announcement.codexCli.description': 'Enable in More menu → Codex',
 };

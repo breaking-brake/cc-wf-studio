@@ -817,4 +817,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'description.panel.title': '描述',
   'description.panel.show': '顯示描述面板',
   'description.panel.hide': '隱藏描述面板',
+
+  // Feature Announcement Banner
+  'announcement.codexCli.title': '新功能: 現已支援 OpenAI Codex CLI 匯出和執行！',
+  'announcement.codexCli.description': '在 更多 選單 → Codex 中啟用',
 };

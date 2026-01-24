@@ -847,4 +847,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'description.panel.title': '説明',
   'description.panel.show': '説明パネルを表示',
   'description.panel.hide': '説明パネルを非表示',
+
+  // Feature Announcement Banner
+  'announcement.codexCli.title': '新機能: OpenAI Codex CLI での変換・実行に対応しました！',
+  'announcement.codexCli.description': 'その他メニュー → Codex で有効化',
 };

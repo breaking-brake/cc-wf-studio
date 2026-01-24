@@ -21,7 +21,9 @@ import ReactFlow, {
 } from 'reactflow';
 import { useAutoFocusNode } from '../hooks/useAutoFocusNode';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
+import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
+import { FeatureAnnouncementBanner } from './common/FeatureAnnouncementBanner';
 import { DescriptionPanel } from './DescriptionPanel';
 // Custom edge with delete button
 import { DeletableEdge } from './edges/DeletableEdge';
@@ -91,6 +93,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   isNodePaletteCollapsed = false,
   onExpandNodePalette,
 }) => {
+  const { t } = useTranslation();
   const isCompact = useIsCompactMode();
 
   // Auto-focus on newly added nodes
@@ -199,109 +202,119 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   const selectionOnDrag = effectiveMode === 'selection';
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={handleNodesChange}
-        onEdgesChange={handleEdgesChange}
-        onConnect={handleConnect}
-        onNodeClick={handleNodeClick}
-        onPaneClick={handlePaneClick}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        defaultEdgeOptions={defaultEdgeOptions}
-        isValidConnection={isValidConnection}
-        snapToGrid={true}
-        snapGrid={snapGrid}
-        panOnDrag={panOnDrag}
-        selectionOnDrag={selectionOnDrag}
-        fitView
-        attributionPosition="bottom-left"
-      >
-        {/* Background grid */}
-        <Background color="var(--vscode-panel-border)" gap={15} size={1} />
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* Feature Announcement Banner - placed above the canvas */}
+      <FeatureAnnouncementBanner
+        featureId="codex-cli-v3.17"
+        title={t('announcement.codexCli.title')}
+        description={t('announcement.codexCli.description')}
+      />
 
-        {/* Controls (zoom, fit view, etc.) */}
-        <Controls />
+      {/* Canvas area */}
+      <div style={{ flex: 1, position: 'relative' }}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={handleNodesChange}
+          onEdgesChange={handleEdgesChange}
+          onConnect={handleConnect}
+          onNodeClick={handleNodeClick}
+          onPaneClick={handlePaneClick}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          defaultEdgeOptions={defaultEdgeOptions}
+          isValidConnection={isValidConnection}
+          snapToGrid={true}
+          snapGrid={snapGrid}
+          panOnDrag={panOnDrag}
+          selectionOnDrag={selectionOnDrag}
+          fitView
+          attributionPosition="bottom-left"
+        >
+          {/* Background grid */}
+          <Background color="var(--vscode-panel-border)" gap={15} size={1} />
 
-        {/* Mini map with container */}
-        <Panel position="bottom-right">
-          <MinimapContainer>
-            <MiniMap
-              nodeColor={(node) => {
-                switch (node.type) {
-                  case 'subAgent':
-                    return 'var(--vscode-charts-blue)';
-                  case 'askUserQuestion':
-                    return 'var(--vscode-charts-orange)';
-                  case 'branch': // Legacy
-                    return 'var(--vscode-charts-yellow)';
-                  case 'ifElse':
-                    return 'var(--vscode-charts-yellow)';
-                  case 'switch':
-                    return 'var(--vscode-charts-yellow)';
-                  case 'start':
-                    return 'var(--vscode-charts-green)';
-                  case 'end':
-                    return 'var(--vscode-charts-red)';
-                  case 'prompt':
-                    return 'var(--vscode-charts-purple)';
-                  case 'skill':
-                    return 'var(--vscode-charts-cyan)';
-                  case 'subAgentFlow':
-                    return 'var(--vscode-charts-purple)';
-                  default:
-                    return 'var(--vscode-foreground)';
-                }
-              }}
-              maskColor="rgba(0, 0, 0, 0.5)"
-              style={{
-                position: 'relative',
-                backgroundColor: 'var(--vscode-editor-background)',
-                width: isCompact ? 120 : 200,
-                height: isCompact ? 80 : 150,
-                margin: '4px 16px',
-              }}
-            />
-          </MinimapContainer>
-        </Panel>
+          {/* Controls (zoom, fit view, etc.) */}
+          <Controls />
 
-        {/* Interaction Mode Toggle */}
-        <Panel position="top-left">
-          <InteractionModeToggle />
-        </Panel>
-
-        {/* Description Panel for workflow description */}
-        <Panel position="top-right">
-          <DescriptionPanel />
-        </Panel>
-
-        {/* Expand Node Palette Button (when collapsed) */}
-        {isNodePaletteCollapsed && onExpandNodePalette && (
-          <Panel position="top-left" style={{ marginTop: '48px' }}>
-            <button
-              type="button"
-              onClick={onExpandNodePalette}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '32px',
-                height: '32px',
-                backgroundColor: 'var(--vscode-editor-background)',
-                border: '1px solid var(--vscode-panel-border)',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                color: 'var(--vscode-foreground)',
-                opacity: 0.85,
-              }}
-            >
-              <PanelLeftOpen size={16} aria-hidden="true" />
-            </button>
+          {/* Mini map with container */}
+          <Panel position="bottom-right">
+            <MinimapContainer>
+              <MiniMap
+                nodeColor={(node) => {
+                  switch (node.type) {
+                    case 'subAgent':
+                      return 'var(--vscode-charts-blue)';
+                    case 'askUserQuestion':
+                      return 'var(--vscode-charts-orange)';
+                    case 'branch': // Legacy
+                      return 'var(--vscode-charts-yellow)';
+                    case 'ifElse':
+                      return 'var(--vscode-charts-yellow)';
+                    case 'switch':
+                      return 'var(--vscode-charts-yellow)';
+                    case 'start':
+                      return 'var(--vscode-charts-green)';
+                    case 'end':
+                      return 'var(--vscode-charts-red)';
+                    case 'prompt':
+                      return 'var(--vscode-charts-purple)';
+                    case 'skill':
+                      return 'var(--vscode-charts-cyan)';
+                    case 'subAgentFlow':
+                      return 'var(--vscode-charts-purple)';
+                    default:
+                      return 'var(--vscode-foreground)';
+                  }
+                }}
+                maskColor="rgba(0, 0, 0, 0.5)"
+                style={{
+                  position: 'relative',
+                  backgroundColor: 'var(--vscode-editor-background)',
+                  width: isCompact ? 120 : 200,
+                  height: isCompact ? 80 : 150,
+                  margin: '4px 16px',
+                }}
+              />
+            </MinimapContainer>
           </Panel>
-        )}
-      </ReactFlow>
+
+          {/* Interaction Mode Toggle */}
+          <Panel position="top-left">
+            <InteractionModeToggle />
+          </Panel>
+
+          {/* Description Panel for workflow description */}
+          <Panel position="top-right">
+            <DescriptionPanel />
+          </Panel>
+
+          {/* Expand Node Palette Button (when collapsed) */}
+          {isNodePaletteCollapsed && onExpandNodePalette && (
+            <Panel position="top-left" style={{ marginTop: '48px' }}>
+              <button
+                type="button"
+                onClick={onExpandNodePalette}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '32px',
+                  height: '32px',
+                  backgroundColor: 'var(--vscode-editor-background)',
+                  border: '1px solid var(--vscode-panel-border)',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  color: 'var(--vscode-foreground)',
+                  opacity: 0.85,
+                }}
+              >
+                <PanelLeftOpen size={16} aria-hidden="true" />
+              </button>
+            </Panel>
+          )}
+        </ReactFlow>
+      </div>
     </div>
   );
 };
