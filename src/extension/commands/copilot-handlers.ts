@@ -327,10 +327,11 @@ export async function handleRunForCopilotCli(
     const { workflow } = payload;
     const workspacePath = fileService.getWorkspacePath();
 
-    // Step 0.5: Normalize skills (copy non-.claude/skills/ to .claude/skills/)
-    // This ensures skills from .github/skills/, .codex/skills/, etc. are available in .claude/skills/
-    if (hasNonStandardSkills(workflow)) {
-      const normalizeResult = await promptAndNormalizeSkills(workflow);
+    // Step 0.5: Normalize skills (copy non-standard skills to .claude/skills/)
+    // For Copilot CLI, .github/skills/ and .copilot/skills/ are considered "native" (no copy needed)
+    // Only skills from other directories (e.g., .codex/skills/) need to be copied
+    if (hasNonStandardSkills(workflow, 'copilot')) {
+      const normalizeResult = await promptAndNormalizeSkills(workflow, 'copilot');
 
       if (!normalizeResult.success) {
         if (normalizeResult.cancelled) {

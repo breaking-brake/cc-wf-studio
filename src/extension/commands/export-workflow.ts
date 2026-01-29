@@ -47,9 +47,10 @@ export async function handleExportWorkflow(
     }
 
     // Check if workflow uses skills from non-standard directories (e.g., .github/skills/, .codex/skills/)
-    // For Claude Code execution, skills must be in .claude/skills/
-    if (hasNonStandardSkills(payload.workflow)) {
-      const normalizeResult = await promptAndNormalizeSkills(payload.workflow);
+    // For Claude Code execution (export), only .claude/skills/ is considered standard
+    // All other skill directories need to be copied to .claude/skills/
+    if (hasNonStandardSkills(payload.workflow, 'claude')) {
+      const normalizeResult = await promptAndNormalizeSkills(payload.workflow, 'claude');
 
       if (!normalizeResult.success) {
         if (normalizeResult.cancelled) {
@@ -191,9 +192,10 @@ export async function handleExportWorkflowForExecution(
     }
 
     // Check if workflow uses skills from non-standard directories (e.g., .github/skills/, .codex/skills/)
-    // For Claude Code execution, skills must be in .claude/skills/
-    if (hasNonStandardSkills(workflow)) {
-      const normalizeResult = await promptAndNormalizeSkills(workflow);
+    // For Claude Code execution, only .claude/skills/ is considered standard
+    // All other skill directories need to be copied to .claude/skills/
+    if (hasNonStandardSkills(workflow, 'claude')) {
+      const normalizeResult = await promptAndNormalizeSkills(workflow, 'claude');
 
       if (!normalizeResult.success) {
         if (normalizeResult.cancelled) {

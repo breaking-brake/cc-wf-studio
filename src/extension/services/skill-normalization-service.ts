@@ -29,6 +29,7 @@ import { getProjectSkillsDir, getWorkspaceRoot } from '../utils/path-utils';
  */
 const NON_STANDARD_SKILL_PATTERNS = [
   '.github/skills/', // GitHub Copilot CLI
+  '.copilot/skills/', // GitHub Copilot CLI (alternative)
   '.codex/skills/', // OpenAI Codex CLI
   // Future: '.gemini/skills/', '.cursor/skills/', etc.
 ] as const;
@@ -36,7 +37,57 @@ const NON_STANDARD_SKILL_PATTERNS = [
 /**
  * Source type for skill directories
  */
-export type SkillSourceType = 'github' | 'codex' | 'other';
+export type SkillSourceType = 'github' | 'copilot' | 'codex' | 'other';
+
+/**
+ * Target CLI for workflow execution
+ *
+ * Each CLI has its own "native" skill directory that should be considered standard:
+ * - 'claude': Only .claude/skills/ is standard (default for export/Claude Code)
+ * - 'copilot': .claude/skills/, .github/skills/, AND .copilot/skills/ are standard
+ * - 'codex': .claude/skills/ AND .codex/skills/ are standard
+ */
+export type TargetCli = 'claude' | 'copilot' | 'codex';
+
+/**
+ * Get the list of skill directory patterns that are considered "standard" for a given CLI
+ *
+ * @param targetCli - Target CLI for execution
+ * @returns Array of directory patterns that are standard for this CLI
+ */
+function getStandardSkillPatterns(targetCli: TargetCli): string[] {
+  // .claude/skills/ is always standard for all CLIs
+  const patterns = ['.claude/skills/'];
+
+  switch (targetCli) {
+    case 'copilot':
+      // Copilot CLI considers .github/skills/ and .copilot/skills/ as native
+      patterns.push('.github/skills/', '.copilot/skills/');
+      break;
+    case 'codex':
+      // Codex CLI considers .codex/skills/ as native
+      patterns.push('.codex/skills/');
+      break;
+    // case 'claude' falls through to default
+    // Claude Code only uses .claude/skills/
+  }
+
+  return patterns;
+}
+
+/**
+ * Check if a skill path is from a standard directory for the given target CLI
+ *
+ * @param skillPath - Path to check (relative or absolute)
+ * @param targetCli - Target CLI for execution
+ * @returns True if the skill is from a standard directory for this CLI
+ */
+function isSkillFromStandardDir(skillPath: string, targetCli: TargetCli): boolean {
+  const normalizedPath = skillPath.replace(/\\/g, '/');
+  const standardPatterns = getStandardSkillPatterns(targetCli);
+
+  return standardPatterns.some((pattern) => normalizedPath.includes(pattern));
+}
 
 /**
  * Information about a skill that needs to be normalized (copied)
@@ -133,6 +184,9 @@ function getSourceType(skillPath: string): SkillSourceType {
   if (normalizedPath.includes('.github/skills/')) {
     return 'github';
   }
+  if (normalizedPath.includes('.copilot/skills/')) {
+    return 'copilot';
+  }
   if (normalizedPath.includes('.codex/skills/')) {
     return 'codex';
   }
@@ -154,6 +208,8 @@ function getSourceSkillsDir(sourceType: SkillSourceType): string | null {
   switch (sourceType) {
     case 'github':
       return path.join(workspaceRoot, '.github', 'skills');
+    case 'copilot':
+      return path.join(workspaceRoot, '.copilot', 'skills');
     case 'codex':
       return path.join(workspaceRoot, '.codex', 'skills');
     default:
@@ -174,13 +230,15 @@ function getSkillName(skillPath: string): string {
 }
 
 /**
- * Check which skills need to be normalized (copied from non-.claude/skills/ to .claude/skills/)
+ * Check which skills need to be normalized (copied from non-standard directories to .claude/skills/)
  *
  * @param workflow - Workflow to check
+ * @param targetCli - Target CLI for execution (default: 'claude')
  * @returns Check result with skills to normalize and overwrite information
  */
 export async function checkSkillsToNormalize(
-  workflow: Workflow
+  workflow: Workflow,
+  targetCli: TargetCli = 'claude'
 ): Promise<SkillNormalizationCheckResult> {
   const skillNodes = extractSkillNodes(workflow);
   const workspaceRoot = getWorkspaceRoot();
@@ -206,8 +264,8 @@ export async function checkSkillsToNormalize(
     }
     processedNames.add(skillName);
 
-    // Only process skills from non-standard directories
-    if (!isNonStandardSkillPath(skillPath)) {
+    // Skip skills from standard directories for the target CLI
+    if (isSkillFromStandardDir(skillPath, targetCli)) {
       skippedSkills.push(skillName);
       continue;
     }
@@ -309,12 +367,14 @@ function getSourceDescription(skills: SkillToNormalize[]): string {
  * If any skills would overwrite existing files, shows a warning.
  *
  * @param workflow - Workflow being processed
+ * @param targetCli - Target CLI for execution (default: 'claude')
  * @returns Normalization result
  */
 export async function promptAndNormalizeSkills(
-  workflow: Workflow
+  workflow: Workflow,
+  targetCli: TargetCli = 'claude'
 ): Promise<SkillNormalizationResult> {
-  const checkResult = await checkSkillsToNormalize(workflow);
+  const checkResult = await checkSkillsToNormalize(workflow, targetCli);
 
   const allSkillsToNormalize = [...checkResult.skillsToNormalize, ...checkResult.skillsToOverwrite];
 
@@ -350,19 +410,21 @@ export async function promptAndNormalizeSkills(
   }
 
   // Execute the normalization
-  return normalizeSkillsWithoutPrompt(workflow);
+  return normalizeSkillsWithoutPrompt(workflow, targetCli);
 }
 
 /**
  * Normalize skills without prompting (for programmatic use or after user confirmation)
  *
  * @param workflow - Workflow to normalize skills for
+ * @param targetCli - Target CLI for execution (default: 'claude')
  * @returns Normalization result
  */
 export async function normalizeSkillsWithoutPrompt(
-  workflow: Workflow
+  workflow: Workflow,
+  targetCli: TargetCli = 'claude'
 ): Promise<SkillNormalizationResult> {
-  const checkResult = await checkSkillsToNormalize(workflow);
+  const checkResult = await checkSkillsToNormalize(workflow, targetCli);
 
   const allSkillsToNormalize = [...checkResult.skillsToNormalize, ...checkResult.skillsToOverwrite];
 
@@ -401,14 +463,15 @@ export async function normalizeSkillsWithoutPrompt(
 }
 
 /**
- * Check if workflow has any skills from non-standard directories
+ * Check if workflow has any skills from non-standard directories for the target CLI
  *
  * @param workflow - Workflow to check
- * @returns True if workflow has skills from non-standard directories
+ * @param targetCli - Target CLI for execution (default: 'claude')
+ * @returns True if workflow has skills from non-standard directories for this CLI
  */
-export function hasNonStandardSkills(workflow: Workflow): boolean {
+export function hasNonStandardSkills(workflow: Workflow, targetCli: TargetCli = 'claude'): boolean {
   const skillNodes = extractSkillNodes(workflow);
-  return skillNodes.some((node) => isNonStandardSkillPath(node.data.skillPath));
+  return skillNodes.some((node) => !isSkillFromStandardDir(node.data.skillPath, targetCli));
 }
 
 // ============================================================================
@@ -418,24 +481,26 @@ export function hasNonStandardSkills(workflow: Workflow): boolean {
 /**
  * @deprecated Use hasNonStandardSkills() instead
  */
-export function hasGithubSkills(workflow: Workflow): boolean {
-  return hasNonStandardSkills(workflow);
+export function hasGithubSkills(workflow: Workflow, targetCli: TargetCli = 'claude'): boolean {
+  return hasNonStandardSkills(workflow, targetCli);
 }
 
 /**
  * @deprecated Use promptAndNormalizeSkills() instead
  */
 export async function promptAndCopyGithubSkills(
-  workflow: Workflow
+  workflow: Workflow,
+  targetCli: TargetCli = 'claude'
 ): Promise<SkillNormalizationResult> {
-  return promptAndNormalizeSkills(workflow);
+  return promptAndNormalizeSkills(workflow, targetCli);
 }
 
 /**
  * @deprecated Use checkSkillsToNormalize() instead
  */
 export async function checkSkillsToCopy(
-  workflow: Workflow
+  workflow: Workflow,
+  targetCli: TargetCli = 'claude'
 ): Promise<SkillNormalizationCheckResult> {
-  return checkSkillsToNormalize(workflow);
+  return checkSkillsToNormalize(workflow, targetCli);
 }
