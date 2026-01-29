@@ -159,8 +159,8 @@ export const SkillNodeComponent: React.FC<NodeProps<SkillNodeData>> = React.memo
           >
             {data.scope}
           </div>
-          {/* Source Badge for project skills */}
-          {data.scope === 'project' && data.source && (
+          {/* Source Badge for project and user skills */}
+          {(data.scope === 'project' || data.scope === 'user') && data.source && (
             <AIProviderBadge provider={data.source as AIProviderType} size="small" />
           )}
         </div>
