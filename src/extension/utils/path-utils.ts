@@ -62,7 +62,7 @@ export function getProjectSkillsDir(): string | null {
 }
 
 /**
- * Get the GitHub Skills directory path
+ * Get the GitHub Skills directory path (Copilot project-scope)
  *
  * @returns Absolute path to .github/skills/ in workspace root, or null if no workspace
  *
@@ -76,6 +76,49 @@ export function getGithubSkillsDir(): string | null {
     return null;
   }
   return path.join(workspaceRoot, '.github', 'skills');
+}
+
+/**
+ * Get the Copilot user-scope Skills directory path
+ *
+ * @returns Absolute path to ~/.copilot/skills/
+ *
+ * @example
+ * // Unix: /Users/username/.copilot/skills
+ * // Windows: C:\Users\username\.copilot\skills
+ */
+export function getCopilotUserSkillsDir(): string {
+  return path.join(os.homedir(), '.copilot', 'skills');
+}
+
+/**
+ * Get the Codex user-scope Skills directory path
+ *
+ * @returns Absolute path to ~/.codex/skills/
+ *
+ * @example
+ * // Unix: /Users/username/.codex/skills
+ * // Windows: C:\Users\username\.codex\skills
+ */
+export function getCodexUserSkillsDir(): string {
+  return path.join(os.homedir(), '.codex', 'skills');
+}
+
+/**
+ * Get the Codex project-scope Skills directory path
+ *
+ * @returns Absolute path to .codex/skills/ in workspace root, or null if no workspace
+ *
+ * @example
+ * // Unix: /workspace/myproject/.codex/skills
+ * // Windows: C:\workspace\myproject\.codex\skills
+ */
+export function getCodexProjectSkillsDir(): string | null {
+  const workspaceRoot = getWorkspaceRoot();
+  if (!workspaceRoot) {
+    return null;
+  }
+  return path.join(workspaceRoot, '.codex', 'skills');
 }
 
 /**

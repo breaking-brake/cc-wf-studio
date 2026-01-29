@@ -11,6 +11,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { CreateSkillPayload, SkillReference } from '../../shared/types/messages';
 import {
+  getCodexProjectSkillsDir,
+  getCodexUserSkillsDir,
+  getCopilotUserSkillsDir,
   getGithubSkillsDir,
   getInstalledPluginsJsonPath,
   getKnownMarketplacesJsonPath,
@@ -39,7 +42,7 @@ import { parseSkillFrontmatter, type SkillMetadata } from './yaml-parser';
 export async function scanSkills(
   baseDir: string,
   scope: 'user' | 'project' | 'local',
-  source?: 'claude' | 'copilot'
+  source?: 'claude' | 'copilot' | 'codex'
 ): Promise<SkillReference[]> {
   const skills: SkillReference[] = [];
 
@@ -367,13 +370,15 @@ async function scanMarketplacePlugin(
  * Scan user, project, and plugin Skills
  *
  * Scans skills from multiple directories:
- * - User: ~/.claude/skills/
+ * - User: ~/.claude/skills/ (source: 'claude')
+ * - User: ~/.copilot/skills/ (source: 'copilot')
+ * - User: ~/.codex/skills/ (source: 'codex')
  * - Project: .claude/skills/ (source: 'claude')
- * - Project (alternative): .github/skills/ (source: 'copilot')
+ * - Project: .github/skills/ (source: 'copilot')
+ * - Project: .codex/skills/ (source: 'codex')
  * - Local: Plugin-provided skills
  *
- * Note: Same-named skills from both .claude/skills/ and .github/skills/
- * are both included (no deduplication) so users can see all available skills.
+ * Skills are NOT deduplicated - all sources are shown so users can see all available skills.
  *
  * @returns Object containing user, project, and local Skills
  */
@@ -382,20 +387,46 @@ export async function scanAllSkills(): Promise<{
   project: SkillReference[];
   local: SkillReference[];
 }> {
-  const userDir = getUserSkillsDir();
-  const projectDir = getProjectSkillsDir();
-  const githubDir = getGithubSkillsDir();
+  // User directories
+  const claudeUserDir = getUserSkillsDir();
+  const copilotUserDir = getCopilotUserSkillsDir();
+  const codexUserDir = getCodexUserSkillsDir();
 
-  const [user, claudeProjectSkills, githubProjectSkills, pluginSkills] = await Promise.all([
-    scanSkills(userDir, 'user'),
-    projectDir ? scanSkills(projectDir, 'project', 'claude') : Promise.resolve([]),
-    githubDir ? scanSkills(githubDir, 'project', 'copilot') : Promise.resolve([]),
+  // Project directories
+  const claudeProjectDir = getProjectSkillsDir();
+  const githubProjectDir = getGithubSkillsDir();
+  const codexProjectDir = getCodexProjectSkillsDir();
+
+  const [
+    claudeUserSkills,
+    copilotUserSkills,
+    codexUserSkills,
+    claudeProjectSkills,
+    githubProjectSkills,
+    codexProjectSkills,
+    pluginSkills,
+  ] = await Promise.all([
+    // User-scope scans
+    scanSkills(claudeUserDir, 'user', 'claude'),
+    scanSkills(copilotUserDir, 'user', 'copilot'),
+    scanSkills(codexUserDir, 'user', 'codex'),
+    // Project-scope scans
+    claudeProjectDir ? scanSkills(claudeProjectDir, 'project', 'claude') : Promise.resolve([]),
+    githubProjectDir ? scanSkills(githubProjectDir, 'project', 'copilot') : Promise.resolve([]),
+    codexProjectDir ? scanSkills(codexProjectDir, 'project', 'codex') : Promise.resolve([]),
+    // Plugin skills
     scanPluginSkills(),
   ]);
 
-  // Merge project skills: include both .claude/skills/ and .github/skills/
-  // (no deduplication - show both even if same-named)
-  const project: SkillReference[] = [...claudeProjectSkills, ...githubProjectSkills];
+  // Merge user skills: include all sources (no deduplication - show all available skills)
+  const user: SkillReference[] = [...claudeUserSkills, ...copilotUserSkills, ...codexUserSkills];
+
+  // Merge project skills: include all sources (no deduplication - show all available skills)
+  const project: SkillReference[] = [
+    ...claudeProjectSkills,
+    ...githubProjectSkills,
+    ...codexProjectSkills,
+  ];
 
   // Separate plugin skills by their scope
   const local: SkillReference[] = [];

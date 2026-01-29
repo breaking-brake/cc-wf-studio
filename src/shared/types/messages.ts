@@ -183,12 +183,13 @@ export interface SkillReference {
   /** Optional: Allowed tools (from YAML frontmatter) */
   allowedTools?: string;
   /**
-   * Source directory for project-scope skills
-   * - 'claude': from .claude/skills/ (Claude Code skills)
-   * - 'copilot': from .github/skills/ (Copilot skills)
-   * - undefined: for user/local scope or legacy data
+   * Source directory for skills
+   * - 'claude': from ~/.claude/skills/ (user) or .claude/skills/ (project)
+   * - 'copilot': from ~/.copilot/skills/ (user) or .github/skills/ (project)
+   * - 'codex': from ~/.codex/skills/ (user) or .codex/skills/ (project)
+   * - undefined: for local scope or legacy data
    */
-  source?: 'claude' | 'copilot';
+  source?: 'claude' | 'copilot' | 'codex';
 }
 
 export interface CreateSkillPayload {
