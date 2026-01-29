@@ -7,6 +7,11 @@
  */
 
 /**
+ * MCP configuration source provider
+ */
+export type McpConfigSource = 'claude' | 'copilot' | 'codex';
+
+/**
  * MCP server reference information (from 'claude mcp list')
  */
 export interface McpServerReference {
@@ -26,6 +31,8 @@ export interface McpServerReference {
   type: 'stdio' | 'sse' | 'http';
   /** Environment variables (optional) */
   environment?: Record<string, string>;
+  /** Source provider (defaults to 'claude' if undefined for backwards compatibility) */
+  source?: McpConfigSource;
 }
 
 /**

@@ -121,6 +121,70 @@ export function getCodexProjectSkillsDir(): string | null {
   return path.join(workspaceRoot, '.codex', 'skills');
 }
 
+// =====================================================================
+// MCP Configuration Paths
+// =====================================================================
+
+/**
+ * Get the Copilot project-scope MCP config path (.copilot/mcp-config.json)
+ *
+ * @returns Absolute path to .copilot/mcp-config.json in workspace root, or null if no workspace
+ *
+ * @example
+ * // Unix: /workspace/myproject/.copilot/mcp-config.json
+ * // Windows: C:\workspace\myproject\.copilot\mcp-config.json
+ */
+export function getCopilotProjectMcpConfigPath(): string | null {
+  const workspaceRoot = getWorkspaceRoot();
+  if (!workspaceRoot) {
+    return null;
+  }
+  return path.join(workspaceRoot, '.copilot', 'mcp-config.json');
+}
+
+/**
+ * Get the Copilot user-scope MCP config path (~/.copilot/mcp-config.json)
+ *
+ * @returns Absolute path to ~/.copilot/mcp-config.json
+ *
+ * @example
+ * // Unix: /Users/username/.copilot/mcp-config.json
+ * // Windows: C:\Users\username\.copilot\mcp-config.json
+ */
+export function getCopilotUserMcpConfigPath(): string {
+  return path.join(os.homedir(), '.copilot', 'mcp-config.json');
+}
+
+/**
+ * Get the VSCode Copilot MCP config path (.vscode/mcp.json)
+ *
+ * @returns Absolute path to .vscode/mcp.json in workspace root, or null if no workspace
+ *
+ * @example
+ * // Unix: /workspace/myproject/.vscode/mcp.json
+ * // Windows: C:\workspace\myproject\.vscode\mcp.json
+ */
+export function getVSCodeMcpConfigPath(): string | null {
+  const workspaceRoot = getWorkspaceRoot();
+  if (!workspaceRoot) {
+    return null;
+  }
+  return path.join(workspaceRoot, '.vscode', 'mcp.json');
+}
+
+/**
+ * Get the Codex user-scope MCP config path (~/.codex/config.toml)
+ *
+ * @returns Absolute path to ~/.codex/config.toml
+ *
+ * @example
+ * // Unix: /Users/username/.codex/config.toml
+ * // Windows: C:\Users\username\.codex\config.toml
+ */
+export function getCodexUserMcpConfigPath(): string {
+  return path.join(os.homedir(), '.codex', 'config.toml');
+}
+
 /**
  * Get the installed plugins JSON path
  *

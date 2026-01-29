@@ -2,18 +2,39 @@
  * MCP Configuration Reader Service
  *
  * Feature: 001-mcp-node
- * Purpose: Read MCP server configurations from .mcp.json and .claude.json
+ * Purpose: Read MCP server configurations from multiple AI coding tools
  *
  * This service reads MCP server configurations from multiple sources:
- * - ~/.mcp.json (user-level)
+ *
+ * Claude Code:
  * - <workspace>/.mcp.json (project-level)
- * - ~/.claude.json (legacy)
+ * - ~/.mcp.json (user-level)
+ * - ~/.claude.json → projects[workspace].mcpServers (legacy, project-level)
+ * - ~/.claude.json → mcpServers (legacy, user-level)
+ *
+ * VSCode Copilot:
+ * - <workspace>/.vscode/mcp.json (project-level, uses 'servers' key)
+ *
+ * Copilot CLI:
+ * - <workspace>/.copilot/mcp-config.json (project-level)
+ * - ~/.copilot/mcp-config.json (user-level)
+ *
+ * Codex CLI:
+ * - ~/.codex/config.toml (user-level, TOML format with [mcp_servers.*] sections)
  */
 
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import { parse as parseToml } from 'smol-toml';
+import type { McpConfigSource } from '../../shared/types/mcp-node';
 import { log } from '../extension';
+import {
+  getCodexUserMcpConfigPath,
+  getCopilotProjectMcpConfigPath,
+  getCopilotUserMcpConfigPath,
+  getVSCodeMcpConfigPath,
+} from '../utils/path-utils';
 
 /**
  * MCP server configuration from .claude.json
@@ -24,6 +45,8 @@ export interface McpServerConfig {
   args?: string[];
   env?: Record<string, string>;
   url?: string;
+  /** Source provider (tracked during reading, defaults to 'claude') */
+  source?: McpConfigSource;
 }
 
 /**
@@ -111,7 +134,7 @@ function normalizeServerConfig(config: Partial<McpServerConfig>): McpServerConfi
 }
 
 /**
- * Read mcp.json file
+ * Read mcp.json file (Claude Code format)
  *
  * @param configPath - Path to mcp.json
  * @returns MCP servers configuration or null if not found
@@ -136,6 +159,177 @@ function readMcpConfig(configPath: string): {
     }
 
     log('WARN', 'Failed to read .mcp.json', {
+      configPath,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
+/**
+ * Read Copilot MCP config (.copilot/mcp-config.json)
+ *
+ * Format: { "mcpServers": { ... } }
+ *
+ * @param configPath - Path to mcp-config.json
+ * @returns MCP servers configuration or null if not found
+ */
+function readCopilotMcpConfig(configPath: string): Record<string, McpServerConfig> | null {
+  try {
+    const content = fs.readFileSync(configPath, 'utf-8');
+    const parsed = JSON.parse(content);
+
+    // Copilot CLI uses same format as Claude Code (mcpServers key)
+    const servers = parsed.mcpServers as Record<string, McpServerConfig> | undefined;
+
+    if (servers) {
+      log('INFO', 'Successfully read Copilot mcp-config.json', {
+        configPath,
+        serverCount: Object.keys(servers).length,
+      });
+      return servers;
+    }
+
+    return null;
+  } catch (error) {
+    // File not found is expected
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return null;
+    }
+
+    log('WARN', 'Failed to read Copilot mcp-config.json', {
+      configPath,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
+/**
+ * Read VSCode Copilot MCP config (.vscode/mcp.json)
+ *
+ * Format: { "servers": { ... } }
+ * Note: VSCode Copilot uses 'servers' key, not 'mcpServers'
+ *
+ * @param configPath - Path to .vscode/mcp.json
+ * @returns MCP servers configuration (normalized to mcpServers format) or null if not found
+ */
+function readVSCodeMcpConfig(configPath: string): Record<string, McpServerConfig> | null {
+  try {
+    const content = fs.readFileSync(configPath, 'utf-8');
+    const parsed = JSON.parse(content);
+
+    // VSCode Copilot uses 'servers' key instead of 'mcpServers'
+    const servers = parsed.servers as Record<string, McpServerConfig> | undefined;
+
+    if (servers) {
+      log('INFO', 'Successfully read VSCode mcp.json', {
+        configPath,
+        serverCount: Object.keys(servers).length,
+      });
+      return servers;
+    }
+
+    return null;
+  } catch (error) {
+    // File not found is expected
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return null;
+    }
+
+    log('WARN', 'Failed to read VSCode mcp.json', {
+      configPath,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
+/**
+ * Codex TOML config structure for mcp_servers section
+ */
+interface CodexMcpServerTomlConfig {
+  enabled?: boolean;
+  command?: string;
+  args?: string[];
+  env?: Record<string, string>;
+  type?: 'stdio' | 'http' | 'sse';
+  url?: string;
+}
+
+/**
+ * Read Codex MCP config (~/.codex/config.toml)
+ *
+ * Format:
+ * [mcp_servers.server-name]
+ * enabled = true
+ * command = "npx"
+ * args = ["-y", "package"]
+ *
+ * @param configPath - Path to config.toml
+ * @returns MCP servers configuration (converted to McpServerConfig format) or null if not found
+ */
+function readCodexMcpConfig(configPath: string): Record<string, McpServerConfig> | null {
+  try {
+    const content = fs.readFileSync(configPath, 'utf-8');
+    const parsed = parseToml(content);
+
+    // Codex stores MCP servers under [mcp_servers.*] sections
+    const mcpServersSection = parsed.mcp_servers as
+      | Record<string, CodexMcpServerTomlConfig>
+      | undefined;
+
+    if (!mcpServersSection) {
+      return null;
+    }
+
+    const servers: Record<string, McpServerConfig> = {};
+
+    for (const [serverId, config] of Object.entries(mcpServersSection)) {
+      // Skip disabled servers
+      if (config.enabled === false) {
+        log('INFO', 'Skipping disabled Codex MCP server', { serverId });
+        continue;
+      }
+
+      // Convert Codex TOML config to McpServerConfig format
+      const serverConfig: Partial<McpServerConfig> = {
+        command: config.command,
+        args: config.args,
+        env: config.env,
+        type: config.type,
+        url: config.url,
+      };
+
+      // Normalize (infer type if missing)
+      const normalized = normalizeServerConfig(serverConfig);
+      if (normalized) {
+        servers[serverId] = normalized;
+      } else {
+        log('WARN', 'Invalid Codex MCP server configuration', {
+          serverId,
+          configPath,
+          config,
+        });
+      }
+    }
+
+    if (Object.keys(servers).length > 0) {
+      log('INFO', 'Successfully read Codex config.toml', {
+        configPath,
+        serverCount: Object.keys(servers).length,
+      });
+      return servers;
+    }
+
+    return null;
+  } catch (error) {
+    // File not found is expected
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return null;
+    }
+
+    log('WARN', 'Failed to read Codex config.toml', {
       configPath,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -185,7 +379,7 @@ export function getMcpServerConfig(
           hasUrl: !!serverConfig.url,
         });
 
-        return serverConfig;
+        return { ...serverConfig, source: 'claude' };
       }
     }
 
@@ -216,7 +410,7 @@ export function getMcpServerConfig(
         hasUrl: !!serverConfig.url,
       });
 
-      return serverConfig;
+      return { ...serverConfig, source: 'claude' };
     }
 
     // Priority 3: Local scope - .claude.json.projects[<workspace>].mcpServers
@@ -248,7 +442,7 @@ export function getMcpServerConfig(
           hasUrl: !!serverConfig.url,
         });
 
-        return serverConfig;
+        return { ...serverConfig, source: 'claude' };
       }
     }
 
@@ -274,11 +468,89 @@ export function getMcpServerConfig(
         hasUrl: !!serverConfig.url,
       });
 
-      return serverConfig;
+      return { ...serverConfig, source: 'claude' };
     }
 
-    // Server not found in any configuration
-    log('WARN', 'MCP server not found in any configuration', {
+    // =========================================================================
+    // Copilot sources (Priority 5-7)
+    // =========================================================================
+
+    // Priority 5: VSCode Copilot project-scope (.vscode/mcp.json)
+    if (workspacePath) {
+      const vscodeMcpConfigPath = getVSCodeMcpConfigPath();
+      if (vscodeMcpConfigPath) {
+        const vscodeConfig = readVSCodeMcpConfig(vscodeMcpConfigPath);
+        if (vscodeConfig?.[serverId]) {
+          const serverConfig = normalizeServerConfig(vscodeConfig[serverId]);
+          if (serverConfig) {
+            log('INFO', 'Retrieved MCP server configuration from VSCode Copilot', {
+              serverId,
+              scope: 'vscode-copilot',
+              configPath: vscodeMcpConfigPath,
+              type: serverConfig.type,
+            });
+            return { ...serverConfig, source: 'copilot' };
+          }
+        }
+      }
+
+      // Priority 6: Copilot CLI project-scope (.copilot/mcp-config.json)
+      const copilotProjectConfigPath = getCopilotProjectMcpConfigPath();
+      if (copilotProjectConfigPath) {
+        const copilotProjectConfig = readCopilotMcpConfig(copilotProjectConfigPath);
+        if (copilotProjectConfig?.[serverId]) {
+          const serverConfig = normalizeServerConfig(copilotProjectConfig[serverId]);
+          if (serverConfig) {
+            log('INFO', 'Retrieved MCP server configuration from Copilot CLI project scope', {
+              serverId,
+              scope: 'copilot-project',
+              configPath: copilotProjectConfigPath,
+              type: serverConfig.type,
+            });
+            return { ...serverConfig, source: 'copilot' };
+          }
+        }
+      }
+    }
+
+    // Priority 7: Copilot CLI user-scope (~/.copilot/mcp-config.json)
+    const copilotUserConfigPath = getCopilotUserMcpConfigPath();
+    const copilotUserConfig = readCopilotMcpConfig(copilotUserConfigPath);
+    if (copilotUserConfig?.[serverId]) {
+      const serverConfig = normalizeServerConfig(copilotUserConfig[serverId]);
+      if (serverConfig) {
+        log('INFO', 'Retrieved MCP server configuration from Copilot CLI user scope', {
+          serverId,
+          scope: 'copilot-user',
+          configPath: copilotUserConfigPath,
+          type: serverConfig.type,
+        });
+        return { ...serverConfig, source: 'copilot' };
+      }
+    }
+
+    // =========================================================================
+    // Codex source (Priority 8)
+    // =========================================================================
+
+    // Priority 8: Codex CLI user-scope (~/.codex/config.toml)
+    const codexConfigPath = getCodexUserMcpConfigPath();
+    const codexConfig = readCodexMcpConfig(codexConfigPath);
+    if (codexConfig?.[serverId]) {
+      const serverConfig = normalizeServerConfig(codexConfig[serverId]);
+      if (serverConfig) {
+        log('INFO', 'Retrieved MCP server configuration from Codex CLI', {
+          serverId,
+          scope: 'codex-user',
+          configPath: codexConfigPath,
+          type: serverConfig.type,
+        });
+        return { ...serverConfig, source: 'codex' };
+      }
+    }
+
+    // Server not found in any configuration (Claude, Copilot, or Codex)
+    log('WARN', 'MCP server not found in any configuration (Claude, Copilot, Codex)', {
       serverId,
       workspacePath,
     });
@@ -296,7 +568,7 @@ export function getMcpServerConfig(
 }
 
 /**
- * Get all MCP server IDs from all configuration sources
+ * Get all MCP server IDs from all configuration sources (Claude, Copilot, Codex)
  *
  * @param workspacePath - Optional workspace path for project-scoped servers
  * @returns Array of unique server IDs
@@ -304,6 +576,10 @@ export function getMcpServerConfig(
 export function getAllMcpServerIds(workspacePath?: string): string[] {
   try {
     const serverIds = new Set<string>();
+
+    // =========================================================================
+    // Claude Code sources
+    // =========================================================================
 
     // Collect from project-scope .mcp.json (<workspace>/.mcp.json)
     if (workspacePath) {
@@ -347,12 +623,210 @@ export function getAllMcpServerIds(workspacePath?: string): string[] {
       }
     }
 
+    // =========================================================================
+    // Copilot sources
+    // =========================================================================
+
+    // Collect from VSCode Copilot (.vscode/mcp.json)
+    if (workspacePath) {
+      const vscodeMcpConfigPath = getVSCodeMcpConfigPath();
+      if (vscodeMcpConfigPath) {
+        const vscodeConfig = readVSCodeMcpConfig(vscodeMcpConfigPath);
+        if (vscodeConfig) {
+          for (const id of Object.keys(vscodeConfig)) {
+            serverIds.add(id);
+          }
+        }
+      }
+
+      // Collect from Copilot CLI project-scope (.copilot/mcp-config.json)
+      const copilotProjectConfigPath = getCopilotProjectMcpConfigPath();
+      if (copilotProjectConfigPath) {
+        const copilotProjectConfig = readCopilotMcpConfig(copilotProjectConfigPath);
+        if (copilotProjectConfig) {
+          for (const id of Object.keys(copilotProjectConfig)) {
+            serverIds.add(id);
+          }
+        }
+      }
+    }
+
+    // Collect from Copilot CLI user-scope (~/.copilot/mcp-config.json)
+    const copilotUserConfig = readCopilotMcpConfig(getCopilotUserMcpConfigPath());
+    if (copilotUserConfig) {
+      for (const id of Object.keys(copilotUserConfig)) {
+        serverIds.add(id);
+      }
+    }
+
+    // =========================================================================
+    // Codex source
+    // =========================================================================
+
+    // Collect from Codex CLI user-scope (~/.codex/config.toml)
+    const codexConfig = readCodexMcpConfig(getCodexUserMcpConfigPath());
+    if (codexConfig) {
+      for (const id of Object.keys(codexConfig)) {
+        serverIds.add(id);
+      }
+    }
+
     return Array.from(serverIds);
   } catch (error) {
     log('ERROR', 'Failed to get MCP server list', {
       error: error instanceof Error ? error.message : String(error),
     });
 
+    return [];
+  }
+}
+
+/**
+ * MCP server with source tracking
+ */
+export interface McpServerWithSource extends McpServerConfig {
+  /** Server identifier */
+  id: string;
+  /** Source provider */
+  source: McpConfigSource;
+  /** Path to the config file this server was read from */
+  configPath: string;
+}
+
+/**
+ * Scan all MCP server configurations from all sources
+ *
+ * This function scans MCP server configurations from all supported AI coding tools:
+ * - Claude Code (.mcp.json, .claude.json)
+ * - VSCode Copilot (.vscode/mcp.json)
+ * - Copilot CLI (.copilot/mcp-config.json)
+ * - Codex CLI (~/.codex/config.toml)
+ *
+ * Priority order (first match wins for duplicate server IDs):
+ * 1. Project-scope Claude Code (<workspace>/.mcp.json)
+ * 2. Project-scope VSCode Copilot (<workspace>/.vscode/mcp.json)
+ * 3. Project-scope Copilot CLI (<workspace>/.copilot/mcp-config.json)
+ * 4. User-scope Claude Code (~/.mcp.json)
+ * 5. Legacy Claude Code project (~/.claude.json → projects[workspace].mcpServers)
+ * 6. Legacy Claude Code user (~/.claude.json → mcpServers)
+ * 7. User-scope Copilot CLI (~/.copilot/mcp-config.json)
+ * 8. User-scope Codex CLI (~/.codex/config.toml)
+ *
+ * @param workspacePath - Optional workspace path for project-scoped servers
+ * @returns Array of MCP server configurations with source metadata
+ */
+export function getAllMcpServersWithSource(workspacePath?: string): McpServerWithSource[] {
+  const servers: McpServerWithSource[] = [];
+  const seenServerIds = new Set<string>();
+
+  /**
+   * Helper to add servers if not already seen (first match wins)
+   */
+  function addServers(
+    configServers: Record<string, McpServerConfig> | null,
+    source: McpConfigSource,
+    configPath: string
+  ): void {
+    if (!configServers) return;
+
+    for (const [serverId, config] of Object.entries(configServers)) {
+      if (seenServerIds.has(serverId)) {
+        log('INFO', 'Skipping duplicate MCP server (already found in higher priority source)', {
+          serverId,
+          skippedSource: source,
+          skippedConfigPath: configPath,
+        });
+        continue;
+      }
+
+      const normalized = normalizeServerConfig(config);
+      if (normalized) {
+        seenServerIds.add(serverId);
+        servers.push({
+          ...normalized,
+          id: serverId,
+          source,
+          configPath,
+        });
+      }
+    }
+  }
+
+  try {
+    // =========================================================================
+    // Project-scope sources (workspace-specific)
+    // =========================================================================
+
+    if (workspacePath) {
+      // Priority 1: Claude Code project-scope (.mcp.json)
+      const projectMcpConfigPath = getProjectMcpConfigPath(workspacePath);
+      const projectMcpConfig = readMcpConfig(projectMcpConfigPath);
+      addServers(projectMcpConfig?.mcpServers ?? null, 'claude', projectMcpConfigPath);
+
+      // Priority 2: VSCode Copilot (.vscode/mcp.json)
+      const vscodeMcpConfigPath = getVSCodeMcpConfigPath();
+      if (vscodeMcpConfigPath) {
+        const vscodeConfig = readVSCodeMcpConfig(vscodeMcpConfigPath);
+        addServers(vscodeConfig, 'copilot', vscodeMcpConfigPath);
+      }
+
+      // Priority 3: Copilot CLI project-scope (.copilot/mcp-config.json)
+      const copilotProjectConfigPath = getCopilotProjectMcpConfigPath();
+      if (copilotProjectConfigPath) {
+        const copilotProjectConfig = readCopilotMcpConfig(copilotProjectConfigPath);
+        addServers(copilotProjectConfig, 'copilot', copilotProjectConfigPath);
+      }
+    }
+
+    // =========================================================================
+    // User-scope sources (global)
+    // =========================================================================
+
+    // Priority 4: Claude Code user-scope (~/.mcp.json)
+    const userMcpConfigPath = getUserMcpConfigPath();
+    const userMcpConfig = readMcpConfig(userMcpConfigPath);
+    addServers(userMcpConfig?.mcpServers ?? null, 'claude', userMcpConfigPath);
+
+    // Priority 5 & 6: Legacy Claude Code (.claude.json)
+    const legacyConfig = readLegacyClaudeConfig();
+    if (legacyConfig) {
+      const legacyConfigPath = path.join(os.homedir(), '.claude.json');
+
+      // Priority 5: Legacy project-scope
+      if (workspacePath) {
+        const projectsConfig = legacyConfig.projects as
+          | Record<string, { mcpServers?: Record<string, McpServerConfig> }>
+          | undefined;
+        const localConfig = projectsConfig?.[workspacePath];
+        addServers(localConfig?.mcpServers ?? null, 'claude', legacyConfigPath);
+      }
+
+      // Priority 6: Legacy user-scope
+      addServers(legacyConfig.mcpServers ?? null, 'claude', legacyConfigPath);
+    }
+
+    // Priority 7: Copilot CLI user-scope (~/.copilot/mcp-config.json)
+    const copilotUserConfigPath = getCopilotUserMcpConfigPath();
+    const copilotUserConfig = readCopilotMcpConfig(copilotUserConfigPath);
+    addServers(copilotUserConfig, 'copilot', copilotUserConfigPath);
+
+    // Priority 8: Codex CLI user-scope (~/.codex/config.toml)
+    const codexConfigPath = getCodexUserMcpConfigPath();
+    const codexConfig = readCodexMcpConfig(codexConfigPath);
+    addServers(codexConfig, 'codex', codexConfigPath);
+
+    log('INFO', 'Scanned all MCP server sources', {
+      totalServers: servers.length,
+      claudeCount: servers.filter((s) => s.source === 'claude').length,
+      copilotCount: servers.filter((s) => s.source === 'copilot').length,
+      codexCount: servers.filter((s) => s.source === 'codex').length,
+    });
+
+    return servers;
+  } catch (error) {
+    log('ERROR', 'Failed to scan all MCP server sources', {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return [];
   }
 }
