@@ -196,10 +196,14 @@ function getSourceType(skillPath: string): SkillSourceType {
 /**
  * Get the source directory path for a given source type
  *
+ * NOTE: Currently unused. Kept for potential future use.
+ * This function only supports project-scope paths, not user-scope paths (~/.copilot/skills/).
+ * For user-scope skills, use path.dirname(skillPath) directly.
+ *
  * @param sourceType - Source type
  * @returns Absolute path to the source skills directory, or null if no workspace
  */
-function getSourceSkillsDir(sourceType: SkillSourceType): string | null {
+function _getSourceSkillsDir(sourceType: SkillSourceType): string | null {
   const workspaceRoot = getWorkspaceRoot();
   if (!workspaceRoot) {
     return null;
@@ -270,17 +274,13 @@ export async function checkSkillsToNormalize(
       continue;
     }
 
-    // Determine source type and directory
+    // Determine source type for metadata
     const sourceType = getSourceType(skillPath);
-    const sourceSkillsDir = getSourceSkillsDir(sourceType);
 
-    if (!sourceSkillsDir) {
-      skippedSkills.push(skillName);
-      continue;
-    }
-
-    // Resolve source and destination paths
-    const sourcePath = path.join(sourceSkillsDir, skillName);
+    // Use the actual skill directory from skillPath
+    // path.resolve() handles both absolute paths (user-scope: ~/.copilot/skills/) and
+    // relative paths (project-scope: .github/skills/) by resolving against workspaceRoot
+    const sourcePath = path.resolve(workspaceRoot, path.dirname(skillPath));
     const destinationPath = path.join(projectSkillsDir, skillName);
 
     // Check if destination already exists
