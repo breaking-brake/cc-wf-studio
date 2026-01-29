@@ -18,18 +18,10 @@ import * as TOML from 'smol-toml';
 import { getMcpServerConfig } from './mcp-config-reader';
 
 /**
- * Project trust level configuration for Codex CLI
- */
-interface CodexProjectConfig {
-  trust_level: 'trusted' | 'untrusted';
-}
-
-/**
  * Codex CLI config.toml structure
  */
 interface CodexConfig {
   mcp_servers?: Record<string, CodexMcpServerEntry>;
-  projects?: Record<string, CodexProjectConfig>;
   [key: string]: unknown;
 }
 
@@ -211,50 +203,4 @@ export async function syncMcpConfigForCodexCli(
   }
 
   return syncedServers;
-}
-
-/**
- * Check if project trust needs to be added to Codex config
- *
- * @param workspacePath - Workspace path to check
- * @returns true if trust needs to be added, false if already trusted
- */
-export async function needsProjectTrustForCodexCli(workspacePath: string): Promise<boolean> {
-  const config = await readCodexConfig();
-  return config.projects?.[workspacePath]?.trust_level !== 'trusted';
-}
-
-/**
- * Ensure the workspace is marked as trusted in Codex config
- *
- * This is required for Codex CLI to recognize project-level skills.
- *
- * TOML output format:
- * ```toml
- * [projects."/path/to/workspace"]
- * trust_level = "trusted"
- * ```
- *
- * @workaround This is a workaround for openai/codex#9752
- * Remove this when Codex CLI fixes the issue
- *
- * @param workspacePath - Workspace path to mark as trusted
- * @returns true if trust was added, false if already trusted
- */
-export async function ensureProjectTrustedForCodexCli(workspacePath: string): Promise<boolean> {
-  const config = await readCodexConfig();
-
-  // Check if already trusted
-  if (config.projects?.[workspacePath]?.trust_level === 'trusted') {
-    return false; // No change needed
-  }
-
-  // Add project trust
-  if (!config.projects) {
-    config.projects = {};
-  }
-  config.projects[workspacePath] = { trust_level: 'trusted' };
-
-  await writeCodexConfig(config);
-  return true; // Changed
 }

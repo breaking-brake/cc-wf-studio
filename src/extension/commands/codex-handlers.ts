@@ -15,8 +15,6 @@ import type {
   RunForCodexCliSuccessPayload,
 } from '../../shared/types/messages';
 import {
-  ensureProjectTrustedForCodexCli,
-  needsProjectTrustForCodexCli,
   previewMcpSyncForCodexCli,
   syncMcpConfigForCodexCli,
 } from '../services/codex-mcp-sync-service';
@@ -137,29 +135,6 @@ export async function handleRunForCodexCli(
     const { workflow } = payload;
     const workspacePath = fileService.getWorkspacePath();
 
-    // Step 0: Ensure project is trusted (workaround for openai/codex#9752)
-    // This is required for Codex CLI to recognize project-level skills
-    let projectTrustAdded = false;
-
-    // Check if project trust needs to be added
-    const needsProjectTrust = await needsProjectTrustForCodexCli(workspacePath);
-    if (needsProjectTrust) {
-      const result = await vscode.window.showInformationMessage(
-        `To allow Codex CLI to recognize skills in this project, a project trust setting needs to be added to ~/.codex/config.toml.\n\nProceed?`,
-        { modal: true },
-        'Yes',
-        'No'
-      );
-      if (result !== 'Yes') {
-        webview.postMessage({
-          type: 'RUN_FOR_CODEX_CLI_CANCELLED',
-          requestId,
-        });
-        return;
-      }
-      projectTrustAdded = await ensureProjectTrustedForCodexCli(workspacePath);
-    }
-
     // Step 0.5: Normalize skills (copy non-standard skills to .claude/skills/)
     // For Codex CLI, .codex/skills/ is considered "native" (no copy needed)
     // Only skills from other directories (e.g., .github/skills/, .copilot/skills/) need to be copied
@@ -265,15 +240,10 @@ export async function handleRunForCodexCli(
     });
 
     // Show notification with config sync info
-    const configChanges: string[] = [];
-    if (projectTrustAdded) {
-      configChanges.push('project trust added');
-    }
-    if (syncedMcpServers.length > 0) {
-      configChanges.push(`MCP servers: ${syncedMcpServers.join(', ')}`);
-    }
     const configInfo =
-      configChanges.length > 0 ? ` (${configChanges.join('; ')} to ~/.codex/config.toml)` : '';
+      syncedMcpServers.length > 0
+        ? ` (MCP servers: ${syncedMcpServers.join(', ')} added to ~/.codex/config.toml)`
+        : '';
     vscode.window.showInformationMessage(
       `Running workflow via Codex CLI: ${workflow.name}${configInfo}`
     );
