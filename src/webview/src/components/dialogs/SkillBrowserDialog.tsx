@@ -10,12 +10,44 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import type { SkillReference } from '@shared/types/messages';
 import { NodeType } from '@shared/types/workflow-definition';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { browseSkills, createSkill } from '../../services/skill-browser-service';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { AIProviderBadge, type AIProviderType } from '../common/AIProviderBadge';
 import { type CreateSkillFormData, SkillCreationDialog } from './SkillCreationDialog';
+
+type SourceType = 'claude' | 'copilot' | 'codex';
+
+interface GroupedSkills {
+  source: SourceType;
+  skills: SkillReference[];
+}
+
+/**
+ * Groups skills by their source (claude/copilot/codex).
+ * Skills without a source are treated as 'claude' for backward compatibility.
+ */
+function groupSkillsBySource(skills: SkillReference[]): GroupedSkills[] {
+  const sourceOrder: SourceType[] = ['claude', 'copilot', 'codex'];
+  const groups = new Map<SourceType, SkillReference[]>();
+
+  // Initialize all groups
+  for (const source of sourceOrder) {
+    groups.set(source, []);
+  }
+
+  // Group skills by source (undefined source → 'claude')
+  for (const skill of skills) {
+    const source = (skill.source as SourceType) || 'claude';
+    groups.get(source)?.push(skill);
+  }
+
+  // Return only non-empty groups in order
+  return sourceOrder
+    .map((source) => ({ source, skills: groups.get(source) ?? [] }))
+    .filter((group) => group.skills.length > 0);
+}
 
 interface SkillBrowserDialogProps {
   isOpen: boolean;
@@ -221,6 +253,15 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
       setSelectedSkill(null);
     }
   }, [currentSkills, selectedSkill]);
+
+  // Group current skills by source
+  const groupedSkills = useMemo(() => groupSkillsBySource(currentSkills), [currentSkills]);
+
+  // Scroll to section by source
+  const scrollToSection = (source: SourceType) => {
+    const element = document.getElementById(`skill-section-${source}`);
+    element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -433,6 +474,42 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
               </div>
             )}
 
+            {/* Jump Navigation */}
+            {!loading && !error && groupedSkills.length > 1 && (
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '8px',
+                  marginBottom: '16px',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                }}
+              >
+                {groupedSkills.map((group) => (
+                  <button
+                    key={group.source}
+                    type="button"
+                    onClick={() => scrollToSection(group.source)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '4px 8px',
+                      fontSize: '11px',
+                      backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                      color: 'var(--vscode-button-secondaryForeground)',
+                      border: '1px solid var(--vscode-panel-border)',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <AIProviderBadge provider={group.source as AIProviderType} size="small" />
+                    <span>({group.skills.length})</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* Skills List */}
             {!loading && !error && currentSkills.length === 0 && (
               <div
@@ -455,125 +532,151 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                   overflow: 'auto',
                 }}
               >
-                {currentSkills.map((skill) => (
-                  <div
-                    key={skill.skillPath}
-                    onClick={() => setSelectedSkill(skill)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setSelectedSkill(skill);
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    style={{
-                      padding: '12px',
-                      borderBottom: '1px solid var(--vscode-panel-border)',
-                      cursor: 'pointer',
-                      backgroundColor:
-                        selectedSkill?.skillPath === skill.skillPath
-                          ? 'var(--vscode-list-activeSelectionBackground)'
-                          : 'transparent',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (selectedSkill?.skillPath !== skill.skillPath) {
-                        e.currentTarget.style.backgroundColor =
-                          'var(--vscode-list-hoverBackground)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (selectedSkill?.skillPath !== skill.skillPath) {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }
-                    }}
-                  >
+                {groupedSkills.map((group) => (
+                  <div key={group.source} id={`skill-section-${group.source}`}>
+                    {/* Section Header */}
                     <div
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginBottom: '4px',
+                        gap: '8px',
+                        padding: '12px',
+                        backgroundColor: 'var(--vscode-sideBarSectionHeader-background)',
+                        borderBottom: '1px solid var(--vscode-panel-border)',
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 1,
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span
-                          style={{
-                            fontSize: '14px',
-                            fontWeight: 600,
-                            color: 'var(--vscode-foreground)',
-                          }}
-                        >
-                          {skill.name}
-                        </span>
-                        <span
-                          style={{
-                            fontSize: '10px',
-                            padding: '2px 6px',
-                            borderRadius: '3px',
-                            backgroundColor:
-                              skill.scope === 'user'
-                                ? 'var(--vscode-badge-background)'
-                                : skill.scope === 'local'
-                                  ? 'var(--vscode-terminal-ansiBlue)'
-                                  : 'var(--vscode-button-secondaryBackground)',
-                            color:
-                              skill.scope === 'user'
-                                ? 'var(--vscode-badge-foreground)'
-                                : skill.scope === 'local'
-                                  ? 'var(--vscode-editor-background)'
-                                  : 'var(--vscode-button-secondaryForeground)',
-                            fontWeight: 500,
-                          }}
-                        >
-                          {skill.scope === 'user'
-                            ? t('skill.browser.userTab')
-                            : skill.scope === 'local'
-                              ? t('skill.browser.localTab')
-                              : t('skill.browser.projectTab')}
-                        </span>
-                        {/* Source badge for project skills */}
-                        {skill.scope === 'project' && skill.source && (
-                          <AIProviderBadge provider={skill.source as AIProviderType} size="small" />
-                        )}
-                      </div>
+                      <AIProviderBadge provider={group.source as AIProviderType} size="medium" />
                       <span
                         style={{
-                          fontSize: '11px',
-                          color:
-                            skill.validationStatus === 'valid'
-                              ? 'var(--vscode-testing-iconPassed)'
-                              : skill.validationStatus === 'missing'
-                                ? 'var(--vscode-editorWarning-foreground)'
-                                : 'var(--vscode-errorForeground)',
-                        }}
-                      >
-                        {skill.validationStatus === 'valid'
-                          ? '✓'
-                          : skill.validationStatus === 'missing'
-                            ? '⚠'
-                            : '✗'}
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        fontSize: '12px',
-                        color: 'var(--vscode-descriptionForeground)',
-                        marginBottom: '4px',
-                      }}
-                    >
-                      {skill.description}
-                    </div>
-                    {skill.allowedTools && (
-                      <div
-                        style={{
-                          fontSize: '11px',
+                          fontSize: '12px',
                           color: 'var(--vscode-descriptionForeground)',
                         }}
                       >
-                        {skill.allowedTools}
+                        ({group.skills.length})
+                      </span>
+                    </div>
+
+                    {/* Skills in this group */}
+                    {group.skills.map((skill) => (
+                      <div
+                        key={skill.skillPath}
+                        onClick={() => setSelectedSkill(skill)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            setSelectedSkill(skill);
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        style={{
+                          padding: '12px',
+                          borderBottom: '1px solid var(--vscode-panel-border)',
+                          cursor: 'pointer',
+                          backgroundColor:
+                            selectedSkill?.skillPath === skill.skillPath
+                              ? 'var(--vscode-list-activeSelectionBackground)'
+                              : 'transparent',
+                        }}
+                        onMouseEnter={(e) => {
+                          if (selectedSkill?.skillPath !== skill.skillPath) {
+                            e.currentTarget.style.backgroundColor =
+                              'var(--vscode-list-hoverBackground)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (selectedSkill?.skillPath !== skill.skillPath) {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                          }
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginBottom: '4px',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span
+                              style={{
+                                fontSize: '14px',
+                                fontWeight: 600,
+                                color: 'var(--vscode-foreground)',
+                              }}
+                            >
+                              {skill.name}
+                            </span>
+                            <span
+                              style={{
+                                fontSize: '10px',
+                                padding: '2px 6px',
+                                borderRadius: '3px',
+                                backgroundColor:
+                                  skill.scope === 'user'
+                                    ? 'var(--vscode-badge-background)'
+                                    : skill.scope === 'local'
+                                      ? 'var(--vscode-terminal-ansiBlue)'
+                                      : 'var(--vscode-button-secondaryBackground)',
+                                color:
+                                  skill.scope === 'user'
+                                    ? 'var(--vscode-badge-foreground)'
+                                    : skill.scope === 'local'
+                                      ? 'var(--vscode-editor-background)'
+                                      : 'var(--vscode-button-secondaryForeground)',
+                                fontWeight: 500,
+                              }}
+                            >
+                              {skill.scope === 'user'
+                                ? t('skill.browser.userTab')
+                                : skill.scope === 'local'
+                                  ? t('skill.browser.localTab')
+                                  : t('skill.browser.projectTab')}
+                            </span>
+                          </div>
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              color:
+                                skill.validationStatus === 'valid'
+                                  ? 'var(--vscode-testing-iconPassed)'
+                                  : skill.validationStatus === 'missing'
+                                    ? 'var(--vscode-editorWarning-foreground)'
+                                    : 'var(--vscode-errorForeground)',
+                            }}
+                          >
+                            {skill.validationStatus === 'valid'
+                              ? '✓'
+                              : skill.validationStatus === 'missing'
+                                ? '⚠'
+                                : '✗'}
+                          </span>
+                        </div>
+                        <div
+                          style={{
+                            fontSize: '12px',
+                            color: 'var(--vscode-descriptionForeground)',
+                            marginBottom: '4px',
+                          }}
+                        >
+                          {skill.description}
+                        </div>
+                        {skill.allowedTools && (
+                          <div
+                            style={{
+                              fontSize: '11px',
+                              color: 'var(--vscode-descriptionForeground)',
+                            }}
+                          >
+                            {skill.allowedTools}
+                          </div>
+                        )}
                       </div>
-                    )}
+                    ))}
                   </div>
                 ))}
               </div>
