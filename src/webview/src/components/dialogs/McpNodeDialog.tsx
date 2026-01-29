@@ -229,6 +229,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
                   setError(null);
                 }}
                 selectedServerId={wizard.state.selectedServer?.id}
+                selectedServerSource={wizard.state.selectedServer?.source}
               />
             </div>
           </div>

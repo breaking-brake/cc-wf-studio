@@ -28,6 +28,10 @@ import {
   setCachedServerList,
 } from '../services/mcp-cache-service';
 import { getToolSchema, getTools, listServers } from '../services/mcp-cli-service';
+import {
+  getAllMcpServersWithSource,
+  type McpServerWithSource,
+} from '../services/mcp-config-reader';
 
 /**
  * Handle LIST_MCP_SERVERS request from Webview (T018)
@@ -87,9 +91,59 @@ export async function handleListMcpServers(
 
     // Cache miss - execute CLI command with workspace folder
     const result = await listServers(workspaceFolder);
+
+    // Get servers from all config sources (Claude Code, Copilot CLI, Codex CLI)
+    const configServers = getAllMcpServersWithSource(workspaceFolder);
+
+    // Convert McpServerWithSource to McpServerReference
+    // Note: status is omitted because config readers can't determine connection status
+    const convertToServerReference = (
+      server: McpServerWithSource
+    ): import('../../shared/types/mcp-node').McpServerReference => ({
+      id: server.id,
+      name: server.id, // Use ID as name since config files don't have separate name
+      scope: 'user', // Config file servers are always user scope
+      // status is intentionally omitted - only Claude Code CLI can determine connection status
+      command: server.command || '',
+      args: server.args || [],
+      type: server.type || 'stdio',
+      environment: server.env,
+      source: server.source,
+    });
+
+    // Combine CLI results and config file servers
+    // Use id + source combination as unique key to allow same server ID from different sources
+    const mergedServers: import('../../shared/types/mcp-node').McpServerReference[] = [];
+    const seenServerKeys = new Set<string>();
+
+    // Helper to create unique key from id and source
+    const getServerKey = (id: string, source: string | undefined) => `${source || 'claude'}:${id}`;
+
+    if (result.success && result.data) {
+      // Add CLI results first (they have accurate status info)
+      for (const server of result.data) {
+        const key = getServerKey(server.id, server.source);
+        if (!seenServerKeys.has(key)) {
+          mergedServers.push(server);
+          seenServerKeys.add(key);
+        }
+      }
+    }
+
+    // Add servers from config files (Copilot CLI, Codex CLI, etc.)
+    // Same ID from different sources will be included
+    for (const configServer of configServers) {
+      const key = getServerKey(configServer.id, configServer.source);
+      if (!seenServerKeys.has(key)) {
+        mergedServers.push(convertToServerReference(configServer));
+        seenServerKeys.add(key);
+      }
+    }
+
     const executionTimeMs = Date.now() - startTime;
 
-    if (!result.success || !result.data) {
+    // If no servers found at all, report error
+    if (mergedServers.length === 0 && !result.success) {
       log('ERROR', 'LIST_MCP_SERVERS failed', {
         requestId,
         errorCode: result.error?.code,
@@ -114,18 +168,20 @@ export async function handleListMcpServers(
     }
 
     // Success - cache and return
-    setCachedServerList(result.data);
+    setCachedServerList(mergedServers);
 
     log('INFO', 'LIST_MCP_SERVERS completed successfully', {
       requestId,
-      serverCount: result.data.length,
+      serverCount: mergedServers.length,
+      cliServerCount: result.data?.length ?? 0,
+      configServerCount: configServers.length,
       executionTimeMs,
     });
 
     // Apply scope filter if specified
     const filteredServers = payload.options?.filterByScope
-      ? result.data.filter((server) => payload.options?.filterByScope?.includes(server.scope))
-      : result.data;
+      ? mergedServers.filter((server) => payload.options?.filterByScope?.includes(server.scope))
+      : mergedServers;
 
     const successPayload: McpServersResultPayload = {
       success: true,

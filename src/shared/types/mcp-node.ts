@@ -21,8 +21,8 @@ export interface McpServerReference {
   name: string;
   /** Configuration scope */
   scope: 'user' | 'project' | 'enterprise';
-  /** Connection status */
-  status: 'connected' | 'disconnected';
+  /** Connection status (only available for Claude Code servers) */
+  status?: 'connected' | 'disconnected';
   /** Executable command */
   command: string;
   /** Command arguments */

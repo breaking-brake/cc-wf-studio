@@ -689,10 +689,18 @@ export interface McpServerWithSource extends McpServerConfig {
  */
 export function getAllMcpServersWithSource(workspacePath?: string): McpServerWithSource[] {
   const servers: McpServerWithSource[] = [];
-  const seenServerIds = new Set<string>();
+  // Use source:id combination as unique key to allow same server ID from different sources
+  const seenServerKeys = new Set<string>();
 
   /**
-   * Helper to add servers if not already seen (first match wins)
+   * Helper to create unique key from source and id
+   */
+  function getServerKey(source: McpConfigSource, serverId: string): string {
+    return `${source}:${serverId}`;
+  }
+
+  /**
+   * Helper to add servers if not already seen (same source + id combination)
    */
   function addServers(
     configServers: Record<string, McpServerConfig> | null,
@@ -702,10 +710,11 @@ export function getAllMcpServersWithSource(workspacePath?: string): McpServerWit
     if (!configServers) return;
 
     for (const [serverId, config] of Object.entries(configServers)) {
-      if (seenServerIds.has(serverId)) {
-        log('INFO', 'Skipping duplicate MCP server (already found in higher priority source)', {
+      const key = getServerKey(source, serverId);
+      if (seenServerKeys.has(key)) {
+        log('INFO', 'Skipping duplicate MCP server (already found in same source)', {
           serverId,
-          skippedSource: source,
+          source,
           skippedConfigPath: configPath,
         });
         continue;
@@ -713,7 +722,7 @@ export function getAllMcpServersWithSource(workspacePath?: string): McpServerWit
 
       const normalized = normalizeServerConfig(config);
       if (normalized) {
-        seenServerIds.add(serverId);
+        seenServerKeys.add(key);
         servers.push({
           ...normalized,
           id: serverId,

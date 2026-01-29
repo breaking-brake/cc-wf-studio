@@ -58,12 +58,21 @@ function scrollToSection(source: SourceType) {
 interface McpServerListProps {
   onServerSelect: (server: McpServerReference) => void;
   selectedServerId?: string;
+  selectedServerSource?: string;
   filterByScope?: ('user' | 'project' | 'enterprise')[];
+}
+
+/**
+ * Create a unique key for server identification (source:id)
+ */
+function getServerKey(id: string, source: string | undefined): string {
+  return `${source || 'claude'}:${id}`;
 }
 
 export function McpServerList({
   onServerSelect,
   selectedServerId,
+  selectedServerSource,
   filterByScope,
 }: McpServerListProps) {
   const { t } = useTranslation();
@@ -322,91 +331,96 @@ export function McpServerList({
               </div>
 
               {/* Servers in group */}
-              {group.servers.map((server) => (
-                <button
-                  key={server.id}
-                  type="button"
-                  onClick={() => onServerSelect(server)}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    backgroundColor:
-                      selectedServerId === server.id
+              {group.servers.map((server) => {
+                const serverKey = getServerKey(server.id, server.source);
+                const selectedKey = getServerKey(selectedServerId || '', selectedServerSource);
+                const isSelected = selectedServerId && serverKey === selectedKey;
+
+                return (
+                  <button
+                    key={serverKey}
+                    type="button"
+                    onClick={() => onServerSelect(server)}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      backgroundColor: isSelected
                         ? 'var(--vscode-list-activeSelectionBackground)'
                         : 'transparent',
-                    color:
-                      selectedServerId === server.id
+                      color: isSelected
                         ? 'var(--vscode-list-activeSelectionForeground)'
                         : 'var(--vscode-foreground)',
-                    border: 'none',
-                    borderBottom: '1px solid var(--vscode-panel-border)',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedServerId !== server.id) {
-                      e.currentTarget.style.backgroundColor = 'var(--vscode-list-hoverBackground)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedServerId !== server.id) {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
+                      border: 'none',
+                      borderBottom: '1px solid var(--vscode-panel-border)',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.backgroundColor =
+                          'var(--vscode-list-hoverBackground)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
                     }}
                   >
-                    <div style={{ flex: 1 }}>
-                      <div
-                        style={{
-                          fontWeight: 500,
-                        }}
-                      >
-                        {server.name}
-                      </div>
-                    </div>
                     <div
                       style={{
                         display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-end',
-                        gap: '4px',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
                       }}
                     >
-                      <span
+                      <div style={{ flex: 1 }}>
+                        <div
+                          style={{
+                            fontWeight: 500,
+                          }}
+                        >
+                          {server.name}
+                        </div>
+                      </div>
+                      <div
                         style={{
-                          fontSize: '11px',
-                          padding: '2px 6px',
-                          borderRadius: '3px',
-                          backgroundColor: getScopeColor(server.scope),
-                          color: getScopeForegroundColor(server.scope),
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: '6px',
                         }}
                       >
-                        {server.scope}
-                      </span>
-                      {server.status && (
                         <span
                           style={{
                             fontSize: '11px',
                             padding: '2px 6px',
                             borderRadius: '3px',
-                            backgroundColor: getStatusColor(server.status),
-                            color: getStatusForegroundColor(server.status),
+                            backgroundColor: getScopeColor(server.scope),
+                            color: getScopeForegroundColor(server.scope),
                           }}
                         >
-                          {server.status}
+                          {server.scope}
                         </span>
-                      )}
+                        {server.status && (
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              padding: '2px 6px',
+                              borderRadius: '3px',
+                              backgroundColor: getStatusColor(server.status),
+                              color: getStatusForegroundColor(server.status),
+                            }}
+                          >
+                            {server.status}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           ))}
         </div>
