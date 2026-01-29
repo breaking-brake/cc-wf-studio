@@ -9,7 +9,7 @@ Created by referencing official documentation for each tool.
 |------|-------|--------|------------------|--------|-----|--------|
 | Claude Code | Project<br>User | Project<br>User | Project<br>User | Project<br>User | Project<br>User | Project |
 | VSCode Copilot Chat | Project<br>User | Project<br>User | Project<br>User | Project | Project<br>User | - |
-| Copilot CLI | Project | Project<br>Global | - | Project<br>Global | Project<br>Global | - |
+| Copilot CLI | Project | Project<br>Global | - | Project<br>Global | Global | - |
 | Codex CLI (OpenAI) | Project<br>Global | Project<br>User<br>Admin | - | - | Global | - |
 
 ---
@@ -322,8 +322,9 @@ description: Skill description  # Required
 
 | Scope | Path | Description |
 |-------|------|-------------|
-| **Project** | `./.copilot/mcp-config.json` | Project MCP configuration |
 | **Global** | `~/.copilot/mcp-config.json` | Global MCP configuration |
+
+> **Note:** Copilot CLI does NOT support project-scope MCP configuration. Only user-scope (`~/.copilot/mcp-config.json`) is supported.
 
 **JSON Schema:**
 ```json
@@ -464,9 +465,6 @@ Project Root/
 ├── .codex/
 │   └── skills/{name}/SKILL.md          # Codex CLI (skills)
 │
-├── .copilot/
-│   └── mcp-config.json                 # Copilot CLI (project MCP)
-│
 ├── .github/
 │   ├── copilot-instructions.md         # VSCode Copilot Chat, Copilot CLI (root rule)
 │   ├── instructions/*.instructions.md  # VSCode Copilot Chat, Copilot CLI (modular rules)
@@ -519,7 +517,7 @@ User Home (~)/
 | **Skills (Global)** | `~/.copilot/skills/`, `~/.claude/skills/` (legacy) | `~/.copilot/skills/` |
 | **Prompts** | `.github/prompts/*.prompt.md` | - |
 | **Agents** | - | `.github/agents/`, `~/.copilot/agents/` |
-| **MCP (Project)** | `.vscode/mcp.json` | `.copilot/mcp-config.json` |
+| **MCP (Project)** | `.vscode/mcp.json` | - (not supported) |
 | **MCP (Global)** | VS Code user profile | `~/.copilot/mcp-config.json` |
 | **Config** | VSCode settings | `~/.copilot/config.json` |
 

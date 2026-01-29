@@ -31,7 +31,6 @@ import type { McpConfigSource } from '../../shared/types/mcp-node';
 import { log } from '../extension';
 import {
   getCodexUserMcpConfigPath,
-  getCopilotProjectMcpConfigPath,
   getCopilotUserMcpConfigPath,
   getVSCodeMcpConfigPath,
 } from '../utils/path-utils';
@@ -493,27 +492,10 @@ export function getMcpServerConfig(
           }
         }
       }
-
-      // Priority 6: Copilot CLI project-scope (.copilot/mcp-config.json)
-      const copilotProjectConfigPath = getCopilotProjectMcpConfigPath();
-      if (copilotProjectConfigPath) {
-        const copilotProjectConfig = readCopilotMcpConfig(copilotProjectConfigPath);
-        if (copilotProjectConfig?.[serverId]) {
-          const serverConfig = normalizeServerConfig(copilotProjectConfig[serverId]);
-          if (serverConfig) {
-            log('INFO', 'Retrieved MCP server configuration from Copilot CLI project scope', {
-              serverId,
-              scope: 'copilot-project',
-              configPath: copilotProjectConfigPath,
-              type: serverConfig.type,
-            });
-            return { ...serverConfig, source: 'copilot' };
-          }
-        }
-      }
     }
 
-    // Priority 7: Copilot CLI user-scope (~/.copilot/mcp-config.json)
+    // Priority 6: Copilot CLI user-scope (~/.copilot/mcp-config.json)
+    // Note: Copilot CLI only supports user-scope MCP configuration (no project-scope)
     const copilotUserConfigPath = getCopilotUserMcpConfigPath();
     const copilotUserConfig = readCopilotMcpConfig(copilotUserConfigPath);
     if (copilotUserConfig?.[serverId]) {
@@ -638,20 +620,10 @@ export function getAllMcpServerIds(workspacePath?: string): string[] {
           }
         }
       }
-
-      // Collect from Copilot CLI project-scope (.copilot/mcp-config.json)
-      const copilotProjectConfigPath = getCopilotProjectMcpConfigPath();
-      if (copilotProjectConfigPath) {
-        const copilotProjectConfig = readCopilotMcpConfig(copilotProjectConfigPath);
-        if (copilotProjectConfig) {
-          for (const id of Object.keys(copilotProjectConfig)) {
-            serverIds.add(id);
-          }
-        }
-      }
     }
 
     // Collect from Copilot CLI user-scope (~/.copilot/mcp-config.json)
+    // Note: Copilot CLI only supports user-scope MCP configuration (no project-scope)
     const copilotUserConfig = readCopilotMcpConfig(getCopilotUserMcpConfigPath());
     if (copilotUserConfig) {
       for (const id of Object.keys(copilotUserConfig)) {
@@ -770,29 +742,24 @@ export function getAllMcpServersWithSource(workspacePath?: string): McpServerWit
         addServers(vscodeConfig, 'copilot', vscodeMcpConfigPath);
       }
 
-      // Priority 3: Copilot CLI project-scope (.copilot/mcp-config.json)
-      const copilotProjectConfigPath = getCopilotProjectMcpConfigPath();
-      if (copilotProjectConfigPath) {
-        const copilotProjectConfig = readCopilotMcpConfig(copilotProjectConfigPath);
-        addServers(copilotProjectConfig, 'copilot', copilotProjectConfigPath);
-      }
+      // Note: Copilot CLI project-scope (.copilot/mcp-config.json) is NOT supported
     }
 
     // =========================================================================
     // User-scope sources (global)
     // =========================================================================
 
-    // Priority 4: Claude Code user-scope (~/.mcp.json)
+    // Priority 3: Claude Code user-scope (~/.mcp.json)
     const userMcpConfigPath = getUserMcpConfigPath();
     const userMcpConfig = readMcpConfig(userMcpConfigPath);
     addServers(userMcpConfig?.mcpServers ?? null, 'claude', userMcpConfigPath);
 
-    // Priority 5 & 6: Legacy Claude Code (.claude.json)
+    // Priority 4 & 5: Legacy Claude Code (.claude.json)
     const legacyConfig = readLegacyClaudeConfig();
     if (legacyConfig) {
       const legacyConfigPath = path.join(os.homedir(), '.claude.json');
 
-      // Priority 5: Legacy project-scope
+      // Priority 4: Legacy project-scope
       if (workspacePath) {
         const projectsConfig = legacyConfig.projects as
           | Record<string, { mcpServers?: Record<string, McpServerConfig> }>
@@ -801,16 +768,17 @@ export function getAllMcpServersWithSource(workspacePath?: string): McpServerWit
         addServers(localConfig?.mcpServers ?? null, 'claude', legacyConfigPath);
       }
 
-      // Priority 6: Legacy user-scope
+      // Priority 5: Legacy user-scope
       addServers(legacyConfig.mcpServers ?? null, 'claude', legacyConfigPath);
     }
 
-    // Priority 7: Copilot CLI user-scope (~/.copilot/mcp-config.json)
+    // Priority 6: Copilot CLI user-scope (~/.copilot/mcp-config.json)
+    // Note: Copilot CLI only supports user-scope MCP configuration (no project-scope)
     const copilotUserConfigPath = getCopilotUserMcpConfigPath();
     const copilotUserConfig = readCopilotMcpConfig(copilotUserConfigPath);
     addServers(copilotUserConfig, 'copilot', copilotUserConfigPath);
 
-    // Priority 8: Codex CLI user-scope (~/.codex/config.toml)
+    // Priority 7: Codex CLI user-scope (~/.codex/config.toml)
     const codexConfigPath = getCodexUserMcpConfigPath();
     const codexConfig = readCodexMcpConfig(codexConfigPath);
     addServers(codexConfig, 'codex', codexConfigPath);

@@ -126,24 +126,10 @@ export function getCodexProjectSkillsDir(): string | null {
 // =====================================================================
 
 /**
- * Get the Copilot project-scope MCP config path (.copilot/mcp-config.json)
- *
- * @returns Absolute path to .copilot/mcp-config.json in workspace root, or null if no workspace
- *
- * @example
- * // Unix: /workspace/myproject/.copilot/mcp-config.json
- * // Windows: C:\workspace\myproject\.copilot\mcp-config.json
- */
-export function getCopilotProjectMcpConfigPath(): string | null {
-  const workspaceRoot = getWorkspaceRoot();
-  if (!workspaceRoot) {
-    return null;
-  }
-  return path.join(workspaceRoot, '.copilot', 'mcp-config.json');
-}
-
-/**
  * Get the Copilot user-scope MCP config path (~/.copilot/mcp-config.json)
+ *
+ * Note: Copilot CLI only supports user-scope MCP configuration.
+ * Project-scope MCP (.copilot/mcp-config.json) is NOT supported.
  *
  * @returns Absolute path to ~/.copilot/mcp-config.json
  *

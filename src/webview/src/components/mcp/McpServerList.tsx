@@ -9,10 +9,51 @@
  */
 
 import type { McpServerReference } from '@shared/types/messages';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { listMcpServers, refreshMcpCache } from '../../services/mcp-service';
+import { AIProviderBadge, type AIProviderType } from '../common/AIProviderBadge';
 import { IndeterminateProgressBar } from '../common/IndeterminateProgressBar';
+
+type SourceType = 'claude' | 'copilot' | 'codex';
+
+interface GroupedServers {
+  source: SourceType;
+  servers: McpServerReference[];
+}
+
+/**
+ * Groups MCP servers by their source (claude/copilot/codex).
+ * Servers without a source are treated as 'claude' for backward compatibility.
+ */
+function groupServersBySource(servers: McpServerReference[]): GroupedServers[] {
+  const sourceOrder: SourceType[] = ['claude', 'copilot', 'codex'];
+  const groups = new Map<SourceType, McpServerReference[]>();
+
+  // Initialize all groups
+  for (const source of sourceOrder) {
+    groups.set(source, []);
+  }
+
+  // Group servers by source (undefined source → 'claude')
+  for (const server of servers) {
+    const source = (server.source as SourceType) || 'claude';
+    groups.get(source)?.push(server);
+  }
+
+  // Return only non-empty groups in order
+  return sourceOrder
+    .map((source) => ({ source, servers: groups.get(source) ?? [] }))
+    .filter((group) => group.servers.length > 0);
+}
+
+/**
+ * Scroll to a specific section by source
+ */
+function scrollToSection(source: SourceType) {
+  const element = document.getElementById(`mcp-server-section-${source}`);
+  element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 interface McpServerListProps {
   onServerSelect: (server: McpServerReference) => void;
@@ -80,6 +121,15 @@ export function McpServerList({
       setRefreshing(false);
     }
   };
+
+  // Filter servers by name - must be before early returns for hooks rule
+  const filterLower = filterText.toLowerCase().trim();
+  const filteredServers = filterLower
+    ? servers.filter((server) => server.name.toLowerCase().includes(filterLower))
+    : servers;
+
+  // Group filtered servers by source - must be before early returns for hooks rule
+  const groupedServers = useMemo(() => groupServersBySource(filteredServers), [filteredServers]);
 
   if (loading) {
     return <IndeterminateProgressBar label={t('mcp.loading.servers')} />;
@@ -156,12 +206,6 @@ export function McpServerList({
     );
   }
 
-  // Filter servers by name
-  const filterLower = filterText.toLowerCase().trim();
-  const filteredServers = filterLower
-    ? servers.filter((server) => server.name.toLowerCase().includes(filterLower))
-    : servers;
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {/* Filter Input */}
@@ -217,92 +261,156 @@ export function McpServerList({
         </div>
       )}
 
-      {/* Server List */}
-      {filteredServers.map((server) => (
-        <button
-          key={server.id}
-          type="button"
-          onClick={() => onServerSelect(server)}
-          style={{
-            padding: '12px',
-            backgroundColor:
-              selectedServerId === server.id
-                ? 'var(--vscode-list-activeSelectionBackground)'
-                : 'var(--vscode-list-inactiveSelectionBackground)',
-            color:
-              selectedServerId === server.id
-                ? 'var(--vscode-list-activeSelectionForeground)'
-                : 'var(--vscode-foreground)',
-            border: '1px solid var(--vscode-panel-border)',
-            borderRadius: '4px',
-            textAlign: 'left',
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-          }}
-          onMouseEnter={(e) => {
-            if (selectedServerId !== server.id) {
-              e.currentTarget.style.backgroundColor = 'var(--vscode-list-hoverBackground)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (selectedServerId !== server.id) {
-              e.currentTarget.style.backgroundColor =
-                'var(--vscode-list-inactiveSelectionBackground)';
-            }
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <div style={{ flex: 1 }}>
-              <div
-                style={{
-                  fontWeight: 500,
-                }}
-              >
-                {server.name}
-              </div>
-            </div>
-            <div
+      {/* Jump Navigation - only show when multiple groups exist */}
+      {groupedServers.length > 1 && (
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+          {groupedServers.map((group) => (
+            <button
+              key={group.source}
+              type="button"
+              onClick={() => scrollToSection(group.source)}
               style={{
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
+                alignItems: 'center',
                 gap: '4px',
+                padding: '4px 8px',
+                fontSize: '11px',
+                backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                color: 'var(--vscode-button-secondaryForeground)',
+                border: '1px solid var(--vscode-panel-border)',
+                borderRadius: '4px',
+                cursor: 'pointer',
               }}
             >
-              <span
+              <AIProviderBadge provider={group.source as AIProviderType} size="small" />
+              <span>({group.servers.length})</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Grouped Server List */}
+      {groupedServers.length > 0 && (
+        <div
+          style={{
+            border: '1px solid var(--vscode-panel-border)',
+            borderRadius: '4px',
+            maxHeight: '400px',
+            overflow: 'auto',
+          }}
+        >
+          {groupedServers.map((group) => (
+            <div key={group.source} id={`mcp-server-section-${group.source}`}>
+              {/* Sticky Section Header */}
+              <div
                 style={{
-                  fontSize: '11px',
-                  padding: '2px 6px',
-                  borderRadius: '3px',
-                  backgroundColor: getScopeColor(server.scope),
-                  color: getScopeForegroundColor(server.scope),
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 12px',
+                  backgroundColor: 'var(--vscode-sideBarSectionHeader-background)',
+                  borderBottom: '1px solid var(--vscode-panel-border)',
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 1,
                 }}
               >
-                {server.scope}
-              </span>
-              {server.status && (
-                <span
+                <AIProviderBadge provider={group.source as AIProviderType} size="medium" />
+                <span style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)' }}>
+                  ({group.servers.length})
+                </span>
+              </div>
+
+              {/* Servers in group */}
+              {group.servers.map((server) => (
+                <button
+                  key={server.id}
+                  type="button"
+                  onClick={() => onServerSelect(server)}
                   style={{
-                    fontSize: '11px',
-                    padding: '2px 6px',
-                    borderRadius: '3px',
-                    backgroundColor: getStatusColor(server.status),
-                    color: getStatusForegroundColor(server.status),
+                    width: '100%',
+                    padding: '12px',
+                    backgroundColor:
+                      selectedServerId === server.id
+                        ? 'var(--vscode-list-activeSelectionBackground)'
+                        : 'transparent',
+                    color:
+                      selectedServerId === server.id
+                        ? 'var(--vscode-list-activeSelectionForeground)'
+                        : 'var(--vscode-foreground)',
+                    border: 'none',
+                    borderBottom: '1px solid var(--vscode-panel-border)',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedServerId !== server.id) {
+                      e.currentTarget.style.backgroundColor = 'var(--vscode-list-hoverBackground)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedServerId !== server.id) {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }
                   }}
                 >
-                  {server.status}
-                </span>
-              )}
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div
+                        style={{
+                          fontWeight: 500,
+                        }}
+                      >
+                        {server.name}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                        gap: '4px',
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          padding: '2px 6px',
+                          borderRadius: '3px',
+                          backgroundColor: getScopeColor(server.scope),
+                          color: getScopeForegroundColor(server.scope),
+                        }}
+                      >
+                        {server.scope}
+                      </span>
+                      {server.status && (
+                        <span
+                          style={{
+                            fontSize: '11px',
+                            padding: '2px 6px',
+                            borderRadius: '3px',
+                            backgroundColor: getStatusColor(server.status),
+                            color: getStatusForegroundColor(server.status),
+                          }}
+                        >
+                          {server.status}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              ))}
             </div>
-          </div>
-        </button>
-      ))}
+          ))}
+        </div>
+      )}
     </div>
   );
 }
