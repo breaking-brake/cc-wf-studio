@@ -171,6 +171,8 @@ export interface PreservedManualParameterConfig {
 export interface McpNodeData {
   /** MCP server identifier (from 'claude mcp list') */
   serverId: string;
+  /** Source provider of the MCP server (claude, copilot, codex) */
+  source?: McpConfigSource;
   /** Tool function name from the MCP server */
   toolName: string;
   /** Human-readable description of the tool's functionality */

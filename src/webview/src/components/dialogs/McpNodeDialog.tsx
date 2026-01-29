@@ -109,6 +109,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
           data: {
             mode: 'manualParameterConfig',
             serverId: wizard.state.selectedServer.id,
+            source: wizard.state.selectedServer.source,
             toolName: wizard.state.selectedTool.name,
             toolDescription: wizard.state.selectedTool.description || '',
             parameters: wizard.state.selectedTool.parameters || [],
@@ -142,6 +143,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
           data: {
             mode: 'aiParameterConfig',
             serverId: wizard.state.selectedServer.id,
+            source: wizard.state.selectedServer.source,
             toolName: wizard.state.selectedTool.name,
             toolDescription: wizard.state.selectedTool.description || '',
             parameters: wizard.state.selectedTool.parameters || [],
@@ -177,6 +179,7 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
           data: {
             mode: 'aiToolSelection',
             serverId: wizard.state.selectedServer.id,
+            source: wizard.state.selectedServer.source,
             aiToolSelectionConfig: {
               taskDescription: wizard.state.naturalLanguageTaskDescription,
               availableTools,

@@ -12,6 +12,7 @@ import type { McpNodeData } from '@shared/types/workflow-definition';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import { useTranslation } from '../../../i18n/i18n-context';
+import { AIProviderBadge, type AIProviderType } from '../../common/AIProviderBadge';
 import { ModeIndicatorBadge } from '../../mode-selection/ModeIndicatorBadge';
 import { DeleteButton } from '../DeleteButton';
 
@@ -131,6 +132,8 @@ export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
           }}
         >
           <span>MCP Tool</span>
+          {/* Source Provider Badge */}
+          <AIProviderBadge provider={(data.source || 'claude') as AIProviderType} size="small" />
           {/* Validation Status Icon */}
           <span
             style={{
