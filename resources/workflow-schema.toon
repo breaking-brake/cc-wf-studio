@@ -423,7 +423,7 @@ validationRules:
 subAgentFlowConstraints:
   description: "Constraints specific to Sub-Agent Flow editing. When refining a Sub-Agent Flow, these rules MUST be followed."
   maxNodes: 30
-  supportedNodeTypes[7]: start,end,prompt,ifElse,switch,skill,mcp
+  supportedNodeTypes[8]: start,end,prompt,ifElse,switch,skill,mcp,codex
   prohibitedNodeTypes[3]: subAgent,subAgentFlow,askUserQuestion
   rules[5]: Sub-Agent Flows cannot contain SubAgent nodes (Claude Code constraint for sequential execution),Sub-Agent Flows cannot contain SubAgentFlow nodes (no nesting allowed in Phase 1 MVP),Sub-Agent Flows cannot contain AskUserQuestion nodes (user interaction not supported in sub-agent context),Sub-Agent Flows must have exactly one Start node and at least one End node,Maximum 30 nodes per Sub-Agent Flow
 workflowStructure:

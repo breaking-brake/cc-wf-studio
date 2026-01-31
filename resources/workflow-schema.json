@@ -462,7 +462,7 @@
   "subAgentFlowConstraints": {
     "description": "Constraints specific to Sub-Agent Flow editing. When refining a Sub-Agent Flow, these rules MUST be followed.",
     "maxNodes": 30,
-    "supportedNodeTypes": ["start", "end", "prompt", "ifElse", "switch", "skill", "mcp"],
+    "supportedNodeTypes": ["start", "end", "prompt", "ifElse", "switch", "skill", "mcp", "codex"],
     "prohibitedNodeTypes": ["subAgent", "subAgentFlow", "askUserQuestion"],
     "rules": [
       "Sub-Agent Flows cannot contain SubAgent nodes (Claude Code constraint for sequential execution)",

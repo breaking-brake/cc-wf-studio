@@ -1090,7 +1090,7 @@ Sub-Agent Flows have strict constraints that MUST be followed:
    - subAgent (Claude Code constraint for sequential execution)
    - subAgentFlow (no nesting allowed)
    - askUserQuestion (user interaction not supported in sub-agent context)
-2. **Allowed Node Types**: start, end, prompt, ifElse, switch, skill, mcp
+2. **Allowed Node Types**: start, end, prompt, ifElse, switch, skill, mcp, codex
 3. **Maximum Nodes**: ${SUBAGENTFLOW_MAX_NODES} nodes maximum
 4. **Must have exactly one Start node and at least one End node**
 
