@@ -12,16 +12,12 @@
   "homepage": "https://breaking-brake.github.io/",
   "license": "AGPL-3.0-or-later",
   "keywords": [
-    "claude",
-    "claude code",
-    "workflow",
-    "visual-editor",
-    "automation",
     "ai",
-    "mcp",
-    "copilot",
-    "github copilot",
-    "codex"
+    "claude",
+    "claude-code",
+    "cli",
+    "codex",
+    "copilot"
   ],
   "engines": {
     "vscode": "^1.80.0"
