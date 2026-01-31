@@ -19,6 +19,7 @@ import ReactFlow, {
   type NodeTypes,
   Panel,
 } from 'reactflow';
+import { CURRENT_ANNOUNCEMENT, cleanupDismissedAnnouncements } from '../constants/announcements';
 import { useAutoFocusNode } from '../hooks/useAutoFocusNode';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useTranslation } from '../i18n/i18n-context';
@@ -100,6 +101,11 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
   // Auto-focus on newly added nodes
   useAutoFocusNode();
+
+  // Cleanup dismissed announcements on mount
+  useEffect(() => {
+    cleanupDismissedAnnouncements();
+  }, []);
 
   // Get state and handlers from Zustand store
   const {
@@ -205,12 +211,16 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Feature Announcement Banner - placed above the canvas */}
-      <FeatureAnnouncementBanner
-        featureId="codex-cli-v3.17"
-        title={t('announcement.codexCli.title')}
-        description={t('announcement.codexCli.description')}
-      />
+      {/* Feature Announcement Banner - displayed when CURRENT_ANNOUNCEMENT is set */}
+      {CURRENT_ANNOUNCEMENT && (
+        <FeatureAnnouncementBanner
+          featureId={CURRENT_ANNOUNCEMENT.featureId}
+          title={t(CURRENT_ANNOUNCEMENT.titleKey)}
+          description={
+            CURRENT_ANNOUNCEMENT.descriptionKey ? t(CURRENT_ANNOUNCEMENT.descriptionKey) : undefined
+          }
+        />
+      )}
 
       {/* Canvas area */}
       <div style={{ flex: 1, position: 'relative' }}>

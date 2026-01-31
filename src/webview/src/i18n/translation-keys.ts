@@ -819,8 +819,4 @@ export interface WebviewTranslationKeys {
   'description.panel.title': string;
   'description.panel.show': string;
   'description.panel.hide': string;
-
-  // Feature Announcement Banner
-  'announcement.codexCli.title': string;
-  'announcement.codexCli.description': string;
 }
