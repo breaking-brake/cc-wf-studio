@@ -28,7 +28,8 @@ export class RefinementPromptBuilder {
     private userMessage: string,
     private schemaResult: SchemaLoadResult,
     private filteredSkills: SkillRelevanceScore[],
-    private previousValidationErrors?: ValidationErrorInfo[]
+    private previousValidationErrors?: ValidationErrorInfo[],
+    private isCodexEnabled = false
   ) {}
 
   buildPrompt(): string {
@@ -116,6 +117,36 @@ export class RefinementPromptBuilder {
         description: s.skill.description,
         scope: s.skill.scope,
       })),
+      // Codex Agent node constraints and guidelines (only when enabled)
+      ...(this.isCodexEnabled && {
+        codexNodeConstraints: [
+          'Must have exactly 1 output port (outputPorts: 1)',
+          'If branching needed, add ifElse/switch node after the Codex node',
+          'For existing codex nodes: COPY data field exactly from currentWorkflow',
+          'Required fields: label, prompt (or promptGuidance for ai-generated mode), model, reasoningEffort',
+          'Optional fields: sandbox (read-only/workspace-write/danger-full-access), skipGitRepoCheck',
+        ],
+        codexAgentGuidelines: {
+          description:
+            'Codex Agent is a specialized node for executing OpenAI Codex CLI within workflows. Use it for advanced code generation, analysis, or complex reasoning tasks.',
+          whenToUse: [
+            'Complex code generation requiring multiple files or architectural decisions',
+            'Code analysis or refactoring tasks that benefit from deep reasoning',
+            'Tasks requiring workspace-level operations (with appropriate sandbox settings)',
+            'Multi-step coding tasks that benefit from reasoning effort configuration',
+          ],
+          configurationOptions: {
+            model: 'o3 (more capable) or o4-mini (faster, cost-effective)',
+            reasoningEffort: 'low/medium/high - controls depth of reasoning',
+            promptMode:
+              'fixed (user-defined prompt) or ai-generated (orchestrating AI provides prompt)',
+            sandbox:
+              'Optional: read-only (safest), workspace-write (can modify files), danger-full-access',
+            skipGitRepoCheck:
+              'Usually required for workflow execution outside trusted git repositories',
+          },
+        },
+      }),
       workflowSchema: this.schemaResult.schemaString || JSON.stringify(this.schemaResult.schema),
       outputFormat: {
         description:

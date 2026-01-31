@@ -31,9 +31,10 @@ import { InteractionModeToggle } from './InteractionModeToggle';
 import { MinimapContainer } from './MinimapContainer';
 import { AskUserQuestionNodeComponent } from './nodes/AskUserQuestionNode';
 import { BranchNodeComponent } from './nodes/BranchNode';
+// 新規ノードタイプのインポート
+import { CodexNodeComponent } from './nodes/CodexNode';
 import { EndNode } from './nodes/EndNode';
 import { IfElseNodeComponent } from './nodes/IfElseNode';
-// 新規ノードタイプのインポート
 import { McpNodeComponent } from './nodes/McpNode/McpNode';
 import { PromptNode } from './nodes/PromptNode';
 import { SkillNodeComponent } from './nodes/SkillNode';
@@ -61,6 +62,7 @@ const nodeTypes: NodeTypes = {
   skill: SkillNodeComponent,
   mcp: McpNodeComponent, // Feature: 001-mcp-node
   subAgentFlow: SubAgentFlowNodeComponent, // Feature: 089-subworkflow
+  codex: CodexNodeComponent, // Feature: 518-codex-agent-node
 };
 
 /**
@@ -263,6 +265,8 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
                       return 'var(--vscode-charts-cyan)';
                     case 'subAgentFlow':
                       return 'var(--vscode-charts-purple)';
+                    case 'codex':
+                      return 'var(--vscode-charts-orange)';
                     default:
                       return 'var(--vscode-foreground)';
                   }

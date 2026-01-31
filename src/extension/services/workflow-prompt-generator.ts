@@ -10,6 +10,7 @@
 import type {
   AskUserQuestionNode,
   BranchNode,
+  CodexNode,
   IfElseNode,
   McpNode,
   PromptNode,
@@ -103,6 +104,10 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
     } else if (nodeType === 'subAgentFlow') {
       const label = node.name || 'Sub-Agent Flow';
       lines.push(`    ${nodeId}[["${escapeLabel(label)}"]]`);
+    } else if (nodeType === 'codex') {
+      const codexNode = node as CodexNode;
+      const codexName = codexNode.data.label || 'Codex Agent';
+      lines.push(`    ${nodeId}[[${escapeLabel(`Codex: ${codexName}`)}]]`);
     }
   }
 
@@ -420,6 +425,7 @@ export function generateExecutionInstructions(
   const promptNodes = nodes.filter((n) => n.type === 'prompt') as PromptNode[];
   const skillNodes = nodes.filter((n) => n.type === 'skill') as SkillNode[];
   const mcpNodes = nodes.filter((n) => n.type === 'mcp') as McpNode[];
+  const codexNodes = nodes.filter((n) => n.type === 'codex') as CodexNode[];
   const askUserQuestionNodes = nodes.filter(
     (n) => n.type === 'askUserQuestion'
   ) as AskUserQuestionNode[];
@@ -478,6 +484,48 @@ export function generateExecutionInstructions(
       }
 
       sections.push(...nodeSections);
+    }
+  }
+
+  // Codex node details
+  if (codexNodes.length > 0) {
+    sections.push('## Codex Agent Nodes');
+    sections.push('');
+    sections.push(
+      'Execute these nodes using the OpenAI Codex CLI. Use the Bash tool to run the `codex exec` command with the specified parameters.'
+    );
+    sections.push('');
+    for (const node of codexNodes) {
+      const nodeId = sanitizeNodeId(node.id);
+      const escapedPrompt = node.data.prompt.replace(/'/g, "'\\''");
+      const skipGitFlag = node.data.skipGitRepoCheck ? '--skip-git-repo-check ' : '';
+      const sandboxFlag = node.data.sandbox ? `-s ${node.data.sandbox} ` : '';
+      sections.push(`#### ${nodeId}(${node.data.label})`);
+      sections.push('');
+      sections.push('**Execution Command**:');
+      sections.push('');
+      sections.push('```bash');
+      sections.push(
+        `codex exec ${skipGitFlag}-m ${node.data.model} -c 'reasoning_effort="${node.data.reasoningEffort}"' ${sandboxFlag}'${escapedPrompt}'`
+      );
+      sections.push('```');
+      sections.push('');
+      sections.push(`**Model**: ${node.data.model}`);
+      sections.push('');
+      sections.push(`**Reasoning Effort**: ${node.data.reasoningEffort}`);
+      sections.push('');
+      if (node.data.sandbox) {
+        sections.push(`**Sandbox Mode**: ${node.data.sandbox}`);
+      } else {
+        sections.push('**Sandbox Mode**: (default - not specified)');
+      }
+      sections.push('');
+      sections.push('**Prompt**:');
+      sections.push('');
+      sections.push('```');
+      sections.push(node.data.prompt);
+      sections.push('```');
+      sections.push('');
     }
   }
 

@@ -59,6 +59,7 @@ export async function handleRefineWorkflow(
     copilotModel = 'gpt-4o',
     codexModel = '',
     codexReasoningEffort = 'low',
+    useCodex = false,
   } = payload;
   const startTime = Date.now();
 
@@ -72,6 +73,7 @@ export async function handleRefineWorkflow(
     currentIteration: conversationHistory.currentIteration,
     maxIterations: conversationHistory.maxIterations,
     useSkills,
+    useCodex,
     timeoutMs: effectiveTimeoutMs,
     targetType,
     subAgentFlowId,
@@ -153,7 +155,8 @@ export async function handleRefineWorkflow(
       provider,
       copilotModel,
       codexModel,
-      codexReasoningEffort
+      codexReasoningEffort,
+      useCodex
     );
 
     // Check if AI is asking for clarification
@@ -327,6 +330,7 @@ async function handleRefineSubAgentFlow(
     copilotModel = 'gpt-4o',
     codexModel = '',
     codexReasoningEffort = 'low',
+    useCodex = false,
   } = payload;
   const startTime = Date.now();
 
@@ -341,6 +345,7 @@ async function handleRefineSubAgentFlow(
     currentIteration: conversationHistory.currentIteration,
     maxIterations: conversationHistory.maxIterations,
     useSkills,
+    useCodex,
     timeoutMs: effectiveTimeoutMs,
     model,
     allowedTools,
@@ -426,7 +431,8 @@ async function handleRefineSubAgentFlow(
       provider,
       copilotModel,
       codexModel,
-      codexReasoningEffort
+      codexReasoningEffort,
+      useCodex
     );
 
     // Check if AI is asking for clarification

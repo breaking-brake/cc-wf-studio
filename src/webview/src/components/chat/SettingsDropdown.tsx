@@ -60,6 +60,8 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
   const {
     useSkills,
     toggleUseSkills,
+    useCodexNodes,
+    toggleUseCodexNodes,
     isProcessing,
     selectedModel,
     setSelectedModel,
@@ -222,6 +224,43 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
             <UserCog size={14} />
             <span>{t('refinement.chat.useSkillsCheckbox')}</span>
           </DropdownMenu.CheckboxItem>
+
+          {/* Use Codex Nodes Toggle Item - Only shown when Codex Beta is enabled */}
+          {isCodexEnabled && (
+            <DropdownMenu.CheckboxItem
+              checked={useCodexNodes}
+              onCheckedChange={toggleUseCodexNodes}
+              disabled={isProcessing}
+              style={{
+                padding: '8px 12px',
+                fontSize: `${FONT_SIZES.small}px`,
+                color: 'var(--vscode-foreground)',
+                cursor: isProcessing ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                outline: 'none',
+                borderRadius: '2px',
+                opacity: isProcessing ? 0.5 : 1,
+              }}
+            >
+              <div
+                style={{
+                  width: '14px',
+                  height: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <DropdownMenu.ItemIndicator>
+                  <Check size={14} />
+                </DropdownMenu.ItemIndicator>
+              </div>
+              <Bot size={14} />
+              <span>{t('refinement.chat.useCodexNodesCheckbox')}</span>
+            </DropdownMenu.CheckboxItem>
+          )}
 
           <DropdownMenu.Separator
             style={{

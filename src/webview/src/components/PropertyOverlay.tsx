@@ -8,14 +8,16 @@
  */
 
 import type { McpNodeData } from '@shared/types/mcp-node';
-import type {
-  AskUserQuestionData,
-  BranchNodeData,
-  IfElseNodeData,
-  SkillNodeData,
-  SubAgentData,
-  SubAgentFlowNodeData,
-  SwitchNodeData,
+import {
+  type AskUserQuestionData,
+  type BranchNodeData,
+  type CodexNodeData,
+  type IfElseNodeData,
+  type SkillNodeData,
+  type SubAgentData,
+  type SubAgentFlowNodeData,
+  type SwitchNodeData,
+  VALIDATION_RULES,
 } from '@shared/types/workflow-definition';
 import type React from 'react';
 import { useState } from 'react';
@@ -142,6 +144,7 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
           </div>
 
           {/* Node Name (only for subAgent, askUserQuestion, branch, ifElse, switch, prompt, skill, mcp types) */}
+          {/* Note: codex uses label field instead of name, handled in CodexProperties */}
           {(selectedNode.type === 'subAgent' ||
             selectedNode.type === 'askUserQuestion' ||
             selectedNode.type === 'branch' ||
@@ -195,7 +198,13 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
                   padding: '6px 8px',
                   backgroundColor: 'var(--vscode-input-background)',
                   color: 'var(--vscode-input-foreground)',
-                  border: '1px solid var(--vscode-input-border)',
+                  border: `1px solid ${
+                    selectedNode.data.name &&
+                    selectedNode.data.name.trim() !== '' &&
+                    !VALIDATION_RULES.NODE.NAME_PATTERN.test(selectedNode.data.name.trim())
+                      ? 'var(--vscode-inputValidation-errorBorder)'
+                      : 'var(--vscode-input-border)'
+                  }`,
                   borderRadius: '2px',
                   fontSize: '13px',
                 }}
@@ -203,11 +212,20 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
               <div
                 style={{
                   fontSize: '11px',
-                  color: 'var(--vscode-descriptionForeground)',
+                  color:
+                    selectedNode.data.name &&
+                    selectedNode.data.name.trim() !== '' &&
+                    !VALIDATION_RULES.NODE.NAME_PATTERN.test(selectedNode.data.name.trim())
+                      ? 'var(--vscode-errorForeground)'
+                      : 'var(--vscode-descriptionForeground)',
                   marginTop: '4px',
                 }}
               >
-                {t('property.nodeName.help')}
+                {selectedNode.data.name &&
+                selectedNode.data.name.trim() !== '' &&
+                !VALIDATION_RULES.NODE.NAME_PATTERN.test(selectedNode.data.name.trim())
+                  ? t('codex.error.nameInvalidPattern')
+                  : t('property.nodeName.help')}
               </div>
             </div>
           )}
@@ -292,6 +310,11 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
           ) : selectedNode.type === 'subAgentFlow' ? (
             <SubAgentFlowProperties
               node={selectedNode as Node<SubAgentFlowNodeData>}
+              updateNodeData={updateNodeData}
+            />
+          ) : selectedNode.type === 'codex' ? (
+            <CodexProperties
+              node={selectedNode as Node<CodexNodeData>}
               updateNodeData={updateNodeData}
             />
           ) : selectedNode.type === 'start' || selectedNode.type === 'end' ? (
@@ -2582,6 +2605,487 @@ const SubAgentFlowProperties: React.FC<{
 
       {/* Color */}
       <ColorPicker value={data.color} onChange={(color) => updateNodeData(node.id, { color })} />
+    </div>
+  );
+};
+
+/**
+ * Codex Properties Editor
+ *
+ * Feature: 518-codex-agent-node
+ * Properties editor for Codex agent nodes in PropertyOverlay
+ */
+const CodexProperties: React.FC<{
+  node: Node<CodexNodeData>;
+  updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
+}> = ({ node, updateNodeData }) => {
+  const { t } = useTranslation();
+  const data = node.data;
+  const [isEditingPrompt, setIsEditingPrompt] = useState(false);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(!!data.sandbox);
+
+  // Predefined model options
+  const PREDEFINED_MODELS = [
+    'gpt-5.2-codex',
+    'gpt-5.2',
+    'gpt-5.1-codex-max',
+    'gpt-5.1-codex-mini',
+  ] as const;
+
+  type ModelSelectValue = (typeof PREDEFINED_MODELS)[number] | 'custom';
+  type ReasoningEffort = 'low' | 'medium' | 'high';
+  type SandboxMode = 'read-only' | 'workspace-write' | 'danger-full-access';
+
+  // Determine if current model is a predefined one
+  const isPredefinedModel = (PREDEFINED_MODELS as readonly string[]).includes(data.model);
+  const currentModelSelect: ModelSelectValue = isPredefinedModel
+    ? (data.model as ModelSelectValue)
+    : 'custom';
+  const customModelValue = isPredefinedModel ? '' : data.model;
+
+  const labelValue = data.label ?? node.id;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {/* Label */}
+      <div>
+        <label
+          htmlFor={`codex-label-${node.id}`}
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('property.nodeName')}
+        </label>
+        <input
+          id={`codex-label-${node.id}`}
+          type="text"
+          value={labelValue}
+          onChange={(e) => updateNodeData(node.id, { label: e.target.value })}
+          onBlur={(e) => {
+            if (!e.target.value.trim()) {
+              updateNodeData(node.id, { label: undefined });
+            }
+          }}
+          className="nodrag"
+          placeholder={t('property.nodeName.placeholder')}
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+          }}
+        />
+        <div
+          style={{
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+            marginTop: '4px',
+          }}
+        >
+          {t('property.nodeName.help')}
+        </div>
+      </div>
+
+      {/* Prompt Mode */}
+      <div>
+        <div
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '8px',
+          }}
+        >
+          {t('codex.promptModeLabel')}
+        </div>
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              color: 'var(--vscode-foreground)',
+            }}
+          >
+            <input
+              type="radio"
+              name={`promptMode-${node.id}`}
+              value="fixed"
+              checked={data.promptMode === 'fixed'}
+              onChange={() => updateNodeData(node.id, { promptMode: 'fixed' })}
+              className="nodrag"
+              style={{ cursor: 'pointer' }}
+            />
+            {t('codex.promptMode.fixed')}
+          </label>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              color: 'var(--vscode-foreground)',
+            }}
+          >
+            <input
+              type="radio"
+              name={`promptMode-${node.id}`}
+              value="ai-generated"
+              checked={data.promptMode === 'ai-generated'}
+              onChange={() => updateNodeData(node.id, { promptMode: 'ai-generated' })}
+              className="nodrag"
+              style={{ cursor: 'pointer' }}
+            />
+            {t('codex.promptMode.aiGenerated')}
+          </label>
+        </div>
+        {data.promptMode === 'ai-generated' && (
+          <div
+            style={{
+              marginTop: '8px',
+              fontSize: '11px',
+              color: 'var(--vscode-descriptionForeground)',
+            }}
+          >
+            {t('codex.promptMode.aiGeneratedHelp')}
+          </div>
+        )}
+      </div>
+
+      {/* Prompt */}
+      <div>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '6px',
+          }}
+        >
+          <label
+            htmlFor="codex-prompt-textarea"
+            style={{
+              display: 'block',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--vscode-foreground)',
+            }}
+          >
+            {data.promptMode === 'fixed' ? t('codex.promptLabel') : t('codex.promptGuidanceLabel')}
+          </label>
+          <EditInEditorButton
+            content={data.prompt}
+            onContentUpdated={(newContent) => updateNodeData(node.id, { prompt: newContent })}
+            label={
+              data.promptMode === 'fixed' ? t('codex.promptLabel') : t('codex.promptGuidanceLabel')
+            }
+            language="markdown"
+            onEditingStateChange={setIsEditingPrompt}
+          />
+        </div>
+        <textarea
+          id="codex-prompt-textarea"
+          value={data.prompt}
+          onChange={(e) => updateNodeData(node.id, { prompt: e.target.value })}
+          className="nodrag"
+          rows={6}
+          readOnly={isEditingPrompt}
+          placeholder={
+            data.promptMode === 'fixed'
+              ? t('codex.promptPlaceholder')
+              : t('codex.promptGuidancePlaceholder')
+          }
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            resize: 'vertical',
+            fontSize: '13px',
+            minHeight: '120px',
+            boxSizing: 'border-box',
+            opacity: isEditingPrompt ? 0.5 : 1,
+          }}
+        />
+      </div>
+
+      {/* Model */}
+      <div>
+        <label
+          htmlFor="codex-model-select"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('codex.modelLabel')}
+        </label>
+        <select
+          id="codex-model-select"
+          value={currentModelSelect}
+          onChange={(e) => {
+            const value = e.target.value as ModelSelectValue;
+            if (value === 'custom') {
+              // Don't update model yet, wait for custom input
+            } else {
+              updateNodeData(node.id, { model: value });
+            }
+          }}
+          className="nodrag"
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-dropdown-background)',
+            color: 'var(--vscode-dropdown-foreground)',
+            border: '1px solid var(--vscode-dropdown-border)',
+            borderRadius: '4px',
+            fontSize: '13px',
+          }}
+        >
+          <option value="gpt-5.2-codex">gpt-5.2-codex</option>
+          <option value="gpt-5.2">gpt-5.2</option>
+          <option value="gpt-5.1-codex-max">gpt-5.1-codex-max</option>
+          <option value="gpt-5.1-codex-mini">gpt-5.1-codex-mini</option>
+          <option value="custom">{t('codex.model.custom')}</option>
+        </select>
+        {currentModelSelect === 'custom' && (
+          <input
+            type="text"
+            value={customModelValue}
+            onChange={(e) => updateNodeData(node.id, { model: e.target.value })}
+            placeholder={t('codex.customModelPlaceholder')}
+            className="nodrag"
+            style={{
+              width: '100%',
+              padding: '6px 8px',
+              marginTop: '8px',
+              backgroundColor: 'var(--vscode-input-background)',
+              color: 'var(--vscode-input-foreground)',
+              border: '1px solid var(--vscode-input-border)',
+              borderRadius: '4px',
+              fontSize: '13px',
+              boxSizing: 'border-box',
+            }}
+          />
+        )}
+      </div>
+
+      {/* Reasoning Effort */}
+      <div>
+        <label
+          htmlFor="codex-reasoning-effort-select"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('codex.reasoningEffortLabel')}
+        </label>
+        <select
+          id="codex-reasoning-effort-select"
+          value={data.reasoningEffort}
+          onChange={(e) =>
+            updateNodeData(node.id, { reasoningEffort: e.target.value as ReasoningEffort })
+          }
+          className="nodrag"
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-dropdown-background)',
+            color: 'var(--vscode-dropdown-foreground)',
+            border: '1px solid var(--vscode-dropdown-border)',
+            borderRadius: '4px',
+            fontSize: '13px',
+          }}
+        >
+          <option value="low">{t('codex.reasoningEffort.low')}</option>
+          <option value="medium">{t('codex.reasoningEffort.medium')}</option>
+          <option value="high">{t('codex.reasoningEffort.high')}</option>
+        </select>
+      </div>
+
+      {/* Skip Git Repo Check */}
+      <div>
+        <label
+          htmlFor={`codex-skip-git-${node.id}`}
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '8px',
+            cursor: 'pointer',
+          }}
+        >
+          <input
+            id={`codex-skip-git-${node.id}`}
+            type="checkbox"
+            checked={data.skipGitRepoCheck ?? false}
+            onChange={(e) => updateNodeData(node.id, { skipGitRepoCheck: e.target.checked })}
+            className="nodrag"
+            style={{
+              marginTop: '2px',
+              cursor: 'pointer',
+            }}
+          />
+          <div>
+            <span
+              style={{
+                fontSize: '12px',
+                fontWeight: 600,
+                color: 'var(--vscode-foreground)',
+                fontFamily: 'monospace',
+              }}
+            >
+              --skip-git-repo-check
+            </span>
+            <div
+              style={{
+                marginTop: '4px',
+                fontSize: '11px',
+                color: 'var(--vscode-errorForeground)',
+              }}
+            >
+              {t('codex.skipGitRepoCheckWarning')}
+            </div>
+          </div>
+        </label>
+      </div>
+
+      {/* Advanced Options - collapsible */}
+      <div>
+        <button
+          type="button"
+          onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '8px 0',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            width: '100%',
+          }}
+        >
+          <span style={{ fontSize: '10px' }}>{isAdvancedOpen ? '▼' : '▶'}</span>
+          {t('codex.advancedOptions')}
+        </button>
+
+        {isAdvancedOpen && (
+          <div
+            style={{
+              paddingLeft: '16px',
+              borderLeft: '2px solid var(--vscode-panel-border)',
+            }}
+          >
+            {/* Sandbox */}
+            <div>
+              <label
+                htmlFor={`codex-use-sandbox-${node.id}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginBottom: '8px',
+                  cursor: 'pointer',
+                }}
+              >
+                <input
+                  id={`codex-use-sandbox-${node.id}`}
+                  type="checkbox"
+                  checked={!!data.sandbox}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      updateNodeData(node.id, { sandbox: 'read-only' });
+                    } else {
+                      updateNodeData(node.id, { sandbox: undefined });
+                    }
+                  }}
+                  className="nodrag"
+                  style={{ cursor: 'pointer' }}
+                />
+                <span
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: 'var(--vscode-foreground)',
+                  }}
+                >
+                  {t('codex.sandboxLabel')}
+                </span>
+              </label>
+              {data.sandbox && (
+                <>
+                  <select
+                    id="codex-sandbox-select"
+                    value={data.sandbox}
+                    onChange={(e) =>
+                      updateNodeData(node.id, { sandbox: e.target.value as SandboxMode })
+                    }
+                    className="nodrag"
+                    style={{
+                      width: '100%',
+                      padding: '6px 8px',
+                      backgroundColor: 'var(--vscode-dropdown-background)',
+                      color: 'var(--vscode-dropdown-foreground)',
+                      border: '1px solid var(--vscode-dropdown-border)',
+                      borderRadius: '4px',
+                      fontSize: '13px',
+                    }}
+                  >
+                    <option value="read-only">{t('codex.sandbox.readOnly')}</option>
+                    <option value="workspace-write">{t('codex.sandbox.workspaceWrite')}</option>
+                    <option value="danger-full-access">
+                      {t('codex.sandbox.dangerFullAccess')}
+                    </option>
+                  </select>
+                  <div
+                    style={{
+                      marginTop: '4px',
+                      fontSize: '11px',
+                      color: 'var(--vscode-descriptionForeground)',
+                    }}
+                  >
+                    {t('codex.sandboxHelp')}
+                  </div>
+                </>
+              )}
+              {!data.sandbox && (
+                <div
+                  style={{
+                    fontSize: '11px',
+                    color: 'var(--vscode-descriptionForeground)',
+                  }}
+                >
+                  {t('codex.sandboxDefaultHelp')}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

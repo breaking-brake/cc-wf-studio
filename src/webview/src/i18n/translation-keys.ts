@@ -94,6 +94,7 @@ export interface WebviewTranslationKeys {
   // Node Palette
   'palette.title': string;
   'palette.basicNodes': string;
+  'palette.specialNodes': string;
   'palette.controlFlow': string;
   'palette.quickStart': string;
 
@@ -115,6 +116,50 @@ export interface WebviewTranslationKeys {
   'node.askUserQuestion.description': string;
   'node.skill.title': string;
   'node.skill.description': string;
+
+  // Codex Node (Feature: 518-codex-agent-node)
+  'node.codex.title': string;
+  'node.codex.description': string;
+  'node.codex.untitled': string;
+  'node.codex.aiGenerated': string;
+
+  // Codex Dialog (Feature: 518-codex-agent-node)
+  'codex.title': string;
+  'codex.description': string;
+  'codex.nameLabel': string;
+  'codex.namePlaceholder': string;
+  'codex.promptModeLabel': string;
+  'codex.promptMode.fixed': string;
+  'codex.promptMode.aiGenerated': string;
+  'codex.promptMode.aiGeneratedHelp': string;
+  'codex.promptLabel': string;
+  'codex.promptPlaceholder': string;
+  'codex.promptGuidanceLabel': string;
+  'codex.promptGuidancePlaceholder': string;
+  'codex.modelLabel': string;
+  'codex.model.custom': string;
+  'codex.customModelPlaceholder': string;
+  'codex.reasoningEffortLabel': string;
+  'codex.reasoningEffort.low': string;
+  'codex.reasoningEffort.medium': string;
+  'codex.reasoningEffort.high': string;
+  'codex.sandboxLabel': string;
+  'codex.sandbox.readOnly': string;
+  'codex.sandbox.workspaceWrite': string;
+  'codex.sandbox.dangerFullAccess': string;
+  'codex.sandboxHelp': string;
+  'codex.sandboxDefaultHelp': string;
+  'codex.advancedOptions': string;
+  'codex.skipGitRepoCheckWarning': string;
+  'codex.createButton': string;
+  'codex.cancelButton': string;
+  'codex.error.nameRequired': string;
+  'codex.error.nameTooLong': string;
+  'codex.error.nameInvalidPattern': string;
+  'codex.error.promptRequired': string;
+  'codex.error.promptTooLong': string;
+  'codex.error.modelRequired': string;
+  'codex.nameHelp': string;
 
   // SubAgentFlow Node (Feature: 089-subworkflow)
   'node.subAgentFlow.title': string;
@@ -417,6 +462,7 @@ export interface WebviewTranslationKeys {
   'refinement.chat.clearButton': string;
   'refinement.chat.clearButton.tooltip': string;
   'refinement.chat.useSkillsCheckbox': string;
+  'refinement.chat.useCodexNodesCheckbox': string;
 
   // Timeout selector
   'refinement.timeout.label': string;

@@ -20,6 +20,7 @@ export enum NodeType {
   Skill = 'skill', // New: Claude Code Skill integration
   Mcp = 'mcp', // New: MCP (Model Context Protocol) tool integration
   SubAgentFlow = 'subAgentFlow', // New: Sub-Agent Flow reference node
+  Codex = 'codex', // New: OpenAI Codex CLI integration
 }
 
 // ============================================================================
@@ -327,6 +328,39 @@ export interface McpNodeData {
   };
 }
 
+/**
+ * Codex Agent node data
+ *
+ * Represents an OpenAI Codex CLI execution node for multi-agent workflows.
+ * Phase 1: UI/data model only (CLI execution is out of scope)
+ */
+export interface CodexNodeData {
+  /** Display label for the Codex agent node. Must match pattern /^[a-zA-Z0-9_-]+$/ */
+  label: string;
+  /**
+   * Prompt mode for Codex execution.
+   * - 'fixed': Use the prompt field as-is (default)
+   * - 'ai-generated': Let the orchestrating AI agent generate the prompt dynamically
+   */
+  promptMode: 'fixed' | 'ai-generated';
+  /** Prompt/instructions for the Codex agent (required for 'fixed', optional guidance for 'ai-generated') */
+  prompt: string;
+  /** Model to use for Codex execution. Predefined options or custom model name. */
+  model: string;
+  /** Reasoning effort level */
+  reasoningEffort: 'low' | 'medium' | 'high';
+  /** Sandbox mode for file system access. If undefined, Codex default is used (no -s option). */
+  sandbox?: 'read-only' | 'workspace-write' | 'danger-full-access';
+  /** Number of output ports (fixed at 1) */
+  outputPorts: 1;
+  /**
+   * Skip Git repository trust check.
+   * When true, allows execution outside trusted Git repositories.
+   * Default: false (respects Codex's security model)
+   */
+  skipGitRepoCheck?: boolean;
+}
+
 // ============================================================================
 // Node Types
 // ============================================================================
@@ -393,6 +427,11 @@ export interface SubAgentFlowNode extends BaseNode {
   data: SubAgentFlowNodeData;
 }
 
+export interface CodexNode extends BaseNode {
+  type: NodeType.Codex;
+  data: CodexNodeData;
+}
+
 export type WorkflowNode =
   | SubAgentNode
   | AskUserQuestionNode
@@ -404,7 +443,8 @@ export type WorkflowNode =
   | PromptNode
   | SkillNode
   | McpNode
-  | SubAgentFlowNode;
+  | SubAgentFlowNode
+  | CodexNode;
 
 // ============================================================================
 // Connection Type
@@ -608,5 +648,12 @@ export const VALIDATION_RULES = {
     MATCHER_MAX_LENGTH: 200,
     MAX_ENTRIES_PER_HOOK: 10,
     MAX_ACTIONS_PER_ENTRY: 5,
+  },
+  CODEX: {
+    NAME_MIN_LENGTH: 1,
+    NAME_MAX_LENGTH: 64,
+    PROMPT_MIN_LENGTH: 1,
+    PROMPT_MAX_LENGTH: 10000,
+    OUTPUT_PORTS: 1, // Fixed: 1 output port
   },
 } as const;

@@ -17,6 +17,7 @@ export const NODE_TYPE_LABELS: Record<string, string> = {
   end: 'End',
   skill: 'Skill',
   mcp: 'MCP Tool',
+  codex: 'Codex Agent',
 } as const;
 
 export const NODE_TYPE_UNKNOWN = 'Unknown';

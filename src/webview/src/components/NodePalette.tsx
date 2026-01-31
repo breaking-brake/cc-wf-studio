@@ -12,7 +12,10 @@ import type React from 'react';
 import { useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useTranslation } from '../i18n/i18n-context';
+import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
+import { BetaBadge } from './common/BetaBadge';
+import { CodexNodeDialog } from './dialogs/CodexNodeDialog';
 import { McpNodeDialog } from './dialogs/McpNodeDialog';
 import { SkillBrowserDialog } from './dialogs/SkillBrowserDialog';
 
@@ -44,8 +47,11 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
 
   // サブエージェントフロー編集中はネスト不可のノードを非活性にする
   const isEditingSubAgentFlow = activeSubAgentFlowId !== null;
+  // Codex Beta が有効かどうか
+  const isCodexEnabled = useRefinementStore((state) => state.isCodexEnabled);
   const [isSkillBrowserOpen, setIsSkillBrowserOpen] = useState(false);
   const [isMcpDialogOpen, setIsMcpDialogOpen] = useState(false);
+  const [isCodexDialogOpen, setIsCodexDialogOpen] = useState(false);
 
   /**
    * 既存のノードと重ならない位置を計算する
@@ -533,6 +539,78 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
         )}
       </button>
 
+      {/* Section: Special Nodes - only shown when Codex Beta is enabled */}
+      {isCodexEnabled && (
+        <>
+          <div
+            style={{
+              fontSize: isCompact ? '10px' : '11px',
+              fontWeight: 600,
+              color: 'var(--vscode-descriptionForeground)',
+              marginBottom: isCompact ? '4px' : '8px',
+              marginTop: isCompact ? '8px' : '16px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+            }}
+          >
+            {t('palette.specialNodes')}
+          </div>
+
+          {/* Codex Agent Node Button (Feature: 518-codex-agent-node) */}
+          <button
+            type="button"
+            onClick={() => setIsCodexDialogOpen(true)}
+            data-tour="add-codex-button"
+            style={{
+              width: '100%',
+              padding: isCompact ? '8px' : '12px',
+              marginBottom: isCompact ? '8px' : '12px',
+              backgroundColor: 'var(--vscode-button-background)',
+              color: 'var(--vscode-button-foreground)',
+              border: '1px solid var(--vscode-button-border)',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: isCompact ? '11px' : '13px',
+              fontWeight: 500,
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                fontWeight: 600,
+              }}
+            >
+              {t('node.codex.title')}
+              <BetaBadge style={{ borderRadius: '3px' }} />
+            </div>
+            {!isCompact && (
+              <div
+                style={{
+                  fontSize: '11px',
+                  color: 'var(--vscode-button-foreground)',
+                  opacity: 0.8,
+                }}
+              >
+                {t('node.codex.description')}
+              </div>
+            )}
+          </button>
+        </>
+      )}
+
       {/* Section: Control Flow */}
       <div
         style={{
@@ -809,6 +887,9 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
 
       {/* MCP Node Dialog (Feature: 001-mcp-node) */}
       <McpNodeDialog isOpen={isMcpDialogOpen} onClose={() => setIsMcpDialogOpen(false)} />
+
+      {/* Codex Node Dialog (Feature: 518-codex-agent-node) */}
+      <CodexNodeDialog isOpen={isCodexDialogOpen} onClose={() => setIsCodexDialogOpen(false)} />
     </div>
   );
 };

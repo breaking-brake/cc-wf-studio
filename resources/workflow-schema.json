@@ -13,7 +13,8 @@
       "switch",
       "skill",
       "mcp",
-      "subAgentFlow"
+      "subAgentFlow",
+      "codex"
     ]
   },
   "nodeTypes": {
@@ -375,6 +376,64 @@
           }
         }
       }
+    },
+    "codex": {
+      "description": "Execute an OpenAI Codex CLI agent for code generation and analysis tasks. **Important: Phase 1 only supports UI/data model - CLI execution is not yet implemented.**",
+      "fields": {
+        "label": {
+          "type": "string",
+          "required": true,
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "Display label for the Codex agent"
+        },
+        "promptMode": {
+          "type": "string",
+          "required": true,
+          "enum": ["fixed", "ai-generated"],
+          "default": "fixed",
+          "description": "Prompt mode: 'fixed' uses the prompt field as-is, 'ai-generated' lets the orchestrating AI agent generate instructions dynamically based on context"
+        },
+        "prompt": {
+          "type": "string",
+          "required": false,
+          "maxLength": 10000,
+          "description": "Instructions for the Codex agent. Required for 'fixed' mode, optional guidance for 'ai-generated' mode"
+        },
+        "model": {
+          "type": "string",
+          "required": true,
+          "minLength": 1,
+          "default": "gpt-5.2-codex",
+          "description": "Model to use for Codex execution. Predefined options: gpt-5.2-codex, gpt-5.2, gpt-5.1-codex-max, gpt-5.1-codex-mini. Custom model names are also supported."
+        },
+        "reasoningEffort": {
+          "type": "string",
+          "required": true,
+          "enum": ["low", "medium", "high"],
+          "default": "medium",
+          "description": "Reasoning effort level for the agent"
+        },
+        "sandbox": {
+          "type": "string",
+          "required": false,
+          "enum": ["read-only", "workspace-write", "danger-full-access"],
+          "description": "Optional. Sandbox mode for file system access. When specified, 'read-only' is recommended."
+        },
+        "outputPorts": {
+          "type": "number",
+          "required": true,
+          "value": 1
+        },
+        "skipGitRepoCheck": {
+          "type": "boolean",
+          "required": false,
+          "default": true,
+          "description": "Skip Git repository trust check. When true, allows execution outside trusted Git repositories. Use with caution."
+        }
+      },
+      "inputPorts": 1,
+      "outputPorts": 1
     }
   },
   "connectionRules": {

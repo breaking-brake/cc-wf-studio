@@ -100,6 +100,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Node Palette
   'palette.title': 'Node Palette',
   'palette.basicNodes': 'Basic Nodes',
+  'palette.specialNodes': 'Special Nodes',
   'palette.controlFlow': 'Control Flow',
   'palette.quickStart': '💡 Quick Start',
 
@@ -121,6 +122,53 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'node.askUserQuestion.description': 'Branch based on user choice',
   'node.skill.title': 'Skill',
   'node.skill.description': 'Execute a Claude Code Skill',
+
+  // Codex Node (Feature: 518-codex-agent-node)
+  'node.codex.title': 'Codex Agent',
+  'node.codex.description': 'Execute OpenAI Codex CLI',
+  'node.codex.untitled': 'Untitled Codex Agent',
+  'node.codex.aiGenerated': 'AI Generated',
+
+  // Codex Dialog (Feature: 518-codex-agent-node)
+  'codex.title': 'Create Codex Agent',
+  'codex.description': 'Configure an OpenAI Codex CLI agent for your workflow.',
+  'codex.nameLabel': 'Name',
+  'codex.namePlaceholder': 'e.g., code-reviewer',
+  'codex.promptModeLabel': 'Prompt Mode',
+  'codex.promptMode.fixed': 'Fixed',
+  'codex.promptMode.aiGenerated': 'AI Generated',
+  'codex.promptMode.aiGeneratedHelp':
+    'The orchestrating AI agent will generate instructions based on context.',
+  'codex.promptLabel': 'Prompt',
+  'codex.promptPlaceholder': 'Enter instructions for the Codex agent...',
+  'codex.promptGuidanceLabel': 'Guidance (Optional)',
+  'codex.promptGuidancePlaceholder': 'Optional hints for the AI when generating instructions...',
+  'codex.modelLabel': 'Model',
+  'codex.model.custom': 'Custom',
+  'codex.customModelPlaceholder': 'e.g., gpt-6.0-codex',
+  'codex.reasoningEffortLabel': 'Reasoning Effort',
+  'codex.reasoningEffort.low': 'Low',
+  'codex.reasoningEffort.medium': 'Medium',
+  'codex.reasoningEffort.high': 'High',
+  'codex.sandboxLabel': 'Sandbox Mode',
+  'codex.sandbox.readOnly': 'Read Only',
+  'codex.sandbox.workspaceWrite': 'Workspace Write',
+  'codex.sandbox.dangerFullAccess': 'Full Access (Dangerous)',
+  'codex.sandboxHelp': 'Controls file system access permissions for the Codex agent.',
+  'codex.sandboxDefaultHelp': 'Uses Codex default behavior (no -s option specified).',
+  'codex.advancedOptions': 'Advanced Options',
+  'codex.skipGitRepoCheckWarning':
+    'This option is usually required for workflow execution. Enables execution outside trusted Git repositories.',
+  'codex.createButton': 'Create',
+  'codex.cancelButton': 'Cancel',
+  'codex.error.nameRequired': 'Name is required',
+  'codex.error.nameTooLong': 'Name must be 64 characters or less',
+  'codex.error.nameInvalidPattern':
+    'Name must contain only alphanumeric characters, hyphens, and underscores',
+  'codex.error.promptRequired': 'Prompt is required',
+  'codex.error.promptTooLong': 'Prompt must be 10,000 characters or less',
+  'codex.error.modelRequired': 'Model name is required',
+  'codex.nameHelp': 'Alphanumeric characters, hyphens, and underscores only',
 
   // SubAgentFlow Node (Feature: 089-subworkflow)
   'node.subAgentFlow.title': 'Sub-Agent Flow',
@@ -212,6 +260,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.validationStatus.missing.tooltip': 'SKILL.md file not found at specified path',
   'property.validationStatus.invalid.tooltip': 'SKILL.md has invalid YAML frontmatter',
   'property.allowedTools': 'Allowed Tools',
+
+  // Codex Agent properties
 
   // AskUserQuestion properties
   'property.questionText': 'Question',
@@ -459,6 +509,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.clearButton': 'Clear Conversation',
   'refinement.chat.clearButton.tooltip': 'Clear conversation history and start fresh',
   'refinement.chat.useSkillsCheckbox': 'Include Skills',
+  'refinement.chat.useCodexNodesCheckbox': 'Include Codex Nodes',
 
   // Timeout selector
   'refinement.timeout.label': 'Timeout',

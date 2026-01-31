@@ -336,6 +336,7 @@ interface RefinementStore {
   currentInput: string;
   currentRequestId: string | null;
   useSkills: boolean;
+  useCodexNodes: boolean;
   timeoutSeconds: number;
   selectedModel: ClaudeModel;
   selectedCopilotModel: CopilotModel;
@@ -363,6 +364,7 @@ interface RefinementStore {
   closeChat: () => void;
   toggleChat: () => void;
   toggleUseSkills: () => void;
+  toggleUseCodexNodes: () => void;
   setTimeoutSeconds: (seconds: number) => void;
   setSelectedModel: (model: ClaudeModel) => void;
   setSelectedCopilotModel: (model: CopilotModel) => void;
@@ -459,6 +461,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   currentInput: '',
   currentRequestId: null,
   useSkills: true,
+  useCodexNodes: false, // Default: disabled, only shown when Codex Beta is enabled
   timeoutSeconds: 0, // Default timeout: None (0 = use system guard)
   selectedModel: loadModelFromStorage(), // Load from localStorage, default: 'haiku'
   selectedCopilotModel: loadCopilotModelFromStorage(), // Load from localStorage, default: 'gpt-4o'
@@ -496,6 +499,10 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
 
   toggleUseSkills: () => {
     set({ useSkills: !get().useSkills });
+  },
+
+  toggleUseCodexNodes: () => {
+    set({ useCodexNodes: !get().useCodexNodes });
   },
 
   setTimeoutSeconds: (seconds: number) => {

@@ -95,6 +95,7 @@ export function RefinementChatPanel({
   // Settings from refinement store (shared across all panels)
   const {
     useSkills,
+    useCodexNodes,
     timeoutSeconds,
     selectedModel,
     selectedCopilotModel,
@@ -177,7 +178,8 @@ export function RefinementChatPanel({
           selectedProvider,
           selectedCopilotModel,
           selectedCodexModel,
-          selectedCodexReasoningEffort
+          selectedCodexReasoningEffort,
+          useCodexNodes
         );
 
         if (result.type === 'success') {
@@ -266,7 +268,8 @@ export function RefinementChatPanel({
           selectedProvider,
           selectedCopilotModel,
           selectedCodexModel,
-          selectedCodexReasoningEffort
+          selectedCodexReasoningEffort,
+          useCodexNodes
         );
 
         if (result.type === 'success') {
@@ -383,7 +386,8 @@ export function RefinementChatPanel({
           selectedProvider,
           selectedCopilotModel,
           selectedCodexModel,
-          selectedCodexReasoningEffort
+          selectedCodexReasoningEffort,
+          useCodexNodes
         );
 
         if (result.type === 'success') {
@@ -468,7 +472,8 @@ export function RefinementChatPanel({
           selectedProvider,
           selectedCopilotModel,
           selectedCodexModel,
-          selectedCodexReasoningEffort
+          selectedCodexReasoningEffort,
+          useCodexNodes
         );
 
         if (result.type === 'success') {

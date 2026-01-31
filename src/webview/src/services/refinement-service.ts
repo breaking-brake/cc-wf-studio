@@ -115,7 +115,8 @@ export function refineWorkflow(
   provider: AiCliProvider = 'claude-code',
   copilotModel: CopilotModel = 'gpt-4o',
   codexModel: CodexModel = '',
-  codexReasoningEffort: CodexReasoningEffort = 'low'
+  codexReasoningEffort: CodexReasoningEffort = 'low',
+  useCodex = false
 ): Promise<RefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
@@ -176,6 +177,7 @@ export function refineWorkflow(
       copilotModel,
       codexModel,
       codexReasoningEffort,
+      useCodex,
     };
 
     vscode.postMessage({
@@ -284,7 +286,8 @@ export function refineSubAgentFlow(
   provider: AiCliProvider = 'claude-code',
   copilotModel: CopilotModel = 'gpt-4o',
   codexModel: CodexModel = '',
-  codexReasoningEffort: CodexReasoningEffort = 'low'
+  codexReasoningEffort: CodexReasoningEffort = 'low',
+  useCodex = false
 ): Promise<SubAgentFlowRefinementResult> {
   return new Promise((resolve, reject) => {
     // Register response handler
@@ -339,6 +342,7 @@ export function refineSubAgentFlow(
       copilotModel,
       codexModel,
       codexReasoningEffort,
+      useCodex,
     };
 
     vscode.postMessage({

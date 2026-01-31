@@ -97,6 +97,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // Node Palette
   'palette.title': '节点面板',
   'palette.basicNodes': '基本节点',
+  'palette.specialNodes': '特殊节点',
   'palette.controlFlow': '控制流程',
   'palette.quickStart': '💡 快速入门',
 
@@ -118,6 +119,50 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'node.askUserQuestion.description': '根据用户选择分支',
   'node.skill.title': 'Skill',
   'node.skill.description': '执行Claude Code Skill',
+
+  // Codex Node (Feature: 518-codex-agent-node)
+  'node.codex.title': 'Codex Agent',
+  'node.codex.description': '执行OpenAI Codex CLI',
+  'node.codex.untitled': '未命名Codex Agent',
+  'node.codex.aiGenerated': 'AI生成',
+
+  // Codex Dialog (Feature: 518-codex-agent-node)
+  'codex.title': '创建Codex Agent',
+  'codex.description': '为工作流配置OpenAI Codex CLI代理。',
+  'codex.nameLabel': '名称',
+  'codex.namePlaceholder': '例如: code-reviewer',
+  'codex.promptModeLabel': '提示模式',
+  'codex.promptMode.fixed': '固定',
+  'codex.promptMode.aiGenerated': 'AI生成',
+  'codex.promptMode.aiGeneratedHelp': '协调AI代理将根据上下文生成指令。',
+  'codex.promptLabel': '提示词',
+  'codex.promptPlaceholder': '输入Codex代理的指令...',
+  'codex.promptGuidanceLabel': '引导（可选）',
+  'codex.promptGuidancePlaceholder': 'AI生成时的提示（可选）...',
+  'codex.modelLabel': '模型',
+  'codex.model.custom': '自定义',
+  'codex.customModelPlaceholder': '例如: gpt-6.0-codex',
+  'codex.reasoningEffortLabel': '推理级别',
+  'codex.reasoningEffort.low': '低',
+  'codex.reasoningEffort.medium': '中',
+  'codex.reasoningEffort.high': '高',
+  'codex.sandboxLabel': '沙箱模式',
+  'codex.sandbox.readOnly': '只读',
+  'codex.sandbox.workspaceWrite': '工作区写入',
+  'codex.sandbox.dangerFullAccess': '完全访问（危险）',
+  'codex.sandboxHelp': '控制Codex代理的文件系统访问权限。',
+  'codex.sandboxDefaultHelp': '使用Codex默认行为（无-s选项）。',
+  'codex.advancedOptions': '高级选项',
+  'codex.skipGitRepoCheckWarning': '工作流执行通常需要此选项。允许在受信任的Git仓库外执行。',
+  'codex.createButton': '创建',
+  'codex.cancelButton': '取消',
+  'codex.error.nameRequired': '名称是必填项',
+  'codex.error.nameTooLong': '名称不能超过64个字符',
+  'codex.error.nameInvalidPattern': '名称只能包含字母、数字、连字符和下划线',
+  'codex.error.promptRequired': '提示词是必填项',
+  'codex.error.promptTooLong': '提示词不能超过10,000个字符',
+  'codex.error.modelRequired': '模型名称是必填项',
+  'codex.nameHelp': '只能使用字母、数字、连字符和下划线',
 
   // SubAgentFlow Node (Feature: 089-subworkflow)
   'node.subAgentFlow.title': 'Sub-Agent Flow',
@@ -206,6 +251,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'property.validationStatus.missing.tooltip': '在指定路径找不到SKILL.md文件',
   'property.validationStatus.invalid.tooltip': 'SKILL.md包含无效的YAML前置内容',
   'property.allowedTools': '允许的工具',
+
+  // Codex Agent properties
 
   // AskUserQuestion properties
   'property.questionText': '问题',
@@ -443,6 +490,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.clearButton': '清除对话',
   'refinement.chat.clearButton.tooltip': '清除对话历史记录并重新开始',
   'refinement.chat.useSkillsCheckbox': '包含Skill',
+  'refinement.chat.useCodexNodesCheckbox': '包含Codex Agent节点',
 
   // Timeout selector
   'refinement.timeout.label': '超时',

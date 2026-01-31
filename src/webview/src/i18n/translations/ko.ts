@@ -99,6 +99,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Node Palette
   'palette.title': '노드 팔레트',
   'palette.basicNodes': '기본 노드',
+  'palette.specialNodes': '특수 노드',
   'palette.controlFlow': '제어 흐름',
   'palette.quickStart': '💡 빠른 시작',
 
@@ -121,6 +122,51 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'node.askUserQuestion.description': '사용자 선택에 따라 분기',
   'node.skill.title': 'Skill',
   'node.skill.description': 'Claude Code Skill 실행',
+
+  // Codex Node (Feature: 518-codex-agent-node)
+  'node.codex.title': 'Codex Agent',
+  'node.codex.description': 'OpenAI Codex CLI 실행',
+  'node.codex.untitled': '제목 없는 Codex Agent',
+  'node.codex.aiGenerated': 'AI 생성',
+
+  // Codex Dialog (Feature: 518-codex-agent-node)
+  'codex.title': 'Codex Agent 생성',
+  'codex.description': '워크플로용 OpenAI Codex CLI 에이전트를 구성합니다.',
+  'codex.nameLabel': '이름',
+  'codex.namePlaceholder': '예: code-reviewer',
+  'codex.promptModeLabel': '프롬프트 모드',
+  'codex.promptMode.fixed': '고정',
+  'codex.promptMode.aiGenerated': 'AI 생성',
+  'codex.promptMode.aiGeneratedHelp': '오케스트레이터 AI가 컨텍스트에 따라 지침을 생성합니다.',
+  'codex.promptLabel': '프롬프트',
+  'codex.promptPlaceholder': 'Codex 에이전트에 대한 지침을 입력하세요...',
+  'codex.promptGuidanceLabel': '가이던스 (선택사항)',
+  'codex.promptGuidancePlaceholder': 'AI 생성 시 힌트 (선택사항)...',
+  'codex.modelLabel': '모델',
+  'codex.model.custom': '사용자 정의',
+  'codex.customModelPlaceholder': '예: gpt-6.0-codex',
+  'codex.reasoningEffortLabel': '추론 수준',
+  'codex.reasoningEffort.low': '낮음',
+  'codex.reasoningEffort.medium': '중간',
+  'codex.reasoningEffort.high': '높음',
+  'codex.sandboxLabel': '샌드박스 모드',
+  'codex.sandbox.readOnly': '읽기 전용',
+  'codex.sandbox.workspaceWrite': '워크스페이스 쓰기',
+  'codex.sandbox.dangerFullAccess': '전체 액세스 (위험)',
+  'codex.sandboxHelp': 'Codex 에이전트의 파일 시스템 액세스 권한을 제어합니다.',
+  'codex.sandboxDefaultHelp': 'Codex 기본 동작을 사용합니다 (-s 옵션 없음).',
+  'codex.advancedOptions': '고급 옵션',
+  'codex.skipGitRepoCheckWarning':
+    '워크플로우 실행 시 일반적으로 이 옵션이 필요합니다. 신뢰할 수 있는 Git 리포지토리 외부에서 실행을 허용합니다.',
+  'codex.createButton': '생성',
+  'codex.cancelButton': '취소',
+  'codex.error.nameRequired': '이름이 필요합니다',
+  'codex.error.nameTooLong': '이름은 64자 이내로 입력하세요',
+  'codex.error.nameInvalidPattern': '이름은 영숫자, 하이픈, 밑줄만 사용할 수 있습니다',
+  'codex.error.promptRequired': '프롬프트가 필요합니다',
+  'codex.error.promptTooLong': '프롬프트는 10,000자 이내로 입력하세요',
+  'codex.error.modelRequired': '모델 이름이 필요합니다',
+  'codex.nameHelp': '영숫자, 하이픈, 밑줄만 사용 가능',
 
   // SubAgentFlow Node (Feature: 089-subworkflow)
   'node.subAgentFlow.title': 'Sub-Agent Flow',
@@ -213,6 +259,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.validationStatus.invalid.tooltip':
     'SKILL.md에 유효하지 않은 YAML frontmatter가 있습니다',
   'property.allowedTools': '허용된 도구',
+
+  // Codex Agent properties
 
   // AskUserQuestion properties
   'property.questionText': '질문',
@@ -459,6 +507,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.clearButton': '대화 지우기',
   'refinement.chat.clearButton.tooltip': '대화 기록을 지우고 처음부터 시작합니다',
   'refinement.chat.useSkillsCheckbox': 'Skill 포함',
+  'refinement.chat.useCodexNodesCheckbox': 'Codex Agent 노드 포함',
 
   // Timeout selector
   'refinement.timeout.label': '타임아웃',

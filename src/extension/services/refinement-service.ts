@@ -188,7 +188,8 @@ export function constructRefinementPrompt(
   userMessage: string,
   schemaResult: SchemaLoadResult,
   filteredSkills: SkillRelevanceScore[] = [],
-  previousValidationErrors?: ValidationErrorInfo[]
+  previousValidationErrors?: ValidationErrorInfo[],
+  isCodexEnabled = false
 ): { prompt: string; schemaSize: number } {
   const schemaFormat = getConfiguredSchemaFormat();
 
@@ -208,7 +209,8 @@ export function constructRefinementPrompt(
     userMessage,
     schemaResult,
     filteredSkills,
-    previousValidationErrors
+    previousValidationErrors,
+    isCodexEnabled
   );
 
   const prompt = builder.buildPrompt();
@@ -266,7 +268,8 @@ export async function refineWorkflow(
   provider: AiCliProvider = 'claude-code',
   copilotModel: CopilotModel = 'gpt-4o',
   codexModel: CodexModel = '',
-  codexReasoningEffort: CodexReasoningEffort = 'low'
+  codexReasoningEffort: CodexReasoningEffort = 'low',
+  useCodex = false
 ): Promise<RefinementResult> {
   const startTime = Date.now();
 
@@ -371,14 +374,15 @@ export async function refineWorkflow(
       sizeBytes: schemaResult.sizeBytes,
     });
 
-    // Step 3: Construct refinement prompt (with or without skills, and error context if retrying)
+    // Step 3: Construct refinement prompt (with or without skills/codex, and error context if retrying)
     const { prompt, schemaSize } = constructRefinementPrompt(
       currentWorkflow,
       conversationHistory,
       userMessage,
       schemaResult,
       filteredSkills,
-      previousValidationErrors
+      previousValidationErrors,
+      useCodex
     );
 
     // Record prompt size for metrics
@@ -991,7 +995,8 @@ export function constructSubAgentFlowRefinementPrompt(
   conversationHistory: ConversationHistory,
   userMessage: string,
   schemaResult: SchemaLoadResult,
-  filteredSkills: SkillRelevanceScore[] = []
+  filteredSkills: SkillRelevanceScore[] = [],
+  isCodexEnabled = false
 ): { prompt: string; schemaSize: number } {
   // Get last 6 messages (3 rounds of user-AI conversation)
   const recentMessages = conversationHistory.messages.slice(-6);
@@ -1047,6 +1052,34 @@ ${JSON.stringify(
 `
       : '';
 
+  // Construct Codex section (only when enabled)
+  const codexSection = isCodexEnabled
+    ? `
+
+**Codex Agent Node Guidelines**:
+Codex Agent is a specialized node for executing OpenAI Codex CLI within workflows.
+
+**When to use Codex Agent**:
+- Complex code generation requiring multiple files or architectural decisions
+- Code analysis or refactoring tasks that benefit from deep reasoning
+- Tasks requiring workspace-level operations (with appropriate sandbox settings)
+- Multi-step coding tasks that benefit from reasoning effort configuration
+
+**Codex Node Constraints**:
+- Must have exactly 1 output port (outputPorts: 1)
+- If branching needed, add ifElse/switch node after the Codex node
+- Required fields: name, prompt (or promptGuidance for ai-generated mode), model, reasoningEffort
+- Optional fields: sandbox (read-only/workspace-write/danger-full-access), skipGitRepoCheck
+
+**Configuration Options**:
+- model: "o3" (more capable) or "o4-mini" (faster, cost-effective)
+- reasoningEffort: "low"/"medium"/"high" - controls depth of reasoning
+- promptMode: "fixed" (user-defined prompt) or "ai-generated" (orchestrating AI provides prompt)
+- sandbox: Optional - "read-only" (safest), "workspace-write" (can modify files), "danger-full-access"
+
+`
+    : '';
+
   const prompt = `You are an expert workflow designer for CC Workflow Studio.
 
 **Task**: Refine a Sub-Agent Flow based on user's feedback.
@@ -1096,7 +1129,7 @@ ${userMessage}
 - Use ifElse node for 2-way conditional branching (true/false)
 - Use switch node for 3+ way branching or multiple conditions
 - Each branch output should connect to exactly one downstream node
-${skillsSection}
+${skillsSection}${codexSection}
 ${schemaSection}
 
 **Output Format**: You MUST output a structured JSON response in exactly this format:
@@ -1187,7 +1220,8 @@ export async function refineSubAgentFlow(
   provider: AiCliProvider = 'claude-code',
   copilotModel: CopilotModel = 'gpt-4o',
   codexModel: CodexModel = '',
-  codexReasoningEffort: CodexReasoningEffort = 'low'
+  codexReasoningEffort: CodexReasoningEffort = 'low',
+  useCodex = false
 ): Promise<SubAgentFlowRefinementResult> {
   const startTime = Date.now();
 
@@ -1274,7 +1308,8 @@ export async function refineSubAgentFlow(
       conversationHistory,
       userMessage,
       schemaResult,
-      filteredSkills
+      filteredSkills,
+      useCodex
     );
 
     // Record prompt size for metrics

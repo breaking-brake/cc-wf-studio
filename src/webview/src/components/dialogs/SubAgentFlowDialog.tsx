@@ -41,6 +41,7 @@ import { MinimapContainer } from '../MinimapContainer';
 import { NodePalette } from '../NodePalette';
 import { AskUserQuestionNodeComponent } from '../nodes/AskUserQuestionNode';
 import { BranchNodeComponent } from '../nodes/BranchNode';
+import { CodexNodeComponent } from '../nodes/CodexNode';
 import { EndNode } from '../nodes/EndNode';
 import { IfElseNodeComponent } from '../nodes/IfElseNode';
 import { McpNodeComponent } from '../nodes/McpNode/McpNode';
@@ -67,6 +68,7 @@ const nodeTypes: NodeTypes = {
   prompt: PromptNode,
   skill: SkillNodeComponent,
   mcp: McpNodeComponent,
+  codex: CodexNodeComponent,
   subAgentFlow: SubAgentFlowNodeComponent,
 };
 
@@ -666,6 +668,10 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
                               return 'var(--vscode-charts-purple)';
                             case 'skill':
                               return 'var(--vscode-charts-cyan)';
+                            case 'mcp':
+                              return 'var(--vscode-charts-green)';
+                            case 'codex':
+                              return 'var(--vscode-charts-orange)';
                             default:
                               return 'var(--vscode-foreground)';
                           }

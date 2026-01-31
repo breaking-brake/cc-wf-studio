@@ -100,6 +100,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Node Palette
   'palette.title': 'ノードパレット',
   'palette.basicNodes': '基本ノード',
+  'palette.specialNodes': '特殊ノード',
   'palette.controlFlow': '制御フロー',
   'palette.quickStart': '💡 クイックスタート',
 
@@ -121,6 +122,51 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'node.askUserQuestion.description': 'ユーザーの選択に基づいて分岐',
   'node.skill.title': 'Skill',
   'node.skill.description': 'Claude Code Skillを実行',
+
+  // Codex Node (Feature: 518-codex-agent-node)
+  'node.codex.title': 'Codex Agent',
+  'node.codex.description': 'OpenAI Codex CLIを実行',
+  'node.codex.untitled': '無題のCodex Agent',
+  'node.codex.aiGenerated': 'AI生成',
+
+  // Codex Dialog (Feature: 518-codex-agent-node)
+  'codex.title': 'Codex Agentを作成',
+  'codex.description': 'ワークフロー用のOpenAI Codex CLIエージェントを設定します。',
+  'codex.nameLabel': '名前',
+  'codex.namePlaceholder': '例: code-reviewer',
+  'codex.promptModeLabel': 'プロンプトモード',
+  'codex.promptMode.fixed': '固定',
+  'codex.promptMode.aiGenerated': 'AI生成',
+  'codex.promptMode.aiGeneratedHelp': 'オーケストレーターAIが文脈に応じて指示を生成します。',
+  'codex.promptLabel': 'プロンプト',
+  'codex.promptPlaceholder': 'Codexエージェントへの指示を入力...',
+  'codex.promptGuidanceLabel': 'ガイダンス（任意）',
+  'codex.promptGuidancePlaceholder': 'AI生成時のヒント（任意）...',
+  'codex.modelLabel': 'モデル',
+  'codex.model.custom': 'カスタム',
+  'codex.customModelPlaceholder': '例: gpt-6.0-codex',
+  'codex.reasoningEffortLabel': '推論レベル',
+  'codex.reasoningEffort.low': '低',
+  'codex.reasoningEffort.medium': '中',
+  'codex.reasoningEffort.high': '高',
+  'codex.sandboxLabel': 'サンドボックスモード',
+  'codex.sandbox.readOnly': '読み取り専用',
+  'codex.sandbox.workspaceWrite': 'ワークスペース書き込み',
+  'codex.sandbox.dangerFullAccess': 'フルアクセス（危険）',
+  'codex.sandboxHelp': 'Codexエージェントのファイルシステムアクセス権限を制御します。',
+  'codex.sandboxDefaultHelp': 'Codexのデフォルト動作を使用します（-sオプションなし）。',
+  'codex.advancedOptions': '詳細設定',
+  'codex.skipGitRepoCheckWarning':
+    'ワークフロー実行時は通常このオプションが必要です。信頼されたGitリポジトリ外での実行を許可します。',
+  'codex.createButton': '作成',
+  'codex.cancelButton': 'キャンセル',
+  'codex.error.nameRequired': '名前は必須です',
+  'codex.error.nameTooLong': '名前は64文字以内で入力してください',
+  'codex.error.nameInvalidPattern': '名前は英数字、ハイフン、アンダースコアのみ使用可能です',
+  'codex.error.promptRequired': 'プロンプトは必須です',
+  'codex.error.promptTooLong': 'プロンプトは10,000文字以内で入力してください',
+  'codex.error.modelRequired': 'モデル名は必須です',
+  'codex.nameHelp': '英数字、ハイフン、アンダースコアのみ使用可能',
 
   // SubAgentFlow Node (Feature: 089-subworkflow)
   'node.subAgentFlow.title': 'Sub-Agent Flow',
@@ -212,6 +258,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.validationStatus.missing.tooltip': '指定されたパスにSKILL.mdファイルが見つかりません',
   'property.validationStatus.invalid.tooltip': 'SKILL.mdのYAMLフロントマターが無効です',
   'property.allowedTools': '許可ツール',
+
+  // Codex Agent properties
 
   // AskUserQuestion properties
   'property.questionText': '質問',
@@ -459,6 +507,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'refinement.chat.clearButton': '会話をクリア',
   'refinement.chat.clearButton.tooltip': '会話履歴をクリアして最初からやり直します',
   'refinement.chat.useSkillsCheckbox': 'Skillを含める',
+  'refinement.chat.useCodexNodesCheckbox': 'Codex Agentノードを含める',
 
   // Timeout selector
   'refinement.timeout.label': 'タイムアウト',

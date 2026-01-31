@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useIsCompactMode } from '../../hooks/useWindowWidth';
 import { useTranslation } from '../../i18n/i18n-context';
+import { BetaBadge } from '../common/BetaBadge';
 
 // Fixed font sizes for dropdown menu (not responsive)
 const FONT_SIZES = {
@@ -171,18 +172,7 @@ export function MoreActionsDropdown({
             <Bot size={14} />
             <span style={{ flex: 1 }}>
               Copilot
-              <span
-                style={{
-                  fontSize: '9px',
-                  backgroundColor: 'var(--vscode-badge-background)',
-                  color: 'var(--vscode-badge-foreground)',
-                  padding: '1px 4px',
-                  borderRadius: '2px',
-                  marginLeft: '4px',
-                }}
-              >
-                Beta
-              </span>
+              <BetaBadge style={{ marginLeft: '4px' }} />
             </span>
             {isCopilotEnabled && <Check size={14} />}
           </DropdownMenu.Item>
@@ -205,18 +195,7 @@ export function MoreActionsDropdown({
             <Terminal size={14} />
             <span style={{ flex: 1 }}>
               Codex
-              <span
-                style={{
-                  fontSize: '9px',
-                  backgroundColor: 'var(--vscode-badge-background)',
-                  color: 'var(--vscode-badge-foreground)',
-                  padding: '1px 4px',
-                  borderRadius: '2px',
-                  marginLeft: '4px',
-                }}
-              >
-                Beta
-              </span>
+              <BetaBadge style={{ marginLeft: '4px' }} />
             </span>
             {isCodexEnabled && <Check size={14} />}
           </DropdownMenu.Item>

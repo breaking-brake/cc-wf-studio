@@ -364,6 +364,8 @@ export interface RefineWorkflowPayload {
   codexModel?: CodexModel;
   /** Codex reasoning effort level (default: 'low') */
   codexReasoningEffort?: CodexReasoningEffort;
+  /** Whether to include Codex Agent node in AI prompt (default: false) */
+  useCodex?: boolean;
 }
 
 export interface RefinementSuccessPayload {
