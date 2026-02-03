@@ -76,10 +76,30 @@
   - Requires [Codex CLI](https://github.com/openai/codex) to be installed
   - Experimental feature; some workflows may not work as expected
 
-## Getting Started
+## How to Use
+
+### Launch the Extension
 
 - Click the <img src="./resources/icon.png" alt="icon" height="16" style="vertical-align: middle"> icon in the top-right corner of the editor
-- Or open Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`) → **"CC Workflow Studio: Open Editor"**
+- Or: Command Palette (`Cmd+Shift+P`) → **"CC Workflow Studio: Open Editor"**
+
+### Create a Workflow
+
+- Add nodes from the palette and configure their settings, or use [Edit with AI](#edit-with-ai).
+
+### Save & Load
+
+- Click Save <img src="./resources/icon-save.svg" alt="save" height="16" style="vertical-align: middle"> button in the toolbar to store your workflow as `.vscode/workflows/*.json`
+- Click Load <img src="./resources/icon-file-down.svg" alt="load" height="16" style="vertical-align: middle"> button in the toolbar to open a saved `.json` workflow
+
+### Export & Run
+
+- Click Export <img src="./resources/icon-export.svg" alt="export" height="16" style="vertical-align: middle"> button in the toolbar to create a `.md` slash command or agent skill (use `/workflow-name` in AI coding agents)
+- Click Run <img src="./resources/icon-play.svg" alt="run" height="16" style="vertical-align: middle"> button in the toolbar to run your workflow directly in AI coding agents
+
+### Edit with AI
+
+- Click Edit with AI <img src="./resources/icon-sparkles.svg" alt="sparkles" height="16" style="vertical-align: middle"> button in the toolbar to generate or refine workflows with natural language
 
 ## Usage Examples
 

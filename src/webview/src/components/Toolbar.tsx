@@ -1046,7 +1046,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                         }}
                       >
                         {isCompact ? (
-                          <FileDown size={16} />
+                          <SquareSlash size={16} />
                         ) : isCopilotExporting ? (
                           t('toolbar.exporting')
                         ) : (
@@ -1142,7 +1142,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                         }}
                       >
                         {isCompact ? (
-                          <FileDown size={16} />
+                          <SquareSlash size={16} />
                         ) : isCodexExporting ? (
                           t('toolbar.exporting')
                         ) : (
