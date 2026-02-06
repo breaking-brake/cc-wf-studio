@@ -53,6 +53,11 @@ resources/demo_run_workflow.gif
 resources/export-demo.gif
 resources/hero.png
 resources/icon-large.png
+resources/icon-save.png
+resources/icon-file-down.png
+resources/icon-export.png
+resources/icon-play.png
+resources/icon-sparkles.png
 
 # Build config
 biome.json
