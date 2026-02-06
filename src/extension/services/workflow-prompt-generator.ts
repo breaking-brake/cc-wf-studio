@@ -440,6 +440,8 @@ export function generateExecutionInstructions(
     sections.push('');
     for (const node of skillNodes) {
       const nodeId = sanitizeNodeId(node.id);
+      const executionMode = node.data.executionMode || 'execute';
+
       sections.push(`#### ${nodeId}(${node.data.name})`);
       sections.push('');
       sections.push(`**Description**: ${node.data.description}`);
@@ -454,9 +456,26 @@ export function generateExecutionInstructions(
       }
       sections.push(`**Skill Path**: \`${node.data.skillPath}\``);
       sections.push('');
-      sections.push(
-        'This node executes a Claude Code Skill. The Skill definition is stored in the SKILL.md file at the path shown above.'
-      );
+      sections.push(`**Execution Mode**: ${executionMode}`);
+      sections.push('');
+
+      if (executionMode === 'load') {
+        sections.push(
+          'Load the Skill knowledge from the SKILL.md file at the path shown above. Read and internalize the content as context for subsequent steps, but do NOT execute the Skill itself.'
+        );
+      } else {
+        sections.push(
+          'This node executes a Claude Code Skill. The Skill definition is stored in the SKILL.md file at the path shown above.'
+        );
+        if (node.data.executionPrompt) {
+          sections.push('');
+          sections.push('**Execution Instructions**:');
+          sections.push('');
+          sections.push('```');
+          sections.push(node.data.executionPrompt);
+          sections.push('```');
+        }
+      }
       sections.push('');
     }
   }

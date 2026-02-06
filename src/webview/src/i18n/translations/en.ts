@@ -433,6 +433,11 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.skillPath': 'Path',
   'skill.browser.validationStatus': 'Status',
 
+  // Skill Browser Settings Step
+  'skill.browser.configureButton': 'Configure',
+  'skill.browser.addButton': 'Add to Workflow',
+  'skill.browser.backToList': 'Back',
+
   // Skill Browser Actions
   'skill.action.refresh': 'Refresh',
   'skill.refreshing': 'Refreshing...',
@@ -467,6 +472,23 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'skill.creation.createButton': 'Create Skill',
   'skill.creation.creatingButton': 'Creating...',
   'skill.creation.error.unknown': 'Failed to create Skill. Please try again.',
+
+  // Skill Execution Mode
+  'property.skill.executionMode': 'Execution Mode',
+  'property.skill.executionMode.execute': 'Execute',
+  'property.skill.executionMode.load': 'Load as Knowledge',
+  'property.skill.executionMode.execute.description':
+    'Execute the Skill as an action in the workflow',
+  'property.skill.executionMode.load.description':
+    'Load the Skill content as knowledge context without executing it',
+  'property.skill.executionPrompt': 'Prompt',
+  'property.skill.executionPrompt.placeholder':
+    'Enter additional instructions for executing this Skill...',
+
+  // Skill Edit Dialog
+  'skill.editDialog.title': 'Edit Skill Settings',
+  'skill.editDialog.saveButton': 'Save',
+  'skill.editDialog.cancelButton': 'Cancel',
 
   // Skill Validation Errors
   'skill.validation.nameRequired': 'Skill name is required',

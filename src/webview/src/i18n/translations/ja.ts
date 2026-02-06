@@ -432,6 +432,11 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.skillPath': 'パス',
   'skill.browser.validationStatus': 'ステータス',
 
+  // Skill Browser Settings Step
+  'skill.browser.configureButton': '設定へ',
+  'skill.browser.addButton': 'ワークフローに追加',
+  'skill.browser.backToList': '戻る',
+
   // Skill Browser Actions
   'skill.action.refresh': '再読み込み',
   'skill.refreshing': '再読み込み中...',
@@ -465,6 +470,23 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'skill.creation.createButton': 'Skillを作成',
   'skill.creation.creatingButton': '作成中...',
   'skill.creation.error.unknown': 'Skillの作成に失敗しました。もう一度お試しください。',
+
+  // Skill Execution Mode
+  'property.skill.executionMode': '実行モード',
+  'property.skill.executionMode.execute': '実行する',
+  'property.skill.executionMode.load': '知識として読み込む',
+  'property.skill.executionMode.execute.description':
+    'ワークフロー内でSkillをアクションとして実行します',
+  'property.skill.executionMode.load.description':
+    'Skillの内容を知識コンテキストとして読み込みます（実行はしません）',
+  'property.skill.executionPrompt': 'プロンプト',
+  'property.skill.executionPrompt.placeholder':
+    'このSkillを実行する際の追加指示を入力してください...',
+
+  // Skill Edit Dialog
+  'skill.editDialog.title': 'Skill設定の編集',
+  'skill.editDialog.saveButton': '保存',
+  'skill.editDialog.cancelButton': 'キャンセル',
 
   // Skill Validation Errors
   'skill.validation.nameRequired': 'Skill名は必須です',

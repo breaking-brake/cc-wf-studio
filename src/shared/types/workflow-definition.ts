@@ -210,6 +210,19 @@ export interface SkillNodeData {
    * - undefined: for user/local scope or legacy data
    */
   source?: 'claude' | 'copilot';
+  /**
+   * Execution mode for this Skill node
+   * - 'execute': Execute the Skill (default behavior)
+   * - 'load': Load the Skill as knowledge context without executing it
+   * - undefined: treated as 'execute' for backward compatibility
+   */
+  executionMode?: 'load' | 'execute';
+  /**
+   * Custom execution prompt for 'execute' mode
+   * Provides additional instructions when executing the Skill.
+   * Only used when executionMode is 'execute' (or undefined).
+   */
+  executionPrompt?: string;
 }
 
 /**
@@ -619,6 +632,7 @@ export const VALIDATION_RULES = {
     DESCRIPTION_MIN_LENGTH: 1,
     DESCRIPTION_MAX_LENGTH: 1024,
     OUTPUT_PORTS: 1, // Fixed: 1 output port
+    EXECUTION_PROMPT_MAX_LENGTH: 2000,
   },
   MCP: {
     NAME_MIN_LENGTH: 1,

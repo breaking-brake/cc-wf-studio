@@ -395,6 +395,11 @@ export interface WebviewTranslationKeys {
   'skill.browser.skillPath': string;
   'skill.browser.validationStatus': string;
 
+  // Skill Browser Settings Step
+  'skill.browser.configureButton': string;
+  'skill.browser.addButton': string;
+  'skill.browser.backToList': string;
+
   // Skill Browser Actions
   'skill.action.refresh': string;
   'skill.refreshing': string;
@@ -426,6 +431,20 @@ export interface WebviewTranslationKeys {
   'skill.creation.createButton': string;
   'skill.creation.creatingButton': string;
   'skill.creation.error.unknown': string;
+
+  // Skill Execution Mode
+  'property.skill.executionMode': string;
+  'property.skill.executionMode.execute': string;
+  'property.skill.executionMode.load': string;
+  'property.skill.executionMode.execute.description': string;
+  'property.skill.executionMode.load.description': string;
+  'property.skill.executionPrompt': string;
+  'property.skill.executionPrompt.placeholder': string;
+
+  // Skill Edit Dialog
+  'skill.editDialog.title': string;
+  'skill.editDialog.saveButton': string;
+  'skill.editDialog.cancelButton': string;
 
   // Skill Validation Errors
   'skill.validation.nameRequired': string;

@@ -117,8 +117,8 @@ export const SkillNodeComponent: React.FC<NodeProps<SkillNodeData>> = React.memo
           {data.name || 'Untitled Skill'}
         </div>
 
-        {/* Description */}
-        {data.description && (
+        {/* Description or Execution Prompt */}
+        {(data.executionPrompt || data.description) && (
           <div
             style={{
               fontSize: '11px',
@@ -132,11 +132,11 @@ export const SkillNodeComponent: React.FC<NodeProps<SkillNodeData>> = React.memo
               WebkitBoxOrient: 'vertical',
             }}
           >
-            {data.description}
+            {data.executionPrompt || data.description}
           </div>
         )}
 
-        {/* Scope and Source Badges */}
+        {/* Scope, Source, and Execution Mode Badges */}
         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
           {/* Scope Badge */}
           <div
@@ -162,6 +162,24 @@ export const SkillNodeComponent: React.FC<NodeProps<SkillNodeData>> = React.memo
           {/* Source Badge for project and user skills */}
           {(data.scope === 'project' || data.scope === 'user') && data.source && (
             <AIProviderBadge provider={data.source as AIProviderType} size="small" />
+          )}
+          {/* Execution Mode Badge (only show for 'load' mode) */}
+          {data.executionMode === 'load' && (
+            <div
+              style={{
+                fontSize: '10px',
+                color: 'var(--vscode-badge-foreground)',
+                backgroundColor: 'var(--vscode-terminal-ansiYellow)',
+                padding: '2px 6px',
+                borderRadius: '3px',
+                display: 'inline-block',
+                fontWeight: 600,
+                letterSpacing: '0.3px',
+              }}
+              title={t('property.skill.executionMode.load.description')}
+            >
+              LOAD ONLY
+            </div>
           )}
         </div>
 

@@ -417,6 +417,11 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.skillPath': '路径',
   'skill.browser.validationStatus': '状态',
 
+  // Skill Browser Settings Step
+  'skill.browser.configureButton': '前往设置',
+  'skill.browser.addButton': '添加到工作流',
+  'skill.browser.backToList': '返回',
+
   // Skill Browser Actions
   'skill.action.refresh': '刷新',
   'skill.refreshing': '刷新中...',
@@ -450,6 +455,20 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'skill.creation.createButton': '创建技能',
   'skill.creation.creatingButton': '创建中...',
   'skill.creation.error.unknown': '创建技能失败。请重试。',
+
+  // Skill Execution Mode
+  'property.skill.executionMode': '执行模式',
+  'property.skill.executionMode.execute': '执行',
+  'property.skill.executionMode.load': '作为知识加载',
+  'property.skill.executionMode.execute.description': '在工作流中将技能作为操作执行',
+  'property.skill.executionMode.load.description': '将技能内容作为知识上下文加载（不执行）',
+  'property.skill.executionPrompt': '提示词',
+  'property.skill.executionPrompt.placeholder': '输入执行此技能时的附加指令...',
+
+  // Skill Edit Dialog
+  'skill.editDialog.title': '编辑技能设置',
+  'skill.editDialog.saveButton': '保存',
+  'skill.editDialog.cancelButton': '取消',
 
   // Skill Validation Errors
   'skill.validation.nameRequired': '技能名称是必需的',

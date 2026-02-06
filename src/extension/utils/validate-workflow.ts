@@ -524,6 +524,29 @@ function validateSkillNode(node: WorkflowNode): ValidationError[] {
     });
   }
 
+  // Execution mode validation
+  if (skillData.executionMode !== undefined) {
+    const validModes = ['load', 'execute'];
+    if (!validModes.includes(skillData.executionMode)) {
+      errors.push({
+        code: 'SKILL_INVALID_EXECUTION_MODE',
+        message: `Skill executionMode must be one of: ${validModes.join(', ')}`,
+        field: `nodes[${node.id}].data.executionMode`,
+      });
+    }
+  }
+
+  // Execution prompt length validation
+  if (skillData.executionPrompt) {
+    if (skillData.executionPrompt.length > VALIDATION_RULES.SKILL.EXECUTION_PROMPT_MAX_LENGTH) {
+      errors.push({
+        code: 'SKILL_EXECUTION_PROMPT_TOO_LONG',
+        message: `Skill executionPrompt exceeds ${VALIDATION_RULES.SKILL.EXECUTION_PROMPT_MAX_LENGTH} characters`,
+        field: `nodes[${node.id}].data.executionPrompt`,
+      });
+    }
+  }
+
   return errors;
 }
 

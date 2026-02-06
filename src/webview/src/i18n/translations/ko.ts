@@ -433,6 +433,11 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.skillPath': '경로',
   'skill.browser.validationStatus': '상태',
 
+  // Skill Browser Settings Step
+  'skill.browser.configureButton': '설정으로',
+  'skill.browser.addButton': '워크플로우에 추가',
+  'skill.browser.backToList': '뒤로',
+
   // Skill Browser Actions
   'skill.action.refresh': '새로고침',
   'skill.refreshing': '새로고침 중...',
@@ -466,6 +471,21 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'skill.creation.createButton': '스킬 만들기',
   'skill.creation.creatingButton': '만드는 중...',
   'skill.creation.error.unknown': '스킬 생성에 실패했습니다. 다시 시도해 주세요.',
+
+  // Skill Execution Mode
+  'property.skill.executionMode': '실행 모드',
+  'property.skill.executionMode.execute': '실행',
+  'property.skill.executionMode.load': '지식으로 로드',
+  'property.skill.executionMode.execute.description': '워크플로우에서 스킬을 액션으로 실행합니다',
+  'property.skill.executionMode.load.description':
+    '스킬 내용을 지식 컨텍스트로 로드합니다 (실행하지 않음)',
+  'property.skill.executionPrompt': '프롬프트',
+  'property.skill.executionPrompt.placeholder': '이 스킬을 실행할 때의 추가 지침을 입력하세요...',
+
+  // Skill Edit Dialog
+  'skill.editDialog.title': '스킬 설정 편집',
+  'skill.editDialog.saveButton': '저장',
+  'skill.editDialog.cancelButton': '취소',
 
   // Skill Validation Errors
   'skill.validation.nameRequired': '스킬 이름은 필수입니다',

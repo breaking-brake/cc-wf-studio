@@ -32,6 +32,7 @@ import { ColorPicker } from './common/ColorPicker';
 import { EditInEditorButton } from './common/EditInEditorButton';
 import { ResizeHandle } from './common/ResizeHandle';
 import { McpNodeEditDialog } from './dialogs/McpNodeEditDialog';
+import { SkillNodeEditDialog } from './dialogs/SkillNodeEditDialog';
 
 /**
  * PropertyOverlay Props
@@ -1836,6 +1837,8 @@ const SkillProperties: React.FC<{
 }> = ({ node }) => {
   const { t } = useTranslation();
   const data = node.data;
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const executionMode = data.executionMode || 'execute';
 
   // Get validation status icon and color
   const getValidationIcon = (status: 'valid' | 'missing' | 'invalid'): string => {
@@ -2041,6 +2044,104 @@ const SkillProperties: React.FC<{
         </div>
       )}
 
+      {/* Execution Mode (Read-only display) */}
+      <div>
+        <label
+          htmlFor="skill-execution-mode"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('property.skill.executionMode')}
+        </label>
+        <div
+          id="skill-execution-mode"
+          style={{
+            fontSize: '12px',
+            color: 'var(--vscode-descriptionForeground)',
+            backgroundColor:
+              executionMode === 'load'
+                ? 'var(--vscode-terminal-ansiYellow)'
+                : 'var(--vscode-badge-background)',
+            padding: '4px 8px',
+            borderRadius: '3px',
+            display: 'inline-block',
+            fontWeight: 600,
+          }}
+        >
+          {executionMode === 'load'
+            ? t('property.skill.executionMode.load')
+            : t('property.skill.executionMode.execute')}
+        </div>
+      </div>
+
+      {/* Execution Prompt (Read-only display, only for execute mode) */}
+      {executionMode === 'execute' && data.executionPrompt && (
+        <div>
+          <label
+            htmlFor="skill-execution-prompt"
+            style={{
+              display: 'block',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--vscode-foreground)',
+              marginBottom: '6px',
+            }}
+          >
+            {t('property.skill.executionPrompt')}
+          </label>
+          <div
+            id="skill-execution-prompt"
+            style={{
+              width: '100%',
+              padding: '6px 8px',
+              backgroundColor: 'var(--vscode-input-background)',
+              color: 'var(--vscode-descriptionForeground)',
+              border: '1px solid var(--vscode-input-border)',
+              borderRadius: '2px',
+              fontSize: '12px',
+              lineHeight: '1.4',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              maxHeight: '100px',
+              overflow: 'auto',
+            }}
+          >
+            {data.executionPrompt}
+          </div>
+        </div>
+      )}
+
+      {/* Edit Settings Button */}
+      <div>
+        <button
+          type="button"
+          onClick={() => setIsEditDialogOpen(true)}
+          className="nodrag"
+          style={{
+            width: '100%',
+            padding: '10px 16px',
+            fontSize: '13px',
+            fontWeight: 600,
+            backgroundColor: 'var(--vscode-button-background)',
+            color: 'var(--vscode-button-foreground)',
+            border: '1px solid var(--vscode-button-border)',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+          }}
+        >
+          <span>{t('skill.editDialog.title')}</span>
+        </button>
+      </div>
+
       {/* Info Note */}
       <div
         style={{
@@ -2056,6 +2157,13 @@ const SkillProperties: React.FC<{
         💡 Skill properties are read-only and loaded from SKILL.md file. To modify, edit the source
         file directly.
       </div>
+
+      {/* Skill Node Edit Dialog */}
+      <SkillNodeEditDialog
+        isOpen={isEditDialogOpen}
+        nodeId={node.id}
+        onClose={() => setIsEditDialogOpen(false)}
+      />
     </div>
   );
 };

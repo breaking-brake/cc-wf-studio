@@ -173,6 +173,19 @@
           "required": true,
           "default": "valid"
         },
+        "executionMode": {
+          "type": "string",
+          "enum": ["load", "execute"],
+          "required": false,
+          "default": "execute",
+          "description": "Execution mode: 'execute' runs the Skill (default), 'load' loads the Skill as knowledge context without executing it"
+        },
+        "executionPrompt": {
+          "type": "string",
+          "required": false,
+          "maxLength": 2000,
+          "description": "Custom execution instructions when executionMode is 'execute'. Ignored when executionMode is 'load'."
+        },
         "outputPorts": {
           "type": "number",
           "required": true,

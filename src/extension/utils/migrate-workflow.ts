@@ -142,6 +142,40 @@ export function migrateSkillScopes(workflow: Workflow): Workflow {
 }
 
 /**
+ * Migrate Skill nodes to include explicit executionMode
+ *
+ * For existing workflows without executionMode:
+ * - Sets executionMode to 'execute' (preserving existing behavior)
+ *
+ * @param workflow - The workflow to migrate
+ * @returns Migrated workflow with updated Skill nodes
+ */
+export function migrateSkillExecutionMode(workflow: Workflow): Workflow {
+  const migratedNodes = workflow.nodes.map((node) => {
+    if (node.type !== 'skill') return node;
+
+    const data = node.data as SkillNodeData;
+
+    if (data.executionMode === undefined) {
+      return {
+        ...node,
+        data: {
+          ...data,
+          executionMode: 'execute' as const,
+        },
+      } as WorkflowNode;
+    }
+
+    return node;
+  });
+
+  return {
+    ...workflow,
+    nodes: migratedNodes,
+  };
+}
+
+/**
  * Apply all workflow migrations
  *
  * Runs all migration functions in sequence.
@@ -159,6 +193,9 @@ export function migrateWorkflow(workflow: Workflow): Workflow {
 
   // Migration 2: Update Skill node scope terminology ('personal' → 'user')
   migrated = migrateSkillScopes(migrated);
+
+  // Migration 3: Set explicit executionMode on Skill nodes
+  migrated = migrateSkillExecutionMode(migrated);
 
   // Add future migrations here...
 
