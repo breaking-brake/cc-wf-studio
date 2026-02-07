@@ -441,40 +441,16 @@ export function generateExecutionInstructions(
     for (const node of skillNodes) {
       const nodeId = sanitizeNodeId(node.id);
       const executionMode = node.data.executionMode || 'execute';
+      const skillName = node.data.name;
 
-      sections.push(`#### ${nodeId}(${node.data.name})`);
+      sections.push(`#### ${nodeId}(${skillName})`);
       sections.push('');
-      sections.push(`**Description**: ${node.data.description}`);
-      sections.push('');
-      sections.push(`**Scope**: ${node.data.scope}`);
-      sections.push('');
-      sections.push(`**Validation Status**: ${node.data.validationStatus}`);
-      sections.push('');
-      if (node.data.allowedTools) {
-        sections.push(`**Allowed Tools**: ${node.data.allowedTools}`);
-        sections.push('');
-      }
-      sections.push(`**Skill Path**: \`${node.data.skillPath}\``);
-      sections.push('');
-      sections.push(`**Execution Mode**: ${executionMode}`);
-      sections.push('');
-
       if (executionMode === 'load') {
-        sections.push(
-          'Load the Skill knowledge from the SKILL.md file at the path shown above. Read and internalize the content as context for subsequent steps, but do NOT execute the Skill itself.'
-        );
+        sections.push(`- **Prompt**: skill "${skillName}" load-skill-knowledge-into-context-only`);
+      } else if (node.data.executionPrompt) {
+        sections.push(`- **Prompt**: skill "${skillName}" "${node.data.executionPrompt}"`);
       } else {
-        sections.push(
-          'This node executes a Claude Code Skill. The Skill definition is stored in the SKILL.md file at the path shown above.'
-        );
-        if (node.data.executionPrompt) {
-          sections.push('');
-          sections.push('**Execution Instructions**:');
-          sections.push('');
-          sections.push('```');
-          sections.push(node.data.executionPrompt);
-          sections.push('```');
-        }
+        sections.push(`- **Prompt**: skill "${skillName}"`);
       }
       sections.push('');
     }
