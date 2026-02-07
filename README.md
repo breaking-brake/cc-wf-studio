@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <strong>Accelerate Claude Code/GitHub Copilot<a href="#github-copilot-support">(※1)</a>/OpenAI Codex<a href="#openai-codex-support">(※2)</a> automation with a visual workflow editor</strong>
+  <strong>Accelerate Claude Code/GitHub Copilot<a href="#github-copilot-support">(※1)</a>/OpenAI Codex<a href="#openai-codex-support">(※2)</a>/Roo Code<a href="#roo-code-support">(※3)</a> automation with a visual workflow editor</strong>
 </p>
 
 <p align="center">
@@ -62,6 +62,7 @@
   - **GitHub Copilot Chat**<a href="#github-copilot-support">(※1)</a>: `.github/prompts/`
   - **GitHub Copilot CLI**<a href="#github-copilot-support">(※1)</a>: `.github/skills/`
   - **OpenAI Codex CLI**<a href="#openai-codex-support">(※2)</a>: `.codex/skills/`
+  - **Roo Code**<a href="#roo-code-support">(※3)</a>: `.roo/skills/`
 
 <span id="github-copilot-support">🤖</span> **GitHub Copilot Support (※1 β)** - Export & Run workflows to Copilot Chat or Copilot CLI, and use Copilot as AI provider for Edit with AI.
 
@@ -75,6 +76,13 @@
   **Note:**
   - Enable **Codex** option in Toolbar's **More** menu to activate
   - Requires [Codex CLI](https://github.com/openai/codex) to be installed
+  - Experimental feature; some workflows may not work as expected
+
+<span id="roo-code-support">🤖</span> **Roo Code Support (※3 β)** - Export & Run workflows to Roo Code (Skills format). Run launches Roo Code directly via Extension API.
+
+  **Note:**
+  - Enable **Roo Code** option in Toolbar's **More** menu to activate
+  - Requires [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) extension to be installed
   - Experimental feature; some workflows may not work as expected
 
 ## How to Use

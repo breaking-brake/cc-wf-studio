@@ -111,6 +111,8 @@ export interface SubAgentData {
   prompt: string;
   tools?: string;
   model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
+  /** Persistent memory scope for cross-conversation knowledge retention */
+  memory?: 'user' | 'project' | 'local';
   color?: 'red' | 'blue' | 'green' | 'yellow' | 'purple' | 'orange' | 'pink' | 'cyan';
   outputPorts: number;
 }
@@ -296,6 +298,8 @@ export interface SubAgentFlowNodeData {
   outputPorts: 1;
   /** Model to use for this sub-agent flow execution */
   model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
+  /** Persistent memory scope for cross-conversation knowledge retention */
+  memory?: 'user' | 'project' | 'local';
   /** Comma-separated list of allowed tools */
   tools?: string;
   /** Visual color for the node */

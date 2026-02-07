@@ -37,6 +37,8 @@ interface MoreActionsDropdownProps {
   onToggleCopilotBeta: () => void;
   isCodexEnabled: boolean;
   onToggleCodexBeta: () => void;
+  isRooCodeEnabled: boolean;
+  onToggleRooCodeBeta: () => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -51,6 +53,8 @@ export function MoreActionsDropdown({
   onToggleCopilotBeta,
   isCodexEnabled,
   onToggleCodexBeta,
+  isRooCodeEnabled,
+  onToggleRooCodeBeta,
   open,
   onOpenChange,
 }: MoreActionsDropdownProps) {
@@ -198,6 +202,29 @@ export function MoreActionsDropdown({
               <BetaBadge style={{ marginLeft: '4px' }} />
             </span>
             {isCodexEnabled && <Check size={14} />}
+          </DropdownMenu.Item>
+
+          {/* Roo Code Beta Toggle */}
+          <DropdownMenu.Item
+            onSelect={onToggleRooCodeBeta}
+            style={{
+              padding: '8px 12px',
+              fontSize: `${FONT_SIZES.small}px`,
+              color: 'var(--vscode-foreground)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              outline: 'none',
+              borderRadius: '2px',
+            }}
+          >
+            <Bot size={14} />
+            <span style={{ flex: 1 }}>
+              Roo Code
+              <BetaBadge style={{ marginLeft: '4px' }} />
+            </span>
+            {isRooCodeEnabled && <Check size={14} />}
           </DropdownMenu.Item>
 
           <DropdownMenu.Separator

@@ -121,6 +121,36 @@ export function getCodexProjectSkillsDir(): string | null {
   return path.join(workspaceRoot, '.codex', 'skills');
 }
 
+/**
+ * Get the Roo Code user-scope Skills directory path
+ *
+ * @returns Absolute path to ~/.roo/skills/
+ *
+ * @example
+ * // Unix: /Users/username/.roo/skills
+ * // Windows: C:\Users\username\.roo\skills
+ */
+export function getRooUserSkillsDir(): string {
+  return path.join(os.homedir(), '.roo', 'skills');
+}
+
+/**
+ * Get the Roo Code project-scope Skills directory path
+ *
+ * @returns Absolute path to .roo/skills/ in workspace root, or null if no workspace
+ *
+ * @example
+ * // Unix: /workspace/myproject/.roo/skills
+ * // Windows: C:\workspace\myproject\.roo\skills
+ */
+export function getRooProjectSkillsDir(): string | null {
+  const workspaceRoot = getWorkspaceRoot();
+  if (!workspaceRoot) {
+    return null;
+  }
+  return path.join(workspaceRoot, '.roo', 'skills');
+}
+
 // =====================================================================
 // MCP Configuration Paths
 // =====================================================================

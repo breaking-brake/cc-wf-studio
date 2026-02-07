@@ -31,13 +31,14 @@ const NON_STANDARD_SKILL_PATTERNS = [
   '.github/skills/', // GitHub Copilot CLI
   '.copilot/skills/', // GitHub Copilot CLI (alternative)
   '.codex/skills/', // OpenAI Codex CLI
+  '.roo/skills/', // Roo Code
   // Future: '.gemini/skills/', '.cursor/skills/', etc.
 ] as const;
 
 /**
  * Source type for skill directories
  */
-export type SkillSourceType = 'github' | 'copilot' | 'codex' | 'other';
+export type SkillSourceType = 'github' | 'copilot' | 'codex' | 'roo-code' | 'other';
 
 /**
  * Target CLI for workflow execution
@@ -47,7 +48,7 @@ export type SkillSourceType = 'github' | 'copilot' | 'codex' | 'other';
  * - 'copilot': .claude/skills/, .github/skills/, AND .copilot/skills/ are standard
  * - 'codex': .claude/skills/ AND .codex/skills/ are standard
  */
-export type TargetCli = 'claude' | 'copilot' | 'codex';
+export type TargetCli = 'claude' | 'copilot' | 'codex' | 'roo-code';
 
 /**
  * Get the list of skill directory patterns that are considered "standard" for a given CLI
@@ -67,6 +68,10 @@ function getStandardSkillPatterns(targetCli: TargetCli): string[] {
     case 'codex':
       // Codex CLI considers .codex/skills/ as native
       patterns.push('.codex/skills/');
+      break;
+    case 'roo-code':
+      // Roo Code considers .roo/skills/ as native
+      patterns.push('.roo/skills/');
       break;
     // case 'claude' falls through to default
     // Claude Code only uses .claude/skills/
@@ -190,6 +195,9 @@ function getSourceType(skillPath: string): SkillSourceType {
   if (normalizedPath.includes('.codex/skills/')) {
     return 'codex';
   }
+  if (normalizedPath.includes('.roo/skills/')) {
+    return 'roo-code';
+  }
   return 'other';
 }
 
@@ -216,6 +224,8 @@ function _getSourceSkillsDir(sourceType: SkillSourceType): string | null {
       return path.join(workspaceRoot, '.copilot', 'skills');
     case 'codex':
       return path.join(workspaceRoot, '.codex', 'skills');
+    case 'roo-code':
+      return path.join(workspaceRoot, '.roo', 'skills');
     default:
       return null;
   }
@@ -352,6 +362,9 @@ function getSourceDescription(skills: SkillToNormalize[]): string {
   }
   if (sources.has('codex')) {
     descriptions.push('.codex/skills/');
+  }
+  if (sources.has('roo-code')) {
+    descriptions.push('.roo/skills/');
   }
   if (sources.has('other')) {
     descriptions.push('non-standard directories');

@@ -19,10 +19,12 @@ import {
   exportForCodexCli,
   exportForCopilot,
   exportForCopilotCli,
+  exportForRooCode,
   runAsSlashCommand,
   runForCodexCli,
   runForCopilot,
   runForCopilotCli,
+  runForRooCode,
   saveWorkflow,
 } from '../services/vscode-bridge';
 import {
@@ -98,6 +100,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     toggleCopilotEnabled,
     isCodexEnabled,
     toggleCodexEnabled,
+    isRooCodeEnabled,
+    toggleRooCodeEnabled,
   } = useRefinementStore();
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -112,6 +116,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   // Codex integration (Beta)
   const [isCodexExporting, setIsCodexExporting] = useState(false);
   const [isCodexRunning, setIsCodexRunning] = useState(false);
+  // Roo Code integration (Beta)
+  const [isRooCodeExporting, setIsRooCodeExporting] = useState(false);
+  const [isRooCodeRunning, setIsRooCodeRunning] = useState(false);
   // Copilot Beta feature toggle is now managed by refinement-store
   // Copilot execution mode (persisted in localStorage, default: 'cli')
   const [copilotExecutionMode, setCopilotExecutionMode] = useState<CopilotExecutionMode>(() => {
@@ -618,6 +625,104 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     }
   };
 
+  // ============================================================================
+  // Roo Code Integration Handlers (Beta)
+  // ============================================================================
+
+  const handleRooCodeExport = async () => {
+    if (!workflowName.trim()) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
+      });
+      return;
+    }
+
+    setIsRooCodeExporting(true);
+    try {
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
+        useWorkflowStore.getState();
+
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        workflowDescription || undefined,
+        undefined,
+        subAgentFlows,
+        slashCommandOptions
+      );
+
+      validateWorkflow(workflow);
+
+      const result = await exportForRooCode(workflow);
+      console.log('Workflow exported as skill for Roo Code:', result.skillPath);
+    } catch (error) {
+      onError({
+        code: 'EXPORT_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to export for Roo Code',
+        details: error,
+      });
+    } finally {
+      setIsRooCodeExporting(false);
+    }
+  };
+
+  const handleRooCodeRun = async () => {
+    if (!workflowName.trim()) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
+      });
+      return;
+    }
+
+    setIsRooCodeRunning(true);
+    try {
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
+        useWorkflowStore.getState();
+
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        workflowDescription || undefined,
+        undefined,
+        subAgentFlows,
+        slashCommandOptions
+      );
+
+      validateWorkflow(workflow);
+
+      const result = await runForRooCode(workflow);
+      console.log('Workflow run for Roo Code:', result.workflowName);
+    } catch (error) {
+      onError({
+        code: 'RUN_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to run for Roo Code',
+        details: error,
+      });
+    } finally {
+      setIsRooCodeRunning(false);
+    }
+  };
+
   // Handle AI workflow name generation
   const handleGenerateWorkflowName = useCallback(async () => {
     const currentRequestId = `gen-name-${Date.now()}`;
@@ -868,7 +973,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         />
 
         {/* Slash Command Section - Layout changes based on Copilot/Codex Beta enabled */}
-        {isCopilotEnabled || isCodexEnabled ? (
+        {isCopilotEnabled || isCodexEnabled || isRooCodeEnabled ? (
           /* Combined layout when Copilot Beta is enabled */
           <div
             style={{
@@ -1180,6 +1285,98 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Vertical Divider - shown when Roo Code is enabled */}
+              {isRooCodeEnabled && (
+                <div
+                  style={{
+                    width: '1px',
+                    backgroundColor: 'var(--vscode-panel-border)',
+                    margin: '0 8px',
+                    alignSelf: 'stretch',
+                  }}
+                />
+              )}
+
+              {/* Roo Code Column - shown when Roo Code is enabled */}
+              {isRooCodeEnabled && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '9px',
+                      color: 'var(--vscode-descriptionForeground)',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Roo Code
+                  </span>
+                  <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex' }}>
+                      <button
+                        type="button"
+                        onClick={handleRooCodeExport}
+                        disabled={isRooCodeExporting}
+                        style={{
+                          padding: isCompact ? '4px 8px' : '4px 12px',
+                          backgroundColor: 'var(--vscode-button-background)',
+                          color: 'var(--vscode-button-foreground)',
+                          border: 'none',
+                          borderRadius: '2px 0 0 2px',
+                          cursor: isRooCodeExporting ? 'not-allowed' : 'pointer',
+                          fontSize: '13px',
+                          opacity: isRooCodeExporting ? 0.6 : 1,
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          borderRight: '1px solid var(--vscode-button-foreground)',
+                        }}
+                      >
+                        {isCompact ? (
+                          <SquareSlash size={16} />
+                        ) : isRooCodeExporting ? (
+                          t('toolbar.exporting')
+                        ) : (
+                          t('toolbar.export')
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleRooCodeRun}
+                        disabled={isRooCodeRunning}
+                        style={{
+                          padding: isCompact ? '4px 8px' : '4px 12px',
+                          backgroundColor: 'var(--vscode-button-background)',
+                          color: 'var(--vscode-button-foreground)',
+                          border: 'none',
+                          borderRadius: '0 2px 2px 0',
+                          cursor: isRooCodeRunning ? 'not-allowed' : 'pointer',
+                          fontSize: '13px',
+                          opacity: isRooCodeRunning ? 0.6 : 1,
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        {isCompact ? (
+                          <Play size={16} />
+                        ) : isRooCodeRunning ? (
+                          t('toolbar.running')
+                        ) : (
+                          t('toolbar.run')
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -1360,6 +1557,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onToggleCopilotBeta={toggleCopilotEnabled}
               isCodexEnabled={isCodexEnabled}
               onToggleCodexBeta={toggleCodexEnabled}
+              isRooCodeEnabled={isRooCodeEnabled}
+              onToggleRooCodeBeta={toggleRooCodeEnabled}
               open={moreActionsOpen}
               onOpenChange={onMoreActionsOpenChange}
             />

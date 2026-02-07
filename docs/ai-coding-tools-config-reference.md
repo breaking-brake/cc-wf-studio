@@ -5,9 +5,10 @@ Created by referencing official documentation for each tool.
 
 ## Summary Table
 
-| Tool | Rules | Skills | Commands/Prompts | Agents | MCP | Ignore |
-|------|-------|--------|------------------|--------|-----|--------|
+| Tool | Rules | Skills | Commands/Prompts | Agents/Modes | MCP | Ignore |
+|------|-------|--------|------------------|--------------|-----|--------|
 | Claude Code | Project<br>User | Project<br>User | Project<br>User | Project<br>User | Project<br>User | Project |
+| Roo Code | Project<br>Global | Project<br>Global | Project<br>Global | Project<br>Global | Project<br>Global | Project |
 | VSCode Copilot Chat | Project<br>User | Project<br>User | Project<br>User | Project | Project<br>User | - |
 | Copilot CLI | Project | Project<br>Global | - | Project<br>Global | Global | - |
 | Codex CLI (OpenAI) | Project<br>Global | Project<br>User<br>Admin | - | - | Global | - |
@@ -442,6 +443,189 @@ X-Custom-Header = "value"
 
 ---
 
+## Roo Code
+
+Roo Code (formerly Roo Cline) is a VSCode extension for AI-assisted coding with customizable modes.
+
+> **Reference:**
+> - [Roo Code Documentation](https://docs.roocode.com/)
+> - [Custom Instructions](https://docs.roocode.com/features/custom-instructions)
+> - [Skills](https://docs.roocode.com/features/skills)
+> - [Slash Commands](https://docs.roocode.com/features/slash-commands)
+> - [Custom Modes](https://docs.roocode.com/features/custom-modes)
+> - [MCP in Roo Code](https://docs.roocode.com/features/mcp/using-mcp-in-roo)
+
+### Rules (Instructions)
+
+**Directory-based (recommended):**
+
+| Scope | Path | Description |
+|-------|------|-------------|
+| **Project** | `./.roo/rules/` | Project rules (all modes) |
+| **Project (mode)** | `./.roo/rules-{modeSlug}/` | Mode-specific project rules |
+| **Global** | `~/.roo/rules/` | Global rules (all workspaces) |
+| **Global (mode)** | `~/.roo/rules-{modeSlug}/` | Mode-specific global rules |
+
+**Fallback (single file, used only when directory-based rules don't exist):**
+
+| File | Description |
+|------|-------------|
+| `.roorules` | Project rules (all modes) |
+| `.roorules-{modeSlug}` | Mode-specific project rules |
+| `.clinerules` | Legacy compatibility |
+| `.clinerules-{modeSlug}` | Legacy compatibility (mode-specific) |
+
+**AGENTS.md support:**
+- `AGENTS.md` at workspace root is read by default
+- Disable via: `"roo-cline.useAgentRules": false`
+
+> **Note:** Rule files in directories are read recursively, sorted alphabetically by base name. Supported formats: `.md`, `.txt`, and other plain text files.
+
+**Priority (low → high):**
+1. Global rules (`~/.roo/rules/`)
+2. Workspace rules (`.roo/rules/`) — overrides global
+3. Legacy files (`.roorules`, `.clinerules`) — only when directory-based rules don't exist
+
+### Skills
+
+| Scope | Path | Description |
+|-------|------|-------------|
+| **Project** | `./.roo/skills/{skill-name}/SKILL.md` | Project skills (all modes) |
+| **Project (mode)** | `./.roo/skills-{modeSlug}/{skill-name}/SKILL.md` | Mode-specific project skills |
+| **Global** | `~/.roo/skills/{skill-name}/SKILL.md` | Global skills |
+| **Global (mode)** | `~/.roo/skills-{modeSlug}/{skill-name}/SKILL.md` | Mode-specific global skills |
+
+**Frontmatter Schema:**
+```yaml
+---
+name: skill-name           # Required, 1-64 chars, lowercase + hyphens, must match directory name
+description: Skill description  # Required, 1-1024 chars
+---
+```
+
+**Override priority (high → low):**
+1. Project mode-specific (`.roo/skills-{modeSlug}/`)
+2. Project general (`.roo/skills/`)
+3. Global mode-specific (`~/.roo/skills-{modeSlug}/`)
+4. Global general (`~/.roo/skills/`)
+
+> **Note:** Skills are fully disabled when `.roo/system-prompt-{mode-slug}` exists.
+
+### Commands (Slash Commands)
+
+| Scope | Path | Description |
+|-------|------|-------------|
+| **Project** | `./.roo/commands/*.md` | Project commands |
+| **Global** | `~/.roo/commands/*.md` | Global commands |
+
+**Frontmatter Schema:**
+```yaml
+---
+description: Command description     # Optional
+argument-hint: <placeholder-text>    # Optional
+mode: mode-slug                      # Optional, mode to use when executing
+---
+```
+
+> **Note:** Filename becomes command name (e.g., `review.md` → `/review`). Project commands override same-named global commands.
+
+### Modes (Custom Agents)
+
+| Scope | Path | Format | Description |
+|-------|------|--------|-------------|
+| **Project** | `./.roomodes` | YAML or JSON | Project custom modes (highest priority) |
+| **Global** | `{globalStorage}/settings/custom_modes.yaml` | YAML | Global custom modes (recommended) |
+| **Global (legacy)** | `{globalStorage}/settings/custom_modes.json` | JSON | Global custom modes (legacy) |
+
+**globalStorage paths:**
+- macOS: `~/Library/Application Support/Code/User/globalStorage/rooveterinaryinc.roo-cline/`
+- Linux: `~/.config/Code/User/globalStorage/rooveterinaryinc.roo-cline/`
+- Windows: `%APPDATA%\Code\User\globalStorage\rooveterinaryinc.roo-cline\`
+
+**Schema:**
+```yaml
+customModes:
+  - slug: my-mode              # Required: /^[a-zA-Z0-9-]+$/
+    name: My Custom Mode       # Required: display name
+    roleDefinition: |          # Required: system prompt prefix
+      You are an expert in...
+    groups:                    # Required: tool access control
+      - read
+      - - edit
+        - fileRegex: \.(md|mdx)$
+          description: Markdown files only
+      - browser
+      - command
+      - mcp
+    description: Short summary   # Optional
+    whenToUse: |                 # Optional: orchestration guidance
+      Use this mode when...
+    customInstructions: |        # Optional: appended to system prompt
+      Additional guidelines...
+```
+
+**Built-in modes:** `code`, `debug`, `ask`, `architect`, `orchestrator`
+
+### MCP
+
+| Scope | Path | Description |
+|-------|------|-------------|
+| **Project** | `./.roo/mcp.json` | Project MCP configuration |
+| **Global** | `{globalStorage}/settings/cline_mcp_settings.json` | Global MCP configuration |
+
+**JSON Schema (STDIO):**
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "command": "node",
+      "args": ["/path/to/server.js"],
+      "cwd": "/working/directory",
+      "env": {
+        "API_KEY": "your-key"
+      },
+      "alwaysAllow": ["tool1", "tool2"],
+      "disabled": false
+    }
+  }
+}
+```
+
+**JSON Schema (Streamable HTTP):**
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "type": "streamable-http",
+      "url": "https://example.com/mcp",
+      "headers": {},
+      "alwaysAllow": [],
+      "disabled": false
+    }
+  }
+}
+```
+
+> **Note:** Project-level overrides global when same server name is defined in both.
+
+### Ignore
+
+| Scope | Path |
+|-------|------|
+| **Project** | `./.rooignore` |
+
+> **Note:** Uses `.gitignore` syntax. Affects `read_file`, `write_to_file`, `apply_diff`, `list_code_definition_names` tools.
+
+### System Prompt Override
+
+| Scope | Path | Description |
+|-------|------|-------------|
+| **Project** | `./.roo/system-prompt-{mode-slug}` | Completely overrides system prompt for a mode |
+
+> **Warning:** This bypasses all standard sections (tool descriptions, rules, skills). Use with caution.
+
+---
+
 ## Directory Structure Comparison
 
 ### Project Level
@@ -449,10 +633,14 @@ X-Custom-Header = "value"
 ```
 Project Root/
 ├── CLAUDE.md                           # Claude Code (root rule)
-├── AGENTS.md                           # Codex CLI, Copilot CLI, VSCode Copilot Chat (root rule)
+├── AGENTS.md                           # Codex CLI, Copilot CLI, VSCode Copilot Chat, Roo Code (root rule)
 ├── AGENTS.override.md                  # Codex CLI (override)
 ├── .mcp.json                           # Claude Code (MCP)
 ├── .claudeignore                       # Claude Code (ignore)
+├── .rooignore                          # Roo Code (ignore)
+├── .roomodes                           # Roo Code (project custom modes, YAML/JSON)
+├── .roorules                           # Roo Code (fallback rules)
+├── .roorules-{modeSlug}               # Roo Code (fallback mode-specific rules)
 │
 ├── .claude/
 │   ├── CLAUDE.local.md                 # Claude Code (local memory, gitignored)
@@ -471,6 +659,15 @@ Project Root/
 │   ├── agents/                         # Copilot CLI (custom agents)
 │   ├── prompts/*.prompt.md             # VSCode Copilot Chat (prompts)
 │   └── skills/{name}/SKILL.md          # VSCode Copilot Chat, Copilot CLI (skills)
+│
+├── .roo/
+│   ├── rules/                          # Roo Code (project rules, all modes)
+│   ├── rules-{modeSlug}/              # Roo Code (project mode-specific rules)
+│   ├── skills/{name}/SKILL.md          # Roo Code (project skills)
+│   ├── skills-{modeSlug}/{name}/SKILL.md  # Roo Code (project mode-specific skills)
+│   ├── commands/*.md                   # Roo Code (project slash commands)
+│   ├── mcp.json                        # Roo Code (project MCP)
+│   └── system-prompt-{mode-slug}       # Roo Code (system prompt override)
 │
 └── .vscode/
     └── mcp.json                        # VSCode Copilot Chat (MCP)
@@ -495,12 +692,29 @@ User Home (~)/
 │   ├── config.toml                     # Codex CLI (config + MCP)
 │   └── skills/{name}/SKILL.md          # Codex CLI (user skills)
 │
-└── .copilot/
-    ├── config.json                     # Copilot CLI (main config)
-    ├── mcp-config.json                 # Copilot CLI (global MCP)
-    ├── agents/                         # Copilot CLI (global custom agents)
-    ├── skills/{name}/SKILL.md          # Copilot CLI, VSCode Copilot Chat (global skills)
-    └── session-state/                  # Copilot CLI (session storage)
+├── .copilot/
+│   ├── config.json                     # Copilot CLI (main config)
+│   ├── mcp-config.json                 # Copilot CLI (global MCP)
+│   ├── agents/                         # Copilot CLI (global custom agents)
+│   ├── skills/{name}/SKILL.md          # Copilot CLI, VSCode Copilot Chat (global skills)
+│   └── session-state/                  # Copilot CLI (session storage)
+│
+└── .roo/
+    ├── rules/                          # Roo Code (global rules, all modes)
+    ├── rules-{modeSlug}/              # Roo Code (global mode-specific rules)
+    ├── skills/{name}/SKILL.md          # Roo Code (global skills)
+    ├── skills-{modeSlug}/{name}/SKILL.md  # Roo Code (global mode-specific skills)
+    └── commands/*.md                   # Roo Code (global slash commands)
+
+# Roo Code VS Code Extension Global Storage
+# macOS:   ~/Library/Application Support/Code/User/globalStorage/rooveterinaryinc.roo-cline/
+# Linux:   ~/.config/Code/User/globalStorage/rooveterinaryinc.roo-cline/
+# Windows: %APPDATA%\Code\User\globalStorage\rooveterinaryinc.roo-cline\
+{globalStorage}/
+└── settings/
+    ├── cline_mcp_settings.json         # Roo Code (global MCP)
+    ├── custom_modes.yaml               # Roo Code (global custom modes, recommended)
+    └── custom_modes.json               # Roo Code (global custom modes, legacy)
 ```
 
 ---
@@ -528,6 +742,14 @@ User Home (~)/
 - [Claude Code Documentation](https://code.claude.com/docs/en)
 - [Claude Code Settings](https://code.claude.com/docs/en/settings)
 - [Claude Code Skills](https://code.claude.com/docs/en/skills)
+- [Roo Code Documentation](https://docs.roocode.com/)
+- [Roo Code Custom Instructions](https://docs.roocode.com/features/custom-instructions)
+- [Roo Code Skills](https://docs.roocode.com/features/skills)
+- [Roo Code Slash Commands](https://docs.roocode.com/features/slash-commands)
+- [Roo Code Custom Modes](https://docs.roocode.com/features/custom-modes)
+- [Roo Code MCP](https://docs.roocode.com/features/mcp/using-mcp-in-roo)
+- [Roo Code .rooignore](https://docs.roocode.com/features/rooignore)
+- [Roo Code System Prompt Override](https://docs.roocode.com/advanced-usage/footgun-prompting)
 - [Use custom instructions in VS Code](https://code.visualstudio.com/docs/copilot/customization/custom-instructions)
 - [Use Agent Skills in VS Code](https://code.visualstudio.com/docs/copilot/customization/agent-skills)
 - [Use prompt files in VS Code](https://code.visualstudio.com/docs/copilot/customization/prompt-files)

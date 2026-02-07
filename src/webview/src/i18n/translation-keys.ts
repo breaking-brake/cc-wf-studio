@@ -227,6 +227,8 @@ export interface WebviewTranslationKeys {
   'property.tools': string;
   'property.tools.placeholder': string;
   'property.tools.help': string;
+  'property.memory': string;
+  'property.memory.referenceUrl': string;
   'properties.subAgent.color': string;
   'properties.subAgent.colorPlaceholder': string;
   'properties.subAgent.colorNone': string;
