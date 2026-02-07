@@ -265,6 +265,21 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
       const subAgentFlowErrors = validateSubAgentFlowNode(node);
       errors.push(...subAgentFlowErrors);
     }
+
+    // Validate SubAgent memory enum (Feature: 540-persistent-memory)
+    if (node.type === NodeType.SubAgent) {
+      const subAgentData = node.data as { memory?: string };
+      if (subAgentData.memory !== undefined) {
+        const validMemoryScopes = ['user', 'project', 'local'];
+        if (!validMemoryScopes.includes(subAgentData.memory)) {
+          errors.push({
+            code: 'SUBAGENT_INVALID_MEMORY',
+            message: `SubAgent memory must be one of: ${validMemoryScopes.join(', ')}`,
+            field: `nodes[${node.id}].data.memory`,
+          });
+        }
+      }
+    }
   }
 
   return errors;
@@ -351,6 +366,18 @@ function validateSubAgentFlowNode(node: WorkflowNode): ValidationError[] {
       message: 'SubAgentFlow outputPorts must equal 1',
       field: `nodes[${node.id}].data.outputPorts`,
     });
+  }
+
+  // Memory enum validation
+  if (refData.memory !== undefined) {
+    const validMemoryScopes = ['user', 'project', 'local'];
+    if (!validMemoryScopes.includes(refData.memory)) {
+      errors.push({
+        code: 'SUBAGENTFLOW_INVALID_MEMORY',
+        message: `SubAgentFlow memory must be one of: ${validMemoryScopes.join(', ')}`,
+        field: `nodes[${node.id}].data.memory`,
+      });
+    }
   }
 
   return errors;

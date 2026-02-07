@@ -61,6 +61,11 @@ nodeTypes:
         required: false
         enum[8]: red,blue,green,yellow,purple,orange,pink,cyan
         description: Visual indicator color for this sub-agent (optional)
+      memory:
+        type: string
+        required: false
+        enum[3]: user,project,local
+        description: "Persistent memory scope. 'user'=cross-project, 'project'=VCS-trackable, 'local'=local-only"
       outputPorts:
         type: number
         required: true
@@ -316,6 +321,11 @@ nodeTypes:
         required: false
         maxLength: 200
         description: Optional description of what this sub-agent flow does
+      memory:
+        type: string
+        required: false
+        enum[3]: user,project,local
+        description: "Persistent memory scope. 'user'=cross-project, 'project'=VCS-trackable, 'local'=local-only"
       outputPorts:
         type: number
         required: true

@@ -230,6 +230,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'property.tools': '工具（逗號分隔）',
   'property.tools.placeholder': '例如：Read,Write,Bash',
   'property.tools.help': '留空表示所有工具',
+  'property.memory': '記憶',
+  'property.memory.referenceUrl': 'https://code.claude.com/docs/zh-TW/sub-agents#啟用持久記憶',
   'properties.subAgent.color': '顏色',
   'properties.subAgent.colorPlaceholder': '選擇顏色...',
   'properties.subAgent.colorNone': '無',

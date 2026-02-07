@@ -237,6 +237,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.tools': '도구 (쉼표로 구분)',
   'property.tools.placeholder': '예: Read,Write,Bash',
   'property.tools.help': '모든 도구를 사용하려면 비워 두세요',
+  'property.memory': '메모리',
+  'property.memory.referenceUrl': 'https://code.claude.com/docs/ko/sub-agents#지속적-메모리-활성화',
   'properties.subAgent.color': '색상',
   'properties.subAgent.colorPlaceholder': '색상 선택...',
   'properties.subAgent.colorNone': '없음',

@@ -25,6 +25,7 @@ import type { Node } from 'reactflow';
 import { getNodeTypeLabel } from '../constants/node-type-labels';
 import { useResizablePanel } from '../hooks/useResizablePanel';
 import { useTranslation } from '../i18n/i18n-context';
+import { openExternalUrl } from '../services/vscode-bridge';
 import { useWorkflowStore } from '../stores/workflow-store';
 import type { PromptNodeData } from '../types/node-types';
 import { extractVariables } from '../utils/template-utils';
@@ -488,6 +489,74 @@ const SubAgentProperties: React.FC<{
           <option value="haiku">Haiku</option>
           <option value="inherit">Inherit</option>
         </select>
+      </div>
+
+      {/* Memory Scope */}
+      <div>
+        <label
+          htmlFor="memory-select"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('property.memory')}
+        </label>
+        <select
+          id="memory-select"
+          value={data.memory || ''}
+          onChange={(e) =>
+            updateNodeData(node.id, {
+              memory:
+                e.target.value === ''
+                  ? undefined
+                  : (e.target.value as 'user' | 'project' | 'local'),
+            })
+          }
+          className="nodrag"
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+          }}
+        >
+          <option value="">-</option>
+          <option value="user">user</option>
+          <option value="project">project</option>
+          <option value="local">local</option>
+        </select>
+        <div
+          style={{
+            fontSize: '11px',
+            marginTop: '4px',
+            textAlign: 'right',
+          }}
+        >
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={() => openExternalUrl(t('property.memory.referenceUrl'))}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                openExternalUrl(t('property.memory.referenceUrl'));
+              }
+            }}
+            style={{
+              color: 'var(--vscode-textLink-foreground)',
+              cursor: 'pointer',
+              textDecoration: 'none',
+            }}
+          >
+            Persistent Memory Reference
+          </span>
+        </div>
       </div>
 
       {/* Tools */}
@@ -2667,6 +2736,74 @@ const SubAgentFlowProperties: React.FC<{
           <option value="haiku">Haiku</option>
           <option value="inherit">Inherit</option>
         </select>
+      </div>
+
+      {/* Memory Scope */}
+      <div>
+        <label
+          htmlFor="subagentflow-memory-select"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('property.memory')}
+        </label>
+        <select
+          id="subagentflow-memory-select"
+          value={data.memory || ''}
+          onChange={(e) =>
+            updateNodeData(node.id, {
+              memory:
+                e.target.value === ''
+                  ? undefined
+                  : (e.target.value as 'user' | 'project' | 'local'),
+            })
+          }
+          className="nodrag"
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+          }}
+        >
+          <option value="">-</option>
+          <option value="user">user</option>
+          <option value="project">project</option>
+          <option value="local">local</option>
+        </select>
+        <div
+          style={{
+            fontSize: '11px',
+            marginTop: '4px',
+            textAlign: 'right',
+          }}
+        >
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={() => openExternalUrl(t('property.memory.referenceUrl'))}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                openExternalUrl(t('property.memory.referenceUrl'));
+              }
+            }}
+            style={{
+              color: 'var(--vscode-textLink-foreground)',
+              cursor: 'pointer',
+              textDecoration: 'none',
+            }}
+          >
+            Persistent Memory Reference
+          </span>
+        </div>
       </div>
 
       {/* Tools */}

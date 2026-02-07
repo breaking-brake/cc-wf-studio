@@ -237,6 +237,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.tools': 'ツール（カンマ区切り）',
   'property.tools.placeholder': '例: Read,Write,Bash',
   'property.tools.help': '空欄で全てのツールを使用',
+  'property.memory': 'メモリ',
+  'property.memory.referenceUrl':
+    'https://code.claude.com/docs/ja/sub-agents#永続メモリを有効にする',
   'properties.subAgent.color': '色',
   'properties.subAgent.colorPlaceholder': '色を選択...',
   'properties.subAgent.colorNone': 'なし',

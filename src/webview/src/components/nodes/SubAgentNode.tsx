@@ -94,6 +94,23 @@ export const SubAgentNodeComponent: React.FC<NodeProps<SubAgentData>> = React.me
             </div>
           )}
 
+          {/* Memory Badge */}
+          {data.memory && (
+            <div
+              style={{
+                fontSize: '10px',
+                color: 'var(--vscode-badge-foreground)',
+                backgroundColor: 'var(--vscode-badge-background)',
+                padding: '2px 6px',
+                borderRadius: '3px',
+                display: 'inline-block',
+                fontWeight: 600,
+              }}
+            >
+              memory: {data.memory}
+            </div>
+          )}
+
           {/* Color Badge */}
           {data.color && (
             <div

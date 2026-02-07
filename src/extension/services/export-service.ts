@@ -234,6 +234,10 @@ function generateSubAgentFile(node: SubAgentNode): string {
     frontmatter.push(`color: ${data.color}`);
   }
 
+  if (data.memory) {
+    frontmatter.push(`memory: ${data.memory}`);
+  }
+
   frontmatter.push('---');
   frontmatter.push('');
 
@@ -262,10 +266,11 @@ function generateSubAgentFlowAgentFile(
 ): string {
   const agentName = agentFileName;
 
-  // Get model/tools/color from referencing node, or use defaults
+  // Get model/tools/color/memory from referencing node, or use defaults
   const model = referencingNode?.data.model || 'sonnet';
   const tools = referencingNode?.data.tools;
   const color = referencingNode?.data.color;
+  const memory = referencingNode?.data.memory;
 
   // YAML frontmatter (same structure as SubAgent)
   const frontmatter = [
@@ -283,6 +288,10 @@ function generateSubAgentFlowAgentFile(
 
   if (color) {
     frontmatter.push(`color: ${color}`);
+  }
+
+  if (memory) {
+    frontmatter.push(`memory: ${memory}`);
   }
 
   frontmatter.push('---');
