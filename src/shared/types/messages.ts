@@ -187,9 +187,10 @@ export interface SkillReference {
    * - 'claude': from ~/.claude/skills/ (user) or .claude/skills/ (project)
    * - 'copilot': from ~/.copilot/skills/ (user) or .github/skills/ (project)
    * - 'codex': from ~/.codex/skills/ (user) or .codex/skills/ (project)
+   * - 'roo': from ~/.roo/skills/ (user) or .roo/skills/ (project)
    * - undefined: for local scope or legacy data
    */
-  source?: 'claude' | 'copilot' | 'codex';
+  source?: 'claude' | 'copilot' | 'codex' | 'roo';
 }
 
 export interface CreateSkillPayload {

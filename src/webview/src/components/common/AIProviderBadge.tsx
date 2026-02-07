@@ -13,7 +13,7 @@ import { useVSCodeTheme } from '../../hooks/useVSCodeTheme';
  * Supported AI provider types
  * Add new providers here as needed
  */
-export type AIProviderType = 'copilot' | 'claude' | 'codex';
+export type AIProviderType = 'copilot' | 'claude' | 'codex' | 'roo';
 
 /**
  * Configuration for each AI provider
@@ -23,6 +23,7 @@ const PROVIDER_CONFIG: Record<
   {
     label: string;
     colors: { dark: string; light: string };
+    textColors?: { dark: string; light: string };
   }
 > = {
   copilot: {
@@ -44,6 +45,17 @@ const PROVIDER_CONFIG: Record<
     colors: {
       light: '#10A37F', // Bright green
       dark: '#0D8A6A', // Dark green
+    },
+  },
+  roo: {
+    label: 'Roo Code',
+    colors: {
+      light: '#FFFFFF', // White background (light theme)
+      dark: '#1E1E1E', // Black background (dark theme)
+    },
+    textColors: {
+      light: '#1E1E1E', // Black text (light theme)
+      dark: '#FFFFFF', // White text (dark theme)
     },
   },
 };
@@ -107,8 +119,13 @@ export function AIProviderBadge({
       className={className}
       style={{
         ...sizeStyle,
-        color: '#ffffff',
+        color: config.textColors
+          ? isLightTheme
+            ? config.textColors.light
+            : config.textColors.dark
+          : '#ffffff',
         backgroundColor: isLightTheme ? config.colors.light : config.colors.dark,
+        border: config.textColors ? '1px solid var(--vscode-panel-border)' : 'none',
         borderRadius: '3px',
         display: 'inline-block',
         fontWeight: 600,

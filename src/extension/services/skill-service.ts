@@ -18,6 +18,8 @@ import {
   getInstalledPluginsJsonPath,
   getKnownMarketplacesJsonPath,
   getProjectSkillsDir,
+  getRooProjectSkillsDir,
+  getRooUserSkillsDir,
   getUserSkillsDir,
   getWorkspaceRoot,
   toRelativePath,
@@ -42,7 +44,7 @@ import { parseSkillFrontmatter, type SkillMetadata } from './yaml-parser';
 export async function scanSkills(
   baseDir: string,
   scope: 'user' | 'project' | 'local',
-  source?: 'claude' | 'copilot' | 'codex'
+  source?: 'claude' | 'copilot' | 'codex' | 'roo'
 ): Promise<SkillReference[]> {
   const skills: SkillReference[] = [];
 
@@ -391,41 +393,53 @@ export async function scanAllSkills(): Promise<{
   const claudeUserDir = getUserSkillsDir();
   const copilotUserDir = getCopilotUserSkillsDir();
   const codexUserDir = getCodexUserSkillsDir();
+  const rooUserDir = getRooUserSkillsDir();
 
   // Project directories
   const claudeProjectDir = getProjectSkillsDir();
   const githubProjectDir = getGithubSkillsDir();
   const codexProjectDir = getCodexProjectSkillsDir();
+  const rooProjectDir = getRooProjectSkillsDir();
 
   const [
     claudeUserSkills,
     copilotUserSkills,
     codexUserSkills,
+    rooUserSkills,
     claudeProjectSkills,
     githubProjectSkills,
     codexProjectSkills,
+    rooProjectSkills,
     pluginSkills,
   ] = await Promise.all([
     // User-scope scans
     scanSkills(claudeUserDir, 'user', 'claude'),
     scanSkills(copilotUserDir, 'user', 'copilot'),
     scanSkills(codexUserDir, 'user', 'codex'),
+    scanSkills(rooUserDir, 'user', 'roo'),
     // Project-scope scans
     claudeProjectDir ? scanSkills(claudeProjectDir, 'project', 'claude') : Promise.resolve([]),
     githubProjectDir ? scanSkills(githubProjectDir, 'project', 'copilot') : Promise.resolve([]),
     codexProjectDir ? scanSkills(codexProjectDir, 'project', 'codex') : Promise.resolve([]),
+    rooProjectDir ? scanSkills(rooProjectDir, 'project', 'roo') : Promise.resolve([]),
     // Plugin skills
     scanPluginSkills(),
   ]);
 
   // Merge user skills: include all sources (no deduplication - show all available skills)
-  const user: SkillReference[] = [...claudeUserSkills, ...copilotUserSkills, ...codexUserSkills];
+  const user: SkillReference[] = [
+    ...claudeUserSkills,
+    ...copilotUserSkills,
+    ...codexUserSkills,
+    ...rooUserSkills,
+  ];
 
   // Merge project skills: include all sources (no deduplication - show all available skills)
   const project: SkillReference[] = [
     ...claudeProjectSkills,
     ...githubProjectSkills,
     ...codexProjectSkills,
+    ...rooProjectSkills,
   ];
 
   // Separate plugin skills by their scope

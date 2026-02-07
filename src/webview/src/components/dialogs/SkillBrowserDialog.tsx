@@ -17,7 +17,7 @@ import { useWorkflowStore } from '../../stores/workflow-store';
 import { AIProviderBadge, type AIProviderType } from '../common/AIProviderBadge';
 import { type CreateSkillFormData, SkillCreationDialog } from './SkillCreationDialog';
 
-type SourceType = 'claude' | 'copilot' | 'codex';
+type SourceType = 'claude' | 'copilot' | 'codex' | 'roo';
 
 interface GroupedSkills {
   source: SourceType;
@@ -25,11 +25,11 @@ interface GroupedSkills {
 }
 
 /**
- * Groups skills by their source (claude/copilot/codex).
+ * Groups skills by their source (claude/copilot/codex/roo).
  * Skills without a source are treated as 'claude' for backward compatibility.
  */
 function groupSkillsBySource(skills: SkillReference[]): GroupedSkills[] {
-  const sourceOrder: SourceType[] = ['claude', 'copilot', 'codex'];
+  const sourceOrder: SourceType[] = ['claude', 'copilot', 'codex', 'roo'];
   const groups = new Map<SourceType, SkillReference[]>();
 
   // Initialize all groups
