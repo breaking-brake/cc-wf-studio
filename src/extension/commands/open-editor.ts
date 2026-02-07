@@ -33,6 +33,7 @@ import {
   handleListMcpServers,
   handleRefreshMcpCache,
 } from './mcp-handlers';
+import { handleExportForRooCode, handleRunForRooCode } from './roo-code-handlers';
 import { saveWorkflow } from './save-workflow';
 import { handleBrowseSkills, handleCreateSkill, handleValidateSkillFile } from './skill-operations';
 import { handleConnectSlackManual } from './slack-connect-manual';
@@ -438,6 +439,45 @@ export function registerOpenEditorCommand(
               } else {
                 webview.postMessage({
                   type: 'RUN_FOR_CODEX_CLI_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorCode: 'UNKNOWN_ERROR',
+                    errorMessage: 'Workflow is required',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+
+            case 'EXPORT_FOR_ROO_CODE':
+              // Export workflow for Roo Code (Skills format)
+              if (message.payload?.workflow) {
+                await handleExportForRooCode(
+                  fileService,
+                  webview,
+                  message.payload,
+                  message.requestId
+                );
+              } else {
+                webview.postMessage({
+                  type: 'EXPORT_FOR_ROO_CODE_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorCode: 'UNKNOWN_ERROR',
+                    errorMessage: 'Workflow is required',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+
+            case 'RUN_FOR_ROO_CODE':
+              // Run workflow for Roo Code (via Extension API)
+              if (message.payload?.workflow) {
+                await handleRunForRooCode(fileService, webview, message.payload, message.requestId);
+              } else {
+                webview.postMessage({
+                  type: 'RUN_FOR_ROO_CODE_FAILED',
                   requestId: message.requestId,
                   payload: {
                     errorCode: 'UNKNOWN_ERROR',

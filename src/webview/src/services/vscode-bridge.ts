@@ -13,6 +13,8 @@ import type {
   ExportForCopilotCliSuccessPayload,
   ExportForCopilotPayload,
   ExportForCopilotSuccessPayload,
+  ExportForRooCodePayload,
+  ExportForRooCodeSuccessPayload,
   ExportWorkflowPayload,
   ExtensionMessage,
   OpenInEditorPayload,
@@ -23,6 +25,8 @@ import type {
   RunForCopilotCliSuccessPayload,
   RunForCopilotPayload,
   RunForCopilotSuccessPayload,
+  RunForRooCodePayload,
+  RunForRooCodeSuccessPayload,
   SaveWorkflowPayload,
   Workflow,
 } from '@shared/types/messages';
@@ -564,6 +568,111 @@ export function runForCodexCli(workflow: Workflow): Promise<RunForCodexCliSucces
     const payload: RunForCodexCliPayload = { workflow };
     vscode.postMessage({
       type: 'RUN_FOR_CODEX_CLI',
+      requestId,
+      payload,
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
+// ============================================================================
+// Roo Code Integration Functions (Beta)
+// ============================================================================
+
+/**
+ * Export workflow for Roo Code (Beta)
+ *
+ * Exports the workflow to Skills format (.roo/skills/name/SKILL.md)
+ *
+ * @param workflow - Workflow to export
+ * @returns Promise that resolves with export result
+ */
+export function exportForRooCode(workflow: Workflow): Promise<ExportForRooCodeSuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'EXPORT_FOR_ROO_CODE_SUCCESS') {
+          resolve(message.payload as ExportForRooCodeSuccessPayload);
+        } else if (message.type === 'EXPORT_FOR_ROO_CODE_CANCELLED') {
+          // User cancelled - resolve with empty result
+          resolve({
+            skillName: '',
+            skillPath: '',
+            timestamp: new Date().toISOString(),
+          });
+        } else if (message.type === 'EXPORT_FOR_ROO_CODE_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to export for Roo Code'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: ExportForRooCodePayload = { workflow };
+    vscode.postMessage({
+      type: 'EXPORT_FOR_ROO_CODE',
+      requestId,
+      payload,
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
+/**
+ * Run workflow for Roo Code (Beta)
+ *
+ * Exports the workflow to Roo Code Skills format and starts
+ * Roo Code with :skill command via Extension API
+ *
+ * @param workflow - Workflow to run
+ * @returns Promise that resolves with run result
+ */
+export function runForRooCode(workflow: Workflow): Promise<RunForRooCodeSuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'RUN_FOR_ROO_CODE_SUCCESS') {
+          resolve(message.payload as RunForRooCodeSuccessPayload);
+        } else if (message.type === 'RUN_FOR_ROO_CODE_CANCELLED') {
+          // User cancelled - resolve with empty result
+          resolve({
+            workflowName: '',
+            rooCodeOpened: false,
+            timestamp: new Date().toISOString(),
+          });
+        } else if (message.type === 'RUN_FOR_ROO_CODE_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to run for Roo Code'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: RunForRooCodePayload = { workflow };
+    vscode.postMessage({
+      type: 'RUN_FOR_ROO_CODE',
       requestId,
       payload,
     });

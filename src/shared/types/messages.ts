@@ -788,7 +788,13 @@ export type ExtensionMessage =
   | Message<CodexOperationFailedPayload, 'EXPORT_FOR_CODEX_CLI_FAILED'>
   | Message<RunForCodexCliSuccessPayload, 'RUN_FOR_CODEX_CLI_SUCCESS'>
   | Message<void, 'RUN_FOR_CODEX_CLI_CANCELLED'>
-  | Message<CodexOperationFailedPayload, 'RUN_FOR_CODEX_CLI_FAILED'>;
+  | Message<CodexOperationFailedPayload, 'RUN_FOR_CODEX_CLI_FAILED'>
+  | Message<ExportForRooCodeSuccessPayload, 'EXPORT_FOR_ROO_CODE_SUCCESS'>
+  | Message<void, 'EXPORT_FOR_ROO_CODE_CANCELLED'>
+  | Message<RooCodeOperationFailedPayload, 'EXPORT_FOR_ROO_CODE_FAILED'>
+  | Message<RunForRooCodeSuccessPayload, 'RUN_FOR_ROO_CODE_SUCCESS'>
+  | Message<void, 'RUN_FOR_ROO_CODE_CANCELLED'>
+  | Message<RooCodeOperationFailedPayload, 'RUN_FOR_ROO_CODE_FAILED'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -1341,6 +1347,64 @@ export interface CodexOperationFailedPayload {
 }
 
 // ============================================================================
+// Roo Code Integration Payloads (Beta)
+// ============================================================================
+
+/**
+ * Export workflow for Roo Code payload (Skills format)
+ * Exports to .roo/skills/{name}/SKILL.md
+ */
+export interface ExportForRooCodePayload {
+  /** Workflow to export */
+  workflow: Workflow;
+}
+
+/**
+ * Export for Roo Code success payload
+ */
+export interface ExportForRooCodeSuccessPayload {
+  /** Skill name */
+  skillName: string;
+  /** Skill file path */
+  skillPath: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Run workflow for Roo Code payload
+ * Exports and runs via Roo Code Extension API
+ */
+export interface RunForRooCodePayload {
+  /** Workflow to run */
+  workflow: Workflow;
+}
+
+/**
+ * Run for Roo Code success payload
+ */
+export interface RunForRooCodeSuccessPayload {
+  /** Workflow name */
+  workflowName: string;
+  /** Whether Roo Code was opened */
+  rooCodeOpened: boolean;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Roo Code operation failed payload
+ */
+export interface RooCodeOperationFailedPayload {
+  /** Error code */
+  errorCode: 'ROO_CODE_NOT_INSTALLED' | 'EXPORT_FAILED' | 'UNKNOWN_ERROR';
+  /** Error message */
+  errorMessage: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+// ============================================================================
 // Edit in VSCode Editor Payloads
 // ============================================================================
 
@@ -1449,7 +1513,9 @@ export type WebviewMessage =
   | Message<RunForCopilotCliPayload, 'RUN_FOR_COPILOT_CLI'>
   | Message<ExportForCopilotCliPayload, 'EXPORT_FOR_COPILOT_CLI'>
   | Message<ExportForCodexCliPayload, 'EXPORT_FOR_CODEX_CLI'>
-  | Message<RunForCodexCliPayload, 'RUN_FOR_CODEX_CLI'>;
+  | Message<RunForCodexCliPayload, 'RUN_FOR_CODEX_CLI'>
+  | Message<ExportForRooCodePayload, 'EXPORT_FOR_ROO_CODE'>
+  | Message<RunForRooCodePayload, 'RUN_FOR_ROO_CODE'>;
 
 // ============================================================================
 // Error Codes
