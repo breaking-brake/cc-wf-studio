@@ -916,6 +916,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     '이 워크플로우에 대한 설명을 입력하세요 (예: 무엇을 하는지, 언제 사용하는지)...',
   'workflow.settings.generateWithAI': 'AI로 생성',
 
+  // MCP Server Section
+  'mcpSection.description.line1': 'AI와 대화 형식으로 워크플로우를 편집합니다.',
+  'mcpSection.description.line2': '사용할 에이전트를 선택하세요.',
+
   // Description Panel (Canvas)
   'description.panel.title': '설명',
   'description.panel.show': '설명 패널 표시',

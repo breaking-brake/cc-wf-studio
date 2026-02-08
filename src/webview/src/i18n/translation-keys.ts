@@ -836,6 +836,10 @@ export interface WebviewTranslationKeys {
   'workflow.settings.description.placeholder': string;
   'workflow.settings.generateWithAI': string;
 
+  // MCP Server Section
+  'mcpSection.description.line1': string;
+  'mcpSection.description.line2': string;
+
   // Description Panel (Canvas)
   'description.panel.title': string;
   'description.panel.show': string;

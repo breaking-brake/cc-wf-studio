@@ -14,6 +14,7 @@
 import type { AiEditingProvider, McpServerStatusPayload } from '@shared/types/messages';
 import { ChevronDown, ChevronRight, ExternalLink, Play, Plug, Square } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from '../../i18n/i18n-context';
 import { vscode } from '../../main';
 import { launchAiAgent, openExternalUrl } from '../../services/vscode-bridge';
 import { useRefinementStore } from '../../stores/refinement-store';
@@ -37,6 +38,7 @@ interface McpServerSectionProps {
 }
 
 export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSectionProps) {
+  const { t } = useTranslation();
   const [isRunning, setIsRunning] = useState(false);
   const [port, setPort] = useState<number | null>(null);
   const [launchingProvider, setLaunchingProvider] = useState<AiEditingProvider | null>(null);
@@ -180,6 +182,20 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
       {/* Collapsible Content */}
       {!isCollapsed && (
         <div style={{ flex: 1, padding: '4px 16px 12px' }}>
+          {/* Description */}
+          <p
+            style={{
+              margin: '0 0 8px',
+              fontSize: '11px',
+              lineHeight: '1.5',
+              color: 'var(--vscode-descriptionForeground)',
+            }}
+          >
+            {t('mcpSection.description.line1')}
+            <br />
+            {t('mcpSection.description.line2')}
+          </p>
+
           {/* AI Agent Buttons */}
           <div
             style={{
@@ -188,7 +204,7 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
               padding: '6px',
               display: 'flex',
               flexDirection: 'column',
-              gap: '4px',
+              gap: '6px',
             }}
           >
             {visibleButtons.map((button) => (
@@ -201,7 +217,7 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px',
-                  padding: '6px 8px',
+                  padding: '8px 8px',
                   fontSize: '11px',
                   backgroundColor: 'var(--vscode-button-secondaryBackground)',
                   color: 'var(--vscode-button-secondaryForeground)',
@@ -237,7 +253,7 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
               }}
             >
               <Square size={10} />
-              {`Stop Server (Port ${port})`}
+              {`Stop MCP Server (Port ${port})`}
             </button>
           )}
         </div>

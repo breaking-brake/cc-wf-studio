@@ -883,6 +883,10 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'workflow.settings.description.placeholder': '输入此工作流的描述（例如：它做什么、何时使用）...',
   'workflow.settings.generateWithAI': 'AI生成',
 
+  // MCP Server Section
+  'mcpSection.description.line1': '通过与AI对话的方式编辑工作流。',
+  'mcpSection.description.line2': '请选择要使用的代理。',
+
   // Description Panel (Canvas)
   'description.panel.title': '描述',
   'description.panel.show': '显示描述面板',

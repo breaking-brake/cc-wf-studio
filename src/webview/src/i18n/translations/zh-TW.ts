@@ -884,6 +884,10 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
     '輸入此工作流程的描述（例如：它做什麼、何時使用）...',
   'workflow.settings.generateWithAI': 'AI生成',
 
+  // MCP Server Section
+  'mcpSection.description.line1': '透過與AI對話的方式編輯工作流程。',
+  'mcpSection.description.line2': '請選擇要使用的代理。',
+
   // Description Panel (Canvas)
   'description.panel.title': '描述',
   'description.panel.show': '顯示描述面板',

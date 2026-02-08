@@ -919,6 +919,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     'このワークフローの説明を入力してください（例：何をするか、いつ使うか）...',
   'workflow.settings.generateWithAI': 'AIで生成',
 
+  // MCP Server Section
+  'mcpSection.description.line1': 'AIとの対話形式でワークフロー編集します。',
+  'mcpSection.description.line2': '使用するエージェントを選択してください。',
+
   // Description Panel (Canvas)
   'description.panel.title': '説明',
   'description.panel.show': '説明パネルを表示',

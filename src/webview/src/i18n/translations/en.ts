@@ -927,6 +927,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Enter a description for this workflow (e.g., what it does, when to use it)...',
   'workflow.settings.generateWithAI': 'Generate with AI',
 
+  // MCP Server Section
+  'mcpSection.description.line1': 'Edit workflows interactively with AI.',
+  'mcpSection.description.line2': 'Select an agent to get started.',
+
   // Description Panel (Canvas)
   'description.panel.title': 'Description',
   'description.panel.show': 'Show description panel',
