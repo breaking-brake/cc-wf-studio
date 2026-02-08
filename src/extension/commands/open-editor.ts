@@ -6,10 +6,18 @@
  */
 
 import * as vscode from 'vscode';
-import type { WebviewMessage } from '../../shared/types/messages';
+import type {
+  ApplyWorkflowFromMcpResponsePayload,
+  GetCurrentWorkflowResponsePayload,
+  McpConfigTarget,
+  StartMcpServerPayload,
+  WebviewMessage,
+} from '../../shared/types/messages';
+import { getMcpServerManager, log } from '../extension';
 import { translate } from '../i18n/i18n-service';
 import { cancelGeneration } from '../services/claude-code-service';
 import { FileService } from '../services/file-service';
+import { removeAllAgentConfigs, writeAllAgentConfigs } from '../services/mcp-server-config-writer';
 import { SlackApiService } from '../services/slack-api-service';
 import { executeSlashCommandInTerminal } from '../services/terminal-execution-service';
 import { listCopilotModels } from '../services/vscode-lm-service';
@@ -156,6 +164,12 @@ export function registerOpenEditorCommand(
       // Set webview HTML content
       currentPanel.webview.html = getWebviewContent(currentPanel.webview, context.extensionUri);
 
+      // Connect MCP server manager to webview
+      const mcpManager = getMcpServerManager();
+      if (mcpManager) {
+        mcpManager.setWebview(currentPanel.webview);
+      }
+
       // Check if user has accepted terms of use
       const hasAcceptedTerms = context.globalState.get<boolean>('hasAcceptedTerms', false);
 
@@ -207,6 +221,11 @@ export function registerOpenEditorCommand(
                   message.payload.workflow,
                   message.requestId
                 );
+                // Update MCP server workflow cache
+                const saveManager = getMcpServerManager();
+                if (saveManager) {
+                  saveManager.updateWorkflowCache(message.payload.workflow);
+                }
               } else {
                 webview.postMessage({
                   type: 'ERROR',
@@ -1048,6 +1067,144 @@ export function registerOpenEditorCommand(
               }
               break;
 
+            case 'GET_CURRENT_WORKFLOW_RESPONSE': {
+              // Forward workflow response to MCP server manager
+              const manager = getMcpServerManager();
+              if (manager && message.payload) {
+                manager.handleWorkflowResponse(
+                  message.payload as GetCurrentWorkflowResponsePayload
+                );
+              }
+              break;
+            }
+
+            case 'APPLY_WORKFLOW_FROM_MCP_RESPONSE': {
+              // Forward apply response to MCP server manager
+              const applyManager = getMcpServerManager();
+              if (applyManager && message.payload) {
+                applyManager.handleApplyResponse(
+                  message.payload as ApplyWorkflowFromMcpResponsePayload
+                );
+              }
+              break;
+            }
+
+            case 'START_MCP_SERVER': {
+              // Start built-in MCP server
+              const startManager = getMcpServerManager();
+              if (!startManager) {
+                webview.postMessage({
+                  type: 'MCP_SERVER_STATUS',
+                  payload: { running: false, port: null, configsWritten: [] },
+                });
+                break;
+              }
+
+              try {
+                const payload = message.payload as StartMcpServerPayload | undefined;
+                const configTargets: McpConfigTarget[] = payload?.configTargets || [
+                  'claude-code',
+                  'roo-code',
+                  'copilot',
+                ];
+
+                const port = await startManager.start(context.extensionPath);
+                const serverUrl = `http://127.0.0.1:${port}/mcp`;
+
+                // Write config to selected targets
+                const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+                let configsWritten: McpConfigTarget[] = [];
+                if (workspacePath) {
+                  configsWritten = await writeAllAgentConfigs(
+                    configTargets,
+                    serverUrl,
+                    workspacePath
+                  );
+                }
+
+                webview.postMessage({
+                  type: 'MCP_SERVER_STATUS',
+                  requestId: message.requestId,
+                  payload: {
+                    running: true,
+                    port,
+                    configsWritten,
+                  },
+                });
+
+                log('INFO', 'MCP Server started via UI', { port, configsWritten });
+              } catch (error) {
+                log('ERROR', 'Failed to start MCP server', {
+                  error: error instanceof Error ? error.message : String(error),
+                });
+                webview.postMessage({
+                  type: 'MCP_SERVER_STATUS',
+                  requestId: message.requestId,
+                  payload: {
+                    running: false,
+                    port: null,
+                    configsWritten: [],
+                  },
+                });
+              }
+              break;
+            }
+
+            case 'STOP_MCP_SERVER': {
+              // Stop built-in MCP server
+              const stopManager = getMcpServerManager();
+              if (!stopManager) {
+                webview.postMessage({
+                  type: 'MCP_SERVER_STATUS',
+                  payload: { running: false, port: null, configsWritten: [] },
+                });
+                break;
+              }
+
+              try {
+                await stopManager.stop();
+
+                // Remove configs (best-effort)
+                const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+                if (workspacePath) {
+                  await removeAllAgentConfigs(workspacePath);
+                }
+
+                webview.postMessage({
+                  type: 'MCP_SERVER_STATUS',
+                  requestId: message.requestId,
+                  payload: {
+                    running: false,
+                    port: null,
+                    configsWritten: [],
+                  },
+                });
+
+                log('INFO', 'MCP Server stopped via UI');
+              } catch (error) {
+                log('ERROR', 'Failed to stop MCP server', {
+                  error: error instanceof Error ? error.message : String(error),
+                });
+                webview.postMessage({
+                  type: 'MCP_SERVER_STATUS',
+                  payload: { running: false, port: null, configsWritten: [] },
+                });
+              }
+              break;
+            }
+
+            case 'GET_MCP_SERVER_STATUS': {
+              // Return current MCP server status
+              const statusManager = getMcpServerManager();
+              const running = statusManager?.isRunning() ?? false;
+              const statusPort = running ? (statusManager?.getPort() ?? null) : null;
+              webview.postMessage({
+                type: 'MCP_SERVER_STATUS',
+                payload: { running, port: statusPort, configsWritten: [] },
+              });
+              break;
+            }
+
             default:
               console.warn('Unknown message type:', message);
           }
@@ -1063,6 +1220,11 @@ export function registerOpenEditorCommand(
           if (activeOAuthService) {
             activeOAuthService.cancelPolling();
             activeOAuthService = null;
+          }
+          // Disconnect MCP server manager from webview
+          const disposeManager = getMcpServerManager();
+          if (disposeManager) {
+            disposeManager.setWebview(null);
           }
           currentPanel = undefined;
         },

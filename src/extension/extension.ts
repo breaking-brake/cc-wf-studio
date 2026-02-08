@@ -10,6 +10,8 @@ import * as vscode from 'vscode';
 import { registerOpenEditorCommand } from './commands/open-editor';
 import { handleConnectSlackManual } from './commands/slack-connect-manual';
 import { WorkflowPreviewEditorProvider } from './editors/workflow-preview-editor-provider';
+import { removeAllAgentConfigs } from './services/mcp-server-config-writer';
+import { McpServerManager } from './services/mcp-server-service';
 import { SlackApiService } from './services/slack-api-service';
 import { SlackTokenManager } from './utils/slack-token-manager';
 
@@ -17,6 +19,11 @@ import { SlackTokenManager } from './utils/slack-token-manager';
  * Global Output Channel for logging
  */
 let outputChannel: vscode.OutputChannel | null = null;
+
+/**
+ * Global MCP Server Manager instance
+ */
+let mcpServerManager: McpServerManager | null = null;
 
 /**
  * Get the global output channel instance
@@ -90,6 +97,13 @@ async function cleanupLegacyBM25Index(context: vscode.ExtensionContext): Promise
 }
 
 /**
+ * Get the global MCP Server Manager instance
+ */
+export function getMcpServerManager(): McpServerManager | null {
+  return mcpServerManager;
+}
+
+/**
  * Extension activation function
  * Called when the extension is activated (when the command is first invoked)
  */
@@ -99,6 +113,9 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(outputChannel);
 
   log('INFO', 'CC Workflow Studio is now active');
+
+  // Create MCP Server Manager (started via UI, not automatically)
+  mcpServerManager = new McpServerManager();
 
   // Clean up legacy BM25 index data (fire-and-forget)
   cleanupLegacyBM25Index(context).catch((error) => {
@@ -227,7 +244,23 @@ export function activate(context: vscode.ExtensionContext): void {
  * Extension deactivation function
  * Called when the extension is deactivated
  */
-export function deactivate(): void {
+export async function deactivate(): Promise<void> {
+  // Stop MCP server and clean up configs if running
+  if (mcpServerManager?.isRunning()) {
+    try {
+      await mcpServerManager.stop();
+      const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      if (workspacePath) {
+        await removeAllAgentConfigs(workspacePath);
+      }
+    } catch (error) {
+      log('ERROR', 'Failed to stop MCP server during deactivation', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+  mcpServerManager = null;
+
   log('INFO', 'CC Workflow Studio is now deactivated');
   outputChannel?.dispose();
   outputChannel = null;

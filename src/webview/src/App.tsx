@@ -7,7 +7,9 @@
 
 import * as Collapsible from '@radix-ui/react-collapsible';
 import type {
+  ApplyWorkflowFromMcpPayload,
   ErrorPayload,
+  GetCurrentWorkflowRequestPayload,
   ImportWorkflowFromSlackPayload,
   InitialStatePayload,
   PreviewModeInitPayload,
@@ -305,6 +307,56 @@ const App: React.FC = () => {
       } else if (message.type === 'LOAD_WORKFLOW') {
         // Hide loading overlay when workflow is loaded from preview
         setIsLoadingWorkflowFromPreview(false);
+      } else if (message.type === 'GET_CURRENT_WORKFLOW_REQUEST') {
+        // MCP Server requesting current workflow
+        const payload = message.payload as GetCurrentWorkflowRequestPayload;
+        const currentWorkflow = activeWorkflow
+          ? serializeWorkflow(
+              nodes,
+              edges,
+              workflowName || 'Untitled',
+              workflowDescription || undefined,
+              activeWorkflow.conversationHistory,
+              subAgentFlows
+            )
+          : null;
+        // Preserve original ID
+        if (currentWorkflow && activeWorkflow) {
+          currentWorkflow.id = activeWorkflow.id;
+        }
+        vscode.postMessage({
+          type: 'GET_CURRENT_WORKFLOW_RESPONSE',
+          payload: {
+            correlationId: payload.correlationId,
+            workflow: currentWorkflow,
+          },
+        });
+      } else if (message.type === 'APPLY_WORKFLOW_FROM_MCP') {
+        // MCP Server applying workflow to canvas
+        const payload = message.payload as ApplyWorkflowFromMcpPayload;
+        try {
+          const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(payload.workflow);
+          setNodes(loadedNodes);
+          setEdges(loadedEdges);
+          setWorkflowName(payload.workflow.name);
+          setActiveWorkflow(payload.workflow);
+          vscode.postMessage({
+            type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
+            payload: {
+              correlationId: payload.correlationId,
+              success: true,
+            },
+          });
+        } catch (error) {
+          vscode.postMessage({
+            type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
+            payload: {
+              correlationId: payload.correlationId,
+              success: false,
+              error: error instanceof Error ? error.message : 'Failed to apply workflow',
+            },
+          });
+        }
       }
     };
 
@@ -313,7 +365,18 @@ const App: React.FC = () => {
     return () => {
       window.removeEventListener('message', messageHandler);
     };
-  }, [setNodes, setEdges, setWorkflowName, setActiveWorkflow]);
+  }, [
+    setNodes,
+    setEdges,
+    setWorkflowName,
+    setActiveWorkflow,
+    activeWorkflow,
+    nodes,
+    edges,
+    workflowName,
+    workflowDescription,
+    subAgentFlows,
+  ]);
 
   // Render loading state (waiting for mode to be determined)
   // Shows spinner while waiting for INITIAL_STATE or PREVIEW_MODE_INIT from Extension Host

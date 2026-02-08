@@ -795,7 +795,10 @@ export type ExtensionMessage =
   | Message<RooCodeOperationFailedPayload, 'EXPORT_FOR_ROO_CODE_FAILED'>
   | Message<RunForRooCodeSuccessPayload, 'RUN_FOR_ROO_CODE_SUCCESS'>
   | Message<void, 'RUN_FOR_ROO_CODE_CANCELLED'>
-  | Message<RooCodeOperationFailedPayload, 'RUN_FOR_ROO_CODE_FAILED'>;
+  | Message<RooCodeOperationFailedPayload, 'RUN_FOR_ROO_CODE_FAILED'>
+  | Message<GetCurrentWorkflowRequestPayload, 'GET_CURRENT_WORKFLOW_REQUEST'>
+  | Message<ApplyWorkflowFromMcpPayload, 'APPLY_WORKFLOW_FROM_MCP'>
+  | Message<McpServerStatusPayload, 'MCP_SERVER_STATUS'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -1406,6 +1409,75 @@ export interface RooCodeOperationFailedPayload {
 }
 
 // ============================================================================
+// MCP Server Management Payloads (Built-in MCP Server)
+// ============================================================================
+
+/**
+ * AI agent config target for MCP server registration
+ */
+export type McpConfigTarget = 'claude-code' | 'roo-code' | 'copilot' | 'codex';
+
+/**
+ * Start MCP Server request payload (Webview → Extension)
+ */
+export interface StartMcpServerPayload {
+  /** Config targets to write server URL to */
+  configTargets: McpConfigTarget[];
+}
+
+/**
+ * MCP Server status payload (Extension → Webview)
+ */
+export interface McpServerStatusPayload {
+  /** Whether the server is running */
+  running: boolean;
+  /** Port number (null when stopped) */
+  port: number | null;
+  /** Config files that were written to */
+  configsWritten: McpConfigTarget[];
+}
+
+/**
+ * Get current workflow request payload (Extension → Webview)
+ */
+export interface GetCurrentWorkflowRequestPayload {
+  /** Request ID for correlating response */
+  correlationId: string;
+}
+
+/**
+ * Get current workflow response payload (Webview → Extension)
+ */
+export interface GetCurrentWorkflowResponsePayload {
+  /** Correlation ID from request */
+  correlationId: string;
+  /** Current workflow (null if no active workflow) */
+  workflow: Workflow | null;
+}
+
+/**
+ * Apply workflow from MCP payload (Extension → Webview)
+ */
+export interface ApplyWorkflowFromMcpPayload {
+  /** Correlation ID for response */
+  correlationId: string;
+  /** Workflow to apply */
+  workflow: Workflow;
+}
+
+/**
+ * Apply workflow from MCP response payload (Webview → Extension)
+ */
+export interface ApplyWorkflowFromMcpResponsePayload {
+  /** Correlation ID from request */
+  correlationId: string;
+  /** Whether the workflow was successfully applied */
+  success: boolean;
+  /** Error message if failed */
+  error?: string;
+}
+
+// ============================================================================
 // Edit in VSCode Editor Payloads
 // ============================================================================
 
@@ -1516,7 +1588,12 @@ export type WebviewMessage =
   | Message<ExportForCodexCliPayload, 'EXPORT_FOR_CODEX_CLI'>
   | Message<RunForCodexCliPayload, 'RUN_FOR_CODEX_CLI'>
   | Message<ExportForRooCodePayload, 'EXPORT_FOR_ROO_CODE'>
-  | Message<RunForRooCodePayload, 'RUN_FOR_ROO_CODE'>;
+  | Message<RunForRooCodePayload, 'RUN_FOR_ROO_CODE'>
+  | Message<GetCurrentWorkflowResponsePayload, 'GET_CURRENT_WORKFLOW_RESPONSE'>
+  | Message<ApplyWorkflowFromMcpResponsePayload, 'APPLY_WORKFLOW_FROM_MCP_RESPONSE'>
+  | Message<StartMcpServerPayload, 'START_MCP_SERVER'>
+  | Message<void, 'STOP_MCP_SERVER'>
+  | Message<void, 'GET_MCP_SERVER_STATUS'>;
 
 // ============================================================================
 // Error Codes

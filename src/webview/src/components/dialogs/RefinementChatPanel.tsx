@@ -28,6 +28,7 @@ import {
 import { useRefinementStore } from '../../stores/refinement-store';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import type { RefinementChatState } from '../../types/refinement-chat-state';
+import { McpServerSection } from '../chat/McpServerSection';
 import { MessageInput } from '../chat/MessageInput';
 import { MessageList } from '../chat/MessageList';
 import { SettingsDropdown } from '../chat/SettingsDropdown';
@@ -703,6 +704,9 @@ export function RefinementChatPanel({
             </button>
           </div>
         </div>
+
+        {/* MCP Server Section - Collapsible */}
+        {mode === 'workflow' && <McpServerSection />}
 
         {/* Warning Banner - Show when 20+ iterations */}
         {shouldShowWarning() && <WarningBanner />}
