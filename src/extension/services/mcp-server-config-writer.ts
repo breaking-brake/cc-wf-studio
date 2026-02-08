@@ -8,6 +8,7 @@
  * - Claude Code: {workspace}/.mcp.json
  * - Roo Code: {workspace}/.roo/mcp.json
  * - VSCode Copilot: {workspace}/.vscode/mcp.json
+ * - Copilot CLI: ~/.copilot/mcp-config.json (global)
  * - Codex CLI: ~/.codex/config.toml (global)
  */
 
@@ -15,7 +16,7 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as TOML from 'smol-toml';
-import type { McpConfigTarget } from '../../shared/types/messages';
+import type { AiEditingProvider, McpConfigTarget } from '../../shared/types/messages';
 import { log } from '../extension';
 
 const SERVER_ENTRY_NAME = 'cc-workflow-studio';
@@ -40,8 +41,10 @@ function getConfigPath(target: McpConfigTarget, workspacePath: string): string {
       return path.join(workspacePath, '.mcp.json');
     case 'roo-code':
       return path.join(workspacePath, '.roo', 'mcp.json');
-    case 'copilot':
+    case 'copilot-chat':
       return path.join(workspacePath, '.vscode', 'mcp.json');
+    case 'copilot-cli':
+      return path.join(os.homedir(), '.copilot', 'mcp-config.json');
     case 'codex':
       return path.join(os.homedir(), '.codex', 'config.toml');
   }
@@ -107,14 +110,23 @@ export async function writeAgentConfig(
       }
       config.mcp_servers[SERVER_ENTRY_NAME] = { url: serverUrl };
       await writeCodexConfig(config);
-    } else if (target === 'copilot') {
-      // Copilot uses "servers" key with type "http"
+    } else if (target === 'copilot-chat') {
+      // VSCode Copilot uses "servers" key with type "http"
       const filePath = getConfigPath(target, workspacePath);
       const config = await readJsonConfig(filePath);
       if (!config.servers) {
         config.servers = {};
       }
       config.servers[SERVER_ENTRY_NAME] = { type: 'http', url: serverUrl };
+      await writeJsonConfig(filePath, config);
+    } else if (target === 'copilot-cli') {
+      // Copilot CLI uses "mcpServers" key with tools: ["*"] (global config)
+      const filePath = getConfigPath(target, workspacePath);
+      const config = await readJsonConfig(filePath);
+      if (!config.mcpServers) {
+        config.mcpServers = {};
+      }
+      config.mcpServers[SERVER_ENTRY_NAME] = { type: 'http', url: serverUrl, tools: ['*'] };
       await writeJsonConfig(filePath, config);
     } else if (target === 'roo-code') {
       // Roo Code uses "mcpServers" key with type "streamable-http"
@@ -159,7 +171,7 @@ export async function removeAgentConfig(
         delete config.mcp_servers[SERVER_ENTRY_NAME];
         await writeCodexConfig(config);
       }
-    } else if (target === 'copilot') {
+    } else if (target === 'copilot-chat') {
       const filePath = getConfigPath(target, workspacePath);
       const config = await readJsonConfig(filePath);
       if (config.servers?.[SERVER_ENTRY_NAME]) {
@@ -167,6 +179,7 @@ export async function removeAgentConfig(
         await writeJsonConfig(filePath, config);
       }
     } else {
+      // claude-code, copilot-cli, roo-code all use "mcpServers" key
       const filePath = getConfigPath(target, workspacePath);
       const config = await readJsonConfig(filePath);
       if (config.mcpServers?.[SERVER_ENTRY_NAME]) {
@@ -207,10 +220,34 @@ export async function writeAllAgentConfigs(
 }
 
 /**
+ * Get the config targets required for a given AI editing provider
+ */
+export function getConfigTargetsForProvider(provider: AiEditingProvider): McpConfigTarget[] {
+  switch (provider) {
+    case 'claude-code':
+      return ['claude-code'];
+    case 'copilot-cli':
+      return ['copilot-cli'];
+    case 'copilot-vscode':
+      return ['copilot-chat'];
+    case 'codex':
+      return ['codex'];
+    case 'roo-code':
+      return ['roo-code'];
+  }
+}
+
+/**
  * Remove MCP server entry from all agent config files (best-effort)
  */
 export async function removeAllAgentConfigs(workspacePath: string): Promise<void> {
-  const allTargets: McpConfigTarget[] = ['claude-code', 'roo-code', 'copilot', 'codex'];
+  const allTargets: McpConfigTarget[] = [
+    'claude-code',
+    'roo-code',
+    'copilot-chat',
+    'copilot-cli',
+    'codex',
+  ];
 
   for (const target of allTargets) {
     await removeAgentConfig(target, workspacePath);

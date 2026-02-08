@@ -687,6 +687,52 @@ export function runForRooCode(workflow: Workflow): Promise<RunForRooCodeSuccessP
 }
 
 // ============================================================================
+// One-Click AI Agent Launch
+// ============================================================================
+
+/**
+ * Launch AI agent with one-click orchestration
+ *
+ * Automatically starts MCP server, writes config, and launches the skill.
+ *
+ * @param provider - AI editing provider to launch
+ * @returns Promise that resolves when agent is launched
+ */
+export function launchAiAgent(provider: AiEditingProvider): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'LAUNCH_AI_AGENT_SUCCESS') {
+          resolve();
+        } else if (message.type === 'LAUNCH_AI_AGENT_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to launch AI agent'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    vscode.postMessage({
+      type: 'LAUNCH_AI_AGENT',
+      requestId,
+      payload: { provider },
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
+// ============================================================================
 // Utility Functions
 // ============================================================================
 

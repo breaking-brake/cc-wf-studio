@@ -11,7 +11,7 @@
  * Updated: SubAgentFlow support - Unified panel for both workflow types
  */
 
-import { ChevronDown, ChevronRight, PanelRightClose } from 'lucide-react';
+import { ChevronDown, ChevronRight, PanelRightClose, Sparkles } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ResponsiveFontProvider } from '../../contexts/ResponsiveFontContext';
 import { useResizablePanel } from '../../hooks/useResizablePanel';
@@ -615,36 +615,40 @@ export function RefinementChatPanel({
     setIsConfirmClearOpen(false);
   };
 
-  // Legacy AI Edit accordion state (workflow mode only)
-  const LEGACY_STORAGE_KEY = 'cc-wf-studio.legacyAiEdit';
-  const [isLegacyCollapsed, setIsLegacyCollapsed] = useState(() => {
+  // Radio-button style accordion: only one section open at a time
+  const AI_EDIT_SECTION_KEY = 'cc-wf-studio.aiEditActiveSection';
+  type AiEditSection = 'native' | 'legacy';
+  const [activeSection, setActiveSection] = useState<AiEditSection>(() => {
     try {
-      const stored = localStorage.getItem(LEGACY_STORAGE_KEY);
-      if (stored !== null) {
-        return JSON.parse(stored) as boolean;
+      const stored = localStorage.getItem(AI_EDIT_SECTION_KEY);
+      if (stored === 'native' || stored === 'legacy') {
+        return stored;
       }
     } catch {
       // Ignore
     }
-    return true; // Default: collapsed
+    return 'native'; // Default: Native open
   });
 
-  const toggleLegacyCollapse = useCallback(() => {
-    setIsLegacyCollapsed((prev) => {
-      const next = !prev;
+  const handleSectionToggle = useCallback(
+    (section: AiEditSection) => {
+      const next: AiEditSection =
+        activeSection === section ? (section === 'native' ? 'legacy' : 'native') : section;
+      setActiveSection(next);
       try {
-        localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(next));
+        localStorage.setItem(AI_EDIT_SECTION_KEY, next);
       } catch {
         // Ignore
       }
-      return next;
-    });
-  }, []);
+    },
+    [activeSection]
+  );
 
   // Determine panel title based on mode
   const panelTitle =
     mode === 'subAgentFlow' ? t('subAgentFlow.aiEdit.title') : t('refinement.title');
 
+  const isLegacyCollapsed = activeSection !== 'legacy';
   const LegacyChevronIcon = isLegacyCollapsed ? ChevronRight : ChevronDown;
 
   return (
@@ -737,19 +741,30 @@ export function RefinementChatPanel({
 
         {mode === 'workflow' ? (
           <>
-            {/* MCP Server Section - Collapsible, default open */}
-            <McpServerSection />
+            {/* AI Edit: Native with MCP Server - Accordion, default open */}
+            <McpServerSection
+              isCollapsed={activeSection !== 'native'}
+              onToggleCollapse={() => handleSectionToggle('native')}
+            />
 
-            {/* Legacy AI Edit Section - Accordion, default closed */}
+            {/* AI Edit: Built-in (Legacy) - Footer, normal accordion */}
             <div
               style={{
-                borderBottom: '1px solid var(--vscode-panel-border)',
+                borderTop: '1px solid var(--vscode-panel-border)',
+                ...(isLegacyCollapsed
+                  ? { flexShrink: 0 }
+                  : {
+                      flex: 1,
+                      display: 'flex',
+                      flexDirection: 'column' as const,
+                      overflow: 'hidden',
+                    }),
               }}
             >
               {/* Legacy Accordion Header */}
               <button
                 type="button"
-                onClick={toggleLegacyCollapse}
+                onClick={() => handleSectionToggle('legacy')}
                 style={{
                   width: '100%',
                   padding: '8px 16px',
@@ -774,7 +789,8 @@ export function RefinementChatPanel({
                 }}
               >
                 <LegacyChevronIcon size={12} />
-                <span>AI Edit (Built-in)</span>
+                <Sparkles size={12} />
+                <span>AI Edit: Built-in</span>
                 <span
                   style={{
                     fontSize: '9px',
@@ -795,9 +811,9 @@ export function RefinementChatPanel({
               {!isLegacyCollapsed && (
                 <div
                   style={{
+                    flex: 1,
                     display: 'flex',
                     flexDirection: 'column',
-                    maxHeight: '400px',
                     overflow: 'hidden',
                   }}
                 >

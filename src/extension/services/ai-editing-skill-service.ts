@@ -19,7 +19,7 @@ export type AiEditingProvider =
   | 'codex'
   | 'roo-code';
 
-const SKILL_NAME = 'cc-workflow-studio_ai-workflow-editor';
+const SKILL_NAME = 'cc-workflow-ai-editor';
 
 /**
  * Get the skill file destination path for a given provider

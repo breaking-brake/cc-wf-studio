@@ -10,6 +10,7 @@ import type {
   AiEditingProvider,
   ApplyWorkflowFromMcpResponsePayload,
   GetCurrentWorkflowResponsePayload,
+  LaunchAiAgentPayload,
   McpConfigTarget,
   RunAiEditingSkillPayload,
   StartMcpServerPayload,
@@ -20,7 +21,11 @@ import { translate } from '../i18n/i18n-service';
 import { generateAndRunAiEditingSkill } from '../services/ai-editing-skill-service';
 import { cancelGeneration } from '../services/claude-code-service';
 import { FileService } from '../services/file-service';
-import { removeAllAgentConfigs, writeAllAgentConfigs } from '../services/mcp-server-config-writer';
+import {
+  getConfigTargetsForProvider,
+  removeAllAgentConfigs,
+  writeAllAgentConfigs,
+} from '../services/mcp-server-config-writer';
 import { SlackApiService } from '../services/slack-api-service';
 import { executeSlashCommandInTerminal } from '../services/terminal-execution-service';
 import { listCopilotModels } from '../services/vscode-lm-service';
@@ -1241,6 +1246,85 @@ export function registerOpenEditorCommand(
                     },
                   });
                 }
+              }
+              break;
+            }
+
+            case 'LAUNCH_AI_AGENT': {
+              // One-click AI agent launch: start server → write config → launch skill
+              const launchPayload = message.payload as LaunchAiAgentPayload | undefined;
+              if (!launchPayload?.provider) break;
+
+              try {
+                const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+                if (!workspacePath) {
+                  throw new Error('No workspace folder is open');
+                }
+
+                const launchManager = getMcpServerManager();
+                if (!launchManager) {
+                  throw new Error('MCP server manager is not available');
+                }
+
+                // 1. Start server if not running
+                let serverPort = launchManager.getPort();
+                if (!launchManager.isRunning()) {
+                  serverPort = await launchManager.start(context.extensionPath);
+                }
+                const serverUrl = `http://127.0.0.1:${serverPort}/mcp`;
+
+                // 2. Write config for this provider if not yet written
+                const requiredTargets = getConfigTargetsForProvider(launchPayload.provider);
+                const alreadyWritten = launchManager.getWrittenConfigs();
+                const newTargets = requiredTargets.filter((t) => !alreadyWritten.has(t));
+                if (newTargets.length > 0) {
+                  const written = await writeAllAgentConfigs(newTargets, serverUrl, workspacePath);
+                  launchManager.addWrittenConfigs(written);
+                }
+
+                // 3. Send MCP_SERVER_STATUS update
+                webview.postMessage({
+                  type: 'MCP_SERVER_STATUS',
+                  payload: {
+                    running: true,
+                    port: serverPort,
+                    configsWritten: [...launchManager.getWrittenConfigs()],
+                  },
+                });
+
+                // 4. Generate and run AI editing skill
+                await generateAndRunAiEditingSkill(
+                  launchPayload.provider as AiEditingProvider,
+                  context.extensionPath,
+                  workspacePath
+                );
+
+                webview.postMessage({
+                  type: 'LAUNCH_AI_AGENT_SUCCESS',
+                  requestId: message.requestId,
+                  payload: {
+                    provider: launchPayload.provider,
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+
+                log('INFO', 'AI agent launched via one-click', {
+                  provider: launchPayload.provider,
+                  port: serverPort,
+                });
+              } catch (error) {
+                log('ERROR', 'Failed to launch AI agent', {
+                  error: error instanceof Error ? error.message : String(error),
+                });
+                webview.postMessage({
+                  type: 'LAUNCH_AI_AGENT_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorMessage:
+                      error instanceof Error ? error.message : 'Failed to launch AI agent',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
               }
               break;
             }

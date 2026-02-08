@@ -800,7 +800,9 @@ export type ExtensionMessage =
   | Message<ApplyWorkflowFromMcpPayload, 'APPLY_WORKFLOW_FROM_MCP'>
   | Message<McpServerStatusPayload, 'MCP_SERVER_STATUS'>
   | Message<RunAiEditingSkillSuccessPayload, 'RUN_AI_EDITING_SKILL_SUCCESS'>
-  | Message<RunAiEditingSkillFailedPayload, 'RUN_AI_EDITING_SKILL_FAILED'>;
+  | Message<RunAiEditingSkillFailedPayload, 'RUN_AI_EDITING_SKILL_FAILED'>
+  | Message<LaunchAiAgentSuccessPayload, 'LAUNCH_AI_AGENT_SUCCESS'>
+  | Message<LaunchAiAgentFailedPayload, 'LAUNCH_AI_AGENT_FAILED'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -1452,6 +1454,35 @@ export interface RunAiEditingSkillFailedPayload {
   timestamp: string; // ISO 8601
 }
 
+/**
+ * Launch AI agent request payload (Webview → Extension)
+ * One-click orchestration: start server → write config → launch skill
+ */
+export interface LaunchAiAgentPayload {
+  /** AI editing provider to launch */
+  provider: AiEditingProvider;
+}
+
+/**
+ * Launch AI agent success payload (Extension → Webview)
+ */
+export interface LaunchAiAgentSuccessPayload {
+  /** Provider that was launched */
+  provider: AiEditingProvider;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Launch AI agent failed payload (Extension → Webview)
+ */
+export interface LaunchAiAgentFailedPayload {
+  /** Error message */
+  errorMessage: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
 // ============================================================================
 // MCP Server Management Payloads (Built-in MCP Server)
 // ============================================================================
@@ -1459,7 +1490,7 @@ export interface RunAiEditingSkillFailedPayload {
 /**
  * AI agent config target for MCP server registration
  */
-export type McpConfigTarget = 'claude-code' | 'roo-code' | 'copilot' | 'codex';
+export type McpConfigTarget = 'claude-code' | 'roo-code' | 'copilot-chat' | 'copilot-cli' | 'codex';
 
 /**
  * Start MCP Server request payload (Webview → Extension)
@@ -1638,7 +1669,8 @@ export type WebviewMessage =
   | Message<StartMcpServerPayload, 'START_MCP_SERVER'>
   | Message<void, 'STOP_MCP_SERVER'>
   | Message<void, 'GET_MCP_SERVER_STATUS'>
-  | Message<RunAiEditingSkillPayload, 'RUN_AI_EDITING_SKILL'>;
+  | Message<RunAiEditingSkillPayload, 'RUN_AI_EDITING_SKILL'>
+  | Message<LaunchAiAgentPayload, 'LAUNCH_AI_AGENT'>;
 
 // ============================================================================
 // Error Codes

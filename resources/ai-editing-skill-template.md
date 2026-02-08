@@ -1,5 +1,5 @@
 ---
-name: cc-workflow-studio_ai-workflow-editor
+name: cc-workflow-ai-editor
 description: AI workflow editor for CC Workflow Studio. Create and edit visual AI agent workflows through interactive conversation using MCP tools (get_workflow_schema, get_current_workflow, apply_workflow, validate_workflow). Use when the user wants to create a new workflow, modify an existing workflow, or edit the workflow canvas in CC Workflow Studio via the built-in MCP server.
 ---
 

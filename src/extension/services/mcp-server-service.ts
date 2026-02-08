@@ -18,6 +18,7 @@ import type * as vscode from 'vscode';
 import type {
   ApplyWorkflowFromMcpResponsePayload,
   GetCurrentWorkflowResponsePayload,
+  McpConfigTarget,
 } from '../../shared/types/messages';
 import type { Workflow } from '../../shared/types/workflow-definition';
 import { log } from '../extension';
@@ -37,6 +38,7 @@ export class McpServerManager {
   private lastKnownWorkflow: Workflow | null = null;
   private webview: vscode.Webview | null = null;
   private extensionPath: string | null = null;
+  private writtenConfigs = new Set<McpConfigTarget>();
 
   private pendingWorkflowRequests = new Map<
     string,
@@ -125,6 +127,8 @@ export class McpServerManager {
   }
 
   async stop(): Promise<void> {
+    this.writtenConfigs.clear();
+
     if (this.httpServer) {
       const server = this.httpServer;
       this.httpServer = null;
@@ -159,6 +163,16 @@ export class McpServerManager {
 
   getExtensionPath(): string | null {
     return this.extensionPath;
+  }
+
+  getWrittenConfigs(): Set<McpConfigTarget> {
+    return this.writtenConfigs;
+  }
+
+  addWrittenConfigs(targets: McpConfigTarget[]): void {
+    for (const t of targets) {
+      this.writtenConfigs.add(t);
+    }
   }
 
   // Webview lifecycle
