@@ -1,0 +1,542 @@
+{
+  "schemaVersion": "1.0.0",
+  "metadata": {
+    "description": "Workflow schema for CC Workflow Studio",
+    "maxNodes": 50,
+    "supportedNodeTypes": [
+      "start",
+      "end",
+      "prompt",
+      "askUserQuestion",
+      "ifElse",
+      "switch",
+      "skill",
+      "mcp",
+      "codex"
+    ]
+  },
+  "nodeTypes": {
+    "start": {
+      "description": "Workflow entry point. Exactly one required per workflow.",
+      "fields": {
+        "label": {
+          "type": "string",
+          "required": false,
+          "default": "Start"
+        }
+      },
+      "inputPorts": 0,
+      "outputPorts": 1
+    },
+    "end": {
+      "description": "Workflow exit point. At least one required per workflow.",
+      "fields": {
+        "label": {
+          "type": "string",
+          "required": false,
+          "default": "End"
+        }
+      },
+      "inputPorts": "unlimited",
+      "outputPorts": 0
+    },
+    "prompt": {
+      "description": "Display a message/instructions to user",
+      "fields": {
+        "label": {
+          "type": "string",
+          "required": false
+        },
+        "prompt": {
+          "type": "string",
+          "required": true,
+          "maxLength": 10000
+        },
+        "variables": {
+          "type": "object",
+          "required": false
+        }
+      },
+      "inputPorts": 1,
+      "outputPorts": 1
+    },
+    "askUserQuestion": {
+      "description": "Present a question with multiple-choice options",
+      "fields": {
+        "questionText": {
+          "type": "string",
+          "required": true,
+          "maxLength": 500
+        },
+        "options": {
+          "type": "array",
+          "required": true,
+          "minLength": 2,
+          "maxLength": 4,
+          "items": {
+            "id": {
+              "type": "string",
+              "required": false
+            },
+            "label": {
+              "type": "string",
+              "required": true,
+              "maxLength": 50
+            },
+            "description": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200
+            }
+          }
+        },
+        "multiSelect": {
+          "type": "boolean",
+          "required": false,
+          "default": false
+        },
+        "useAiSuggestions": {
+          "type": "boolean",
+          "required": false,
+          "default": false
+        },
+        "outputPorts": {
+          "type": "number",
+          "required": true,
+          "min": 1,
+          "max": 4
+        }
+      },
+      "inputPorts": 1,
+      "outputPorts": "2-4"
+    },
+    "ifElse": {
+      "description": "Two-way conditional branching (if/else). Use for 2-way branching only (true/false).",
+      "fields": {
+        "evaluationTarget": {
+          "type": "string",
+          "required": false
+        },
+        "branches": {
+          "type": "array",
+          "required": true,
+          "length": 2,
+          "items": {
+            "id": {
+              "type": "string",
+              "required": false
+            },
+            "label": {
+              "type": "string",
+              "required": true,
+              "maxLength": 50
+            },
+            "condition": {
+              "type": "string",
+              "required": true,
+              "maxLength": 500
+            }
+          }
+        },
+        "outputPorts": {
+          "type": "number",
+          "required": true,
+          "value": 2
+        }
+      },
+      "inputPorts": 1,
+      "outputPorts": 2
+    },
+    "switch": {
+      "description": "Multi-way branching (switch/case). Use for 3+ way branching - ideal for time-based, case-based, or multi-condition routing. **Important: Always include a default branch as the last branch with isDefault: true.**",
+      "fields": {
+        "evaluationTarget": {
+          "type": "string",
+          "required": false
+        },
+        "branches": {
+          "type": "array",
+          "required": true,
+          "minLength": 2,
+          "maxLength": 10,
+          "items": {
+            "id": {
+              "type": "string",
+              "required": false
+            },
+            "label": {
+              "type": "string",
+              "required": true,
+              "maxLength": 50
+            },
+            "condition": {
+              "type": "string",
+              "required": true,
+              "maxLength": 500
+            },
+            "isDefault": {
+              "type": "boolean",
+              "required": false,
+              "default": false,
+              "description": "If true, this is the default branch (must be last, exactly one per node)"
+            }
+          },
+          "constraint": "Last branch must have isDefault: true with label 'default' and condition 'Other cases'"
+        },
+        "outputPorts": {
+          "type": "number",
+          "required": true,
+          "min": 2,
+          "max": 10
+        }
+      },
+      "inputPorts": 1,
+      "outputPorts": "2-10"
+    },
+    "skill": {
+      "description": "Reference a Claude Code Skill (specialized agent capability defined in SKILL.md files). Use when user description matches a Skill's documented purpose. **Important: Skills always have exactly 1 output port. For conditional branching based on Skill results, add an ifElse or switch node after the Skill node.**",
+      "fields": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "maxLength": 64,
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Exact Skill name from available Skills list"
+        },
+        "description": {
+          "type": "string",
+          "required": true,
+          "maxLength": 1024,
+          "description": "Exact description from available Skills list"
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "user",
+            "project",
+            "local"
+          ],
+          "required": true,
+          "description": "Skill scope: user (all projects), project (this project, shared), local (this project, private)"
+        },
+        "skillPath": {
+          "type": "string",
+          "required": false,
+          "description": "Auto-resolved by system after generation - do NOT include in AI output"
+        },
+        "allowedTools": {
+          "type": "string",
+          "required": false,
+          "description": "Optional tool restrictions from Skill definition"
+        },
+        "validationStatus": {
+          "type": "string",
+          "enum": [
+            "valid",
+            "missing",
+            "invalid"
+          ],
+          "required": true,
+          "default": "valid"
+        },
+        "executionMode": {
+          "type": "string",
+          "enum": [
+            "load",
+            "execute"
+          ],
+          "required": false,
+          "default": "execute",
+          "description": "Execution mode: 'execute' runs the Skill (default), 'load' loads the Skill as knowledge context without executing it"
+        },
+        "executionPrompt": {
+          "type": "string",
+          "required": false,
+          "maxLength": 2000,
+          "description": "Custom execution instructions when executionMode is 'execute'. Ignored when executionMode is 'load'."
+        },
+        "outputPorts": {
+          "type": "number",
+          "required": true,
+          "value": 1
+        }
+      },
+      "inputPorts": 1,
+      "outputPorts": 1
+    },
+    "mcp": {
+      "description": "Execute an MCP (Model Context Protocol) tool from an external server. MCP enables integration with external services, databases, APIs, and tools. **Important: Always use 'manualParameterConfig' mode for AI-generated workflows. Parameters must be provided as an array of parameter definitions, NOT as key-value pairs.**",
+      "fields": {
+        "serverId": {
+          "type": "string",
+          "required": true,
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "MCP server identifier (e.g., 'playwright', 'github', 'filesystem')"
+        },
+        "toolName": {
+          "type": "string",
+          "required": true,
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Tool function name from the MCP server (e.g., 'playwright_navigate', 'get_file_contents')"
+        },
+        "toolDescription": {
+          "type": "string",
+          "required": false,
+          "maxLength": 1024,
+          "description": "Human-readable description of what the tool does"
+        },
+        "parameters": {
+          "type": "array",
+          "required": false,
+          "description": "Array of parameter schema definitions (NOT parameter values). Each parameter object must have: name (string), type (string), description (string), required (boolean). Example: [{\"name\": \"url\", \"type\": \"string\", \"description\": \"Target URL\", \"required\": true}]",
+          "items": {
+            "name": {
+              "type": "string",
+              "required": true
+            },
+            "type": {
+              "type": "string",
+              "required": true,
+              "enum": [
+                "string",
+                "number",
+                "boolean",
+                "array",
+                "object"
+              ]
+            },
+            "description": {
+              "type": "string",
+              "required": false
+            },
+            "required": {
+              "type": "boolean",
+              "required": true
+            }
+          }
+        },
+        "parameterValues": {
+          "type": "object",
+          "required": false,
+          "description": "Key-value pairs of parameter values. Keys must match parameter names from the 'parameters' array. Example: {\"url\": \"https://example.com\"}"
+        },
+        "mode": {
+          "type": "string",
+          "required": false,
+          "enum": [
+            "manualParameterConfig",
+            "aiParameterConfig",
+            "aiToolSelection"
+          ],
+          "default": "manualParameterConfig",
+          "description": "Configuration mode - ALWAYS use 'manualParameterConfig' for AI-generated workflows"
+        },
+        "validationStatus": {
+          "type": "string",
+          "enum": [
+            "valid",
+            "missing",
+            "invalid"
+          ],
+          "required": true,
+          "default": "valid"
+        },
+        "outputPorts": {
+          "type": "number",
+          "required": true,
+          "value": 1
+        }
+      },
+      "inputPorts": 1,
+      "outputPorts": 1,
+      "aiGenerationGuidance": {
+        "mode": "ALWAYS set mode to 'manualParameterConfig'",
+        "parameters": "MUST be an array of parameter schema objects with {name, type, description, required} fields",
+        "parameterValues": "Optional object with key-value pairs matching parameter names",
+        "commonTools": {
+          "playwright": [
+            "playwright_navigate",
+            "playwright_click",
+            "playwright_screenshot",
+            "playwright_evaluate"
+          ],
+          "filesystem": [
+            "read_file",
+            "write_file",
+            "list_directory"
+          ],
+          "github": [
+            "get_issue",
+            "create_pull_request",
+            "list_repositories"
+          ]
+        },
+        "example": {
+          "type": "mcp",
+          "data": {
+            "serverId": "playwright",
+            "toolName": "playwright_navigate",
+            "toolDescription": "Navigate browser to URL",
+            "parameters": [
+              {
+                "name": "url",
+                "type": "string",
+                "description": "Target URL to navigate to",
+                "required": true
+              }
+            ],
+            "parameterValues": {
+              "url": "https://example.com"
+            },
+            "mode": "manualParameterConfig",
+            "validationStatus": "valid",
+            "outputPorts": 1
+          }
+        }
+      }
+    },
+    "codex": {
+      "description": "Execute an OpenAI Codex CLI agent for code generation and analysis tasks. **Important: Phase 1 only supports UI/data model - CLI execution is not yet implemented.**",
+      "fields": {
+        "label": {
+          "type": "string",
+          "required": true,
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "Display label for the Codex agent"
+        },
+        "promptMode": {
+          "type": "string",
+          "required": true,
+          "enum": [
+            "fixed",
+            "ai-generated"
+          ],
+          "default": "fixed",
+          "description": "Prompt mode: 'fixed' uses the prompt field as-is, 'ai-generated' lets the orchestrating AI agent generate instructions dynamically based on context"
+        },
+        "prompt": {
+          "type": "string",
+          "required": false,
+          "maxLength": 10000,
+          "description": "Instructions for the Codex agent. Required for 'fixed' mode, optional guidance for 'ai-generated' mode"
+        },
+        "model": {
+          "type": "string",
+          "required": true,
+          "minLength": 1,
+          "default": "gpt-5.2-codex",
+          "description": "Model to use for Codex execution. Predefined options: gpt-5.2-codex, gpt-5.2, gpt-5.1-codex-max, gpt-5.1-codex-mini. Custom model names are also supported."
+        },
+        "reasoningEffort": {
+          "type": "string",
+          "required": true,
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "default": "medium",
+          "description": "Reasoning effort level for the agent"
+        },
+        "sandbox": {
+          "type": "string",
+          "required": false,
+          "enum": [
+            "read-only",
+            "workspace-write",
+            "danger-full-access"
+          ],
+          "description": "Optional. Sandbox mode for file system access. When specified, 'read-only' is recommended."
+        },
+        "outputPorts": {
+          "type": "number",
+          "required": true,
+          "value": 1
+        },
+        "skipGitRepoCheck": {
+          "type": "boolean",
+          "required": false,
+          "default": true,
+          "description": "Skip Git repository trust check. When true, allows execution outside trusted Git repositories. Use with caution."
+        }
+      },
+      "inputPorts": 1,
+      "outputPorts": 1
+    }
+  },
+  "connectionRules": {
+    "forbidden": [
+      "Start node cannot have input connections",
+      "End node cannot have output connections",
+      "No cycles allowed",
+      "No self-connections",
+      "One connection per output port"
+    ],
+    "required": [
+      "Exactly one Start node per workflow",
+      "At least one End node per workflow",
+      "All non-Start nodes must have input connection",
+      "All non-End nodes must have output connection"
+    ]
+  },
+  "validationRules": {
+    "workflow": {
+      "maxNodes": 50,
+      "nameMaxLength": 100,
+      "namePattern": "^[a-z0-9_-]+$",
+      "versionPattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "node": {
+      "nameMaxLength": 50,
+      "namePattern": "^[a-zA-Z0-9_-]+$",
+      "namePatternDescription": "IMPORTANT: Node names must use ASCII alphanumeric characters, hyphens, and underscores only. NO spaces or non-ASCII characters allowed."
+    }
+  },
+  "workflowStructure": {
+    "description": "Top-level workflow structure fields",
+    "fields": {
+      "id": {
+        "type": "string",
+        "required": true
+      },
+      "name": {
+        "type": "string",
+        "required": true,
+        "maxLength": 100,
+        "pattern": "^[a-z0-9_-]+$",
+        "description": "Workflow name. Only lowercase letters (a-z), numbers, hyphens, and underscores allowed."
+      },
+      "description": {
+        "type": "string",
+        "required": false
+      },
+      "version": {
+        "type": "string",
+        "required": true,
+        "pattern": "semver"
+      },
+      "nodes": {
+        "type": "array",
+        "required": true
+      },
+      "connections": {
+        "type": "array",
+        "required": true
+      },
+      "createdAt": {
+        "type": "string",
+        "required": true,
+        "format": "ISO8601"
+      },
+      "updatedAt": {
+        "type": "string",
+        "required": true,
+        "format": "ISO8601"
+      }
+    }
+  },
+  "examples": []
+}

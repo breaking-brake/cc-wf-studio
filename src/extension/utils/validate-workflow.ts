@@ -57,6 +57,13 @@ export function validateAIGeneratedWorkflow(workflow: unknown): ValidationResult
 
   if (!wf.name || typeof wf.name !== 'string') {
     errors.push({ code: 'MISSING_FIELD', message: 'Workflow must have a name', field: 'name' });
+  } else if (!VALIDATION_RULES.WORKFLOW.NAME_PATTERN.test(wf.name)) {
+    errors.push({
+      code: 'INVALID_FORMAT',
+      message:
+        'Workflow name must contain only lowercase letters (a-z), numbers, hyphens, and underscores',
+      field: 'name',
+    });
   }
 
   if (!wf.version || typeof wf.version !== 'string') {

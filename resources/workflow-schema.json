@@ -477,7 +477,12 @@
     ]
   },
   "validationRules": {
-    "workflow": { "maxNodes": 50, "nameMaxLength": 100, "versionPattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "workflow": {
+      "maxNodes": 50,
+      "nameMaxLength": 100,
+      "namePattern": "^[a-z0-9_-]+$",
+      "versionPattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
     "node": {
       "nameMaxLength": 50,
       "namePattern": "^[a-zA-Z0-9_-]+$",
@@ -501,7 +506,13 @@
     "description": "Top-level workflow structure fields",
     "fields": {
       "id": { "type": "string", "required": true },
-      "name": { "type": "string", "required": true, "maxLength": 100 },
+      "name": {
+        "type": "string",
+        "required": true,
+        "maxLength": 100,
+        "pattern": "^[a-z0-9_-]+$",
+        "description": "Workflow name. Only lowercase letters (a-z), numbers, hyphens, and underscores allowed."
+      },
       "description": { "type": "string", "required": false },
       "version": { "type": "string", "required": true, "pattern": "semver" },
       "nodes": { "type": "array", "required": true },
@@ -540,7 +551,7 @@
       "complexity": "simple",
       "workflow": {
         "id": "ex-simple",
-        "name": "Data Analysis",
+        "name": "data-analysis",
         "version": "1.0.0",
         "nodes": [
           {
@@ -589,7 +600,7 @@
       "complexity": "medium",
       "workflow": {
         "id": "ex-medium",
-        "name": "Code Review",
+        "name": "code-review",
         "version": "1.0.0",
         "nodes": [
           {
@@ -683,7 +694,7 @@
       "complexity": "complex",
       "workflow": {
         "id": "ex-complex",
-        "name": "Doc Pipeline",
+        "name": "doc-pipeline",
         "version": "1.0.0",
         "nodes": [
           {

@@ -16,6 +16,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import type * as vscode from 'vscode';
 import type {
+  AiEditingProvider,
   ApplyWorkflowFromMcpResponsePayload,
   GetCurrentWorkflowResponsePayload,
   McpConfigTarget,
@@ -39,6 +40,7 @@ export class McpServerManager {
   private webview: vscode.Webview | null = null;
   private extensionPath: string | null = null;
   private writtenConfigs = new Set<McpConfigTarget>();
+  private currentProvider: AiEditingProvider | null = null;
 
   private pendingWorkflowRequests = new Map<
     string,
@@ -128,6 +130,7 @@ export class McpServerManager {
 
   async stop(): Promise<void> {
     this.writtenConfigs.clear();
+    this.currentProvider = null;
 
     if (this.httpServer) {
       const server = this.httpServer;
@@ -173,6 +176,14 @@ export class McpServerManager {
     for (const t of targets) {
       this.writtenConfigs.add(t);
     }
+  }
+
+  setCurrentProvider(provider: AiEditingProvider | null): void {
+    this.currentProvider = provider;
+  }
+
+  getCurrentProvider(): AiEditingProvider | null {
+    return this.currentProvider;
   }
 
   // Webview lifecycle

@@ -1273,6 +1273,9 @@ export function registerOpenEditorCommand(
                 }
                 const serverUrl = `http://127.0.0.1:${serverPort}/mcp`;
 
+                // 1.5. Track provider for schema variant selection
+                launchManager.setCurrentProvider(launchPayload.provider);
+
                 // 2. Write config for this provider if not yet written
                 const requiredTargets = getConfigTargetsForProvider(launchPayload.provider);
                 const alreadyWritten = launchManager.getWrittenConfigs();
