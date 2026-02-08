@@ -69,7 +69,7 @@ export class McpServerManager {
           // McpServer.connect() can only be called once per instance,
           // so we must create a fresh instance for each request.
           mcpServer = new McpServer({
-            name: 'cc-wf-studio',
+            name: 'cc-workflow-studio',
             version: '1.0.0',
           });
           registerMcpTools(mcpServer, this);

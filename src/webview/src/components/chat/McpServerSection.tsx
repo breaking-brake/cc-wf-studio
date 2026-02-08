@@ -1,30 +1,34 @@
 /**
  * MCP Server Section Component
  *
- * Collapsible section in the RefinementChatPanel for managing
+ * Always-visible section in the RefinementChatPanel for managing
  * the built-in MCP server that external AI agents can connect to.
  *
  * Features:
  * - Start/Stop toggle
  * - Port status display
  * - Config target checkboxes (Claude Code, Roo Code, Copilot, Codex)
+ * - AI Edit buttons per provider (launch AI editing skill via MCP)
  * - State persisted to localStorage
  */
 
-import type { McpConfigTarget, McpServerStatusPayload } from '@shared/types/messages';
-import { ChevronDown, ChevronRight, Plug } from 'lucide-react';
+import type {
+  AiEditingProvider,
+  McpConfigTarget,
+  McpServerStatusPayload,
+} from '@shared/types/messages';
+import { ExternalLink, Play, Plug } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { vscode } from '../../main';
+import { openExternalUrl, runAiEditingSkill } from '../../services/vscode-bridge';
 
 const STORAGE_KEY = 'cc-wf-studio.mcpServer';
 
 interface McpServerState {
-  isCollapsed: boolean;
   configTargets: Record<McpConfigTarget, boolean>;
 }
 
 const DEFAULT_STATE: McpServerState = {
-  isCollapsed: false,
   configTargets: {
     'claude-code': true,
     'roo-code': true,
@@ -39,6 +43,21 @@ const CONFIG_LABELS: Record<McpConfigTarget, string> = {
   copilot: 'Copilot (.vscode/mcp.json)',
   codex: 'Codex (~/.codex/config.toml)',
 };
+
+interface AiEditButton {
+  provider: AiEditingProvider;
+  label: string;
+  /** Which configTarget controls visibility (null = always visible) */
+  configKey: McpConfigTarget | null;
+}
+
+const AI_EDIT_BUTTONS: AiEditButton[] = [
+  { provider: 'claude-code', label: 'Claude Code', configKey: null },
+  { provider: 'copilot-cli', label: 'Copilot CLI', configKey: 'copilot' },
+  { provider: 'copilot-vscode', label: 'VSCode Copilot', configKey: 'copilot' },
+  { provider: 'codex', label: 'Codex CLI', configKey: 'codex' },
+  { provider: 'roo-code', label: 'Roo Code', configKey: 'roo-code' },
+];
 
 function loadState(): McpServerState {
   try {
@@ -65,6 +84,7 @@ export function McpServerSection() {
   const [isRunning, setIsRunning] = useState(false);
   const [port, setPort] = useState<number | null>(null);
   const [isStarting, setIsStarting] = useState(false);
+  const [launchingProvider, setLaunchingProvider] = useState<AiEditingProvider | null>(null);
 
   // Listen for MCP server status updates
   useEffect(() => {
@@ -100,10 +120,6 @@ export function McpServerSection() {
     saveState(state);
   }, [state]);
 
-  const toggleCollapse = useCallback(() => {
-    setState((prev) => ({ ...prev, isCollapsed: !prev.isCollapsed }));
-  }, []);
-
   const toggleConfigTarget = useCallback((target: McpConfigTarget) => {
     setState((prev) => ({
       ...prev,
@@ -131,7 +147,30 @@ export function McpServerSection() {
     }
   }, [isRunning, state.configTargets]);
 
-  const ChevronIcon = state.isCollapsed ? ChevronRight : ChevronDown;
+  const handleAiEdit = useCallback(
+    async (provider: AiEditingProvider) => {
+      if (launchingProvider) return;
+      setLaunchingProvider(provider);
+      try {
+        await runAiEditingSkill(provider);
+      } catch {
+        // Error is handled by the extension host
+      } finally {
+        setLaunchingProvider(null);
+      }
+    },
+    [launchingProvider]
+  );
+
+  const isButtonVisible = useCallback(
+    (button: AiEditButton): boolean => {
+      if (button.configKey === null) return true;
+      return state.configTargets[button.configKey] ?? false;
+    },
+    [state.configTargets]
+  );
+
+  const visibleButtons = AI_EDIT_BUTTONS.filter(isButtonVisible);
 
   return (
     <div
@@ -140,18 +179,13 @@ export function McpServerSection() {
       }}
     >
       {/* Header */}
-      <button
-        type="button"
-        onClick={toggleCollapse}
+      <div
         style={{
           width: '100%',
           padding: '8px 16px',
           display: 'flex',
           alignItems: 'center',
           gap: '6px',
-          backgroundColor: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
           color: 'var(--vscode-foreground)',
           fontSize: '11px',
           fontWeight: 600,
@@ -159,16 +193,30 @@ export function McpServerSection() {
           letterSpacing: '0.5px',
           opacity: 0.8,
         }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.opacity = '1';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.opacity = '0.8';
-        }}
       >
-        <ChevronIcon size={12} />
         <Plug size={12} />
         <span>MCP Server</span>
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={() =>
+            openExternalUrl('https://github.com/breaking-brake/cc-wf-studio#edit-with-ai')
+          }
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              openExternalUrl('https://github.com/breaking-brake/cc-wf-studio#edit-with-ai');
+            }
+          }}
+          style={{
+            display: 'inline-flex',
+            cursor: 'pointer',
+            color: 'var(--vscode-textLink-foreground)',
+            opacity: 1,
+          }}
+          title="Open documentation"
+        >
+          <ExternalLink size={11} />
+        </span>
         {isRunning && (
           <span
             style={{
@@ -181,87 +229,132 @@ export function McpServerSection() {
             }}
           />
         )}
-      </button>
+      </div>
 
-      {/* Collapsible Content */}
-      {!state.isCollapsed && (
-        <div style={{ padding: '4px 16px 12px' }}>
-          {/* Start/Stop Button + Status */}
-          <div
+      {/* Content */}
+      <div style={{ padding: '4px 16px 12px' }}>
+        {/* Start/Stop Button + Status */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '8px',
+          }}
+        >
+          <button
+            type="button"
+            onClick={handleStartStop}
+            disabled={isStarting}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '8px',
+              padding: '4px 12px',
+              fontSize: '11px',
+              backgroundColor: isRunning
+                ? 'var(--vscode-button-secondaryBackground)'
+                : 'var(--vscode-button-background)',
+              color: isRunning
+                ? 'var(--vscode-button-secondaryForeground)'
+                : 'var(--vscode-button-foreground)',
+              border: 'none',
+              borderRadius: '3px',
+              cursor: isStarting ? 'wait' : 'pointer',
+              opacity: isStarting ? 0.6 : 1,
             }}
           >
-            <button
-              type="button"
-              onClick={handleStartStop}
-              disabled={isStarting}
-              style={{
-                padding: '4px 12px',
-                fontSize: '11px',
-                backgroundColor: isRunning
-                  ? 'var(--vscode-button-secondaryBackground)'
-                  : 'var(--vscode-button-background)',
-                color: isRunning
-                  ? 'var(--vscode-button-secondaryForeground)'
-                  : 'var(--vscode-button-foreground)',
-                border: 'none',
-                borderRadius: '3px',
-                cursor: isStarting ? 'wait' : 'pointer',
-                opacity: isStarting ? 0.6 : 1,
-              }}
-            >
-              {isStarting ? 'Starting...' : isRunning ? 'Stop' : 'Start'}
-            </button>
-            <span
-              style={{
-                fontSize: '11px',
-                color: 'var(--vscode-descriptionForeground)',
-              }}
-            >
-              {isRunning && port ? `Port ${port}` : 'Stopped'}
-            </span>
-          </div>
-
-          {/* Config targets */}
-          <div
+            {isStarting ? 'Starting...' : isRunning ? 'Stop' : 'Start'}
+          </button>
+          <span
             style={{
               fontSize: '11px',
               color: 'var(--vscode-descriptionForeground)',
-              marginBottom: '4px',
             }}
           >
-            Config:
-          </div>
-          {(Object.keys(CONFIG_LABELS) as McpConfigTarget[]).map((target) => (
-            <label
-              key={target}
+            {isRunning && port ? `Port ${port}` : 'Stopped'}
+          </span>
+        </div>
+
+        {/* Config targets */}
+        <div
+          style={{
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+            marginBottom: '4px',
+          }}
+        >
+          Config:
+        </div>
+        {(Object.keys(CONFIG_LABELS) as McpConfigTarget[]).map((target) => (
+          <label
+            key={target}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '2px 0',
+              fontSize: '11px',
+              color: 'var(--vscode-foreground)',
+              cursor: isRunning ? 'not-allowed' : 'pointer',
+              opacity: isRunning ? 0.6 : 1,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={state.configTargets[target]}
+              onChange={() => toggleConfigTarget(target)}
+              disabled={isRunning}
+              style={{ margin: 0 }}
+            />
+            {CONFIG_LABELS[target]}
+          </label>
+        ))}
+
+        {/* AI Edit Buttons */}
+        {isRunning && visibleButtons.length > 0 && (
+          <div style={{ marginTop: '8px' }}>
+            <div
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '2px 0',
                 fontSize: '11px',
-                color: 'var(--vscode-foreground)',
-                cursor: isRunning ? 'not-allowed' : 'pointer',
-                opacity: isRunning ? 0.6 : 1,
+                color: 'var(--vscode-descriptionForeground)',
+                marginBottom: '4px',
               }}
             >
-              <input
-                type="checkbox"
-                checked={state.configTargets[target]}
-                onChange={() => toggleConfigTarget(target)}
-                disabled={isRunning}
-                style={{ margin: 0 }}
-              />
-              {CONFIG_LABELS[target]}
-            </label>
-          ))}
-        </div>
-      )}
+              AI Edit:
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '4px',
+              }}
+            >
+              {visibleButtons.map((button) => (
+                <button
+                  key={button.provider}
+                  type="button"
+                  onClick={() => handleAiEdit(button.provider)}
+                  disabled={launchingProvider !== null}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '3px 8px',
+                    fontSize: '11px',
+                    backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                    color: 'var(--vscode-button-secondaryForeground)',
+                    border: 'none',
+                    borderRadius: '3px',
+                    cursor: launchingProvider !== null ? 'wait' : 'pointer',
+                    opacity: launchingProvider !== null ? 0.6 : 1,
+                  }}
+                >
+                  <Play size={10} />
+                  {launchingProvider === button.provider ? 'Launching...' : button.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

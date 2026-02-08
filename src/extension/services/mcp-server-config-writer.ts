@@ -18,7 +18,7 @@ import * as TOML from 'smol-toml';
 import type { McpConfigTarget } from '../../shared/types/messages';
 import { log } from '../extension';
 
-const SERVER_ENTRY_NAME = 'cc-wf-studio';
+const SERVER_ENTRY_NAME = 'cc-workflow-studio';
 
 interface JsonMcpConfig {
   mcpServers?: Record<string, { url?: string; [key: string]: unknown }>;

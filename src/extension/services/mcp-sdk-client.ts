@@ -47,7 +47,7 @@ export async function connectToMcpServer(
 
   const client = new Client(
     {
-      name: 'cc-wf-studio',
+      name: 'cc-workflow-studio',
       version: '1.0.0',
     },
     {

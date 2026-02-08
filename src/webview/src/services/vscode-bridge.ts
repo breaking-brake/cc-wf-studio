@@ -6,6 +6,7 @@
  */
 
 import type {
+  AiEditingProvider,
   EditorContentUpdatedPayload,
   ExportForCodexCliPayload,
   ExportForCodexCliSuccessPayload,
@@ -701,5 +702,48 @@ export function openExternalUrl(url: string): void {
   vscode.postMessage({
     type: 'OPEN_EXTERNAL_URL',
     payload: { url },
+  });
+}
+
+/**
+ * Run AI editing skill with specified provider
+ *
+ * Generates a skill template and launches the provider to run it.
+ * The AI agent will use MCP tools to interact with the workflow canvas.
+ *
+ * @param provider - AI editing provider to use
+ * @returns Promise that resolves when skill is launched
+ */
+export function runAiEditingSkill(provider: AiEditingProvider): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'RUN_AI_EDITING_SKILL_SUCCESS') {
+          resolve();
+        } else if (message.type === 'RUN_AI_EDITING_SKILL_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to run AI editing skill'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    vscode.postMessage({
+      type: 'RUN_AI_EDITING_SKILL',
+      requestId,
+      payload: { provider },
+    });
+
+    // Timeout after 15 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 15000);
   });
 }

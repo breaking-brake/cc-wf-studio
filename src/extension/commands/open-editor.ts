@@ -7,14 +7,17 @@
 
 import * as vscode from 'vscode';
 import type {
+  AiEditingProvider,
   ApplyWorkflowFromMcpResponsePayload,
   GetCurrentWorkflowResponsePayload,
   McpConfigTarget,
+  RunAiEditingSkillPayload,
   StartMcpServerPayload,
   WebviewMessage,
 } from '../../shared/types/messages';
 import { getMcpServerManager, log } from '../extension';
 import { translate } from '../i18n/i18n-service';
+import { generateAndRunAiEditingSkill } from '../services/ai-editing-skill-service';
 import { cancelGeneration } from '../services/claude-code-service';
 import { FileService } from '../services/file-service';
 import { removeAllAgentConfigs, writeAllAgentConfigs } from '../services/mcp-server-config-writer';
@@ -1202,6 +1205,43 @@ export function registerOpenEditorCommand(
                 type: 'MCP_SERVER_STATUS',
                 payload: { running, port: statusPort, configsWritten: [] },
               });
+              break;
+            }
+
+            case 'RUN_AI_EDITING_SKILL': {
+              // Run AI editing skill with specified provider
+              const aiEditPayload = message.payload as RunAiEditingSkillPayload | undefined;
+              if (aiEditPayload?.provider) {
+                try {
+                  const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+                  if (!workspacePath) {
+                    throw new Error('No workspace folder is open');
+                  }
+                  await generateAndRunAiEditingSkill(
+                    aiEditPayload.provider as AiEditingProvider,
+                    context.extensionPath,
+                    workspacePath
+                  );
+                  webview.postMessage({
+                    type: 'RUN_AI_EDITING_SKILL_SUCCESS',
+                    requestId: message.requestId,
+                    payload: {
+                      provider: aiEditPayload.provider,
+                      timestamp: new Date().toISOString(),
+                    },
+                  });
+                } catch (error) {
+                  webview.postMessage({
+                    type: 'RUN_AI_EDITING_SKILL_FAILED',
+                    requestId: message.requestId,
+                    payload: {
+                      errorMessage:
+                        error instanceof Error ? error.message : 'Failed to run AI editing skill',
+                      timestamp: new Date().toISOString(),
+                    },
+                  });
+                }
+              }
               break;
             }
 

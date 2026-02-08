@@ -798,7 +798,9 @@ export type ExtensionMessage =
   | Message<RooCodeOperationFailedPayload, 'RUN_FOR_ROO_CODE_FAILED'>
   | Message<GetCurrentWorkflowRequestPayload, 'GET_CURRENT_WORKFLOW_REQUEST'>
   | Message<ApplyWorkflowFromMcpPayload, 'APPLY_WORKFLOW_FROM_MCP'>
-  | Message<McpServerStatusPayload, 'MCP_SERVER_STATUS'>;
+  | Message<McpServerStatusPayload, 'MCP_SERVER_STATUS'>
+  | Message<RunAiEditingSkillSuccessPayload, 'RUN_AI_EDITING_SKILL_SUCCESS'>
+  | Message<RunAiEditingSkillFailedPayload, 'RUN_AI_EDITING_SKILL_FAILED'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -1409,6 +1411,48 @@ export interface RooCodeOperationFailedPayload {
 }
 
 // ============================================================================
+// AI Editing Skill Payloads (MCP-based AI editing)
+// ============================================================================
+
+/**
+ * AI editing provider selection
+ */
+export type AiEditingProvider =
+  | 'claude-code'
+  | 'copilot-cli'
+  | 'copilot-vscode'
+  | 'codex'
+  | 'roo-code';
+
+/**
+ * Run AI editing skill request payload (Webview → Extension)
+ */
+export interface RunAiEditingSkillPayload {
+  /** Provider to use */
+  provider: AiEditingProvider;
+}
+
+/**
+ * Run AI editing skill success payload (Extension → Webview)
+ */
+export interface RunAiEditingSkillSuccessPayload {
+  /** Provider that was launched */
+  provider: AiEditingProvider;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Run AI editing skill failed payload (Extension → Webview)
+ */
+export interface RunAiEditingSkillFailedPayload {
+  /** Error message */
+  errorMessage: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+// ============================================================================
 // MCP Server Management Payloads (Built-in MCP Server)
 // ============================================================================
 
@@ -1593,7 +1637,8 @@ export type WebviewMessage =
   | Message<ApplyWorkflowFromMcpResponsePayload, 'APPLY_WORKFLOW_FROM_MCP_RESPONSE'>
   | Message<StartMcpServerPayload, 'START_MCP_SERVER'>
   | Message<void, 'STOP_MCP_SERVER'>
-  | Message<void, 'GET_MCP_SERVER_STATUS'>;
+  | Message<void, 'GET_MCP_SERVER_STATUS'>
+  | Message<RunAiEditingSkillPayload, 'RUN_AI_EDITING_SKILL'>;
 
 // ============================================================================
 // Error Codes

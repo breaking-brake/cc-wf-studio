@@ -109,6 +109,7 @@
 ### Edit with AI
 
 - Click Edit with AI <img src="./resources/icon-sparkles.png" alt="sparkles" height="16" style="vertical-align: middle"> button in the toolbar to generate or refine workflows with natural language
+- **MCP Server**: Start the built-in MCP server from the Edit with AI panel to enable external AI agents (Claude Code, Copilot, Codex, Roo Code) to edit workflows collaboratively. Select config targets, then launch AI editing directly from the panel.
 
 ## Usage Examples
 
