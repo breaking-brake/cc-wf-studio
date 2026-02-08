@@ -24,7 +24,7 @@ interface McpServerState {
 }
 
 const DEFAULT_STATE: McpServerState = {
-  isCollapsed: true,
+  isCollapsed: false,
   configTargets: {
     'claude-code': true,
     'roo-code': true,

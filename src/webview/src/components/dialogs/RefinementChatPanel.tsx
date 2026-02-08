@@ -11,8 +11,8 @@
  * Updated: SubAgentFlow support - Unified panel for both workflow types
  */
 
-import { PanelRightClose } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { ChevronDown, ChevronRight, PanelRightClose } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ResponsiveFontProvider } from '../../contexts/ResponsiveFontContext';
 import { useResizablePanel } from '../../hooks/useResizablePanel';
 import { useResponsiveFontSizes } from '../../hooks/useResponsiveFontSizes';
@@ -615,9 +615,37 @@ export function RefinementChatPanel({
     setIsConfirmClearOpen(false);
   };
 
+  // Legacy AI Edit accordion state (workflow mode only)
+  const LEGACY_STORAGE_KEY = 'cc-wf-studio.legacyAiEdit';
+  const [isLegacyCollapsed, setIsLegacyCollapsed] = useState(() => {
+    try {
+      const stored = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (stored !== null) {
+        return JSON.parse(stored) as boolean;
+      }
+    } catch {
+      // Ignore
+    }
+    return true; // Default: collapsed
+  });
+
+  const toggleLegacyCollapse = useCallback(() => {
+    setIsLegacyCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        // Ignore
+      }
+      return next;
+    });
+  }, []);
+
   // Determine panel title based on mode
   const panelTitle =
     mode === 'subAgentFlow' ? t('subAgentFlow.aiEdit.title') : t('refinement.title');
+
+  const LegacyChevronIcon = isLegacyCollapsed ? ChevronRight : ChevronDown;
 
   return (
     <div
@@ -665,10 +693,12 @@ export function RefinementChatPanel({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <SettingsDropdown
-              onClearHistoryClick={handleClearHistoryClick}
-              hasMessages={conversationHistory ? conversationHistory.messages.length > 0 : false}
-            />
+            {mode === 'subAgentFlow' && (
+              <SettingsDropdown
+                onClearHistoryClick={handleClearHistoryClick}
+                hasMessages={conversationHistory ? conversationHistory.messages.length > 0 : false}
+              />
+            )}
 
             <button
               type="button"
@@ -705,26 +735,124 @@ export function RefinementChatPanel({
           </div>
         </div>
 
-        {/* MCP Server Section - Collapsible */}
-        {mode === 'workflow' && <McpServerSection />}
+        {mode === 'workflow' ? (
+          <>
+            {/* MCP Server Section - Collapsible, default open */}
+            <McpServerSection />
 
-        {/* Warning Banner - Show when 20+ iterations */}
-        {shouldShowWarning() && <WarningBanner />}
+            {/* Legacy AI Edit Section - Accordion, default closed */}
+            <div
+              style={{
+                borderBottom: '1px solid var(--vscode-panel-border)',
+              }}
+            >
+              {/* Legacy Accordion Header */}
+              <button
+                type="button"
+                onClick={toggleLegacyCollapse}
+                style={{
+                  width: '100%',
+                  padding: '8px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--vscode-foreground)',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  opacity: 0.8,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '0.8';
+                }}
+              >
+                <LegacyChevronIcon size={12} />
+                <span>AI Edit (Built-in)</span>
+                <span
+                  style={{
+                    fontSize: '9px',
+                    padding: '1px 4px',
+                    borderRadius: '3px',
+                    backgroundColor: 'var(--vscode-badge-background)',
+                    color: 'var(--vscode-badge-foreground)',
+                    fontWeight: 500,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.3px',
+                  }}
+                >
+                  Legacy
+                </span>
+              </button>
 
-        {/* Message List (controlled mode - pass conversation history from chatState) */}
-        <MessageList onRetry={handleRetry} conversationHistory={conversationHistory} />
+              {/* Legacy Accordion Content */}
+              {!isLegacyCollapsed && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    maxHeight: '400px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {/* Settings button inside legacy section */}
+                  <div style={{ padding: '4px 16px 0' }}>
+                    <SettingsDropdown
+                      onClearHistoryClick={handleClearHistoryClick}
+                      hasMessages={
+                        conversationHistory ? conversationHistory.messages.length > 0 : false
+                      }
+                    />
+                  </div>
 
-        {/* Input (controlled mode - pass input state from chatState) */}
-        <MessageInput
-          onSend={handleSend}
-          inputState={{
-            currentInput: chatState.currentInput,
-            setInput: chatState.setInput,
-            isProcessing,
-            currentRequestId: chatState.currentRequestId,
-            canSend: chatState.canSend,
-          }}
-        />
+                  {/* Warning Banner */}
+                  {shouldShowWarning() && <WarningBanner />}
+
+                  {/* Message List with fixed height and scroll */}
+                  <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+                    <MessageList onRetry={handleRetry} conversationHistory={conversationHistory} />
+                  </div>
+
+                  {/* Message Input */}
+                  <MessageInput
+                    onSend={handleSend}
+                    inputState={{
+                      currentInput: chatState.currentInput,
+                      setInput: chatState.setInput,
+                      isProcessing,
+                      currentRequestId: chatState.currentRequestId,
+                      canSend: chatState.canSend,
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* subAgentFlow: conventional full layout */}
+            {shouldShowWarning() && <WarningBanner />}
+
+            <MessageList onRetry={handleRetry} conversationHistory={conversationHistory} />
+
+            <MessageInput
+              onSend={handleSend}
+              inputState={{
+                currentInput: chatState.currentInput,
+                setInput: chatState.setInput,
+                isProcessing,
+                currentRequestId: chatState.currentRequestId,
+                canSend: chatState.canSend,
+              }}
+            />
+          </>
+        )}
 
         {/* Clear Confirmation Dialog */}
         <ConfirmDialog
