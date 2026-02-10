@@ -18,7 +18,7 @@ import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
 import type { McpServerManager } from './mcp-server-service';
 import {
   getDefaultSchemaPath,
-  loadWorkflowSchema,
+  loadWorkflowSchemaToon,
   type SchemaVariant,
 } from './schema-loader-service';
 
@@ -84,7 +84,7 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
   // Tool 2: get_workflow_schema
   server.tool(
     'get_workflow_schema',
-    'Get the workflow JSON schema documentation. Use this to understand the valid structure for creating or modifying workflows.',
+    'Get the workflow schema documentation in optimized TOON format. Use this to understand the valid structure for creating or modifying workflows.',
     {},
     async () => {
       try {
@@ -106,9 +106,9 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
 
         const variant = getSchemaVariantForProvider(manager.getCurrentProvider());
         const schemaPath = getDefaultSchemaPath(extensionPath, variant);
-        const result = await loadWorkflowSchema(schemaPath, variant);
+        const result = await loadWorkflowSchemaToon(schemaPath, variant);
 
-        if (!result.success || !result.schema) {
+        if (!result.success || !result.schemaString) {
           return {
             content: [
               {
@@ -127,10 +127,7 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
           content: [
             {
               type: 'text' as const,
-              text: JSON.stringify({
-                success: true,
-                schema: result.schema,
-              }),
+              text: result.schemaString,
             },
           ],
         };
