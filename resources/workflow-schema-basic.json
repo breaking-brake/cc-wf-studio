@@ -467,20 +467,272 @@
       "outputPorts": 1
     }
   },
-  "connectionRules": {
-    "forbidden": [
-      "Start node cannot have input connections",
-      "End node cannot have output connections",
-      "No cycles allowed",
-      "No self-connections",
-      "One connection per output port"
-    ],
-    "required": [
-      "Exactly one Start node per workflow",
-      "At least one End node per workflow",
-      "All non-Start nodes must have input connection",
-      "All non-End nodes must have output connection"
-    ]
+  "connections": {
+    "description": "Comprehensive specification for workflow connections. Defines connection object structure, port naming conventions, and completeness rules for AI-generated workflows.",
+    "overview": {
+      "description": "High-level connection constraints that apply to all workflows",
+      "forbidden": [
+        "Start node cannot have input connections",
+        "End node cannot have output connections",
+        "No cycles allowed",
+        "No self-connections",
+        "One connection per output port"
+      ],
+      "required": [
+        "Exactly one Start node per workflow",
+        "At least one End node per workflow",
+        "All non-Start nodes must have input connection",
+        "All non-End nodes must have output connection"
+      ]
+    },
+    "format": {
+      "description": "Connection object structure in connections array",
+      "objectStructure": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "example": "c1",
+          "description": "Unique connection identifier. Must be unique across all connections in the workflow."
+        },
+        "from": {
+          "type": "string",
+          "required": true,
+          "example": "start-1",
+          "description": "Source node ID. Must reference an existing node in the nodes array."
+        },
+        "to": {
+          "type": "string",
+          "required": true,
+          "example": "prompt-1",
+          "description": "Target node ID. Must reference an existing node in the nodes array."
+        },
+        "fromPort": {
+          "type": "string",
+          "required": true,
+          "description": "Source port identifier. See portNamingRules for complete mapping by node type. Examples: 'output', 'branch-0', 'branch-1'"
+        },
+        "toPort": {
+          "type": "string",
+          "required": true,
+          "enum": [
+            "input"
+          ],
+          "description": "Target port is always 'input'. Every node has exactly one input port."
+        },
+        "condition": {
+          "type": "string",
+          "required": false,
+          "example": "User selected Option A",
+          "description": "Optional condition description for documenting branch semantics."
+        }
+      }
+    },
+    "portNamingRules": {
+      "description": "Port identifier conventions for each node type. Linear nodes: single output. Conditional nodes: multiple outputs (one per branch).",
+      "linearNodes": {
+        "types": [
+          "start",
+          "end",
+          "prompt",
+          "skill",
+          "mcp",
+          "codex"
+        ],
+        "inputPortId": "input",
+        "outputPortId": "output",
+        "connectionExample": {
+          "id": "c1",
+          "from": "start-1",
+          "to": "prompt-1",
+          "fromPort": "output",
+          "toPort": "input"
+        }
+      },
+      "ifElseNode": {
+        "type": "ifElse",
+        "inputPortId": "input",
+        "outputPortIds": [
+          "branch-0",
+          "branch-1"
+        ],
+        "semantics": "branch-0 = true/if condition, branch-1 = false/else condition",
+        "constraint": "BOTH branch-0 and branch-1 MUST each have exactly one outgoing connection",
+        "connectionExample": {
+          "id": "c2",
+          "from": "ifelse-1",
+          "to": "prompt-true",
+          "fromPort": "branch-0",
+          "toPort": "input"
+        }
+      },
+      "switchNode": {
+        "type": "switch",
+        "inputPortId": "input",
+        "outputPortIds": "branch-0, branch-1, ..., branch-N (where N = branchesLength - 1)",
+        "constraint": "ALL branches (branch-0 through branch-N) MUST each have exactly one outgoing connection",
+        "note": "Last branch is typically the 'default' case",
+        "connectionExample": {
+          "id": "c3",
+          "from": "switch-1",
+          "to": "handler-case-1",
+          "fromPort": "branch-1",
+          "toPort": "input"
+        }
+      },
+      "askUserQuestionNode": {
+        "type": "askUserQuestion",
+        "inputPortId": "input",
+        "outputPortIds": "DYNAMIC - depends on configuration",
+        "modes": {
+          "mode_aiSuggestions": {
+            "condition": "useAiSuggestions: true",
+            "outputPortId": "output",
+            "description": "AI generates options at runtime. Single output port 'output' used."
+          },
+          "mode_multiSelect": {
+            "condition": "multiSelect: true",
+            "outputPortId": "output",
+            "description": "Multi-select enabled. Single output port 'output' used."
+          },
+          "mode_singleSelect": {
+            "condition": "useAiSuggestions: false AND multiSelect: false",
+            "outputPortIds": "branch-0, branch-1, ..., branch-N (where N = optionsLength - 1)",
+            "constraint": "ALL branches (branch-0 through branch-N) MUST each have exactly one outgoing connection",
+            "description": "Single-select with user-defined options. One port per option."
+          }
+        },
+        "connectionExample": {
+          "id": "c4",
+          "from": "ask-1",
+          "to": "handler-option-a",
+          "fromPort": "branch-0",
+          "toPort": "input"
+        }
+      }
+    },
+    "completenessRules": {
+      "description": "Completeness specification for workflow connections. Distinguishes between AI generation guidelines (what AI should produce) and export validation rules (what must be true at export/execution time). Manual canvas editing allows incomplete states - validation only occurs at export.",
+      "aiGenerationRules": {
+        "description": "Guidelines for AI-generated and AI-refined workflows. The AI system should ensure these rules are satisfied when generating/refining workflows. These guarantee that generated workflows are complete and ready to export.",
+        "rules": [
+          {
+            "id": "START_OUTPUT",
+            "rule": "Every Start node's 'output' port MUST have exactly one outgoing connection",
+            "aiGuidance": "When generating/adding a Start node, immediately create a connection from its 'output' port to the next node"
+          },
+          {
+            "id": "NON_END_OUTPUT",
+            "rule": "Every non-End node's output port(s) MUST have exactly one outgoing connection per port",
+            "example": "IfElse node with branch-0 and branch-1 requires both branches to be connected"
+          },
+          {
+            "id": "NON_START_INPUT",
+            "rule": "Every non-Start node's 'input' port MUST have exactly one incoming connection",
+            "aiGuidance": "When creating or moving a node, ensure it receives an input connection from a predecessor"
+          },
+          {
+            "id": "END_INPUT",
+            "rule": "Every End node's 'input' port can have one OR MORE incoming connections (merge point allowed)",
+            "example": "Multiple upstream paths can converge to a single End node"
+          },
+          {
+            "id": "IFELSE_BOTH_BRANCHES",
+            "rule": "IfElse node: BOTH branch-0 and branch-1 MUST have outgoing connections",
+            "aiGuidance": "Create both connections before moving to next node"
+          },
+          {
+            "id": "SWITCH_ALL_BRANCHES",
+            "rule": "Switch node: ALL branch ports (branch-0 through branch-N) MUST have outgoing connections",
+            "aiGuidance": "Count branches, create N connections (one per branch)"
+          },
+          {
+            "id": "ASKUSERQUESTION_ALL_OPTIONS",
+            "rule": "AskUserQuestion (single-select): ALL branch ports (branch-0 through branch-N) MUST have outgoing connections",
+            "aiGuidance": "For single-select with N options, create N connections"
+          },
+          {
+            "id": "NODE_ADDITION",
+            "rule": "When adding a new node, immediately add an input connection to it (except Start)",
+            "aiGuidance": "Never leave nodes disconnected. Node creation must be paired with connection creation."
+          },
+          {
+            "id": "NODE_REMOVAL",
+            "rule": "When removing a node, remove ALL connections associated with that node",
+            "aiGuidance": "Before deleting a node, remove all edges where node is source or target"
+          },
+          {
+            "id": "NODE_ID_VALIDITY",
+            "rule": "Node IDs referenced in connections must exist in nodes array",
+            "validation": "For each connection: verify 'from' node exists, verify 'to' node exists"
+          }
+        ]
+      },
+      "exportValidationRules": {
+        "description": "Mandatory validation rules checked when exporting or executing a workflow. These rules apply to both manually-edited and AI-generated workflows. Workflows must pass these validations before execution.",
+        "rules": [
+          {
+            "id": "EXACTLY_ONE_START",
+            "rule": "Workflow MUST have exactly one Start node",
+            "failureMessage": "Workflow must have exactly one Start node"
+          },
+          {
+            "id": "AT_LEAST_ONE_END",
+            "rule": "Workflow MUST have at least one End node",
+            "failureMessage": "Workflow must have at least one End node"
+          },
+          {
+            "id": "START_OUTPUT_CONNECTED",
+            "rule": "Start node's 'output' port MUST be connected",
+            "failureMessage": "Start node output must be connected to downstream node"
+          },
+          {
+            "id": "END_INPUT_CONNECTED",
+            "rule": "At least one End node's 'input' port MUST be connected",
+            "failureMessage": "At least one End node must have incoming connection"
+          },
+          {
+            "id": "ALL_NODES_REACHABLE",
+            "rule": "All nodes MUST be reachable from Start node",
+            "failureMessage": "Unreachable nodes found - ensure all nodes form a connected path from Start"
+          },
+          {
+            "id": "ALL_PATHS_LEAD_TO_END",
+            "rule": "All execution paths MUST lead to at least one End node",
+            "failureMessage": "Dead-end paths found - ensure all branches converge to an End node"
+          },
+          {
+            "id": "NO_CYCLES",
+            "rule": "Workflow MUST NOT contain cycles",
+            "failureMessage": "Circular reference detected - workflows must be acyclic (DAG)"
+          },
+          {
+            "id": "NODE_ID_REFERENCES_VALID",
+            "rule": "All node IDs in connections must reference existing nodes",
+            "failureMessage": "Connection references non-existent node"
+          },
+          {
+            "id": "CONDITIONAL_BRANCHES_CONNECTED",
+            "rule": "All conditional node branches (IfElse, Switch, AskUserQuestion single-select) MUST have outgoing connections",
+            "failureMessage": "Conditional node has disconnected branch"
+          }
+        ]
+      },
+      "postGenerationChecklist": {
+        "description": "Quick checklist for verifying AI-generated workflows before returning to user",
+        "items": [
+          "✓ Exactly 1 Start node with output connected",
+          "✓ At least 1 End node with input(s) connected",
+          "✓ All non-Start nodes have input connected",
+          "✓ All non-End nodes have output(s) connected",
+          "✓ IfElse nodes: both branches connected",
+          "✓ Switch nodes: all branches connected",
+          "✓ AskUserQuestion nodes (single-select): all options connected",
+          "✓ No dangling nodes",
+          "✓ No circular references",
+          "✓ All node IDs in connections exist in nodes array"
+        ]
+      }
+    }
   },
   "validationRules": {
     "workflow": {
@@ -524,7 +776,8 @@
       },
       "connections": {
         "type": "array",
-        "required": true
+        "required": true,
+        "description": "Array of connections between workflow nodes. Each connection defines a directed edge from one node's output port to another node's input port. See 'connections' section for detailed specifications: format, portNamingRules, and completenessRules."
       },
       "createdAt": {
         "type": "string",

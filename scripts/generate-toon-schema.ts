@@ -51,7 +51,21 @@ function createBasicSchema(fullSchema: Record<string, unknown>): Record<string, 
     }
   }
 
-  // 5. Remove examples that use subAgent nodes
+  // 5. Remove subAgent and subAgentFlow from connections.portNamingRules.linearNodes.types
+  const connections = schema.connections as Record<string, unknown> | undefined;
+  if (connections) {
+    const portNamingRules = connections.portNamingRules as Record<string, unknown> | undefined;
+    if (portNamingRules) {
+      const linearNodes = portNamingRules.linearNodes as Record<string, unknown> | undefined;
+      if (linearNodes?.types && Array.isArray(linearNodes.types)) {
+        linearNodes.types = linearNodes.types.filter(
+          (t: string) => t !== 'subAgent' && t !== 'subAgentFlow'
+        );
+      }
+    }
+  }
+
+  // 6. Remove examples that use subAgent nodes
   if (schema.examples && Array.isArray(schema.examples)) {
     schema.examples = schema.examples.filter((example: Record<string, unknown>) => {
       const workflow = example.workflow as Record<string, unknown> | undefined;
