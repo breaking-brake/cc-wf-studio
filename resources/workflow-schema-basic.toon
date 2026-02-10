@@ -141,7 +141,7 @@ nodeTypes:
     inputPorts: 1
     outputPorts: 2-10
   skill:
-    description: "Reference a Claude Code Skill (specialized agent capability defined in SKILL.md files). Use when user description matches a Skill's documented purpose. **Important: Skills always have exactly 1 output port. For conditional branching based on Skill results, add an ifElse or switch node after the Skill node.**"
+    description: "Reference a Claude Code Skill (specialized agent capability defined in SKILL.md files). ONLY use Skills that are available on the system - do NOT fabricate Skills. If no matching Skill exists, use a prompt or subAgent node instead. **Important: Skills always have exactly 1 output port. For conditional branching based on Skill results, add an ifElse or switch node after the Skill node.**"
     fields:
       name:
         type: string
@@ -497,6 +497,11 @@ workflowStructure:
     nodes:
       type: array
       required: true
+      nodePositionGuidelines:
+        description: "Each node must have a position: { x, y } in pixels. Follow these spacing rules for readable layouts."
+        horizontalSpacing: 300
+        verticalSpacing: 350
+        rules[4]: Place nodes left-to-right in execution order. Increment x by 300 for each step.,"For linear flows, keep all nodes at the same y value.","For conditional branches (ifElse, switch, askUserQuestion), fan out vertically: center the parent, offset children by ±175 (2 branches) or ±350/0 (3 branches).","After branches merge back, return to the parent's y value."
     connections:
       type: array
       required: true

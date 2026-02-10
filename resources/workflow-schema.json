@@ -142,7 +142,7 @@
       "outputPorts": "2-10"
     },
     "skill": {
-      "description": "Reference a Claude Code Skill (specialized agent capability defined in SKILL.md files). Use when user description matches a Skill's documented purpose. **Important: Skills always have exactly 1 output port. For conditional branching based on Skill results, add an ifElse or switch node after the Skill node.**",
+      "description": "Reference a Claude Code Skill (specialized agent capability defined in SKILL.md files). ONLY use Skills that are available on the system - do NOT fabricate Skills. If no matching Skill exists, use a prompt or subAgent node instead. **Important: Skills always have exactly 1 output port. For conditional branching based on Skill results, add an ifElse or switch node after the Skill node.**",
       "fields": {
         "name": {
           "type": "string",
@@ -378,14 +378,14 @@
                 "id": "sf-start",
                 "type": "start",
                 "name": "Start",
-                "position": { "x": 100, "y": 200 },
+                "position": { "x": 100, "y": 300 },
                 "data": { "label": "Start" }
               },
               {
                 "id": "sf-end",
                 "type": "end",
                 "name": "End",
-                "position": { "x": 400, "y": 200 },
+                "position": { "x": 400, "y": 300 },
                 "data": { "label": "End" }
               }
             ],
@@ -755,7 +755,21 @@
       },
       "description": { "type": "string", "required": false },
       "version": { "type": "string", "required": true, "pattern": "semver" },
-      "nodes": { "type": "array", "required": true },
+      "nodes": {
+        "type": "array",
+        "required": true,
+        "nodePositionGuidelines": {
+          "description": "Each node must have a position: { x, y } in pixels. Follow these spacing rules for readable layouts.",
+          "horizontalSpacing": 300,
+          "verticalSpacing": 350,
+          "rules": [
+            "Place nodes left-to-right in execution order. Increment x by 300 for each step.",
+            "For linear flows, keep all nodes at the same y value.",
+            "For conditional branches (ifElse, switch, askUserQuestion), fan out vertically: center the parent, offset children by ±175 (2 branches) or ±350/0 (3 branches).",
+            "After branches merge back, return to the parent's y value."
+          ]
+        }
+      },
       "connections": {
         "type": "array",
         "required": true,
@@ -802,14 +816,14 @@
             "id": "start-1",
             "type": "start",
             "name": "start-node",
-            "position": { "x": 100, "y": 200 },
+            "position": { "x": 100, "y": 300 },
             "data": { "label": "Start" }
           },
           {
             "id": "agent-1",
             "type": "subAgent",
             "name": "analyzer",
-            "position": { "x": 350, "y": 200 },
+            "position": { "x": 400, "y": 300 },
             "data": {
               "description": "Analyze data",
               "prompt": "Analyze data and generate insights.",
@@ -821,7 +835,7 @@
             "id": "end-1",
             "type": "end",
             "name": "end-node",
-            "position": { "x": 700, "y": 200 },
+            "position": { "x": 700, "y": 300 },
             "data": { "label": "End" }
           }
         ],
@@ -858,7 +872,7 @@
             "id": "scanner-1",
             "type": "subAgent",
             "name": "scanner",
-            "position": { "x": 350, "y": 300 },
+            "position": { "x": 400, "y": 300 },
             "data": {
               "description": "Scan code",
               "prompt": "Scan for bugs and issues.",
@@ -869,7 +883,7 @@
             "id": "ask-1",
             "type": "askUserQuestion",
             "name": "priority",
-            "position": { "x": 650, "y": 300 },
+            "position": { "x": 700, "y": 300 },
             "data": {
               "questionText": "Priority level?",
               "options": [
@@ -883,7 +897,7 @@
             "id": "fix-1",
             "type": "subAgent",
             "name": "critical-fixer",
-            "position": { "x": 950, "y": 150 },
+            "position": { "x": 1000, "y": 125 },
             "data": {
               "description": "Critical fixes",
               "prompt": "Generate critical fixes.",
@@ -894,7 +908,7 @@
             "id": "fix-2",
             "type": "subAgent",
             "name": "all-fixer",
-            "position": { "x": 950, "y": 450 },
+            "position": { "x": 1000, "y": 475 },
             "data": {
               "description": "All fixes",
               "prompt": "Generate all fixes.",
@@ -952,7 +966,7 @@
             "id": "validator-1",
             "type": "subAgent",
             "name": "validator",
-            "position": { "x": 350, "y": 350 },
+            "position": { "x": 400, "y": 350 },
             "data": {
               "description": "Validate doc",
               "prompt": "Validate document format.",
@@ -963,7 +977,7 @@
             "id": "if-1",
             "type": "ifElse",
             "name": "valid-check",
-            "position": { "x": 650, "y": 350 },
+            "position": { "x": 700, "y": 350 },
             "data": {
               "branches": [
                 { "label": "Valid", "condition": "Passed" },
@@ -976,7 +990,7 @@
             "id": "analyzer-1",
             "type": "subAgent",
             "name": "analyzer",
-            "position": { "x": 950, "y": 200 },
+            "position": { "x": 1000, "y": 175 },
             "data": {
               "description": "Analyze content",
               "prompt": "Analyze content.",
@@ -987,7 +1001,7 @@
             "id": "error-1",
             "type": "subAgent",
             "name": "error-handler",
-            "position": { "x": 950, "y": 500 },
+            "position": { "x": 1000, "y": 525 },
             "data": {
               "description": "Error report",
               "prompt": "Generate error report.",
@@ -998,7 +1012,7 @@
             "id": "ask-1",
             "type": "askUserQuestion",
             "name": "format",
-            "position": { "x": 1250, "y": 200 },
+            "position": { "x": 1300, "y": 175 },
             "data": {
               "questionText": "Output format?",
               "options": [
@@ -1013,14 +1027,14 @@
             "id": "fmt-pdf",
             "type": "subAgent",
             "name": "pdf-fmt",
-            "position": { "x": 1550, "y": 50 },
+            "position": { "x": 1600, "y": -175 },
             "data": { "description": "PDF format", "prompt": "Format as PDF.", "outputPorts": 1 }
           },
           {
             "id": "fmt-md",
             "type": "subAgent",
             "name": "md-fmt",
-            "position": { "x": 1550, "y": 200 },
+            "position": { "x": 1600, "y": 175 },
             "data": {
               "description": "MD format",
               "prompt": "Format as Markdown.",
@@ -1031,21 +1045,21 @@
             "id": "fmt-html",
             "type": "subAgent",
             "name": "html-fmt",
-            "position": { "x": 1550, "y": 350 },
+            "position": { "x": 1600, "y": 525 },
             "data": { "description": "HTML format", "prompt": "Format as HTML.", "outputPorts": 1 }
           },
           {
             "id": "end-ok",
             "type": "end",
             "name": "success",
-            "position": { "x": 1900, "y": 200 },
+            "position": { "x": 1900, "y": 175 },
             "data": { "label": "Success" }
           },
           {
             "id": "end-err",
             "type": "end",
             "name": "error",
-            "position": { "x": 1300, "y": 500 },
+            "position": { "x": 1300, "y": 525 },
             "data": { "label": "Error" }
           }
         ],
