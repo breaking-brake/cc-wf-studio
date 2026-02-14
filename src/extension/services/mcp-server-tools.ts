@@ -293,4 +293,134 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
       }
     }
   );
+
+  // ============================================================================
+  // AutoExplainer Pipeline Tools
+  // ============================================================================
+
+  // Tool 5: execute_pipeline_stage
+  server.tool(
+    'execute_pipeline_stage',
+    'Execute an AutoExplainer pipeline stage via the axp CLI. Requires AutoExplainer to be installed and a valid project UUID.',
+    {
+      projectId: z.string().describe('The AutoExplainer project UUID'),
+      stage: z.string().describe('Pipeline stage to execute (e.g., "script_draft", "storyboard", "render")'),
+      command: z.string().optional().describe('Optional override CLI command. If not provided, the default command for the stage is used.'),
+    },
+    async ({ projectId, stage, command }) => {
+      try {
+        const { execSync } = await import('node:child_process');
+        const cmd = command || `axp run ${projectId} --stage ${stage}`;
+        const output = execSync(cmd, {
+          encoding: 'utf-8',
+          timeout: 300000,
+          cwd: manager.getExtensionPath() || undefined,
+        });
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({ success: true, stage, output: output.trim() }),
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({
+                success: false,
+                error: error instanceof Error ? error.message : String(error),
+              }),
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // Tool 6: get_manifest_status
+  server.tool(
+    'get_manifest_status',
+    'Read the manifest.json for an AutoExplainer project and return its pipeline status, beat count, and gate results.',
+    {
+      projectPath: z.string().describe('Absolute path to the AutoExplainer project directory'),
+    },
+    async ({ projectPath }) => {
+      try {
+        const fs = await import('node:fs');
+        const path = await import('node:path');
+        const manifestPath = path.join(projectPath, 'manifest.json');
+        const raw = fs.readFileSync(manifestPath, 'utf-8');
+        const manifest = JSON.parse(raw);
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({
+                success: true,
+                status: manifest.status,
+                projectId: manifest.project_id,
+                beatCount: manifest.storyboard?.beats?.length || 0,
+                gates: manifest.quality_gates || {},
+              }),
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({
+                success: false,
+                error: error instanceof Error ? error.message : String(error),
+              }),
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // Tool 7: approve_gate
+  server.tool(
+    'approve_gate',
+    'Approve a human gate in the AutoExplainer pipeline (script, animation, or final review).',
+    {
+      projectId: z.string().describe('The AutoExplainer project UUID'),
+      gate: z.enum(['script', 'animation', 'final']).describe('Which gate to approve'),
+    },
+    async ({ projectId, gate }) => {
+      try {
+        const { execSync } = await import('node:child_process');
+        const cmd = `axp approve ${projectId} --gate ${gate}`;
+        const output = execSync(cmd, { encoding: 'utf-8', timeout: 30000 });
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({ success: true, gate, output: output.trim() }),
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({
+                success: false,
+                error: error instanceof Error ? error.message : String(error),
+              }),
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
 }

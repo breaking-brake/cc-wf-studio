@@ -33,7 +33,12 @@ import { MinimapContainer } from './MinimapContainer';
 import { AskUserQuestionNodeComponent } from './nodes/AskUserQuestionNode';
 import { BranchNodeComponent } from './nodes/BranchNode';
 // 新規ノードタイプのインポート
+import { AssetBatchNodeComponent } from './nodes/AssetBatchNode';
+import { AutoGateNodeComponent as AutoGateComponent } from './nodes/AutoGateNode';
 import { CodexNodeComponent } from './nodes/CodexNode';
+import { ConfigPresetNodeComponent } from './nodes/ConfigPresetNode';
+import { HumanGateNodeComponent } from './nodes/HumanGateNode';
+import { PipelineStageNodeComponent } from './nodes/PipelineStageNode';
 import { EndNode } from './nodes/EndNode';
 import { IfElseNodeComponent } from './nodes/IfElseNode';
 import { McpNodeComponent } from './nodes/McpNode/McpNode';
@@ -64,6 +69,12 @@ const nodeTypes: NodeTypes = {
   mcp: McpNodeComponent, // Feature: 001-mcp-node
   subAgentFlow: SubAgentFlowNodeComponent, // Feature: 089-subworkflow
   codex: CodexNodeComponent, // Feature: 518-codex-agent-node
+  // AutoExplainer custom node types
+  pipelineStage: PipelineStageNodeComponent,
+  humanGate: HumanGateNodeComponent,
+  autoGate: AutoGateComponent,
+  assetBatch: AssetBatchNodeComponent,
+  configPreset: ConfigPresetNodeComponent,
 };
 
 /**

@@ -611,6 +611,214 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
         </>
       )}
 
+      {/* Section: AutoExplainer Pipeline */}
+      <div
+        style={{
+          fontSize: isCompact ? '10px' : '11px',
+          fontWeight: 600,
+          color: 'var(--vscode-descriptionForeground)',
+          marginBottom: isCompact ? '4px' : '8px',
+          marginTop: isCompact ? '8px' : '16px',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+        }}
+      >
+        AutoExplainer
+      </div>
+
+      {/* Pipeline Stage Node Button */}
+      <button
+        type="button"
+        onClick={() => {
+          const position = calculateNonOverlappingPosition(250, 100);
+          addNode({
+            id: `stage-${Date.now()}`,
+            type: 'pipelineStage' as const,
+            position,
+            data: {
+              label: 'New Stage',
+              stage: 'script_draft',
+              cliCommand: 'axp script generate',
+              outputPorts: 1,
+            },
+          });
+        }}
+        style={{
+          width: '100%',
+          padding: isCompact ? '8px' : '12px',
+          marginBottom: isCompact ? '8px' : '12px',
+          backgroundColor: 'var(--vscode-button-background)',
+          color: 'var(--vscode-button-foreground)',
+          border: '1px solid var(--vscode-button-border)',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: isCompact ? '11px' : '13px',
+          fontWeight: 500,
+          textAlign: 'left',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+        }}
+      >
+        <div style={{ fontWeight: 600 }}>Pipeline Stage</div>
+        {!isCompact && (
+          <div style={{ fontSize: '11px', color: 'var(--vscode-button-foreground)', opacity: 0.8 }}>
+            Wraps an axp CLI command
+          </div>
+        )}
+      </button>
+
+      {/* Human Gate Node Button */}
+      <button
+        type="button"
+        onClick={() => {
+          const position = calculateNonOverlappingPosition(250, 200);
+          addNode({
+            id: `hgate-${Date.now()}`,
+            type: 'humanGate' as const,
+            position,
+            data: {
+              label: 'Human Review',
+              gateType: 'script_review',
+              approveCommand: 'axp approve --gate script',
+              outputPorts: 1,
+            },
+          });
+        }}
+        style={{
+          width: '100%',
+          padding: isCompact ? '8px' : '12px',
+          marginBottom: isCompact ? '8px' : '12px',
+          backgroundColor: 'var(--vscode-button-background)',
+          color: 'var(--vscode-button-foreground)',
+          border: '1px solid var(--vscode-button-border)',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: isCompact ? '11px' : '13px',
+          fontWeight: 500,
+          textAlign: 'left',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+        }}
+      >
+        <div style={{ fontWeight: 600 }}>Human Gate</div>
+        {!isCompact && (
+          <div style={{ fontSize: '11px', color: 'var(--vscode-button-foreground)', opacity: 0.8 }}>
+            Pauses for human review
+          </div>
+        )}
+      </button>
+
+      {/* Auto Gate Node Button */}
+      <button
+        type="button"
+        onClick={() => {
+          const position = calculateNonOverlappingPosition(250, 300);
+          addNode({
+            id: `agate-${Date.now()}`,
+            type: 'autoGate' as const,
+            position,
+            data: {
+              label: 'Quality Check',
+              gateType: 'variety_check',
+              blocking: true,
+              outputPorts: 1,
+            },
+          });
+        }}
+        style={{
+          width: '100%',
+          padding: isCompact ? '8px' : '12px',
+          marginBottom: isCompact ? '8px' : '12px',
+          backgroundColor: 'var(--vscode-button-background)',
+          color: 'var(--vscode-button-foreground)',
+          border: '1px solid var(--vscode-button-border)',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: isCompact ? '11px' : '13px',
+          fontWeight: 500,
+          textAlign: 'left',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+        }}
+      >
+        <div style={{ fontWeight: 600 }}>Auto Gate</div>
+        {!isCompact && (
+          <div style={{ fontSize: '11px', color: 'var(--vscode-button-foreground)', opacity: 0.8 }}>
+            Automated quality check
+          </div>
+        )}
+      </button>
+
+      {/* Asset Batch Node Button */}
+      <button
+        type="button"
+        onClick={() => {
+          const position = calculateNonOverlappingPosition(250, 400);
+          addNode({
+            id: `batch-${Date.now()}`,
+            type: 'assetBatch' as const,
+            position,
+            data: {
+              label: 'Image Generation',
+              batchType: 'image_gen',
+              cliCommand: 'axp assets images generate',
+              maxConcurrent: 3,
+              outputPorts: 1,
+            },
+          });
+        }}
+        style={{
+          width: '100%',
+          padding: isCompact ? '8px' : '12px',
+          marginBottom: isCompact ? '8px' : '12px',
+          backgroundColor: 'var(--vscode-button-background)',
+          color: 'var(--vscode-button-foreground)',
+          border: '1px solid var(--vscode-button-border)',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: isCompact ? '11px' : '13px',
+          fontWeight: 500,
+          textAlign: 'left',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+        }}
+      >
+        <div style={{ fontWeight: 600 }}>Asset Batch</div>
+        {!isCompact && (
+          <div style={{ fontSize: '11px', color: 'var(--vscode-button-foreground)', opacity: 0.8 }}>
+            Batch asset operations
+          </div>
+        )}
+      </button>
+
       {/* Section: Control Flow */}
       <div
         style={{

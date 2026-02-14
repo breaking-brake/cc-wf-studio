@@ -21,6 +21,12 @@ export enum NodeType {
   Mcp = 'mcp', // New: MCP (Model Context Protocol) tool integration
   SubAgentFlow = 'subAgentFlow', // New: Sub-Agent Flow reference node
   Codex = 'codex', // New: OpenAI Codex CLI integration
+  // AutoExplainer custom node types
+  PipelineStage = 'pipelineStage',
+  HumanGate = 'humanGate',
+  AutoGate = 'autoGate',
+  AssetBatch = 'assetBatch',
+  ConfigPreset = 'configPreset',
 }
 
 // ============================================================================
@@ -379,6 +385,93 @@ export interface CodexNodeData {
 }
 
 // ============================================================================
+// AutoExplainer Custom Node Data Types
+// ============================================================================
+
+/** Pipeline stage types that map to `axp` CLI commands */
+export type PipelineStageType =
+  | 'research'
+  | 'script_draft'
+  | 'script_critique'
+  | 'script_revision'
+  | 'storyboard'
+  | 'image_gen'
+  | 'audio_gen'
+  | 'render'
+  | 'publish';
+
+export interface PipelineStageNodeData {
+  /** Display label */
+  label: string;
+  /** Which pipeline stage this node represents */
+  stage: PipelineStageType;
+  /** CLI command to execute (e.g., "axp script generate") */
+  cliCommand: string;
+  /** Optional description of what this stage does */
+  description?: string;
+  /** Number of output ports (fixed at 1) */
+  outputPorts: 1;
+}
+
+export type HumanGateType = 'script_review' | 'animation_review' | 'final_review';
+
+export interface HumanGateNodeData {
+  /** Display label */
+  label: string;
+  /** Which human gate this represents */
+  gateType: HumanGateType;
+  /** CLI command to approve (e.g., "axp approve <uuid> --gate script") */
+  approveCommand: string;
+  /** Instructions for the human reviewer */
+  reviewInstructions?: string;
+  /** Number of output ports (fixed at 1) */
+  outputPorts: 1;
+}
+
+export type AutoGateType = 'variety_check' | 'style_check' | 'sync_check' | 'detectability';
+
+export interface AutoGateNodeData {
+  /** Display label */
+  label: string;
+  /** Which automated gate this represents */
+  gateType: AutoGateType;
+  /** Threshold for passing (0-100) */
+  threshold?: number;
+  /** Whether this gate blocks the pipeline on failure */
+  blocking: boolean;
+  /** Number of output ports (fixed at 1) */
+  outputPorts: 1;
+}
+
+export type AssetBatchType = 'image_gen' | 'whisk_animation' | 'audio_gen';
+
+export interface AssetBatchNodeData {
+  /** Display label */
+  label: string;
+  /** Which batch operation this represents */
+  batchType: AssetBatchType;
+  /** Maximum concurrent operations */
+  maxConcurrent?: number;
+  /** CLI command to execute */
+  cliCommand: string;
+  /** Number of output ports (fixed at 1) */
+  outputPorts: 1;
+}
+
+export type ConfigPresetType = 'style' | 'voice' | 'pipeline';
+
+export interface ConfigPresetNodeData {
+  /** Display label */
+  label: string;
+  /** Type of config this loads */
+  presetType: ConfigPresetType;
+  /** Path to the config file */
+  configPath: string;
+  /** Number of output ports (fixed at 1) */
+  outputPorts: 1;
+}
+
+// ============================================================================
 // Node Types
 // ============================================================================
 
@@ -449,6 +542,33 @@ export interface CodexNode extends BaseNode {
   data: CodexNodeData;
 }
 
+// AutoExplainer custom nodes
+
+export interface PipelineStageNode extends BaseNode {
+  type: NodeType.PipelineStage;
+  data: PipelineStageNodeData;
+}
+
+export interface HumanGateNode extends BaseNode {
+  type: NodeType.HumanGate;
+  data: HumanGateNodeData;
+}
+
+export interface AutoGateNode extends BaseNode {
+  type: NodeType.AutoGate;
+  data: AutoGateNodeData;
+}
+
+export interface AssetBatchNode extends BaseNode {
+  type: NodeType.AssetBatch;
+  data: AssetBatchNodeData;
+}
+
+export interface ConfigPresetNode extends BaseNode {
+  type: NodeType.ConfigPreset;
+  data: ConfigPresetNodeData;
+}
+
 export type WorkflowNode =
   | SubAgentNode
   | AskUserQuestionNode
@@ -461,7 +581,12 @@ export type WorkflowNode =
   | SkillNode
   | McpNode
   | SubAgentFlowNode
-  | CodexNode;
+  | CodexNode
+  | PipelineStageNode
+  | HumanGateNode
+  | AutoGateNode
+  | AssetBatchNode
+  | ConfigPresetNode;
 
 // ============================================================================
 // Connection Type
@@ -673,5 +798,35 @@ export const VALIDATION_RULES = {
     PROMPT_MIN_LENGTH: 1,
     PROMPT_MAX_LENGTH: 10000,
     OUTPUT_PORTS: 1, // Fixed: 1 output port
+  },
+  // AutoExplainer custom node validation rules
+  PIPELINE_STAGE: {
+    LABEL_MIN_LENGTH: 1,
+    LABEL_MAX_LENGTH: 64,
+    OUTPUT_PORTS: 1,
+  },
+  HUMAN_GATE: {
+    LABEL_MIN_LENGTH: 1,
+    LABEL_MAX_LENGTH: 64,
+    OUTPUT_PORTS: 1,
+  },
+  AUTO_GATE: {
+    LABEL_MIN_LENGTH: 1,
+    LABEL_MAX_LENGTH: 64,
+    THRESHOLD_MIN: 0,
+    THRESHOLD_MAX: 100,
+    OUTPUT_PORTS: 1,
+  },
+  ASSET_BATCH: {
+    LABEL_MIN_LENGTH: 1,
+    LABEL_MAX_LENGTH: 64,
+    MAX_CONCURRENT_MIN: 1,
+    MAX_CONCURRENT_MAX: 10,
+    OUTPUT_PORTS: 1,
+  },
+  CONFIG_PRESET: {
+    LABEL_MIN_LENGTH: 1,
+    LABEL_MAX_LENGTH: 64,
+    OUTPUT_PORTS: 1,
   },
 } as const;
