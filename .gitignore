@@ -27,6 +27,7 @@ npm-debug.log*
 # Claude Code settings (contains private configuration)
 .claude/
 .vscode/workflows/
+.mcp.json
 
 # Temporary files
 *.tmp
