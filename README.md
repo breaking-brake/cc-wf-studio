@@ -17,11 +17,21 @@
 </p>
 
 <p align="center">
-  <strong>Accelerate Claude Code/GitHub Copilot<a href="#github-copilot-support">(※1)</a>/OpenAI Codex<a href="#openai-codex-support">(※2)</a>/Roo Code<a href="#roo-code-support">(※3)</a> automation with a visual workflow editor</strong>
+  <strong>Visual Agentic Engineering Toolkit for AI Coding Agents</strong>
 </p>
 
+<span id="github-copilot-support"></span><span id="openai-codex-support"></span><span id="roo-code-support"></span><span id="gemini-cli-support"></span>
+
+| Provider | Export Format | Requires |
+|----------|--------------|----------|
+| Claude Code | `.claude/agents/` `.claude/commands/` | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) |
+| GitHub Copilot (β) | `.github/prompts/` `.github/skills/` | [Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) or [Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli) |
+| OpenAI Codex CLI (β) | `.codex/skills/` | [Codex CLI](https://github.com/openai/codex) |
+| Roo Code (β) | `.roo/skills/` | [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) |
+| Gemini CLI (β) | `.gemini/skills/` | [Gemini CLI](https://github.com/google-gemini/gemini-cli) |
+
 <p align="center">
-  Design complex AI agent workflows by conversing with AI – or use intuitive drag-and-drop. Build Sub-Agent orchestrations and conditional branching with natural language, then export directly to <code>.claude</code> format.
+  Design, orchestrate, and run AI agent workflows by conversing with AI – or use intuitive drag-and-drop. Build Sub-Agent orchestrations and conditional branching with natural language, then export and run directly in your favorite AI coding agent.
 </p>
 
 <!-- Hero image placeholder - recommended size: 1600x900px or 16:9 aspect ratio -->
@@ -53,37 +63,13 @@
 
 ## Key Features
 
-🔀 **Visual Workflow Editor** - Intuitive drag-and-drop canvas for designing AI workflows without code
+🔀 **Visual Workflow Editor** - Intuitive drag-and-drop canvas for designing AI agent orchestrations without code
+
+🤖 **Agentic Engineering** - Design multi-agent workflows with Sub-Agent orchestration, Agent Skills, and MCP tool integration — the building blocks of agentic engineering
 
 ✨ **Edit with AI** - Iteratively improve workflows through conversational AI - ask for changes, add features, or refine logic with natural language feedback
 
-⚡ **One-Click Export & Run** - Export workflows to ready-to-use formats and run directly from the editor:
-  - **Claude Code**: `.claude/agents/` and `.claude/commands/`
-  - **GitHub Copilot Chat**<a href="#github-copilot-support">(※1)</a>: `.github/prompts/`
-  - **GitHub Copilot CLI**<a href="#github-copilot-support">(※1)</a>: `.github/skills/`
-  - **OpenAI Codex CLI**<a href="#openai-codex-support">(※2)</a>: `.codex/skills/`
-  - **Roo Code**<a href="#roo-code-support">(※3)</a>: `.roo/skills/`
-
-<span id="github-copilot-support">🤖</span> **GitHub Copilot Support (※1 β)** - Export & Run workflows to Copilot Chat or Copilot CLI, and use Copilot as AI provider for Edit with AI.
-
-  **Note:**
-  - Enable **Copilot** option in Toolbar's **More** menu to activate
-  - Requires [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) extension or [Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli) to be installed
-  - Experimental feature; some workflows may not work as expected
-
-<span id="openai-codex-support">🤖</span> **OpenAI Codex CLI Support (※2 β)** - Export & Run workflows to Codex CLI (Skills format).
-
-  **Note:**
-  - Enable **Codex** option in Toolbar's **More** menu to activate
-  - Requires [Codex CLI](https://github.com/openai/codex) to be installed
-  - Experimental feature; some workflows may not work as expected
-
-<span id="roo-code-support">🤖</span> **Roo Code Support (※3 β)** - Export & Run workflows to Roo Code (Skills format). Run launches Roo Code directly via Extension API.
-
-  **Note:**
-  - Enable **Roo Code** option in Toolbar's **More** menu to activate
-  - Requires [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) extension to be installed
-  - Experimental feature; some workflows may not work as expected
+⚡ **One-Click Export & Run** - Export workflows to ready-to-use formats and run directly from the editor
 
 ## How to Use
 
