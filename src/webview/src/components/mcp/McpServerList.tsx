@@ -15,7 +15,7 @@ import { listMcpServers, refreshMcpCache } from '../../services/mcp-service';
 import { AIProviderBadge, type AIProviderType } from '../common/AIProviderBadge';
 import { IndeterminateProgressBar } from '../common/IndeterminateProgressBar';
 
-type SourceType = 'claude' | 'copilot' | 'codex';
+type SourceType = 'claude' | 'copilot' | 'codex' | 'gemini';
 
 interface GroupedServers {
   source: SourceType;
@@ -27,7 +27,7 @@ interface GroupedServers {
  * Servers without a source are treated as 'claude' for backward compatibility.
  */
 function groupServersBySource(servers: McpServerReference[]): GroupedServers[] {
-  const sourceOrder: SourceType[] = ['claude', 'copilot', 'codex'];
+  const sourceOrder: SourceType[] = ['claude', 'copilot', 'codex', 'gemini'];
   const groups = new Map<SourceType, McpServerReference[]>();
 
   // Initialize all groups

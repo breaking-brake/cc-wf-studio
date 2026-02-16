@@ -232,6 +232,36 @@ export function getCodexUserMcpConfigPath(): string {
 }
 
 /**
+ * Get the Gemini CLI user-scope MCP config path (~/.gemini/settings.json)
+ *
+ * @returns Absolute path to user MCP config
+ *
+ * @example
+ * // Unix: /Users/username/.gemini/settings.json
+ * // Windows: C:\Users\username\.gemini\settings.json
+ */
+export function getGeminiUserMcpConfigPath(): string {
+  return path.join(os.homedir(), '.gemini', 'settings.json');
+}
+
+/**
+ * Get the Gemini CLI project-scope MCP config path (.gemini/settings.json)
+ *
+ * @returns Absolute path to project MCP config, or null if no workspace
+ *
+ * @example
+ * // Unix: /workspace/myproject/.gemini/settings.json
+ * // Windows: C:\workspace\myproject\.gemini\settings.json
+ */
+export function getGeminiProjectMcpConfigPath(): string | null {
+  const workspaceRoot = getWorkspaceRoot();
+  if (!workspaceRoot) {
+    return null;
+  }
+  return path.join(workspaceRoot, '.gemini', 'settings.json');
+}
+
+/**
  * Get the installed plugins JSON path
  *
  * @returns Absolute path to ~/.claude/plugins/installed_plugins.json

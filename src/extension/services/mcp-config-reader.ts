@@ -21,6 +21,10 @@
  *
  * Codex CLI:
  * - ~/.codex/config.toml (user-level, TOML format with [mcp_servers.*] sections)
+ *
+ * Gemini CLI:
+ * - ~/.gemini/settings.json (user-level)
+ * - <workspace>/.gemini/settings.json (project-level)
  */
 
 import * as fs from 'node:fs';
@@ -32,6 +36,8 @@ import { log } from '../extension';
 import {
   getCodexUserMcpConfigPath,
   getCopilotUserMcpConfigPath,
+  getGeminiProjectMcpConfigPath,
+  getGeminiUserMcpConfigPath,
   getVSCodeMcpConfigPath,
 } from '../utils/path-utils';
 
@@ -197,6 +203,69 @@ function readCopilotMcpConfig(configPath: string): Record<string, McpServerConfi
     }
 
     log('WARN', 'Failed to read Copilot mcp-config.json', {
+      configPath,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
+/**
+ * Read MCP server configuration from Gemini CLI settings.json
+ *
+ * @param configPath - Absolute path to settings.json (~/.gemini/settings.json or .gemini/settings.json)
+ * @returns McpServerConfig record, or null on error
+ */
+function readGeminiMcpConfig(configPath: string): Record<string, McpServerConfig> | null {
+  try {
+    const content = fs.readFileSync(configPath, 'utf-8');
+    const parsed = JSON.parse(content);
+    const rawServers = parsed.mcpServers;
+
+    if (!rawServers || typeof rawServers !== 'object') {
+      return null;
+    }
+
+    // Gemini settings.json entries may have url without type field.
+    // normalizeServerConfig cannot infer http vs sse, so we pre-normalize here:
+    // - url present → type 'http'
+    // - command present → type 'stdio'
+    const servers: Record<string, McpServerConfig> = {};
+
+    for (const [serverId, raw] of Object.entries(
+      rawServers as Record<string, Partial<McpServerConfig>>
+    )) {
+      if (raw.type) {
+        servers[serverId] = raw as McpServerConfig;
+      } else if (raw.command) {
+        servers[serverId] = { ...raw, type: 'stdio' } as McpServerConfig;
+      } else if (raw.url) {
+        servers[serverId] = { ...raw, type: 'http' } as McpServerConfig;
+      } else {
+        log('WARN', 'Invalid Gemini MCP server configuration (no command or url)', {
+          serverId,
+          configPath,
+        });
+      }
+    }
+
+    if (Object.keys(servers).length === 0) {
+      return null;
+    }
+
+    log('INFO', 'Successfully read Gemini settings.json', {
+      configPath,
+      serverCount: Object.keys(servers).length,
+    });
+
+    return servers;
+  } catch (error) {
+    // File not found is expected
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return null;
+    }
+
+    log('WARN', 'Failed to read Gemini settings.json', {
       configPath,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -531,8 +600,46 @@ export function getMcpServerConfig(
       }
     }
 
-    // Server not found in any configuration (Claude, Copilot, or Codex)
-    log('WARN', 'MCP server not found in any configuration (Claude, Copilot, Codex)', {
+    // =========================================================================
+    // Gemini source (Priority 9-10)
+    // =========================================================================
+
+    // Priority 9: Gemini CLI user-scope (~/.gemini/settings.json)
+    const geminiUserConfigPath = getGeminiUserMcpConfigPath();
+    const geminiUserConfig = readGeminiMcpConfig(geminiUserConfigPath);
+    if (geminiUserConfig?.[serverId]) {
+      const serverConfig = normalizeServerConfig(geminiUserConfig[serverId]);
+      if (serverConfig) {
+        log('INFO', 'Retrieved MCP server configuration from Gemini CLI user scope', {
+          serverId,
+          scope: 'gemini-user',
+          configPath: geminiUserConfigPath,
+          type: serverConfig.type,
+        });
+        return { ...serverConfig, source: 'gemini' };
+      }
+    }
+
+    // Priority 10: Gemini CLI project-scope (.gemini/settings.json)
+    const geminiProjectConfigPath = getGeminiProjectMcpConfigPath();
+    if (geminiProjectConfigPath) {
+      const geminiProjectConfig = readGeminiMcpConfig(geminiProjectConfigPath);
+      if (geminiProjectConfig?.[serverId]) {
+        const serverConfig = normalizeServerConfig(geminiProjectConfig[serverId]);
+        if (serverConfig) {
+          log('INFO', 'Retrieved MCP server configuration from Gemini CLI project scope', {
+            serverId,
+            scope: 'gemini-project',
+            configPath: geminiProjectConfigPath,
+            type: serverConfig.type,
+          });
+          return { ...serverConfig, source: 'gemini' };
+        }
+      }
+    }
+
+    // Server not found in any configuration (Claude, Copilot, Codex, or Gemini)
+    log('WARN', 'MCP server not found in any configuration (Claude, Copilot, Codex, Gemini)', {
       serverId,
       workspacePath,
     });
@@ -550,7 +657,7 @@ export function getMcpServerConfig(
 }
 
 /**
- * Get all MCP server IDs from all configuration sources (Claude, Copilot, Codex)
+ * Get all MCP server IDs from all configuration sources (Claude, Copilot, Codex, Gemini)
  *
  * @param workspacePath - Optional workspace path for project-scoped servers
  * @returns Array of unique server IDs
@@ -643,6 +750,29 @@ export function getAllMcpServerIds(workspacePath?: string): string[] {
       }
     }
 
+    // =========================================================================
+    // Gemini source
+    // =========================================================================
+
+    // Collect from Gemini CLI user-scope (~/.gemini/settings.json)
+    const geminiUserConfig = readGeminiMcpConfig(getGeminiUserMcpConfigPath());
+    if (geminiUserConfig) {
+      for (const id of Object.keys(geminiUserConfig)) {
+        serverIds.add(id);
+      }
+    }
+
+    // Collect from Gemini CLI project-scope (.gemini/settings.json)
+    const geminiProjectConfigPath = getGeminiProjectMcpConfigPath();
+    if (geminiProjectConfigPath) {
+      const geminiProjectConfig = readGeminiMcpConfig(geminiProjectConfigPath);
+      if (geminiProjectConfig) {
+        for (const id of Object.keys(geminiProjectConfig)) {
+          serverIds.add(id);
+        }
+      }
+    }
+
     return Array.from(serverIds);
   } catch (error) {
     log('ERROR', 'Failed to get MCP server list', {
@@ -673,6 +803,7 @@ export interface McpServerWithSource extends McpServerConfig {
  * - VSCode Copilot (.vscode/mcp.json)
  * - Copilot CLI (.copilot/mcp-config.json)
  * - Codex CLI (~/.codex/config.toml)
+ * - Gemini CLI (~/.gemini/settings.json, .gemini/settings.json)
  *
  * Priority order (first match wins for duplicate server IDs):
  * 1. Project-scope Claude Code (<workspace>/.mcp.json)
@@ -683,6 +814,8 @@ export interface McpServerWithSource extends McpServerConfig {
  * 6. Legacy Claude Code user (~/.claude.json → mcpServers)
  * 7. User-scope Copilot CLI (~/.copilot/mcp-config.json)
  * 8. User-scope Codex CLI (~/.codex/config.toml)
+ * 9. User-scope Gemini CLI (~/.gemini/settings.json)
+ * 10. Project-scope Gemini CLI (<workspace>/.gemini/settings.json)
  *
  * @param workspacePath - Optional workspace path for project-scoped servers
  * @returns Array of MCP server configurations with source metadata
@@ -792,11 +925,26 @@ export function getAllMcpServersWithSource(workspacePath?: string): McpServerWit
     const codexConfig = readCodexMcpConfig(codexConfigPath);
     addServers(codexConfig, 'codex', codexConfigPath);
 
+    // Priority 8: Gemini CLI user-scope (~/.gemini/settings.json)
+    const geminiUserConfigPath = getGeminiUserMcpConfigPath();
+    const geminiUserConfig = readGeminiMcpConfig(geminiUserConfigPath);
+    addServers(geminiUserConfig, 'gemini', geminiUserConfigPath);
+
+    // Priority 9: Gemini CLI project-scope (.gemini/settings.json)
+    if (workspacePath) {
+      const geminiProjectConfigPath = getGeminiProjectMcpConfigPath();
+      if (geminiProjectConfigPath) {
+        const geminiProjectConfig = readGeminiMcpConfig(geminiProjectConfigPath);
+        addServers(geminiProjectConfig, 'gemini', geminiProjectConfigPath);
+      }
+    }
+
     log('INFO', 'Scanned all MCP server sources', {
       totalServers: servers.length,
       claudeCount: servers.filter((s) => s.source === 'claude').length,
       copilotCount: servers.filter((s) => s.source === 'copilot').length,
       codexCount: servers.filter((s) => s.source === 'codex').length,
+      geminiCount: servers.filter((s) => s.source === 'gemini').length,
     });
 
     return servers;
