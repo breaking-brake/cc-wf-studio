@@ -19,11 +19,13 @@ import {
   exportForCodexCli,
   exportForCopilot,
   exportForCopilotCli,
+  exportForGeminiCli,
   exportForRooCode,
   runAsSlashCommand,
   runForCodexCli,
   runForCopilot,
   runForCopilotCli,
+  runForGeminiCli,
   runForRooCode,
   saveWorkflow,
 } from '../services/vscode-bridge';
@@ -102,6 +104,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     toggleCodexEnabled,
     isRooCodeEnabled,
     toggleRooCodeEnabled,
+    isGeminiEnabled,
+    toggleGeminiEnabled,
   } = useRefinementStore();
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -119,6 +123,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   // Roo Code integration (Beta)
   const [isRooCodeExporting, setIsRooCodeExporting] = useState(false);
   const [isRooCodeRunning, setIsRooCodeRunning] = useState(false);
+  // Gemini CLI integration (Beta)
+  const [isGeminiExporting, setIsGeminiExporting] = useState(false);
+  const [isGeminiRunning, setIsGeminiRunning] = useState(false);
   // Copilot Beta feature toggle is now managed by refinement-store
   // Copilot execution mode (persisted in localStorage, default: 'cli')
   const [copilotExecutionMode, setCopilotExecutionMode] = useState<CopilotExecutionMode>(() => {
@@ -723,6 +730,104 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     }
   };
 
+  // ============================================================================
+  // Gemini CLI Integration Handlers (Beta)
+  // ============================================================================
+
+  const handleGeminiExport = async () => {
+    if (!workflowName.trim()) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
+      });
+      return;
+    }
+
+    setIsGeminiExporting(true);
+    try {
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
+        useWorkflowStore.getState();
+
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        workflowDescription || undefined,
+        undefined,
+        subAgentFlows,
+        slashCommandOptions
+      );
+
+      validateWorkflow(workflow);
+
+      const result = await exportForGeminiCli(workflow);
+      console.log('Workflow exported as skill for Gemini CLI:', result.skillPath);
+    } catch (error) {
+      onError({
+        code: 'EXPORT_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to export for Gemini CLI',
+        details: error,
+      });
+    } finally {
+      setIsGeminiExporting(false);
+    }
+  };
+
+  const handleGeminiRun = async () => {
+    if (!workflowName.trim()) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
+      });
+      return;
+    }
+
+    setIsGeminiRunning(true);
+    try {
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
+        useWorkflowStore.getState();
+
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        workflowDescription || undefined,
+        undefined,
+        subAgentFlows,
+        slashCommandOptions
+      );
+
+      validateWorkflow(workflow);
+
+      const result = await runForGeminiCli(workflow);
+      console.log('Workflow run for Gemini CLI:', result.workflowName);
+    } catch (error) {
+      onError({
+        code: 'RUN_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to run for Gemini CLI',
+        details: error,
+      });
+    } finally {
+      setIsGeminiRunning(false);
+    }
+  };
+
   // Handle AI workflow name generation
   const handleGenerateWorkflowName = useCallback(async () => {
     const currentRequestId = `gen-name-${Date.now()}`;
@@ -973,7 +1078,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         />
 
         {/* Slash Command Section - Layout changes based on Copilot/Codex Beta enabled */}
-        {isCopilotEnabled || isCodexEnabled || isRooCodeEnabled ? (
+        {isCopilotEnabled || isCodexEnabled || isRooCodeEnabled || isGeminiEnabled ? (
           /* Combined layout when Copilot Beta is enabled */
           <div
             style={{
@@ -1377,6 +1482,98 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Vertical Divider - shown when Gemini CLI is enabled */}
+              {isGeminiEnabled && (
+                <div
+                  style={{
+                    width: '1px',
+                    backgroundColor: 'var(--vscode-panel-border)',
+                    margin: '0 8px',
+                    alignSelf: 'stretch',
+                  }}
+                />
+              )}
+
+              {/* Gemini CLI Column - shown when Gemini CLI is enabled */}
+              {isGeminiEnabled && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '9px',
+                      color: 'var(--vscode-descriptionForeground)',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Gemini CLI
+                  </span>
+                  <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex' }}>
+                      <button
+                        type="button"
+                        onClick={handleGeminiExport}
+                        disabled={isGeminiExporting}
+                        style={{
+                          padding: isCompact ? '4px 8px' : '4px 12px',
+                          backgroundColor: 'var(--vscode-button-background)',
+                          color: 'var(--vscode-button-foreground)',
+                          border: 'none',
+                          borderRadius: '2px 0 0 2px',
+                          cursor: isGeminiExporting ? 'not-allowed' : 'pointer',
+                          fontSize: '13px',
+                          opacity: isGeminiExporting ? 0.6 : 1,
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          borderRight: '1px solid var(--vscode-button-foreground)',
+                        }}
+                      >
+                        {isCompact ? (
+                          <SquareSlash size={16} />
+                        ) : isGeminiExporting ? (
+                          t('toolbar.exporting')
+                        ) : (
+                          t('toolbar.export')
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleGeminiRun}
+                        disabled={isGeminiRunning}
+                        style={{
+                          padding: isCompact ? '4px 8px' : '4px 12px',
+                          backgroundColor: 'var(--vscode-button-background)',
+                          color: 'var(--vscode-button-foreground)',
+                          border: 'none',
+                          borderRadius: '0 2px 2px 0',
+                          cursor: isGeminiRunning ? 'not-allowed' : 'pointer',
+                          fontSize: '13px',
+                          opacity: isGeminiRunning ? 0.6 : 1,
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        {isCompact ? (
+                          <Play size={16} />
+                        ) : isGeminiRunning ? (
+                          t('toolbar.running')
+                        ) : (
+                          t('toolbar.run')
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -1559,6 +1756,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onToggleCodexBeta={toggleCodexEnabled}
               isRooCodeEnabled={isRooCodeEnabled}
               onToggleRooCodeBeta={toggleRooCodeEnabled}
+              isGeminiEnabled={isGeminiEnabled}
+              onToggleGeminiBeta={toggleGeminiEnabled}
               open={moreActionsOpen}
               onOpenChange={onMoreActionsOpenChange}
             />

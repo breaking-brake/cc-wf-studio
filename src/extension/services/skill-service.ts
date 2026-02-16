@@ -14,6 +14,8 @@ import {
   getCodexProjectSkillsDir,
   getCodexUserSkillsDir,
   getCopilotUserSkillsDir,
+  getGeminiProjectSkillsDir,
+  getGeminiUserSkillsDir,
   getGithubSkillsDir,
   getInstalledPluginsJsonPath,
   getKnownMarketplacesJsonPath,
@@ -44,7 +46,7 @@ import { parseSkillFrontmatter, type SkillMetadata } from './yaml-parser';
 export async function scanSkills(
   baseDir: string,
   scope: 'user' | 'project' | 'local',
-  source?: 'claude' | 'copilot' | 'codex' | 'roo'
+  source?: 'claude' | 'copilot' | 'codex' | 'roo' | 'gemini'
 ): Promise<SkillReference[]> {
   const skills: SkillReference[] = [];
 
@@ -394,22 +396,26 @@ export async function scanAllSkills(): Promise<{
   const copilotUserDir = getCopilotUserSkillsDir();
   const codexUserDir = getCodexUserSkillsDir();
   const rooUserDir = getRooUserSkillsDir();
+  const geminiUserDir = getGeminiUserSkillsDir();
 
   // Project directories
   const claudeProjectDir = getProjectSkillsDir();
   const githubProjectDir = getGithubSkillsDir();
   const codexProjectDir = getCodexProjectSkillsDir();
   const rooProjectDir = getRooProjectSkillsDir();
+  const geminiProjectDir = getGeminiProjectSkillsDir();
 
   const [
     claudeUserSkills,
     copilotUserSkills,
     codexUserSkills,
     rooUserSkills,
+    geminiUserSkills,
     claudeProjectSkills,
     githubProjectSkills,
     codexProjectSkills,
     rooProjectSkills,
+    geminiProjectSkills,
     pluginSkills,
   ] = await Promise.all([
     // User-scope scans
@@ -417,11 +423,13 @@ export async function scanAllSkills(): Promise<{
     scanSkills(copilotUserDir, 'user', 'copilot'),
     scanSkills(codexUserDir, 'user', 'codex'),
     scanSkills(rooUserDir, 'user', 'roo'),
+    scanSkills(geminiUserDir, 'user', 'gemini'),
     // Project-scope scans
     claudeProjectDir ? scanSkills(claudeProjectDir, 'project', 'claude') : Promise.resolve([]),
     githubProjectDir ? scanSkills(githubProjectDir, 'project', 'copilot') : Promise.resolve([]),
     codexProjectDir ? scanSkills(codexProjectDir, 'project', 'codex') : Promise.resolve([]),
     rooProjectDir ? scanSkills(rooProjectDir, 'project', 'roo') : Promise.resolve([]),
+    geminiProjectDir ? scanSkills(geminiProjectDir, 'project', 'gemini') : Promise.resolve([]),
     // Plugin skills
     scanPluginSkills(),
   ]);
@@ -432,6 +440,7 @@ export async function scanAllSkills(): Promise<{
     ...copilotUserSkills,
     ...codexUserSkills,
     ...rooUserSkills,
+    ...geminiUserSkills,
   ];
 
   // Merge project skills: include all sources (no deduplication - show all available skills)
@@ -440,6 +449,7 @@ export async function scanAllSkills(): Promise<{
     ...githubProjectSkills,
     ...codexProjectSkills,
     ...rooProjectSkills,
+    ...geminiProjectSkills,
   ];
 
   // Separate plugin skills by their scope

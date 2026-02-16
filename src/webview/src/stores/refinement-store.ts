@@ -30,6 +30,8 @@ const COPILOT_ENABLED_STORAGE_KEY = 'cc-wf-studio:copilot-beta-enabled';
 const CODEX_ENABLED_STORAGE_KEY = 'cc-wf-studio:codex-beta-enabled';
 // Note: This key is shared with Toolbar.tsx for the "Roo Code (Beta)" toggle
 const ROO_CODE_ENABLED_STORAGE_KEY = 'cc-wf-studio:roo-code-beta-enabled';
+// Note: This key is shared with Toolbar.tsx for the "Gemini CLI (Beta)" toggle
+const GEMINI_ENABLED_STORAGE_KEY = 'cc-wf-studio:gemini-beta-enabled';
 
 // Available tools for Claude Code CLI (used in AI editing allowed tools)
 export const AVAILABLE_TOOLS = [
@@ -337,6 +339,29 @@ function saveRooCodeEnabledToStorage(enabled: boolean): void {
   }
 }
 
+/**
+ * Load Gemini enabled state from localStorage
+ */
+function loadGeminiEnabledFromStorage(): boolean {
+  try {
+    const saved = localStorage.getItem(GEMINI_ENABLED_STORAGE_KEY);
+    return saved === 'true';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Save Gemini enabled state to localStorage
+ */
+function saveGeminiEnabledToStorage(enabled: boolean): void {
+  try {
+    localStorage.setItem(GEMINI_ENABLED_STORAGE_KEY, String(enabled));
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+}
+
 // ============================================================================
 // Session Status Type
 // ============================================================================
@@ -372,6 +397,7 @@ interface RefinementStore {
   isCopilotEnabled: boolean;
   isCodexEnabled: boolean;
   isRooCodeEnabled: boolean;
+  isGeminiEnabled: boolean;
 
   // Dynamic Copilot Models State
   availableCopilotModels: CopilotModelInfo[];
@@ -403,6 +429,7 @@ interface RefinementStore {
   toggleCopilotEnabled: () => void;
   toggleCodexEnabled: () => void;
   toggleRooCodeEnabled: () => void;
+  toggleGeminiEnabled: () => void;
   fetchCopilotModels: () => Promise<void>;
   initConversation: () => void;
   loadConversationHistory: (history: ConversationHistory | undefined) => void;
@@ -499,6 +526,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   isCopilotEnabled: loadCopilotEnabledFromStorage(), // Load from localStorage, default: false
   isCodexEnabled: loadCodexEnabledFromStorage(), // Load from localStorage, default: false
   isRooCodeEnabled: loadRooCodeEnabledFromStorage(), // Load from localStorage, default: false
+  isGeminiEnabled: loadGeminiEnabledFromStorage(), // Load from localStorage, default: false
 
   // Dynamic Copilot Models Initial State
   availableCopilotModels: [],
@@ -614,6 +642,13 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     const newEnabled = !currentEnabled;
     saveRooCodeEnabledToStorage(newEnabled);
     set({ isRooCodeEnabled: newEnabled });
+  },
+
+  toggleGeminiEnabled: () => {
+    const currentEnabled = get().isGeminiEnabled;
+    const newEnabled = !currentEnabled;
+    saveGeminiEnabledToStorage(newEnabled);
+    set({ isGeminiEnabled: newEnabled });
   },
 
   fetchCopilotModels: async () => {

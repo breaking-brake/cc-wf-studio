@@ -211,11 +211,7 @@
         },
         "scope": {
           "type": "string",
-          "enum": [
-            "user",
-            "project",
-            "local"
-          ],
+          "enum": ["user", "project", "local"],
           "required": true,
           "description": "Skill scope: user (all projects), project (this project, shared), local (this project, private)"
         },
@@ -231,20 +227,13 @@
         },
         "validationStatus": {
           "type": "string",
-          "enum": [
-            "valid",
-            "missing",
-            "invalid"
-          ],
+          "enum": ["valid", "missing", "invalid"],
           "required": true,
           "default": "valid"
         },
         "executionMode": {
           "type": "string",
-          "enum": [
-            "load",
-            "execute"
-          ],
+          "enum": ["load", "execute"],
           "required": false,
           "default": "execute",
           "description": "Execution mode: 'execute' runs the Skill (default), 'load' loads the Skill as knowledge context without executing it"
@@ -299,13 +288,7 @@
             "type": {
               "type": "string",
               "required": true,
-              "enum": [
-                "string",
-                "number",
-                "boolean",
-                "array",
-                "object"
-              ]
+              "enum": ["string", "number", "boolean", "array", "object"]
             },
             "description": {
               "type": "string",
@@ -325,21 +308,13 @@
         "mode": {
           "type": "string",
           "required": false,
-          "enum": [
-            "manualParameterConfig",
-            "aiParameterConfig",
-            "aiToolSelection"
-          ],
+          "enum": ["manualParameterConfig", "aiParameterConfig", "aiToolSelection"],
           "default": "manualParameterConfig",
           "description": "Configuration mode - ALWAYS use 'manualParameterConfig' for AI-generated workflows"
         },
         "validationStatus": {
           "type": "string",
-          "enum": [
-            "valid",
-            "missing",
-            "invalid"
-          ],
+          "enum": ["valid", "missing", "invalid"],
           "required": true,
           "default": "valid"
         },
@@ -362,16 +337,8 @@
             "playwright_screenshot",
             "playwright_evaluate"
           ],
-          "filesystem": [
-            "read_file",
-            "write_file",
-            "list_directory"
-          ],
-          "github": [
-            "get_issue",
-            "create_pull_request",
-            "list_repositories"
-          ]
+          "filesystem": ["read_file", "write_file", "list_directory"],
+          "github": ["get_issue", "create_pull_request", "list_repositories"]
         },
         "example": {
           "type": "mcp",
@@ -410,10 +377,7 @@
         "promptMode": {
           "type": "string",
           "required": true,
-          "enum": [
-            "fixed",
-            "ai-generated"
-          ],
+          "enum": ["fixed", "ai-generated"],
           "default": "fixed",
           "description": "Prompt mode: 'fixed' uses the prompt field as-is, 'ai-generated' lets the orchestrating AI agent generate instructions dynamically based on context"
         },
@@ -433,22 +397,14 @@
         "reasoningEffort": {
           "type": "string",
           "required": true,
-          "enum": [
-            "low",
-            "medium",
-            "high"
-          ],
+          "enum": ["low", "medium", "high"],
           "default": "medium",
           "description": "Reasoning effort level for the agent"
         },
         "sandbox": {
           "type": "string",
           "required": false,
-          "enum": [
-            "read-only",
-            "workspace-write",
-            "danger-full-access"
-          ],
+          "enum": ["read-only", "workspace-write", "danger-full-access"],
           "description": "Optional. Sandbox mode for file system access. When specified, 'read-only' is recommended."
         },
         "outputPorts": {
@@ -514,9 +470,7 @@
         "toPort": {
           "type": "string",
           "required": true,
-          "enum": [
-            "input"
-          ],
+          "enum": ["input"],
           "description": "Target port is always 'input'. Every node has exactly one input port."
         },
         "condition": {
@@ -530,14 +484,7 @@
     "portNamingRules": {
       "description": "Port identifier conventions for each node type. Linear nodes: single output. Conditional nodes: multiple outputs (one per branch).",
       "linearNodes": {
-        "types": [
-          "start",
-          "end",
-          "prompt",
-          "skill",
-          "mcp",
-          "codex"
-        ],
+        "types": ["start", "end", "prompt", "skill", "mcp", "codex"],
         "inputPortId": "input",
         "outputPortId": "output",
         "connectionExample": {
@@ -551,10 +498,7 @@
       "ifElseNode": {
         "type": "ifElse",
         "inputPortId": "input",
-        "outputPortIds": [
-          "branch-0",
-          "branch-1"
-        ],
+        "outputPortIds": ["branch-0", "branch-1"],
         "semantics": "branch-0 = true/if condition, branch-1 = false/else condition",
         "constraint": "BOTH branch-0 and branch-1 MUST each have exactly one outgoing connection",
         "connectionExample": {

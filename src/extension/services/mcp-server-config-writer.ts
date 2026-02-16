@@ -47,6 +47,8 @@ function getConfigPath(target: McpConfigTarget, workspacePath: string): string {
       return path.join(os.homedir(), '.copilot', 'mcp-config.json');
     case 'codex':
       return path.join(os.homedir(), '.codex', 'config.toml');
+    case 'gemini':
+      return path.join(os.homedir(), '.gemini', 'settings.json');
   }
 }
 
@@ -110,6 +112,15 @@ export async function writeAgentConfig(
       }
       config.mcp_servers[SERVER_ENTRY_NAME] = { url: serverUrl };
       await writeCodexConfig(config);
+    } else if (target === 'gemini') {
+      // Gemini CLI uses JSON format with "mcpServers" key
+      const filePath = getConfigPath(target, workspacePath);
+      const config = await readJsonConfig(filePath);
+      if (!config.mcpServers) {
+        config.mcpServers = {};
+      }
+      config.mcpServers[SERVER_ENTRY_NAME] = { url: serverUrl };
+      await writeJsonConfig(filePath, config);
     } else if (target === 'copilot-chat') {
       // VSCode Copilot uses "servers" key with type "http"
       const filePath = getConfigPath(target, workspacePath);
@@ -170,6 +181,14 @@ export async function removeAgentConfig(
       if (config.mcp_servers?.[SERVER_ENTRY_NAME]) {
         delete config.mcp_servers[SERVER_ENTRY_NAME];
         await writeCodexConfig(config);
+      }
+    } else if (target === 'gemini') {
+      // Gemini CLI uses JSON format with "mcpServers" key
+      const filePath = getConfigPath(target, workspacePath);
+      const config = await readJsonConfig(filePath);
+      if (config.mcpServers?.[SERVER_ENTRY_NAME]) {
+        delete config.mcpServers[SERVER_ENTRY_NAME];
+        await writeJsonConfig(filePath, config);
       }
     } else if (target === 'copilot-chat') {
       const filePath = getConfigPath(target, workspacePath);
@@ -234,6 +253,8 @@ export function getConfigTargetsForProvider(provider: AiEditingProvider): McpCon
       return ['codex'];
     case 'roo-code':
       return ['roo-code'];
+    case 'gemini':
+      return ['gemini'];
   }
 }
 
@@ -247,6 +268,7 @@ export async function removeAllAgentConfigs(workspacePath: string): Promise<void
     'copilot-chat',
     'copilot-cli',
     'codex',
+    'gemini',
   ];
 
   for (const target of allTargets) {

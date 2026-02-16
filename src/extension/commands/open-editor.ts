@@ -41,6 +41,7 @@ import {
   handleRunForCopilotCli,
 } from './copilot-handlers';
 import { handleExportWorkflow, handleExportWorkflowForExecution } from './export-workflow';
+import { handleExportForGeminiCli, handleRunForGeminiCli } from './gemini-handlers';
 import { loadWorkflow } from './load-workflow';
 import { loadWorkflowList } from './load-workflow-list';
 import {
@@ -505,6 +506,50 @@ export function registerOpenEditorCommand(
               } else {
                 webview.postMessage({
                   type: 'RUN_FOR_ROO_CODE_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorCode: 'UNKNOWN_ERROR',
+                    errorMessage: 'Workflow is required',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+
+            case 'EXPORT_FOR_GEMINI_CLI':
+              // Export workflow for Gemini CLI (Skills format)
+              if (message.payload?.workflow) {
+                await handleExportForGeminiCli(
+                  fileService,
+                  webview,
+                  message.payload,
+                  message.requestId
+                );
+              } else {
+                webview.postMessage({
+                  type: 'EXPORT_FOR_GEMINI_CLI_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorCode: 'UNKNOWN_ERROR',
+                    errorMessage: 'Workflow is required',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+
+            case 'RUN_FOR_GEMINI_CLI':
+              // Run workflow for Gemini CLI (via Gemini CLI terminal)
+              if (message.payload?.workflow) {
+                await handleRunForGeminiCli(
+                  fileService,
+                  webview,
+                  message.payload,
+                  message.requestId
+                );
+              } else {
+                webview.postMessage({
+                  type: 'RUN_FOR_GEMINI_CLI_FAILED',
                   requestId: message.requestId,
                   payload: {
                     errorCode: 'UNKNOWN_ERROR',

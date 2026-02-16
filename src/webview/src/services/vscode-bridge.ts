@@ -14,6 +14,8 @@ import type {
   ExportForCopilotCliSuccessPayload,
   ExportForCopilotPayload,
   ExportForCopilotSuccessPayload,
+  ExportForGeminiCliPayload,
+  ExportForGeminiCliSuccessPayload,
   ExportForRooCodePayload,
   ExportForRooCodeSuccessPayload,
   ExportWorkflowPayload,
@@ -26,6 +28,8 @@ import type {
   RunForCopilotCliSuccessPayload,
   RunForCopilotPayload,
   RunForCopilotSuccessPayload,
+  RunForGeminiCliPayload,
+  RunForGeminiCliSuccessPayload,
   RunForRooCodePayload,
   RunForRooCodeSuccessPayload,
   SaveWorkflowPayload,
@@ -674,6 +678,111 @@ export function runForRooCode(workflow: Workflow): Promise<RunForRooCodeSuccessP
     const payload: RunForRooCodePayload = { workflow };
     vscode.postMessage({
       type: 'RUN_FOR_ROO_CODE',
+      requestId,
+      payload,
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
+// ============================================================================
+// Gemini CLI Integration Functions (Beta)
+// ============================================================================
+
+/**
+ * Export workflow for Gemini CLI (Beta)
+ *
+ * Exports the workflow to Skills format (.gemini/skills/name/SKILL.md)
+ *
+ * @param workflow - Workflow to export
+ * @returns Promise that resolves with export result
+ */
+export function exportForGeminiCli(workflow: Workflow): Promise<ExportForGeminiCliSuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'EXPORT_FOR_GEMINI_CLI_SUCCESS') {
+          resolve(message.payload as ExportForGeminiCliSuccessPayload);
+        } else if (message.type === 'EXPORT_FOR_GEMINI_CLI_CANCELLED') {
+          // User cancelled - resolve with empty result
+          resolve({
+            skillName: '',
+            skillPath: '',
+            timestamp: new Date().toISOString(),
+          });
+        } else if (message.type === 'EXPORT_FOR_GEMINI_CLI_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to export for Gemini CLI'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: ExportForGeminiCliPayload = { workflow };
+    vscode.postMessage({
+      type: 'EXPORT_FOR_GEMINI_CLI',
+      requestId,
+      payload,
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
+/**
+ * Run workflow for Gemini CLI (Beta)
+ *
+ * Exports the workflow to Gemini Skills format and runs it via
+ * Gemini CLI terminal
+ *
+ * @param workflow - Workflow to run
+ * @returns Promise that resolves with run result
+ */
+export function runForGeminiCli(workflow: Workflow): Promise<RunForGeminiCliSuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'RUN_FOR_GEMINI_CLI_SUCCESS') {
+          resolve(message.payload as RunForGeminiCliSuccessPayload);
+        } else if (message.type === 'RUN_FOR_GEMINI_CLI_CANCELLED') {
+          // User cancelled - resolve with empty result
+          resolve({
+            workflowName: '',
+            terminalName: '',
+            timestamp: new Date().toISOString(),
+          });
+        } else if (message.type === 'RUN_FOR_GEMINI_CLI_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to run for Gemini CLI'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: RunForGeminiCliPayload = { workflow };
+    vscode.postMessage({
+      type: 'RUN_FOR_GEMINI_CLI',
       requestId,
       payload,
     });

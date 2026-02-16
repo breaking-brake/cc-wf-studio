@@ -8,6 +8,7 @@ Created by referencing official documentation for each tool.
 | Tool | Rules | Skills | Commands/Prompts | Agents/Modes | MCP | Ignore |
 |------|-------|--------|------------------|--------------|-----|--------|
 | Claude Code | Project<br>User | Project<br>User | Project<br>User | Project<br>User | Project<br>User | Project |
+| Gemini CLI | Project<br>User | Project<br>User | Project<br>User | - | Project<br>User | Project |
 | Roo Code | Project<br>Global | Project<br>Global | Project<br>Global | Project<br>Global | Project<br>Global | Project |
 | VSCode Copilot Chat | Project<br>User | Project<br>User | Project<br>User | Project | Project<br>User | - |
 | Copilot CLI | Project | Project<br>Global | - | Project<br>Global | Global | - |
@@ -127,6 +128,236 @@ disable-model-invocation: false     # Optional
 | Scope | Path |
 |-------|------|
 | **Project** | `./.claudeignore` |
+
+---
+
+## Gemini CLI
+
+Google Gemini CLI is a terminal-based AI coding agent.
+
+> **Reference:**
+> - [Gemini CLI Installation](https://geminicli.com/docs/get-started/installation/)
+> - [Gemini CLI Configuration](https://geminicli.com/docs/get-started/configuration/)
+> - [GEMINI.md Files](https://geminicli.com/docs/cli/gemini-md/)
+> - [Agent Skills](https://geminicli.com/docs/cli/skills/)
+> - [Custom Commands](https://geminicli.com/docs/cli/custom-commands/)
+> - [MCP Servers](https://geminicli.com/docs/tools/mcp-server/)
+> - [Extensions](https://geminicli.com/docs/extensions/)
+
+### Installation
+
+| Method | Command |
+|--------|---------|
+| **npm (global)** | `npm install -g @google/gemini-cli` |
+| **Homebrew (macOS/Linux)** | `brew install gemini-cli` |
+| **npx (no install)** | `npx @google/gemini-cli` |
+
+**Prerequisites:** Node.js 20.0.0+
+
+### Rules (GEMINI.md)
+
+| Scope | Path | Description |
+|-------|------|-------------|
+| **Project** | `./GEMINI.md` | Project instructions (discovered from CWD up to `.git` root) |
+| **Project (subdirs)** | `**/GEMINI.md` | Subdirectory instructions (recursive scan) |
+| **User** | `~/.gemini/GEMINI.md` | User instructions (all projects) |
+
+**Features:**
+- `@file.md` syntax to import other Markdown files
+- `/memory show` to display current combined context
+- `/memory refresh` to reload all context files
+- `/memory add <text>` to append text to `~/.gemini/GEMINI.md`
+- `GEMINI_SYSTEM_MD` environment variable to override system prompt
+
+**Custom context file names (settings.json):**
+```json
+{
+  "context": {
+    "fileName": ["AGENTS.md", "CONTEXT.md", "GEMINI.md"]
+  }
+}
+```
+
+### Skills
+
+| Scope | Path | Description |
+|-------|------|-------------|
+| **Project** | `./.gemini/skills/{skill-name}/SKILL.md` | Project skills |
+| **User** | `~/.gemini/skills/{skill-name}/SKILL.md` | User skills (all projects) |
+| **Extension** | Extension-bundled | Skills from installed extensions |
+
+**Directory structure:**
+```
+.gemini/skills/my-skill/
+├── SKILL.md          # Required: metadata + instructions
+├── scripts/          # Optional: executable scripts
+├── references/       # Optional: static documentation
+└── assets/           # Optional: templates/resources
+```
+
+**Frontmatter Schema:**
+```yaml
+---
+name: skill-name           # Required
+description: Skill description  # Required (single-line string)
+---
+```
+
+**Lifecycle:**
+1. **Discovery**: CLI scans 3 layers; only `name` and `description` are injected into system prompt
+2. **Activation**: Model calls `activate_skill` tool when task matches (user confirmation required)
+3. **Injection**: After approval, SKILL.md body + folder structure are added to conversation
+
+**CLI commands:** `gemini skills list`, `gemini skills install`, `gemini skills link`
+
+**settings.json:**
+```json
+{
+  "skills": {
+    "enabled": true,
+    "disabled": ["skill-name"]
+  }
+}
+```
+
+### Commands (Custom Commands)
+
+| Scope | Path | Description |
+|-------|------|-------------|
+| **Project** | `./.gemini/commands/*.toml` | Project commands |
+| **User** | `~/.gemini/commands/*.toml` | User commands |
+| **Extension** | Extension-bundled | Commands from installed extensions |
+
+> **Note:** Project commands override same-named user commands. Filename becomes command name (e.g., `test.toml` → `/test`, `git/commit.toml` → `/git:commit`).
+
+**TOML Schema:**
+```toml
+description = "Generate a commit message"    # Optional
+prompt = """
+Review the following staged changes:
+
+!{git diff --staged}
+
+{{args}}
+"""
+```
+
+**Template syntax:**
+- `{{args}}` — User input placeholder
+- `!{command}` — Shell command output injection
+- `@{file.md}` — File content injection
+
+### MCP
+
+MCP servers are configured in `settings.json` under `mcpServers` key.
+
+| Scope | Path | Description |
+|-------|------|-------------|
+| **Project** | `./.gemini/settings.json` | Project MCP configuration (within `mcpServers` key) |
+| **User** | `~/.gemini/settings.json` | User MCP configuration (within `mcpServers` key) |
+
+**JSON Schema:**
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "command": "npx",
+      "args": ["-y", "package-name"],
+      "env": {
+        "API_KEY": "$ENV_VAR"
+      },
+      "cwd": "/path/to/dir",
+      "timeout": 600000,
+      "trust": false,
+      "includeTools": ["tool1"],
+      "excludeTools": ["tool2"]
+    }
+  }
+}
+```
+
+**Transport types:** `httpUrl` > `url` > `command` (priority order, at least one required)
+
+**Global MCP settings:**
+```json
+{
+  "mcp": {
+    "allowed": ["serverName"],
+    "excluded": ["serverName"]
+  }
+}
+```
+
+### Configuration
+
+| Scope | Path | Description |
+|-------|------|-------------|
+| **Project** | `./.gemini/settings.json` | Project settings |
+| **User** | `~/.gemini/settings.json` | User settings |
+| **System** | See below | System settings (admin-deployed) |
+
+**System settings locations:**
+- Linux: `/etc/gemini-cli/settings.json`
+- macOS: `/Library/Application Support/GeminiCli/settings.json`
+
+**Precedence order (high → low):**
+1. CLI arguments (`--model`, `--sandbox`, etc.)
+2. Environment variables (`GEMINI_API_KEY`, `GEMINI_MODEL`, etc.)
+3. System settings
+4. Project settings (`.gemini/settings.json`)
+5. User settings (`~/.gemini/settings.json`)
+6. System defaults
+7. Hard-coded defaults
+
+> **Note:** `GEMINI_CLI_HOME` environment variable can change the `~/.gemini` path
+
+**Key environment variables:**
+
+| Variable | Description |
+|----------|-------------|
+| `GEMINI_API_KEY` | API authentication key |
+| `GEMINI_MODEL` | Default model |
+| `GEMINI_CLI_HOME` | Config root directory (overrides `~/.gemini`) |
+| `GEMINI_SANDBOX` | Sandbox mode |
+| `GEMINI_SYSTEM_MD` | System prompt override |
+
+### Ignore
+
+| Scope | Path |
+|-------|------|
+| **Project** | `./.geminiignore` |
+
+> **Note:** Uses `.gitignore` syntax. Session restart required after changes.
+
+**settings.json related:**
+```json
+{
+  "context": {
+    "fileFiltering": {
+      "respectGitIgnore": true,
+      "respectGeminiIgnore": true
+    }
+  }
+}
+```
+
+### Extensions
+
+| Scope | Path | Description |
+|-------|------|-------------|
+| **User** | `~/.gemini/extensions/{name}/` | Installed extensions |
+
+**Extension directory structure:**
+```
+.gemini/extensions/my-extension/
+├── gemini-extension.json   # Required: manifest
+├── GEMINI.md               # Optional: context
+├── commands/*.toml          # Optional: custom commands
+├── skills/{name}/SKILL.md   # Optional: skills
+└── hooks/hooks.json         # Optional: hook definitions
+```
+
+**CLI commands:** `gemini extensions install <source>`, `gemini extensions list`, `gemini extensions enable/disable`
 
 ---
 
@@ -633,10 +864,12 @@ customModes:
 ```
 Project Root/
 ├── CLAUDE.md                           # Claude Code (root rule)
+├── GEMINI.md                           # Gemini CLI (project instructions)
 ├── AGENTS.md                           # Codex CLI, Copilot CLI, VSCode Copilot Chat, Roo Code (root rule)
 ├── AGENTS.override.md                  # Codex CLI (override)
 ├── .mcp.json                           # Claude Code (MCP)
 ├── .claudeignore                       # Claude Code (ignore)
+├── .geminiignore                       # Gemini CLI (ignore)
 ├── .rooignore                          # Roo Code (ignore)
 ├── .roomodes                           # Roo Code (project custom modes, YAML/JSON)
 ├── .roorules                           # Roo Code (fallback rules)
@@ -652,6 +885,13 @@ Project Root/
 │
 ├── .codex/
 │   └── skills/{name}/SKILL.md          # Codex CLI (skills)
+│
+├── .gemini/
+│   ├── settings.json                   # Gemini CLI (project settings + MCP)
+│   ├── commands/*.toml                 # Gemini CLI (project custom commands)
+│   └── skills/{name}/SKILL.md          # Gemini CLI (project skills)
+│
+├── .geminiignore                       # Gemini CLI (ignore)
 │
 ├── .github/
 │   ├── copilot-instructions.md         # VSCode Copilot Chat, Copilot CLI (root rule)
@@ -691,6 +931,13 @@ User Home (~)/
 │   ├── AGENTS.override.md              # Codex CLI (global override)
 │   ├── config.toml                     # Codex CLI (config + MCP)
 │   └── skills/{name}/SKILL.md          # Codex CLI (user skills)
+│
+├── .gemini/
+│   ├── GEMINI.md                       # Gemini CLI (user instructions)
+│   ├── settings.json                   # Gemini CLI (user settings + MCP)
+│   ├── commands/*.toml                 # Gemini CLI (user custom commands)
+│   ├── skills/{name}/SKILL.md          # Gemini CLI (user skills)
+│   └── extensions/{name}/              # Gemini CLI (installed extensions)
 │
 ├── .copilot/
 │   ├── config.json                     # Copilot CLI (main config)
@@ -742,6 +989,15 @@ User Home (~)/
 - [Claude Code Documentation](https://code.claude.com/docs/en)
 - [Claude Code Settings](https://code.claude.com/docs/en/settings)
 - [Claude Code Skills](https://code.claude.com/docs/en/skills)
+- [Gemini CLI GitHub Repository](https://github.com/google-gemini/gemini-cli)
+- [Gemini CLI Installation](https://geminicli.com/docs/get-started/installation/)
+- [Gemini CLI Configuration](https://geminicli.com/docs/get-started/configuration/)
+- [Gemini CLI GEMINI.md](https://geminicli.com/docs/cli/gemini-md/)
+- [Gemini CLI Skills](https://geminicli.com/docs/cli/skills/)
+- [Gemini CLI Custom Commands](https://geminicli.com/docs/cli/custom-commands/)
+- [Gemini CLI MCP Servers](https://geminicli.com/docs/tools/mcp-server/)
+- [Gemini CLI .geminiignore](https://geminicli.com/docs/cli/gemini-ignore/)
+- [Gemini CLI Extensions](https://geminicli.com/docs/extensions/)
 - [Roo Code Documentation](https://docs.roocode.com/)
 - [Roo Code Custom Instructions](https://docs.roocode.com/features/custom-instructions)
 - [Roo Code Skills](https://docs.roocode.com/features/skills)

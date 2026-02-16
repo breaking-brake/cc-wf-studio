@@ -17,7 +17,8 @@ export type AiEditingProvider =
   | 'copilot-cli'
   | 'copilot-vscode'
   | 'codex'
-  | 'roo-code';
+  | 'roo-code'
+  | 'gemini';
 
 const SKILL_NAME = 'cc-workflow-ai-editor';
 
@@ -36,6 +37,8 @@ function getSkillDestination(provider: AiEditingProvider, workingDirectory: stri
       return path.join(workingDirectory, '.codex', 'skills', SKILL_NAME, 'SKILL.md');
     case 'roo-code':
       return path.join(workingDirectory, '.roo', 'skills', SKILL_NAME, 'SKILL.md');
+    case 'gemini':
+      return path.join(workingDirectory, '.gemini', 'skills', SKILL_NAME, 'SKILL.md');
   }
 }
 
@@ -126,6 +129,17 @@ async function launchProvider(
       } else {
         throw new Error('Roo Code extension is not installed.');
       }
+      break;
+    }
+
+    case 'gemini': {
+      const terminalName = `AI Edit: Gemini CLI`;
+      const terminal = vscode.window.createTerminal({
+        name: terminalName,
+        cwd: workingDirectory,
+      });
+      terminal.show(true);
+      terminal.sendText(`gemini -i ":skill ${SKILL_NAME}"`);
       break;
     }
   }

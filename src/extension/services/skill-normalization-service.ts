@@ -32,13 +32,13 @@ const NON_STANDARD_SKILL_PATTERNS = [
   '.copilot/skills/', // GitHub Copilot CLI (alternative)
   '.codex/skills/', // OpenAI Codex CLI
   '.roo/skills/', // Roo Code
-  // Future: '.gemini/skills/', '.cursor/skills/', etc.
+  '.gemini/skills/', // Google Gemini CLI
 ] as const;
 
 /**
  * Source type for skill directories
  */
-export type SkillSourceType = 'github' | 'copilot' | 'codex' | 'roo-code' | 'other';
+export type SkillSourceType = 'github' | 'copilot' | 'codex' | 'roo-code' | 'gemini' | 'other';
 
 /**
  * Target CLI for workflow execution
@@ -48,7 +48,7 @@ export type SkillSourceType = 'github' | 'copilot' | 'codex' | 'roo-code' | 'oth
  * - 'copilot': .claude/skills/, .github/skills/, AND .copilot/skills/ are standard
  * - 'codex': .claude/skills/ AND .codex/skills/ are standard
  */
-export type TargetCli = 'claude' | 'copilot' | 'codex' | 'roo-code';
+export type TargetCli = 'claude' | 'copilot' | 'codex' | 'roo-code' | 'gemini';
 
 /**
  * Get the list of skill directory patterns that are considered "standard" for a given CLI
@@ -72,6 +72,10 @@ function getStandardSkillPatterns(targetCli: TargetCli): string[] {
     case 'roo-code':
       // Roo Code considers .roo/skills/ as native
       patterns.push('.roo/skills/');
+      break;
+    case 'gemini':
+      // Gemini CLI considers .gemini/skills/ as native
+      patterns.push('.gemini/skills/');
       break;
     // case 'claude' falls through to default
     // Claude Code only uses .claude/skills/
@@ -198,6 +202,9 @@ function getSourceType(skillPath: string): SkillSourceType {
   if (normalizedPath.includes('.roo/skills/')) {
     return 'roo-code';
   }
+  if (normalizedPath.includes('.gemini/skills/')) {
+    return 'gemini';
+  }
   return 'other';
 }
 
@@ -226,6 +233,8 @@ function _getSourceSkillsDir(sourceType: SkillSourceType): string | null {
       return path.join(workspaceRoot, '.codex', 'skills');
     case 'roo-code':
       return path.join(workspaceRoot, '.roo', 'skills');
+    case 'gemini':
+      return path.join(workspaceRoot, '.gemini', 'skills');
     default:
       return null;
   }
@@ -365,6 +374,9 @@ function getSourceDescription(skills: SkillToNormalize[]): string {
   }
   if (sources.has('roo-code')) {
     descriptions.push('.roo/skills/');
+  }
+  if (sources.has('gemini')) {
+    descriptions.push('.gemini/skills/');
   }
   if (sources.has('other')) {
     descriptions.push('non-standard directories');

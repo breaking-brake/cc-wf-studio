@@ -39,6 +39,8 @@ interface MoreActionsDropdownProps {
   onToggleCodexBeta: () => void;
   isRooCodeEnabled: boolean;
   onToggleRooCodeBeta: () => void;
+  isGeminiEnabled: boolean;
+  onToggleGeminiBeta: () => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -55,6 +57,8 @@ export function MoreActionsDropdown({
   onToggleCodexBeta,
   isRooCodeEnabled,
   onToggleRooCodeBeta,
+  isGeminiEnabled,
+  onToggleGeminiBeta,
   open,
   onOpenChange,
 }: MoreActionsDropdownProps) {
@@ -225,6 +229,29 @@ export function MoreActionsDropdown({
               <BetaBadge style={{ marginLeft: '4px' }} />
             </span>
             {isRooCodeEnabled && <Check size={14} />}
+          </DropdownMenu.Item>
+
+          {/* Gemini CLI Beta Toggle */}
+          <DropdownMenu.Item
+            onSelect={onToggleGeminiBeta}
+            style={{
+              padding: '8px 12px',
+              fontSize: `${FONT_SIZES.small}px`,
+              color: 'var(--vscode-foreground)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              outline: 'none',
+              borderRadius: '2px',
+            }}
+          >
+            <Terminal size={14} />
+            <span style={{ flex: 1 }}>
+              Gemini CLI
+              <BetaBadge style={{ marginLeft: '4px' }} />
+            </span>
+            {isGeminiEnabled && <Check size={14} />}
           </DropdownMenu.Item>
 
           <DropdownMenu.Separator

@@ -145,3 +145,45 @@ export function executeCodexCliInTerminal(
     terminal,
   };
 }
+
+/**
+ * Options for executing Gemini CLI skill command
+ */
+export interface GeminiCliExecutionOptions {
+  /** Skill name (the workflow name as .gemini/skills/{name}/SKILL.md) */
+  skillName: string;
+  /** Working directory for the terminal */
+  workingDirectory: string;
+}
+
+/**
+ * Execute Gemini CLI with skill in a new VSCode integrated terminal
+ *
+ * Creates a new terminal and executes:
+ *   gemini -i ":skill {skillName}"
+ *
+ * @param options - Gemini CLI execution options
+ * @returns Terminal execution result
+ */
+export function executeGeminiCliInTerminal(
+  options: GeminiCliExecutionOptions
+): TerminalExecutionResult {
+  const terminalName = `Gemini: ${options.skillName}`;
+
+  // Create a new terminal
+  const terminal = vscode.window.createTerminal({
+    name: terminalName,
+    cwd: options.workingDirectory,
+  });
+
+  // Show the terminal and focus on it
+  terminal.show(true);
+
+  // Execute: gemini with :skill prompt to invoke the exported skill
+  terminal.sendText(`gemini -i ":skill ${options.skillName}"`);
+
+  return {
+    terminalName,
+    terminal,
+  };
+}

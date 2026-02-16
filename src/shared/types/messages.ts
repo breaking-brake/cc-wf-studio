@@ -188,9 +188,10 @@ export interface SkillReference {
    * - 'copilot': from ~/.copilot/skills/ (user) or .github/skills/ (project)
    * - 'codex': from ~/.codex/skills/ (user) or .codex/skills/ (project)
    * - 'roo': from ~/.roo/skills/ (user) or .roo/skills/ (project)
+   * - 'gemini': from ~/.gemini/skills/ (user) or .gemini/skills/ (project)
    * - undefined: for local scope or legacy data
    */
-  source?: 'claude' | 'copilot' | 'codex' | 'roo';
+  source?: 'claude' | 'copilot' | 'codex' | 'roo' | 'gemini';
 }
 
 export interface CreateSkillPayload {
@@ -796,6 +797,12 @@ export type ExtensionMessage =
   | Message<RunForRooCodeSuccessPayload, 'RUN_FOR_ROO_CODE_SUCCESS'>
   | Message<void, 'RUN_FOR_ROO_CODE_CANCELLED'>
   | Message<RooCodeOperationFailedPayload, 'RUN_FOR_ROO_CODE_FAILED'>
+  | Message<ExportForGeminiCliSuccessPayload, 'EXPORT_FOR_GEMINI_CLI_SUCCESS'>
+  | Message<void, 'EXPORT_FOR_GEMINI_CLI_CANCELLED'>
+  | Message<GeminiOperationFailedPayload, 'EXPORT_FOR_GEMINI_CLI_FAILED'>
+  | Message<RunForGeminiCliSuccessPayload, 'RUN_FOR_GEMINI_CLI_SUCCESS'>
+  | Message<void, 'RUN_FOR_GEMINI_CLI_CANCELLED'>
+  | Message<GeminiOperationFailedPayload, 'RUN_FOR_GEMINI_CLI_FAILED'>
   | Message<GetCurrentWorkflowRequestPayload, 'GET_CURRENT_WORKFLOW_REQUEST'>
   | Message<ApplyWorkflowFromMcpPayload, 'APPLY_WORKFLOW_FROM_MCP'>
   | Message<McpServerStatusPayload, 'MCP_SERVER_STATUS'>
@@ -1413,6 +1420,63 @@ export interface RooCodeOperationFailedPayload {
 }
 
 // ============================================================================
+// Gemini CLI Integration Payloads (Beta)
+// ============================================================================
+
+/**
+ * Export workflow for Gemini CLI payload (Skills format)
+ * Exports to .gemini/skills/{name}/SKILL.md
+ */
+export interface ExportForGeminiCliPayload {
+  /** Workflow to export */
+  workflow: Workflow;
+}
+
+/**
+ * Export for Gemini CLI success payload
+ */
+export interface ExportForGeminiCliSuccessPayload {
+  /** Skill name */
+  skillName: string;
+  /** Skill file path */
+  skillPath: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Run workflow for Gemini CLI payload
+ */
+export interface RunForGeminiCliPayload {
+  /** Workflow to run */
+  workflow: Workflow;
+}
+
+/**
+ * Run for Gemini CLI success payload
+ */
+export interface RunForGeminiCliSuccessPayload {
+  /** Workflow name */
+  workflowName: string;
+  /** Terminal name where command is running */
+  terminalName: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Gemini CLI operation failed payload
+ */
+export interface GeminiOperationFailedPayload {
+  /** Error code */
+  errorCode: 'GEMINI_NOT_INSTALLED' | 'EXPORT_FAILED' | 'UNKNOWN_ERROR';
+  /** Error message */
+  errorMessage: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+// ============================================================================
 // AI Editing Skill Payloads (MCP-based AI editing)
 // ============================================================================
 
@@ -1424,7 +1488,8 @@ export type AiEditingProvider =
   | 'copilot-cli'
   | 'copilot-vscode'
   | 'codex'
-  | 'roo-code';
+  | 'roo-code'
+  | 'gemini';
 
 /**
  * Run AI editing skill request payload (Webview → Extension)
@@ -1490,7 +1555,13 @@ export interface LaunchAiAgentFailedPayload {
 /**
  * AI agent config target for MCP server registration
  */
-export type McpConfigTarget = 'claude-code' | 'roo-code' | 'copilot-chat' | 'copilot-cli' | 'codex';
+export type McpConfigTarget =
+  | 'claude-code'
+  | 'roo-code'
+  | 'copilot-chat'
+  | 'copilot-cli'
+  | 'codex'
+  | 'gemini';
 
 /**
  * Start MCP Server request payload (Webview → Extension)
@@ -1664,6 +1735,8 @@ export type WebviewMessage =
   | Message<RunForCodexCliPayload, 'RUN_FOR_CODEX_CLI'>
   | Message<ExportForRooCodePayload, 'EXPORT_FOR_ROO_CODE'>
   | Message<RunForRooCodePayload, 'RUN_FOR_ROO_CODE'>
+  | Message<ExportForGeminiCliPayload, 'EXPORT_FOR_GEMINI_CLI'>
+  | Message<RunForGeminiCliPayload, 'RUN_FOR_GEMINI_CLI'>
   | Message<GetCurrentWorkflowResponsePayload, 'GET_CURRENT_WORKFLOW_RESPONSE'>
   | Message<ApplyWorkflowFromMcpResponsePayload, 'APPLY_WORKFLOW_FROM_MCP_RESPONSE'>
   | Message<StartMcpServerPayload, 'START_MCP_SERVER'>
