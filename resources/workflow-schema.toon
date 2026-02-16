@@ -433,8 +433,8 @@ connections:
   description: "Comprehensive specification for workflow connections. Defines connection object structure, port naming conventions, and completeness rules for AI-generated workflows."
   overview:
     description: High-level connection constraints that apply to all workflows
-    forbidden[5]: Start node cannot have input connections,End node cannot have output connections,No cycles allowed,No self-connections,One connection per output port
-    required[4]: Exactly one Start node per workflow,At least one End node per workflow,All non-Start nodes must have input connection,All non-End nodes must have output connection
+    forbidden[4]: Start node cannot have input connections,End node cannot have output connections,No cycles allowed,No self-connections
+    required[5]: At least one connection per output port,Exactly one Start node per workflow,At least one End node per workflow,All non-Start nodes must have input connection,All non-End nodes must have output connection
   format:
     description: Connection object structure in connections array
     objectStructure:
@@ -533,10 +533,10 @@ connections:
       description: Guidelines for AI-generated and AI-refined workflows. The AI system should ensure these rules are satisfied when generating/refining workflows. These guarantee that generated workflows are complete and ready to export.
       rules[10]:
         - id: START_OUTPUT
-          rule: Every Start node's 'output' port MUST have exactly one outgoing connection
+          rule: Every Start node's 'output' port MUST have at least one outgoing connection
           aiGuidance: "When generating/adding a Start node, immediately create a connection from its 'output' port to the next node"
         - id: NON_END_OUTPUT
-          rule: Every non-End node's output port(s) MUST have exactly one outgoing connection per port
+          rule: Every non-End node's output port(s) MUST have at least one outgoing connection per port
           example: IfElse node with branch-0 and branch-1 requires both branches to be connected
         - id: NON_START_INPUT
           rule: Every non-Start node's 'input' port MUST have exactly one incoming connection

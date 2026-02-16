@@ -469,10 +469,10 @@
         "Start node cannot have input connections",
         "End node cannot have output connections",
         "No cycles allowed",
-        "No self-connections",
-        "One connection per output port"
+        "No self-connections"
       ],
       "required": [
+        "At least one connection per output port",
         "Exactly one Start node per workflow",
         "At least one End node per workflow",
         "All non-Start nodes must have input connection",
@@ -599,12 +599,12 @@
         "rules": [
           {
             "id": "START_OUTPUT",
-            "rule": "Every Start node's 'output' port MUST have exactly one outgoing connection",
+            "rule": "Every Start node's 'output' port MUST have at least one outgoing connection",
             "aiGuidance": "When generating/adding a Start node, immediately create a connection from its 'output' port to the next node"
           },
           {
             "id": "NON_END_OUTPUT",
-            "rule": "Every non-End node's output port(s) MUST have exactly one outgoing connection per port",
+            "rule": "Every non-End node's output port(s) MUST have at least one outgoing connection per port",
             "example": "IfElse node with branch-0 and branch-1 requires both branches to be connected"
           },
           {
