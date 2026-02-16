@@ -22,16 +22,20 @@
 
 <span id="github-copilot-support"></span><span id="openai-codex-support"></span><span id="roo-code-support"></span><span id="gemini-cli-support"></span>
 
-| Provider | Export Format | Requires |
-|----------|--------------|----------|
+| Agent | Export Format | Requires |
+|-------|--------------|----------|
 | Claude Code | `.claude/agents/` `.claude/commands/` | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) |
 | GitHub Copilot (β) | `.github/prompts/` `.github/skills/` | [Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) or [Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli) |
 | OpenAI Codex CLI (β) | `.codex/skills/` | [Codex CLI](https://github.com/openai/codex) |
 | Roo Code (β) | `.roo/skills/` | [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) |
 | Gemini CLI (β) | `.gemini/skills/` | [Gemini CLI](https://github.com/google-gemini/gemini-cli) |
 
+> **Note:** β-supported agents require activation from Toolbar's **More** menu. Some workflows may not work as expected.
+
 <p align="center">
-  Design, orchestrate, and run AI agent workflows by conversing with AI – or use intuitive drag-and-drop. Build Sub-Agent orchestrations and conditional branching with natural language, then export and run directly in your favorite AI coding agent.
+  Design, orchestrate, and run AI agent workflows by conversing with AI – or use intuitive drag-and-drop.<br/>
+  Build agent orchestrations and conditional branching with natural language.<br/>
+  Export as custom slash commands or agent skills and run directly in your favorite AI coding agent.
 </p>
 
 <!-- Hero image placeholder - recommended size: 1600x900px or 16:9 aspect ratio -->
