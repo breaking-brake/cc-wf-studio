@@ -200,24 +200,6 @@ TypeScript 5.x (VSCode Extension Host), React 18.x (Webview UI): Follow standard
 
 <!-- MANUAL ADDITIONS START -->
 
-## Planning Guidelines
-
-### Gather Context from github-knowledge MCP (Required for Plan Mode)
-
-**When entering Plan Mode to design or plan implementation, always gather related knowledge from the github-knowledge MCP first.**
-
-#### Steps
-1. Use `search_decisions` to find past technical decisions by relevant modules, tags, or keywords
-2. Use `search_domain_knowledge` to find related business rules, domain terms, and constraints
-3. Use `get_decision_detail` as needed for full context on specific decisions
-4. Use `get_module_history` as needed to understand how a module has evolved
-
-#### Purpose
-- Maintain consistency with past technical decisions
-- Avoid re-proposing previously rejected alternatives
-- Incorporate domain knowledge (business rules, constraints) into design
-- Align implementation with established architectural patterns
-
 ## AI Editing Features
 
 ### MCP Server-based AI Editing (Active)
