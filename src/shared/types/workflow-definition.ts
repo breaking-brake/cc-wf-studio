@@ -309,8 +309,8 @@ export interface SubAgentFlowNodeData {
 export interface McpNodeData {
   /** MCP server identifier (from 'claude mcp list') */
   serverId: string;
-  /** Source provider of the MCP server (claude, copilot, codex, gemini) */
-  source?: 'claude' | 'copilot' | 'codex' | 'gemini';
+  /** Source provider of the MCP server (claude, copilot, codex, gemini, roo) */
+  source?: 'claude' | 'copilot' | 'codex' | 'gemini' | 'roo';
   /** Tool function name from the MCP server (optional for aiToolSelection mode) */
   toolName?: string;
   /** Human-readable description of the tool's functionality (optional for aiToolSelection mode) */

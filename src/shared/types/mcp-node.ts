@@ -9,7 +9,7 @@
 /**
  * MCP configuration source provider
  */
-export type McpConfigSource = 'claude' | 'copilot' | 'codex' | 'gemini';
+export type McpConfigSource = 'claude' | 'copilot' | 'codex' | 'gemini' | 'roo';
 
 /**
  * MCP server reference information (from 'claude mcp list')

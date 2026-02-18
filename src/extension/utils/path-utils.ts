@@ -262,6 +262,23 @@ export function getGeminiProjectMcpConfigPath(): string | null {
 }
 
 /**
+ * Get the Roo Code project-scope MCP config path (.roo/mcp.json)
+ *
+ * @returns Absolute path to project MCP config, or null if no workspace
+ *
+ * @example
+ * // Unix: /workspace/myproject/.roo/mcp.json
+ * // Windows: C:\workspace\myproject\.roo\mcp.json
+ */
+export function getRooProjectMcpConfigPath(): string | null {
+  const workspaceRoot = getWorkspaceRoot();
+  if (!workspaceRoot) {
+    return null;
+  }
+  return path.join(workspaceRoot, '.roo', 'mcp.json');
+}
+
+/**
  * Get the installed plugins JSON path
  *
  * @returns Absolute path to ~/.claude/plugins/installed_plugins.json

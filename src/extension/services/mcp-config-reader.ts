@@ -25,6 +25,9 @@
  * Gemini CLI:
  * - ~/.gemini/settings.json (user-level)
  * - <workspace>/.gemini/settings.json (project-level)
+ *
+ * Roo Code:
+ * - <workspace>/.roo/mcp.json (project-level)
  */
 
 import * as fs from 'node:fs';
@@ -38,6 +41,7 @@ import {
   getCopilotUserMcpConfigPath,
   getGeminiProjectMcpConfigPath,
   getGeminiUserMcpConfigPath,
+  getRooProjectMcpConfigPath,
   getVSCodeMcpConfigPath,
 } from '../utils/path-utils';
 
@@ -112,9 +116,11 @@ function readLegacyClaudeConfig(): {
  * @returns Normalized configuration with type field
  */
 function normalizeServerConfig(config: Partial<McpServerConfig>): McpServerConfig | null {
-  // If type is already specified, use it as-is
+  // If type is already specified, normalize and use it
   if (config.type) {
-    return config as McpServerConfig;
+    // Normalize 'streamable-http' (used by Roo Code) to 'http'
+    const type = config.type === ('streamable-http' as string) ? 'http' : config.type;
+    return { ...config, type } as McpServerConfig;
   }
 
   // Infer type from available fields
@@ -266,6 +272,44 @@ function readGeminiMcpConfig(configPath: string): Record<string, McpServerConfig
     }
 
     log('WARN', 'Failed to read Gemini settings.json', {
+      configPath,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
+/**
+ * Read Roo Code MCP config (.roo/mcp.json)
+ *
+ * Format: { "mcpServers": { ... } }
+ *
+ * @param configPath - Path to .roo/mcp.json
+ * @returns MCP servers configuration or null if not found
+ */
+function readRooMcpConfig(configPath: string): Record<string, McpServerConfig> | null {
+  try {
+    const content = fs.readFileSync(configPath, 'utf-8');
+    const parsed = JSON.parse(content);
+
+    const servers = parsed.mcpServers as Record<string, McpServerConfig> | undefined;
+
+    if (servers) {
+      log('INFO', 'Successfully read Roo Code mcp.json', {
+        configPath,
+        serverCount: Object.keys(servers).length,
+      });
+      return servers;
+    }
+
+    return null;
+  } catch (error) {
+    // File not found is expected
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return null;
+    }
+
+    log('WARN', 'Failed to read Roo Code mcp.json', {
       configPath,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -638,11 +682,37 @@ export function getMcpServerConfig(
       }
     }
 
-    // Server not found in any configuration (Claude, Copilot, Codex, or Gemini)
-    log('WARN', 'MCP server not found in any configuration (Claude, Copilot, Codex, Gemini)', {
-      serverId,
-      workspacePath,
-    });
+    // =========================================================================
+    // Roo Code source (Priority 11)
+    // =========================================================================
+
+    // Priority 11: Roo Code project-scope (.roo/mcp.json)
+    const rooProjectConfigPath = getRooProjectMcpConfigPath();
+    if (rooProjectConfigPath) {
+      const rooProjectConfig = readRooMcpConfig(rooProjectConfigPath);
+      if (rooProjectConfig?.[serverId]) {
+        const serverConfig = normalizeServerConfig(rooProjectConfig[serverId]);
+        if (serverConfig) {
+          log('INFO', 'Retrieved MCP server configuration from Roo Code project scope', {
+            serverId,
+            scope: 'roo-project',
+            configPath: rooProjectConfigPath,
+            type: serverConfig.type,
+          });
+          return { ...serverConfig, source: 'roo' };
+        }
+      }
+    }
+
+    // Server not found in any configuration (Claude, Copilot, Codex, Gemini, or Roo Code)
+    log(
+      'WARN',
+      'MCP server not found in any configuration (Claude, Copilot, Codex, Gemini, Roo Code)',
+      {
+        serverId,
+        workspacePath,
+      }
+    );
 
     return null;
   } catch (error) {
@@ -657,7 +727,7 @@ export function getMcpServerConfig(
 }
 
 /**
- * Get all MCP server IDs from all configuration sources (Claude, Copilot, Codex, Gemini)
+ * Get all MCP server IDs from all configuration sources (Claude, Copilot, Codex, Gemini, Roo Code)
  *
  * @param workspacePath - Optional workspace path for project-scoped servers
  * @returns Array of unique server IDs
@@ -773,6 +843,21 @@ export function getAllMcpServerIds(workspacePath?: string): string[] {
       }
     }
 
+    // =========================================================================
+    // Roo Code source
+    // =========================================================================
+
+    // Collect from Roo Code project-scope (.roo/mcp.json)
+    const rooProjectConfigPath = getRooProjectMcpConfigPath();
+    if (rooProjectConfigPath) {
+      const rooProjectConfig = readRooMcpConfig(rooProjectConfigPath);
+      if (rooProjectConfig) {
+        for (const id of Object.keys(rooProjectConfig)) {
+          serverIds.add(id);
+        }
+      }
+    }
+
     return Array.from(serverIds);
   } catch (error) {
     log('ERROR', 'Failed to get MCP server list', {
@@ -804,6 +889,7 @@ export interface McpServerWithSource extends McpServerConfig {
  * - Copilot CLI (.copilot/mcp-config.json)
  * - Codex CLI (~/.codex/config.toml)
  * - Gemini CLI (~/.gemini/settings.json, .gemini/settings.json)
+ * - Roo Code (.roo/mcp.json)
  *
  * Priority order (first match wins for duplicate server IDs):
  * 1. Project-scope Claude Code (<workspace>/.mcp.json)
@@ -816,6 +902,7 @@ export interface McpServerWithSource extends McpServerConfig {
  * 8. User-scope Codex CLI (~/.codex/config.toml)
  * 9. User-scope Gemini CLI (~/.gemini/settings.json)
  * 10. Project-scope Gemini CLI (<workspace>/.gemini/settings.json)
+ * 11. Project-scope Roo Code (<workspace>/.roo/mcp.json)
  *
  * @param workspacePath - Optional workspace path for project-scoped servers
  * @returns Array of MCP server configurations with source metadata
@@ -939,12 +1026,20 @@ export function getAllMcpServersWithSource(workspacePath?: string): McpServerWit
       }
     }
 
+    // Priority 10: Roo Code project-scope (.roo/mcp.json)
+    const rooProjectConfigPath = getRooProjectMcpConfigPath();
+    if (rooProjectConfigPath) {
+      const rooProjectConfig = readRooMcpConfig(rooProjectConfigPath);
+      addServers(rooProjectConfig, 'roo', rooProjectConfigPath);
+    }
+
     log('INFO', 'Scanned all MCP server sources', {
       totalServers: servers.length,
       claudeCount: servers.filter((s) => s.source === 'claude').length,
       copilotCount: servers.filter((s) => s.source === 'copilot').length,
       codexCount: servers.filter((s) => s.source === 'codex').length,
       geminiCount: servers.filter((s) => s.source === 'gemini').length,
+      rooCount: servers.filter((s) => s.source === 'roo').length,
     });
 
     return servers;
