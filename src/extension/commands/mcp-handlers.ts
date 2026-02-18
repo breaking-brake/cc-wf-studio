@@ -95,6 +95,15 @@ export async function handleListMcpServers(
     // Get servers from all config sources (Claude Code, Copilot CLI, Codex CLI)
     const configServers = getAllMcpServersWithSource(workspaceFolder);
 
+    // Build config server lookup map for supplementing CLI results with accurate type/url
+    const configServerMap = new Map<string, McpServerWithSource>();
+    for (const configServer of configServers) {
+      const key = `${configServer.source || 'claude'}:${configServer.id}`;
+      if (!configServerMap.has(key)) {
+        configServerMap.set(key, configServer);
+      }
+    }
+
     // Convert McpServerWithSource to McpServerReference
     // Note: status is omitted because config readers can't determine connection status
     const convertToServerReference = (
@@ -107,6 +116,7 @@ export async function handleListMcpServers(
       command: server.command || '',
       args: server.args || [],
       type: server.type || 'stdio',
+      url: server.url,
       environment: server.env,
       source: server.source,
     });
@@ -121,9 +131,16 @@ export async function handleListMcpServers(
 
     if (result.success && result.data) {
       // Add CLI results first (they have accurate status info)
+      // Supplement type/url from config files (CLI parser may hardcode type to 'stdio')
       for (const server of result.data) {
         const key = getServerKey(server.id, server.source);
         if (!seenServerKeys.has(key)) {
+          const configMatch = configServerMap.get(key);
+          if (configMatch) {
+            // Use config file's type and url (more accurate than CLI parser)
+            server.type = configMatch.type || server.type;
+            server.url = configMatch.url || server.url;
+          }
           mergedServers.push(server);
           seenServerKeys.add(key);
         }

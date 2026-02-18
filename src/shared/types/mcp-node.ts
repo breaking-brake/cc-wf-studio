@@ -29,6 +29,8 @@ export interface McpServerReference {
   args: string[];
   /** MCP transport type */
   type: 'stdio' | 'sse' | 'http';
+  /** URL for HTTP/SSE transport (optional, not used for stdio) */
+  url?: string;
   /** Environment variables (optional) */
   environment?: Record<string, string>;
   /** Source provider (defaults to 'claude' if undefined for backwards compatibility) */

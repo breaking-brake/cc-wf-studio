@@ -551,6 +551,10 @@ function parseMcpGetOutput(output: string, serverId: string): McpServerReference
         details.args = value.split(/\s+/).filter((arg) => arg.length > 0);
         break;
 
+      case 'Url':
+        details.url = value;
+        break;
+
       case 'Environment':
         // Environment variables (currently not parsed, assumed empty)
         details.environment = {};
@@ -559,8 +563,24 @@ function parseMcpGetOutput(output: string, serverId: string): McpServerReference
   }
 
   // Validate required fields
-  if (!details.scope || !details.status || !details.type || !details.command || !details.args) {
+  if (!details.scope || !details.status || !details.type) {
     throw new Error('Missing required fields in MCP server details');
+  }
+
+  // For stdio transport, command and args are required
+  // For http/sse transport, they may not be present
+  if (details.type === 'stdio') {
+    if (!details.command || !details.args) {
+      throw new Error('Missing command/args for stdio MCP server');
+    }
+  } else {
+    // Ensure command/args have default values for non-stdio transports
+    if (!details.command) {
+      details.command = '';
+    }
+    if (!details.args) {
+      details.args = [];
+    }
   }
 
   return details as McpServerReference;
@@ -584,7 +604,7 @@ export async function listTools(
 
   // Import MCP SDK services
   const { getMcpServerConfig } = await import('./mcp-config-reader');
-  const { listToolsFromMcpServer } = await import('./mcp-sdk-client');
+  const { listToolsFromMcpServer, listToolsFromMcpServerHttp } = await import('./mcp-sdk-client');
 
   // Get server configuration from .claude.json
   const serverConfig = getMcpServerConfig(serverId, workspacePath);
@@ -601,20 +621,86 @@ export async function listTools(
     };
   }
 
-  // Only stdio servers are supported for now
+  // Route by transport type
+  if (serverConfig.type === 'http') {
+    if (!serverConfig.url) {
+      return {
+        success: false,
+        error: {
+          code: 'MCP_INVALID_CONFIG',
+          message: `MCP server '${serverId}' has HTTP transport but no URL configured`,
+          details: 'Missing url in server configuration',
+        },
+        executionTimeMs: Date.now() - startTime,
+      };
+    }
+
+    try {
+      const tools = await listToolsFromMcpServerHttp(serverId, serverConfig.url);
+
+      log('INFO', 'Successfully listed MCP tools via HTTP', {
+        serverId,
+        toolCount: tools.length,
+        executionTimeMs: Date.now() - startTime,
+      });
+
+      return {
+        success: true,
+        data: tools,
+        executionTimeMs: Date.now() - startTime,
+      };
+    } catch (error) {
+      const executionTimeMs = Date.now() - startTime;
+
+      if (error instanceof Error && error.message.includes('timeout')) {
+        return {
+          success: false,
+          error: {
+            code: 'MCP_CONNECTION_TIMEOUT',
+            message: `Connection to MCP server '${serverId}' timed out`,
+            details: error.message,
+          },
+          executionTimeMs,
+        };
+      }
+
+      return {
+        success: false,
+        error: {
+          code: 'MCP_CONNECTION_ERROR',
+          message: `Failed to connect to MCP server '${serverId}' via HTTP`,
+          details: error instanceof Error ? error.message : String(error),
+        },
+        executionTimeMs,
+      };
+    }
+  }
+
+  if (serverConfig.type === 'sse') {
+    return {
+      success: false,
+      error: {
+        code: 'MCP_UNSUPPORTED_TRANSPORT',
+        message: `MCP server '${serverId}' uses SSE transport which is deprecated`,
+        details: 'SSE transport is deprecated. Please migrate to HTTP (Streamable HTTP) transport.',
+      },
+      executionTimeMs: Date.now() - startTime,
+    };
+  }
+
   if (serverConfig.type !== 'stdio') {
     return {
       success: false,
       error: {
         code: 'MCP_UNSUPPORTED_TRANSPORT',
         message: `MCP server '${serverId}' uses unsupported transport type: ${serverConfig.type}`,
-        details: 'Only stdio transport is currently supported',
+        details: 'Supported transport types: stdio, http',
       },
       executionTimeMs: Date.now() - startTime,
     };
   }
 
-  // Validate stdio configuration
+  // stdio transport
   if (!serverConfig.command || !serverConfig.args) {
     return {
       success: false,
@@ -759,7 +845,7 @@ export async function getToolSchema(
 
   // Import MCP SDK services
   const { getMcpServerConfig } = await import('./mcp-config-reader');
-  const { listToolsFromMcpServer } = await import('./mcp-sdk-client');
+  const { listToolsFromMcpServer, listToolsFromMcpServerHttp } = await import('./mcp-sdk-client');
 
   // Get server configuration from .claude.json
   const serverConfig = getMcpServerConfig(serverId, workspacePath);
@@ -776,20 +862,100 @@ export async function getToolSchema(
     };
   }
 
-  // Only stdio servers are supported for now
+  // Route by transport type
+  if (serverConfig.type === 'http') {
+    if (!serverConfig.url) {
+      return {
+        success: false,
+        error: {
+          code: 'MCP_INVALID_CONFIG',
+          message: `MCP server '${serverId}' has HTTP transport but no URL configured`,
+          details: 'Missing url in server configuration',
+        },
+        executionTimeMs: Date.now() - startTime,
+      };
+    }
+
+    try {
+      const tools = await listToolsFromMcpServerHttp(serverId, serverConfig.url);
+      const tool = tools.find((t) => t.name === toolName);
+
+      if (!tool) {
+        return {
+          success: false,
+          error: {
+            code: 'MCP_PARSE_ERROR',
+            message: `Tool '${toolName}' not found in server '${serverId}'`,
+            details: `Available tools: ${tools.map((t) => t.name).join(', ')}`,
+          },
+          executionTimeMs: Date.now() - startTime,
+        };
+      }
+
+      log('INFO', 'GET_TOOL_SCHEMA completed successfully via HTTP', {
+        serverId,
+        toolName,
+        parameterCount: tool.parameters?.length || 0,
+        executionTimeMs: Date.now() - startTime,
+      });
+
+      return {
+        success: true,
+        data: tool,
+        executionTimeMs: Date.now() - startTime,
+      };
+    } catch (error) {
+      const executionTimeMs = Date.now() - startTime;
+
+      if (error instanceof Error && error.message.includes('timeout')) {
+        return {
+          success: false,
+          error: {
+            code: 'MCP_CONNECTION_TIMEOUT',
+            message: `Connection to MCP server '${serverId}' timed out`,
+            details: error.message,
+          },
+          executionTimeMs,
+        };
+      }
+
+      return {
+        success: false,
+        error: {
+          code: 'MCP_CONNECTION_ERROR',
+          message: `Failed to connect to MCP server '${serverId}' via HTTP`,
+          details: error instanceof Error ? error.message : String(error),
+        },
+        executionTimeMs,
+      };
+    }
+  }
+
+  if (serverConfig.type === 'sse') {
+    return {
+      success: false,
+      error: {
+        code: 'MCP_UNSUPPORTED_TRANSPORT',
+        message: `MCP server '${serverId}' uses SSE transport which is deprecated`,
+        details: 'SSE transport is deprecated. Please migrate to HTTP (Streamable HTTP) transport.',
+      },
+      executionTimeMs: Date.now() - startTime,
+    };
+  }
+
   if (serverConfig.type !== 'stdio') {
     return {
       success: false,
       error: {
         code: 'MCP_UNSUPPORTED_TRANSPORT',
         message: `MCP server '${serverId}' uses unsupported transport type: ${serverConfig.type}`,
-        details: 'Only stdio transport is currently supported',
+        details: 'Supported transport types: stdio, http',
       },
       executionTimeMs: Date.now() - startTime,
     };
   }
 
-  // Validate stdio configuration
+  // stdio transport
   if (!serverConfig.command || !serverConfig.args) {
     return {
       success: false,

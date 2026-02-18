@@ -10,6 +10,7 @@
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import type { McpToolReference, ToolParameter } from '../../shared/types/mcp-node';
 import { log } from '../extension';
 
@@ -195,6 +196,114 @@ export async function listToolsFromMcpServer(
         log('INFO', 'Closed MCP server connection', { serverId });
       } catch (closeError) {
         log('WARN', 'Failed to close MCP server connection', {
+          serverId,
+          error: closeError instanceof Error ? closeError.message : String(closeError),
+        });
+      }
+    }
+  }
+}
+
+/**
+ * Connect to an MCP server using HTTP (Streamable HTTP) transport
+ *
+ * @param url - Server URL (e.g., "http://localhost:3000/mcp")
+ * @param timeoutMs - Connection timeout in milliseconds (default: 5000)
+ * @returns Connected MCP client
+ */
+export async function connectToMcpServerHttp(url: string, timeoutMs = 5000): Promise<Client> {
+  log('INFO', 'Connecting to MCP server via HTTP transport', {
+    url,
+    timeoutMs,
+  });
+
+  const transport = new StreamableHTTPClientTransport(new URL(url));
+
+  const client = new Client(
+    {
+      name: 'cc-workflow-studio',
+      version: '1.0.0',
+    },
+    {
+      capabilities: {},
+    }
+  );
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => {
+      reject(new Error(`MCP server HTTP connection timeout after ${timeoutMs}ms`));
+    }, timeoutMs);
+  });
+
+  try {
+    await Promise.race([client.connect(transport), timeoutPromise]);
+
+    log('INFO', 'Successfully connected to MCP server via HTTP', { url });
+
+    return client;
+  } catch (error) {
+    log('ERROR', 'Failed to connect to MCP server via HTTP', {
+      url,
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    throw error;
+  }
+}
+
+/**
+ * List all tools available from a specific MCP server using HTTP transport
+ *
+ * @param serverId - Server identifier
+ * @param url - Server URL
+ * @returns List of available tools
+ */
+export async function listToolsFromMcpServerHttp(
+  serverId: string,
+  url: string
+): Promise<McpToolReference[]> {
+  const startTime = Date.now();
+
+  log('INFO', 'Listing tools from MCP server via HTTP', {
+    serverId,
+    url,
+  });
+
+  let client: Client | null = null;
+
+  try {
+    client = await connectToMcpServerHttp(url);
+
+    const response = await client.listTools();
+
+    log('INFO', 'Successfully retrieved tools from MCP server via HTTP', {
+      serverId,
+      toolCount: response.tools.length,
+      executionTimeMs: Date.now() - startTime,
+    });
+
+    return response.tools.map((tool) => ({
+      serverId,
+      name: tool.name,
+      description: tool.description || '',
+      parameters: tool.inputSchema ? convertJsonSchemaToToolParameters(tool.inputSchema) : [],
+    }));
+  } catch (error) {
+    log('ERROR', 'Failed to list tools from MCP server via HTTP', {
+      serverId,
+      url,
+      error: error instanceof Error ? error.message : String(error),
+      executionTimeMs: Date.now() - startTime,
+    });
+
+    throw error;
+  } finally {
+    if (client) {
+      try {
+        await client.close();
+        log('INFO', 'Closed MCP server HTTP connection', { serverId });
+      } catch (closeError) {
+        log('WARN', 'Failed to close MCP server HTTP connection', {
           serverId,
           error: closeError instanceof Error ? closeError.message : String(closeError),
         });
