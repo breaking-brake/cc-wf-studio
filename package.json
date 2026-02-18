@@ -1,7 +1,7 @@
 {
   "name": "cc-wf-studio",
   "displayName": "CC Workflow Studio",
-  "description": "Visual Workflow Editor for AI Agents",
+  "description": "Visual Workflow Editor — Claude Code, Codex CLI, Copilot, Roo Code, and Gemini CLI",
   "version": "3.22.1",
   "publisher": "breaking-brake",
   "icon": "resources/icon.png",
@@ -13,8 +13,7 @@
   "license": "AGPL-3.0-or-later",
   "keywords": [
     "ai",
-    "agentic-engineering",
-    "agent-orchestration",
+    "workflow",
     "claude",
     "claude-code",
     "cli",
