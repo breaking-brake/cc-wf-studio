@@ -126,12 +126,12 @@ function normalizeServerConfig(config: Partial<McpServerConfig>): McpServerConfi
     } as McpServerConfig;
   }
 
-  // Rule 2: If url exists, cannot infer (http or sse?)
+  // Rule 2: If url exists, assume http transport (same as Gemini config handling)
   if (config.url) {
-    log('WARN', 'Cannot infer MCP server type from url field', {
-      url: config.url,
-    });
-    return null;
+    return {
+      ...config,
+      type: 'http',
+    } as McpServerConfig;
   }
 
   // No type and no command/url - invalid configuration
