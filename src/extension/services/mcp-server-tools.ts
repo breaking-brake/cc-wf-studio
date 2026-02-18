@@ -8,7 +8,6 @@
  * - get_current_workflow: Get the currently active workflow from the canvas
  * - get_workflow_schema: Get the workflow JSON schema for generating valid workflows
  * - apply_workflow: Apply a workflow to the canvas (validates first)
- * - validate_workflow: Validate a workflow JSON without applying
  */
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -217,74 +216,6 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
               text: JSON.stringify({
                 success: false,
                 error: error instanceof Error ? error.message : String(error),
-              }),
-            },
-          ],
-          isError: true,
-        };
-      }
-    }
-  );
-
-  // Tool 4: validate_workflow
-  server.tool(
-    'validate_workflow',
-    'Validate a workflow JSON without applying it to the canvas. Returns validation results with any errors found.',
-    {
-      workflow: z.string().describe('The workflow JSON string to validate'),
-    },
-    async ({ workflow: workflowJson }) => {
-      try {
-        // Parse JSON
-        let parsedWorkflow: unknown;
-        try {
-          parsedWorkflow = JSON.parse(workflowJson);
-        } catch {
-          return {
-            content: [
-              {
-                type: 'text' as const,
-                text: JSON.stringify({
-                  valid: false,
-                  errors: [
-                    {
-                      code: 'PARSE_ERROR',
-                      message: 'Invalid JSON: Failed to parse workflow string',
-                    },
-                  ],
-                }),
-              },
-            ],
-          };
-        }
-
-        // Validate
-        const validation = validateAIGeneratedWorkflow(parsedWorkflow);
-
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: JSON.stringify({
-                valid: validation.valid,
-                errors: validation.errors,
-              }),
-            },
-          ],
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: JSON.stringify({
-                valid: false,
-                errors: [
-                  {
-                    code: 'UNKNOWN_ERROR',
-                    message: error instanceof Error ? error.message : String(error),
-                  },
-                ],
               }),
             },
           ],
