@@ -79,15 +79,17 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
     } else if (nodeType === 'askUserQuestion') {
       const askNode = node as AskUserQuestionNode;
       const questionText = askNode.data.questionText || 'Question';
-      lines.push(`    ${nodeId}{${escapeLabel(`AskUserQuestion:<br/>${questionText}`)}}`);
+      lines.push(
+        `    ${nodeId}{${escapeLabel('AskUserQuestion')}:<br/>${escapeLabel(questionText)}}`
+      );
     } else if (nodeType === 'branch') {
       const branchNode = node as BranchNode;
       const branchType = branchNode.data.branchType === 'conditional' ? 'Branch' : 'Switch';
-      lines.push(`    ${nodeId}{${escapeLabel(`${branchType}:<br/>Conditional Branch`)}}`);
+      lines.push(`    ${nodeId}{${escapeLabel(branchType)}:<br/>Conditional Branch}`);
     } else if (nodeType === 'ifElse') {
-      lines.push(`    ${nodeId}{${escapeLabel('If/Else:<br/>Conditional Branch')}}`);
+      lines.push(`    ${nodeId}{If/Else:<br/>Conditional Branch}`);
     } else if (nodeType === 'switch') {
-      lines.push(`    ${nodeId}{${escapeLabel('Switch:<br/>Conditional Branch')}}`);
+      lines.push(`    ${nodeId}{Switch:<br/>Conditional Branch}`);
     } else if (nodeType === 'prompt') {
       const promptNode = node as PromptNode;
       const promptText = promptNode.data.prompt?.split('\n')[0] || 'Prompt';
