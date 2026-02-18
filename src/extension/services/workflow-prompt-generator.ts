@@ -40,7 +40,18 @@ export function sanitizeNodeId(id: string): string {
  * Escape special characters in Mermaid labels
  */
 export function escapeLabel(label: string): string {
-  return label.replace(/"/g, '#quot;').replace(/\[/g, '#91;').replace(/\]/g, '#93;');
+  return label
+    .replace(/"/g, '#quot;')
+    .replace(/\[/g, '#91;')
+    .replace(/\]/g, '#93;')
+    .replace(/\(/g, '#40;')
+    .replace(/\)/g, '#41;')
+    .replace(/\{/g, '#123;')
+    .replace(/\}/g, '#125;')
+    .replace(/</g, '#60;')
+    .replace(/>/g, '#62;')
+    .replace(/\|/g, '#124;')
+    .replace(/#/g, '#35;');
 }
 
 /**
