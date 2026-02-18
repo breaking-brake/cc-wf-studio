@@ -41,6 +41,7 @@ export function sanitizeNodeId(id: string): string {
  */
 export function escapeLabel(label: string): string {
   return label
+    .replace(/#/g, '#35;')
     .replace(/"/g, '#quot;')
     .replace(/\[/g, '#91;')
     .replace(/\]/g, '#93;')
@@ -50,8 +51,7 @@ export function escapeLabel(label: string): string {
     .replace(/\}/g, '#125;')
     .replace(/</g, '#60;')
     .replace(/>/g, '#62;')
-    .replace(/\|/g, '#124;')
-    .replace(/#/g, '#35;');
+    .replace(/\|/g, '#124;');
 }
 
 /**
