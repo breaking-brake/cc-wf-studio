@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <strong>Visual Agentic Engineering Toolkit for AI Coding Agents</strong>
+  <strong>Visual Workflow Editor for AI Agents</strong>
 </p>
 
 <span id="github-copilot-support"></span><span id="openai-codex-support"></span><span id="roo-code-support"></span><span id="gemini-cli-support"></span>
@@ -31,12 +31,6 @@
 | Gemini CLI (β) | `.gemini/skills/` | [Gemini CLI](https://github.com/google-gemini/gemini-cli) |
 
 > **Note:** β-supported agents require activation from Toolbar's **More** menu. Some workflows may not work as expected.
-
-<p align="center">
-  Design, orchestrate, and run AI agent workflows by conversing with AI – or use intuitive drag-and-drop.<br/>
-  Build agent orchestrations and conditional branching with natural language.<br/>
-  Export as custom slash commands or agent skills and run directly in your favorite AI coding agent.
-</p>
 
 <!-- Hero image placeholder - recommended size: 1600x900px or 16:9 aspect ratio -->
 <!-- Place image at: /resources/hero.png -->
