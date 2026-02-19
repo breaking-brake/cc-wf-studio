@@ -12,20 +12,9 @@
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import type { AiEditingProvider } from '../../shared/types/messages';
 import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
 import type { McpServerManager } from './mcp-server-service';
-import {
-  getDefaultSchemaPath,
-  loadWorkflowSchemaToon,
-  type SchemaVariant,
-} from './schema-loader-service';
-
-function getSchemaVariantForProvider(provider: AiEditingProvider | null): SchemaVariant {
-  if (provider === 'codex' || provider === 'roo-code' || provider === 'copilot-vscode')
-    return 'basic';
-  return 'full';
-}
+import { getDefaultSchemaPath, loadWorkflowSchemaToon } from './schema-loader-service';
 
 export function registerMcpTools(server: McpServer, manager: McpServerManager): void {
   // Tool 1: get_current_workflow
@@ -103,9 +92,8 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
           };
         }
 
-        const variant = getSchemaVariantForProvider(manager.getCurrentProvider());
-        const schemaPath = getDefaultSchemaPath(extensionPath, variant);
-        const result = await loadWorkflowSchemaToon(schemaPath, variant);
+        const schemaPath = getDefaultSchemaPath(extensionPath);
+        const result = await loadWorkflowSchemaToon(schemaPath);
 
         if (!result.success || !result.schemaString) {
           return {

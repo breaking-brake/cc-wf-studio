@@ -3,7 +3,6 @@
  *
  * Loads and caches the workflow schema documentation for AI context.
  * Supports both JSON and TOON formats for A/B testing.
- * Supports 'full' and 'basic' schema variants for provider-specific content.
  * Based on: /specs/001-ai-workflow-generation/research.md Q2
  */
 
@@ -11,16 +10,9 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import type { SchemaFormat } from '../../shared/types/ai-metrics';
 
-/**
- * Schema variant determines which set of node types are included.
- * - 'full': All node types (for Claude Code, Copilot CLI, VSCode Copilot)
- * - 'basic': SubAgent/SubAgentFlow excluded (for Codex CLI, Roo Code)
- */
-export type SchemaVariant = 'full' | 'basic';
-
-// In-memory caches for loaded schemas (keyed by variant)
-const cachedJsonSchemas = new Map<SchemaVariant, unknown>();
-const cachedToonSchemas = new Map<SchemaVariant, string>();
+// In-memory caches for loaded schemas
+let cachedJsonSchema: unknown | undefined;
+let cachedToonSchema: string | undefined;
 
 export interface SchemaLoadResult {
   success: boolean;
@@ -39,21 +31,16 @@ export interface SchemaLoadResult {
  * Load workflow schema in JSON format (existing behavior)
  *
  * @param schemaPath - Absolute path to workflow-schema.json file
- * @param variant - Schema variant to load (default: 'full')
  * @returns Load result with success status and schema/error
  */
-export async function loadWorkflowSchema(
-  schemaPath: string,
-  variant: SchemaVariant = 'full'
-): Promise<SchemaLoadResult> {
+export async function loadWorkflowSchema(schemaPath: string): Promise<SchemaLoadResult> {
   // Return cached schema if available
-  const cached = cachedJsonSchemas.get(variant);
-  if (cached !== undefined) {
+  if (cachedJsonSchema !== undefined) {
     return {
       success: true,
-      schema: cached,
+      schema: cachedJsonSchema,
       format: 'json',
-      sizeBytes: JSON.stringify(cached).length,
+      sizeBytes: JSON.stringify(cachedJsonSchema).length,
     };
   }
 
@@ -65,7 +52,7 @@ export async function loadWorkflowSchema(
     const schema = JSON.parse(schemaContent);
 
     // Cache for future use
-    cachedJsonSchemas.set(variant, schema);
+    cachedJsonSchema = schema;
 
     return {
       success: true,
@@ -118,30 +105,25 @@ export async function loadWorkflowSchema(
  * Returns the raw TOON string for direct inclusion in prompts
  *
  * @param schemaPath - Absolute path to workflow-schema.json file (TOON path derived from it)
- * @param variant - Schema variant to load (default: 'full')
  * @returns Load result with success status and schemaString/error
  */
-export async function loadWorkflowSchemaToon(
-  schemaPath: string,
-  variant: SchemaVariant = 'full'
-): Promise<SchemaLoadResult> {
+export async function loadWorkflowSchemaToon(schemaPath: string): Promise<SchemaLoadResult> {
   // Derive TOON path from JSON path
   const toonPath = schemaPath.replace('.json', '.toon');
 
   // Return cached schema if available
-  const cached = cachedToonSchemas.get(variant);
-  if (cached !== undefined) {
+  if (cachedToonSchema !== undefined) {
     return {
       success: true,
-      schemaString: cached,
+      schemaString: cachedToonSchema,
       format: 'toon',
-      sizeBytes: cached.length,
+      sizeBytes: cachedToonSchema.length,
     };
   }
 
   try {
     const toonContent = await fs.readFile(toonPath, 'utf-8');
-    cachedToonSchemas.set(variant, toonContent);
+    cachedToonSchema = toonContent;
 
     return {
       success: true,
@@ -181,18 +163,16 @@ export async function loadWorkflowSchemaToon(
  *
  * @param extensionPath - The extension's root path
  * @param format - Schema format to load ('json' or 'toon')
- * @param variant - Schema variant to load (default: 'full')
  * @returns Load result with schema data
  */
 export async function loadWorkflowSchemaByFormat(
   extensionPath: string,
-  format: SchemaFormat,
-  variant: SchemaVariant = 'full'
+  format: SchemaFormat
 ): Promise<SchemaLoadResult> {
-  const jsonPath = getDefaultSchemaPath(extensionPath, variant);
+  const jsonPath = getDefaultSchemaPath(extensionPath);
 
   if (format === 'toon') {
-    const result = await loadWorkflowSchemaToon(jsonPath, variant);
+    const result = await loadWorkflowSchemaToon(jsonPath);
     if (result.success) {
       return result;
     }
@@ -200,28 +180,23 @@ export async function loadWorkflowSchemaByFormat(
     console.warn('TOON schema load failed, falling back to JSON');
   }
 
-  return loadWorkflowSchema(jsonPath, variant);
+  return loadWorkflowSchema(jsonPath);
 }
 
 /**
  * Clear both schema caches (useful for testing or schema updates)
  */
 export function clearSchemaCache(): void {
-  cachedJsonSchemas.clear();
-  cachedToonSchemas.clear();
+  cachedJsonSchema = undefined;
+  cachedToonSchema = undefined;
 }
 
 /**
  * Get the default schema path for the extension
  *
  * @param extensionPath - The extension's root path from context.extensionPath
- * @param variant - Schema variant (default: 'full')
- * @returns Absolute path to workflow-schema.json (or workflow-schema-basic.json for 'basic')
+ * @returns Absolute path to workflow-schema.json
  */
-export function getDefaultSchemaPath(
-  extensionPath: string,
-  variant: SchemaVariant = 'full'
-): string {
-  const filename = variant === 'basic' ? 'workflow-schema-basic.json' : 'workflow-schema.json';
-  return path.join(extensionPath, 'resources', filename);
+export function getDefaultSchemaPath(extensionPath: string): string {
+  return path.join(extensionPath, 'resources', 'workflow-schema.json');
 }
