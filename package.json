@@ -1,7 +1,7 @@
 {
   "name": "cc-wf-studio",
-  "displayName": "CC Workflow Studio",
-  "description": "Visual Workflow Editor — Claude Code, Codex CLI, Copilot, Roo Code, and Gemini CLI",
+  "displayName": "Claude Code Workflow Studio",
+  "description": "Visual Workflow Editor for Claude Code, GitHub Copilot, Codex CLI, Roo Code, and Gemini CLI",
   "version": "3.22.2",
   "publisher": "breaking-brake",
   "icon": "resources/icon.png",
@@ -14,12 +14,10 @@
   "keywords": [
     "ai",
     "claude",
-    "claude-code",
-    "cli",
     "codex",
     "copilot",
-    "roo-code",
-    "gemini-cli"
+    "roo",
+    "gemini"
   ],
   "engines": {
     "vscode": "^1.80.0"
