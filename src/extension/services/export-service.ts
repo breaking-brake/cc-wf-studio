@@ -312,7 +312,9 @@ function generateSubAgentFlowAgentFile(
   };
 
   // Generate execution logic using shared module
-  const executionLogic = generateExecutionInstructions(pseudoWorkflow);
+  const executionLogic = generateExecutionInstructions(pseudoWorkflow, {
+    provider: 'claude-code',
+  });
 
   return `${frontmatter.join('\n')}${mermaidFlowchart}\n\n${executionLogic}`;
 }
@@ -423,6 +425,7 @@ function generateSlashCommandFile(workflow: Workflow): string {
   const executionLogic = generateExecutionInstructions(workflow, {
     parentWorkflowName: workflowBaseName,
     subAgentFlows: workflow.subAgentFlows,
+    provider: 'claude-code',
   });
 
   return `${frontmatter}${mermaidFlowchart}\n\n${executionLogic}`;

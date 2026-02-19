@@ -14,7 +14,10 @@ import type {
   RunForCodexCliPayload,
   RunForCodexCliSuccessPayload,
 } from '../../shared/types/messages';
+import { NodeType } from '../../shared/types/workflow-definition';
 import {
+  checkCodexMultiAgentEnabled,
+  enableCodexMultiAgent,
   previewMcpSyncForCodexCli,
   syncMcpConfigForCodexCli,
 } from '../services/codex-mcp-sync-service';
@@ -48,6 +51,29 @@ export async function handleExportForCodexCli(
 ): Promise<void> {
   try {
     const { workflow } = payload;
+
+    // Check if workflow uses SubAgent/SubAgentFlow nodes and ensure multi_agent is enabled
+    const hasSubAgentNodes = workflow.nodes.some(
+      (node) => node.type === NodeType.SubAgent || node.type === NodeType.SubAgentFlow
+    );
+    if (hasSubAgentNodes) {
+      const multiAgentEnabled = await checkCodexMultiAgentEnabled();
+      if (!multiAgentEnabled) {
+        const result = await vscode.window.showInformationMessage(
+          'This workflow uses Sub-Agent nodes which require the multi_agent feature in Codex CLI.\n\nAdd the following setting to ~/.codex/config.toml?\n\n[features]\nmulti_agent = true',
+          { modal: true },
+          'Yes'
+        );
+        if (result !== 'Yes') {
+          webview.postMessage({
+            type: 'EXPORT_FOR_CODEX_CLI_CANCELLED',
+            requestId,
+          });
+          return;
+        }
+        await enableCodexMultiAgent();
+      }
+    }
 
     // Check for existing skill and ask for confirmation
     const existingSkillPath = await checkExistingCodexSkill(workflow, fileService);
@@ -157,6 +183,29 @@ export async function handleRunForCodexCli(
         console.log(
           `[Codex CLI] Copied ${normalizeResult.normalizedSkills.length} skill(s) to .claude/skills/`
         );
+      }
+    }
+
+    // Step 0.75: Check if workflow uses SubAgent/SubAgentFlow nodes and ensure multi_agent is enabled
+    const hasSubAgentNodes = workflow.nodes.some(
+      (node) => node.type === NodeType.SubAgent || node.type === NodeType.SubAgentFlow
+    );
+    if (hasSubAgentNodes) {
+      const multiAgentEnabled = await checkCodexMultiAgentEnabled();
+      if (!multiAgentEnabled) {
+        const result = await vscode.window.showInformationMessage(
+          'This workflow uses Sub-Agent nodes which require the multi_agent feature in Codex CLI.\n\nAdd the following setting to ~/.codex/config.toml?\n\n[features]\nmulti_agent = true',
+          { modal: true },
+          'Yes'
+        );
+        if (result !== 'Yes') {
+          webview.postMessage({
+            type: 'RUN_FOR_CODEX_CLI_CANCELLED',
+            requestId,
+          });
+          return;
+        }
+        await enableCodexMultiAgent();
       }
     }
 

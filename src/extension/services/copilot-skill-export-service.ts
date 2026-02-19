@@ -53,7 +53,9 @@ description: ${description}
   });
 
   // Generate execution instructions
-  const instructions = generateExecutionInstructions(workflow);
+  const instructions = generateExecutionInstructions(workflow, {
+    provider: 'copilot-cli',
+  });
 
   // Compose SKILL.md body
   // Note: mermaidContent already includes ```mermaid and ``` wrapper

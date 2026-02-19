@@ -383,6 +383,7 @@ function generateCopilotPromptFile(workflow: Workflow, options: CopilotExportOpt
   const executionInstructions = generateExecutionInstructions(workflow, {
     parentWorkflowName: workflowBaseName,
     subAgentFlows: workflow.subAgentFlows,
+    provider: 'copilot',
   });
 
   return `${frontmatter}${mermaidFlowchart}\n\n${executionInstructions}`;

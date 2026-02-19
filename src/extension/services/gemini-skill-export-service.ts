@@ -52,7 +52,9 @@ description: ${description}
   });
 
   // Generate execution instructions
-  const instructions = generateExecutionInstructions(workflow);
+  const instructions = generateExecutionInstructions(workflow, {
+    provider: 'gemini',
+  });
 
   // Compose SKILL.md body
   const body = `# ${workflow.name}
