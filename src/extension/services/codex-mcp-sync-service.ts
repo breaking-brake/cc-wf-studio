@@ -7,8 +7,6 @@
  * Note: Codex CLI uses TOML format for configuration:
  * - Config path: $HOME/.codex/config.toml
  * - MCP servers section: [mcp_servers.{server_name}]
- *
- * @beta This is a PoC feature for OpenAI Codex CLI integration
  */
 
 import * as fs from 'node:fs/promises';

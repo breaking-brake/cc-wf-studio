@@ -2,8 +2,6 @@
  * Claude Code Workflow Studio - Gemini CLI Integration Handlers
  *
  * Handles Export/Run for Google Gemini CLI integration
- *
- * @beta This is a PoC feature for Google Gemini CLI integration
  */
 
 import * as vscode from 'vscode';

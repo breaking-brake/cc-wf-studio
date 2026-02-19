@@ -2,8 +2,6 @@
  * Claude Code Workflow Studio - Codex CLI Integration Handlers
  *
  * Handles Export/Run for OpenAI Codex CLI integration
- *
- * @beta This is a PoC feature for OpenAI Codex CLI integration
  */
 
 import * as vscode from 'vscode';

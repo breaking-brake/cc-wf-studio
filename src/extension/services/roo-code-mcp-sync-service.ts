@@ -7,8 +7,6 @@
  * Note: Roo Code uses JSON format for MCP configuration:
  * - Config path: {workspace}/.roo/mcp.json
  * - MCP servers section: mcpServers.{server_name}
- *
- * @beta This is a PoC feature for Roo Code integration
  */
 
 import * as fs from 'node:fs/promises';

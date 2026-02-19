@@ -225,7 +225,7 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
             <span>{t('refinement.chat.useSkillsCheckbox')}</span>
           </DropdownMenu.CheckboxItem>
 
-          {/* Use Codex Nodes Toggle Item - Only shown when Codex Beta is enabled */}
+          {/* Use Codex Nodes Toggle Item - Only shown when Codex is enabled */}
           {isCodexEnabled && (
             <DropdownMenu.CheckboxItem
               checked={useCodexNodes}

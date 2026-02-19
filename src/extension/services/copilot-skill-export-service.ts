@@ -3,8 +3,6 @@
  *
  * Handles workflow export to GitHub Copilot Skills format (.github/skills/name/SKILL.md)
  * Skills format enables Copilot CLI to execute workflows as slash commands.
- *
- * @beta This is a PoC feature for GitHub Copilot CLI integration
  */
 
 import * as path from 'node:path';

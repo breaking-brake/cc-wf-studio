@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import { useIsCompactMode } from '../../hooks/useWindowWidth';
 import { useTranslation } from '../../i18n/i18n-context';
-import { BetaBadge } from '../common/BetaBadge';
 
 // Fixed font sizes for dropdown menu (not responsive)
 const FONT_SIZES = {
@@ -178,10 +177,7 @@ export function MoreActionsDropdown({
             }}
           >
             <Bot size={14} />
-            <span style={{ flex: 1 }}>
-              Copilot
-              <BetaBadge style={{ marginLeft: '4px' }} />
-            </span>
+            <span style={{ flex: 1 }}>Copilot</span>
             {isCopilotEnabled && <Check size={14} />}
           </DropdownMenu.Item>
 
@@ -201,10 +197,7 @@ export function MoreActionsDropdown({
             }}
           >
             <Terminal size={14} />
-            <span style={{ flex: 1 }}>
-              Codex
-              <BetaBadge style={{ marginLeft: '4px' }} />
-            </span>
+            <span style={{ flex: 1 }}>Codex</span>
             {isCodexEnabled && <Check size={14} />}
           </DropdownMenu.Item>
 
@@ -224,10 +217,7 @@ export function MoreActionsDropdown({
             }}
           >
             <Bot size={14} />
-            <span style={{ flex: 1 }}>
-              Roo Code
-              <BetaBadge style={{ marginLeft: '4px' }} />
-            </span>
+            <span style={{ flex: 1 }}>Roo Code</span>
             {isRooCodeEnabled && <Check size={14} />}
           </DropdownMenu.Item>
 
@@ -247,10 +237,7 @@ export function MoreActionsDropdown({
             }}
           >
             <Terminal size={14} />
-            <span style={{ flex: 1 }}>
-              Gemini CLI
-              <BetaBadge style={{ marginLeft: '4px' }} />
-            </span>
+            <span style={{ flex: 1 }}>Gemini CLI</span>
             {isGeminiEnabled && <Check size={14} />}
           </DropdownMenu.Item>
 

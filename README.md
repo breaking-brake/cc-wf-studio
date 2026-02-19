@@ -25,12 +25,12 @@
 | Agent | Export Format | Requires |
 |-------|--------------|----------|
 | Claude Code | `.claude/agents/` `.claude/commands/` | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) |
-| GitHub Copilot (β) | `.github/prompts/` `.github/skills/` | [Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) or [Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli) |
-| OpenAI Codex CLI (β) | `.codex/skills/` | [Codex CLI](https://github.com/openai/codex) |
-| Roo Code (β) | `.roo/skills/` | [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) |
-| Gemini CLI (β) | `.gemini/skills/` | [Gemini CLI](https://github.com/google-gemini/gemini-cli) |
+| GitHub Copilot | `.github/prompts/` `.github/skills/` | [Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) or [Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli) |
+| OpenAI Codex CLI | `.codex/skills/` | [Codex CLI](https://github.com/openai/codex) |
+| Roo Code | `.roo/skills/` | [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) |
+| Gemini CLI | `.gemini/skills/` | [Gemini CLI](https://github.com/google-gemini/gemini-cli) |
 
-> **Note:** β-supported agents require activation from Toolbar's **More** menu. Some workflows may not work as expected.
+> **Note:** Agents other than Claude Code require activation from Toolbar's **More** menu.
 
 <!-- Hero image placeholder - recommended size: 1600x900px or 16:9 aspect ratio -->
 <!-- Place image at: /resources/hero.png -->

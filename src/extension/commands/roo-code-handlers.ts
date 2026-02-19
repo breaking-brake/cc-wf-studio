@@ -2,8 +2,6 @@
  * Claude Code Workflow Studio - Roo Code Integration Handlers
  *
  * Handles Export/Run for Roo Code integration
- *
- * @beta This is a PoC feature for Roo Code integration
  */
 
 import * as vscode from 'vscode';

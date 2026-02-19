@@ -114,19 +114,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [isGeneratingName, setIsGeneratingName] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [workflowNameError, setWorkflowNameError] = useState<string | null>(null);
-  // Copilot integration (Beta)
+  // Copilot integration
   const [isCopilotExporting, setIsCopilotExporting] = useState(false);
   const [isCopilotRunning, setIsCopilotRunning] = useState(false);
-  // Codex integration (Beta)
+  // Codex integration
   const [isCodexExporting, setIsCodexExporting] = useState(false);
   const [isCodexRunning, setIsCodexRunning] = useState(false);
-  // Roo Code integration (Beta)
+  // Roo Code integration
   const [isRooCodeExporting, setIsRooCodeExporting] = useState(false);
   const [isRooCodeRunning, setIsRooCodeRunning] = useState(false);
-  // Gemini CLI integration (Beta)
+  // Gemini CLI integration
   const [isGeminiExporting, setIsGeminiExporting] = useState(false);
   const [isGeminiRunning, setIsGeminiRunning] = useState(false);
-  // Copilot Beta feature toggle is now managed by refinement-store
+  // Copilot feature toggle is now managed by refinement-store
   // Copilot execution mode (persisted in localStorage, default: 'cli')
   const [copilotExecutionMode, setCopilotExecutionMode] = useState<CopilotExecutionMode>(() => {
     const stored = localStorage.getItem('cc-wf-studio.copilotExecutionMode');
@@ -425,7 +425,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   };
 
   // ============================================================================
-  // Copilot Integration Handlers (Beta)
+  // Copilot Integration Handlers
   // ============================================================================
 
   const handleCopilotExport = async () => {
@@ -535,7 +535,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   };
 
   // ============================================================================
-  // Codex Integration Handlers (Beta)
+  // Codex Integration Handlers
   // ============================================================================
 
   const handleCodexExport = async () => {
@@ -633,7 +633,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   };
 
   // ============================================================================
-  // Roo Code Integration Handlers (Beta)
+  // Roo Code Integration Handlers
   // ============================================================================
 
   const handleRooCodeExport = async () => {
@@ -731,7 +731,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   };
 
   // ============================================================================
-  // Gemini CLI Integration Handlers (Beta)
+  // Gemini CLI Integration Handlers
   // ============================================================================
 
   const handleGeminiExport = async () => {
@@ -1577,7 +1577,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             </div>
           </div>
         ) : (
-          /* Original layout when Copilot Beta is disabled */
+          /* Original layout when Copilot is disabled */
           <div
             style={{
               display: 'flex',

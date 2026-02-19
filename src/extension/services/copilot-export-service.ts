@@ -3,8 +3,6 @@
  *
  * Handles workflow export to GitHub Copilot Prompts format (.github/prompts/*.prompt.md)
  * Based on: /docs/Copilot-Prompts-Guide.md
- *
- * @beta This is a PoC feature for GitHub Copilot integration
  */
 
 import * as path from 'node:path';

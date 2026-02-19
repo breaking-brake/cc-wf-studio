@@ -2,8 +2,6 @@
  * Claude Code Workflow Studio - Copilot Integration Handlers
  *
  * Handles Export/Run for GitHub Copilot integration
- *
- * @beta This is a PoC feature for GitHub Copilot integration
  */
 
 import * as vscode from 'vscode';

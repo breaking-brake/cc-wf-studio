@@ -3,8 +3,6 @@
  *
  * Wrapper for Roo Code VSCode Extension API.
  * Uses the extension's exported API to start new tasks with :skill command.
- *
- * @beta This is a PoC feature for Roo Code integration
  */
 
 import * as vscode from 'vscode';

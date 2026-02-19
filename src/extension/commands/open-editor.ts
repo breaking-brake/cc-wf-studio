@@ -339,7 +339,7 @@ export function registerOpenEditorCommand(
               break;
 
             case 'EXPORT_FOR_COPILOT':
-              // Export workflow for Copilot (Beta)
+              // Export workflow for Copilot
               if (message.payload?.workflow) {
                 await handleExportForCopilot(
                   fileService,
@@ -373,7 +373,7 @@ export function registerOpenEditorCommand(
               break;
 
             case 'RUN_FOR_COPILOT':
-              // Run workflow for Copilot (Beta) - VSCode Copilot Chat mode
+              // Run workflow for Copilot - VSCode Copilot Chat mode
               if (message.payload?.workflow) {
                 await handleRunForCopilot(fileService, webview, message.payload, message.requestId);
               } else {

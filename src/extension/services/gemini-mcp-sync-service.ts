@@ -7,8 +7,6 @@
  * Note: Gemini CLI uses JSON format for configuration:
  * - Config path: ~/.gemini/settings.json
  * - MCP servers section: mcpServers key
- *
- * @beta This is a PoC feature for Google Gemini CLI integration
  */
 
 import * as fs from 'node:fs/promises';
