@@ -15,6 +15,7 @@ import type {
   McpNode,
   PromptNode,
   SkillNode,
+  SubAgentNode,
   SwitchNode,
   Workflow,
   WorkflowNode,
@@ -75,7 +76,7 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
       lines.push(`    ${nodeId}([End])`);
     } else if (nodeType === 'subAgent') {
       const agentName = node.name || 'Sub-Agent';
-      lines.push(`    ${nodeId}[${escapeLabel(agentName)}]`);
+      lines.push(`    ${nodeId}[${escapeLabel(`Sub-Agent: ${agentName}`)}]`);
     } else if (nodeType === 'askUserQuestion') {
       const askNode = node as AskUserQuestionNode;
       const questionText = askNode.data.questionText || 'Question';
@@ -411,17 +412,17 @@ export type ExportProvider =
 function getSubAgentDescription(provider: ExportProvider): string {
   switch (provider) {
     case 'claude-code':
-      return '- **Rectangle nodes**: Execute Sub-Agents';
+      return '- **Rectangle nodes (Sub-Agent: ...)**: Execute Sub-Agents';
     case 'copilot':
-      return '- **Rectangle nodes**: Execute Sub-Agents using the #runSubagent tool';
+      return '- **Rectangle nodes (Sub-Agent: ...)**: Execute Sub-Agents using the #runSubagent tool';
     case 'copilot-cli':
-      return '- **Rectangle nodes**: Execute Sub-Agents using the task/agent tool';
+      return '- **Rectangle nodes (Sub-Agent: ...)**: Execute Sub-Agents using the task/agent tool';
     case 'codex':
-      return '- **Rectangle nodes**: Execute Sub-Agents using the spawn_agent tool';
+      return '- **Rectangle nodes (Sub-Agent: ...)**: Execute Sub-Agents using the spawn_agent tool';
     case 'gemini':
-      return '- **Rectangle nodes**: Execute Sub-Agents';
+      return '- **Rectangle nodes (Sub-Agent: ...)**: Execute Sub-Agents';
     case 'roo-code':
-      return '- **Rectangle nodes**: Execute Sub-Agents using the delegate_to_subagent tool';
+      return '- **Rectangle nodes (Sub-Agent: ...)**: Execute Sub-Agents';
     default: {
       const _exhaustiveCheck: never = provider;
       throw new Error(`Unknown provider: ${_exhaustiveCheck}`);
@@ -546,6 +547,7 @@ export function generateExecutionInstructions(
   sections.push('');
 
   // Collect nodes by type
+  const subAgentNodes = nodes.filter((n) => n.type === 'subAgent') as SubAgentNode[];
   const promptNodes = nodes.filter((n) => n.type === 'prompt') as PromptNode[];
   const skillNodes = nodes.filter((n) => n.type === 'skill') as SkillNode[];
   const mcpNodes = nodes.filter((n) => n.type === 'mcp') as McpNode[];
@@ -557,6 +559,36 @@ export function generateExecutionInstructions(
   const ifElseNodes = nodes.filter((n) => n.type === 'ifElse') as IfElseNode[];
   const switchNodes = nodes.filter((n) => n.type === 'switch') as SwitchNode[];
   const subAgentFlowNodes = nodes.filter((n) => n.type === 'subAgentFlow');
+
+  // Sub-Agent node details
+  if (subAgentNodes.length > 0) {
+    sections.push('## Sub-Agent Node Details');
+    sections.push('');
+    for (const node of subAgentNodes) {
+      const nodeId = sanitizeNodeId(node.id);
+      const agentName = node.name || 'Sub-Agent';
+      sections.push(`#### ${nodeId}(Sub-Agent: ${agentName})`);
+      sections.push('');
+      if (node.data.description) {
+        sections.push(`**Description**: ${node.data.description}`);
+        sections.push('');
+      }
+      if (node.data.model && node.data.model !== 'inherit') {
+        sections.push(`**Model**: ${node.data.model}`);
+        sections.push('');
+      }
+      if (node.data.tools) {
+        sections.push(`**Tools**: ${node.data.tools}`);
+        sections.push('');
+      }
+      sections.push('**Prompt**:');
+      sections.push('');
+      sections.push('```');
+      sections.push(node.data.prompt || '');
+      sections.push('```');
+      sections.push('');
+    }
+  }
 
   // Skill node details
   if (skillNodes.length > 0) {

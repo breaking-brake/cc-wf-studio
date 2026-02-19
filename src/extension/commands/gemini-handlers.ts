@@ -14,9 +14,12 @@ import type {
   RunForGeminiCliPayload,
   RunForGeminiCliSuccessPayload,
 } from '../../shared/types/messages';
+import { NodeType } from '../../shared/types/workflow-definition';
 import { extractMcpServerIdsFromWorkflow } from '../services/copilot-export-service';
 import type { FileService } from '../services/file-service';
 import {
+  checkGeminiAgentsEnabled,
+  enableGeminiAgents,
   previewMcpSyncForGeminiCli,
   syncMcpConfigForGeminiCli,
 } from '../services/gemini-mcp-sync-service';
@@ -48,6 +51,29 @@ export async function handleExportForGeminiCli(
 ): Promise<void> {
   try {
     const { workflow } = payload;
+
+    // Check if workflow uses SubAgent/SubAgentFlow nodes and ensure enableAgents is enabled
+    const hasSubAgentNodes = workflow.nodes.some(
+      (node) => node.type === NodeType.SubAgent || node.type === NodeType.SubAgentFlow
+    );
+    if (hasSubAgentNodes) {
+      const agentsEnabled = await checkGeminiAgentsEnabled();
+      if (!agentsEnabled) {
+        const result = await vscode.window.showInformationMessage(
+          'This workflow uses Sub-Agent nodes which require the enableAgents feature in Gemini CLI.\n\nAdd the following setting to ~/.gemini/settings.json?\n\n{ "experimental": { "enableAgents": true } }',
+          { modal: true },
+          'Yes'
+        );
+        if (result !== 'Yes') {
+          webview.postMessage({
+            type: 'EXPORT_FOR_GEMINI_CLI_CANCELLED',
+            requestId,
+          });
+          return;
+        }
+        await enableGeminiAgents();
+      }
+    }
 
     // Check for existing skill and ask for confirmation
     const existingSkillPath = await checkExistingGeminiSkill(workflow, fileService);
@@ -155,6 +181,29 @@ export async function handleRunForGeminiCli(
         console.log(
           `[Gemini CLI] Copied ${normalizeResult.normalizedSkills.length} skill(s) to .claude/skills/`
         );
+      }
+    }
+
+    // Step 0.75: Check if workflow uses SubAgent/SubAgentFlow nodes and ensure enableAgents is enabled
+    const hasSubAgentNodes = workflow.nodes.some(
+      (node) => node.type === NodeType.SubAgent || node.type === NodeType.SubAgentFlow
+    );
+    if (hasSubAgentNodes) {
+      const agentsEnabled = await checkGeminiAgentsEnabled();
+      if (!agentsEnabled) {
+        const result = await vscode.window.showInformationMessage(
+          'This workflow uses Sub-Agent nodes which require the enableAgents feature in Gemini CLI.\n\nAdd the following setting to ~/.gemini/settings.json?\n\n{ "experimental": { "enableAgents": true } }',
+          { modal: true },
+          'Yes'
+        );
+        if (result !== 'Yes') {
+          webview.postMessage({
+            type: 'RUN_FOR_GEMINI_CLI_CANCELLED',
+            requestId,
+          });
+          return;
+        }
+        await enableGeminiAgents();
       }
     }
 

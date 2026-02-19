@@ -14,6 +14,7 @@ import type {
   RunForRooCodePayload,
   RunForRooCodeSuccessPayload,
 } from '../../shared/types/messages';
+import { NodeType } from '../../shared/types/workflow-definition';
 import { extractMcpServerIdsFromWorkflow } from '../services/copilot-export-service';
 import { nodeNameToFileName } from '../services/export-service';
 import type { FileService } from '../services/file-service';
@@ -49,6 +50,26 @@ export async function handleExportForRooCode(
 ): Promise<void> {
   try {
     const { workflow } = payload;
+
+    // Warn about SubAgent limitations in Roo Code
+    const hasSubAgentNodes = workflow.nodes.some(
+      (node) => node.type === NodeType.SubAgent || node.type === NodeType.SubAgentFlow
+    );
+    if (hasSubAgentNodes) {
+      const result = await vscode.window.showWarningMessage(
+        'This workflow contains Sub-Agent nodes.\n\nRoo Code does not have a Sub-Agent feature. Sub-Agents will be substituted with child tasks (new_task), which cannot run in parallel.',
+        { modal: true },
+        'Continue',
+        'Cancel'
+      );
+      if (result !== 'Continue') {
+        webview.postMessage({
+          type: 'EXPORT_FOR_ROO_CODE_CANCELLED',
+          requestId,
+        });
+        return;
+      }
+    }
 
     // Check for existing skill and ask for confirmation
     const existingSkillPath = await checkExistingRooCodeSkill(workflow, fileService);
@@ -155,6 +176,26 @@ export async function handleRunForRooCode(
         console.log(
           `[Roo Code] Copied ${normalizeResult.normalizedSkills.length} skill(s) to .claude/skills/`
         );
+      }
+    }
+
+    // Step 0.75: Warn about SubAgent limitations in Roo Code
+    const hasSubAgentNodes = workflow.nodes.some(
+      (node) => node.type === NodeType.SubAgent || node.type === NodeType.SubAgentFlow
+    );
+    if (hasSubAgentNodes) {
+      const result = await vscode.window.showWarningMessage(
+        'This workflow contains Sub-Agent nodes.\n\nRoo Code does not have a Sub-Agent feature. Sub-Agents will be substituted with child tasks (new_task), which cannot run in parallel.',
+        { modal: true },
+        'Continue',
+        'Cancel'
+      );
+      if (result !== 'Continue') {
+        webview.postMessage({
+          type: 'RUN_FOR_ROO_CODE_CANCELLED',
+          requestId,
+        });
+        return;
       }
     }
 
