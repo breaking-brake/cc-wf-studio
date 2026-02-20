@@ -13,6 +13,7 @@ import type {
   LaunchAiAgentPayload,
   McpConfigTarget,
   RunAiEditingSkillPayload,
+  SetReviewBeforeApplyPayload,
   StartMcpServerPayload,
   WebviewMessage,
 } from '../../shared/types/messages';
@@ -1148,7 +1149,12 @@ export function registerOpenEditorCommand(
               if (!startManager) {
                 webview.postMessage({
                   type: 'MCP_SERVER_STATUS',
-                  payload: { running: false, port: null, configsWritten: [] },
+                  payload: {
+                    running: false,
+                    port: null,
+                    configsWritten: [],
+                    reviewBeforeApply: true,
+                  },
                 });
                 break;
               }
@@ -1182,6 +1188,7 @@ export function registerOpenEditorCommand(
                     running: true,
                     port,
                     configsWritten,
+                    reviewBeforeApply: startManager.getReviewBeforeApply(),
                   },
                 });
 
@@ -1197,6 +1204,7 @@ export function registerOpenEditorCommand(
                     running: false,
                     port: null,
                     configsWritten: [],
+                    reviewBeforeApply: startManager.getReviewBeforeApply(),
                   },
                 });
               }
@@ -1209,7 +1217,12 @@ export function registerOpenEditorCommand(
               if (!stopManager) {
                 webview.postMessage({
                   type: 'MCP_SERVER_STATUS',
-                  payload: { running: false, port: null, configsWritten: [] },
+                  payload: {
+                    running: false,
+                    port: null,
+                    configsWritten: [],
+                    reviewBeforeApply: true,
+                  },
                 });
                 break;
               }
@@ -1230,6 +1243,7 @@ export function registerOpenEditorCommand(
                     running: false,
                     port: null,
                     configsWritten: [],
+                    reviewBeforeApply: stopManager.getReviewBeforeApply(),
                   },
                 });
 
@@ -1240,7 +1254,12 @@ export function registerOpenEditorCommand(
                 });
                 webview.postMessage({
                   type: 'MCP_SERVER_STATUS',
-                  payload: { running: false, port: null, configsWritten: [] },
+                  payload: {
+                    running: false,
+                    port: null,
+                    configsWritten: [],
+                    reviewBeforeApply: stopManager.getReviewBeforeApply(),
+                  },
                 });
               }
               break;
@@ -1253,8 +1272,24 @@ export function registerOpenEditorCommand(
               const statusPort = running ? (statusManager?.getPort() ?? null) : null;
               webview.postMessage({
                 type: 'MCP_SERVER_STATUS',
-                payload: { running, port: statusPort, configsWritten: [] },
+                payload: {
+                  running,
+                  port: statusPort,
+                  configsWritten: [],
+                  reviewBeforeApply: statusManager?.getReviewBeforeApply() ?? true,
+                },
               });
+              break;
+            }
+
+            case 'SET_REVIEW_BEFORE_APPLY': {
+              const reviewPayload = message.payload as SetReviewBeforeApplyPayload | undefined;
+              if (reviewPayload != null) {
+                const reviewManager = getMcpServerManager();
+                if (reviewManager) {
+                  reviewManager.setReviewBeforeApply(reviewPayload.value);
+                }
+              }
               break;
             }
 
@@ -1337,6 +1372,7 @@ export function registerOpenEditorCommand(
                     running: true,
                     port: serverPort,
                     configsWritten: [...launchManager.getWrittenConfigs()],
+                    reviewBeforeApply: launchManager.getReviewBeforeApply(),
                   },
                 });
 

@@ -26,6 +26,7 @@ import { log } from '../extension';
 import { registerMcpTools } from './mcp-server-tools';
 
 const REQUEST_TIMEOUT_MS = 10000;
+const APPLY_WITH_REVIEW_TIMEOUT_MS = 120000;
 
 interface PendingRequest<T> {
   resolve: (value: T) => void;
@@ -41,6 +42,7 @@ export class McpServerManager {
   private extensionPath: string | null = null;
   private writtenConfigs = new Set<McpConfigTarget>();
   private currentProvider: AiEditingProvider | null = null;
+  private reviewBeforeApply = true;
 
   private pendingWorkflowRequests = new Map<
     string,
@@ -186,6 +188,14 @@ export class McpServerManager {
     return this.currentProvider;
   }
 
+  setReviewBeforeApply(value: boolean): void {
+    this.reviewBeforeApply = value;
+  }
+
+  getReviewBeforeApply(): boolean {
+    return this.reviewBeforeApply;
+  }
+
   // Webview lifecycle
   setWebview(webview: vscode.Webview | null): void {
     this.webview = webview;
@@ -230,24 +240,26 @@ export class McpServerManager {
   }
 
   // Called by MCP tools to apply workflow to canvas
-  async applyWorkflowToCanvas(workflow: Workflow): Promise<boolean> {
+  async applyWorkflowToCanvas(workflow: Workflow, description?: string): Promise<boolean> {
     if (!this.webview) {
       throw new Error('Webview is not open. Please open CC Workflow Studio first.');
     }
 
+    const requireConfirmation = this.reviewBeforeApply;
+    const timeoutMs = requireConfirmation ? APPLY_WITH_REVIEW_TIMEOUT_MS : REQUEST_TIMEOUT_MS;
     const correlationId = `mcp-apply-${Date.now()}-${Math.random()}`;
 
     return new Promise<boolean>((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pendingApplyRequests.delete(correlationId);
         reject(new Error('Timeout waiting for workflow apply confirmation'));
-      }, REQUEST_TIMEOUT_MS);
+      }, timeoutMs);
 
       this.pendingApplyRequests.set(correlationId, { resolve, reject, timer });
 
       this.webview?.postMessage({
         type: 'APPLY_WORKFLOW_FROM_MCP',
-        payload: { correlationId, workflow },
+        payload: { correlationId, workflow, requireConfirmation, description },
       });
     });
   }

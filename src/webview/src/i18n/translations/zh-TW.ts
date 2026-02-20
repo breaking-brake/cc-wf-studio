@@ -389,6 +389,20 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'dialog.loadWorkflow.confirm': '捨棄並載入',
   'dialog.loadWorkflow.cancel': '取消',
 
+  // Diff Preview Dialog (MCP apply_workflow)
+  'dialog.diffPreview.title': '審核工作流程變更',
+  'dialog.diffPreview.description': 'AI 代理正在嘗試對工作流程進行以下更改:',
+  'dialog.diffPreview.newWorkflow': 'AI 代理正在建立新的工作流程:',
+  'dialog.diffPreview.nameChange': '名稱:',
+  'dialog.diffPreview.nodes': '節點',
+  'dialog.diffPreview.connections': '連接',
+  'dialog.diffPreview.connectionsAdded': '新增',
+  'dialog.diffPreview.connectionsRemoved': '移除',
+  'dialog.diffPreview.noChanges': '未偵測到變更。',
+  'dialog.diffPreview.agentDescription': '代理說明',
+  'dialog.diffPreview.accept': '接受',
+  'dialog.diffPreview.reject': '拒絕',
+
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '重設工作流程',
   'toolbar.focusMode': '專注模式',
@@ -887,6 +901,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   // MCP Server Section
   'mcpSection.description.line1': '透過與AI對話的方式編輯工作流程。',
   'mcpSection.description.line2': '請選擇要使用的代理。',
+  'mcpSection.reviewBeforeApply': '套用前確認變更',
 
   // Description Panel (Canvas)
   'description.panel.title': '描述',

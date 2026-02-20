@@ -389,6 +389,20 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'dialog.loadWorkflow.confirm': '放弃并加载',
   'dialog.loadWorkflow.cancel': '取消',
 
+  // Diff Preview Dialog (MCP apply_workflow)
+  'dialog.diffPreview.title': '审核工作流变更',
+  'dialog.diffPreview.description': 'AI 代理正在尝试对工作流进行以下更改:',
+  'dialog.diffPreview.newWorkflow': 'AI 代理正在创建新的工作流:',
+  'dialog.diffPreview.nameChange': '名称:',
+  'dialog.diffPreview.nodes': '节点',
+  'dialog.diffPreview.connections': '连接',
+  'dialog.diffPreview.connectionsAdded': '添加',
+  'dialog.diffPreview.connectionsRemoved': '删除',
+  'dialog.diffPreview.noChanges': '未检测到更改。',
+  'dialog.diffPreview.agentDescription': '代理说明',
+  'dialog.diffPreview.accept': '接受',
+  'dialog.diffPreview.reject': '拒绝',
+
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '重置工作流',
   'toolbar.focusMode': '专注模式',
@@ -886,6 +900,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // MCP Server Section
   'mcpSection.description.line1': '通过与AI对话的方式编辑工作流。',
   'mcpSection.description.line2': '请选择要使用的代理。',
+  'mcpSection.reviewBeforeApply': '应用前确认更改',
 
   // Description Panel (Canvas)
   'description.panel.title': '描述',

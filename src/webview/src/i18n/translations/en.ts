@@ -405,6 +405,21 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'dialog.loadWorkflow.confirm': 'Discard & Load',
   'dialog.loadWorkflow.cancel': 'Cancel',
 
+  // Diff Preview Dialog (MCP apply_workflow)
+  'dialog.diffPreview.title': 'Review Workflow Changes',
+  'dialog.diffPreview.description':
+    'An AI agent is proposing the following changes to the workflow:',
+  'dialog.diffPreview.newWorkflow': 'An AI agent is creating a new workflow:',
+  'dialog.diffPreview.nameChange': 'Name:',
+  'dialog.diffPreview.nodes': 'Nodes',
+  'dialog.diffPreview.connections': 'Connections',
+  'dialog.diffPreview.connectionsAdded': 'added',
+  'dialog.diffPreview.connectionsRemoved': 'removed',
+  'dialog.diffPreview.noChanges': 'No changes detected.',
+  'dialog.diffPreview.agentDescription': 'Agent description',
+  'dialog.diffPreview.accept': 'Accept',
+  'dialog.diffPreview.reject': 'Reject',
+
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': 'Reset Workflow',
   'toolbar.focusMode': 'Focus Mode',
@@ -930,6 +945,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // MCP Server Section
   'mcpSection.description.line1': 'Edit workflows interactively with AI.',
   'mcpSection.description.line2': 'Select an agent to get started.',
+  'mcpSection.reviewBeforeApply': 'Review changes before applying',
 
   // Description Panel (Canvas)
   'description.panel.title': 'Description',

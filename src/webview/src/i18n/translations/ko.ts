@@ -404,6 +404,20 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'dialog.loadWorkflow.confirm': '삭제 후 로드',
   'dialog.loadWorkflow.cancel': '취소',
 
+  // Diff Preview Dialog (MCP apply_workflow)
+  'dialog.diffPreview.title': '워크플로우 변경 검토',
+  'dialog.diffPreview.description': 'AI 에이전트가 워크플로우에 다음 변경을 적용하려고 합니다:',
+  'dialog.diffPreview.newWorkflow': 'AI 에이전트가 새 워크플로우를 생성하려고 합니다:',
+  'dialog.diffPreview.nameChange': '이름:',
+  'dialog.diffPreview.nodes': '노드',
+  'dialog.diffPreview.connections': '연결',
+  'dialog.diffPreview.connectionsAdded': '추가',
+  'dialog.diffPreview.connectionsRemoved': '삭제',
+  'dialog.diffPreview.noChanges': '변경 사항이 없습니다.',
+  'dialog.diffPreview.agentDescription': '에이전트 설명',
+  'dialog.diffPreview.accept': '적용',
+  'dialog.diffPreview.reject': '거부',
+
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '워크플로우 초기화',
   'toolbar.focusMode': '집중 모드',
@@ -919,6 +933,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // MCP Server Section
   'mcpSection.description.line1': 'AI와 대화 형식으로 워크플로우를 편집합니다.',
   'mcpSection.description.line2': '사용할 에이전트를 선택하세요.',
+  'mcpSection.reviewBeforeApply': '적용 전 변경사항 확인',
 
   // Description Panel (Canvas)
   'description.panel.title': '설명',

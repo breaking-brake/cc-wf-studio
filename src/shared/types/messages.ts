@@ -1581,6 +1581,15 @@ export interface McpServerStatusPayload {
   port: number | null;
   /** Config files that were written to */
   configsWritten: McpConfigTarget[];
+  /** Whether to show diff preview before applying AI changes */
+  reviewBeforeApply: boolean;
+}
+
+/**
+ * Set review before apply setting payload (Webview → Extension)
+ */
+export interface SetReviewBeforeApplyPayload {
+  value: boolean;
 }
 
 /**
@@ -1609,6 +1618,10 @@ export interface ApplyWorkflowFromMcpPayload {
   correlationId: string;
   /** Workflow to apply */
   workflow: Workflow;
+  /** Whether to show diff preview dialog before applying */
+  requireConfirmation: boolean;
+  /** AI agent's description of the changes (optional) */
+  description?: string;
 }
 
 /**
@@ -1743,7 +1756,8 @@ export type WebviewMessage =
   | Message<void, 'STOP_MCP_SERVER'>
   | Message<void, 'GET_MCP_SERVER_STATUS'>
   | Message<RunAiEditingSkillPayload, 'RUN_AI_EDITING_SKILL'>
-  | Message<LaunchAiAgentPayload, 'LAUNCH_AI_AGENT'>;
+  | Message<LaunchAiAgentPayload, 'LAUNCH_AI_AGENT'>
+  | Message<SetReviewBeforeApplyPayload, 'SET_REVIEW_BEFORE_APPLY'>;
 
 // ============================================================================
 // Error Codes

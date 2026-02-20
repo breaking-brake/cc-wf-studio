@@ -138,11 +138,17 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
   // Tool 3: apply_workflow
   server.tool(
     'apply_workflow',
-    'Apply a workflow to the CC Workflow Studio canvas. The workflow is validated before being applied. The editor must be open.',
+    'Apply a workflow to the CC Workflow Studio canvas. The workflow is validated before being applied. If the user has review mode enabled, they will see a diff preview and must accept changes before they are applied. If rejected, an error with message "User rejected the changes" is returned. The editor must be open.',
     {
       workflow: z.string().describe('The workflow JSON string to apply to the canvas'),
+      description: z
+        .string()
+        .optional()
+        .describe(
+          'A brief description of the changes being made (e.g., "Added error handling step after API call"). Shown to the user in the review dialog.'
+        ),
     },
-    async ({ workflow: workflowJson }) => {
+    async ({ workflow: workflowJson, description }) => {
       try {
         // Parse JSON
         let parsedWorkflow: unknown;
@@ -183,7 +189,8 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
 
         // Apply to canvas
         const applied = await manager.applyWorkflowToCanvas(
-          parsedWorkflow as import('../../shared/types/workflow-definition').Workflow
+          parsedWorkflow as import('../../shared/types/workflow-definition').Workflow,
+          description
         );
 
         return {

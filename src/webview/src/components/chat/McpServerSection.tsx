@@ -12,7 +12,7 @@
  */
 
 import type { AiEditingProvider, McpServerStatusPayload } from '@shared/types/messages';
-import { ChevronDown, ChevronRight, ExternalLink, Play, Plug, Square } from 'lucide-react';
+import { Check, ChevronDown, ChevronRight, ExternalLink, Play, Plug, Square } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { vscode } from '../../main';
@@ -43,6 +43,7 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
   const [isRunning, setIsRunning] = useState(false);
   const [port, setPort] = useState<number | null>(null);
   const [launchingProvider, setLaunchingProvider] = useState<AiEditingProvider | null>(null);
+  const [reviewBeforeApply, setReviewBeforeApply] = useState(true);
 
   const { isCopilotEnabled, isCodexEnabled, isRooCodeEnabled, isGeminiEnabled } =
     useRefinementStore();
@@ -75,6 +76,7 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
         const payload = message.payload as McpServerStatusPayload;
         setIsRunning(payload.running);
         setPort(payload.port);
+        setReviewBeforeApply(payload.reviewBeforeApply);
       }
     };
 
@@ -103,6 +105,11 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
 
   const handleStop = useCallback(() => {
     vscode.postMessage({ type: 'STOP_MCP_SERVER' });
+  }, []);
+
+  const handleReviewBeforeApplyChange = useCallback((checked: boolean) => {
+    setReviewBeforeApply(checked);
+    vscode.postMessage({ type: 'SET_REVIEW_BEFORE_APPLY', payload: { value: checked } });
   }, []);
 
   const ChevronIcon = isCollapsed ? ChevronRight : ChevronDown;
@@ -199,6 +206,42 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
             <br />
             {t('mcpSection.description.line2')}
           </p>
+
+          {/* Review Before Apply Toggle */}
+          <button
+            type="button"
+            onClick={() => handleReviewBeforeApplyChange(!reviewBeforeApply)}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              marginBottom: '8px',
+              fontSize: '11px',
+              color: reviewBeforeApply
+                ? 'var(--vscode-foreground)'
+                : 'var(--vscode-disabledForeground)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              outline: 'none',
+              borderRadius: '2px',
+              backgroundColor: 'transparent',
+              border: 'none',
+            }}
+          >
+            <div
+              style={{
+                width: '14px',
+                height: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {reviewBeforeApply && <Check size={14} />}
+            </div>
+            <span>{t('mcpSection.reviewBeforeApply')}</span>
+          </button>
 
           {/* AI Agent Buttons */}
           <div

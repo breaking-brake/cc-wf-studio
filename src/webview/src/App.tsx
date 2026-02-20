@@ -21,6 +21,7 @@ import { ProcessingOverlay } from './components/common/ProcessingOverlay';
 import { SimpleOverlay } from './components/common/SimpleOverlay';
 import { Spinner } from './components/common/Spinner';
 import { ConfirmDialog } from './components/dialogs/ConfirmDialog';
+import { DiffPreviewDialog } from './components/dialogs/DiffPreviewDialog';
 import { RefinementChatPanel } from './components/dialogs/RefinementChatPanel';
 import { SlackConnectionRequiredDialog } from './components/dialogs/SlackConnectionRequiredDialog';
 import { SlackManualTokenDialog } from './components/dialogs/SlackManualTokenDialog';
@@ -42,6 +43,7 @@ import { deserializeWorkflow, serializeWorkflow } from './services/workflow-serv
 import { useRefinementStore } from './stores/refinement-store';
 import { useWorkflowStore } from './stores/workflow-store';
 import type { RefinementChatState } from './types/refinement-chat-state';
+import { computeWorkflowDiff, type WorkflowDiffSummary } from './utils/workflow-diff';
 
 const App: React.FC = () => {
   const { t } = useTranslation();
@@ -182,6 +184,16 @@ const App: React.FC = () => {
   >(undefined);
   const [isMoreActionsOpen, setIsMoreActionsOpen] = useState(false);
 
+  // Pending MCP apply state for diff preview
+  const [pendingMcpApply, setPendingMcpApply] = useState<{
+    correlationId: string;
+    workflow: Workflow;
+    diffSummary: WorkflowDiffSummary;
+    description?: string;
+  } | null>(null);
+  const pendingMcpApplyRef = useRef(pendingMcpApply);
+  pendingMcpApplyRef.current = pendingMcpApply;
+
   // Node Palette collapse state
   const {
     isCollapsed: isNodePaletteCollapsed,
@@ -210,6 +222,46 @@ const App: React.FC = () => {
   const handleShareToSlack = () => {
     setIsSlackShareDialogOpen(true);
   };
+
+  const handleAcceptMcpApply = useCallback(() => {
+    const pending = pendingMcpApplyRef.current;
+    if (!pending) return;
+    try {
+      const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(pending.workflow);
+      setNodes(loadedNodes);
+      setEdges(loadedEdges);
+      setWorkflowName(pending.workflow.name);
+      setActiveWorkflow(pending.workflow);
+      vscode.postMessage({
+        type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
+        payload: { correlationId: pending.correlationId, success: true },
+      });
+    } catch (error) {
+      vscode.postMessage({
+        type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
+        payload: {
+          correlationId: pending.correlationId,
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to apply workflow',
+        },
+      });
+    }
+    setPendingMcpApply(null);
+  }, [setNodes, setEdges, setWorkflowName, setActiveWorkflow]);
+
+  const handleRejectMcpApply = useCallback(() => {
+    const pending = pendingMcpApplyRef.current;
+    if (!pending) return;
+    vscode.postMessage({
+      type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
+      payload: {
+        correlationId: pending.correlationId,
+        success: false,
+        error: 'User rejected the changes',
+      },
+    });
+    setPendingMcpApply(null);
+  }, []);
 
   const handleAcceptTerms = () => {
     // Send accept message to Extension
@@ -334,28 +386,73 @@ const App: React.FC = () => {
       } else if (message.type === 'APPLY_WORKFLOW_FROM_MCP') {
         // MCP Server applying workflow to canvas
         const payload = message.payload as ApplyWorkflowFromMcpPayload;
-        try {
-          const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(payload.workflow);
-          setNodes(loadedNodes);
-          setEdges(loadedEdges);
-          setWorkflowName(payload.workflow.name);
-          setActiveWorkflow(payload.workflow);
-          vscode.postMessage({
-            type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
-            payload: {
-              correlationId: payload.correlationId,
-              success: true,
-            },
-          });
-        } catch (error) {
+
+        // Reject if in preview mode
+        if (mode === 'preview') {
           vscode.postMessage({
             type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
             payload: {
               correlationId: payload.correlationId,
               success: false,
-              error: error instanceof Error ? error.message : 'Failed to apply workflow',
+              error: 'Cannot apply workflow while in preview mode. Please open the editor first.',
             },
           });
+          return;
+        }
+
+        if (payload.requireConfirmation) {
+          // Auto-reject any existing pending request
+          if (pendingMcpApplyRef.current) {
+            vscode.postMessage({
+              type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
+              payload: {
+                correlationId: pendingMcpApplyRef.current.correlationId,
+                success: false,
+                error: 'Superseded by new apply request',
+              },
+            });
+          }
+
+          // Compute diff and show preview dialog
+          const diffSummary = computeWorkflowDiff(
+            nodes,
+            edges,
+            workflowName || 'Untitled',
+            payload.workflow
+          );
+          setPendingMcpApply({
+            correlationId: payload.correlationId,
+            workflow: payload.workflow,
+            diffSummary,
+            description: payload.description,
+          });
+        } else {
+          // Direct apply without confirmation
+          try {
+            const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(
+              payload.workflow
+            );
+            setNodes(loadedNodes);
+            setEdges(loadedEdges);
+            setWorkflowName(payload.workflow.name);
+            setActiveWorkflow(payload.workflow);
+            vscode.postMessage({
+              type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
+              payload: {
+                correlationId: payload.correlationId,
+                success: true,
+              },
+            });
+          } catch (error) {
+            vscode.postMessage({
+              type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
+              payload: {
+                correlationId: payload.correlationId,
+                success: false,
+                error: error instanceof Error ? error.message : 'Failed to apply workflow',
+              },
+            });
+          }
         }
       }
     };
@@ -376,6 +473,7 @@ const App: React.FC = () => {
     workflowName,
     workflowDescription,
     subAgentFlows,
+    mode,
   ]);
 
   // Render loading state (waiting for mode to be determined)
@@ -520,6 +618,15 @@ const App: React.FC = () => {
         cancelLabel={t('dialog.deleteNode.cancel')}
         onConfirm={confirmDeleteNodes}
         onCancel={cancelDeleteNodes}
+      />
+
+      {/* Diff Preview Dialog for MCP apply_workflow */}
+      <DiffPreviewDialog
+        isOpen={pendingMcpApply !== null}
+        diffSummary={pendingMcpApply?.diffSummary ?? null}
+        description={pendingMcpApply?.description}
+        onAccept={handleAcceptMcpApply}
+        onReject={handleRejectMcpApply}
       />
 
       {/* Slack Share Dialog */}

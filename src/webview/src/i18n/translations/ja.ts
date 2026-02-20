@@ -404,6 +404,21 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'dialog.loadWorkflow.confirm': '破棄して読み込む',
   'dialog.loadWorkflow.cancel': 'キャンセル',
 
+  // Diff Preview Dialog (MCP apply_workflow)
+  'dialog.diffPreview.title': 'ワークフロー変更の確認',
+  'dialog.diffPreview.description':
+    'AIエージェントがワークフローに以下の変更を適用しようとしています:',
+  'dialog.diffPreview.newWorkflow': 'AIエージェントが新しいワークフローを作成しようとしています:',
+  'dialog.diffPreview.nameChange': '名前:',
+  'dialog.diffPreview.nodes': 'ノード',
+  'dialog.diffPreview.connections': '接続',
+  'dialog.diffPreview.connectionsAdded': '追加',
+  'dialog.diffPreview.connectionsRemoved': '削除',
+  'dialog.diffPreview.noChanges': '変更はありません。',
+  'dialog.diffPreview.agentDescription': 'エージェントの説明',
+  'dialog.diffPreview.accept': '適用',
+  'dialog.diffPreview.reject': '却下',
+
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': 'ワークフローをリセット',
   'toolbar.focusMode': '集中モード',
@@ -922,6 +937,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // MCP Server Section
   'mcpSection.description.line1': 'AIとの対話形式でワークフロー編集します。',
   'mcpSection.description.line2': '使用するエージェントを選択してください。',
+  'mcpSection.reviewBeforeApply': '適用前に変更を確認する',
 
   // Description Panel (Canvas)
   'description.panel.title': '説明',

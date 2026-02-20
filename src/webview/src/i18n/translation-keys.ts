@@ -368,6 +368,20 @@ export interface WebviewTranslationKeys {
   'dialog.loadWorkflow.confirm': string;
   'dialog.loadWorkflow.cancel': string;
 
+  // Diff Preview Dialog (MCP apply_workflow)
+  'dialog.diffPreview.title': string;
+  'dialog.diffPreview.description': string;
+  'dialog.diffPreview.newWorkflow': string;
+  'dialog.diffPreview.nameChange': string;
+  'dialog.diffPreview.nodes': string;
+  'dialog.diffPreview.connections': string;
+  'dialog.diffPreview.connectionsAdded': string;
+  'dialog.diffPreview.connectionsRemoved': string;
+  'dialog.diffPreview.noChanges': string;
+  'dialog.diffPreview.agentDescription': string;
+  'dialog.diffPreview.accept': string;
+  'dialog.diffPreview.reject': string;
+
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': string;
   'toolbar.focusMode': string;
@@ -839,6 +853,7 @@ export interface WebviewTranslationKeys {
   // MCP Server Section
   'mcpSection.description.line1': string;
   'mcpSection.description.line2': string;
+  'mcpSection.reviewBeforeApply': string;
 
   // Description Panel (Canvas)
   'description.panel.title': string;
