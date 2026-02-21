@@ -1488,7 +1488,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    Codex
+                    Codex CLI
                   </span>
                   <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                     <div style={{ display: 'flex' }}>

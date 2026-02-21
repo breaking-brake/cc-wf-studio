@@ -41,7 +41,7 @@ const MODEL_PRESETS: { value: ClaudeModel; label: string }[] = [
 const PROVIDER_PRESETS: { value: AiCliProvider; label: string }[] = [
   { value: 'claude-code', label: 'Claude Code' },
   { value: 'copilot', label: 'Copilot' },
-  { value: 'codex', label: 'Codex' },
+  { value: 'codex', label: 'Codex CLI' },
 ];
 
 // Fixed font sizes for dropdown menu (not responsive)

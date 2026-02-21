@@ -41,7 +41,7 @@ const PROVIDER_CONFIG: Record<
     },
   },
   codex: {
-    label: 'Codex',
+    label: 'Codex CLI',
     colors: {
       light: '#10A37F', // Bright green
       dark: '#0D8A6A', // Dark green

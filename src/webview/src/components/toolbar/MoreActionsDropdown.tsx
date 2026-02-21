@@ -267,7 +267,7 @@ export function MoreActionsDropdown({
                   }}
                 >
                   <Terminal size={14} />
-                  <span style={{ flex: 1 }}>Codex</span>
+                  <span style={{ flex: 1 }}>Codex CLI</span>
                   {isCodexEnabled && <Check size={14} />}
                 </DropdownMenu.Item>
 
