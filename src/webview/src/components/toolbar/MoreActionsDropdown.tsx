@@ -43,6 +43,8 @@ interface MoreActionsDropdownProps {
   onToggleRooCodeBeta: () => void;
   isGeminiEnabled: boolean;
   onToggleGeminiBeta: () => void;
+  isAntigravityEnabled: boolean;
+  onToggleAntigravityBeta: () => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -63,6 +65,8 @@ export function MoreActionsDropdown({
   onToggleRooCodeBeta,
   isGeminiEnabled,
   onToggleGeminiBeta,
+  isAntigravityEnabled,
+  onToggleAntigravityBeta,
   open,
   onOpenChange,
 }: MoreActionsDropdownProps) {
@@ -315,6 +319,29 @@ export function MoreActionsDropdown({
                   <Terminal size={14} />
                   <span style={{ flex: 1 }}>Gemini CLI</span>
                   {isGeminiEnabled && <Check size={14} />}
+                </DropdownMenu.Item>
+
+                {/* Antigravity Toggle */}
+                <DropdownMenu.Item
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    onToggleAntigravityBeta();
+                  }}
+                  style={{
+                    padding: '8px 12px',
+                    fontSize: `${FONT_SIZES.small}px`,
+                    color: 'var(--vscode-foreground)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    outline: 'none',
+                    borderRadius: '2px',
+                  }}
+                >
+                  <Bot size={14} />
+                  <span style={{ flex: 1 }}>Antigravity</span>
+                  {isAntigravityEnabled && <Check size={14} />}
                 </DropdownMenu.Item>
               </DropdownMenu.SubContent>
             </DropdownMenu.Portal>

@@ -10,6 +10,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { log } from '../extension';
+import { isAntigravityInstalled } from './antigravity-extension-service';
 import { isRooCodeInstalled, startRooCodeTask } from './roo-code-extension-service';
 
 export type AiEditingProvider =
@@ -18,7 +19,8 @@ export type AiEditingProvider =
   | 'copilot-chat'
   | 'codex'
   | 'roo-code'
-  | 'gemini';
+  | 'gemini'
+  | 'antigravity';
 
 const SKILL_NAME = 'cc-workflow-ai-editor';
 
@@ -39,6 +41,8 @@ function getSkillDestination(provider: AiEditingProvider, workingDirectory: stri
       return path.join(workingDirectory, '.roo', 'skills', SKILL_NAME, 'SKILL.md');
     case 'gemini':
       return path.join(workingDirectory, '.gemini', 'skills', SKILL_NAME, 'SKILL.md');
+    case 'antigravity':
+      return path.join(workingDirectory, '.agent', 'skills', SKILL_NAME, 'SKILL.md');
   }
 }
 
@@ -140,6 +144,15 @@ async function launchProvider(
       });
       terminal.show(true);
       terminal.sendText(`gemini -i ":skill ${SKILL_NAME}"`);
+      break;
+    }
+
+    case 'antigravity': {
+      // For Antigravity, only check installation here.
+      // Launch is handled separately after MCP refresh dialog in open-editor.ts.
+      if (!isAntigravityInstalled()) {
+        throw new Error('Antigravity extension is not installed.');
+      }
       break;
     }
   }

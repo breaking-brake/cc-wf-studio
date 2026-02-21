@@ -18,6 +18,7 @@ import { useTranslation } from '../../i18n/i18n-context';
 import { vscode } from '../../main';
 import { launchAiAgent, openExternalUrl } from '../../services/vscode-bridge';
 import { useRefinementStore } from '../../stores/refinement-store';
+import { AntigravityMcpRefreshDialog } from '../dialogs/AntigravityMcpRefreshDialog';
 
 interface AiEditButton {
   provider: AiEditingProvider;
@@ -31,6 +32,7 @@ const AI_EDIT_BUTTONS: AiEditButton[] = [
   { provider: 'codex', label: 'Codex CLI' },
   { provider: 'roo-code', label: 'Roo Code' },
   { provider: 'gemini', label: 'Gemini CLI' },
+  { provider: 'antigravity', label: 'Antigravity' },
 ];
 
 interface McpServerSectionProps {
@@ -44,6 +46,7 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
   const [port, setPort] = useState<number | null>(null);
   const [launchingProvider, setLaunchingProvider] = useState<AiEditingProvider | null>(null);
   const [reviewBeforeApply, setReviewBeforeApply] = useState(true);
+  const [showMcpRefreshDialog, setShowMcpRefreshDialog] = useState(false);
 
   const {
     isCopilotChatEnabled,
@@ -51,6 +54,7 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
     isCodexEnabled,
     isRooCodeEnabled,
     isGeminiEnabled,
+    isAntigravityEnabled,
   } = useRefinementStore();
 
   const visibleButtons = useMemo(() => {
@@ -68,6 +72,8 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
           return isRooCodeEnabled;
         case 'gemini':
           return isGeminiEnabled;
+        case 'antigravity':
+          return isAntigravityEnabled;
         default:
           return false;
       }
@@ -78,6 +84,7 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
     isCodexEnabled,
     isRooCodeEnabled,
     isGeminiEnabled,
+    isAntigravityEnabled,
   ]);
 
   // Listen for MCP server status updates
@@ -89,6 +96,10 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
         setIsRunning(payload.running);
         setPort(payload.port);
         setReviewBeforeApply(payload.reviewBeforeApply);
+      }
+      if (message.type === 'ANTIGRAVITY_MCP_REFRESH_NEEDED') {
+        setLaunchingProvider(null);
+        setShowMcpRefreshDialog(true);
       }
     };
 
@@ -115,6 +126,19 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
     [launchingProvider]
   );
 
+  const handleMcpRefreshOpenSettings = useCallback(() => {
+    vscode.postMessage({ type: 'OPEN_ANTIGRAVITY_MCP_SETTINGS' });
+  }, []);
+
+  const handleMcpRefreshRun = useCallback(() => {
+    setShowMcpRefreshDialog(false);
+    vscode.postMessage({ type: 'CONFIRM_ANTIGRAVITY_CASCADE_LAUNCH' });
+  }, []);
+
+  const handleMcpRefreshCancel = useCallback(() => {
+    setShowMcpRefreshDialog(false);
+  }, []);
+
   const handleStop = useCallback(() => {
     vscode.postMessage({ type: 'STOP_MCP_SERVER' });
   }, []);
@@ -135,6 +159,14 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
         overflow: 'hidden',
       }}
     >
+      {/* Antigravity MCP Refresh Dialog */}
+      <AntigravityMcpRefreshDialog
+        isOpen={showMcpRefreshDialog}
+        onOpenMcpSettings={handleMcpRefreshOpenSettings}
+        onRun={handleMcpRefreshRun}
+        onCancel={handleMcpRefreshCancel}
+      />
+
       {/* Header */}
       <button
         type="button"

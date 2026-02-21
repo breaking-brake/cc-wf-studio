@@ -404,7 +404,8 @@ export type ExportProvider =
   | 'copilot-cli'
   | 'codex'
   | 'gemini'
-  | 'roo-code';
+  | 'roo-code'
+  | 'antigravity';
 
 /**
  * Get the provider-specific sub-agent execution description for rectangle nodes.
@@ -422,6 +423,8 @@ function getSubAgentDescription(provider: ExportProvider): string {
     case 'gemini':
       return '- **Rectangle nodes (Sub-Agent: ...)**: Execute Sub-Agents';
     case 'roo-code':
+      return '- **Rectangle nodes (Sub-Agent: ...)**: Execute Sub-Agents';
+    case 'antigravity':
       return '- **Rectangle nodes (Sub-Agent: ...)**: Execute Sub-Agents';
     default: {
       const _exhaustiveCheck: never = provider;
@@ -447,6 +450,8 @@ function getAskUserQuestionDescription(provider: ExportProvider): string {
       return '- **Diamond nodes (AskUserQuestion:...)**: Use the ask_user tool to prompt the user and branch based on their response';
     case 'roo-code':
       return '- **Diamond nodes (AskUserQuestion:...)**: Use the ask_followup_question tool to prompt the user and branch based on their response';
+    case 'antigravity':
+      return '- **Diamond nodes (AskUserQuestion:...)**: Prompt the user with a question and branch based on their response';
     default: {
       const _exhaustiveCheck: never = provider;
       throw new Error(`Unknown provider: ${_exhaustiveCheck}`);
@@ -471,6 +476,8 @@ function getAgentName(provider: ExportProvider): string {
       return 'Gemini CLI';
     case 'roo-code':
       return 'Roo Code';
+    case 'antigravity':
+      return 'Antigravity';
     default: {
       const _exhaustiveCheck: never = provider;
       throw new Error(`Unknown provider: ${_exhaustiveCheck}`);
@@ -495,6 +502,8 @@ function getShellToolDescription(provider: ExportProvider): string {
       return 'Use the run_shell_command tool to run';
     case 'roo-code':
       return 'Use the execute_command tool to run';
+    case 'antigravity':
+      return 'Use the Bash tool to run';
     default: {
       const _exhaustiveCheck: never = provider;
       throw new Error(`Unknown provider: ${_exhaustiveCheck}`);

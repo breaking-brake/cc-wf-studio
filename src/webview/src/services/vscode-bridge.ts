@@ -8,6 +8,8 @@
 import type {
   AiEditingProvider,
   EditorContentUpdatedPayload,
+  ExportForAntigravityPayload,
+  ExportForAntigravitySuccessPayload,
   ExportForCodexCliPayload,
   ExportForCodexCliSuccessPayload,
   ExportForCopilotCliPayload,
@@ -22,6 +24,8 @@ import type {
   ExtensionMessage,
   OpenInEditorPayload,
   RunAsSlashCommandPayload,
+  RunForAntigravityPayload,
+  RunForAntigravitySuccessPayload,
   RunForCodexCliPayload,
   RunForCodexCliSuccessPayload,
   RunForCopilotCliPayload,
@@ -796,6 +800,112 @@ export function runForGeminiCli(workflow: Workflow): Promise<RunForGeminiCliSucc
 }
 
 // ============================================================================
+// Antigravity Integration
+// ============================================================================
+
+/**
+ * Export workflow for Antigravity
+ *
+ * Exports the workflow to Skills format (.claude/skills/name/SKILL.md)
+ *
+ * @param workflow - Workflow to export
+ * @returns Promise that resolves with export result
+ */
+export function exportForAntigravity(
+  workflow: Workflow
+): Promise<ExportForAntigravitySuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'EXPORT_FOR_ANTIGRAVITY_SUCCESS') {
+          resolve(message.payload as ExportForAntigravitySuccessPayload);
+        } else if (message.type === 'EXPORT_FOR_ANTIGRAVITY_CANCELLED') {
+          // User cancelled - resolve with empty result
+          resolve({
+            skillName: '',
+            skillPath: '',
+            timestamp: new Date().toISOString(),
+          });
+        } else if (message.type === 'EXPORT_FOR_ANTIGRAVITY_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to export for Antigravity'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: ExportForAntigravityPayload = { workflow };
+    vscode.postMessage({
+      type: 'EXPORT_FOR_ANTIGRAVITY',
+      requestId,
+      payload,
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
+/**
+ * Run workflow for Antigravity
+ *
+ * Exports the workflow to Skills format and runs it via Antigravity (Cascade)
+ *
+ * @param workflow - Workflow to run
+ * @returns Promise that resolves with run result
+ */
+export function runForAntigravity(workflow: Workflow): Promise<RunForAntigravitySuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'RUN_FOR_ANTIGRAVITY_SUCCESS') {
+          resolve(message.payload as RunForAntigravitySuccessPayload);
+        } else if (message.type === 'RUN_FOR_ANTIGRAVITY_CANCELLED') {
+          // User cancelled - resolve with empty result
+          resolve({
+            workflowName: '',
+            antigravityOpened: false,
+            timestamp: new Date().toISOString(),
+          });
+        } else if (message.type === 'RUN_FOR_ANTIGRAVITY_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to run for Antigravity'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: RunForAntigravityPayload = { workflow };
+    vscode.postMessage({
+      type: 'RUN_FOR_ANTIGRAVITY',
+      requestId,
+      payload,
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
+// ============================================================================
 // One-Click AI Agent Launch
 // ============================================================================
 
@@ -817,7 +927,10 @@ export function launchAiAgent(provider: AiEditingProvider): Promise<void> {
       if (message.requestId === requestId) {
         window.removeEventListener('message', handler);
 
-        if (message.type === 'LAUNCH_AI_AGENT_SUCCESS') {
+        if (
+          message.type === 'LAUNCH_AI_AGENT_SUCCESS' ||
+          message.type === 'ANTIGRAVITY_MCP_REFRESH_NEEDED'
+        ) {
           resolve();
         } else if (message.type === 'LAUNCH_AI_AGENT_FAILED') {
           reject(new Error(message.payload?.errorMessage || 'Failed to launch AI agent'));

@@ -10,6 +10,7 @@
  * - VSCode Copilot: {workspace}/.vscode/mcp.json
  * - Copilot CLI: ~/.copilot/mcp-config.json (global)
  * - Codex CLI: ~/.codex/config.toml (global)
+ * - Antigravity: ~/.gemini/antigravity/mcp_config.json (global)
  */
 
 import * as fs from 'node:fs/promises';
@@ -49,6 +50,8 @@ function getConfigPath(target: McpConfigTarget, workspacePath: string): string {
       return path.join(os.homedir(), '.codex', 'config.toml');
     case 'gemini':
       return path.join(os.homedir(), '.gemini', 'settings.json');
+    case 'antigravity':
+      return path.join(os.homedir(), '.gemini', 'antigravity', 'mcp_config.json');
   }
 }
 
@@ -121,6 +124,16 @@ export async function writeAgentConfig(
       }
       config.mcpServers[SERVER_ENTRY_NAME] = { url: serverUrl };
       await writeJsonConfig(filePath, config);
+    } else if (target === 'antigravity') {
+      // Antigravity uses "mcpServers" key with { serverUrl: "..." } format
+      // in ~/.gemini/antigravity/mcp_config.json
+      const filePath = getConfigPath(target, workspacePath);
+      const config = await readJsonConfig(filePath);
+      if (!config.mcpServers) {
+        config.mcpServers = {};
+      }
+      config.mcpServers[SERVER_ENTRY_NAME] = { serverUrl };
+      await writeJsonConfig(filePath, config);
     } else if (target === 'copilot-chat') {
       // VSCode Copilot uses "servers" key with type "http"
       const filePath = getConfigPath(target, workspacePath);
@@ -184,6 +197,14 @@ export async function removeAgentConfig(
       }
     } else if (target === 'gemini') {
       // Gemini CLI uses JSON format with "mcpServers" key
+      const filePath = getConfigPath(target, workspacePath);
+      const config = await readJsonConfig(filePath);
+      if (config.mcpServers?.[SERVER_ENTRY_NAME]) {
+        delete config.mcpServers[SERVER_ENTRY_NAME];
+        await writeJsonConfig(filePath, config);
+      }
+    } else if (target === 'antigravity') {
+      // Antigravity uses "mcpServers" key
       const filePath = getConfigPath(target, workspacePath);
       const config = await readJsonConfig(filePath);
       if (config.mcpServers?.[SERVER_ENTRY_NAME]) {
@@ -255,6 +276,8 @@ export function getConfigTargetsForProvider(provider: AiEditingProvider): McpCon
       return ['roo-code'];
     case 'gemini':
       return ['gemini'];
+    case 'antigravity':
+      return ['antigravity'];
   }
 }
 
@@ -269,6 +292,7 @@ export async function removeAllAgentConfigs(workspacePath: string): Promise<void
     'copilot-cli',
     'codex',
     'gemini',
+    'antigravity',
   ];
 
   for (const target of allTargets) {

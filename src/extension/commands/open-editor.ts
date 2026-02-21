@@ -20,6 +20,10 @@ import type {
 import { getMcpServerManager, log } from '../extension';
 import { translate } from '../i18n/i18n-service';
 import { generateAndRunAiEditingSkill } from '../services/ai-editing-skill-service';
+import {
+  openAntigravityMcpSettings,
+  startAntigravityTask,
+} from '../services/antigravity-extension-service';
 import { cancelGeneration } from '../services/claude-code-service';
 import { FileService } from '../services/file-service';
 import {
@@ -34,6 +38,7 @@ import { migrateWorkflow } from '../utils/migrate-workflow';
 import { SlackTokenManager } from '../utils/slack-token-manager';
 import { validateWorkflowFile } from '../utils/workflow-validator';
 import { getWebviewContent } from '../webview-content';
+import { handleExportForAntigravity, handleRunForAntigravity } from './antigravity-handlers';
 import { handleExportForCodexCli, handleRunForCodexCli } from './codex-handlers';
 import {
   handleExportForCopilot,
@@ -551,6 +556,50 @@ export function registerOpenEditorCommand(
               } else {
                 webview.postMessage({
                   type: 'RUN_FOR_GEMINI_CLI_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorCode: 'UNKNOWN_ERROR',
+                    errorMessage: 'Workflow is required',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+
+            case 'EXPORT_FOR_ANTIGRAVITY':
+              // Export workflow for Antigravity (Skills format)
+              if (message.payload?.workflow) {
+                await handleExportForAntigravity(
+                  fileService,
+                  webview,
+                  message.payload,
+                  message.requestId
+                );
+              } else {
+                webview.postMessage({
+                  type: 'EXPORT_FOR_ANTIGRAVITY_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorCode: 'UNKNOWN_ERROR',
+                    errorMessage: 'Workflow is required',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+
+            case 'RUN_FOR_ANTIGRAVITY':
+              // Run workflow for Antigravity (via Cascade)
+              if (message.payload?.workflow) {
+                await handleRunForAntigravity(
+                  fileService,
+                  webview,
+                  message.payload,
+                  message.requestId
+                );
+              } else {
+                webview.postMessage({
+                  type: 'RUN_FOR_ANTIGRAVITY_FAILED',
                   requestId: message.requestId,
                   payload: {
                     errorCode: 'UNKNOWN_ERROR',
@@ -1383,6 +1432,18 @@ export function registerOpenEditorCommand(
                   workspacePath
                 );
 
+                // For Antigravity, pause and let the user manually refresh MCP
+                if (launchPayload.provider === 'antigravity') {
+                  webview.postMessage({
+                    type: 'ANTIGRAVITY_MCP_REFRESH_NEEDED',
+                    requestId: message.requestId,
+                  });
+                  log('INFO', 'Antigravity MCP refresh needed, waiting for user', {
+                    port: serverPort,
+                  });
+                  break;
+                }
+
                 webview.postMessage({
                   type: 'LAUNCH_AI_AGENT_SUCCESS',
                   requestId: message.requestId,
@@ -1406,6 +1467,36 @@ export function registerOpenEditorCommand(
                   payload: {
                     errorMessage:
                       error instanceof Error ? error.message : 'Failed to launch AI agent',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+            }
+
+            case 'OPEN_ANTIGRAVITY_MCP_SETTINGS': {
+              await openAntigravityMcpSettings();
+              break;
+            }
+
+            case 'CONFIRM_ANTIGRAVITY_CASCADE_LAUNCH': {
+              try {
+                await startAntigravityTask('cc-workflow-ai-editor');
+                webview.postMessage({
+                  type: 'LAUNCH_AI_AGENT_SUCCESS',
+                  requestId: message.requestId,
+                  payload: {
+                    provider: 'antigravity',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              } catch (error) {
+                webview.postMessage({
+                  type: 'LAUNCH_AI_AGENT_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorMessage:
+                      error instanceof Error ? error.message : 'Failed to launch Antigravity',
                     timestamp: new Date().toISOString(),
                   },
                 });

@@ -20,7 +20,7 @@
   <strong>Visual Workflow Editor for AI Agents</strong>
 </p>
 
-<span id="github-copilot-support"></span><span id="openai-codex-support"></span><span id="roo-code-support"></span><span id="gemini-cli-support"></span>
+<span id="github-copilot-support"></span><span id="openai-codex-support"></span><span id="roo-code-support"></span><span id="gemini-cli-support"></span><span id="antigravity-support"></span>
 
 | Agent | Export Format | Requires |
 |-------|--------------|----------|
@@ -30,6 +30,7 @@
 | OpenAI Codex CLI | `.codex/skills/` | [Codex CLI](https://github.com/openai/codex) |
 | Roo Code | `.roo/skills/` | [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) |
 | Gemini CLI | `.gemini/skills/` | [Gemini CLI](https://github.com/google-gemini/gemini-cli) |
+| Antigravity | `.agent/skills/` | [Antigravity](https://antigravity.google/) |
 
 > **Note:** Agents other than Claude Code require activation from Toolbar's **More** menu.
 
@@ -94,7 +95,7 @@
 ### Edit with AI
 
 - Click Edit with AI <img src="./resources/icon-sparkles.png" alt="sparkles" height="16" style="vertical-align: middle"> button in the toolbar to generate or refine workflows with natural language
-- **Native with MCP Server**: Click an AI agent button (Claude Code, Copilot Chat, Copilot CLI, Codex, Roo Code) in the Edit with AI panel to launch native AI editing. The MCP server starts automatically behind the scenes.
+- **Native with MCP Server**: Click an AI agent button in the Edit with AI panel to launch native AI editing. The MCP server starts automatically behind the scenes.
 
 ```mermaid
 sequenceDiagram

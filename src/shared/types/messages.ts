@@ -803,13 +803,20 @@ export type ExtensionMessage =
   | Message<RunForGeminiCliSuccessPayload, 'RUN_FOR_GEMINI_CLI_SUCCESS'>
   | Message<void, 'RUN_FOR_GEMINI_CLI_CANCELLED'>
   | Message<GeminiOperationFailedPayload, 'RUN_FOR_GEMINI_CLI_FAILED'>
+  | Message<ExportForAntigravitySuccessPayload, 'EXPORT_FOR_ANTIGRAVITY_SUCCESS'>
+  | Message<void, 'EXPORT_FOR_ANTIGRAVITY_CANCELLED'>
+  | Message<AntigravityOperationFailedPayload, 'EXPORT_FOR_ANTIGRAVITY_FAILED'>
+  | Message<RunForAntigravitySuccessPayload, 'RUN_FOR_ANTIGRAVITY_SUCCESS'>
+  | Message<void, 'RUN_FOR_ANTIGRAVITY_CANCELLED'>
+  | Message<AntigravityOperationFailedPayload, 'RUN_FOR_ANTIGRAVITY_FAILED'>
   | Message<GetCurrentWorkflowRequestPayload, 'GET_CURRENT_WORKFLOW_REQUEST'>
   | Message<ApplyWorkflowFromMcpPayload, 'APPLY_WORKFLOW_FROM_MCP'>
   | Message<McpServerStatusPayload, 'MCP_SERVER_STATUS'>
   | Message<RunAiEditingSkillSuccessPayload, 'RUN_AI_EDITING_SKILL_SUCCESS'>
   | Message<RunAiEditingSkillFailedPayload, 'RUN_AI_EDITING_SKILL_FAILED'>
   | Message<LaunchAiAgentSuccessPayload, 'LAUNCH_AI_AGENT_SUCCESS'>
-  | Message<LaunchAiAgentFailedPayload, 'LAUNCH_AI_AGENT_FAILED'>;
+  | Message<LaunchAiAgentFailedPayload, 'LAUNCH_AI_AGENT_FAILED'>
+  | Message<void, 'ANTIGRAVITY_MCP_REFRESH_NEEDED'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -1470,6 +1477,63 @@ export interface GeminiOperationFailedPayload {
 }
 
 // ============================================================================
+// Antigravity Integration Payloads (Beta)
+// ============================================================================
+
+/**
+ * Export workflow for Antigravity payload (Skills format)
+ * Exports to .claude/skills/{name}/SKILL.md
+ */
+export interface ExportForAntigravityPayload {
+  /** Workflow to export */
+  workflow: Workflow;
+}
+
+/**
+ * Export for Antigravity success payload
+ */
+export interface ExportForAntigravitySuccessPayload {
+  /** Skill name */
+  skillName: string;
+  /** Skill file path */
+  skillPath: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Run workflow for Antigravity payload
+ */
+export interface RunForAntigravityPayload {
+  /** Workflow to run */
+  workflow: Workflow;
+}
+
+/**
+ * Run for Antigravity success payload
+ */
+export interface RunForAntigravitySuccessPayload {
+  /** Workflow name */
+  workflowName: string;
+  /** Whether Antigravity Cascade was opened */
+  antigravityOpened: boolean;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Antigravity operation failed payload
+ */
+export interface AntigravityOperationFailedPayload {
+  /** Error code */
+  errorCode: 'ANTIGRAVITY_NOT_INSTALLED' | 'EXPORT_FAILED' | 'UNKNOWN_ERROR';
+  /** Error message */
+  errorMessage: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+// ============================================================================
 // AI Editing Skill Payloads (MCP-based AI editing)
 // ============================================================================
 
@@ -1482,7 +1546,8 @@ export type AiEditingProvider =
   | 'copilot-chat'
   | 'codex'
   | 'roo-code'
-  | 'gemini';
+  | 'gemini'
+  | 'antigravity';
 
 /**
  * Run AI editing skill request payload (Webview → Extension)
@@ -1554,7 +1619,8 @@ export type McpConfigTarget =
   | 'copilot-chat'
   | 'copilot-cli'
   | 'codex'
-  | 'gemini';
+  | 'gemini'
+  | 'antigravity';
 
 /**
  * Start MCP Server request payload (Webview → Extension)
@@ -1743,6 +1809,8 @@ export type WebviewMessage =
   | Message<RunForRooCodePayload, 'RUN_FOR_ROO_CODE'>
   | Message<ExportForGeminiCliPayload, 'EXPORT_FOR_GEMINI_CLI'>
   | Message<RunForGeminiCliPayload, 'RUN_FOR_GEMINI_CLI'>
+  | Message<ExportForAntigravityPayload, 'EXPORT_FOR_ANTIGRAVITY'>
+  | Message<RunForAntigravityPayload, 'RUN_FOR_ANTIGRAVITY'>
   | Message<GetCurrentWorkflowResponsePayload, 'GET_CURRENT_WORKFLOW_RESPONSE'>
   | Message<ApplyWorkflowFromMcpResponsePayload, 'APPLY_WORKFLOW_FROM_MCP_RESPONSE'>
   | Message<StartMcpServerPayload, 'START_MCP_SERVER'>
@@ -1750,7 +1818,9 @@ export type WebviewMessage =
   | Message<void, 'GET_MCP_SERVER_STATUS'>
   | Message<RunAiEditingSkillPayload, 'RUN_AI_EDITING_SKILL'>
   | Message<LaunchAiAgentPayload, 'LAUNCH_AI_AGENT'>
-  | Message<SetReviewBeforeApplyPayload, 'SET_REVIEW_BEFORE_APPLY'>;
+  | Message<SetReviewBeforeApplyPayload, 'SET_REVIEW_BEFORE_APPLY'>
+  | Message<void, 'OPEN_ANTIGRAVITY_MCP_SETTINGS'>
+  | Message<void, 'CONFIRM_ANTIGRAVITY_CASCADE_LAUNCH'>;
 
 // ============================================================================
 // Error Codes

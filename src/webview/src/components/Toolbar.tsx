@@ -16,12 +16,14 @@ import {
   generateWorkflowName,
 } from '../services/ai-generation-service';
 import {
+  exportForAntigravity,
   exportForCodexCli,
   exportForCopilot,
   exportForCopilotCli,
   exportForGeminiCli,
   exportForRooCode,
   runAsSlashCommand,
+  runForAntigravity,
   runForCodexCli,
   runForCopilot,
   runForCopilotCli,
@@ -104,6 +106,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     toggleRooCodeEnabled,
     isGeminiEnabled,
     toggleGeminiEnabled,
+    isAntigravityEnabled,
+    toggleAntigravityEnabled,
   } = useRefinementStore();
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -127,6 +131,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   // Gemini CLI integration
   const [isGeminiExporting, setIsGeminiExporting] = useState(false);
   const [isGeminiRunning, setIsGeminiRunning] = useState(false);
+  // Antigravity integration
+  const [isAntigravityExporting, setIsAntigravityExporting] = useState(false);
+  const [isAntigravityRunning, setIsAntigravityRunning] = useState(false);
   const generationNameRequestIdRef = useRef<string | null>(null);
 
   // Workflow name validation pattern (lowercase, numbers, hyphens, underscores only)
@@ -897,6 +904,104 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     }
   };
 
+  // ============================================================================
+  // Antigravity Integration Handlers
+  // ============================================================================
+
+  const handleAntigravityExport = async () => {
+    if (!workflowName.trim()) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
+      });
+      return;
+    }
+
+    setIsAntigravityExporting(true);
+    try {
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
+        useWorkflowStore.getState();
+
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        workflowDescription || undefined,
+        undefined,
+        subAgentFlows,
+        slashCommandOptions
+      );
+
+      validateWorkflow(workflow);
+
+      const result = await exportForAntigravity(workflow);
+      console.log('Workflow exported as skill for Antigravity:', result.skillPath);
+    } catch (error) {
+      onError({
+        code: 'EXPORT_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to export for Antigravity',
+        details: error,
+      });
+    } finally {
+      setIsAntigravityExporting(false);
+    }
+  };
+
+  const handleAntigravityRun = async () => {
+    if (!workflowName.trim()) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
+      });
+      return;
+    }
+
+    setIsAntigravityRunning(true);
+    try {
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
+        useWorkflowStore.getState();
+
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        workflowDescription || undefined,
+        undefined,
+        subAgentFlows,
+        slashCommandOptions
+      );
+
+      validateWorkflow(workflow);
+
+      const result = await runForAntigravity(workflow);
+      console.log('Workflow run for Antigravity:', result.workflowName);
+    } catch (error) {
+      onError({
+        code: 'RUN_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to run for Antigravity',
+        details: error,
+      });
+    } finally {
+      setIsAntigravityRunning(false);
+    }
+  };
+
   // Handle AI workflow name generation
   const handleGenerateWorkflowName = useCallback(async () => {
     const currentRequestId = `gen-name-${Date.now()}`;
@@ -1151,7 +1256,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         isCopilotCliEnabled ||
         isCodexEnabled ||
         isRooCodeEnabled ||
-        isGeminiEnabled ? (
+        isGeminiEnabled ||
+        isAntigravityEnabled ? (
           /* Combined layout when Copilot Beta is enabled */
           <div
             style={{
@@ -1735,6 +1841,98 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Vertical Divider - shown when Antigravity is enabled */}
+              {isAntigravityEnabled && (
+                <div
+                  style={{
+                    width: '1px',
+                    backgroundColor: 'var(--vscode-panel-border)',
+                    margin: '0 8px',
+                    alignSelf: 'stretch',
+                  }}
+                />
+              )}
+
+              {/* Antigravity Column - shown when Antigravity is enabled */}
+              {isAntigravityEnabled && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '9px',
+                      color: 'var(--vscode-descriptionForeground)',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Antigravity
+                  </span>
+                  <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex' }}>
+                      <button
+                        type="button"
+                        onClick={handleAntigravityExport}
+                        disabled={isAntigravityExporting}
+                        style={{
+                          padding: isCompact ? '4px 8px' : '4px 12px',
+                          backgroundColor: 'var(--vscode-button-background)',
+                          color: 'var(--vscode-button-foreground)',
+                          border: 'none',
+                          borderRadius: '2px 0 0 2px',
+                          cursor: isAntigravityExporting ? 'not-allowed' : 'pointer',
+                          fontSize: '13px',
+                          opacity: isAntigravityExporting ? 0.6 : 1,
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          borderRight: '1px solid var(--vscode-button-foreground)',
+                        }}
+                      >
+                        {isCompact ? (
+                          <SquareSlash size={16} />
+                        ) : isAntigravityExporting ? (
+                          t('toolbar.exporting')
+                        ) : (
+                          t('toolbar.export')
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleAntigravityRun}
+                        disabled={isAntigravityRunning}
+                        style={{
+                          padding: isCompact ? '4px 8px' : '4px 12px',
+                          backgroundColor: 'var(--vscode-button-background)',
+                          color: 'var(--vscode-button-foreground)',
+                          border: 'none',
+                          borderRadius: '0 2px 2px 0',
+                          cursor: isAntigravityRunning ? 'not-allowed' : 'pointer',
+                          fontSize: '13px',
+                          opacity: isAntigravityRunning ? 0.6 : 1,
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        {isCompact ? (
+                          <Play size={16} />
+                        ) : isAntigravityRunning ? (
+                          t('toolbar.running')
+                        ) : (
+                          t('toolbar.run')
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -1921,6 +2119,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onToggleRooCodeBeta={toggleRooCodeEnabled}
               isGeminiEnabled={isGeminiEnabled}
               onToggleGeminiBeta={toggleGeminiEnabled}
+              isAntigravityEnabled={isAntigravityEnabled}
+              onToggleAntigravityBeta={toggleAntigravityEnabled}
               open={moreActionsOpen}
               onOpenChange={onMoreActionsOpenChange}
             />

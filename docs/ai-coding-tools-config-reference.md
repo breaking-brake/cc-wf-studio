@@ -9,6 +9,7 @@ Created by referencing official documentation for each tool.
 |------|-------|--------|------------------|--------------|-----|--------|
 | Claude Code | Project<br>User | Project<br>User | Project<br>User | Project<br>User | Project<br>User | Project |
 | Gemini CLI | Project<br>User | Project<br>User | Project<br>User | - | Project<br>User | Project |
+| Antigravity | Project | Project<br>User | Workflows | Agent mode | Project | - |
 | Roo Code | Project<br>Global | Project<br>Global | Project<br>Global | Project<br>Global | Project<br>Global | Project |
 | VSCode Copilot Chat | Project<br>User | Project<br>User | Project<br>User | Project | Project<br>User | - |
 | Copilot CLI | Project | Project<br>Global | - | Project<br>Global | Global | - |
@@ -358,6 +359,186 @@ MCP servers are configured in `settings.json` under `mcpServers` key.
 ```
 
 **CLI commands:** `gemini extensions install <source>`, `gemini extensions list`, `gemini extensions enable/disable`
+
+---
+
+## Antigravity (Google)
+
+Antigravity is a Google-made VSCode fork with a built-in AI agent called **Cascade**.
+
+> **Note:** This section is based on reverse engineering of Antigravity v1.107.0 (app bundle analysis). No official public documentation is available.
+>
+> - Extension ID (built-in): `google.antigravity`
+> - Internal codename: Jetski
+> - App location: `/Applications/Antigravity.app`
+> - Config directory: `~/Library/Application Support/Antigravity/`
+
+### VSCode Commands (AI Agent Interaction)
+
+These commands can be used via `vscode.commands.executeCommand()` to interact with Antigravity's Cascade AI.
+
+#### Chat / Agent Launch
+
+| Command | Description |
+|---------|-------------|
+| `antigravity.sendPromptToAgentPanel` | Send a prompt to the Agent panel |
+| `antigravity.openAgent` | Open the Agent side panel |
+| `antigravity.openChatView` | Open the Chat view |
+| `antigravity.startNewConversation` | Start a new conversation |
+| `antigravity.sendTextToChat` | Send text to Chat |
+| `antigravity.sendChatActionMessage` | Send a chat action message |
+| `antigravity.sendTerminalToChat` | Send terminal content to Chat |
+| `antigravity.sendTerminalToSidePanel` | Send terminal content to side panel |
+| `antigravity.enableAgentMode` | Enable Agent mode |
+| `antigravity.initializeAgent` | Initialize the Agent |
+| `antigravity.executeCascadeAction` | Execute a Cascade action |
+
+#### Standard VSCode Chat API (also supported)
+
+| Command | Description |
+|---------|-------------|
+| `workbench.action.chat.open` | Open chat (supports `{ mode: 'agent', query: '...' }`) |
+| `workbench.action.chat.newChat` | Create a new chat session |
+
+#### Agent Step Control
+
+| Command | Description |
+|---------|-------------|
+| `antigravity.agent.acceptAgentStep` | Accept an agent step |
+| `antigravity.agent.rejectAgentStep` | Reject an agent step |
+| `antigravity.agent.manageAnnotations` | Manage agent annotations |
+
+#### Workflow / Rules
+
+| Command | Description |
+|---------|-------------|
+| `antigravity.createWorkflow` | Create a workflow |
+| `antigravity.createGlobalWorkflow` | Create a global workflow |
+| `antigravity.createRule` | Create a rule |
+| `antigravity.openGlobalRules` | Open global rules |
+
+#### Other Notable Commands
+
+| Command | Description |
+|---------|-------------|
+| `antigravity.openMcpConfigFile` | Open MCP config file |
+| `antigravity.pollMcpServerStates` | Poll MCP server states |
+| `antigravity.generateCommitMessage` | Generate commit message |
+| `antigravity.openBrowser` | Open built-in browser |
+| `antigravity.getCascadePluginTemplate` | Get Cascade plugin template |
+| `antigravity.login` | Log in to IDE |
+
+### Built-in Extensions
+
+| Extension | Description |
+|-----------|-------------|
+| `antigravity` | Core AI features (Cascade, completions, agent) |
+| `antigravity-code-executor` | Execute generated code from Cascade |
+| `antigravity-browser-launcher` | Built-in browser launcher |
+| `antigravity-dev-containers` | Dev Containers support |
+| `antigravity-remote-openssh` | Remote SSH support |
+| `antigravity-remote-wsl` | Remote WSL support |
+
+### Rules
+
+| Scope | Path | Description |
+|-------|------|-------------|
+| **Project** | `./.agent/rules/**/*.md` or `./.agents/rules/**/*.md` | Agent rules (markdown files) |
+
+Rules files use the header `# antigravity rules`.
+
+> **Note:** `antigravity.createRule` command is available for rule creation. `antigravity.openGlobalRules` opens global rules.
+
+### Skills (Claude Skills互換)
+
+Antigravityは **`.agent/skills/` ディレクトリ** からスキルを読み込む（`chat.useClaudeSkills` 設定で有効化）。Claude Code の SKILL.md と同一フォーマット。
+
+| Scope | Path | Description |
+|-------|------|-------------|
+| **Project** | `./.agent/skills/{skill-name}/SKILL.md` | プロジェクトスキル |
+
+**検出ロジック:**
+1. `.agent/skills/` ディレクトリを探索
+2. 各サブディレクトリ内の `SKILL.md` を検出
+3. Frontmatter の `name` と `description` をシステムプロンプトに注入
+4. ユーザーのタスクがスキルのドメインに一致すると、スキル内容が会話に追加される
+
+**Frontmatter Schema:**
+```yaml
+---
+name: skill-name           # Required
+description: Skill description  # Required
+---
+```
+
+> **Note:** `chat.useClaudeSkills` 設定（experimental）で切り替え可能。Claude Code の SKILL.md と同一フォーマット。
+
+### MCP
+
+Antigravity uses a **global MCP configuration** at `~/.gemini/antigravity/mcp_config.json`.
+
+| Scope | Path | Description |
+|-------|------|-------------|
+| **Global** | `~/.gemini/antigravity/mcp_config.json` | Global MCP configuration |
+
+**JSON Schema:**
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "command": "npx",
+      "args": ["-y", "package-name"],
+      "env": {}
+    }
+  }
+}
+```
+
+> **Note:** Uses `mcpServers` key (same as Claude Code), NOT `servers`.
+
+### Cascade Configuration
+
+Cascade has several configuration keys found in the workbench:
+
+| Key | Description |
+|-----|-------------|
+| `cascade_config` | General Cascade configuration |
+| `cascade_model_config_data` | Model configuration |
+| `cascade_allowed_commands` | Allowed shell commands |
+| `cascade_denied_commands` | Denied shell commands |
+| `cascade_auto_execution_policy` | Auto-execution policy for commands |
+| `cascade_browser_mode` | Browser mode settings |
+| `cascade_web_search` | Web search toggle |
+| `cascade_plugins` | Cascade plugins |
+| `cascade_planner_mode` | Planner mode toggle |
+| `cascade_memory_summary` | Memory/conversation summary |
+| `cascade_init_prompt` | Initial prompt for Cascade |
+
+### CLI
+
+| Item | Path |
+|------|------|
+| **Binary** | `~/.antigravity/antigravity/bin/antigravity` |
+| **URI Scheme** | `antigravity://` (deep links) |
+
+### Integration Strategy for cc-wf-studio
+
+**Execution pattern:** Closest to **Copilot Chat** (VSCode command-based).
+
+```typescript
+// Recommended launch pattern
+await vscode.commands.executeCommand('antigravity.sendPromptToAgentPanel', prompt);
+
+// Fallback: standard VSCode Chat API
+await vscode.commands.executeCommand('workbench.action.chat.open', {
+  mode: 'agent',
+  query: prompt,
+});
+```
+
+**MCP config:** Shares `.vscode/mcp.json` with Copilot Chat (same `servers` key).
+
+**Skill file location:** `.claude/skills/{skill-name}/SKILL.md`（Claude Codeと完全互換）。`chat.useClaudeSkills` 設定で有効化。
 
 ---
 
@@ -893,6 +1074,12 @@ Project Root/
 │
 ├── .geminiignore                       # Gemini CLI (ignore)
 │
+├── .agent/
+│   ├── rules/**/*.md                   # Antigravity (agent rules)
+│   └── skills/{name}/SKILL.md          # Antigravity (skills)
+├── .agents/
+│   └── rules/**/*.md                   # Antigravity (agent rules, alternative)
+│
 ├── .github/
 │   ├── copilot-instructions.md         # VSCode Copilot Chat, Copilot CLI (root rule)
 │   ├── instructions/*.instructions.md  # VSCode Copilot Chat, Copilot CLI (modular rules)
@@ -937,7 +1124,9 @@ User Home (~)/
 │   ├── settings.json                   # Gemini CLI (user settings + MCP)
 │   ├── commands/*.toml                 # Gemini CLI (user custom commands)
 │   ├── skills/{name}/SKILL.md          # Gemini CLI (user skills)
-│   └── extensions/{name}/              # Gemini CLI (installed extensions)
+│   ├── extensions/{name}/              # Gemini CLI (installed extensions)
+│   └── antigravity/
+│       └── mcp_config.json             # Antigravity (global MCP)
 │
 ├── .copilot/
 │   ├── config.json                     # Copilot CLI (main config)
@@ -986,6 +1175,7 @@ User Home (~)/
 
 ## References
 
+- Antigravity: No official public documentation. Information reverse-engineered from app bundle v1.107.0.
 - [Claude Code Documentation](https://code.claude.com/docs/en)
 - [Claude Code Settings](https://code.claude.com/docs/en/settings)
 - [Claude Code Skills](https://code.claude.com/docs/en/skills)

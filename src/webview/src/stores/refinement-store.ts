@@ -35,6 +35,8 @@ const CODEX_ENABLED_STORAGE_KEY = 'cc-wf-studio:codex-beta-enabled';
 const ROO_CODE_ENABLED_STORAGE_KEY = 'cc-wf-studio:roo-code-beta-enabled';
 // Note: This key is shared with Toolbar.tsx for the "Gemini CLI (Beta)" toggle
 const GEMINI_ENABLED_STORAGE_KEY = 'cc-wf-studio:gemini-beta-enabled';
+// Note: This key is shared with Toolbar.tsx for the "Antigravity (Beta)" toggle
+const ANTIGRAVITY_ENABLED_STORAGE_KEY = 'cc-wf-studio:antigravity-enabled';
 
 // Available tools for Claude Code CLI (used in AI editing allowed tools)
 export const AVAILABLE_TOOLS = [
@@ -425,6 +427,29 @@ function saveGeminiEnabledToStorage(enabled: boolean): void {
   }
 }
 
+/**
+ * Load Antigravity enabled state from localStorage
+ */
+function loadAntigravityEnabledFromStorage(): boolean {
+  try {
+    const saved = localStorage.getItem(ANTIGRAVITY_ENABLED_STORAGE_KEY);
+    return saved === 'true';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Save Antigravity enabled state to localStorage
+ */
+function saveAntigravityEnabledToStorage(enabled: boolean): void {
+  try {
+    localStorage.setItem(ANTIGRAVITY_ENABLED_STORAGE_KEY, String(enabled));
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+}
+
 // ============================================================================
 // Session Status Type
 // ============================================================================
@@ -462,6 +487,7 @@ interface RefinementStore {
   isCodexEnabled: boolean;
   isRooCodeEnabled: boolean;
   isGeminiEnabled: boolean;
+  isAntigravityEnabled: boolean;
 
   // Dynamic Copilot Models State
   availableCopilotModels: CopilotModelInfo[];
@@ -495,6 +521,7 @@ interface RefinementStore {
   toggleCodexEnabled: () => void;
   toggleRooCodeEnabled: () => void;
   toggleGeminiEnabled: () => void;
+  toggleAntigravityEnabled: () => void;
   fetchCopilotModels: () => Promise<void>;
   initConversation: () => void;
   loadConversationHistory: (history: ConversationHistory | undefined) => void;
@@ -593,6 +620,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   isCodexEnabled: loadCodexEnabledFromStorage(), // Load from localStorage, default: false
   isRooCodeEnabled: loadRooCodeEnabledFromStorage(), // Load from localStorage, default: false
   isGeminiEnabled: loadGeminiEnabledFromStorage(), // Load from localStorage, default: false
+  isAntigravityEnabled: loadAntigravityEnabledFromStorage(), // Load from localStorage, default: false
 
   // Dynamic Copilot Models Initial State
   availableCopilotModels: [],
@@ -727,6 +755,13 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     const newEnabled = !currentEnabled;
     saveGeminiEnabledToStorage(newEnabled);
     set({ isGeminiEnabled: newEnabled });
+  },
+
+  toggleAntigravityEnabled: () => {
+    const currentEnabled = get().isAntigravityEnabled;
+    const newEnabled = !currentEnabled;
+    saveAntigravityEnabledToStorage(newEnabled);
+    set({ isAntigravityEnabled: newEnabled });
   },
 
   fetchCopilotModels: async () => {
