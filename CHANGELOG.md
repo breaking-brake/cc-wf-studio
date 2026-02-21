@@ -1,3 +1,11 @@
+## [3.24.1](https://github.com/breaking-brake/cc-wf-studio/compare/v3.24.0...v3.24.1) (2026-02-21)
+
+### Improvements
+
+* move AI agent toggles into submenu and prevent menu auto-close ([#598](https://github.com/breaking-brake/cc-wf-studio/issues/598)) ([5032b9d](https://github.com/breaking-brake/cc-wf-studio/commit/5032b9d4ab7754388f20c7b83650aaaeaccb944b))
+* rename Codex to Codex CLI in UI labels ([#600](https://github.com/breaking-brake/cc-wf-studio/issues/600)) ([34df72e](https://github.com/breaking-brake/cc-wf-studio/commit/34df72e05c50310a40e796a8fb3be290a5fe6a2f))
+* split Copilot toggle into Copilot Chat and Copilot CLI ([#597](https://github.com/breaking-brake/cc-wf-studio/issues/597)) ([3f9fe0e](https://github.com/breaking-brake/cc-wf-studio/commit/3f9fe0e1b7a0bdb87ca47c15e6f9828690e6eb5f))
+
 ## [3.24.0](https://github.com/breaking-brake/cc-wf-studio/compare/v3.23.1...v3.24.0) (2026-02-20)
 
 ### Features
