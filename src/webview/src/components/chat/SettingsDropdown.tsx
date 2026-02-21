@@ -76,7 +76,8 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
     resetAllowedTools,
     selectedProvider,
     setSelectedProvider,
-    isCopilotEnabled,
+    isCopilotChatEnabled,
+    isCopilotCliEnabled,
     isCodexEnabled,
     availableCopilotModels,
     isFetchingCopilotModels,
@@ -270,8 +271,8 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
             }}
           />
 
-          {/* Provider Sub-menu - Only shown when Copilot or Codex is enabled via More Actions */}
-          {(isCopilotEnabled || isCodexEnabled) && (
+          {/* Provider Sub-menu - Only shown when Copilot (Chat or CLI) or Codex is enabled via More Actions */}
+          {(isCopilotChatEnabled || isCopilotCliEnabled || isCodexEnabled) && (
             <DropdownMenu.Sub>
               <DropdownMenu.SubTrigger
                 disabled={isProcessing}
@@ -318,7 +319,8 @@ export function SettingsDropdown({ onClearHistoryClick, hasMessages }: SettingsD
                     {PROVIDER_PRESETS.filter(
                       (preset) =>
                         preset.value === 'claude-code' ||
-                        (preset.value === 'copilot' && isCopilotEnabled) ||
+                        (preset.value === 'copilot' &&
+                          (isCopilotChatEnabled || isCopilotCliEnabled)) ||
                         (preset.value === 'codex' && isCodexEnabled)
                     ).map((preset) => (
                       <DropdownMenu.RadioItem

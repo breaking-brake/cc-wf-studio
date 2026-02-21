@@ -32,8 +32,10 @@ interface MoreActionsDropdownProps {
   onStartTour: () => void;
   isFocusMode: boolean;
   onToggleFocusMode: () => void;
-  isCopilotEnabled: boolean;
-  onToggleCopilotBeta: () => void;
+  isCopilotChatEnabled: boolean;
+  onToggleCopilotChat: () => void;
+  isCopilotCliEnabled: boolean;
+  onToggleCopilotCli: () => void;
   isCodexEnabled: boolean;
   onToggleCodexBeta: () => void;
   isRooCodeEnabled: boolean;
@@ -50,8 +52,10 @@ export function MoreActionsDropdown({
   onStartTour,
   isFocusMode,
   onToggleFocusMode,
-  isCopilotEnabled,
-  onToggleCopilotBeta,
+  isCopilotChatEnabled,
+  onToggleCopilotChat,
+  isCopilotCliEnabled,
+  onToggleCopilotCli,
   isCodexEnabled,
   onToggleCodexBeta,
   isRooCodeEnabled,
@@ -161,9 +165,9 @@ export function MoreActionsDropdown({
             {isFocusMode && <Check size={14} />}
           </DropdownMenu.Item>
 
-          {/* Copilot Beta Toggle */}
+          {/* Copilot Chat Toggle */}
           <DropdownMenu.Item
-            onSelect={onToggleCopilotBeta}
+            onSelect={onToggleCopilotChat}
             style={{
               padding: '8px 12px',
               fontSize: `${FONT_SIZES.small}px`,
@@ -177,8 +181,28 @@ export function MoreActionsDropdown({
             }}
           >
             <Bot size={14} />
-            <span style={{ flex: 1 }}>Copilot</span>
-            {isCopilotEnabled && <Check size={14} />}
+            <span style={{ flex: 1 }}>Copilot Chat</span>
+            {isCopilotChatEnabled && <Check size={14} />}
+          </DropdownMenu.Item>
+
+          {/* Copilot CLI Toggle */}
+          <DropdownMenu.Item
+            onSelect={onToggleCopilotCli}
+            style={{
+              padding: '8px 12px',
+              fontSize: `${FONT_SIZES.small}px`,
+              color: 'var(--vscode-foreground)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              outline: 'none',
+              borderRadius: '2px',
+            }}
+          >
+            <Terminal size={14} />
+            <span style={{ flex: 1 }}>Copilot CLI</span>
+            {isCopilotCliEnabled && <Check size={14} />}
           </DropdownMenu.Item>
 
           {/* Codex Beta Toggle */}

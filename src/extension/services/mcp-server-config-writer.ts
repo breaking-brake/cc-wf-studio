@@ -247,7 +247,7 @@ export function getConfigTargetsForProvider(provider: AiEditingProvider): McpCon
       return ['claude-code'];
     case 'copilot-cli':
       return ['copilot-cli'];
-    case 'copilot-vscode':
+    case 'copilot-chat':
       return ['copilot-chat'];
     case 'codex':
       return ['codex'];
