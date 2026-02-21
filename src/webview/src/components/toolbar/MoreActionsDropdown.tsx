@@ -11,6 +11,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import {
   Bot,
   Check,
+  ChevronLeft,
   Focus,
   HelpCircle,
   MoreHorizontal,
@@ -147,7 +148,10 @@ export function MoreActionsDropdown({
 
           {/* Focus Mode Toggle */}
           <DropdownMenu.Item
-            onSelect={onToggleFocusMode}
+            onSelect={(event) => {
+              event.preventDefault();
+              onToggleFocusMode();
+            }}
             style={{
               padding: '8px 12px',
               fontSize: `${FONT_SIZES.small}px`,
@@ -165,105 +169,156 @@ export function MoreActionsDropdown({
             {isFocusMode && <Check size={14} />}
           </DropdownMenu.Item>
 
-          {/* Copilot Chat Toggle */}
-          <DropdownMenu.Item
-            onSelect={onToggleCopilotChat}
-            style={{
-              padding: '8px 12px',
-              fontSize: `${FONT_SIZES.small}px`,
-              color: 'var(--vscode-foreground)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              outline: 'none',
-              borderRadius: '2px',
-            }}
-          >
-            <Bot size={14} />
-            <span style={{ flex: 1 }}>Copilot Chat</span>
-            {isCopilotChatEnabled && <Check size={14} />}
-          </DropdownMenu.Item>
+          {/* AI Agents Sub-menu */}
+          <DropdownMenu.Sub>
+            <DropdownMenu.SubTrigger
+              style={{
+                padding: '8px 12px',
+                fontSize: `${FONT_SIZES.small}px`,
+                color: 'var(--vscode-foreground)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                outline: 'none',
+                borderRadius: '2px',
+              }}
+            >
+              <ChevronLeft size={14} />
+              <Bot size={14} />
+              <span>AI Agents</span>
+            </DropdownMenu.SubTrigger>
 
-          {/* Copilot CLI Toggle */}
-          <DropdownMenu.Item
-            onSelect={onToggleCopilotCli}
-            style={{
-              padding: '8px 12px',
-              fontSize: `${FONT_SIZES.small}px`,
-              color: 'var(--vscode-foreground)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              outline: 'none',
-              borderRadius: '2px',
-            }}
-          >
-            <Terminal size={14} />
-            <span style={{ flex: 1 }}>Copilot CLI</span>
-            {isCopilotCliEnabled && <Check size={14} />}
-          </DropdownMenu.Item>
+            <DropdownMenu.Portal>
+              <DropdownMenu.SubContent
+                sideOffset={4}
+                style={{
+                  backgroundColor: 'var(--vscode-dropdown-background)',
+                  border: '1px solid var(--vscode-dropdown-border)',
+                  borderRadius: '4px',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+                  zIndex: 10000,
+                  minWidth: '160px',
+                  padding: '4px',
+                }}
+              >
+                {/* Copilot Chat Toggle */}
+                <DropdownMenu.Item
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    onToggleCopilotChat();
+                  }}
+                  style={{
+                    padding: '8px 12px',
+                    fontSize: `${FONT_SIZES.small}px`,
+                    color: 'var(--vscode-foreground)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    outline: 'none',
+                    borderRadius: '2px',
+                  }}
+                >
+                  <Bot size={14} />
+                  <span style={{ flex: 1 }}>Copilot Chat</span>
+                  {isCopilotChatEnabled && <Check size={14} />}
+                </DropdownMenu.Item>
 
-          {/* Codex Beta Toggle */}
-          <DropdownMenu.Item
-            onSelect={onToggleCodexBeta}
-            style={{
-              padding: '8px 12px',
-              fontSize: `${FONT_SIZES.small}px`,
-              color: 'var(--vscode-foreground)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              outline: 'none',
-              borderRadius: '2px',
-            }}
-          >
-            <Terminal size={14} />
-            <span style={{ flex: 1 }}>Codex</span>
-            {isCodexEnabled && <Check size={14} />}
-          </DropdownMenu.Item>
+                {/* Copilot CLI Toggle */}
+                <DropdownMenu.Item
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    onToggleCopilotCli();
+                  }}
+                  style={{
+                    padding: '8px 12px',
+                    fontSize: `${FONT_SIZES.small}px`,
+                    color: 'var(--vscode-foreground)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    outline: 'none',
+                    borderRadius: '2px',
+                  }}
+                >
+                  <Terminal size={14} />
+                  <span style={{ flex: 1 }}>Copilot CLI</span>
+                  {isCopilotCliEnabled && <Check size={14} />}
+                </DropdownMenu.Item>
 
-          {/* Roo Code Beta Toggle */}
-          <DropdownMenu.Item
-            onSelect={onToggleRooCodeBeta}
-            style={{
-              padding: '8px 12px',
-              fontSize: `${FONT_SIZES.small}px`,
-              color: 'var(--vscode-foreground)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              outline: 'none',
-              borderRadius: '2px',
-            }}
-          >
-            <Bot size={14} />
-            <span style={{ flex: 1 }}>Roo Code</span>
-            {isRooCodeEnabled && <Check size={14} />}
-          </DropdownMenu.Item>
+                {/* Codex Toggle */}
+                <DropdownMenu.Item
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    onToggleCodexBeta();
+                  }}
+                  style={{
+                    padding: '8px 12px',
+                    fontSize: `${FONT_SIZES.small}px`,
+                    color: 'var(--vscode-foreground)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    outline: 'none',
+                    borderRadius: '2px',
+                  }}
+                >
+                  <Terminal size={14} />
+                  <span style={{ flex: 1 }}>Codex</span>
+                  {isCodexEnabled && <Check size={14} />}
+                </DropdownMenu.Item>
 
-          {/* Gemini CLI Beta Toggle */}
-          <DropdownMenu.Item
-            onSelect={onToggleGeminiBeta}
-            style={{
-              padding: '8px 12px',
-              fontSize: `${FONT_SIZES.small}px`,
-              color: 'var(--vscode-foreground)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              outline: 'none',
-              borderRadius: '2px',
-            }}
-          >
-            <Terminal size={14} />
-            <span style={{ flex: 1 }}>Gemini CLI</span>
-            {isGeminiEnabled && <Check size={14} />}
-          </DropdownMenu.Item>
+                {/* Roo Code Toggle */}
+                <DropdownMenu.Item
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    onToggleRooCodeBeta();
+                  }}
+                  style={{
+                    padding: '8px 12px',
+                    fontSize: `${FONT_SIZES.small}px`,
+                    color: 'var(--vscode-foreground)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    outline: 'none',
+                    borderRadius: '2px',
+                  }}
+                >
+                  <Bot size={14} />
+                  <span style={{ flex: 1 }}>Roo Code</span>
+                  {isRooCodeEnabled && <Check size={14} />}
+                </DropdownMenu.Item>
+
+                {/* Gemini CLI Toggle */}
+                <DropdownMenu.Item
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    onToggleGeminiBeta();
+                  }}
+                  style={{
+                    padding: '8px 12px',
+                    fontSize: `${FONT_SIZES.small}px`,
+                    color: 'var(--vscode-foreground)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    outline: 'none',
+                    borderRadius: '2px',
+                  }}
+                >
+                  <Terminal size={14} />
+                  <span style={{ flex: 1 }}>Gemini CLI</span>
+                  {isGeminiEnabled && <Check size={14} />}
+                </DropdownMenu.Item>
+              </DropdownMenu.SubContent>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Sub>
 
           <DropdownMenu.Separator
             style={{
