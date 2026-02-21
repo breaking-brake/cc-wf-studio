@@ -28,6 +28,9 @@
  *
  * Roo Code:
  * - <workspace>/.roo/mcp.json (project-level)
+ *
+ * Antigravity:
+ * - ~/.gemini/antigravity/mcp_config.json (user-level, uses 'serverUrl' for HTTP)
  */
 
 import * as fs from 'node:fs';
@@ -37,6 +40,7 @@ import { parse as parseToml } from 'smol-toml';
 import type { McpConfigSource } from '../../shared/types/mcp-node';
 import { log } from '../extension';
 import {
+  getAntigravityUserMcpConfigPath,
   getCodexUserMcpConfigPath,
   getCopilotUserMcpConfigPath,
   getGeminiProjectMcpConfigPath,
@@ -310,6 +314,77 @@ function readRooMcpConfig(configPath: string): Record<string, McpServerConfig> |
     }
 
     log('WARN', 'Failed to read Roo Code mcp.json', {
+      configPath,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
+/**
+ * Read Antigravity MCP config (~/.gemini/antigravity/mcp_config.json)
+ *
+ * Format: { "mcpServers": { "name": { "serverUrl": "..." } } }
+ * Note: Antigravity uses 'serverUrl' instead of 'url' for HTTP transport.
+ * It also supports standard 'command'/'args' for stdio transport.
+ *
+ * @param configPath - Path to mcp_config.json
+ * @returns MCP servers configuration (normalized) or null if not found
+ */
+function readAntigravityMcpConfig(configPath: string): Record<string, McpServerConfig> | null {
+  try {
+    const content = fs.readFileSync(configPath, 'utf-8');
+    const parsed = JSON.parse(content);
+    const rawServers = parsed.mcpServers;
+
+    if (!rawServers || typeof rawServers !== 'object') {
+      return null;
+    }
+
+    const servers: Record<string, McpServerConfig> = {};
+
+    for (const [serverId, raw] of Object.entries(
+      rawServers as Record<string, Partial<McpServerConfig> & { serverUrl?: string }>
+    )) {
+      if (raw.command) {
+        // stdio transport (standard format)
+        servers[serverId] = { ...raw, type: raw.type ?? 'stdio' } as McpServerConfig;
+      } else if (raw.serverUrl) {
+        // Antigravity-specific: 'serverUrl' → normalize to 'url'
+        const { serverUrl, ...rest } = raw;
+        servers[serverId] = { ...rest, url: serverUrl, type: 'http' } as McpServerConfig;
+      } else if (raw.url) {
+        // Standard url field
+        servers[serverId] = { ...raw, type: raw.type ?? 'http' } as McpServerConfig;
+      } else {
+        log(
+          'WARN',
+          'Invalid Antigravity MCP server configuration (no command, serverUrl, or url)',
+          {
+            serverId,
+            configPath,
+          }
+        );
+      }
+    }
+
+    if (Object.keys(servers).length === 0) {
+      return null;
+    }
+
+    log('INFO', 'Successfully read Antigravity mcp_config.json', {
+      configPath,
+      serverCount: Object.keys(servers).length,
+    });
+
+    return servers;
+  } catch (error) {
+    // File not found is expected
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return null;
+    }
+
+    log('WARN', 'Failed to read Antigravity mcp_config.json', {
       configPath,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -704,10 +779,30 @@ export function getMcpServerConfig(
       }
     }
 
-    // Server not found in any configuration (Claude, Copilot, Codex, Gemini, or Roo Code)
+    // =========================================================================
+    // Antigravity source (Priority 12)
+    // =========================================================================
+
+    // Priority 12: Antigravity user-scope (~/.gemini/antigravity/mcp_config.json)
+    const antigravityConfigPath = getAntigravityUserMcpConfigPath();
+    const antigravityConfig = readAntigravityMcpConfig(antigravityConfigPath);
+    if (antigravityConfig?.[serverId]) {
+      const serverConfig = normalizeServerConfig(antigravityConfig[serverId]);
+      if (serverConfig) {
+        log('INFO', 'Retrieved MCP server configuration from Antigravity', {
+          serverId,
+          scope: 'antigravity-user',
+          configPath: antigravityConfigPath,
+          type: serverConfig.type,
+        });
+        return { ...serverConfig, source: 'antigravity' };
+      }
+    }
+
+    // Server not found in any configuration
     log(
       'WARN',
-      'MCP server not found in any configuration (Claude, Copilot, Codex, Gemini, Roo Code)',
+      'MCP server not found in any configuration (Claude, Copilot, Codex, Gemini, Roo Code, Antigravity)',
       {
         serverId,
         workspacePath,
@@ -858,6 +953,18 @@ export function getAllMcpServerIds(workspacePath?: string): string[] {
       }
     }
 
+    // =========================================================================
+    // Antigravity source
+    // =========================================================================
+
+    // Collect from Antigravity user-scope (~/.gemini/antigravity/mcp_config.json)
+    const antigravityConfig = readAntigravityMcpConfig(getAntigravityUserMcpConfigPath());
+    if (antigravityConfig) {
+      for (const id of Object.keys(antigravityConfig)) {
+        serverIds.add(id);
+      }
+    }
+
     return Array.from(serverIds);
   } catch (error) {
     log('ERROR', 'Failed to get MCP server list', {
@@ -890,6 +997,7 @@ export interface McpServerWithSource extends McpServerConfig {
  * - Codex CLI (~/.codex/config.toml)
  * - Gemini CLI (~/.gemini/settings.json, .gemini/settings.json)
  * - Roo Code (.roo/mcp.json)
+ * - Antigravity (~/.gemini/antigravity/mcp_config.json)
  *
  * Priority order (first match wins for duplicate server IDs):
  * 1. Project-scope Claude Code (<workspace>/.mcp.json)
@@ -903,6 +1011,7 @@ export interface McpServerWithSource extends McpServerConfig {
  * 9. User-scope Gemini CLI (~/.gemini/settings.json)
  * 10. Project-scope Gemini CLI (<workspace>/.gemini/settings.json)
  * 11. Project-scope Roo Code (<workspace>/.roo/mcp.json)
+ * 12. User-scope Antigravity (~/.gemini/antigravity/mcp_config.json)
  *
  * @param workspacePath - Optional workspace path for project-scoped servers
  * @returns Array of MCP server configurations with source metadata
@@ -1033,6 +1142,11 @@ export function getAllMcpServersWithSource(workspacePath?: string): McpServerWit
       addServers(rooProjectConfig, 'roo', rooProjectConfigPath);
     }
 
+    // Priority 11: Antigravity user-scope (~/.gemini/antigravity/mcp_config.json)
+    const antigravityConfigPath = getAntigravityUserMcpConfigPath();
+    const antigravityConfig = readAntigravityMcpConfig(antigravityConfigPath);
+    addServers(antigravityConfig, 'antigravity', antigravityConfigPath);
+
     log('INFO', 'Scanned all MCP server sources', {
       totalServers: servers.length,
       claudeCount: servers.filter((s) => s.source === 'claude').length,
@@ -1040,6 +1154,7 @@ export function getAllMcpServersWithSource(workspacePath?: string): McpServerWit
       codexCount: servers.filter((s) => s.source === 'codex').length,
       geminiCount: servers.filter((s) => s.source === 'gemini').length,
       rooCount: servers.filter((s) => s.source === 'roo').length,
+      antigravityCount: servers.filter((s) => s.source === 'antigravity').length,
     });
 
     return servers;

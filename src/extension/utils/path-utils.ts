@@ -181,6 +181,36 @@ export function getGeminiProjectSkillsDir(): string | null {
   return path.join(workspaceRoot, '.gemini', 'skills');
 }
 
+/**
+ * Get the Antigravity (Google VSCode fork) user-scope Skills directory path
+ *
+ * @returns Absolute path to ~/.gemini/antigravity/skills/
+ *
+ * @example
+ * // Unix: /Users/username/.gemini/antigravity/skills
+ * // Windows: C:\Users\username\.gemini\antigravity\skills
+ */
+export function getAntigravityUserSkillsDir(): string {
+  return path.join(os.homedir(), '.gemini', 'antigravity', 'skills');
+}
+
+/**
+ * Get the Antigravity (Google VSCode fork) project-scope Skills directory path
+ *
+ * @returns Absolute path to .agent/skills/ in workspace root, or null if no workspace
+ *
+ * @example
+ * // Unix: /workspace/myproject/.agent/skills
+ * // Windows: C:\workspace\myproject\.agent\skills
+ */
+export function getAntigravityProjectSkillsDir(): string | null {
+  const workspaceRoot = getWorkspaceRoot();
+  if (!workspaceRoot) {
+    return null;
+  }
+  return path.join(workspaceRoot, '.agent', 'skills');
+}
+
 // =====================================================================
 // MCP Configuration Paths
 // =====================================================================
@@ -259,6 +289,19 @@ export function getGeminiProjectMcpConfigPath(): string | null {
     return null;
   }
   return path.join(workspaceRoot, '.gemini', 'settings.json');
+}
+
+/**
+ * Get the Antigravity user-scope MCP config path (~/.gemini/antigravity/mcp_config.json)
+ *
+ * @returns Absolute path to ~/.gemini/antigravity/mcp_config.json
+ *
+ * @example
+ * // Unix: /Users/username/.gemini/antigravity/mcp_config.json
+ * // Windows: C:\Users\username\.gemini\antigravity\mcp_config.json
+ */
+export function getAntigravityUserMcpConfigPath(): string {
+  return path.join(os.homedir(), '.gemini', 'antigravity', 'mcp_config.json');
 }
 
 /**

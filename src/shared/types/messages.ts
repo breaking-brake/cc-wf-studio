@@ -189,9 +189,10 @@ export interface SkillReference {
    * - 'codex': from ~/.codex/skills/ (user) or .codex/skills/ (project)
    * - 'roo': from ~/.roo/skills/ (user) or .roo/skills/ (project)
    * - 'gemini': from ~/.gemini/skills/ (user) or .gemini/skills/ (project)
+   * - 'antigravity': from ~/.agent/skills/ (user) or .agent/skills/ (project)
    * - undefined: for local scope or legacy data
    */
-  source?: 'claude' | 'copilot' | 'codex' | 'roo' | 'gemini';
+  source?: 'claude' | 'copilot' | 'codex' | 'roo' | 'gemini' | 'antigravity';
 }
 
 export interface CreateSkillPayload {

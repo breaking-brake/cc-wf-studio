@@ -11,6 +11,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { CreateSkillPayload, SkillReference } from '../../shared/types/messages';
 import {
+  getAntigravityProjectSkillsDir,
+  getAntigravityUserSkillsDir,
   getCodexProjectSkillsDir,
   getCodexUserSkillsDir,
   getCopilotUserSkillsDir,
@@ -46,7 +48,7 @@ import { parseSkillFrontmatter, type SkillMetadata } from './yaml-parser';
 export async function scanSkills(
   baseDir: string,
   scope: 'user' | 'project' | 'local',
-  source?: 'claude' | 'copilot' | 'codex' | 'roo' | 'gemini'
+  source?: 'claude' | 'copilot' | 'codex' | 'roo' | 'gemini' | 'antigravity'
 ): Promise<SkillReference[]> {
   const skills: SkillReference[] = [];
 
@@ -397,6 +399,7 @@ export async function scanAllSkills(): Promise<{
   const codexUserDir = getCodexUserSkillsDir();
   const rooUserDir = getRooUserSkillsDir();
   const geminiUserDir = getGeminiUserSkillsDir();
+  const antigravityUserDir = getAntigravityUserSkillsDir();
 
   // Project directories
   const claudeProjectDir = getProjectSkillsDir();
@@ -404,6 +407,7 @@ export async function scanAllSkills(): Promise<{
   const codexProjectDir = getCodexProjectSkillsDir();
   const rooProjectDir = getRooProjectSkillsDir();
   const geminiProjectDir = getGeminiProjectSkillsDir();
+  const antigravityProjectDir = getAntigravityProjectSkillsDir();
 
   const [
     claudeUserSkills,
@@ -411,11 +415,13 @@ export async function scanAllSkills(): Promise<{
     codexUserSkills,
     rooUserSkills,
     geminiUserSkills,
+    antigravityUserSkills,
     claudeProjectSkills,
     githubProjectSkills,
     codexProjectSkills,
     rooProjectSkills,
     geminiProjectSkills,
+    antigravityProjectSkills,
     pluginSkills,
   ] = await Promise.all([
     // User-scope scans
@@ -424,12 +430,16 @@ export async function scanAllSkills(): Promise<{
     scanSkills(codexUserDir, 'user', 'codex'),
     scanSkills(rooUserDir, 'user', 'roo'),
     scanSkills(geminiUserDir, 'user', 'gemini'),
+    scanSkills(antigravityUserDir, 'user', 'antigravity'),
     // Project-scope scans
     claudeProjectDir ? scanSkills(claudeProjectDir, 'project', 'claude') : Promise.resolve([]),
     githubProjectDir ? scanSkills(githubProjectDir, 'project', 'copilot') : Promise.resolve([]),
     codexProjectDir ? scanSkills(codexProjectDir, 'project', 'codex') : Promise.resolve([]),
     rooProjectDir ? scanSkills(rooProjectDir, 'project', 'roo') : Promise.resolve([]),
     geminiProjectDir ? scanSkills(geminiProjectDir, 'project', 'gemini') : Promise.resolve([]),
+    antigravityProjectDir
+      ? scanSkills(antigravityProjectDir, 'project', 'antigravity')
+      : Promise.resolve([]),
     // Plugin skills
     scanPluginSkills(),
   ]);
@@ -441,6 +451,7 @@ export async function scanAllSkills(): Promise<{
     ...codexUserSkills,
     ...rooUserSkills,
     ...geminiUserSkills,
+    ...antigravityUserSkills,
   ];
 
   // Merge project skills: include all sources (no deduplication - show all available skills)
@@ -450,6 +461,7 @@ export async function scanAllSkills(): Promise<{
     ...codexProjectSkills,
     ...rooProjectSkills,
     ...geminiProjectSkills,
+    ...antigravityProjectSkills,
   ];
 
   // Separate plugin skills by their scope
