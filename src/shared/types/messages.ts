@@ -1206,13 +1206,6 @@ export interface ShareWorkflowFailedPayload {
 // ============================================================================
 
 /**
- * Copilot execution mode selection
- * - vscode: Opens VSCode Copilot Chat panel and sends command
- * - cli: Uses Claude Code terminal with copilot-cli-slash-command skill
- */
-export type CopilotExecutionMode = 'vscode' | 'cli';
-
-/**
  * Export workflow for Copilot payload
  */
 export interface ExportForCopilotPayload {
@@ -1486,7 +1479,7 @@ export interface GeminiOperationFailedPayload {
 export type AiEditingProvider =
   | 'claude-code'
   | 'copilot-cli'
-  | 'copilot-vscode'
+  | 'copilot-chat'
   | 'codex'
   | 'roo-code'
   | 'gemini';

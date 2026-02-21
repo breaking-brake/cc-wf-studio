@@ -24,8 +24,11 @@ const CODEX_MODEL_STORAGE_KEY = 'cc-wf-studio.refinement.selectedCodexModel';
 const CODEX_REASONING_EFFORT_STORAGE_KEY = 'cc-wf-studio.refinement.selectedCodexReasoningEffort';
 const ALLOWED_TOOLS_STORAGE_KEY = 'cc-wf-studio.refinement.allowedTools';
 const PROVIDER_STORAGE_KEY = 'cc-wf-studio.refinement.selectedProvider';
-// Note: This key is shared with Toolbar.tsx for the "Copilot (Beta)" toggle
-const COPILOT_ENABLED_STORAGE_KEY = 'cc-wf-studio:copilot-beta-enabled';
+// Note: Legacy key (kept for migration only)
+const COPILOT_ENABLED_STORAGE_KEY_LEGACY = 'cc-wf-studio:copilot-beta-enabled';
+// Note: These keys are shared with Toolbar.tsx for the "Copilot Chat" and "Copilot CLI" toggles
+const COPILOT_CHAT_ENABLED_STORAGE_KEY = 'cc-wf-studio:copilot-chat-enabled';
+const COPILOT_CLI_ENABLED_STORAGE_KEY = 'cc-wf-studio:copilot-cli-enabled';
 // Note: This key is shared with Toolbar.tsx for the "Codex (Beta)" toggle
 const CODEX_ENABLED_STORAGE_KEY = 'cc-wf-studio:codex-beta-enabled';
 // Note: This key is shared with Toolbar.tsx for the "Roo Code (Beta)" toggle
@@ -267,12 +270,48 @@ function saveProviderToStorage(provider: AiCliProvider): void {
 }
 
 /**
- * Load Copilot enabled state from localStorage
- * Returns false as default if no value is stored
+ * Migrate legacy Copilot enabled state to new split keys.
+ * Old: cc-wf-studio:copilot-beta-enabled + cc-wf-studio.copilotExecutionMode
+ * New: cc-wf-studio:copilot-chat-enabled + cc-wf-studio:copilot-cli-enabled
  */
-function loadCopilotEnabledFromStorage(): boolean {
+function migrateCopilotEnabledState(): void {
   try {
-    const saved = localStorage.getItem(COPILOT_ENABLED_STORAGE_KEY);
+    const chatExists = localStorage.getItem(COPILOT_CHAT_ENABLED_STORAGE_KEY);
+    const cliExists = localStorage.getItem(COPILOT_CLI_ENABLED_STORAGE_KEY);
+    // If new keys already exist, migration already done
+    if (chatExists !== null || cliExists !== null) return;
+
+    const legacyEnabled = localStorage.getItem(COPILOT_ENABLED_STORAGE_KEY_LEGACY);
+    if (legacyEnabled === null) return;
+
+    if (legacyEnabled === 'true') {
+      const legacyMode = localStorage.getItem('cc-wf-studio.copilotExecutionMode');
+      if (legacyMode === 'vscode') {
+        localStorage.setItem(COPILOT_CHAT_ENABLED_STORAGE_KEY, 'true');
+        localStorage.setItem(COPILOT_CLI_ENABLED_STORAGE_KEY, 'false');
+      } else {
+        // Default was 'cli'
+        localStorage.setItem(COPILOT_CHAT_ENABLED_STORAGE_KEY, 'false');
+        localStorage.setItem(COPILOT_CLI_ENABLED_STORAGE_KEY, 'true');
+      }
+    } else {
+      localStorage.setItem(COPILOT_CHAT_ENABLED_STORAGE_KEY, 'false');
+      localStorage.setItem(COPILOT_CLI_ENABLED_STORAGE_KEY, 'false');
+    }
+  } catch {
+    // localStorage may not be available
+  }
+}
+
+// Run migration on module load
+migrateCopilotEnabledState();
+
+/**
+ * Load Copilot Chat enabled state from localStorage
+ */
+function loadCopilotChatEnabledFromStorage(): boolean {
+  try {
+    const saved = localStorage.getItem(COPILOT_CHAT_ENABLED_STORAGE_KEY);
     return saved === 'true';
   } catch {
     // localStorage may not be available in some contexts
@@ -281,11 +320,35 @@ function loadCopilotEnabledFromStorage(): boolean {
 }
 
 /**
- * Save Copilot enabled state to localStorage
+ * Save Copilot Chat enabled state to localStorage
  */
-function saveCopilotEnabledToStorage(enabled: boolean): void {
+function saveCopilotChatEnabledToStorage(enabled: boolean): void {
   try {
-    localStorage.setItem(COPILOT_ENABLED_STORAGE_KEY, String(enabled));
+    localStorage.setItem(COPILOT_CHAT_ENABLED_STORAGE_KEY, String(enabled));
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+}
+
+/**
+ * Load Copilot CLI enabled state from localStorage
+ */
+function loadCopilotCliEnabledFromStorage(): boolean {
+  try {
+    const saved = localStorage.getItem(COPILOT_CLI_ENABLED_STORAGE_KEY);
+    return saved === 'true';
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+  return false;
+}
+
+/**
+ * Save Copilot CLI enabled state to localStorage
+ */
+function saveCopilotCliEnabledToStorage(enabled: boolean): void {
+  try {
+    localStorage.setItem(COPILOT_CLI_ENABLED_STORAGE_KEY, String(enabled));
   } catch {
     // localStorage may not be available in some contexts
   }
@@ -394,7 +457,8 @@ interface RefinementStore {
   selectedCodexReasoningEffort: CodexReasoningEffort;
   allowedTools: string[];
   selectedProvider: AiCliProvider;
-  isCopilotEnabled: boolean;
+  isCopilotChatEnabled: boolean;
+  isCopilotCliEnabled: boolean;
   isCodexEnabled: boolean;
   isRooCodeEnabled: boolean;
   isGeminiEnabled: boolean;
@@ -426,7 +490,8 @@ interface RefinementStore {
   toggleAllowedTool: (toolName: string) => void;
   resetAllowedTools: () => void;
   setSelectedProvider: (provider: AiCliProvider) => void;
-  toggleCopilotEnabled: () => void;
+  toggleCopilotChatEnabled: () => void;
+  toggleCopilotCliEnabled: () => void;
   toggleCodexEnabled: () => void;
   toggleRooCodeEnabled: () => void;
   toggleGeminiEnabled: () => void;
@@ -523,7 +588,8 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   selectedCodexReasoningEffort: loadCodexReasoningEffortFromStorage(), // Load from localStorage, default: 'minimal'
   allowedTools: loadAllowedToolsFromStorage(), // Load from localStorage, default: DEFAULT_ALLOWED_TOOLS
   selectedProvider: loadProviderFromStorage(), // Load from localStorage, default: 'claude-code'
-  isCopilotEnabled: loadCopilotEnabledFromStorage(), // Load from localStorage, default: false
+  isCopilotChatEnabled: loadCopilotChatEnabledFromStorage(), // Load from localStorage, default: false
+  isCopilotCliEnabled: loadCopilotCliEnabledFromStorage(), // Load from localStorage, default: false
   isCodexEnabled: loadCodexEnabledFromStorage(), // Load from localStorage, default: false
   isRooCodeEnabled: loadRooCodeEnabledFromStorage(), // Load from localStorage, default: false
   isGeminiEnabled: loadGeminiEnabledFromStorage(), // Load from localStorage, default: false
@@ -609,17 +675,29 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     saveProviderToStorage(provider);
   },
 
-  toggleCopilotEnabled: () => {
-    const currentEnabled = get().isCopilotEnabled;
-    const newEnabled = !currentEnabled;
-    saveCopilotEnabledToStorage(newEnabled);
+  toggleCopilotChatEnabled: () => {
+    const newEnabled = !get().isCopilotChatEnabled;
+    saveCopilotChatEnabledToStorage(newEnabled);
 
-    // When disabling Copilot, reset provider to 'claude-code'
-    if (!newEnabled && get().selectedProvider === 'copilot') {
-      set({ isCopilotEnabled: newEnabled, selectedProvider: 'claude-code' });
+    // When both Copilot toggles are disabled, reset provider to 'claude-code'
+    if (!newEnabled && !get().isCopilotCliEnabled && get().selectedProvider === 'copilot') {
+      set({ isCopilotChatEnabled: newEnabled, selectedProvider: 'claude-code' });
       saveProviderToStorage('claude-code');
     } else {
-      set({ isCopilotEnabled: newEnabled });
+      set({ isCopilotChatEnabled: newEnabled });
+    }
+  },
+
+  toggleCopilotCliEnabled: () => {
+    const newEnabled = !get().isCopilotCliEnabled;
+    saveCopilotCliEnabledToStorage(newEnabled);
+
+    // When both Copilot toggles are disabled, reset provider to 'claude-code'
+    if (!newEnabled && !get().isCopilotChatEnabled && get().selectedProvider === 'copilot') {
+      set({ isCopilotCliEnabled: newEnabled, selectedProvider: 'claude-code' });
+      saveProviderToStorage('claude-code');
+    } else {
+      set({ isCopilotCliEnabled: newEnabled });
     }
   },
 

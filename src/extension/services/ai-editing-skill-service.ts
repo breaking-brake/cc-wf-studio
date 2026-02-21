@@ -15,7 +15,7 @@ import { isRooCodeInstalled, startRooCodeTask } from './roo-code-extension-servi
 export type AiEditingProvider =
   | 'claude-code'
   | 'copilot-cli'
-  | 'copilot-vscode'
+  | 'copilot-chat'
   | 'codex'
   | 'roo-code'
   | 'gemini';
@@ -31,7 +31,7 @@ function getSkillDestination(provider: AiEditingProvider, workingDirectory: stri
       return path.join(workingDirectory, '.claude', 'commands', `${SKILL_NAME}.md`);
     case 'copilot-cli':
       return path.join(workingDirectory, '.github', 'skills', SKILL_NAME, 'SKILL.md');
-    case 'copilot-vscode':
+    case 'copilot-chat':
       return path.join(workingDirectory, '.github', 'skills', SKILL_NAME, 'SKILL.md');
     case 'codex':
       return path.join(workingDirectory, '.codex', 'skills', SKILL_NAME, 'SKILL.md');
@@ -92,7 +92,7 @@ async function launchProvider(
       break;
     }
 
-    case 'copilot-vscode': {
+    case 'copilot-chat': {
       try {
         await vscode.commands.executeCommand('workbench.action.chat.newChat');
         await vscode.commands.executeCommand('workbench.action.chat.open', {

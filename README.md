@@ -24,8 +24,9 @@
 
 | Agent | Export Format | Requires |
 |-------|--------------|----------|
-| Claude Code | `.claude/agents/` `.claude/commands/` | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) |
-| GitHub Copilot | `.github/prompts/` `.github/skills/` | [Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) or [Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli) |
+| Claude Code | `.claude/agents/` `.claude/commands/` | [Claude Code](https://github.com/anthropics/claude-code) |
+| GitHub Copilot Chat | `.github/prompts/` | [Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) |
+| GitHub Copilot CLI | `.github/skills/` | [Copilot CLI](https://github.com/github/copilot-cli) |
 | OpenAI Codex CLI | `.codex/skills/` | [Codex CLI](https://github.com/openai/codex) |
 | Roo Code | `.roo/skills/` | [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) |
 | Gemini CLI | `.gemini/skills/` | [Gemini CLI](https://github.com/google-gemini/gemini-cli) |
@@ -93,7 +94,7 @@
 ### Edit with AI
 
 - Click Edit with AI <img src="./resources/icon-sparkles.png" alt="sparkles" height="16" style="vertical-align: middle"> button in the toolbar to generate or refine workflows with natural language
-- **Native with MCP Server**: Click an AI agent button (Claude Code, Copilot, Codex, Roo Code) in the Edit with AI panel to launch native AI editing. The MCP server starts automatically behind the scenes.
+- **Native with MCP Server**: Click an AI agent button (Claude Code, Copilot Chat, Copilot CLI, Codex, Roo Code) in the Edit with AI panel to launch native AI editing. The MCP server starts automatically behind the scenes.
 
 ```mermaid
 sequenceDiagram

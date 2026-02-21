@@ -26,8 +26,8 @@ interface AiEditButton {
 
 const AI_EDIT_BUTTONS: AiEditButton[] = [
   { provider: 'claude-code', label: 'Claude Code' },
+  { provider: 'copilot-chat', label: 'Copilot Chat' },
   { provider: 'copilot-cli', label: 'Copilot CLI' },
-  { provider: 'copilot-vscode', label: 'VSCode Copilot' },
   { provider: 'codex', label: 'Codex CLI' },
   { provider: 'roo-code', label: 'Roo Code' },
   { provider: 'gemini', label: 'Gemini CLI' },
@@ -45,8 +45,13 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
   const [launchingProvider, setLaunchingProvider] = useState<AiEditingProvider | null>(null);
   const [reviewBeforeApply, setReviewBeforeApply] = useState(true);
 
-  const { isCopilotEnabled, isCodexEnabled, isRooCodeEnabled, isGeminiEnabled } =
-    useRefinementStore();
+  const {
+    isCopilotChatEnabled,
+    isCopilotCliEnabled,
+    isCodexEnabled,
+    isRooCodeEnabled,
+    isGeminiEnabled,
+  } = useRefinementStore();
 
   const visibleButtons = useMemo(() => {
     return AI_EDIT_BUTTONS.filter((button) => {
@@ -54,8 +59,9 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
         case 'claude-code':
           return true;
         case 'copilot-cli':
-        case 'copilot-vscode':
-          return isCopilotEnabled;
+          return isCopilotCliEnabled;
+        case 'copilot-chat':
+          return isCopilotChatEnabled;
         case 'codex':
           return isCodexEnabled;
         case 'roo-code':
@@ -66,7 +72,13 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
           return false;
       }
     });
-  }, [isCopilotEnabled, isCodexEnabled, isRooCodeEnabled, isGeminiEnabled]);
+  }, [
+    isCopilotChatEnabled,
+    isCopilotCliEnabled,
+    isCodexEnabled,
+    isRooCodeEnabled,
+    isGeminiEnabled,
+  ]);
 
   // Listen for MCP server status updates
   useEffect(() => {

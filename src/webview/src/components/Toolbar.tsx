@@ -40,10 +40,6 @@ import { EditableNameField } from './common/EditableNameField';
 import { ProcessingOverlay } from './common/ProcessingOverlay';
 import { StyledTooltipProvider } from './common/StyledTooltip';
 import { ConfirmDialog } from './dialogs/ConfirmDialog';
-import {
-  type CopilotExecutionMode,
-  CopilotExecutionModeDropdown,
-} from './toolbar/CopilotExecutionModeDropdown';
 import { MoreActionsDropdown } from './toolbar/MoreActionsDropdown';
 import { SlashCommandOptionsDropdown } from './toolbar/SlashCommandOptionsDropdown';
 
@@ -98,8 +94,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     closeChat,
     initConversation,
     loadConversationHistory,
-    isCopilotEnabled,
-    toggleCopilotEnabled,
+    isCopilotChatEnabled,
+    toggleCopilotChatEnabled,
+    isCopilotCliEnabled,
+    toggleCopilotCliEnabled,
     isCodexEnabled,
     toggleCodexEnabled,
     isRooCodeEnabled,
@@ -114,9 +112,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [isGeneratingName, setIsGeneratingName] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [workflowNameError, setWorkflowNameError] = useState<string | null>(null);
-  // Copilot integration
-  const [isCopilotExporting, setIsCopilotExporting] = useState(false);
-  const [isCopilotRunning, setIsCopilotRunning] = useState(false);
+  // Copilot Chat integration
+  const [isCopilotChatExporting, setIsCopilotChatExporting] = useState(false);
+  const [isCopilotChatRunning, setIsCopilotChatRunning] = useState(false);
+  // Copilot CLI integration
+  const [isCopilotCliExporting, setIsCopilotCliExporting] = useState(false);
+  const [isCopilotCliRunning, setIsCopilotCliRunning] = useState(false);
   // Codex integration
   const [isCodexExporting, setIsCodexExporting] = useState(false);
   const [isCodexRunning, setIsCodexRunning] = useState(false);
@@ -126,12 +127,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   // Gemini CLI integration
   const [isGeminiExporting, setIsGeminiExporting] = useState(false);
   const [isGeminiRunning, setIsGeminiRunning] = useState(false);
-  // Copilot feature toggle is now managed by refinement-store
-  // Copilot execution mode (persisted in localStorage, default: 'cli')
-  const [copilotExecutionMode, setCopilotExecutionMode] = useState<CopilotExecutionMode>(() => {
-    const stored = localStorage.getItem('cc-wf-studio.copilotExecutionMode');
-    return (stored as CopilotExecutionMode) || 'cli';
-  });
   const generationNameRequestIdRef = useRef<string | null>(null);
 
   // Workflow name validation pattern (lowercase, numbers, hyphens, underscores only)
@@ -156,14 +151,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     clearHistory(); // Clear AI refinement chat history
     setShowResetConfirm(false);
   }, [clearWorkflow, clearHistory]);
-
-  // Handle toggle Copilot Beta feature - now uses refinement store
-
-  // Handle Copilot execution mode change
-  const handleCopilotExecutionModeChange = useCallback((mode: CopilotExecutionMode) => {
-    setCopilotExecutionMode(mode);
-    localStorage.setItem('cc-wf-studio.copilotExecutionMode', mode);
-  }, []);
 
   const handleSave = async () => {
     if (!workflowName.trim()) {
@@ -428,7 +415,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   // Copilot Integration Handlers
   // ============================================================================
 
-  const handleCopilotExport = async () => {
+  const handleCopilotChatExport = async () => {
     if (!workflowName.trim()) {
       onError({
         code: 'VALIDATION_ERROR',
@@ -445,7 +432,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       return;
     }
 
-    setIsCopilotExporting(true);
+    setIsCopilotChatExporting(true);
     try {
       const { subAgentFlows, workflowDescription, slashCommandOptions } =
         useWorkflowStore.getState();
@@ -462,26 +449,20 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      // Export based on execution mode
-      if (copilotExecutionMode === 'cli') {
-        const result = await exportForCopilotCli(workflow);
-        console.log('Workflow exported as skill for Copilot CLI:', result.skillPath);
-      } else {
-        const result = await exportForCopilot(workflow);
-        console.log('Workflow exported for Copilot:', result.exportedFiles);
-      }
+      const result = await exportForCopilot(workflow);
+      console.log('Workflow exported for Copilot Chat:', result.exportedFiles);
     } catch (error) {
       onError({
         code: 'EXPORT_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to export for Copilot',
+        message: error instanceof Error ? error.message : 'Failed to export for Copilot Chat',
         details: error,
       });
     } finally {
-      setIsCopilotExporting(false);
+      setIsCopilotChatExporting(false);
     }
   };
 
-  const handleCopilotRun = async () => {
+  const handleCopilotChatRun = async () => {
     if (!workflowName.trim()) {
       onError({
         code: 'VALIDATION_ERROR',
@@ -498,7 +479,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       return;
     }
 
-    setIsCopilotRunning(true);
+    setIsCopilotChatRunning(true);
     try {
       const { subAgentFlows, workflowDescription, slashCommandOptions } =
         useWorkflowStore.getState();
@@ -515,22 +496,110 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      // Run based on execution mode
-      if (copilotExecutionMode === 'cli') {
-        const result = await runForCopilotCli(workflow);
-        console.log('Workflow run for Copilot CLI:', result.workflowName);
-      } else {
-        const result = await runForCopilot(workflow);
-        console.log('Workflow run for Copilot:', result.workflowName);
-      }
+      const result = await runForCopilot(workflow);
+      console.log('Workflow run for Copilot Chat:', result.workflowName);
     } catch (error) {
       onError({
         code: 'RUN_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to run for Copilot',
+        message: error instanceof Error ? error.message : 'Failed to run for Copilot Chat',
         details: error,
       });
     } finally {
-      setIsCopilotRunning(false);
+      setIsCopilotChatRunning(false);
+    }
+  };
+
+  const handleCopilotCliExport = async () => {
+    if (!workflowName.trim()) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
+      });
+      return;
+    }
+
+    setIsCopilotCliExporting(true);
+    try {
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
+        useWorkflowStore.getState();
+
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        workflowDescription || undefined,
+        undefined,
+        subAgentFlows,
+        slashCommandOptions
+      );
+
+      validateWorkflow(workflow);
+
+      const result = await exportForCopilotCli(workflow);
+      console.log('Workflow exported as skill for Copilot CLI:', result.skillPath);
+    } catch (error) {
+      onError({
+        code: 'EXPORT_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to export for Copilot CLI',
+        details: error,
+      });
+    } finally {
+      setIsCopilotCliExporting(false);
+    }
+  };
+
+  const handleCopilotCliRun = async () => {
+    if (!workflowName.trim()) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
+      });
+      return;
+    }
+
+    setIsCopilotCliRunning(true);
+    try {
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
+        useWorkflowStore.getState();
+
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        workflowDescription || undefined,
+        undefined,
+        subAgentFlows,
+        slashCommandOptions
+      );
+
+      validateWorkflow(workflow);
+
+      const result = await runForCopilotCli(workflow);
+      console.log('Workflow run for Copilot CLI:', result.workflowName);
+    } catch (error) {
+      onError({
+        code: 'RUN_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to run for Copilot CLI',
+        details: error,
+      });
+    } finally {
+      setIsCopilotCliRunning(false);
     }
   };
 
@@ -1078,7 +1147,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         />
 
         {/* Slash Command Section - Layout changes based on Copilot/Codex Beta enabled */}
-        {isCopilotEnabled || isCodexEnabled || isRooCodeEnabled || isGeminiEnabled ? (
+        {isCopilotChatEnabled ||
+        isCopilotCliEnabled ||
+        isCodexEnabled ||
+        isRooCodeEnabled ||
+        isGeminiEnabled ? (
           /* Combined layout when Copilot Beta is enabled */
           <div
             style={{
@@ -1203,8 +1276,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 </div>
               </div>
 
-              {/* Vertical Divider - shown when Copilot is enabled */}
-              {isCopilotEnabled && (
+              {/* Vertical Divider - shown when Copilot Chat is enabled */}
+              {isCopilotChatEnabled && (
                 <div
                   style={{
                     width: '1px',
@@ -1215,8 +1288,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 />
               )}
 
-              {/* Copilot Column - shown when Copilot is enabled */}
-              {isCopilotEnabled && (
+              {/* Copilot Chat Column - shown when Copilot Chat is enabled */}
+              {isCopilotChatEnabled && (
                 <div
                   style={{
                     display: 'flex',
@@ -1231,23 +1304,23 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    Copilot
+                    Copilot Chat
                   </span>
                   <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                     <div style={{ display: 'flex' }}>
                       <button
                         type="button"
-                        onClick={handleCopilotExport}
-                        disabled={isCopilotExporting}
+                        onClick={handleCopilotChatExport}
+                        disabled={isCopilotChatExporting}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
                           backgroundColor: 'var(--vscode-button-background)',
                           color: 'var(--vscode-button-foreground)',
                           border: 'none',
                           borderRadius: '2px 0 0 2px',
-                          cursor: isCopilotExporting ? 'not-allowed' : 'pointer',
+                          cursor: isCopilotChatExporting ? 'not-allowed' : 'pointer',
                           fontSize: '13px',
-                          opacity: isCopilotExporting ? 0.6 : 1,
+                          opacity: isCopilotChatExporting ? 0.6 : 1,
                           whiteSpace: 'nowrap',
                           display: 'flex',
                           alignItems: 'center',
@@ -1257,7 +1330,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       >
                         {isCompact ? (
                           <SquareSlash size={16} />
-                        ) : isCopilotExporting ? (
+                        ) : isCopilotChatExporting ? (
                           t('toolbar.exporting')
                         ) : (
                           t('toolbar.export')
@@ -1265,17 +1338,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       </button>
                       <button
                         type="button"
-                        onClick={handleCopilotRun}
-                        disabled={isCopilotRunning}
+                        onClick={handleCopilotChatRun}
+                        disabled={isCopilotChatRunning}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
                           backgroundColor: 'var(--vscode-button-background)',
                           color: 'var(--vscode-button-foreground)',
                           border: 'none',
                           borderRadius: '0 2px 2px 0',
-                          cursor: isCopilotRunning ? 'not-allowed' : 'pointer',
+                          cursor: isCopilotChatRunning ? 'not-allowed' : 'pointer',
                           fontSize: '13px',
-                          opacity: isCopilotRunning ? 0.6 : 1,
+                          opacity: isCopilotChatRunning ? 0.6 : 1,
                           whiteSpace: 'nowrap',
                           display: 'flex',
                           alignItems: 'center',
@@ -1284,17 +1357,105 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       >
                         {isCompact ? (
                           <Play size={16} />
-                        ) : isCopilotRunning ? (
+                        ) : isCopilotChatRunning ? (
                           t('toolbar.running')
                         ) : (
                           t('toolbar.run')
                         )}
                       </button>
                     </div>
-                    <CopilotExecutionModeDropdown
-                      mode={copilotExecutionMode}
-                      onModeChange={handleCopilotExecutionModeChange}
-                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Vertical Divider - shown when Copilot CLI is enabled */}
+              {isCopilotCliEnabled && (
+                <div
+                  style={{
+                    width: '1px',
+                    backgroundColor: 'var(--vscode-panel-border)',
+                    margin: '0 8px',
+                    alignSelf: 'stretch',
+                  }}
+                />
+              )}
+
+              {/* Copilot CLI Column - shown when Copilot CLI is enabled */}
+              {isCopilotCliEnabled && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '9px',
+                      color: 'var(--vscode-descriptionForeground)',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Copilot CLI
+                  </span>
+                  <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex' }}>
+                      <button
+                        type="button"
+                        onClick={handleCopilotCliExport}
+                        disabled={isCopilotCliExporting}
+                        style={{
+                          padding: isCompact ? '4px 8px' : '4px 12px',
+                          backgroundColor: 'var(--vscode-button-background)',
+                          color: 'var(--vscode-button-foreground)',
+                          border: 'none',
+                          borderRadius: '2px 0 0 2px',
+                          cursor: isCopilotCliExporting ? 'not-allowed' : 'pointer',
+                          fontSize: '13px',
+                          opacity: isCopilotCliExporting ? 0.6 : 1,
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          borderRight: '1px solid var(--vscode-button-foreground)',
+                        }}
+                      >
+                        {isCompact ? (
+                          <SquareSlash size={16} />
+                        ) : isCopilotCliExporting ? (
+                          t('toolbar.exporting')
+                        ) : (
+                          t('toolbar.export')
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCopilotCliRun}
+                        disabled={isCopilotCliRunning}
+                        style={{
+                          padding: isCompact ? '4px 8px' : '4px 12px',
+                          backgroundColor: 'var(--vscode-button-background)',
+                          color: 'var(--vscode-button-foreground)',
+                          border: 'none',
+                          borderRadius: '0 2px 2px 0',
+                          cursor: isCopilotCliRunning ? 'not-allowed' : 'pointer',
+                          fontSize: '13px',
+                          opacity: isCopilotCliRunning ? 0.6 : 1,
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        {isCompact ? (
+                          <Play size={16} />
+                        ) : isCopilotCliRunning ? (
+                          t('toolbar.running')
+                        ) : (
+                          t('toolbar.run')
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1750,8 +1911,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onStartTour={onStartTour}
               isFocusMode={isFocusMode}
               onToggleFocusMode={toggleFocusMode}
-              isCopilotEnabled={isCopilotEnabled}
-              onToggleCopilotBeta={toggleCopilotEnabled}
+              isCopilotChatEnabled={isCopilotChatEnabled}
+              onToggleCopilotChat={toggleCopilotChatEnabled}
+              isCopilotCliEnabled={isCopilotCliEnabled}
+              onToggleCopilotCli={toggleCopilotCliEnabled}
               isCodexEnabled={isCodexEnabled}
               onToggleCodexBeta={toggleCodexEnabled}
               isRooCodeEnabled={isRooCodeEnabled}
