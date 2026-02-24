@@ -20,6 +20,7 @@ import {
   exportForCodexCli,
   exportForCopilot,
   exportForCopilotCli,
+  exportForCursor,
   exportForGeminiCli,
   exportForRooCode,
   runAsSlashCommand,
@@ -27,6 +28,7 @@ import {
   runForCodexCli,
   runForCopilot,
   runForCopilotCli,
+  runForCursor,
   runForGeminiCli,
   runForRooCode,
   saveWorkflow,
@@ -108,6 +110,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     toggleGeminiEnabled,
     isAntigravityEnabled,
     toggleAntigravityEnabled,
+    isCursorEnabled,
+    toggleCursorEnabled,
   } = useRefinementStore();
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -134,6 +138,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   // Antigravity integration
   const [isAntigravityExporting, setIsAntigravityExporting] = useState(false);
   const [isAntigravityRunning, setIsAntigravityRunning] = useState(false);
+  // Cursor integration
+  const [isCursorExporting, setIsCursorExporting] = useState(false);
+  const [isCursorRunning, setIsCursorRunning] = useState(false);
   const generationNameRequestIdRef = useRef<string | null>(null);
 
   // Workflow name validation pattern (lowercase, numbers, hyphens, underscores only)
@@ -1002,6 +1009,104 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     }
   };
 
+  // ============================================================================
+  // Cursor Integration Handlers
+  // ============================================================================
+
+  const handleCursorExport = async () => {
+    if (!workflowName.trim()) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
+      });
+      return;
+    }
+
+    setIsCursorExporting(true);
+    try {
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
+        useWorkflowStore.getState();
+
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        workflowDescription || undefined,
+        undefined,
+        subAgentFlows,
+        slashCommandOptions
+      );
+
+      validateWorkflow(workflow);
+
+      const result = await exportForCursor(workflow);
+      console.log('Workflow exported as skill for Cursor:', result.skillPath);
+    } catch (error) {
+      onError({
+        code: 'EXPORT_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to export for Cursor',
+        details: error,
+      });
+    } finally {
+      setIsCursorExporting(false);
+    }
+  };
+
+  const handleCursorRun = async () => {
+    if (!workflowName.trim()) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameRequiredForExport'),
+      });
+      return;
+    }
+
+    if (!WORKFLOW_NAME_PATTERN.test(workflowName)) {
+      onError({
+        code: 'VALIDATION_ERROR',
+        message: t('toolbar.error.workflowNameInvalid'),
+      });
+      return;
+    }
+
+    setIsCursorRunning(true);
+    try {
+      const { subAgentFlows, workflowDescription, slashCommandOptions } =
+        useWorkflowStore.getState();
+
+      const workflow = serializeWorkflow(
+        nodes,
+        edges,
+        workflowName,
+        workflowDescription || undefined,
+        undefined,
+        subAgentFlows,
+        slashCommandOptions
+      );
+
+      validateWorkflow(workflow);
+
+      const result = await runForCursor(workflow);
+      console.log('Workflow run for Cursor:', result.workflowName);
+    } catch (error) {
+      onError({
+        code: 'RUN_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to run for Cursor',
+        details: error,
+      });
+    } finally {
+      setIsCursorRunning(false);
+    }
+  };
+
   // Handle AI workflow name generation
   const handleGenerateWorkflowName = useCallback(async () => {
     const currentRequestId = `gen-name-${Date.now()}`;
@@ -1257,7 +1362,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         isCodexEnabled ||
         isRooCodeEnabled ||
         isGeminiEnabled ||
-        isAntigravityEnabled ? (
+        isAntigravityEnabled ||
+        isCursorEnabled ? (
           /* Combined layout when Copilot Beta is enabled */
           <div
             style={{
@@ -1933,6 +2039,98 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Vertical Divider - shown when Cursor is enabled */}
+              {isCursorEnabled && (
+                <div
+                  style={{
+                    width: '1px',
+                    backgroundColor: 'var(--vscode-panel-border)',
+                    margin: '0 8px',
+                    alignSelf: 'stretch',
+                  }}
+                />
+              )}
+
+              {/* Cursor Column - shown when Cursor is enabled */}
+              {isCursorEnabled && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '9px',
+                      color: 'var(--vscode-descriptionForeground)',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Cursor
+                  </span>
+                  <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex' }}>
+                      <button
+                        type="button"
+                        onClick={handleCursorExport}
+                        disabled={isCursorExporting}
+                        style={{
+                          padding: isCompact ? '4px 8px' : '4px 12px',
+                          backgroundColor: 'var(--vscode-button-background)',
+                          color: 'var(--vscode-button-foreground)',
+                          border: 'none',
+                          borderRadius: '2px 0 0 2px',
+                          cursor: isCursorExporting ? 'not-allowed' : 'pointer',
+                          fontSize: '13px',
+                          opacity: isCursorExporting ? 0.6 : 1,
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          borderRight: '1px solid var(--vscode-button-foreground)',
+                        }}
+                      >
+                        {isCompact ? (
+                          <SquareSlash size={16} />
+                        ) : isCursorExporting ? (
+                          t('toolbar.exporting')
+                        ) : (
+                          t('toolbar.export')
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCursorRun}
+                        disabled={isCursorRunning}
+                        style={{
+                          padding: isCompact ? '4px 8px' : '4px 12px',
+                          backgroundColor: 'var(--vscode-button-background)',
+                          color: 'var(--vscode-button-foreground)',
+                          border: 'none',
+                          borderRadius: '0 2px 2px 0',
+                          cursor: isCursorRunning ? 'not-allowed' : 'pointer',
+                          fontSize: '13px',
+                          opacity: isCursorRunning ? 0.6 : 1,
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        {isCompact ? (
+                          <Play size={16} />
+                        ) : isCursorRunning ? (
+                          t('toolbar.running')
+                        ) : (
+                          t('toolbar.run')
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -2121,6 +2319,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onToggleGeminiBeta={toggleGeminiEnabled}
               isAntigravityEnabled={isAntigravityEnabled}
               onToggleAntigravityBeta={toggleAntigravityEnabled}
+              isCursorEnabled={isCursorEnabled}
+              onToggleCursorBeta={toggleCursorEnabled}
               open={moreActionsOpen}
               onOpenChange={onMoreActionsOpenChange}
             />

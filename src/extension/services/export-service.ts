@@ -212,7 +212,7 @@ export function nodeNameToFileName(name: string): string {
  * @param node - Sub-Agent node
  * @returns Markdown content with YAML frontmatter
  */
-function generateSubAgentFile(node: SubAgentNode): string {
+export function generateSubAgentFile(node: SubAgentNode): string {
   const { name, data } = node;
   const agentName = nodeNameToFileName(name);
 
@@ -259,7 +259,7 @@ function generateSubAgentFile(node: SubAgentNode): string {
  * @param referencingNode - Optional SubAgentFlowNode that references this flow (for model/tools/color)
  * @returns Markdown content with YAML frontmatter
  */
-function generateSubAgentFlowAgentFile(
+export function generateSubAgentFlowAgentFile(
   subAgentFlow: SubAgentFlow,
   agentFileName: string,
   referencingNode?: SubAgentFlowNode

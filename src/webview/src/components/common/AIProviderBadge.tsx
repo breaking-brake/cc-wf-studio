@@ -13,7 +13,14 @@ import { useVSCodeTheme } from '../../hooks/useVSCodeTheme';
  * Supported AI provider types
  * Add new providers here as needed
  */
-export type AIProviderType = 'copilot' | 'claude' | 'codex' | 'roo' | 'gemini' | 'antigravity';
+export type AIProviderType =
+  | 'copilot'
+  | 'claude'
+  | 'codex'
+  | 'roo'
+  | 'gemini'
+  | 'antigravity'
+  | 'cursor';
 
 /**
  * Configuration for each AI provider
@@ -70,6 +77,17 @@ const PROVIDER_CONFIG: Record<
     colors: {
       light: '#34A853', // Google Green
       dark: '#1E8E3E', // Darker Google Green
+    },
+  },
+  cursor: {
+    label: 'Cursor',
+    colors: {
+      light: '#FFFFFF', // White background (light theme)
+      dark: '#1E1E1E', // Black background (dark theme)
+    },
+    textColors: {
+      light: '#1E1E1E', // Black text (light theme)
+      dark: '#FFFFFF', // White text (dark theme)
     },
   },
 };

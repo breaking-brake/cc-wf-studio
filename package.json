@@ -1,7 +1,7 @@
 {
   "name": "cc-wf-studio",
   "displayName": "Claude Code Workflow Studio",
-  "description": "Visual Workflow Editor for Claude Code, GitHub Copilot, Codex CLI, Roo Code, Gemini CLI, and Antigravity",
+  "description": "Visual Workflow Editor for Claude Code, GitHub Copilot, and more AI agents",
   "version": "3.25.0",
   "publisher": "breaking-brake",
   "icon": "resources/icon.png",
@@ -20,7 +20,8 @@
     "copilot",
     "roo",
     "gemini",
-    "antigravity"
+    "antigravity",
+    "cursor"
   ],
   "engines": {
     "vscode": "^1.80.0"

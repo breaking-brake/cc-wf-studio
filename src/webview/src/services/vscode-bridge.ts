@@ -16,6 +16,8 @@ import type {
   ExportForCopilotCliSuccessPayload,
   ExportForCopilotPayload,
   ExportForCopilotSuccessPayload,
+  ExportForCursorPayload,
+  ExportForCursorSuccessPayload,
   ExportForGeminiCliPayload,
   ExportForGeminiCliSuccessPayload,
   ExportForRooCodePayload,
@@ -32,6 +34,8 @@ import type {
   RunForCopilotCliSuccessPayload,
   RunForCopilotPayload,
   RunForCopilotSuccessPayload,
+  RunForCursorPayload,
+  RunForCursorSuccessPayload,
   RunForGeminiCliPayload,
   RunForGeminiCliSuccessPayload,
   RunForRooCodePayload,
@@ -893,6 +897,110 @@ export function runForAntigravity(workflow: Workflow): Promise<RunForAntigravity
     const payload: RunForAntigravityPayload = { workflow };
     vscode.postMessage({
       type: 'RUN_FOR_ANTIGRAVITY',
+      requestId,
+      payload,
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
+// ============================================================================
+// Cursor Integration
+// ============================================================================
+
+/**
+ * Export workflow for Cursor
+ *
+ * Exports the workflow to Skills format (.cursor/skills/name/SKILL.md)
+ *
+ * @param workflow - Workflow to export
+ * @returns Promise that resolves with export result
+ */
+export function exportForCursor(workflow: Workflow): Promise<ExportForCursorSuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'EXPORT_FOR_CURSOR_SUCCESS') {
+          resolve(message.payload as ExportForCursorSuccessPayload);
+        } else if (message.type === 'EXPORT_FOR_CURSOR_CANCELLED') {
+          // User cancelled - resolve with empty result
+          resolve({
+            skillName: '',
+            skillPath: '',
+            timestamp: new Date().toISOString(),
+          });
+        } else if (message.type === 'EXPORT_FOR_CURSOR_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to export for Cursor'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: ExportForCursorPayload = { workflow };
+    vscode.postMessage({
+      type: 'EXPORT_FOR_CURSOR',
+      requestId,
+      payload,
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
+/**
+ * Run workflow for Cursor
+ *
+ * Exports the workflow to Skills format and runs it via Cursor
+ *
+ * @param workflow - Workflow to run
+ * @returns Promise that resolves with run result
+ */
+export function runForCursor(workflow: Workflow): Promise<RunForCursorSuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'RUN_FOR_CURSOR_SUCCESS') {
+          resolve(message.payload as RunForCursorSuccessPayload);
+        } else if (message.type === 'RUN_FOR_CURSOR_CANCELLED') {
+          // User cancelled - resolve with empty result
+          resolve({
+            workflowName: '',
+            cursorOpened: false,
+            timestamp: new Date().toISOString(),
+          });
+        } else if (message.type === 'RUN_FOR_CURSOR_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to run for Cursor'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: RunForCursorPayload = { workflow };
+    vscode.postMessage({
+      type: 'RUN_FOR_CURSOR',
       requestId,
       payload,
     });

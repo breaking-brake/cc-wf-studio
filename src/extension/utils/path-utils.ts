@@ -211,6 +211,36 @@ export function getAntigravityProjectSkillsDir(): string | null {
   return path.join(workspaceRoot, '.agent', 'skills');
 }
 
+/**
+ * Get the Cursor (Anysphere VSCode fork) user-scope Skills directory path
+ *
+ * @returns Absolute path to ~/.cursor/skills/
+ *
+ * @example
+ * // Unix: /Users/username/.cursor/skills
+ * // Windows: C:\Users\username\.cursor\skills
+ */
+export function getCursorUserSkillsDir(): string {
+  return path.join(os.homedir(), '.cursor', 'skills');
+}
+
+/**
+ * Get the Cursor (Anysphere VSCode fork) project-scope Skills directory path
+ *
+ * @returns Absolute path to .cursor/skills/ in workspace root, or null if no workspace
+ *
+ * @example
+ * // Unix: /workspace/myproject/.cursor/skills
+ * // Windows: C:\workspace\myproject\.cursor\skills
+ */
+export function getCursorProjectSkillsDir(): string | null {
+  const workspaceRoot = getWorkspaceRoot();
+  if (!workspaceRoot) {
+    return null;
+  }
+  return path.join(workspaceRoot, '.cursor', 'skills');
+}
+
 // =====================================================================
 // MCP Configuration Paths
 // =====================================================================
@@ -302,6 +332,21 @@ export function getGeminiProjectMcpConfigPath(): string | null {
  */
 export function getAntigravityUserMcpConfigPath(): string {
   return path.join(os.homedir(), '.gemini', 'antigravity', 'mcp_config.json');
+}
+
+/**
+ * Get the Cursor user-scope MCP config path (~/.cursor/mcp.json)
+ *
+ * Note: Cursor only supports user-scope MCP configuration.
+ *
+ * @returns Absolute path to ~/.cursor/mcp.json
+ *
+ * @example
+ * // Unix: /Users/username/.cursor/mcp.json
+ * // Windows: C:\Users\username\.cursor\mcp.json
+ */
+export function getCursorUserMcpConfigPath(): string {
+  return path.join(os.homedir(), '.cursor', 'mcp.json');
 }
 
 /**

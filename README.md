@@ -20,8 +20,6 @@
   <strong>Visual Workflow Editor for AI Agents</strong>
 </p>
 
-<span id="github-copilot-support"></span><span id="openai-codex-support"></span><span id="roo-code-support"></span><span id="gemini-cli-support"></span><span id="antigravity-support"></span>
-
 | Agent | Export Format | Requires |
 |-------|--------------|----------|
 | Claude Code | `.claude/agents/` `.claude/commands/` | [Claude Code](https://github.com/anthropics/claude-code) |
@@ -31,6 +29,7 @@
 | Roo Code | `.roo/skills/` | [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) |
 | Gemini CLI | `.gemini/skills/` | [Gemini CLI](https://github.com/google-gemini/gemini-cli) |
 | Antigravity | `.agent/skills/` | [Antigravity](https://antigravity.google/) |
+| Cursor | `.cursor/agents/` `.cursor/skills/` | [Cursor](https://github.com/cursor/cursor) |
 
 > **Note:** Agents other than Claude Code require activation from Toolbar's **More** menu.
 

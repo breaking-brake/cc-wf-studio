@@ -37,6 +37,8 @@ const ROO_CODE_ENABLED_STORAGE_KEY = 'cc-wf-studio:roo-code-beta-enabled';
 const GEMINI_ENABLED_STORAGE_KEY = 'cc-wf-studio:gemini-beta-enabled';
 // Note: This key is shared with Toolbar.tsx for the "Antigravity (Beta)" toggle
 const ANTIGRAVITY_ENABLED_STORAGE_KEY = 'cc-wf-studio:antigravity-enabled';
+// Note: This key is shared with Toolbar.tsx for the "Cursor (Beta)" toggle
+const CURSOR_ENABLED_STORAGE_KEY = 'cc-wf-studio:cursor-enabled';
 
 // Available tools for Claude Code CLI (used in AI editing allowed tools)
 export const AVAILABLE_TOOLS = [
@@ -450,6 +452,29 @@ function saveAntigravityEnabledToStorage(enabled: boolean): void {
   }
 }
 
+/**
+ * Load Cursor enabled state from localStorage
+ */
+function loadCursorEnabledFromStorage(): boolean {
+  try {
+    const saved = localStorage.getItem(CURSOR_ENABLED_STORAGE_KEY);
+    return saved === 'true';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Save Cursor enabled state to localStorage
+ */
+function saveCursorEnabledToStorage(enabled: boolean): void {
+  try {
+    localStorage.setItem(CURSOR_ENABLED_STORAGE_KEY, String(enabled));
+  } catch {
+    // localStorage may not be available in some contexts
+  }
+}
+
 // ============================================================================
 // Session Status Type
 // ============================================================================
@@ -488,6 +513,7 @@ interface RefinementStore {
   isRooCodeEnabled: boolean;
   isGeminiEnabled: boolean;
   isAntigravityEnabled: boolean;
+  isCursorEnabled: boolean;
 
   // Dynamic Copilot Models State
   availableCopilotModels: CopilotModelInfo[];
@@ -522,6 +548,7 @@ interface RefinementStore {
   toggleRooCodeEnabled: () => void;
   toggleGeminiEnabled: () => void;
   toggleAntigravityEnabled: () => void;
+  toggleCursorEnabled: () => void;
   fetchCopilotModels: () => Promise<void>;
   initConversation: () => void;
   loadConversationHistory: (history: ConversationHistory | undefined) => void;
@@ -621,6 +648,7 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
   isRooCodeEnabled: loadRooCodeEnabledFromStorage(), // Load from localStorage, default: false
   isGeminiEnabled: loadGeminiEnabledFromStorage(), // Load from localStorage, default: false
   isAntigravityEnabled: loadAntigravityEnabledFromStorage(), // Load from localStorage, default: false
+  isCursorEnabled: loadCursorEnabledFromStorage(), // Load from localStorage, default: false
 
   // Dynamic Copilot Models Initial State
   availableCopilotModels: [],
@@ -762,6 +790,13 @@ export const useRefinementStore = create<RefinementStore>((set, get) => ({
     const newEnabled = !currentEnabled;
     saveAntigravityEnabledToStorage(newEnabled);
     set({ isAntigravityEnabled: newEnabled });
+  },
+
+  toggleCursorEnabled: () => {
+    const currentEnabled = get().isCursorEnabled;
+    const newEnabled = !currentEnabled;
+    saveCursorEnabledToStorage(newEnabled);
+    set({ isCursorEnabled: newEnabled });
   },
 
   fetchCopilotModels: async () => {

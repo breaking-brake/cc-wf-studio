@@ -31,6 +31,9 @@
  *
  * Antigravity:
  * - ~/.gemini/antigravity/mcp_config.json (user-level, uses 'serverUrl' for HTTP)
+ *
+ * Cursor:
+ * - ~/.cursor/mcp.json (user-level, uses 'mcpServers' key like Claude Code)
  */
 
 import * as fs from 'node:fs';
@@ -43,6 +46,7 @@ import {
   getAntigravityUserMcpConfigPath,
   getCodexUserMcpConfigPath,
   getCopilotUserMcpConfigPath,
+  getCursorUserMcpConfigPath,
   getGeminiProjectMcpConfigPath,
   getGeminiUserMcpConfigPath,
   getRooProjectMcpConfigPath,
@@ -385,6 +389,68 @@ function readAntigravityMcpConfig(configPath: string): Record<string, McpServerC
     }
 
     log('WARN', 'Failed to read Antigravity mcp_config.json', {
+      configPath,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
+/**
+ * Read Cursor MCP config (~/.cursor/mcp.json)
+ *
+ * Format: { "mcpServers": { "name": { ... } } }
+ * Note: Cursor uses the same 'mcpServers' key as Claude Code. No special conversion needed.
+ *
+ * @param configPath - Path to mcp.json
+ * @returns MCP servers configuration or null if not found
+ */
+function readCursorMcpConfig(configPath: string): Record<string, McpServerConfig> | null {
+  try {
+    const content = fs.readFileSync(configPath, 'utf-8');
+    const parsed = JSON.parse(content);
+    const rawServers = parsed.mcpServers;
+
+    if (!rawServers || typeof rawServers !== 'object') {
+      return null;
+    }
+
+    const servers: Record<string, McpServerConfig> = {};
+
+    for (const [serverId, raw] of Object.entries(
+      rawServers as Record<string, Partial<McpServerConfig>>
+    )) {
+      if (raw.command) {
+        // stdio transport
+        servers[serverId] = { ...raw, type: raw.type ?? 'stdio' } as McpServerConfig;
+      } else if (raw.url) {
+        // HTTP/SSE transport
+        servers[serverId] = { ...raw, type: raw.type ?? 'http' } as McpServerConfig;
+      } else {
+        log('WARN', 'Invalid Cursor MCP server configuration (no command or url)', {
+          serverId,
+          configPath,
+        });
+      }
+    }
+
+    if (Object.keys(servers).length === 0) {
+      return null;
+    }
+
+    log('INFO', 'Successfully read Cursor mcp.json', {
+      configPath,
+      serverCount: Object.keys(servers).length,
+    });
+
+    return servers;
+  } catch (error) {
+    // File not found is expected
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return null;
+    }
+
+    log('WARN', 'Failed to read Cursor mcp.json', {
       configPath,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -799,10 +865,30 @@ export function getMcpServerConfig(
       }
     }
 
+    // =========================================================================
+    // Cursor source (Priority 13)
+    // =========================================================================
+
+    // Priority 13: Cursor user-scope (~/.cursor/mcp.json)
+    const cursorConfigPath = getCursorUserMcpConfigPath();
+    const cursorConfig = readCursorMcpConfig(cursorConfigPath);
+    if (cursorConfig?.[serverId]) {
+      const serverConfig = normalizeServerConfig(cursorConfig[serverId]);
+      if (serverConfig) {
+        log('INFO', 'Retrieved MCP server configuration from Cursor', {
+          serverId,
+          scope: 'cursor-user',
+          configPath: cursorConfigPath,
+          type: serverConfig.type,
+        });
+        return { ...serverConfig, source: 'cursor' };
+      }
+    }
+
     // Server not found in any configuration
     log(
       'WARN',
-      'MCP server not found in any configuration (Claude, Copilot, Codex, Gemini, Roo Code, Antigravity)',
+      'MCP server not found in any configuration (Claude, Copilot, Codex, Gemini, Roo Code, Antigravity, Cursor)',
       {
         serverId,
         workspacePath,
@@ -965,6 +1051,18 @@ export function getAllMcpServerIds(workspacePath?: string): string[] {
       }
     }
 
+    // =========================================================================
+    // Cursor source
+    // =========================================================================
+
+    // Collect from Cursor user-scope (~/.cursor/mcp.json)
+    const cursorConfig = readCursorMcpConfig(getCursorUserMcpConfigPath());
+    if (cursorConfig) {
+      for (const id of Object.keys(cursorConfig)) {
+        serverIds.add(id);
+      }
+    }
+
     return Array.from(serverIds);
   } catch (error) {
     log('ERROR', 'Failed to get MCP server list', {
@@ -998,6 +1096,7 @@ export interface McpServerWithSource extends McpServerConfig {
  * - Gemini CLI (~/.gemini/settings.json, .gemini/settings.json)
  * - Roo Code (.roo/mcp.json)
  * - Antigravity (~/.gemini/antigravity/mcp_config.json)
+ * - Cursor (~/.cursor/mcp.json)
  *
  * Priority order (first match wins for duplicate server IDs):
  * 1. Project-scope Claude Code (<workspace>/.mcp.json)
@@ -1012,6 +1111,7 @@ export interface McpServerWithSource extends McpServerConfig {
  * 10. Project-scope Gemini CLI (<workspace>/.gemini/settings.json)
  * 11. Project-scope Roo Code (<workspace>/.roo/mcp.json)
  * 12. User-scope Antigravity (~/.gemini/antigravity/mcp_config.json)
+ * 13. User-scope Cursor (~/.cursor/mcp.json)
  *
  * @param workspacePath - Optional workspace path for project-scoped servers
  * @returns Array of MCP server configurations with source metadata
@@ -1147,6 +1247,11 @@ export function getAllMcpServersWithSource(workspacePath?: string): McpServerWit
     const antigravityConfig = readAntigravityMcpConfig(antigravityConfigPath);
     addServers(antigravityConfig, 'antigravity', antigravityConfigPath);
 
+    // Priority 12: Cursor user-scope (~/.cursor/mcp.json)
+    const cursorConfigPath = getCursorUserMcpConfigPath();
+    const cursorConfig = readCursorMcpConfig(cursorConfigPath);
+    addServers(cursorConfig, 'cursor', cursorConfigPath);
+
     log('INFO', 'Scanned all MCP server sources', {
       totalServers: servers.length,
       claudeCount: servers.filter((s) => s.source === 'claude').length,
@@ -1155,6 +1260,7 @@ export function getAllMcpServersWithSource(workspacePath?: string): McpServerWit
       geminiCount: servers.filter((s) => s.source === 'gemini').length,
       rooCount: servers.filter((s) => s.source === 'roo').length,
       antigravityCount: servers.filter((s) => s.source === 'antigravity').length,
+      cursorCount: servers.filter((s) => s.source === 'cursor').length,
     });
 
     return servers;

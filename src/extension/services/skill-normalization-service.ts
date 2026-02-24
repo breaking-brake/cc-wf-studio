@@ -34,6 +34,7 @@ const NON_STANDARD_SKILL_PATTERNS = [
   '.roo/skills/', // Roo Code
   '.gemini/skills/', // Google Gemini CLI
   '.agent/skills/', // Google Antigravity
+  '.cursor/skills/', // Cursor (Anysphere)
 ] as const;
 
 /**
@@ -49,7 +50,14 @@ export type SkillSourceType = 'github' | 'copilot' | 'codex' | 'roo-code' | 'gem
  * - 'copilot': .claude/skills/, .github/skills/, AND .copilot/skills/ are standard
  * - 'codex': .claude/skills/ AND .codex/skills/ are standard
  */
-export type TargetCli = 'claude' | 'copilot' | 'codex' | 'roo-code' | 'gemini' | 'antigravity';
+export type TargetCli =
+  | 'claude'
+  | 'copilot'
+  | 'codex'
+  | 'roo-code'
+  | 'gemini'
+  | 'antigravity'
+  | 'cursor';
 
 /**
  * Get the list of skill directory patterns that are considered "standard" for a given CLI
@@ -81,6 +89,10 @@ function getStandardSkillPatterns(targetCli: TargetCli): string[] {
     case 'antigravity':
       // Antigravity reads from .agent/skills/
       patterns.push('.agent/skills/');
+      break;
+    case 'cursor':
+      // Cursor reads from .cursor/skills/
+      patterns.push('.cursor/skills/');
       break;
     // case 'claude' falls through to default
     // Claude Code only uses .claude/skills/

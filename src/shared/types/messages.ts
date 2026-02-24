@@ -190,9 +190,10 @@ export interface SkillReference {
    * - 'roo': from ~/.roo/skills/ (user) or .roo/skills/ (project)
    * - 'gemini': from ~/.gemini/skills/ (user) or .gemini/skills/ (project)
    * - 'antigravity': from ~/.agent/skills/ (user) or .agent/skills/ (project)
+   * - 'cursor': from ~/.cursor/skills/ (user) or .cursor/skills/ (project)
    * - undefined: for local scope or legacy data
    */
-  source?: 'claude' | 'copilot' | 'codex' | 'roo' | 'gemini' | 'antigravity';
+  source?: 'claude' | 'copilot' | 'codex' | 'roo' | 'gemini' | 'antigravity' | 'cursor';
 }
 
 export interface CreateSkillPayload {
@@ -810,6 +811,12 @@ export type ExtensionMessage =
   | Message<RunForAntigravitySuccessPayload, 'RUN_FOR_ANTIGRAVITY_SUCCESS'>
   | Message<void, 'RUN_FOR_ANTIGRAVITY_CANCELLED'>
   | Message<AntigravityOperationFailedPayload, 'RUN_FOR_ANTIGRAVITY_FAILED'>
+  | Message<ExportForCursorSuccessPayload, 'EXPORT_FOR_CURSOR_SUCCESS'>
+  | Message<void, 'EXPORT_FOR_CURSOR_CANCELLED'>
+  | Message<CursorOperationFailedPayload, 'EXPORT_FOR_CURSOR_FAILED'>
+  | Message<RunForCursorSuccessPayload, 'RUN_FOR_CURSOR_SUCCESS'>
+  | Message<void, 'RUN_FOR_CURSOR_CANCELLED'>
+  | Message<CursorOperationFailedPayload, 'RUN_FOR_CURSOR_FAILED'>
   | Message<GetCurrentWorkflowRequestPayload, 'GET_CURRENT_WORKFLOW_REQUEST'>
   | Message<ApplyWorkflowFromMcpPayload, 'APPLY_WORKFLOW_FROM_MCP'>
   | Message<McpServerStatusPayload, 'MCP_SERVER_STATUS'>
@@ -1535,6 +1542,63 @@ export interface AntigravityOperationFailedPayload {
 }
 
 // ============================================================================
+// Cursor Integration Payloads (Beta)
+// ============================================================================
+
+/**
+ * Export workflow for Cursor payload (Skills format)
+ * Exports to .cursor/skills/{name}/SKILL.md
+ */
+export interface ExportForCursorPayload {
+  /** Workflow to export */
+  workflow: Workflow;
+}
+
+/**
+ * Export for Cursor success payload
+ */
+export interface ExportForCursorSuccessPayload {
+  /** Skill name */
+  skillName: string;
+  /** Skill file path */
+  skillPath: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Run workflow for Cursor payload
+ */
+export interface RunForCursorPayload {
+  /** Workflow to run */
+  workflow: Workflow;
+}
+
+/**
+ * Run for Cursor success payload
+ */
+export interface RunForCursorSuccessPayload {
+  /** Workflow name */
+  workflowName: string;
+  /** Whether Cursor was opened */
+  cursorOpened: boolean;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Cursor operation failed payload
+ */
+export interface CursorOperationFailedPayload {
+  /** Error code */
+  errorCode: 'CURSOR_NOT_INSTALLED' | 'EXPORT_FAILED' | 'UNKNOWN_ERROR';
+  /** Error message */
+  errorMessage: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+// ============================================================================
 // AI Editing Skill Payloads (MCP-based AI editing)
 // ============================================================================
 
@@ -1548,7 +1612,8 @@ export type AiEditingProvider =
   | 'codex'
   | 'roo-code'
   | 'gemini'
-  | 'antigravity';
+  | 'antigravity'
+  | 'cursor';
 
 /**
  * Run AI editing skill request payload (Webview → Extension)
@@ -1621,7 +1686,8 @@ export type McpConfigTarget =
   | 'copilot-cli'
   | 'codex'
   | 'gemini'
-  | 'antigravity';
+  | 'antigravity'
+  | 'cursor';
 
 /**
  * Start MCP Server request payload (Webview → Extension)
@@ -1812,6 +1878,8 @@ export type WebviewMessage =
   | Message<RunForGeminiCliPayload, 'RUN_FOR_GEMINI_CLI'>
   | Message<ExportForAntigravityPayload, 'EXPORT_FOR_ANTIGRAVITY'>
   | Message<RunForAntigravityPayload, 'RUN_FOR_ANTIGRAVITY'>
+  | Message<ExportForCursorPayload, 'EXPORT_FOR_CURSOR'>
+  | Message<RunForCursorPayload, 'RUN_FOR_CURSOR'>
   | Message<GetCurrentWorkflowResponsePayload, 'GET_CURRENT_WORKFLOW_RESPONSE'>
   | Message<ApplyWorkflowFromMcpResponsePayload, 'APPLY_WORKFLOW_FROM_MCP_RESPONSE'>
   | Message<StartMcpServerPayload, 'START_MCP_SERVER'>

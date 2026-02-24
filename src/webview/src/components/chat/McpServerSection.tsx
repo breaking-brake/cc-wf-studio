@@ -33,6 +33,7 @@ const AI_EDIT_BUTTONS: AiEditButton[] = [
   { provider: 'roo-code', label: 'Roo Code' },
   { provider: 'gemini', label: 'Gemini CLI' },
   { provider: 'antigravity', label: 'Antigravity' },
+  { provider: 'cursor', label: 'Cursor' },
 ];
 
 interface McpServerSectionProps {
@@ -55,6 +56,7 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
     isRooCodeEnabled,
     isGeminiEnabled,
     isAntigravityEnabled,
+    isCursorEnabled,
   } = useRefinementStore();
 
   const visibleButtons = useMemo(() => {
@@ -74,6 +76,8 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
           return isGeminiEnabled;
         case 'antigravity':
           return isAntigravityEnabled;
+        case 'cursor':
+          return isCursorEnabled;
         default:
           return false;
       }
@@ -85,6 +89,7 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
     isRooCodeEnabled,
     isGeminiEnabled,
     isAntigravityEnabled,
+    isCursorEnabled,
   ]);
 
   // Listen for MCP server status updates

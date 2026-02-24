@@ -11,6 +11,7 @@
  * - Copilot CLI: ~/.copilot/mcp-config.json (global)
  * - Codex CLI: ~/.codex/config.toml (global)
  * - Antigravity: ~/.gemini/antigravity/mcp_config.json (global)
+ * - Cursor: ~/.cursor/mcp.json (global)
  */
 
 import * as fs from 'node:fs/promises';
@@ -52,6 +53,8 @@ function getConfigPath(target: McpConfigTarget, workspacePath: string): string {
       return path.join(os.homedir(), '.gemini', 'settings.json');
     case 'antigravity':
       return path.join(os.homedir(), '.gemini', 'antigravity', 'mcp_config.json');
+    case 'cursor':
+      return path.join(os.homedir(), '.cursor', 'mcp.json');
   }
 }
 
@@ -278,6 +281,8 @@ export function getConfigTargetsForProvider(provider: AiEditingProvider): McpCon
       return ['gemini'];
     case 'antigravity':
       return ['antigravity'];
+    case 'cursor':
+      return ['cursor'];
   }
 }
 
@@ -293,6 +298,7 @@ export async function removeAllAgentConfigs(workspacePath: string): Promise<void
     'codex',
     'gemini',
     'antigravity',
+    'cursor',
   ];
 
   for (const target of allTargets) {

@@ -46,6 +46,7 @@ import {
   handleRunForCopilot,
   handleRunForCopilotCli,
 } from './copilot-handlers';
+import { handleExportForCursor, handleRunForCursor } from './cursor-handlers';
 import { handleExportWorkflow, handleExportWorkflowForExecution } from './export-workflow';
 import { handleExportForGeminiCli, handleRunForGeminiCli } from './gemini-handlers';
 import { loadWorkflow } from './load-workflow';
@@ -600,6 +601,45 @@ export function registerOpenEditorCommand(
               } else {
                 webview.postMessage({
                   type: 'RUN_FOR_ANTIGRAVITY_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorCode: 'UNKNOWN_ERROR',
+                    errorMessage: 'Workflow is required',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+
+            case 'EXPORT_FOR_CURSOR':
+              // Export workflow for Cursor (Skills format)
+              if (message.payload?.workflow) {
+                await handleExportForCursor(
+                  fileService,
+                  webview,
+                  message.payload,
+                  message.requestId
+                );
+              } else {
+                webview.postMessage({
+                  type: 'EXPORT_FOR_CURSOR_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorCode: 'UNKNOWN_ERROR',
+                    errorMessage: 'Workflow is required',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+
+            case 'RUN_FOR_CURSOR':
+              // Run workflow for Cursor
+              if (message.payload?.workflow) {
+                await handleRunForCursor(fileService, webview, message.payload, message.requestId);
+              } else {
+                webview.postMessage({
+                  type: 'RUN_FOR_CURSOR_FAILED',
                   requestId: message.requestId,
                   payload: {
                     errorCode: 'UNKNOWN_ERROR',

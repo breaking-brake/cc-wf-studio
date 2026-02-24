@@ -11,6 +11,7 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { log } from '../extension';
 import { isAntigravityInstalled } from './antigravity-extension-service';
+import { isCursorInstalled } from './cursor-extension-service';
 import { isRooCodeInstalled, startRooCodeTask } from './roo-code-extension-service';
 
 export type AiEditingProvider =
@@ -20,7 +21,8 @@ export type AiEditingProvider =
   | 'codex'
   | 'roo-code'
   | 'gemini'
-  | 'antigravity';
+  | 'antigravity'
+  | 'cursor';
 
 const SKILL_NAME = 'cc-workflow-ai-editor';
 
@@ -43,6 +45,8 @@ function getSkillDestination(provider: AiEditingProvider, workingDirectory: stri
       return path.join(workingDirectory, '.gemini', 'skills', SKILL_NAME, 'SKILL.md');
     case 'antigravity':
       return path.join(workingDirectory, '.agent', 'skills', SKILL_NAME, 'SKILL.md');
+    case 'cursor':
+      return path.join(workingDirectory, '.cursor', 'skills', SKILL_NAME, 'SKILL.md');
   }
 }
 
@@ -152,6 +156,19 @@ async function launchProvider(
       // Launch is handled separately after MCP refresh dialog in open-editor.ts.
       if (!isAntigravityInstalled()) {
         throw new Error('Antigravity extension is not installed.');
+      }
+      break;
+    }
+
+    case 'cursor': {
+      // For Cursor, check installation and launch via chat command.
+      if (!isCursorInstalled()) {
+        throw new Error('Cursor extension is not installed.');
+      }
+      try {
+        await vscode.commands.executeCommand('workbench.action.chat.open', `/${SKILL_NAME}`);
+      } catch {
+        throw new Error('Failed to launch Cursor agent.');
       }
       break;
     }

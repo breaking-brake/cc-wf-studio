@@ -45,6 +45,8 @@ interface MoreActionsDropdownProps {
   onToggleGeminiBeta: () => void;
   isAntigravityEnabled: boolean;
   onToggleAntigravityBeta: () => void;
+  isCursorEnabled: boolean;
+  onToggleCursorBeta: () => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -67,6 +69,8 @@ export function MoreActionsDropdown({
   onToggleGeminiBeta,
   isAntigravityEnabled,
   onToggleAntigravityBeta,
+  isCursorEnabled,
+  onToggleCursorBeta,
   open,
   onOpenChange,
 }: MoreActionsDropdownProps) {
@@ -342,6 +346,29 @@ export function MoreActionsDropdown({
                   <Bot size={14} />
                   <span style={{ flex: 1 }}>Antigravity</span>
                   {isAntigravityEnabled && <Check size={14} />}
+                </DropdownMenu.Item>
+
+                {/* Cursor Toggle */}
+                <DropdownMenu.Item
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    onToggleCursorBeta();
+                  }}
+                  style={{
+                    padding: '8px 12px',
+                    fontSize: `${FONT_SIZES.small}px`,
+                    color: 'var(--vscode-foreground)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    outline: 'none',
+                    borderRadius: '2px',
+                  }}
+                >
+                  <Bot size={14} />
+                  <span style={{ flex: 1 }}>Cursor</span>
+                  {isCursorEnabled && <Check size={14} />}
                 </DropdownMenu.Item>
               </DropdownMenu.SubContent>
             </DropdownMenu.Portal>
