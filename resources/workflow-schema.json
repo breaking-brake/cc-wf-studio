@@ -213,10 +213,10 @@
         },
         "toolName": {
           "type": "string",
-          "required": true,
-          "minLength": 1,
+          "required": false,
+          "minLength": 0,
           "maxLength": 100,
-          "description": "Tool function name from the MCP server (e.g., 'playwright_navigate', 'get_file_contents')"
+          "description": "Tool function name from the MCP server. Required for manualParameterConfig/aiParameterConfig; optional in aiToolSelection mode"
         },
         "toolDescription": {
           "type": "string",
@@ -250,6 +250,23 @@
           "enum": ["manualParameterConfig", "aiParameterConfig", "aiToolSelection"],
           "default": "aiToolSelection",
           "description": "Configuration mode. 'aiToolSelection' is recommended for AI-generated workflows"
+        },
+        "aiToolSelectionConfig": {
+          "type": "object",
+          "required": false,
+          "description": "Required when mode is 'aiToolSelection'. Contains the task description and available tools for AI-driven tool selection.",
+          "properties": {
+            "taskDescription": {
+              "type": "string",
+              "required": true,
+              "description": "Natural language description of the task to accomplish"
+            },
+            "timestamp": {
+              "type": "string",
+              "required": false,
+              "description": "ISO 8601 timestamp of when this configuration was created"
+            }
+          }
         },
         "validationStatus": {
           "type": "string",
@@ -290,27 +307,6 @@
             "mode": "aiToolSelection",
             "aiToolSelectionConfig": {
               "taskDescription": "Navigate to the example.com website and take a screenshot",
-              "availableTools": [
-                {
-                  "serverId": "playwright",
-                  "name": "playwright_navigate",
-                  "description": "Navigate browser to URL",
-                  "parameters": [
-                    {
-                      "name": "url",
-                      "type": "string",
-                      "description": "Target URL to navigate to",
-                      "required": true
-                    }
-                  ]
-                },
-                {
-                  "serverId": "playwright",
-                  "name": "playwright_screenshot",
-                  "description": "Take a screenshot of the current page",
-                  "parameters": []
-                }
-              ],
               "timestamp": "2025-02-28T00:00:00Z"
             },
             "validationStatus": "valid",
