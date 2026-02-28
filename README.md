@@ -60,6 +60,42 @@
 
 ---
 
+## Multi-Platform Support
+
+CC Workflow Studio runs in three modes:
+
+| Mode | Description | Use Case |
+|------|-------------|----------|
+| **VSCode Extension** | Install from [VS Marketplace](https://marketplace.visualstudio.com/items?itemName=breaking-brake.cc-wf-studio) or [OpenVSX](https://open-vsx.org/extension/breaking-brake/cc-wf-studio) | Primary usage — full integration with editor |
+| **Electron Desktop App** | Standalone desktop application via `packages/electron/` | Offline use without VSCode |
+| **Web Browser (Dev)** | Run with Vite dev server | Development and quick preview |
+
+### Web Mode (Development)
+
+Run the editor directly in a browser with hot reload:
+
+```bash
+cd src/webview
+npm run dev              # http://localhost:5173
+npm run dev -- --host    # Expose on LAN
+```
+
+The Web mode automatically applies a standalone theme that follows your OS light/dark preference.
+
+## Project Structure
+
+```
+cc-wf-studio/
+├── packages/
+│   ├── core/           # Shared backend logic (platform-agnostic)
+│   ├── electron/       # Electron desktop app
+│   └── vscode/         # VSCode extension adapter
+├── src/
+│   ├── extension/      # VSCode Extension Host
+│   └── webview/        # React UI (shared across all platforms)
+└── resources/          # Icons, schemas
+```
+
 ## Key Features
 
 🔀 **Visual Workflow Editor** - Intuitive drag-and-drop canvas for designing AI agent orchestrations without code

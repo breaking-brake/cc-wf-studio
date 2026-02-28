@@ -14,6 +14,7 @@ import { type IHostBridge, setBridge } from './services/bridge';
 import { createElectronBridge } from './services/electron-bridge-adapter';
 import { createVSCodeBridge } from './services/vscode-bridge-adapter';
 import 'reactflow/dist/style.css';
+import './styles/standalone-theme.css';
 import './styles/main.css';
 
 // ============================================================================
@@ -42,13 +43,19 @@ function createDevBridge(): IHostBridge {
   return {
     postMessage: (message: unknown) => {
       console.log('[Dev Mode] postMessage:', message);
+      const msg = message as { type: string };
+      // Simulate extension host: when webview sends WEBVIEW_READY, reply with INITIAL_STATE
+      if (msg.type === 'WEBVIEW_READY') {
+        setTimeout(() => {
+          window.postMessage({ type: 'INITIAL_STATE', payload: { locale: 'en' } }, '*');
+        }, 50);
+      }
     },
     onMessage: (handler) => {
       window.addEventListener('message', handler);
       return () => window.removeEventListener('message', handler);
     },
     getState: () => {
-      console.log('[Dev Mode] getState');
       return null;
     },
     setState: (state: unknown) => {

@@ -29,6 +29,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--vscode-editor-background);
   color: var(--vscode-editor-foreground);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 #root {
@@ -84,7 +87,7 @@ button {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--vscode-scrollbarSlider-background);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
