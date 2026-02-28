@@ -8,7 +8,6 @@
  */
 
 import * as Dialog from '@radix-ui/react-dialog';
-import type { McpToolReference } from '@shared/types/mcp-node';
 import { NodeType } from '@shared/types/workflow-definition';
 import { useEffect, useState } from 'react';
 import { useMcpCreationWizard, WizardStep } from '../../hooks/useMcpCreationWizard';
@@ -168,10 +167,6 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
           return;
         }
 
-        // TODO: T045-T046 - Get available tools from MCP server
-        // For now, using empty array as placeholder until T045-T046 are implemented
-        const availableTools: McpToolReference[] = [];
-
         addNode({
           id: nodeId,
           type: NodeType.Mcp,
@@ -182,7 +177,6 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
             source: wizard.state.selectedServer.source,
             aiToolSelectionConfig: {
               taskDescription: wizard.state.naturalLanguageTaskDescription,
-              availableTools,
               timestamp: new Date().toISOString(),
             },
             validationStatus: 'valid',

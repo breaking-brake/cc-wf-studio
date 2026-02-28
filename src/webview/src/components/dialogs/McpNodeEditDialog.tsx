@@ -162,7 +162,6 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
           ...nodeData,
           aiToolSelectionConfig: {
             taskDescription: naturalLanguageTaskDescription,
-            availableTools: nodeData.aiToolSelectionConfig?.availableTools || [],
             timestamp: new Date().toISOString(),
           },
         });

@@ -150,8 +150,6 @@ export interface AiParameterConfig {
 export interface AiToolSelectionConfig {
   /** Natural language description of the task to accomplish */
   taskDescription: string;
-  /** Snapshot of available tools from the MCP server at configuration time */
-  availableTools: McpToolReference[];
   /** Timestamp when this configuration was created (ISO 8601 format) */
   timestamp: string;
 }
@@ -253,13 +251,6 @@ export interface AiToolSelectionMetadata {
   serverId: string;
   /** Natural language description of the entire task */
   userIntent: string;
-  /** List of available tools from the MCP server (snapshot at configuration time) */
-  availableTools: Array<{
-    /** Tool function name */
-    name: string;
-    /** Tool description */
-    description: string;
-  }>;
 }
 
 /**
