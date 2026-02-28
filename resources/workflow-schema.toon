@@ -275,7 +275,7 @@ nodeTypes:
       aiToolSelectionConfig:
         type: object
         required: false
-        description: Required when mode is 'aiToolSelection'. Contains the task description and available tools for AI-driven tool selection.
+        description: Required when mode is 'aiToolSelection'. Contains the task description for AI-driven tool selection.
         properties:
           taskDescription:
             type: string
