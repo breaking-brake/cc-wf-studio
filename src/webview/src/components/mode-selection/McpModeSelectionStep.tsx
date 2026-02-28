@@ -1,54 +1,50 @@
 /**
- * Parameter Config Mode Step Component
+ * MCP Mode Selection Step Component
  *
- * Feature: 001-mcp-natural-language-mode
- * Purpose: Let user choose how to configure MCP tool parameters (manual vs AI-assisted)
+ * Purpose: Let user directly choose one of 3 MCP node modes
+ * (aiToolSelection / aiParameterConfig / manualParameterConfig)
  *
- * Based on: specs/001-mcp-natural-language-mode/tasks.md T013
+ * Replaces the previous two-step ToolSelectionModeStep + ParameterConfigModeStep flow.
  */
 
-import type { ParameterConfigMode } from '@shared/types/mcp-node';
+import type { McpNodeMode } from '@shared/types/mcp-node';
 import { useTranslation } from '../../i18n/i18n-context';
 
-interface ParameterConfigModeStepProps {
-  selectedMode: ParameterConfigMode;
-  onModeChange: (mode: ParameterConfigMode) => void;
+interface McpModeSelectionStepProps {
+  selectedMode: McpNodeMode;
+  onModeChange: (mode: McpNodeMode) => void;
 }
 
 interface ModeOption {
-  mode: ParameterConfigMode;
-  titleKey: 'mcp.parameterConfigMode.manual.title' | 'mcp.parameterConfigMode.auto.title';
+  mode: McpNodeMode;
+  titleKey:
+    | 'mcp.modeSelection.aiToolSelection.title'
+    | 'mcp.modeSelection.aiParameterConfig.title'
+    | 'mcp.modeSelection.manualParameterConfig.title';
   descriptionKey:
-    | 'mcp.parameterConfigMode.manual.description'
-    | 'mcp.parameterConfigMode.auto.description';
+    | 'mcp.modeSelection.aiToolSelection.description'
+    | 'mcp.modeSelection.aiParameterConfig.description'
+    | 'mcp.modeSelection.manualParameterConfig.description';
 }
 
-/**
- * Parameter Config Mode Step Component
- *
- * Displays two-choice card UI for selecting parameter configuration mode.
- * User can choose between manual parameter configuration or AI-assisted configuration.
- *
- * @param props - Component props
- * @param props.selectedMode - Currently selected parameter config mode
- * @param props.onModeChange - Callback when user selects a mode
- */
-export function ParameterConfigModeStep({
-  selectedMode,
-  onModeChange,
-}: ParameterConfigModeStepProps) {
+export function McpModeSelectionStep({ selectedMode, onModeChange }: McpModeSelectionStepProps) {
   const { t } = useTranslation();
 
   const modeOptions: ModeOption[] = [
     {
-      mode: 'auto',
-      titleKey: 'mcp.parameterConfigMode.auto.title',
-      descriptionKey: 'mcp.parameterConfigMode.auto.description',
+      mode: 'aiToolSelection',
+      titleKey: 'mcp.modeSelection.aiToolSelection.title',
+      descriptionKey: 'mcp.modeSelection.aiToolSelection.description',
     },
     {
-      mode: 'manual',
-      titleKey: 'mcp.parameterConfigMode.manual.title',
-      descriptionKey: 'mcp.parameterConfigMode.manual.description',
+      mode: 'aiParameterConfig',
+      titleKey: 'mcp.modeSelection.aiParameterConfig.title',
+      descriptionKey: 'mcp.modeSelection.aiParameterConfig.description',
+    },
+    {
+      mode: 'manualParameterConfig',
+      titleKey: 'mcp.modeSelection.manualParameterConfig.title',
+      descriptionKey: 'mcp.modeSelection.manualParameterConfig.description',
     },
   ];
 
@@ -65,7 +61,7 @@ export function ParameterConfigModeStep({
             color: 'var(--vscode-foreground)',
           }}
         >
-          {t('mcp.parameterConfigMode.title')}
+          {t('mcp.modeSelection.title')}
         </h2>
         <p
           style={{
@@ -74,12 +70,12 @@ export function ParameterConfigModeStep({
             color: 'var(--vscode-descriptionForeground)',
           }}
         >
-          {t('mcp.parameterConfigMode.subtitle')}
+          {t('mcp.modeSelection.subtitle')}
         </p>
       </div>
 
       {/* Mode Selection Cards */}
-      <div role="radiogroup" aria-label={t('mcp.parameterConfigMode.title')}>
+      <div role="radiogroup" aria-label={t('mcp.modeSelection.title')}>
         {modeOptions.map((option) => {
           const isSelected = selectedMode === option.mode;
           return (

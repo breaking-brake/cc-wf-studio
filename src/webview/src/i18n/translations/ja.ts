@@ -723,33 +723,13 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.modeSelection.subtitle': 'MCPツールの設定方法を選択してください',
   'mcp.modeSelection.manualParameterConfig.title': '手動パラメータ設定',
   'mcp.modeSelection.manualParameterConfig.description':
-    'サーバー、ツール、すべてのパラメータを明示的に設定します。再現性が高く、技術的なユーザーに最適です。',
+    'MCPサーバー、MCPツール、すべてのパラメータを明示的に設定します。再現性が高く、技術的なユーザーに最適です。',
   'mcp.modeSelection.aiParameterConfig.title': 'AIパラメータ設定',
   'mcp.modeSelection.aiParameterConfig.description':
-    'サーバーとツールを選択し、パラメータを自然言語で記述します。バランスの取れたアプローチです。',
+    'MCPサーバーとMCPツールを選択し、パラメータを自然言語で記述します。バランスの取れたアプローチです。',
   'mcp.modeSelection.aiToolSelection.title': 'AIツール選択',
   'mcp.modeSelection.aiToolSelection.description':
-    'サーバーのみを選択し、タスク全体を自然言語で記述します。最もシンプルですが、再現性は低いです。',
-
-  // Tool Selection Mode (Step-by-step decision flow)
-  'mcp.toolSelectionMode.title': 'ツール選択方法',
-  'mcp.toolSelectionMode.subtitle': 'MCPノードのツールをどのように選択するか選んでください',
-  'mcp.toolSelectionMode.manual.title': 'ツールを自分で選ぶ',
-  'mcp.toolSelectionMode.manual.description':
-    '自分でツールを参照して選択します。使用したいツールが明確な場合に最適です。',
-  'mcp.toolSelectionMode.auto.title': 'AIにツールを選んでもらう',
-  'mcp.toolSelectionMode.auto.description':
-    'タスクの説明に基づいて、AIが自動的に最適なツールを選択します。探索中や不確実な場合に最適です。',
-
-  // Parameter Config Mode (Step-by-step decision flow)
-  'mcp.parameterConfigMode.title': 'パラメータ設定方法',
-  'mcp.parameterConfigMode.subtitle': 'このツールのパラメータをどのように設定するか選んでください',
-  'mcp.parameterConfigMode.manual.title': 'パラメータを自分で設定する',
-  'mcp.parameterConfigMode.manual.description':
-    '自分ですべてのパラメータを入力します。正確な制御と再現性が必要な場合に最適です。',
-  'mcp.parameterConfigMode.auto.title': 'AIにパラメータを設定してもらう',
-  'mcp.parameterConfigMode.auto.description':
-    '自然言語の説明に基づいて、AIがパラメータを設定します。素早く設定したい場合に最適です。',
+    'MCPサーバーのみを選択し、タスク全体を自然言語で記述します。最もシンプルですが、再現性は低いです。',
 
   // Parameter Detailed Config Step
   'mcp.parameterDetailedConfig.title': 'ツールパラメータの設定',
