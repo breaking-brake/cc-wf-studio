@@ -3,8 +3,6 @@
  *
  * Purpose: Let user directly choose one of 3 MCP node modes
  * (aiToolSelection / aiParameterConfig / manualParameterConfig)
- *
- * Replaces the previous two-step ToolSelectionModeStep + ParameterConfigModeStep flow.
  */
 
 import type { McpNodeMode } from '@shared/types/mcp-node';
