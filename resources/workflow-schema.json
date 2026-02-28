@@ -259,6 +259,7 @@
             "taskDescription": {
               "type": "string",
               "required": true,
+              "minLength": 1,
               "description": "Natural language description of the task to accomplish"
             },
             "timestamp": {
@@ -276,6 +277,7 @@
             "description": {
               "type": "string",
               "required": true,
+              "minLength": 1,
               "description": "Natural language description of desired parameter values. NOT 'taskDescription' — use 'description' for this field."
             },
             "timestamp": {
