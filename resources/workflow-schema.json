@@ -202,7 +202,7 @@
       "outputPorts": 1
     },
     "mcp": {
-      "description": "Execute an MCP (Model Context Protocol) tool from an external server. MCP enables integration with external services, databases, APIs, and tools. **Important: Always use 'manualParameterConfig' mode for AI-generated workflows. Parameters must be provided as an array of parameter definitions, NOT as key-value pairs.**",
+      "description": "Execute an MCP (Model Context Protocol) tool from an external server. MCP enables integration with external services, databases, APIs, and tools. In 'aiToolSelection' mode, provide a natural language task description and the AI will select the appropriate tool and parameters automatically.",
       "fields": {
         "serverId": {
           "type": "string",
@@ -248,8 +248,8 @@
           "type": "string",
           "required": false,
           "enum": ["manualParameterConfig", "aiParameterConfig", "aiToolSelection"],
-          "default": "manualParameterConfig",
-          "description": "Configuration mode - ALWAYS use 'manualParameterConfig' for AI-generated workflows"
+          "default": "aiToolSelection",
+          "description": "Configuration mode. 'aiToolSelection' is recommended for AI-generated workflows"
         },
         "validationStatus": {
           "type": "string",
@@ -266,8 +266,8 @@
       "inputPorts": 1,
       "outputPorts": 1,
       "aiGenerationGuidance": {
-        "mode": "ALWAYS set mode to 'manualParameterConfig'",
-        "parameters": "MUST be an array of parameter schema objects with {name, type, description, required} fields",
+        "mode": "Use 'aiToolSelection' mode. Provide serverId and a taskDescription in aiToolSelectionConfig",
+        "parameters": "Array of parameter schema objects with {name, type, description, required} fields. Can be empty for aiToolSelection mode",
         "parameterValues": "Optional object with key-value pairs matching parameter names",
         "commonTools": {
           "playwright": [
@@ -283,20 +283,36 @@
           "type": "mcp",
           "data": {
             "serverId": "playwright",
-            "toolName": "playwright_navigate",
-            "toolDescription": "Navigate browser to URL",
-            "parameters": [
-              {
-                "name": "url",
-                "type": "string",
-                "description": "Target URL to navigate to",
-                "required": true
-              }
-            ],
-            "parameterValues": {
-              "url": "https://example.com"
+            "toolName": "",
+            "toolDescription": "",
+            "parameters": [],
+            "parameterValues": {},
+            "mode": "aiToolSelection",
+            "aiToolSelectionConfig": {
+              "taskDescription": "Navigate to the example.com website and take a screenshot",
+              "availableTools": [
+                {
+                  "serverId": "playwright",
+                  "name": "playwright_navigate",
+                  "description": "Navigate browser to URL",
+                  "parameters": [
+                    {
+                      "name": "url",
+                      "type": "string",
+                      "description": "Target URL to navigate to",
+                      "required": true
+                    }
+                  ]
+                },
+                {
+                  "serverId": "playwright",
+                  "name": "playwright_screenshot",
+                  "description": "Take a screenshot of the current page",
+                  "parameters": []
+                }
+              ],
+              "timestamp": "2025-02-28T00:00:00Z"
             },
-            "mode": "manualParameterConfig",
             "validationStatus": "valid",
             "outputPorts": 1
           }
