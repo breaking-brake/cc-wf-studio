@@ -5,6 +5,7 @@ node_modules/
 out/
 dist/
 *.vsix
+*.tsbuildinfo
 
 # Generated files
 *.generated.ts
