@@ -3,6 +3,10 @@
   "displayName": "Claude Code Workflow Studio",
   "description": "Visual Workflow Editor for Claude Code, GitHub Copilot, and more AI agents",
   "version": "3.26.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "publisher": "breaking-brake",
   "icon": "resources/icon.png",
   "repository": {
@@ -90,7 +94,10 @@
     "vscode:prepublish": "npm run build",
     "generate:toon": "npx tsx scripts/generate-toon-schema.ts",
     "generate:editing-flow": "npx tsx scripts/generate-editing-flow.ts",
-    "build": "npm run generate:toon && npm run generate:editing-flow && npm run build:webview && npm run build:extension",
+    "build": "npm run build:core && npm run generate:toon && npm run generate:editing-flow && npm run build:webview && npm run build:extension",
+    "build:core": "npm run build -w @cc-wf-studio/core",
+    "build:vscode": "npm run build:core && npm run generate:toon && npm run generate:editing-flow && npm run build:webview && npm run build:extension",
+    "build:electron": "npm run build:core && npm run build:webview && npm run build -w @cc-wf-studio/electron",
     "build:dev": "npm run build:webview:dev && npm run build:extension:dev",
     "build:webview": "cd src/webview && npm run build",
     "build:webview:dev": "cd src/webview && npm run build:dev",

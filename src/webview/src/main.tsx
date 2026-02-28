@@ -1,8 +1,8 @@
 /**
  * Claude Code Workflow Studio - Webview Entry Point
  *
- * React 18 root initialization and VSCode API acquisition
- * Based on: /specs/001-cc-wf-studio/plan.md
+ * React 18 root initialization with platform-agnostic bridge detection.
+ * Supports VSCode, Electron, and Dev mode environments.
  */
 
 import React from 'react';
@@ -10,17 +10,16 @@ import ReactDOM from 'react-dom/client';
 import { ReactFlowProvider } from 'reactflow';
 import App from './App';
 import { I18nProvider } from './i18n/i18n-context';
+import { type IHostBridge, setBridge } from './services/bridge';
+import { createElectronBridge } from './services/electron-bridge-adapter';
+import { createVSCodeBridge } from './services/vscode-bridge-adapter';
 import 'reactflow/dist/style.css';
 import './styles/main.css';
 
 // ============================================================================
-// VSCode API
+// VSCode API Type (for type checking only)
 // ============================================================================
 
-/**
- * VSCode API type definition
- * Reference: https://code.visualstudio.com/api/extension-guides/webview
- */
 interface VSCodeAPI {
   postMessage(message: unknown): void;
   getState(): unknown;
@@ -35,22 +34,53 @@ declare global {
   }
 }
 
-// Acquire VSCode API (only available in VSCode Webview context)
-export const vscode = window.acquireVsCodeApi?.() ?? {
-  postMessage: (message: unknown) => {
-    console.log('[Dev Mode] postMessage:', message);
-  },
-  getState: () => {
-    console.log('[Dev Mode] getState');
-    return null;
-  },
-  setState: (state: unknown) => {
-    console.log('[Dev Mode] setState:', state);
-  },
-};
+// ============================================================================
+// Bridge Initialization
+// ============================================================================
 
-// Make vscode API available globally for services that can't import ES modules
-window.vscode = vscode;
+function createDevBridge(): IHostBridge {
+  return {
+    postMessage: (message: unknown) => {
+      console.log('[Dev Mode] postMessage:', message);
+    },
+    onMessage: (handler) => {
+      window.addEventListener('message', handler);
+      return () => window.removeEventListener('message', handler);
+    },
+    getState: () => {
+      console.log('[Dev Mode] getState');
+      return null;
+    },
+    setState: (state: unknown) => {
+      console.log('[Dev Mode] setState:', state);
+    },
+  };
+}
+
+let bridge: IHostBridge;
+
+if (window.acquireVsCodeApi) {
+  // VSCode Webview context
+  const api = window.acquireVsCodeApi();
+  bridge = createVSCodeBridge(api);
+  // Make vscode API available globally for backward compatibility
+  window.vscode = api;
+} else if (window.electronAPI) {
+  // Electron renderer context
+  bridge = createElectronBridge();
+} else {
+  // Dev mode (browser)
+  bridge = createDevBridge();
+}
+
+setBridge(bridge);
+
+// Export for backward compatibility with existing code that imports `vscode` from main
+export const vscode: VSCodeAPI = {
+  postMessage: (msg: unknown) => bridge.postMessage(msg as { type: string }),
+  getState: () => bridge.getState(),
+  setState: (s: unknown) => bridge.setState(s),
+};
 
 // ============================================================================
 // React 18 Root Initialization
@@ -77,7 +107,5 @@ root.render(
   </React.StrictMode>
 );
 
-// Notify Extension Host that Webview is ready to receive messages
-// This ensures INITIAL_STATE is sent only after React is fully initialized
-// Fixes: Issue #396 - blank page when Webview loads slowly
-vscode.postMessage({ type: 'WEBVIEW_READY' });
+// Notify host that Webview is ready to receive messages
+bridge.postMessage({ type: 'WEBVIEW_READY' });
