@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "ES2020",
     "lib": ["ES2020"],
-    "module": "commonjs",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "rootDir": "./src",
     "outDir": "./out",
     "sourceMap": true,
@@ -10,7 +11,6 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
     "resolveJsonModule": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,
@@ -19,7 +19,7 @@
     "noFallthroughCasesInSwitch": true,
     "declaration": true,
     "declarationMap": true,
-    "types": ["vscode", "node"]
+    "types": ["node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "out", "dist", "src/webview"]

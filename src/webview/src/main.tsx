@@ -2,7 +2,7 @@
  * Claude Code Workflow Studio - Webview Entry Point
  *
  * React 18 root initialization with platform-agnostic bridge detection.
- * Supports VSCode, Electron, and Dev mode environments.
+ * Supports VSCode, Electron, Web (standalone), and Dev mode environments.
  */
 
 import React from 'react';
@@ -13,6 +13,7 @@ import { I18nProvider } from './i18n/i18n-context';
 import { type IHostBridge, setBridge } from './services/bridge';
 import { createElectronBridge } from './services/electron-bridge-adapter';
 import { createVSCodeBridge } from './services/vscode-bridge-adapter';
+import { createWebBridge } from './services/web-bridge-adapter';
 import 'reactflow/dist/style.css';
 import './styles/standalone-theme.css';
 import './styles/main.css';
@@ -75,8 +76,11 @@ if (window.acquireVsCodeApi) {
 } else if (window.electronAPI) {
   // Electron renderer context
   bridge = createElectronBridge();
+} else if (import.meta.env.VITE_WEB_MODE === 'true' || window.location.pathname !== '/') {
+  // Standalone web app mode (served by Hono backend with WebSocket)
+  bridge = createWebBridge();
 } else {
-  // Dev mode (browser)
+  // Dev mode (browser) — fallback for Vite dev server without backend
   bridge = createDevBridge();
 }
 

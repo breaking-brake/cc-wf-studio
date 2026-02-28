@@ -15,7 +15,7 @@ const RESOURCES_DIR = path.resolve(__dirname, '../resources');
 const MD_PATH = path.join(RESOURCES_DIR, 'ai-editing-process-flow.md');
 const OUTPUT_PATH = path.resolve(
   __dirname,
-  '../src/extension/services/editing-flow-constants.generated.ts'
+  '../packages/core/src/generated/editing-flow-constants.generated.ts'
 );
 
 interface EditingFlowData {

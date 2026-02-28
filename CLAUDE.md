@@ -3,25 +3,27 @@
 Auto-generated from all feature plans. Last updated: 2025-11-01
 
 ## Active Technologies
-- ローカルファイルシステム (`.vscode/workflows/*.json`, `.claude/skills/*.md`, `.claude/commands/*.md`) (001-cc-wf-studio)
-- TypeScript 5.3 (VSCode Extension Host), React 18.2 (Webview UI) (001-node-types-extension)
-- ローカルファイルシステム (`.vscode/workflows/*.json`) (001-node-types-extension)
-- TypeScript 5.3.0 (001-skill-node)
-- File system (SKILL.md files in `~/.claude/skills/` and `.claude/skills/`), workflow JSON files in `.vscode/workflows/` (001-skill-node)
-- TypeScript 5.3.0 (VSCode Extension Host), TypeScript/React 18.2 (Webview UI) + VSCode Extension API 1.80.0+, React 18.2, React Flow (visual canvas), Zustand (state management), child_process (Claude Code CLI execution) (001-mcp-node)
-- Workflow JSON files in `.vscode/workflows/` directory, Claude Code MCP configuration (user/project/enterprise scopes) (001-mcp-node)
-- TypeScript 5.3.0 (VSCode Extension Host), TypeScript/React 18.2 (Webview UI) + VSCode Extension API 1.80.0+, React 18.2, React Flow (visual canvas), Zustand (state management), existing MCP SDK client services (001-mcp-natural-language-mode)
-- Workflow JSON files in `.vscode/workflows/` directory (extends existing McpNodeData structure) (001-mcp-natural-language-mode)
-- TypeScript 5.3 (VSCode Extension Host), React 18.2 (Webview UI), @slack/web-api 7.x, Node.js http (OAuth callback server), VSCode Secret Storage (001-slack-workflow-sharing)
-- Workflow JSON files in `.vscode/workflows/` directory, Slack message attachments (workflow storage), VSCode Secret Storage (OAuth tokens) (001-slack-workflow-sharing)
-
-- TypeScript 5.x (VSCode Extension Host), React 18.x (Webview UI) (001-cc-wf-studio)
+- TypeScript 5.x (Hono Web Server), React 18.x (Webview UI)
+- Hono (HTTP server + WebSocket), React Flow (visual canvas), Zustand (state management)
+- @cc-wf-studio/core (shared services: FileService, McpServerManager, NodeFileSystem)
+- @slack/web-api 7.x, @modelcontextprotocol/sdk
+- File system: `.vscode/workflows/*.json`, `.claude/skills/*.md`, `.claude/commands/*.md`
 
 ## Project Structure
 
 ```text
+packages/
+  core/                 # Shared services, interfaces, types
+  web-server/           # Hono backend (replaces src/extension/)
+    src/
+      server.ts         # HTTP + WebSocket server
+      routes/           # WebSocket message router
+      handlers/         # Message handlers by feature
+      services/         # Secret store, shell exec, dialog
+      adapters/         # WebSocket transport adapter
 src/
-tests/
+  webview/              # React UI (unchanged)
+  shared/               # Shared types between webview and server
 ```
 
 ## Development Workflow & Commands
@@ -93,8 +95,8 @@ npm run build   # Build extension and webview (verify compilation)
    ```bash
    npm run build
    ```
-   - Compiles TypeScript and builds extension
-   - Required for testing changes in VSCode
+   - Compiles TypeScript and builds webview + web server
+   - Required for testing changes
 
 3. **Before git commit**:
    ```bash
@@ -107,7 +109,8 @@ npm run build   # Build extension and webview (verify compilation)
 - **Unit/Integration tests**: Not required (manual E2E testing only)
 - **Manual E2E testing**: Required for all feature changes and bug fixes
   - Run `npm run build` first
-  - Test in VSCode Extension Development Host
+  - Run `npm run start:web` to start the server
+  - Open `http://localhost:3001` in browser
 
 ## Version Update Procedure
 
@@ -127,9 +130,8 @@ This project uses **Semantic Release** with **GitHub Actions** for fully automat
 3. **Changelog Generation**: Automatically updates `CHANGELOG.md`
 4. **Git Commit**: Creates release commit with message `chore(release): ${version} [skip ci]`
 5. **GitHub Release**: Creates GitHub release with release notes
-6. **VSIX Build**: Builds and packages the extension
-7. **VSIX Upload**: Uploads `.vsix` file to GitHub release
-8. **Version Sync**: Merges version changes from `production` to `main` branch
+6. **Build**: Builds the web application
+7. **Version Sync**: Merges version changes from `production` to `main` branch
 
 #### Commit Message Convention (Conventional Commits)
 
@@ -191,11 +193,12 @@ Manual version updates will be overwritten by the next automated release.
 
 ## Code Style
 
-TypeScript 5.x (VSCode Extension Host), React 18.x (Webview UI): Follow standard conventions
+TypeScript 5.x (Hono Web Server + React Webview): Follow standard conventions
 
 ## Recent Changes
-- 001-mcp-natural-language-mode: Added TypeScript 5.3.0 (VSCode Extension Host), TypeScript/React 18.2 (Webview UI) + VSCode Extension API 1.80.0+, React 18.2, React Flow (visual canvas), Zustand (state management), existing MCP SDK client services
-- 001-mcp-node: Added TypeScript 5.3.0 (VSCode Extension Host), TypeScript/React 18.2 (Webview UI) + VSCode Extension API 1.80.0+, React 18.2, React Flow (visual canvas), Zustand (state management), child_process (Claude Code CLI execution)
+- Migrated from VSCode extension to standalone web app with Hono backend + WebSocket
+- Removed src/extension/, packages/vscode/, packages/electron/
+- Added packages/web-server/ with full message routing for all features
 
 
 <!-- MANUAL ADDITIONS START -->
@@ -241,17 +244,18 @@ sequenceDiagram
 
 ```mermaid
 flowchart TB
-    subgraph VSCode["VSCode Extension"]
-        subgraph ExtHost["Extension Host (Node.js)"]
-            Commands["Commands<br/>src/extension/commands/"]
-            Services["Services<br/>src/extension/services/"]
-            Utils["Utilities<br/>src/extension/utils/"]
-        end
-        subgraph Webview["Webview (React)"]
-            Components["Components<br/>src/webview/src/components/"]
-            Stores["Zustand Stores<br/>src/webview/src/stores/"]
-            WVServices["Services<br/>src/webview/src/services/"]
-        end
+    subgraph Browser["Browser (React)"]
+        Components["Components<br/>src/webview/src/components/"]
+        Stores["Zustand Stores<br/>src/webview/src/stores/"]
+        WVServices["Services<br/>src/webview/src/services/"]
+    end
+    subgraph Server["Hono Web Server (Node.js)"]
+        WSHandler["WS Handler<br/>packages/web-server/src/routes/"]
+        Handlers["Handlers<br/>packages/web-server/src/handlers/"]
+        Services["Services<br/>packages/web-server/src/services/"]
+    end
+    subgraph Core["@cc-wf-studio/core"]
+        CoreServices["FileService, McpServerManager"]
     end
     subgraph External["External Services"]
         FS["File System<br/>.vscode/workflows/"]
@@ -260,11 +264,12 @@ flowchart TB
         MCP["MCP Servers"]
     end
 
-    Webview <-->|postMessage| ExtHost
-    ExtHost --> FS
-    ExtHost --> CLI
-    ExtHost --> Slack
-    ExtHost --> MCP
+    Browser <-->|WebSocket| Server
+    Handlers --> CoreServices
+    Server --> FS
+    Server --> CLI
+    Server --> Slack
+    Server --> MCP
 ```
 
 ### ワークフロー保存フロー
@@ -273,20 +278,21 @@ flowchart TB
 sequenceDiagram
     actor User
     participant Toolbar as Toolbar.tsx
-    participant Bridge as vscode-bridge.ts
-    participant Cmd as save-workflow.ts
-    participant FS as file-service.ts
+    participant Bridge as web-bridge-adapter.ts
+    participant WS as WebSocket
+    participant Handler as ws-handler.ts
+    participant FS as FileService (core)
     participant Disk as .vscode/workflows/
 
     User->>Toolbar: Click Save
     Toolbar->>Bridge: saveWorkflow(workflow)
-    Bridge->>Cmd: postMessage(SAVE_WORKFLOW)
-    Cmd->>Cmd: validateWorkflow()
-    Cmd->>FS: ensureDirectory()
-    FS->>Disk: mkdir -p
-    Cmd->>FS: writeFile()
+    Bridge->>WS: send(SAVE_WORKFLOW)
+    WS->>Handler: handleMessage
+    Handler->>FS: ensureDirectory()
+    Handler->>FS: writeFile()
     FS->>Disk: write JSON
-    Cmd->>Bridge: postMessage(SAVE_SUCCESS)
+    Handler->>WS: send(SAVE_SUCCESS)
+    WS->>Bridge: onmessage
     Bridge->>Toolbar: resolve Promise
     Toolbar->>User: Show notification
 ```

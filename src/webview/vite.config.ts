@@ -10,8 +10,11 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
+  define: {
+    'import.meta.env.VITE_WEB_MODE': JSON.stringify(mode === 'web' ? 'true' : 'false'),
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
@@ -44,5 +47,15 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    // Proxy WebSocket to backend in web dev mode
+    proxy:
+      mode === 'web'
+        ? {
+            '/ws': {
+              target: 'ws://localhost:3001',
+              ws: true,
+            },
+          }
+        : undefined,
   },
-});
+}));
