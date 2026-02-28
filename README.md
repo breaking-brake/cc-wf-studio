@@ -38,9 +38,9 @@
 
 ---
 
-<!-- AI Edit Demo GIF: PR Code Review Workflow -->
+<!-- AI Edit Demo GIF: MCP Server-based Workflow Editing -->
 <p align="center">
-  <img src="./resources/demo_edit_with_ai.gif" alt="AI-Assisted Workflow Creation Demo - PR Code Review" width="800">
+  <img src="./resources/demo_edit_with_ai.gif" alt="AI-Assisted Workflow Creation Demo - MCP Server-based Editing" width="800">
 </p>
 
 <p align="center">
