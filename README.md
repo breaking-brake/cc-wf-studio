@@ -44,7 +44,7 @@
 </p>
 
 <p align="center">
-  <em>✨ Edit with AI: Create a PR code review workflow with MCP, Skills, and conditional branching – All with natural language</em>
+  <em>✨ Edit with AI: AI agents (Claude Code, GitHub Copilot, etc.) create workflows through natural language via MCP Server</em>
 </p>
 
 ---
