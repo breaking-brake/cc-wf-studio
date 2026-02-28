@@ -10,6 +10,7 @@ import * as vscode from 'vscode';
 import { registerOpenEditorCommand } from './commands/open-editor';
 import { handleConnectSlackManual } from './commands/slack-connect-manual';
 import { WorkflowPreviewEditorProvider } from './editors/workflow-preview-editor-provider';
+import { HealthServerService } from './services/health-server-service';
 import { SlackApiService } from './services/slack-api-service';
 import { SlackTokenManager } from './utils/slack-token-manager';
 
@@ -17,6 +18,11 @@ import { SlackTokenManager } from './utils/slack-token-manager';
  * Global Output Channel for logging
  */
 let outputChannel: vscode.OutputChannel | null = null;
+
+/**
+ * Health HTTP server instance (started on activation, stopped on deactivation)
+ */
+let healthServer: HealthServerService | null = null;
 
 /**
  * Get the global output channel instance
@@ -221,6 +227,14 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   log('INFO', 'Claude Code Workflow Studio: All commands and handlers registered');
+
+  // Start health server (fire-and-forget; non-fatal if port is in use)
+  const extensionPackage = context.extension.packageJSON as { name: string; version: string };
+  healthServer = new HealthServerService(extensionPackage.name, extensionPackage.version);
+  healthServer.start().catch((err: Error) => {
+    log('WARN', 'Health server failed to start', { error: err.message });
+    healthServer = null;
+  });
 }
 
 /**
@@ -229,6 +243,13 @@ export function activate(context: vscode.ExtensionContext): void {
  */
 export function deactivate(): void {
   log('INFO', 'Claude Code Workflow Studio is now deactivated');
+
+  // Stop health server if running
+  healthServer?.stop().catch((err: Error) => {
+    log('WARN', 'Health server failed to stop cleanly', { error: err.message });
+  });
+  healthServer = null;
+
   outputChannel?.dispose();
   outputChannel = null;
 }
