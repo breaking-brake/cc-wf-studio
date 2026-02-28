@@ -1,0 +1,32 @@
+{
+  "name": "@cc-wf-studio/core",
+  "version": "3.26.0",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "cc-wf-mcp-server": "./dist/cli/mcp-server-cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "@toon-format/toon": "^2.1.0",
+    "nano-spawn": "^2.0.0",
+    "smol-toml": "^1.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/node": "^25.0.3"
+  }
+}
