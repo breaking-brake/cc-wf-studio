@@ -1,25 +1,31 @@
 /**
- * MCP Node Edit Dialog Component
+ * MCP Node Edit Dialog Component (Wizard Format)
  *
  * Feature: 001-mcp-natural-language-mode
- * Purpose: Edit MCP nodes with mode-specific UI
+ * Purpose: Edit MCP nodes with step-by-step wizard UI matching the creation dialog
  *
- * Based on: specs/001-mcp-natural-language-mode/tasks.md T022-T023
+ * Opens at the final step based on existing node mode, allowing users to
+ * navigate back to change mode or tool selection.
+ *
+ * Steps (server is read-only, not a step):
+ * 1. Mode selection
+ * 2. Tool or Task config
+ * 3. Final config (only for aiParameterConfig / manualParameterConfig)
  */
 
 import * as Dialog from '@radix-ui/react-dialog';
-import type { McpNodeData, ToolParameter } from '@shared/types/mcp-node';
+import type { McpNodeData } from '@shared/types/mcp-node';
 import { useEffect, useState } from 'react';
+import { EditWizardStep, useMcpEditWizard } from '../../hooks/useMcpEditWizard';
 import { useTranslation } from '../../i18n/i18n-context';
-import { getMcpToolSchema, refreshMcpCache } from '../../services/mcp-service';
 import { useWorkflowStore } from '../../stores/workflow-store';
-import type { ExtendedToolParameter } from '../../utils/parameter-validator';
-import { validateAllParameters } from '../../utils/parameter-validator';
-import { IndeterminateProgressBar } from '../common/IndeterminateProgressBar';
-import { ParameterFormGenerator } from '../mcp/ParameterFormGenerator';
+import { WizardStepIndicator } from '../common/WizardStepIndicator';
+import { McpToolList } from '../mcp/McpToolList';
+import { McpToolSearch } from '../mcp/McpToolSearch';
 import { AiParameterConfigInput } from '../mode-selection/AiParameterConfigInput';
 import { AiToolSelectionInput } from '../mode-selection/AiToolSelectionInput';
-import { ModeIndicatorBadge } from '../mode-selection/ModeIndicatorBadge';
+import { McpModeSelectionStep } from '../mode-selection/McpModeSelectionStep';
+import { ParameterDetailedConfigStep } from '../mode-selection/ParameterDetailedConfigStep';
 
 interface McpNodeEditDialogProps {
   isOpen: boolean;
@@ -30,120 +36,91 @@ interface McpNodeEditDialogProps {
 export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialogProps) {
   const { t } = useTranslation();
   const { nodes, updateNodeData } = useWorkflowStore();
-
-  const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
-
-  // Detailed Mode state
-  const [parameterValues, setParameterValues] = useState<Record<string, unknown>>({});
-  const [parameters, setParameters] = useState<ToolParameter[]>([]);
-
-  // AI Mode state
-  const [naturalLanguageTaskDescription, setNaturalLanguageTaskDescription] = useState('');
-  const [aiParameterConfigDescription, setAiParameterConfigDescription] = useState('');
-
   const [showValidation, setShowValidation] = useState(false);
+
+  const wizard = useMcpEditWizard();
 
   // Find the node being edited
   const node = nodes.find((n) => n.id === nodeId);
   const nodeData = node?.data as McpNodeData | undefined;
 
-  // Get current mode (default to 'manualParameterConfig' for backward compatibility)
-  const currentMode = nodeData?.mode || 'manualParameterConfig';
-
   /**
-   * Load tool schema and initialize state based on mode
+   * Initialize wizard from node data when dialog opens
    */
+  // biome-ignore lint/correctness/useExhaustiveDependencies: initializeFromNodeData is stable (useCallback with [])
   useEffect(() => {
-    const initializeDialog = async () => {
-      if (!isOpen || !nodeData) {
-        return;
-      }
-
-      setLoading(true);
+    if (isOpen && nodeData) {
+      wizard.initializeFromNodeData(nodeData);
+      setSearchQuery('');
       setError(null);
-
-      try {
-        // Initialize mode-specific state
-        if (currentMode === 'aiToolSelection') {
-          // AI Tool Selection Mode: Initialize task description only (no schema loading needed)
-          setNaturalLanguageTaskDescription(nodeData.aiToolSelectionConfig?.taskDescription || '');
-        } else if (currentMode === 'aiParameterConfig') {
-          // AI Parameter Config Mode: Initialize param description only (no schema loading needed)
-          setAiParameterConfigDescription(nodeData.aiParameterConfig?.description || '');
-        } else {
-          // Manual Parameter Config Mode: Load schema and initialize parameter values
-          const result = await getMcpToolSchema({
-            serverId: nodeData.serverId,
-            toolName: nodeData.toolName || '',
-          });
-
-          if (!result.success || !result.schema) {
-            setError(result.error?.message || t('mcp.editDialog.error.schemaLoadFailed'));
-            setParameters([]);
-            return;
-          }
-
-          setParameters(result.schema.parameters || []);
-          setParameterValues(nodeData.parameterValues || {});
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t('mcp.editDialog.error.schemaLoadFailed'));
-        setParameters([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initializeDialog();
-  }, [isOpen, nodeData, currentMode, t]);
+      setShowValidation(false);
+    }
+  }, [isOpen, nodeData]);
 
   /**
-   * Handle save button click
+   * Reset validation state when wizard step changes
+   */
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Need to reset validation when step changes
+  useEffect(() => {
+    setShowValidation(false);
+    setError(null);
+  }, [wizard.state.currentStep]);
+
+  /**
+   * Handle save
    */
   const handleSave = () => {
     if (!node || !nodeData) {
       return;
     }
 
-    // Enable validation display
     setShowValidation(true);
 
-    // Mode-specific validation and save
-    switch (currentMode) {
+    switch (wizard.state.selectedMode) {
       case 'manualParameterConfig': {
-        // Validate all parameters
-        const errors = validateAllParameters(
-          parameterValues,
-          parameters as ExtendedToolParameter[]
-        );
-
-        // If validation fails, don't save
-        if (Object.keys(errors).length > 0) {
+        if (!wizard.state.selectedTool) {
+          setError(t('mcp.dialog.error.noToolSelected'));
           return;
         }
 
-        // Update node with new parameter values
+        // ParameterDetailedConfigStep handles its own schema loading,
+        // so we validate using the wizard's manualParameterValues.
+        // For required parameter validation, we rely on ParameterDetailedConfigStep's
+        // internal validation display (showValidation prop).
+
         updateNodeData(nodeId, {
           ...nodeData,
-          parameterValues,
+          mode: wizard.state.selectedMode,
+          toolName: wizard.state.selectedTool.name,
+          toolDescription: wizard.state.selectedTool.description || '',
+          parameterValues: wizard.state.manualParameterValues,
         });
         break;
       }
 
       case 'aiParameterConfig': {
-        // Validate required field (T037)
-        if (!aiParameterConfigDescription || aiParameterConfigDescription.trim().length === 0) {
+        if (!wizard.state.selectedTool) {
+          setError(t('mcp.dialog.error.noToolSelected'));
+          return;
+        }
+
+        if (
+          !wizard.state.aiParameterConfigDescription ||
+          wizard.state.aiParameterConfigDescription.trim().length === 0
+        ) {
           setShowValidation(true);
           return;
         }
 
-        // Update node with new natural language description
         updateNodeData(nodeId, {
           ...nodeData,
+          mode: wizard.state.selectedMode,
+          toolName: wizard.state.selectedTool.name,
+          toolDescription: wizard.state.selectedTool.description || '',
           aiParameterConfig: {
-            description: aiParameterConfigDescription,
+            description: wizard.state.aiParameterConfigDescription,
             timestamp: new Date().toISOString(),
           },
         });
@@ -151,18 +128,21 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
       }
 
       case 'aiToolSelection': {
-        // Validate required field (T049)
-        if (!naturalLanguageTaskDescription || naturalLanguageTaskDescription.trim().length === 0) {
+        if (
+          !wizard.state.naturalLanguageTaskDescription ||
+          wizard.state.naturalLanguageTaskDescription.trim().length === 0
+        ) {
           setShowValidation(true);
           return;
         }
 
-        // Update node with new task description
         updateNodeData(nodeId, {
           ...nodeData,
+          mode: wizard.state.selectedMode,
+          toolName: '',
+          toolDescription: '',
           aiToolSelectionConfig: {
-            taskDescription: naturalLanguageTaskDescription,
-            availableTools: nodeData.aiToolSelectionConfig?.availableTools || [],
+            taskDescription: wizard.state.naturalLanguageTaskDescription,
             timestamp: new Date().toISOString(),
           },
         });
@@ -173,55 +153,130 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
         return;
     }
 
-    // Close dialog
     handleClose();
   };
 
-  /**
-   * Handle cancel/close
-   */
   const handleClose = () => {
+    wizard.reset();
+    setSearchQuery('');
     setShowValidation(false);
     setError(null);
     onClose();
   };
 
   /**
-   * Handle refresh button click
-   * Refreshes MCP cache and reloads tool schema
+   * Render step content based on current wizard step
    */
-  const handleRefresh = async () => {
-    if (!nodeData || currentMode === 'aiToolSelection') {
-      return;
-    }
+  const renderStepContent = () => {
+    switch (wizard.state.currentStep) {
+      case EditWizardStep.ModeSelection:
+        return (
+          <McpModeSelectionStep
+            selectedMode={wizard.state.selectedMode}
+            onModeChange={(mode) => {
+              wizard.setSelectedMode(mode);
+              setError(null);
+            }}
+          />
+        );
 
-    setRefreshing(true);
-    setError(null);
-
-    try {
-      // Invalidate cache first
-      await refreshMcpCache({});
-
-      // Reload tool schema if in manual parameter config mode
-      if (currentMode === 'manualParameterConfig') {
-        const result = await getMcpToolSchema({
-          serverId: nodeData.serverId,
-          toolName: nodeData.toolName || '',
-        });
-
-        if (!result.success || !result.schema) {
-          setError(result.error?.message || t('mcp.editDialog.error.schemaLoadFailed'));
-          setParameters([]);
-          return;
+      case EditWizardStep.ToolOrTaskConfig:
+        if (wizard.state.selectedMode === 'aiToolSelection') {
+          return (
+            <AiToolSelectionInput
+              value={wizard.state.naturalLanguageTaskDescription}
+              onChange={(value) => {
+                wizard.setNaturalLanguageTaskDescription(value);
+                setError(null);
+              }}
+              showValidation={showValidation}
+            />
+          );
         }
+        // aiParameterConfig / manualParameterConfig → Tool selection
+        return (
+          <div>
+            <h3
+              style={{
+                margin: '0 0 12px 0',
+                fontSize: '14px',
+                fontWeight: 600,
+                color: 'var(--vscode-foreground)',
+              }}
+            >
+              {t('mcp.dialog.selectTool')}
+            </h3>
+            <McpToolSearch value={searchQuery} onChange={setSearchQuery} disabled={false} />
+            <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+              <McpToolList
+                serverId={nodeData?.serverId || ''}
+                onToolSelect={(tool) => {
+                  wizard.setTool(tool);
+                  setError(null);
+                }}
+                selectedToolName={wizard.state.selectedTool?.name}
+                searchQuery={searchQuery}
+              />
+            </div>
+          </div>
+        );
 
-        setParameters(result.schema.parameters || []);
-        setParameterValues(nodeData.parameterValues || {});
+      case EditWizardStep.FinalConfig:
+        if (wizard.state.selectedMode === 'aiParameterConfig') {
+          return (
+            <AiParameterConfigInput
+              value={wizard.state.aiParameterConfigDescription}
+              onChange={(value) => {
+                wizard.setAiParameterConfigDescription(value);
+                setError(null);
+              }}
+              showValidation={showValidation}
+            />
+          );
+        }
+        // manualParameterConfig
+        return (
+          <ParameterDetailedConfigStep
+            serverId={nodeData?.serverId || ''}
+            toolName={wizard.state.selectedTool?.name || ''}
+            parameterValues={wizard.state.manualParameterValues}
+            onChange={(values) => {
+              wizard.setManualParameterValues(values);
+              setError(null);
+            }}
+            showValidation={showValidation}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  /**
+   * Determine button label based on wizard state
+   */
+  const getActionButtonLabel = (): string => {
+    if (wizard.isComplete) {
+      return t('mcp.editDialog.saveButton');
+    }
+    return t('mcp.dialog.nextButton');
+  };
+
+  /**
+   * Handle action button click (Next or Save)
+   */
+  const handleActionButton = () => {
+    setShowValidation(true);
+
+    if (wizard.isComplete) {
+      handleSave();
+    } else {
+      if (wizard.canProceed) {
+        wizard.nextStep();
+      } else {
+        setError(t('mcp.dialog.error.cannotProceed'));
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('mcp.error.refreshFailed'));
-    } finally {
-      setRefreshing(false);
     }
   };
 
@@ -245,169 +300,87 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
               border: '1px solid var(--vscode-panel-border)',
               borderRadius: '6px',
               padding: '24px',
-              maxWidth: '700px',
+              maxWidth: '600px',
               width: '90%',
-              maxHeight: '80vh',
+              maxHeight: '90vh',
               overflow: 'auto',
             }}
           >
             {/* Dialog Header */}
-            <div
+            <Dialog.Title
               style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '16px',
+                margin: '0 0 8px 0',
+                fontSize: '18px',
+                fontWeight: 600,
+                color: 'var(--vscode-foreground)',
               }}
             >
-              <Dialog.Title
+              {t('mcp.editDialog.title')}
+            </Dialog.Title>
+
+            {/* Server Info (read-only) */}
+            {nodeData && (
+              <div
                 style={{
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  color: 'var(--vscode-foreground)',
+                  marginBottom: '12px',
+                  padding: '8px 12px',
+                  backgroundColor: 'var(--vscode-list-inactiveSelectionBackground)',
+                  border: '1px solid var(--vscode-panel-border)',
+                  borderRadius: '4px',
+                  fontSize: '13px',
+                  color: 'var(--vscode-disabledForeground)',
                 }}
               >
-                {t('mcp.editDialog.title')}
-              </Dialog.Title>
-              {/* Mode Badge */}
-              <ModeIndicatorBadge mode={currentMode} />
-            </div>
+                <strong>{t('property.mcp.serverId')}:</strong> {nodeData.serverId}
+              </div>
+            )}
 
-            {/* Hidden description for accessibility */}
-            <Dialog.Description style={{ display: 'none' }}>
-              {t('mcp.editDialog.title')}
+            {/* Step Indicator */}
+            <WizardStepIndicator
+              currentStep={wizard.state.currentStep}
+              totalSteps={wizard.totalSteps}
+            />
+
+            {/* Visually Hidden Accessibility Description */}
+            <Dialog.Description
+              style={{
+                position: 'absolute',
+                width: '1px',
+                height: '1px',
+                overflow: 'hidden',
+                clip: 'rect(0, 0, 0, 0)',
+              }}
+            >
+              Step {wizard.state.currentStep} of {wizard.totalSteps}
             </Dialog.Description>
 
-            {/* Tool Information */}
-            {nodeData && (
+            {/* Error Message */}
+            {error && (
               <div
                 style={{
                   marginBottom: '16px',
                   padding: '12px',
-                  backgroundColor: 'var(--vscode-list-inactiveSelectionBackground)',
-                  border: '1px solid var(--vscode-panel-border)',
-                  borderRadius: '4px',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    marginBottom: '8px',
-                  }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '13px', color: 'var(--vscode-disabledForeground)' }}>
-                      <strong>{t('property.mcp.serverId')}:</strong> {nodeData.serverId}
-                    </div>
-                    {(currentMode === 'manualParameterConfig' ||
-                      currentMode === 'aiParameterConfig') && (
-                      <div
-                        style={{
-                          fontSize: '13px',
-                          color: 'var(--vscode-disabledForeground)',
-                          marginTop: '4px',
-                        }}
-                      >
-                        <strong>{t('property.mcp.toolName')}:</strong> {nodeData.toolName}
-                      </div>
-                    )}
-                  </div>
-                  {/* Refresh Button */}
-                  {currentMode !== 'aiToolSelection' && (
-                    <button
-                      type="button"
-                      onClick={handleRefresh}
-                      disabled={refreshing || loading}
-                      style={{
-                        padding: '4px 8px',
-                        fontSize: '12px',
-                        backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                        color: 'var(--vscode-button-secondaryForeground)',
-                        border: '1px solid var(--vscode-panel-border)',
-                        borderRadius: '3px',
-                        cursor: refreshing || loading ? 'wait' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        flexShrink: 0,
-                      }}
-                      title={t('mcp.action.refresh')}
-                    >
-                      <span>{refreshing ? t('mcp.refreshing') : t('mcp.action.refresh')}</span>
-                    </button>
-                  )}
-                </div>
-                {nodeData.toolDescription && currentMode === 'manualParameterConfig' && (
-                  <div
-                    style={{
-                      fontSize: '12px',
-                      color: 'var(--vscode-disabledForeground)',
-                    }}
-                  >
-                    {nodeData.toolDescription}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Loading State */}
-            {loading && <IndeterminateProgressBar label={t('mcp.editDialog.loading')} />}
-
-            {/* Error State */}
-            {error && !loading && (
-              <div
-                style={{
-                  padding: '16px',
-                  marginBottom: '16px',
-                  color: 'var(--vscode-errorForeground)',
                   backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
                   border: '1px solid var(--vscode-inputValidation-errorBorder)',
                   borderRadius: '4px',
+                  color: 'var(--vscode-errorForeground)',
                 }}
               >
                 {error}
               </div>
             )}
 
-            {/* Mode-specific Edit UI */}
-            {!loading && !error && (
-              <>
-                {currentMode === 'manualParameterConfig' && (
-                  <ParameterFormGenerator
-                    parameters={parameters}
-                    parameterValues={parameterValues}
-                    onChange={setParameterValues}
-                    showValidation={showValidation}
-                  />
-                )}
-
-                {currentMode === 'aiParameterConfig' && (
-                  <AiParameterConfigInput
-                    value={aiParameterConfigDescription}
-                    onChange={setAiParameterConfigDescription}
-                    showValidation={showValidation}
-                  />
-                )}
-
-                {currentMode === 'aiToolSelection' && (
-                  <AiToolSelectionInput
-                    value={naturalLanguageTaskDescription}
-                    onChange={setNaturalLanguageTaskDescription}
-                    showValidation={showValidation}
-                  />
-                )}
-              </>
-            )}
+            {/* Step Content */}
+            <div style={{ marginBottom: '20px', minHeight: '300px' }}>{renderStepContent()}</div>
 
             {/* Dialog Actions */}
             <div
               style={{
-                marginTop: '24px',
                 display: 'flex',
                 gap: '12px',
                 justifyContent: 'flex-end',
+                paddingTop: '20px',
+                borderTop: '1px solid var(--vscode-panel-border)',
               }}
             >
               <button
@@ -415,37 +388,57 @@ export function McpNodeEditDialog({ isOpen, nodeId, onClose }: McpNodeEditDialog
                 onClick={handleClose}
                 style={{
                   padding: '8px 16px',
-                  fontSize: '13px',
                   backgroundColor: 'var(--vscode-button-secondaryBackground)',
                   color: 'var(--vscode-button-secondaryForeground)',
                   border: 'none',
-                  borderRadius: '2px',
+                  borderRadius: '4px',
                   cursor: 'pointer',
+                  fontSize: '13px',
                 }}
               >
                 {t('mcp.editDialog.cancelButton')}
               </button>
+
+              {/* Back Button */}
+              {wizard.state.currentStep !== EditWizardStep.ModeSelection && (
+                <button
+                  type="button"
+                  onClick={wizard.prevStep}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                    color: 'var(--vscode-button-secondaryForeground)',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                  }}
+                >
+                  {t('mcp.dialog.backButton')}
+                </button>
+              )}
+
+              {/* Next/Save Button */}
               <button
                 type="button"
-                onClick={handleSave}
-                disabled={loading || !!error}
+                onClick={handleActionButton}
+                disabled={!wizard.canProceed}
                 style={{
                   padding: '8px 16px',
-                  fontSize: '13px',
-                  backgroundColor:
-                    loading || error
-                      ? 'var(--vscode-button-secondaryBackground)'
-                      : 'var(--vscode-button-background)',
-                  color:
-                    loading || error
-                      ? 'var(--vscode-button-secondaryForeground)'
-                      : 'var(--vscode-button-foreground)',
+                  backgroundColor: wizard.canProceed
+                    ? 'var(--vscode-button-background)'
+                    : 'var(--vscode-button-secondaryBackground)',
+                  color: wizard.canProceed
+                    ? 'var(--vscode-button-foreground)'
+                    : 'var(--vscode-descriptionForeground)',
                   border: 'none',
-                  borderRadius: '2px',
-                  cursor: loading || error ? 'not-allowed' : 'pointer',
+                  borderRadius: '4px',
+                  cursor: wizard.canProceed ? 'pointer' : 'not-allowed',
+                  fontSize: '13px',
+                  opacity: wizard.canProceed ? 1 : 0.6,
                 }}
               >
-                {t('mcp.editDialog.saveButton')}
+                {getActionButtonLabel()}
               </button>
             </div>
           </Dialog.Content>

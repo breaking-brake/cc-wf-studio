@@ -597,7 +597,6 @@ export interface WebviewTranslationKeys {
   'mcp.dialog.selectTool': string;
   'mcp.dialog.addButton': string;
   'mcp.dialog.cancelButton': string;
-  'mcp.dialog.wizardStep': string;
   'mcp.dialog.nextButton': string;
   'mcp.dialog.backButton': string;
   'mcp.dialog.saveButton': string;
@@ -662,22 +661,6 @@ export interface WebviewTranslationKeys {
   'mcp.modeSelection.aiParameterConfig.description': string;
   'mcp.modeSelection.aiToolSelection.title': string;
   'mcp.modeSelection.aiToolSelection.description': string;
-
-  // Tool Selection Mode (Step-by-step decision flow)
-  'mcp.toolSelectionMode.title': string;
-  'mcp.toolSelectionMode.subtitle': string;
-  'mcp.toolSelectionMode.manual.title': string;
-  'mcp.toolSelectionMode.manual.description': string;
-  'mcp.toolSelectionMode.auto.title': string;
-  'mcp.toolSelectionMode.auto.description': string;
-
-  // Parameter Config Mode (Step-by-step decision flow)
-  'mcp.parameterConfigMode.title': string;
-  'mcp.parameterConfigMode.subtitle': string;
-  'mcp.parameterConfigMode.manual.title': string;
-  'mcp.parameterConfigMode.manual.description': string;
-  'mcp.parameterConfigMode.auto.title': string;
-  'mcp.parameterConfigMode.auto.description': string;
 
   // Parameter Detailed Config Step
   'mcp.parameterDetailedConfig.title': string;

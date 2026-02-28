@@ -84,3 +84,4 @@ jobs:
         if: always()
         with:
           sarif_file: snyk.sarif
+          category: snyk-open-source

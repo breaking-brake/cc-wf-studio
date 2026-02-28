@@ -4,10 +4,14 @@
  * Feature: 001-mcp-natural-language-mode
  * Purpose: Manage step-by-step wizard state for MCP node creation
  *
- * Based on: specs/001-mcp-natural-language-mode/tasks.md T018
+ * Flow (simplified from 7-step to 4-step):
+ * 1. Server selection
+ * 2. Mode selection (aiToolSelection / aiParameterConfig / manualParameterConfig)
+ * 3. Tool or Task config (depends on mode)
+ * 4. Final config (only for aiParameterConfig / manualParameterConfig)
  */
 
-import type { McpNodeMode, ParameterConfigMode, ToolSelectionMode } from '@shared/types/mcp-node';
+import type { McpNodeMode } from '@shared/types/mcp-node';
 import type { McpServerReference, McpToolReference } from '@shared/types/messages';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -16,27 +20,26 @@ import { useCallback, useMemo, useState } from 'react';
  *
  * Flow:
  * 1. Server selection
- * 2. Tool selection method choice
- * 3. (manual) Tool selection OR (auto) Natural language task input [Full NL Mode]
- * 4. (manual only) Parameter config method choice
- * 5. (manual detailed) Parameter detailed config OR (auto) Natural language param input [NL Param Mode]
+ * 2. Mode selection (3 modes: aiToolSelection, aiParameterConfig, manualParameterConfig)
+ * 3. Tool or Task config:
+ *    - aiToolSelection → NL Task input (final step)
+ *    - aiParameterConfig / manualParameterConfig → Tool selection
+ * 4. Final config (only for non-aiToolSelection):
+ *    - aiParameterConfig → NL Param input
+ *    - manualParameterConfig → Parameter form
  */
 export enum WizardStep {
   ServerSelection = 1,
-  ToolSelectionMethod = 2,
-  ToolSelection = 3,
-  ParameterConfigMethod = 4,
-  NaturalLanguageTask = 5,
-  NaturalLanguageParam = 6,
-  ParameterDetailedConfig = 7,
+  ModeSelection = 2,
+  ToolOrTaskConfig = 3,
+  FinalConfig = 4,
 }
 
 interface WizardState {
   currentStep: WizardStep;
   selectedServer: McpServerReference | null;
-  toolSelectionMode: ToolSelectionMode;
+  selectedMode: McpNodeMode;
   selectedTool: McpToolReference | null;
-  parameterConfigMode: ParameterConfigMode;
   naturalLanguageTaskDescription: string;
   aiParameterConfigDescription: string;
   manualParameterValues: Record<string, unknown>;
@@ -45,9 +48,8 @@ interface WizardState {
 const initialState: WizardState = {
   currentStep: WizardStep.ServerSelection,
   selectedServer: null,
-  toolSelectionMode: 'auto', // Default to AI-assisted selection
+  selectedMode: 'aiToolSelection',
   selectedTool: null,
-  parameterConfigMode: 'auto', // Default to AI-assisted configuration
   naturalLanguageTaskDescription: '',
   aiParameterConfigDescription: '',
   manualParameterValues: {},
@@ -57,23 +59,9 @@ export function useMcpCreationWizard() {
   const [state, setState] = useState<WizardState>(initialState);
 
   /**
-   * Determine the final MCP node mode based on wizard choices
+   * The final mode is simply the selected mode
    */
-  const determineFinalMode = useCallback((): McpNodeMode | null => {
-    if (state.toolSelectionMode === 'auto') {
-      return 'aiToolSelection';
-    }
-
-    if (state.toolSelectionMode === 'manual' && state.parameterConfigMode === 'auto') {
-      return 'aiParameterConfig';
-    }
-
-    if (state.toolSelectionMode === 'manual' && state.parameterConfigMode === 'manual') {
-      return 'manualParameterConfig';
-    }
-
-    return null;
-  }, [state.toolSelectionMode, state.parameterConfigMode]);
+  const finalMode = state.selectedMode;
 
   /**
    * Check if user can proceed to next step
@@ -83,27 +71,21 @@ export function useMcpCreationWizard() {
       case WizardStep.ServerSelection:
         return state.selectedServer !== null;
 
-      case WizardStep.ToolSelectionMethod:
-        // Always true since toolSelectionMode has default value
+      case WizardStep.ModeSelection:
         return true;
 
-      case WizardStep.ToolSelection:
+      case WizardStep.ToolOrTaskConfig:
+        if (state.selectedMode === 'aiToolSelection') {
+          return state.naturalLanguageTaskDescription.length > 0;
+        }
+        // aiParameterConfig / manualParameterConfig → tool must be selected
         return state.selectedTool !== null;
 
-      case WizardStep.ParameterConfigMethod:
-        // Always true since parameterConfigMode has default value
-        return true;
-
-      case WizardStep.NaturalLanguageTask:
-        // Required field for Full NL Mode
-        return state.naturalLanguageTaskDescription.length > 0;
-
-      case WizardStep.NaturalLanguageParam:
-        // Required field for AI Parameter Config Mode
-        return state.aiParameterConfigDescription.length > 0;
-
-      case WizardStep.ParameterDetailedConfig:
-        // Always allow proceeding (parameters can be empty or filled)
+      case WizardStep.FinalConfig:
+        if (state.selectedMode === 'aiParameterConfig') {
+          return state.aiParameterConfigDescription.length > 0;
+        }
+        // manualParameterConfig → always allow (parameters can be empty)
         return true;
 
       default:
@@ -117,46 +99,25 @@ export function useMcpCreationWizard() {
   const getNextStep = useCallback((): WizardStep | null => {
     switch (state.currentStep) {
       case WizardStep.ServerSelection:
-        return WizardStep.ToolSelectionMethod;
+        return WizardStep.ModeSelection;
 
-      case WizardStep.ToolSelectionMethod:
-        if (state.toolSelectionMode === 'manual') {
-          return WizardStep.ToolSelection;
+      case WizardStep.ModeSelection:
+        return WizardStep.ToolOrTaskConfig;
+
+      case WizardStep.ToolOrTaskConfig:
+        if (state.selectedMode === 'aiToolSelection') {
+          // aiToolSelection: step 3 is the final step (NL task input)
+          return null;
         }
-        if (state.toolSelectionMode === 'auto') {
-          return WizardStep.NaturalLanguageTask;
-        }
-        return null;
+        return WizardStep.FinalConfig;
 
-      case WizardStep.ToolSelection:
-        return WizardStep.ParameterConfigMethod;
-
-      case WizardStep.ParameterConfigMethod:
-        if (state.parameterConfigMode === 'manual') {
-          // Manual Parameter Config Mode - go to parameter detailed config
-          return WizardStep.ParameterDetailedConfig;
-        }
-        if (state.parameterConfigMode === 'auto') {
-          return WizardStep.NaturalLanguageParam;
-        }
-        return null;
-
-      case WizardStep.NaturalLanguageTask:
-        // AI Tool Selection Mode - no more steps, ready to save
-        return null;
-
-      case WizardStep.NaturalLanguageParam:
-        // AI Parameter Config Mode - no more steps, ready to save
-        return null;
-
-      case WizardStep.ParameterDetailedConfig:
-        // Manual Parameter Config Mode - no more steps, ready to save
+      case WizardStep.FinalConfig:
         return null;
 
       default:
         return null;
     }
-  }, [state.currentStep, state.toolSelectionMode, state.parameterConfigMode]);
+  }, [state.currentStep, state.selectedMode]);
 
   /**
    * Determine previous step based on current state
@@ -166,23 +127,14 @@ export function useMcpCreationWizard() {
       case WizardStep.ServerSelection:
         return null;
 
-      case WizardStep.ToolSelectionMethod:
+      case WizardStep.ModeSelection:
         return WizardStep.ServerSelection;
 
-      case WizardStep.ToolSelection:
-        return WizardStep.ToolSelectionMethod;
+      case WizardStep.ToolOrTaskConfig:
+        return WizardStep.ModeSelection;
 
-      case WizardStep.ParameterConfigMethod:
-        return WizardStep.ToolSelection;
-
-      case WizardStep.NaturalLanguageTask:
-        return WizardStep.ToolSelectionMethod;
-
-      case WizardStep.NaturalLanguageParam:
-        return WizardStep.ParameterConfigMethod;
-
-      case WizardStep.ParameterDetailedConfig:
-        return WizardStep.ParameterConfigMethod;
+      case WizardStep.FinalConfig:
+        return WizardStep.ToolOrTaskConfig;
 
       default:
         return null;
@@ -213,46 +165,29 @@ export function useMcpCreationWizard() {
    * Check if wizard is complete and ready to save
    */
   const isComplete = useMemo((): boolean => {
-    // First check if there are more steps remaining
     const nextStep = getNextStep();
     if (nextStep !== null) {
-      // Still have more steps, not complete yet
       return false;
     }
 
-    // No more steps - check if all required data is collected
-    const mode = determineFinalMode();
-    if (!mode) return false;
-
-    switch (mode) {
-      case 'manualParameterConfig':
-        return (
-          state.selectedServer !== null &&
-          state.toolSelectionMode === 'manual' &&
-          state.selectedTool !== null &&
-          state.parameterConfigMode === 'manual'
-        );
+    switch (state.selectedMode) {
+      case 'aiToolSelection':
+        return state.selectedServer !== null && state.naturalLanguageTaskDescription.length > 0;
 
       case 'aiParameterConfig':
         return (
           state.selectedServer !== null &&
-          state.toolSelectionMode === 'manual' &&
           state.selectedTool !== null &&
-          state.parameterConfigMode === 'auto' &&
           state.aiParameterConfigDescription.length > 0
         );
 
-      case 'aiToolSelection':
-        return (
-          state.selectedServer !== null &&
-          state.toolSelectionMode === 'auto' &&
-          state.naturalLanguageTaskDescription.length > 0
-        );
+      case 'manualParameterConfig':
+        return state.selectedServer !== null && state.selectedTool !== null;
 
       default:
         return false;
     }
-  }, [state, determineFinalMode, getNextStep]);
+  }, [state, getNextStep]);
 
   /**
    * Reset wizard to initial state
@@ -266,16 +201,20 @@ export function useMcpCreationWizard() {
     setState((prev) => ({ ...prev, selectedServer: server }));
   }, []);
 
-  const setToolSelectionMode = useCallback((mode: ToolSelectionMode) => {
-    setState((prev) => ({ ...prev, toolSelectionMode: mode }));
+  const setSelectedMode = useCallback((mode: McpNodeMode) => {
+    // Reset downstream data when mode changes
+    setState((prev) => ({
+      ...prev,
+      selectedMode: mode,
+      selectedTool: null,
+      naturalLanguageTaskDescription: '',
+      aiParameterConfigDescription: '',
+      manualParameterValues: {},
+    }));
   }, []);
 
   const setTool = useCallback((tool: McpToolReference | null) => {
     setState((prev) => ({ ...prev, selectedTool: tool }));
-  }, []);
-
-  const setParameterConfigMode = useCallback((mode: ParameterConfigMode) => {
-    setState((prev) => ({ ...prev, parameterConfigMode: mode }));
   }, []);
 
   const setNaturalLanguageTaskDescription = useCallback((description: string) => {
@@ -290,14 +229,20 @@ export function useMcpCreationWizard() {
     setState((prev) => ({ ...prev, manualParameterValues: values }));
   }, []);
 
+  /**
+   * Total steps for step indicator (dynamic based on mode)
+   */
+  const totalSteps = state.selectedMode === 'aiToolSelection' ? 3 : 4;
+
   return {
     // State
     state,
 
     // Computed
-    finalMode: determineFinalMode(),
+    finalMode,
     canProceed: canProceed(),
     isComplete,
+    totalSteps,
 
     // Navigation
     nextStep,
@@ -306,9 +251,8 @@ export function useMcpCreationWizard() {
 
     // Setters
     setServer,
-    setToolSelectionMode,
+    setSelectedMode,
     setTool,
-    setParameterConfigMode,
     setNaturalLanguageTaskDescription,
     setAiParameterConfigDescription,
     setManualParameterValues,

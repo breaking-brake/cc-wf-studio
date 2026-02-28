@@ -664,7 +664,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.selectTool': 'Select Tool',
   'mcp.dialog.addButton': 'Add Tool',
   'mcp.dialog.cancelButton': 'Cancel',
-  'mcp.dialog.wizardStep': 'Step {{current}} of {{total}}',
   'mcp.dialog.nextButton': 'Next',
   'mcp.dialog.backButton': 'Back',
   'mcp.dialog.saveButton': 'Create Node',
@@ -726,34 +725,13 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.modeSelection.subtitle': 'Choose how you want to configure this MCP tool',
   'mcp.modeSelection.manualParameterConfig.title': 'Manual Parameter Configuration',
   'mcp.modeSelection.manualParameterConfig.description':
-    'Configure server, tool, and all parameters explicitly. High reproducibility, best for technical users.',
+    'Configure MCP server, MCP tool, and all parameters explicitly. High reproducibility, best for technical users.',
   'mcp.modeSelection.aiParameterConfig.title': 'AI Parameter Configuration',
   'mcp.modeSelection.aiParameterConfig.description':
-    'Select server and tool, describe parameters in natural language. Balanced approach.',
+    'Select MCP server and MCP tool, describe parameters in natural language. Balanced approach.',
   'mcp.modeSelection.aiToolSelection.title': 'AI Tool Selection',
   'mcp.modeSelection.aiToolSelection.description':
-    'Select server only, describe entire task in natural language. Simplest, lowest reproducibility.',
-
-  // Tool Selection Mode (Step-by-step decision flow)
-  'mcp.toolSelectionMode.title': 'How to Select Tool',
-  'mcp.toolSelectionMode.subtitle': 'Choose how you want to select the tool for this MCP node',
-  'mcp.toolSelectionMode.manual.title': 'Select Tool Manually',
-  'mcp.toolSelectionMode.manual.description':
-    'I will browse and select the tool myself. Good for when you know exactly which tool to use.',
-  'mcp.toolSelectionMode.auto.title': 'Let AI Select Tool',
-  'mcp.toolSelectionMode.auto.description':
-    'AI will automatically select the best tool based on my task description. Good for exploring or when unsure.',
-
-  // Parameter Config Mode (Step-by-step decision flow)
-  'mcp.parameterConfigMode.title': 'How to Configure Parameters',
-  'mcp.parameterConfigMode.subtitle':
-    'Choose how you want to configure the parameters for this tool',
-  'mcp.parameterConfigMode.manual.title': 'Configure Manually',
-  'mcp.parameterConfigMode.manual.description':
-    'I will fill in all parameters myself. Good for precise control and reproducibility.',
-  'mcp.parameterConfigMode.auto.title': 'Let AI Configure',
-  'mcp.parameterConfigMode.auto.description':
-    'AI will configure parameters based on my natural language description. Good for quick setup.',
+    'Select MCP server only, describe entire task in natural language. Simplest, lowest reproducibility.',
 
   // Parameter Detailed Config Step
   'mcp.parameterDetailedConfig.title': 'Configure Tool Parameters',

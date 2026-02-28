@@ -202,7 +202,7 @@
       "outputPorts": 1
     },
     "mcp": {
-      "description": "Execute an MCP (Model Context Protocol) tool from an external server. MCP enables integration with external services, databases, APIs, and tools. **Important: Always use 'manualParameterConfig' mode for AI-generated workflows. Parameters must be provided as an array of parameter definitions, NOT as key-value pairs.**",
+      "description": "Execute an MCP (Model Context Protocol) tool from an external server. MCP enables integration with external services, databases, APIs, and tools. In 'aiParameterConfig' mode, select a server and tool, then provide a natural language description of the parameters for AI to configure automatically.",
       "fields": {
         "serverId": {
           "type": "string",
@@ -213,10 +213,10 @@
         },
         "toolName": {
           "type": "string",
-          "required": true,
-          "minLength": 1,
+          "required": false,
+          "minLength": 0,
           "maxLength": 100,
-          "description": "Tool function name from the MCP server (e.g., 'playwright_navigate', 'get_file_contents')"
+          "description": "Tool function name from the MCP server. Required for manualParameterConfig/aiParameterConfig; optional in aiToolSelection mode"
         },
         "toolDescription": {
           "type": "string",
@@ -248,8 +248,44 @@
           "type": "string",
           "required": false,
           "enum": ["manualParameterConfig", "aiParameterConfig", "aiToolSelection"],
-          "default": "manualParameterConfig",
-          "description": "Configuration mode - ALWAYS use 'manualParameterConfig' for AI-generated workflows"
+          "default": "aiParameterConfig",
+          "description": "Configuration mode. 'aiParameterConfig' is recommended for AI-generated workflows. Required fields per mode: (1) manualParameterConfig: serverId, toolName, toolDescription, parameters (empty [] OK), parameterValues (if parameters non-empty), validationStatus, outputPorts=1. (2) aiParameterConfig: serverId, toolName, toolDescription, parameters (min 1 item), aiParameterConfig.description (non-empty), validationStatus, outputPorts=1. (3) aiToolSelection: serverId, aiToolSelectionConfig.taskDescription (non-empty), validationStatus, outputPorts=1."
+        },
+        "aiToolSelectionConfig": {
+          "type": "object",
+          "required": false,
+          "description": "Required when mode is 'aiToolSelection'. Contains the task description for AI-driven tool selection.",
+          "properties": {
+            "taskDescription": {
+              "type": "string",
+              "required": true,
+              "minLength": 1,
+              "description": "Natural language description of the task to accomplish"
+            },
+            "timestamp": {
+              "type": "string",
+              "required": false,
+              "description": "ISO 8601 timestamp of when this configuration was created"
+            }
+          }
+        },
+        "aiParameterConfig": {
+          "type": "object",
+          "required": false,
+          "description": "Required when mode is 'aiParameterConfig'. Contains a natural language description for AI to configure parameter values.",
+          "properties": {
+            "description": {
+              "type": "string",
+              "required": true,
+              "minLength": 1,
+              "description": "Natural language description of desired parameter values. NOT 'taskDescription' — use 'description' for this field."
+            },
+            "timestamp": {
+              "type": "string",
+              "required": false,
+              "description": "ISO 8601 timestamp of when this configuration was created"
+            }
+          }
         },
         "validationStatus": {
           "type": "string",
@@ -266,9 +302,41 @@
       "inputPorts": 1,
       "outputPorts": 1,
       "aiGenerationGuidance": {
-        "mode": "ALWAYS set mode to 'manualParameterConfig'",
-        "parameters": "MUST be an array of parameter schema objects with {name, type, description, required} fields",
+        "mode": "Use 'aiParameterConfig' mode. Provide serverId, toolName, toolDescription, parameters (min 1 item), and aiParameterConfig.description",
+        "parameters": "Array of parameter schema objects with {name, type, description, required} fields. In aiParameterConfig mode, must have at least 1 item. In manualParameterConfig, empty [] OK. In aiToolSelection, optional.",
         "parameterValues": "Optional object with key-value pairs matching parameter names",
+        "requiredFieldsPerMode": {
+          "aiParameterConfig": {
+            "required": [
+              "serverId",
+              "toolName",
+              "toolDescription",
+              "parameters",
+              "aiParameterConfig",
+              "validationStatus",
+              "outputPorts"
+            ],
+            "notes": "parameters must have at least 1 item; aiParameterConfig.description must be non-empty; parameterValues is optional"
+          },
+          "manualParameterConfig": {
+            "required": [
+              "serverId",
+              "toolName",
+              "toolDescription",
+              "parameters",
+              "validationStatus",
+              "outputPorts"
+            ],
+            "conditionallyRequired": {
+              "parameterValues": "required when parameters array is non-empty"
+            },
+            "notes": "parameters can be empty [] for tools with no parameters"
+          },
+          "aiToolSelection": {
+            "required": ["serverId", "aiToolSelectionConfig", "validationStatus", "outputPorts"],
+            "notes": "aiToolSelectionConfig.taskDescription must be non-empty; toolName/toolDescription/parameters are optional"
+          }
+        },
         "commonTools": {
           "playwright": [
             "playwright_navigate",
@@ -284,19 +352,21 @@
           "data": {
             "serverId": "playwright",
             "toolName": "playwright_navigate",
-            "toolDescription": "Navigate browser to URL",
+            "toolDescription": "Navigate to a URL in the browser",
             "parameters": [
               {
                 "name": "url",
                 "type": "string",
-                "description": "Target URL to navigate to",
+                "description": "The URL to navigate to",
                 "required": true
               }
             ],
-            "parameterValues": {
-              "url": "https://example.com"
+            "parameterValues": {},
+            "mode": "aiParameterConfig",
+            "aiParameterConfig": {
+              "description": "Navigate to example.com and take a screenshot of the page",
+              "timestamp": "2025-02-28T00:00:00Z"
             },
-            "mode": "manualParameterConfig",
             "validationStatus": "valid",
             "outputPorts": 1
           }

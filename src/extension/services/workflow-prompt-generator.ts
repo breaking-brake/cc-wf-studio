@@ -337,20 +337,10 @@ function formatAiToolSelectionMode(node: McpNode, provider: ExportProvider): str
   sections.push(`#### ${nodeId}(MCP Auto-Selection) - AI Tool Selection Mode`);
   sections.push('');
 
-  const availableToolsRaw = node.data.aiToolSelectionConfig?.availableTools || [];
-  const availableTools = availableToolsRaw.map((tool: unknown) => {
-    if (typeof tool === 'object' && tool !== null && 'name' in tool) {
-      const toolObj = tool as { name: string; description?: string };
-      return { name: toolObj.name, description: toolObj.description || '' };
-    }
-    return { name: String(tool), description: '' };
-  });
-
   const metadata = {
     mode: 'aiToolSelection',
     serverId: node.data.serverId,
     userIntent: node.data.aiToolSelectionConfig?.taskDescription || '',
-    availableTools,
   };
   sections.push(`<!-- MCP_NODE_METADATA: ${JSON.stringify(metadata)} -->`);
   sections.push('');
@@ -369,25 +359,11 @@ function formatAiToolSelectionMode(node: McpNode, provider: ExportProvider): str
     sections.push('');
   }
 
-  if (availableTools.length > 0) {
-    sections.push(
-      `**Available Tools** (${availableTools.length} tools from ${node.data.serverId}):`
-    );
-    sections.push('');
-    for (const tool of availableTools) {
-      sections.push(`- **${tool.name}**: ${tool.description || 'No description'}`);
-    }
-    sections.push('');
-  } else {
-    sections.push('**Available Tools**: (snapshot not available, query server at runtime)');
-    sections.push('');
-  }
-
   sections.push('**Execution Method**:');
   sections.push('');
   const agentName = getAgentName(provider);
   sections.push(
-    `${agentName} should analyze the task description above and select the most appropriate tool from the available tools list. Then, determine the appropriate parameter values for the selected tool based on the task requirements. If the available tools list is empty, query the MCP server at runtime to get the current list of tools.`
+    `${agentName} should analyze the task description above and query the MCP server "${node.data.serverId}" at runtime to get the current list of tools. Then, select the most appropriate tool and determine the appropriate parameter values based on the task requirements.`
   );
   sections.push('');
 

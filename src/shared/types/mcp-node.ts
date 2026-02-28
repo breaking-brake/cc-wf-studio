@@ -101,24 +101,6 @@ export interface ToolParameter {
 }
 
 /**
- * Tool selection mode for MCP node creation wizard
- *
- * Determines how the user selects the MCP tool:
- * - 'manual': User manually selects a tool from the list
- * - 'auto': AI automatically selects the best tool based on task description
- */
-export type ToolSelectionMode = 'manual' | 'auto';
-
-/**
- * Parameter configuration mode for MCP node creation wizard
- *
- * Determines how the user configures tool parameters:
- * - 'manual': User manually fills in parameter values
- * - 'auto': AI configures parameters based on natural language description
- */
-export type ParameterConfigMode = 'manual' | 'auto';
-
-/**
  * MCP node configuration mode
  *
  * Determines how the MCP tool node is configured and executed:
@@ -150,8 +132,6 @@ export interface AiParameterConfig {
 export interface AiToolSelectionConfig {
   /** Natural language description of the task to accomplish */
   taskDescription: string;
-  /** Snapshot of available tools from the MCP server at configuration time */
-  availableTools: McpToolReference[];
   /** Timestamp when this configuration was created (ISO 8601 format) */
   timestamp: string;
 }
@@ -253,13 +233,6 @@ export interface AiToolSelectionMetadata {
   serverId: string;
   /** Natural language description of the entire task */
   userIntent: string;
-  /** List of available tools from the MCP server (snapshot at configuration time) */
-  availableTools: Array<{
-    /** Tool function name */
-    name: string;
-    /** Tool description */
-    description: string;
-  }>;
 }
 
 /**

@@ -656,7 +656,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.selectTool': '도구 선택',
   'mcp.dialog.addButton': '도구 추가',
   'mcp.dialog.cancelButton': '취소',
-  'mcp.dialog.wizardStep': '{{total}}단계 중 {{current}}단계',
   'mcp.dialog.nextButton': '다음',
   'mcp.dialog.backButton': '뒤로',
   'mcp.dialog.saveButton': '노드 생성',
@@ -718,33 +717,13 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.modeSelection.subtitle': 'MCP 도구 구성 방법을 선택하세요',
   'mcp.modeSelection.manualParameterConfig.title': '수동 매개변수 설정',
   'mcp.modeSelection.manualParameterConfig.description':
-    '서버, 도구 및 모든 매개변수를 명시적으로 구성합니다. 재현성이 높으며 기술 사용자에게 적합합니다.',
+    'MCP 서버, MCP 도구 및 모든 매개변수를 명시적으로 구성합니다. 재현성이 높으며 기술 사용자에게 적합합니다.',
   'mcp.modeSelection.aiParameterConfig.title': 'AI 매개변수 설정',
   'mcp.modeSelection.aiParameterConfig.description':
-    '서버와 도구를 선택하고 매개변수를 자연어로 설명합니다. 균형잡힌 접근 방식입니다.',
+    'MCP 서버와 MCP 도구를 선택하고 매개변수를 자연어로 설명합니다. 균형잡힌 접근 방식입니다.',
   'mcp.modeSelection.aiToolSelection.title': 'AI 도구 선택',
   'mcp.modeSelection.aiToolSelection.description':
-    '서버만 선택하고 전체 작업을 자연어로 설명합니다. 가장 간단하지만 재현성은 낮습니다.',
-
-  // Tool Selection Mode (Step-by-step decision flow)
-  'mcp.toolSelectionMode.title': '도구 선택 방법',
-  'mcp.toolSelectionMode.subtitle': 'MCP 노드의 도구를 선택하는 방법을 선택하세요',
-  'mcp.toolSelectionMode.manual.title': '도구를 직접 선택',
-  'mcp.toolSelectionMode.manual.description':
-    '직접 도구를 찾아보고 선택합니다. 사용할 도구를 정확히 알고 있을 때 적합합니다.',
-  'mcp.toolSelectionMode.auto.title': 'AI가 도구 선택',
-  'mcp.toolSelectionMode.auto.description':
-    '작업 설명을 기반으로 AI가 자동으로 최적의 도구를 선택합니다. 탐색 중이거나 불확실할 때 적합합니다.',
-
-  // Parameter Config Mode (Step-by-step decision flow)
-  'mcp.parameterConfigMode.title': '매개변수 구성 방법',
-  'mcp.parameterConfigMode.subtitle': '이 도구의 매개변수를 구성하는 방법을 선택하세요',
-  'mcp.parameterConfigMode.manual.title': '수동으로 구성',
-  'mcp.parameterConfigMode.manual.description':
-    '직접 모든 매개변수를 입력합니다. 정밀한 제어와 재현성이 필요할 때 적합합니다.',
-  'mcp.parameterConfigMode.auto.title': 'AI가 구성',
-  'mcp.parameterConfigMode.auto.description':
-    '자연어 설명을 기반으로 AI가 매개변수를 구성합니다. 빠른 설정에 적합합니다.',
+    'MCP 서버만 선택하고 전체 작업을 자연어로 설명합니다. 가장 간단하지만 재현성은 낮습니다.',
 
   // Parameter Detailed Config Step
   'mcp.parameterDetailedConfig.title': '도구 매개변수 구성',

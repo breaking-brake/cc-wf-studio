@@ -336,7 +336,6 @@ export interface McpNodeData {
   /** AI Tool Selection Mode configuration (only if mode === 'aiToolSelection') */
   aiToolSelectionConfig?: {
     taskDescription: string;
-    availableTools: string[];
     timestamp: string;
   };
   /** Preserved manual parameter configuration (stores data when switching away from manual parameter config mode) */
