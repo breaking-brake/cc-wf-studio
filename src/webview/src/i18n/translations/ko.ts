@@ -656,7 +656,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.selectTool': '도구 선택',
   'mcp.dialog.addButton': '도구 추가',
   'mcp.dialog.cancelButton': '취소',
-  'mcp.dialog.wizardStep': '{{total}}단계 중 {{current}}단계',
   'mcp.dialog.nextButton': '다음',
   'mcp.dialog.backButton': '뒤로',
   'mcp.dialog.saveButton': '노드 생성',

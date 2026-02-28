@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { useMcpCreationWizard, WizardStep } from '../../hooks/useMcpCreationWizard';
 import { useTranslation } from '../../i18n/i18n-context';
 import { useWorkflowStore } from '../../stores/workflow-store';
+import { WizardStepIndicator } from '../common/WizardStepIndicator';
 import { McpServerList } from '../mcp/McpServerList';
 import { McpToolList } from '../mcp/McpToolList';
 import { McpToolSearch } from '../mcp/McpToolSearch';
@@ -382,17 +383,22 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
             </Dialog.Title>
 
             {/* Step Indicator */}
+            <WizardStepIndicator
+              currentStep={wizard.state.currentStep}
+              totalSteps={wizard.totalSteps}
+            />
+
+            {/* Visually Hidden Accessibility Description */}
             <Dialog.Description
               style={{
-                marginBottom: '20px',
-                fontSize: '12px',
-                color: 'var(--vscode-descriptionForeground)',
+                position: 'absolute',
+                width: '1px',
+                height: '1px',
+                overflow: 'hidden',
+                clip: 'rect(0, 0, 0, 0)',
               }}
             >
-              {t('mcp.dialog.wizardStep', {
-                current: wizard.state.currentStep.toString(),
-                total: wizard.totalSteps.toString(),
-              })}
+              Step {wizard.state.currentStep} of {wizard.totalSteps}
             </Dialog.Description>
 
             {/* Error Message */}

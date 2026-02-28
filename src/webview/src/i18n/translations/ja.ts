@@ -661,7 +661,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.selectTool': 'ツールを選択',
   'mcp.dialog.addButton': 'ツールを追加',
   'mcp.dialog.cancelButton': 'キャンセル',
-  'mcp.dialog.wizardStep': 'ステップ {{current}} / {{total}}',
   'mcp.dialog.nextButton': '次へ',
   'mcp.dialog.backButton': '戻る',
   'mcp.dialog.saveButton': 'ノードを作成',

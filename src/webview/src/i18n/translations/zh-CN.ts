@@ -633,7 +633,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.selectTool': '选择工具',
   'mcp.dialog.addButton': '添加工具',
   'mcp.dialog.cancelButton': '取消',
-  'mcp.dialog.wizardStep': '第{{current}}步，共{{total}}步',
   'mcp.dialog.nextButton': '下一步',
   'mcp.dialog.backButton': '返回',
   'mcp.dialog.saveButton': '创建节点',

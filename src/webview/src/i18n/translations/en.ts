@@ -664,7 +664,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.dialog.selectTool': 'Select Tool',
   'mcp.dialog.addButton': 'Add Tool',
   'mcp.dialog.cancelButton': 'Cancel',
-  'mcp.dialog.wizardStep': 'Step {{current}} of {{total}}',
   'mcp.dialog.nextButton': 'Next',
   'mcp.dialog.backButton': 'Back',
   'mcp.dialog.saveButton': 'Create Node',

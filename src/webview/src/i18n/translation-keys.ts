@@ -597,7 +597,6 @@ export interface WebviewTranslationKeys {
   'mcp.dialog.selectTool': string;
   'mcp.dialog.addButton': string;
   'mcp.dialog.cancelButton': string;
-  'mcp.dialog.wizardStep': string;
   'mcp.dialog.nextButton': string;
   'mcp.dialog.backButton': string;
   'mcp.dialog.saveButton': string;
