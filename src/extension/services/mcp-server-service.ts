@@ -74,8 +74,17 @@ export class McpServerManager {
       // CLI clients (e.g. Claude Code) don't send Origin, so only validate when present
       const origin = req.headers.origin;
       if (origin) {
-        const isLocalOrigin =
-          origin.startsWith('http://127.0.0.1') || origin.startsWith('http://localhost');
+        let isLocalOrigin = false;
+        try {
+          const originUrl = new URL(origin);
+          const originHost = originUrl.hostname.toLowerCase();
+          isLocalOrigin =
+            (originHost === '127.0.0.1' || originHost === 'localhost') &&
+            originUrl.protocol === 'http:';
+        } catch {
+          // Invalid URL format - treat as non-local
+          isLocalOrigin = false;
+        }
         if (!isLocalOrigin) {
           log('WARN', 'MCP Server: Rejected request with invalid Origin header', {
             origin,
