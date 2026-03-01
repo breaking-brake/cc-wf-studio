@@ -831,7 +831,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'slack.oauth.status.waitingHint': '브라우저에서 인증을 완료한 후 여기로 돌아오세요.',
   'slack.oauth.cancelled': '인증이 취소되었습니다',
   'slack.oauth.reviewNotice.message':
-    '공유에 사용되는 Slack 앱은 Slack 심사 예정입니다.\n심사 승인이 완료될 때까지 권한 화면에 경고가 표시됩니다.',
+    '이 Slack 앱은 Slack Marketplace에 제출되지 않았습니다.\n권한 화면에 경고가 표시됩니다.',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Reconnect to Slack',
