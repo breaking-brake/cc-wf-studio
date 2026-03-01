@@ -801,7 +801,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'slack.oauth.status.waitingHint': '在浏览器中完成身份验证后返回此处。',
   'slack.oauth.cancelled': '身份验证已取消',
   'slack.oauth.reviewNotice.message':
-    '用于共享的 Slack 应用计划进行 Slack 审核。\n在审核通过之前，权限画面会显示警告。',
+    '此 Slack 应用尚未提交至 Slack Marketplace。\n权限画面会显示警告。',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Reconnect to Slack',

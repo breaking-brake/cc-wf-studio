@@ -59,7 +59,44 @@ export class McpServerManager {
 
     // Create HTTP server
     this.httpServer = http.createServer(async (req, res) => {
-      const url = new URL(req.url || '/', `http://${req.headers.host}`);
+      // DNS rebinding protection: validate Host header
+      const host = (req.headers.host || '').split(':')[0];
+      if (host !== '127.0.0.1' && host !== 'localhost') {
+        log('WARN', 'MCP Server: Rejected request with invalid Host header', {
+          host: req.headers.host,
+        });
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Forbidden' }));
+        return;
+      }
+
+      // DNS rebinding protection: validate Origin header (if present)
+      // CLI clients (e.g. Claude Code) don't send Origin, so only validate when present
+      const origin = req.headers.origin;
+      if (origin) {
+        let isLocalOrigin = false;
+        try {
+          const originUrl = new URL(origin);
+          const originHost = originUrl.hostname.toLowerCase();
+          isLocalOrigin =
+            (originHost === '127.0.0.1' || originHost === 'localhost') &&
+            originUrl.protocol === 'http:';
+        } catch {
+          // Invalid URL format - treat as non-local
+          isLocalOrigin = false;
+        }
+        if (!isLocalOrigin) {
+          log('WARN', 'MCP Server: Rejected request with invalid Origin header', {
+            origin,
+          });
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Forbidden' }));
+          return;
+        }
+      }
+
+      // Use hardcoded localhost instead of trusting Host header for URL construction
+      const url = new URL(req.url || '/', 'http://127.0.0.1');
 
       if (url.pathname !== '/mcp') {
         res.writeHead(404, { 'Content-Type': 'application/json' });
