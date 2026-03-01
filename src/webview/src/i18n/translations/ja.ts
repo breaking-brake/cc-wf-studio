@@ -837,7 +837,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'slack.oauth.status.waitingHint': 'ブラウザで認証を完了し、こちらに戻ってください。',
   'slack.oauth.cancelled': '認証がキャンセルされました',
   'slack.oauth.reviewNotice.message':
-    '共有に使用するSlack AppはSlackへの審査を予定しています。\n審査の承認が下りるまで、許可画面で警告が表示されます。',
+    'このSlack AppはSlack Marketplaceに未申請です。\n許可画面で警告が表示されます。',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Slackに再接続',

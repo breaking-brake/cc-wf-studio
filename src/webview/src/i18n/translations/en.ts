@@ -842,7 +842,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Complete the authentication in your browser, then return here.',
   'slack.oauth.cancelled': 'Authentication was cancelled',
   'slack.oauth.reviewNotice.message':
-    'The Slack App used for sharing is pending Slack review.\nA warning will be displayed on the permission screen until the review is approved.',
+    'This Slack App has not been submitted to the Slack Marketplace.\nA warning will be displayed on the permission screen.',
 
   // Slack Reconnect
   'slack.reconnect.button': 'Reconnect to Slack',
