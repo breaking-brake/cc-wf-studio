@@ -4,8 +4,6 @@
  * Main activation and deactivation logic for the VSCode extension.
  */
 
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { registerOpenEditorCommand } from './commands/open-editor';
 import { handleConnectSlackManual } from './commands/slack-connect-manual';
@@ -58,45 +56,6 @@ export function log(level: 'INFO' | 'WARN' | 'ERROR', message: string, data?: un
 }
 
 /**
- * Clean up legacy BM25 index data from globalStorageUri
- *
- * This function removes the old BM25 codebase index data that was stored
- * when the BM25 search feature was active. The feature has been removed
- * and this cleanup ensures no orphaned data remains on user devices.
- *
- * @param context - Extension context containing globalStorageUri
- */
-async function cleanupLegacyBM25Index(context: vscode.ExtensionContext): Promise<void> {
-  try {
-    if (!context.globalStorageUri) {
-      log('WARN', 'BM25 Cleanup: globalStorageUri not available, skipping cleanup');
-      return;
-    }
-
-    const indexesDir = path.join(context.globalStorageUri.fsPath, 'indexes');
-
-    // Check if the indexes directory exists
-    try {
-      await fs.access(indexesDir);
-    } catch {
-      // Directory doesn't exist, nothing to clean up
-      log('INFO', 'BM25 Cleanup: No legacy index data found');
-      return;
-    }
-
-    // Directory exists, remove it
-    log('INFO', 'BM25 Cleanup: Removing legacy index directory', { path: indexesDir });
-    await fs.rm(indexesDir, { recursive: true, force: true });
-    log('INFO', 'BM25 Cleanup: Successfully removed legacy index data');
-  } catch (error) {
-    // Log error but don't prevent extension activation
-    log('ERROR', 'BM25 Cleanup: Failed to remove legacy index data', {
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-}
-
-/**
  * Get the global MCP Server Manager instance
  */
 export function getMcpServerManager(): McpServerManager | null {
@@ -116,11 +75,6 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Create MCP Server Manager (started via UI, not automatically)
   mcpServerManager = new McpServerManager();
-
-  // Clean up legacy BM25 index data (fire-and-forget)
-  cleanupLegacyBM25Index(context).catch((error) => {
-    log('ERROR', 'BM25 Cleanup: Unexpected error during cleanup', { error });
-  });
 
   // Register commands
   registerOpenEditorCommand(context);
