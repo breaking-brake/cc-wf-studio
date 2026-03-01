@@ -97,51 +97,6 @@ export function migrateSwitchNodes(workflow: Workflow): Workflow {
 }
 
 /**
- * Migrate Skill nodes to use new scope terminology
- *
- * Converts legacy scope values to Anthropic official terminology:
- * - 'personal' → 'user'
- *
- * This migration supports backward compatibility for existing workflows
- * saved before the scope terminology update.
- *
- * @param workflow - The workflow to migrate
- * @returns Migrated workflow with updated Skill node scopes
- *
- * @see Issue #364 - Tech Debt: Remove this migration after deprecation period
- */
-export function migrateSkillScopes(workflow: Workflow): Workflow {
-  const migratedNodes = workflow.nodes.map((node) => {
-    if (node.type !== 'skill') return node;
-
-    const data = node.data as SkillNodeData;
-    // Cast to allow checking for legacy 'personal' value
-    const currentScope = data.scope as string;
-
-    // Migrate 'personal' → 'user'
-    if (currentScope === 'personal') {
-      console.warn(
-        `[Workflow Migration] Migrating Skill "${data.name}" scope: 'personal' → 'user'`
-      );
-      return {
-        ...node,
-        data: {
-          ...data,
-          scope: 'user' as const,
-        },
-      } as WorkflowNode;
-    }
-
-    return node;
-  });
-
-  return {
-    ...workflow,
-    nodes: migratedNodes,
-  };
-}
-
-/**
  * Migrate Skill nodes to include explicit executionMode
  *
  * For existing workflows without executionMode:
@@ -191,10 +146,7 @@ export function migrateWorkflow(workflow: Workflow): Workflow {
   // Migration 1: Add default branch to Switch nodes
   migrated = migrateSwitchNodes(migrated);
 
-  // Migration 2: Update Skill node scope terminology ('personal' → 'user')
-  migrated = migrateSkillScopes(migrated);
-
-  // Migration 3: Set explicit executionMode on Skill nodes
+  // Migration 2: Set explicit executionMode on Skill nodes
   migrated = migrateSkillExecutionMode(migrated);
 
   // Add future migrations here...
