@@ -708,6 +708,152 @@ export interface McpCacheRefreshedPayload {
 }
 
 // ============================================================================
+// Claude API Upload Payloads
+// ============================================================================
+
+/**
+ * Upload to Claude API request payload (Webview → Extension)
+ */
+export interface UploadToClaudeApiPayload {
+  workflow: Workflow;
+}
+
+/**
+ * Upload to Claude API success payload (Extension → Webview)
+ */
+export interface UploadToClaudeApiSuccessPayload {
+  skillId: string;
+  version: string;
+  isNewVersion: boolean;
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Upload to Claude API failed payload (Extension → Webview)
+ */
+export interface UploadToClaudeApiFailedPayload {
+  errorCode: string;
+  errorMessage: string;
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Execute uploaded skill payload (Webview → Extension)
+ */
+export interface ExecuteUploadedSkillPayload {
+  skillId: string;
+  prompt: string;
+  model: string;
+  conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
+  containerId?: string;
+  mcpServers?: Array<{ id: string; url: string }>;
+  additionalSkillIds?: string[];
+}
+
+/**
+ * Execute uploaded skill success payload (Extension → Webview)
+ */
+export interface ExecuteUploadedSkillSuccessPayload {
+  responseText: string;
+  stopReason: string;
+  timestamp: string; // ISO 8601
+  containerId?: string;
+}
+
+/**
+ * Execute uploaded skill failed payload (Extension → Webview)
+ */
+export interface ExecuteUploadedSkillFailedPayload {
+  errorCode: string;
+  errorMessage: string;
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * List custom skills success payload (Extension → Webview)
+ */
+export interface ListCustomSkillsSuccessPayload {
+  skills: { id: string; displayTitle: string; latestVersion: string }[];
+}
+
+/**
+ * List custom skills failed payload (Extension → Webview)
+ */
+export interface ListCustomSkillsFailedPayload {
+  errorCode: string;
+  errorMessage: string;
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Execute skill progress payload (Extension → Webview)
+ * Sent during streaming execution with each new chunk
+ */
+export interface ExecuteSkillProgressPayload {
+  chunk: string;
+  accumulatedText: string;
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Store Anthropic API key payload (Webview → Extension)
+ */
+export interface StoreAnthropicApiKeyPayload {
+  apiKey: string;
+}
+
+/**
+ * Check Anthropic API key result payload (Extension → Webview)
+ */
+export interface CheckAnthropicApiKeyResultPayload {
+  hasApiKey: boolean;
+}
+
+/**
+ * Get MCP server types request payload (Webview → Extension)
+ */
+export interface GetMcpServerTypesPayload {
+  serverIds: string[];
+}
+
+/**
+ * Get MCP server types result payload (Extension → Webview)
+ * null = configuration not found (treat as non-Claude API compatible)
+ */
+export interface GetMcpServerTypesResultPayload {
+  serverTypes: Record<string, 'stdio' | 'http' | 'sse' | null>;
+}
+
+/**
+ * Get skill version details request payload (Webview → Extension)
+ */
+export interface GetSkillVersionDetailsPayload {
+  skillId: string;
+  version: string;
+}
+
+/**
+ * Get skill version details success payload (Extension → Webview)
+ */
+export interface GetSkillVersionDetailsSuccessPayload {
+  skillId: string;
+  version: string;
+  name: string;
+  description: string;
+  mcpServerIds: string[];
+  dependentSkillNames: string[];
+}
+
+/**
+ * Get skill version details failed payload (Extension → Webview)
+ */
+export interface GetSkillVersionDetailsFailedPayload {
+  errorCode: string;
+  errorMessage: string;
+  timestamp: string;
+}
+
+// ============================================================================
 // Extension → Webview Messages
 // ============================================================================
 
@@ -824,7 +970,20 @@ export type ExtensionMessage =
   | Message<RunAiEditingSkillFailedPayload, 'RUN_AI_EDITING_SKILL_FAILED'>
   | Message<LaunchAiAgentSuccessPayload, 'LAUNCH_AI_AGENT_SUCCESS'>
   | Message<LaunchAiAgentFailedPayload, 'LAUNCH_AI_AGENT_FAILED'>
-  | Message<void, 'ANTIGRAVITY_MCP_REFRESH_NEEDED'>;
+  | Message<void, 'ANTIGRAVITY_MCP_REFRESH_NEEDED'>
+  | Message<UploadToClaudeApiSuccessPayload, 'UPLOAD_TO_CLAUDE_API_SUCCESS'>
+  | Message<UploadToClaudeApiFailedPayload, 'UPLOAD_TO_CLAUDE_API_FAILED'>
+  | Message<ExecuteUploadedSkillSuccessPayload, 'EXECUTE_UPLOADED_SKILL_SUCCESS'>
+  | Message<ExecuteUploadedSkillFailedPayload, 'EXECUTE_UPLOADED_SKILL_FAILED'>
+  | Message<ExecuteSkillProgressPayload, 'EXECUTE_SKILL_PROGRESS'>
+  | Message<ListCustomSkillsSuccessPayload, 'LIST_CUSTOM_SKILLS_SUCCESS'>
+  | Message<ListCustomSkillsFailedPayload, 'LIST_CUSTOM_SKILLS_FAILED'>
+  | Message<CheckAnthropicApiKeyResultPayload, 'CHECK_ANTHROPIC_API_KEY_RESULT'>
+  | Message<void, 'STORE_ANTHROPIC_API_KEY_SUCCESS'>
+  | Message<void, 'CLEAR_ANTHROPIC_API_KEY_SUCCESS'>
+  | Message<GetMcpServerTypesResultPayload, 'GET_MCP_SERVER_TYPES_RESULT'>
+  | Message<GetSkillVersionDetailsSuccessPayload, 'GET_SKILL_VERSION_DETAILS_SUCCESS'>
+  | Message<GetSkillVersionDetailsFailedPayload, 'GET_SKILL_VERSION_DETAILS_FAILED'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -1889,7 +2048,15 @@ export type WebviewMessage =
   | Message<LaunchAiAgentPayload, 'LAUNCH_AI_AGENT'>
   | Message<SetReviewBeforeApplyPayload, 'SET_REVIEW_BEFORE_APPLY'>
   | Message<void, 'OPEN_ANTIGRAVITY_MCP_SETTINGS'>
-  | Message<void, 'CONFIRM_ANTIGRAVITY_CASCADE_LAUNCH'>;
+  | Message<void, 'CONFIRM_ANTIGRAVITY_CASCADE_LAUNCH'>
+  | Message<UploadToClaudeApiPayload, 'UPLOAD_TO_CLAUDE_API'>
+  | Message<ExecuteUploadedSkillPayload, 'EXECUTE_UPLOADED_SKILL'>
+  | Message<StoreAnthropicApiKeyPayload, 'STORE_ANTHROPIC_API_KEY'>
+  | Message<void, 'CHECK_ANTHROPIC_API_KEY'>
+  | Message<void, 'CLEAR_ANTHROPIC_API_KEY'>
+  | Message<void, 'LIST_CUSTOM_SKILLS'>
+  | Message<GetMcpServerTypesPayload, 'GET_MCP_SERVER_TYPES'>
+  | Message<GetSkillVersionDetailsPayload, 'GET_SKILL_VERSION_DETAILS'>;
 
 // ============================================================================
 // Error Codes

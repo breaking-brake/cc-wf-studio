@@ -34,11 +34,22 @@ import {
 import { SlackApiService } from '../services/slack-api-service';
 import { executeSlashCommandInTerminal } from '../services/terminal-execution-service';
 import { listCopilotModels } from '../services/vscode-lm-service';
+import { AnthropicApiKeyManager } from '../utils/anthropic-api-key-manager';
 import { migrateWorkflow } from '../utils/migrate-workflow';
 import { SlackTokenManager } from '../utils/slack-token-manager';
 import { validateWorkflowFile } from '../utils/workflow-validator';
 import { getWebviewContent } from '../webview-content';
 import { handleExportForAntigravity, handleRunForAntigravity } from './antigravity-handlers';
+import {
+  handleCheckAnthropicApiKey,
+  handleClearAnthropicApiKey,
+  handleExecuteUploadedSkill,
+  handleGetMcpServerTypes,
+  handleGetSkillVersionDetails,
+  handleListCustomSkills,
+  handleStoreAnthropicApiKey,
+  handleUploadToClaudeApi,
+} from './claude-api-handlers';
 import { handleExportForCodexCli, handleRunForCodexCli } from './codex-handlers';
 import {
   handleExportForCopilot,
@@ -83,6 +94,7 @@ let fileService: FileService;
 let slackTokenManager: SlackTokenManager;
 let slackApiService: SlackApiService;
 let activeOAuthService: ReturnType<typeof createOAuthService> | null = null;
+let anthropicApiKeyManager: AnthropicApiKeyManager;
 
 /**
  * Import parameters for workflow import from Slack
@@ -138,6 +150,9 @@ export function registerOpenEditorCommand(
       // Initialize Slack services
       slackTokenManager = new SlackTokenManager(context);
       slackApiService = new SlackApiService(slackTokenManager);
+
+      // Initialize Anthropic API Key Manager
+      anthropicApiKeyManager = new AnthropicApiKeyManager(context);
 
       const columnToShowIn = vscode.window.activeTextEditor
         ? vscode.window.activeTextEditor.viewColumn
@@ -1543,6 +1558,84 @@ export function registerOpenEditorCommand(
               }
               break;
             }
+
+            case 'UPLOAD_TO_CLAUDE_API':
+              if (message.payload?.workflow) {
+                await handleUploadToClaudeApi(
+                  webview,
+                  message.payload,
+                  anthropicApiKeyManager,
+                  message.requestId
+                );
+              } else {
+                webview.postMessage({
+                  type: 'UPLOAD_TO_CLAUDE_API_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorCode: 'UNKNOWN_ERROR',
+                    errorMessage: 'Workflow is required',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+
+            case 'EXECUTE_UPLOADED_SKILL':
+              if (message.payload?.skillId && message.payload?.prompt) {
+                await handleExecuteUploadedSkill(
+                  webview,
+                  message.payload,
+                  anthropicApiKeyManager,
+                  message.requestId
+                );
+              } else {
+                webview.postMessage({
+                  type: 'EXECUTE_UPLOADED_SKILL_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorCode: 'INVALID_PAYLOAD',
+                    errorMessage: 'skillId and prompt are required',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+
+            case 'STORE_ANTHROPIC_API_KEY':
+              if (message.payload?.apiKey) {
+                await handleStoreAnthropicApiKey(
+                  webview,
+                  message.payload,
+                  anthropicApiKeyManager,
+                  message.requestId
+                );
+              }
+              break;
+
+            case 'CHECK_ANTHROPIC_API_KEY':
+              await handleCheckAnthropicApiKey(webview, anthropicApiKeyManager, message.requestId);
+              break;
+
+            case 'CLEAR_ANTHROPIC_API_KEY':
+              await handleClearAnthropicApiKey(webview, anthropicApiKeyManager, message.requestId);
+              break;
+
+            case 'LIST_CUSTOM_SKILLS':
+              await handleListCustomSkills(webview, anthropicApiKeyManager, message.requestId);
+              break;
+
+            case 'GET_MCP_SERVER_TYPES':
+              await handleGetMcpServerTypes(webview, message.payload, message.requestId);
+              break;
+
+            case 'GET_SKILL_VERSION_DETAILS':
+              await handleGetSkillVersionDetails(
+                webview,
+                message.payload,
+                anthropicApiKeyManager,
+                message.requestId
+              );
+              break;
 
             default:
               console.warn('Unknown message type:', message);

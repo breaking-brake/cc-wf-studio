@@ -5,7 +5,7 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
-import { FileDown, Play, Save, Sparkles, SquareSlash } from 'lucide-react';
+import { Cloud, FileDown, Play, Save, Sparkles, SquareSlash } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
@@ -43,6 +43,7 @@ import { useWorkflowStore } from '../stores/workflow-store';
 import { EditableNameField } from './common/EditableNameField';
 import { ProcessingOverlay } from './common/ProcessingOverlay';
 import { StyledTooltipProvider } from './common/StyledTooltip';
+import { ClaudeApiUploadDialog } from './dialogs/ClaudeApiUploadDialog';
 import { ConfirmDialog } from './dialogs/ConfirmDialog';
 import { MoreActionsDropdown } from './toolbar/MoreActionsDropdown';
 import { SlashCommandOptionsDropdown } from './toolbar/SlashCommandOptionsDropdown';
@@ -141,6 +142,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   // Cursor integration
   const [isCursorExporting, setIsCursorExporting] = useState(false);
   const [isCursorRunning, setIsCursorRunning] = useState(false);
+  // Claude API Upload
+  const [isClaudeApiUploadDialogOpen, setIsClaudeApiUploadDialogOpen] = useState(false);
   const generationNameRequestIdRef = useRef<string | null>(null);
 
   // Workflow name validation pattern (lowercase, numbers, hyphens, underscores only)
@@ -2300,6 +2303,29 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               {!isCompact && t('toolbar.refineWithAI')}
             </button>
 
+            {/* Custom Skills Button */}
+            <button
+              type="button"
+              onClick={() => setIsClaudeApiUploadDialogOpen(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: isCompact ? '0' : '4px',
+                padding: isCompact ? '4px 8px' : '4px 12px',
+                backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                color: 'var(--vscode-button-secondaryForeground)',
+                border: 'none',
+                borderRadius: '2px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                whiteSpace: 'nowrap',
+              }}
+              title="Claude API"
+            >
+              <Cloud size={14} />
+              {!isCompact && 'Claude API'}
+            </button>
+
             {/* More Actions Dropdown */}
             <MoreActionsDropdown
               onShareToSlack={onShareToSlack}
@@ -2329,6 +2355,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
         {/* Processing Overlay (Phase 3.10) */}
         <ProcessingOverlay isVisible={isProcessing} />
+
+        {/* Claude API Upload Dialog */}
+        <ClaudeApiUploadDialog
+          isOpen={isClaudeApiUploadDialogOpen}
+          onClose={() => setIsClaudeApiUploadDialogOpen(false)}
+        />
 
         {/* Reset Workflow Confirmation Dialog */}
         <ConfirmDialog

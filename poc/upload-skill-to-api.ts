@@ -19,9 +19,9 @@
  *   ANTHROPIC_API_KEY=sk-ant-... npx tsx poc/upload-skill-to-api.ts .vscode/workflows/daily-task-workflow.json --execute
  */
 
+import { execSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { execSync } from 'node:child_process';
 
 // ============================================================================
 // SKILL.md Generation (extracted from copilot-skill-export-service.ts)
@@ -324,11 +324,7 @@ async function listSkills(apiKey: string): Promise<void> {
   }
 }
 
-async function executeSkill(
-  apiKey: string,
-  skillId: string,
-  prompt: string
-): Promise<void> {
+async function executeSkill(apiKey: string, skillId: string, prompt: string): Promise<void> {
   console.log(`\n🚀 Executing skill ${skillId}...`);
   console.log(`   Prompt: "${prompt}"`);
 
@@ -403,13 +399,18 @@ async function main() {
 
   // List existing skills
   if (shouldList) {
-    if (!apiKey) { console.error('❌ ANTHROPIC_API_KEY required for --list'); process.exit(1); }
+    if (!apiKey) {
+      console.error('❌ ANTHROPIC_API_KEY required for --list');
+      process.exit(1);
+    }
     await listSkills(apiKey);
     return;
   }
 
   if (!workflowPath) {
-    console.error('Usage: npx tsx poc/upload-skill-to-api.ts <workflow-json-path> [--execute] [--list] [--dry-run]');
+    console.error(
+      'Usage: npx tsx poc/upload-skill-to-api.ts <workflow-json-path> [--execute] [--list] [--dry-run]'
+    );
     console.error('');
     console.error('Options:');
     console.error('  --execute   Execute the uploaded skill after upload');
@@ -460,7 +461,9 @@ async function main() {
     console.log(`   - ${skillName}.zip`);
     fs.rmSync(tmpDir, { recursive: true, force: true });
     console.log(`\n🧹 Cleaned up temp directory`);
-    console.log(`\n✅ Dry-run complete. Review the generated files, then run with ANTHROPIC_API_KEY to upload.`);
+    console.log(
+      `\n✅ Dry-run complete. Review the generated files, then run with ANTHROPIC_API_KEY to upload.`
+    );
     return;
   }
 
