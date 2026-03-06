@@ -45,8 +45,11 @@ import {
   handleClearAnthropicApiKey,
   handleExecuteUploadedSkill,
   handleGetMcpServerTypes,
+  handleGetSavedMcpServerUrls,
   handleGetSkillVersionDetails,
   handleListCustomSkills,
+  handleLookupMcpRegistry,
+  handleSaveMcpServerUrls,
   handleStoreAnthropicApiKey,
   handleUploadToClaudeApi,
 } from './claude-api-handlers';
@@ -1626,6 +1629,18 @@ export function registerOpenEditorCommand(
 
             case 'GET_MCP_SERVER_TYPES':
               await handleGetMcpServerTypes(webview, message.payload, message.requestId);
+              break;
+
+            case 'GET_SAVED_MCP_SERVER_URLS':
+              await handleGetSavedMcpServerUrls(context, webview, message.requestId);
+              break;
+
+            case 'SAVE_MCP_SERVER_URLS':
+              await handleSaveMcpServerUrls(context, webview, message.payload, message.requestId);
+              break;
+
+            case 'LOOKUP_MCP_REGISTRY':
+              await handleLookupMcpRegistry(webview, message.payload, message.requestId);
               break;
 
             case 'GET_SKILL_VERSION_DETAILS':

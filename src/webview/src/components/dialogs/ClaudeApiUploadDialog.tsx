@@ -10,6 +10,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import type { Workflow } from '@shared/types/messages';
 import type { McpNode } from '@shared/types/workflow-definition';
 import { ExternalLink, Send } from 'lucide-react';
+import { useTranslation } from '../../i18n/i18n-context';
 import { CodeBlock } from '../common/CodeBlock';
 import { SelectTagInput } from '../common/SelectTagInput';
 import type React from 'react';
@@ -18,8 +19,11 @@ import {
   checkAnthropicApiKey,
   clearAnthropicApiKey,
   executeUploadedSkill,
+  getSavedMcpServerUrls,
   getSkillVersionDetails,
   listCustomSkills,
+  lookupMcpRegistry,
+  saveMcpServerUrls,
   storeAnthropicApiKey,
   openExternalUrl,
   uploadToClaudeApi,
@@ -52,14 +56,17 @@ interface ChatMessage {
   isStreaming?: boolean;
   isError?: boolean;
   stopReason?: string;
+  usage?: { input_tokens: number; output_tokens: number };
 }
 
 function generateSampleCode(
   skillId: string,
   lang: SampleCodeLang,
   skillName?: string,
-  mcpServers?: Array<{ id: string; url: string }>
+  mcpServers?: Array<{ id: string; url: string }>,
+  model?: string
 ): string {
+  const modelId = model || 'claude-haiku-4-5-20251001';
   const promptContent = skillName ? `/${skillName}` : `/${skillId}`;
   const hasMcpServers = mcpServers && mcpServers.length > 0;
 
@@ -90,7 +97,7 @@ ${mcpServers.map((s) => `      {"type": "url", "url": "${s.url || ''}", "name": 
   -H "anthropic-beta: ${betaHeader}" \\
   -H "content-type: application/json" \\
   -d '{
-    "model": "claude-haiku-4-5-20251001",
+    "model": "${modelId}",
     "max_tokens": 4096,
     "container": {
       "skills": [{"type": "custom", "skill_id": "${skillId}", "version": "latest"}]
@@ -120,7 +127,7 @@ ${mcpServers.map((s) => `        {"type": "url", "url": "${s.url || ''}", "name"
 client = anthropic.Anthropic()  # uses ANTHROPIC_API_KEY env var
 
 response = client.messages.create(
-    model="claude-haiku-4-5-20251001",
+    model="${modelId}",
     max_tokens=4096,
     container={"skills": [{"type": "custom", "skill_id": "${skillId}", "version": "latest"}]}${mcpServersSection},
     tools=${toolsArray},
@@ -150,7 +157,7 @@ ${mcpServers.map((s) => `      { type: "url", url: "${s.url || ''}", name: "${s.
 const client = new Anthropic(); // uses ANTHROPIC_API_KEY env var
 
 const response = await client.messages.create({
-  model: "claude-haiku-4-5-20251001",
+  model: "${modelId}",
   max_tokens: 4096,
   container: { skills: [{ type: "custom", skill_id: "${skillId}", version: "latest" }] }${mcpServersSection},
   tools: ${toolsArray}${extraHeaders},
@@ -210,6 +217,27 @@ const McpServerUrlForm: React.FC<{
       }}
     >
       Claude API supports remote HTTP MCP servers only (type: url).
+      <div style={{ marginTop: '4px', paddingLeft: '8px' }}>
+        ・Don't know the URL?{' '}
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={() => openExternalUrl('https://www.pulsemcp.com/servers')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              openExternalUrl('https://www.pulsemcp.com/servers');
+            }
+          }}
+          style={{
+            cursor: 'pointer',
+            color: 'var(--vscode-textLink-foreground)',
+            textDecoration: 'underline',
+          }}
+          title="Search MCP server URLs on PulseMCP"
+        >
+          Search on PulseMCP <ExternalLink size={10} style={{ verticalAlign: 'middle' }} />
+        </span>
+      </div>
     </div>
     {serverIds.map((id) => {
       const owners = serverOwners?.[id];
@@ -406,6 +434,62 @@ const btnPrimary: React.CSSProperties = {
   fontWeight: 500,
 };
 
+const PANEL_MIN_WIDTH = 180;
+const PANEL_MAX_WIDTH = 400;
+const PANEL_DEFAULT_WIDTH = 240;
+
+const ResizeDivider: React.FC<{
+  onResize: (deltaX: number) => void;
+}> = ({ onResize }) => {
+  const [dragging, setDragging] = useState(false);
+
+  useEffect(() => {
+    if (!dragging) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      onResize(e.movementX);
+    };
+    const handleMouseUp = () => {
+      setDragging(false);
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    };
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'col-resize';
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    };
+  }, [dragging, onResize]);
+
+  return (
+    <div
+      onMouseDown={() => setDragging(true)}
+      style={{
+        width: '5px',
+        cursor: 'col-resize',
+        flexShrink: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        style={{
+          width: '1px',
+          height: '40px',
+          backgroundColor: dragging ? 'var(--vscode-focusBorder)' : 'var(--vscode-panel-border)',
+          borderRadius: '1px',
+          transition: dragging ? 'none' : 'background-color 0.15s',
+        }}
+      />
+    </div>
+  );
+};
+
 interface ClaudeApiUploadDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -415,6 +499,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const [state, setState] = useState<DialogState>('check-api-key');
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
@@ -456,6 +541,12 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
   // Skill version details state (for list-selected skills)
   const [skillMcpServerIds, setSkillMcpServerIds] = useState<string[] | null>(null);
   const [isLoadingSkillDetails, setIsLoadingSkillDetails] = useState(false);
+
+  // Left panel width for resizable splitter
+  const [leftPanelWidth, setLeftPanelWidth] = useState(PANEL_DEFAULT_WIDTH);
+  const handlePanelResize = useCallback((deltaX: number) => {
+    setLeftPanelWidth((w) => Math.min(PANEL_MAX_WIDTH, Math.max(PANEL_MIN_WIDTH, w + deltaX)));
+  }, []);
 
   // Auto-scroll ref for chat
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -509,7 +600,6 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
     setAdditionalSkillIds([]);
     setAdditionalSkillsOpen(false);
     setAdditionalSkillMcpMap({});
-    setMcpServerUrls({});
     setSkillMcpServerIds(null);
     setIsLoadingSkillDetails(false);
   }, []);
@@ -554,6 +644,61 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [chatMessages]);
+
+  // Restore saved MCP server URLs and lookup missing ones from registry
+  const effectiveMcpServerIdsKey = effectiveMcpServerIds.join(',');
+  useEffect(() => {
+    const serverIds = effectiveMcpServerIdsKey.split(',').filter(Boolean);
+    if (state !== 'sample-code' || serverIds.length === 0) return;
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const saved = await getSavedMcpServerUrls();
+        if (cancelled) return;
+
+        setMcpServerUrls((prev) => {
+          const merged = { ...prev };
+          const missingIds: string[] = [];
+          for (const id of serverIds) {
+            if (id in prev) continue;
+            if (saved.urls[id]) {
+              merged[id] = saved.urls[id];
+            } else {
+              missingIds.push(id);
+            }
+          }
+
+          if (missingIds.length > 0 && !cancelled) {
+            lookupMcpRegistry(missingIds)
+              .then((registryResult) => {
+                if (cancelled) return;
+                if (Object.keys(registryResult.urls).length > 0) {
+                  setMcpServerUrls((p) => {
+                    const m = { ...p };
+                    for (const [rid, rurl] of Object.entries(registryResult.urls)) {
+                      if (!(rid in p)) m[rid] = rurl;
+                    }
+                    return m;
+                  });
+                  saveMcpServerUrls(registryResult.urls).catch(() => {});
+                }
+              })
+              .catch(() => {});
+          }
+
+          return merged;
+        });
+      } catch {
+        // getSavedMcpServerUrls failed — not critical
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [state, effectiveMcpServerIdsKey]);
 
   const handleSaveApiKey = async () => {
     if (!apiKeyInput.startsWith('sk-ant-')) {
@@ -611,12 +756,17 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
     latestVersion?: string
   ) => {
     const targetId = skillId || selectedSkillId || result?.skillId;
+    const skillChanged = targetId && targetId !== selectedSkillId;
     if (targetId) {
       setSelectedSkillId(targetId);
     }
     const title = displayTitle || selectedSkillDisplayTitle;
     if (displayTitle) {
       setSelectedSkillDisplayTitle(displayTitle);
+    }
+    if (skillChanged) {
+      setChatMessages([]);
+      setActiveContainerId(null);
     }
     setChatInput(title ? `/${title}` : 'Please execute the workflow.');
     setState('sample-code');
@@ -665,6 +815,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
     }
     const title = displayTitle || selectedSkillDisplayTitle;
     setChatMessages([]);
+    setActiveContainerId(null);
     setChatInput(title ? `/${title}` : 'Please execute the workflow.');
     setIsExecuting(false);
     setState('sample-code');
@@ -724,9 +875,25 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
     [skills, additionalSkillMcpMap]
   );
 
+  const totalUsage = useMemo(() => {
+    let lastInput = 0;
+    let totalOutput = 0;
+    for (const msg of chatMessages) {
+      if (msg.usage) {
+        lastInput = msg.usage.input_tokens;
+        totalOutput += msg.usage.output_tokens;
+      }
+    }
+    return lastInput + totalOutput > 0
+      ? { input_tokens: lastInput, output_tokens: totalOutput }
+      : null;
+  }, [chatMessages]);
+
   const handleNewConversation = () => {
     setChatMessages([]);
     setActiveContainerId(null);
+    const title = selectedSkillDisplayTitle;
+    setChatInput(title ? `/${title}` : 'Please execute the workflow.');
   };
 
   const handleSendMessage = async () => {
@@ -772,6 +939,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
           content: execResult.responseText,
           isStreaming: false,
           stopReason: execResult.stopReason,
+          usage: execResult.usage,
         };
         return updated;
       });
@@ -815,13 +983,6 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
     return 'Claude API';
   };
 
-  const getSubtitle = (): string | null => {
-    if (state === 'skill-list' || state === 'skill-list-loading') return 'Agent Skills';
-    if (state === 'confirm-upload' || state === 'uploading') return 'Agent Skills';
-    if (state === 'success' || state === 'error') return 'Agent Skills';
-    return null;
-  };
-
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <Dialog.Portal>
@@ -844,7 +1005,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
               padding: '24px',
               minWidth: state === 'sample-code' ? '800px' : '540px',
               maxWidth: state === 'sample-code' ? '960px' : '720px',
-              maxHeight: '80vh',
+              maxHeight: '90vh',
               transition: 'min-width 0.2s, max-width 0.2s',
               display: 'flex',
               flexDirection: 'column',
@@ -863,43 +1024,6 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
             >
               {getTitle()}
             </Dialog.Title>
-            {getSubtitle() && (
-              <div
-                style={{
-                  fontSize: '12px',
-                  color: 'var(--vscode-descriptionForeground)',
-                  marginTop: '-10px',
-                  marginBottom: '16px',
-                  flexShrink: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                }}
-              >
-                {getSubtitle()}
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onClick={() =>
-                    openExternalUrl('https://platform.claude.com/workspaces/default/skills')
-                  }
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      openExternalUrl('https://platform.claude.com/workspaces/default/skills');
-                    }
-                  }}
-                  style={{
-                    display: 'inline-flex',
-                    cursor: 'pointer',
-                    color: 'var(--vscode-textLink-foreground)',
-                  }}
-                  title="Open Skills Dashboard"
-                >
-                  <ExternalLink size={11} />
-                </span>
-              </div>
-            )}
-
             <div style={{ overflowY: 'auto', minHeight: 0, flex: 1 }}>
               {/* Loading state */}
               {state === 'check-api-key' && (
@@ -1021,6 +1145,63 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
               {/* Skill List */}
               {state === 'skill-list' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      color: 'var(--vscode-descriptionForeground)',
+                      lineHeight: '1.5',
+                      whiteSpace: 'pre-line',
+                      padding: '8px 12px',
+                      backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
+                      border: '1px solid var(--vscode-panel-border)',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    {t('claudeApi.description')}
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        color: 'var(--vscode-foreground)',
+                      }}
+                    >
+                      Uploaded Skills
+                    </div>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={() =>
+                        openExternalUrl('https://platform.claude.com/workspaces/default/skills')
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          openExternalUrl('https://platform.claude.com/workspaces/default/skills');
+                        }
+                      }}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        cursor: 'pointer',
+                        color: 'var(--vscode-textLink-foreground)',
+                        fontSize: '11px',
+                      }}
+                      title="Open in Claude Platform"
+                    >
+                      platform.claude.com
+                      <ExternalLink size={11} />
+                    </span>
+                  </div>
+
                   {skillListError && (
                     <div
                       style={{
@@ -1388,11 +1569,11 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
 
                   {/* Code Tab */}
                   {sampleCodeTab === 'code' && (
-                    <div style={{ display: 'flex', gap: '12px', minHeight: '300px' }}>
+                    <div style={{ display: 'flex', minHeight: '300px' }}>
                       {/* Left: Language & MCP settings */}
                       <div
                         style={{
-                          width: '240px',
+                          width: `${leftPanelWidth}px`,
                           flexShrink: 0,
                           display: 'flex',
                           flexDirection: 'column',
@@ -1401,6 +1582,49 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                           maxHeight: '55vh',
                         }}
                       >
+                        {/* Model selector */}
+                        <div
+                          style={{
+                            backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
+                            border: '1px solid var(--vscode-panel-border)',
+                            borderRadius: '4px',
+                            padding: '8px 10px',
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: '11px',
+                              fontWeight: 500,
+                              color: 'var(--vscode-foreground)',
+                              marginBottom: '6px',
+                            }}
+                          >
+                            Model
+                          </div>
+                          <select
+                            value={testModel}
+                            onChange={(e) => setTestModel(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '4px 8px',
+                              backgroundColor: 'var(--vscode-input-background)',
+                              color: 'var(--vscode-input-foreground)',
+                              border: '1px solid var(--vscode-input-border)',
+                              borderRadius: '2px',
+                              fontSize: '11px',
+                              outline: 'none',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <option value="claude-haiku-4-5-20251001">Haiku 4.5</option>
+                            <option value="claude-sonnet-4-5-20250929">Sonnet 4.5</option>
+                            <option value="claude-sonnet-4-6">Sonnet 4.6</option>
+                            <option value="claude-opus-4-5-20251101">Opus 4.5</option>
+                            <option value="claude-opus-4-6">Opus 4.6</option>
+                          </select>
+                        </div>
+
+                        {/* Language selector */}
                         <div
                           style={{
                             backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
@@ -1455,12 +1679,17 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                           <McpServerUrlForm
                             serverIds={effectiveMcpServerIds}
                             urls={mcpServerUrls}
-                            onUrlChange={(id, url) =>
-                              setMcpServerUrls((prev) => ({ ...prev, [id]: url }))
-                            }
+                            onUrlChange={(id, url) => {
+                              setMcpServerUrls((prev) => ({ ...prev, [id]: url }));
+                              if (url.trim()) {
+                                saveMcpServerUrls({ [id]: url }).catch(() => {});
+                              }
+                            }}
                           />
                         )}
                       </div>
+
+                      <ResizeDivider onResize={handlePanelResize} />
 
                       {/* Right: Code preview */}
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -1473,7 +1702,8 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                   targetId,
                                   sampleCodeLang,
                                   undefined,
-                                  mcpServersForCode
+                                  mcpServersForCode,
+                                  testModel
                                 )
                               );
                             }
@@ -1488,7 +1718,8 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                             selectedSkillId || result?.skillId || '',
                             sampleCodeLang,
                             selectedSkillDisplayTitle || undefined,
-                            mcpServersForCode
+                            mcpServersForCode,
+                            testModel
                           )}
                         </CodeBlock>
                       </div>
@@ -1497,11 +1728,11 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
 
                   {/* Test Tab */}
                   {sampleCodeTab === 'test' && (
-                    <div style={{ display: 'flex', gap: '12px', minHeight: '300px' }}>
+                    <div style={{ display: 'flex', minHeight: '300px' }}>
                       {/* Left: Settings panel */}
                       <div
                         style={{
-                          width: '240px',
+                          width: `${leftPanelWidth}px`,
                           flexShrink: 0,
                           display: 'flex',
                           flexDirection: 'column',
@@ -1510,6 +1741,50 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                           maxHeight: '55vh',
                         }}
                       >
+                        {/* Model selector */}
+                        <div
+                          style={{
+                            backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
+                            border: '1px solid var(--vscode-panel-border)',
+                            borderRadius: '4px',
+                            padding: '8px 10px',
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: '11px',
+                              fontWeight: 500,
+                              color: 'var(--vscode-foreground)',
+                              marginBottom: '6px',
+                            }}
+                          >
+                            Model
+                          </div>
+                          <select
+                            value={testModel}
+                            onChange={(e) => setTestModel(e.target.value)}
+                            disabled={isExecuting}
+                            style={{
+                              width: '100%',
+                              padding: '4px 8px',
+                              backgroundColor: 'var(--vscode-input-background)',
+                              color: 'var(--vscode-input-foreground)',
+                              border: '1px solid var(--vscode-input-border)',
+                              borderRadius: '2px',
+                              fontSize: '11px',
+                              outline: 'none',
+                              cursor: isExecuting ? 'default' : 'pointer',
+                              opacity: isExecuting ? 0.6 : 1,
+                            }}
+                          >
+                            <option value="claude-haiku-4-5-20251001">Haiku 4.5</option>
+                            <option value="claude-sonnet-4-5-20250929">Sonnet 4.5</option>
+                            <option value="claude-sonnet-4-6">Sonnet 4.6</option>
+                            <option value="claude-opus-4-5-20251101">Opus 4.5</option>
+                            <option value="claude-opus-4-6">Opus 4.6</option>
+                          </select>
+                        </div>
+
                         {/* Additional Skills (collapsible) */}
                         <div
                           style={{
@@ -1573,7 +1848,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                   .map((s) => ({ value: s.id, label: s.displayTitle }))}
                                 selectedValues={additionalSkillIds}
                                 onChange={handleAdditionalSkillsChange}
-                                placeholder="Select skills..."
+                                placeholder="Select uploaded skills..."
                               />
                             </div>
                           )}
@@ -1590,11 +1865,16 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                 (sid) => !next[sid]?.trim()
                               );
                               if (!stillMissing) setShowMcpValidation(false);
+                              if (url.trim()) {
+                                saveMcpServerUrls({ [id]: url }).catch(() => {});
+                              }
                             }}
                             serverOwners={mcpServerOwners}
                           />
                         )}
                       </div>
+
+                      <ResizeDivider onResize={handlePanelResize} />
 
                       {/* Right: Chat panel */}
                       <div
@@ -1604,34 +1884,16 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                           flexDirection: 'column',
                           gap: '8px',
                           minWidth: 0,
+                          maxWidth: '100%',
+                          maxHeight: '55vh',
+                          overflow: 'hidden',
                         }}
                       >
-                        {chatMessages.length > 0 && !isExecuting && (
-                          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <button
-                              type="button"
-                              onClick={handleNewConversation}
-                              style={{
-                                padding: '2px 8px',
-                                fontSize: '11px',
-                                color: 'var(--vscode-descriptionForeground)',
-                                background: 'transparent',
-                                border: '1px solid var(--vscode-panel-border)',
-                                borderRadius: '3px',
-                                cursor: 'pointer',
-                              }}
-                            >
-                              New conversation
-                            </button>
-                          </div>
-                        )}
-
                         {/* Chat messages area */}
                         <div
                           style={{
                             flex: 1,
-                            minHeight: '120px',
-                            maxHeight: '55vh',
+                            minHeight: 0,
                             overflowY: 'auto',
                             display: 'flex',
                             flexDirection: 'column',
@@ -1703,6 +1965,13 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                     }}
                                   >
                                     stop_reason: {msg.stopReason}
+                                    {msg.usage && (
+                                      <>
+                                        {' · '}
+                                        {msg.usage.input_tokens.toLocaleString()} in /{' '}
+                                        {msg.usage.output_tokens.toLocaleString()} out
+                                      </>
+                                    )}
                                   </div>
                                 )}
                               </div>
@@ -1730,9 +1999,15 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                         )}
 
                         {/* Input area */}
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
-                          <input
-                            type="text"
+                        <div
+                          style={{
+                            border: '1px solid var(--vscode-input-border)',
+                            borderRadius: '4px',
+                            backgroundColor: 'var(--vscode-input-background)',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <textarea
                             value={chatInput}
                             onChange={(e) => setChatInput(e.target.value)}
                             onKeyDown={(e) => {
@@ -1746,51 +2021,108 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                               }
                             }}
                             placeholder="Enter your test prompt..."
+                            rows={2}
                             style={{
-                              flex: 1,
+                              width: '100%',
                               padding: '8px 12px',
-                              backgroundColor: 'var(--vscode-input-background)',
-                              border: '1px solid var(--vscode-input-border)',
+                              backgroundColor: 'transparent',
                               color: 'var(--vscode-input-foreground)',
-                              borderRadius: '2px',
+                              border: 'none',
+                              outline: 'none',
                               fontSize: '12px',
+                              resize: 'none',
+                              fontFamily: 'inherit',
+                              boxSizing: 'border-box',
                             }}
                           />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (isMcpUrlsMissing) {
-                                setShowMcpValidation(true);
-                                return;
-                              }
-                              handleSendMessage();
-                            }}
-                            title={isMcpUrlsMissing ? 'Enter MCP server URLs first' : undefined}
+                          <div
                             style={{
                               display: 'flex',
                               alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '4px',
-                              padding: '8px 12px',
-                              backgroundColor:
-                                isExecuting || !chatInput.trim() || isMcpUrlsMissing
-                                  ? 'var(--vscode-button-secondaryBackground)'
-                                  : 'var(--vscode-button-background)',
-                              color:
-                                isExecuting || !chatInput.trim() || isMcpUrlsMissing
-                                  ? 'var(--vscode-button-secondaryForeground)'
-                                  : 'var(--vscode-button-foreground)',
-                              border: 'none',
-                              borderRadius: '2px',
-                              cursor:
-                                isExecuting || !chatInput.trim() || isMcpUrlsMissing
-                                  ? 'not-allowed'
-                                  : 'pointer',
-                              fontSize: '12px',
+                              justifyContent: 'space-between',
+                              padding: '4px 8px',
                             }}
                           >
-                            <Send size={14} />
-                          </button>
+                            <div>
+                              {chatMessages.length > 0 && !isExecuting && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (
+                                      window.confirm(
+                                        'Reset conversation? Chat history will be cleared.'
+                                      )
+                                    ) {
+                                      handleNewConversation();
+                                    }
+                                  }}
+                                  style={{
+                                    padding: '2px 8px',
+                                    backgroundColor: 'transparent',
+                                    color: 'var(--vscode-descriptionForeground)',
+                                    border: '1px solid var(--vscode-panel-border)',
+                                    borderRadius: '3px',
+                                    cursor: 'pointer',
+                                    fontSize: '11px',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                  title="Reset conversation"
+                                >
+                                  Reset Conversation
+                                </button>
+                              )}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              {totalUsage && (
+                                <span
+                                  style={{
+                                    fontSize: '10px',
+                                    color: 'var(--vscode-descriptionForeground)',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                  title={`Total: ${(totalUsage.input_tokens + totalUsage.output_tokens).toLocaleString()} tokens`}
+                                >
+                                  Total Usage: {totalUsage.input_tokens.toLocaleString()} in /{' '}
+                                  {totalUsage.output_tokens.toLocaleString()} out
+                                </span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (isMcpUrlsMissing) {
+                                    setShowMcpValidation(true);
+                                    return;
+                                  }
+                                  handleSendMessage();
+                                }}
+                                title={
+                                  isMcpUrlsMissing ? 'Enter MCP server URLs first' : 'Send message'
+                                }
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  padding: '4px 8px',
+                                  backgroundColor:
+                                    isExecuting || !chatInput.trim() || isMcpUrlsMissing
+                                      ? 'var(--vscode-button-secondaryBackground)'
+                                      : 'var(--vscode-button-background)',
+                                  color:
+                                    isExecuting || !chatInput.trim() || isMcpUrlsMissing
+                                      ? 'var(--vscode-button-secondaryForeground)'
+                                      : 'var(--vscode-button-foreground)',
+                                  border: 'none',
+                                  borderRadius: '3px',
+                                  cursor:
+                                    isExecuting || !chatInput.trim() || isMcpUrlsMissing
+                                      ? 'not-allowed'
+                                      : 'pointer',
+                                }}
+                              >
+                                <Send size={14} />
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>

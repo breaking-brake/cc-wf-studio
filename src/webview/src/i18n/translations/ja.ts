@@ -922,4 +922,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'description.panel.title': '説明',
   'description.panel.show': '説明パネルを表示',
   'description.panel.hide': '説明パネルを非表示',
+
+  // Claude API Upload Dialog
+  'claudeApi.description':
+    'ワークフローを Agent Skills として Claude API にアップロードし、Messages API 経由で実行できます。\nMCP サーバー、コード実行、他のスキルと組み合わせることで、ドキュメント処理・データ分析・カスタマーサポートなど、専門的な AI エージェントを API として公開できます。',
 };

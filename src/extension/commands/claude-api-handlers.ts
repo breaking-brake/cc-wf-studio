@@ -14,7 +14,11 @@ import type {
   GetMcpServerTypesResultPayload,
   GetSkillVersionDetailsFailedPayload,
   GetSkillVersionDetailsPayload,
+  GetSavedMcpServerUrlsResultPayload,
+  LookupMcpRegistryPayload,
+  LookupMcpRegistryResultPayload,
   ListCustomSkillsFailedPayload,
+  SaveMcpServerUrlsPayload,
   StoreAnthropicApiKeyPayload,
   UploadToClaudeApiFailedPayload,
   UploadToClaudeApiPayload,
@@ -248,6 +252,7 @@ export async function handleExecuteUploadedSkill(
       stopReason: result.stopReason,
       timestamp: new Date().toISOString(),
       containerId: result.containerId,
+      usage: result.usage,
     };
 
     webview.postMessage({
@@ -321,6 +326,81 @@ export async function handleGetSkillVersionDetails(
       payload: failedPayload,
     });
   }
+}
+
+const MCP_SERVER_URLS_KEY = 'mcp-server-urls';
+
+/**
+ * Handle Get Saved MCP Server URLs request
+ */
+export async function handleGetSavedMcpServerUrls(
+  context: vscode.ExtensionContext,
+  webview: vscode.Webview,
+  requestId?: string
+): Promise<void> {
+  const urls = context.globalState.get<Record<string, string>>(MCP_SERVER_URLS_KEY, {});
+  const resultPayload: GetSavedMcpServerUrlsResultPayload = { urls };
+  webview.postMessage({
+    type: 'GET_SAVED_MCP_SERVER_URLS_RESULT',
+    requestId,
+    payload: resultPayload,
+  });
+}
+
+/**
+ * Handle Save MCP Server URLs request
+ */
+export async function handleSaveMcpServerUrls(
+  context: vscode.ExtensionContext,
+  webview: vscode.Webview,
+  payload: SaveMcpServerUrlsPayload,
+  requestId?: string
+): Promise<void> {
+  const existing = context.globalState.get<Record<string, string>>(MCP_SERVER_URLS_KEY, {});
+  const merged = { ...existing, ...payload.urls };
+  await context.globalState.update(MCP_SERVER_URLS_KEY, merged);
+  webview.postMessage({
+    type: 'SAVE_MCP_SERVER_URLS_SUCCESS',
+    requestId,
+  });
+}
+
+/**
+ * Handle Lookup MCP Registry request
+ */
+export async function handleLookupMcpRegistry(
+  webview: vscode.Webview,
+  payload: LookupMcpRegistryPayload,
+  requestId?: string
+): Promise<void> {
+  const urls: Record<string, string> = {};
+
+  await Promise.all(
+    payload.serverIds.map(async (serverId) => {
+      try {
+        const response = await fetch(
+          `https://registry.modelcontextprotocol.io/v0/servers/${encodeURIComponent(serverId)}`
+        );
+        if (response.ok) {
+          const data = (await response.json()) as {
+            remotes?: Array<{ type?: string; url?: string }>;
+          };
+          if (data.remotes && data.remotes.length > 0 && data.remotes[0].url) {
+            urls[serverId] = data.remotes[0].url;
+          }
+        }
+      } catch {
+        // Server not found or network error — skip
+      }
+    })
+  );
+
+  const resultPayload: LookupMcpRegistryResultPayload = { urls };
+  webview.postMessage({
+    type: 'LOOKUP_MCP_REGISTRY_RESULT',
+    requestId,
+    payload: resultPayload,
+  });
 }
 
 /**

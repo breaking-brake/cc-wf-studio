@@ -842,4 +842,7 @@ export interface WebviewTranslationKeys {
   'description.panel.title': string;
   'description.panel.show': string;
   'description.panel.hide': string;
+
+  // Claude API Upload Dialog
+  'claudeApi.description': string;
 }

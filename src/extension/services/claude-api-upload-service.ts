@@ -338,7 +338,12 @@ export async function executeUploadedSkillStreaming(
   containerId?: string,
   mcpServers?: Array<{ id: string; url: string }>,
   additionalSkillIds?: string[]
-): Promise<{ responseText: string; stopReason: string; containerId?: string }> {
+): Promise<{
+  responseText: string;
+  stopReason: string;
+  containerId?: string;
+  usage?: { input_tokens: number; output_tokens: number };
+}> {
   const hasMcp = mcpServers && mcpServers.length > 0;
   const betaHeaders = [BETA_CODE_EXECUTION, BETA_SKILLS];
   if (hasMcp) betaHeaders.push(BETA_MCP_CLIENT);
@@ -402,6 +407,7 @@ export async function executeUploadedSkillStreaming(
   let fullText = '';
   let stopReason = 'end_turn';
   let returnedContainerId: string | undefined;
+  let usage: { input_tokens: number; output_tokens: number } | undefined;
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
@@ -422,20 +428,32 @@ export async function executeUploadedSkillStreaming(
       try {
         const event = JSON.parse(jsonStr) as {
           type: string;
-          message?: { container?: { id?: string } };
+          message?: {
+            container?: { id?: string };
+            usage?: { input_tokens: number; output_tokens: number };
+          };
           delta?: { type?: string; text?: string; stop_reason?: string };
+          usage?: { output_tokens: number };
         };
 
         if (event.type === 'message_start') {
           if (event.message?.container?.id) {
             returnedContainerId = event.message.container.id;
           }
+          if (event.message?.usage) {
+            usage = { ...event.message.usage, output_tokens: 0 };
+          }
         } else if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
           const text = event.delta.text || '';
           fullText += text;
           onChunk(text);
-        } else if (event.type === 'message_delta' && event.delta?.stop_reason) {
-          stopReason = event.delta.stop_reason;
+        } else if (event.type === 'message_delta') {
+          if (event.delta?.stop_reason) {
+            stopReason = event.delta.stop_reason;
+          }
+          if (event.usage?.output_tokens && usage) {
+            usage.output_tokens = event.usage.output_tokens;
+          }
         }
       } catch {
         // Skip malformed JSON lines
@@ -447,5 +465,6 @@ export async function executeUploadedSkillStreaming(
     responseText: fullText || '(No text response)',
     stopReason,
     containerId: returnedContainerId,
+    usage,
   };
 }

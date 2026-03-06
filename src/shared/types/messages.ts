@@ -758,6 +758,7 @@ export interface ExecuteUploadedSkillSuccessPayload {
   stopReason: string;
   timestamp: string; // ISO 8601
   containerId?: string;
+  usage?: { input_tokens: number; output_tokens: number };
 }
 
 /**
@@ -822,6 +823,34 @@ export interface GetMcpServerTypesPayload {
  */
 export interface GetMcpServerTypesResultPayload {
   serverTypes: Record<string, 'stdio' | 'http' | 'sse' | null>;
+}
+
+/**
+ * Get saved MCP server URLs result payload (Extension → Webview)
+ */
+export interface GetSavedMcpServerUrlsResultPayload {
+  urls: Record<string, string>;
+}
+
+/**
+ * Save MCP server URLs payload (Webview → Extension)
+ */
+export interface SaveMcpServerUrlsPayload {
+  urls: Record<string, string>;
+}
+
+/**
+ * Lookup MCP Registry payload (Webview → Extension)
+ */
+export interface LookupMcpRegistryPayload {
+  serverIds: string[];
+}
+
+/**
+ * Lookup MCP Registry result payload (Extension → Webview)
+ */
+export interface LookupMcpRegistryResultPayload {
+  urls: Record<string, string>;
 }
 
 /**
@@ -982,6 +1011,9 @@ export type ExtensionMessage =
   | Message<void, 'STORE_ANTHROPIC_API_KEY_SUCCESS'>
   | Message<void, 'CLEAR_ANTHROPIC_API_KEY_SUCCESS'>
   | Message<GetMcpServerTypesResultPayload, 'GET_MCP_SERVER_TYPES_RESULT'>
+  | Message<GetSavedMcpServerUrlsResultPayload, 'GET_SAVED_MCP_SERVER_URLS_RESULT'>
+  | Message<void, 'SAVE_MCP_SERVER_URLS_SUCCESS'>
+  | Message<LookupMcpRegistryResultPayload, 'LOOKUP_MCP_REGISTRY_RESULT'>
   | Message<GetSkillVersionDetailsSuccessPayload, 'GET_SKILL_VERSION_DETAILS_SUCCESS'>
   | Message<GetSkillVersionDetailsFailedPayload, 'GET_SKILL_VERSION_DETAILS_FAILED'>;
 
@@ -2056,6 +2088,9 @@ export type WebviewMessage =
   | Message<void, 'CLEAR_ANTHROPIC_API_KEY'>
   | Message<void, 'LIST_CUSTOM_SKILLS'>
   | Message<GetMcpServerTypesPayload, 'GET_MCP_SERVER_TYPES'>
+  | Message<void, 'GET_SAVED_MCP_SERVER_URLS'>
+  | Message<SaveMcpServerUrlsPayload, 'SAVE_MCP_SERVER_URLS'>
+  | Message<LookupMcpRegistryPayload, 'LOOKUP_MCP_REGISTRY'>
   | Message<GetSkillVersionDetailsPayload, 'GET_SKILL_VERSION_DETAILS'>;
 
 // ============================================================================

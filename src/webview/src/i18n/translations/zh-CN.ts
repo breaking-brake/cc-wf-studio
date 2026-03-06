@@ -886,4 +886,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'description.panel.title': '描述',
   'description.panel.show': '显示描述面板',
   'description.panel.hide': '隐藏描述面板',
+
+  // Claude API Upload Dialog
+  'claudeApi.description':
+    '将工作流作为 Agent Skills 上传到 Claude API，并通过 Messages API 运行。\n结合 MCP 服务器、代码执行和其他技能，您可以将专业 AI 代理作为 API 发布，用于文档处理、数据分析、客户支持等场景。',
 };

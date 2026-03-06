@@ -929,4 +929,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'description.panel.title': 'Description',
   'description.panel.show': 'Show description panel',
   'description.panel.hide': 'Hide description panel',
+
+  // Claude API Upload Dialog
+  'claudeApi.description':
+    'Upload workflows as Agent Skills to Claude API and run them via the Messages API.\nCombined with MCP servers, code execution, and other skills, you can publish specialized AI agents as APIs for document processing, data analysis, customer support, and more.',
 };

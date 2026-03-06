@@ -29,8 +29,10 @@ import type {
   ExportWorkflowPayload,
   ExtensionMessage,
   GetMcpServerTypesResultPayload,
+  GetSavedMcpServerUrlsResultPayload,
   GetSkillVersionDetailsSuccessPayload,
   ListCustomSkillsSuccessPayload,
+  LookupMcpRegistryResultPayload,
   OpenInEditorPayload,
   RunAsSlashCommandPayload,
   RunForAntigravityPayload,
@@ -1376,6 +1378,84 @@ export function getMcpServerTypes(serverIds: string[]): Promise<GetMcpServerType
     };
     window.addEventListener('message', handler);
     vscode.postMessage({ type: 'GET_MCP_SERVER_TYPES', requestId, payload: { serverIds } });
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 10000);
+  });
+}
+
+/**
+ * Get saved MCP server URLs from globalState
+ */
+export function getSavedMcpServerUrls(): Promise<GetSavedMcpServerUrlsResultPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+        if (message.type === 'GET_SAVED_MCP_SERVER_URLS_RESULT') {
+          resolve(message.payload as GetSavedMcpServerUrlsResultPayload);
+        } else {
+          reject(new Error('Failed to get saved MCP server URLs'));
+        }
+      }
+    };
+    window.addEventListener('message', handler);
+    vscode.postMessage({ type: 'GET_SAVED_MCP_SERVER_URLS', requestId });
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 10000);
+  });
+}
+
+/**
+ * Save MCP server URLs to globalState
+ */
+export function saveMcpServerUrls(urls: Record<string, string>): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+        if (message.type === 'SAVE_MCP_SERVER_URLS_SUCCESS') {
+          resolve();
+        } else {
+          reject(new Error('Failed to save MCP server URLs'));
+        }
+      }
+    };
+    window.addEventListener('message', handler);
+    vscode.postMessage({ type: 'SAVE_MCP_SERVER_URLS', requestId, payload: { urls } });
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 10000);
+  });
+}
+
+/**
+ * Lookup MCP server URLs from the official MCP Registry
+ */
+export function lookupMcpRegistry(serverIds: string[]): Promise<LookupMcpRegistryResultPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+        if (message.type === 'LOOKUP_MCP_REGISTRY_RESULT') {
+          resolve(message.payload as LookupMcpRegistryResultPayload);
+        } else {
+          reject(new Error('Failed to lookup MCP registry'));
+        }
+      }
+    };
+    window.addEventListener('message', handler);
+    vscode.postMessage({ type: 'LOOKUP_MCP_REGISTRY', requestId, payload: { serverIds } });
     setTimeout(() => {
       window.removeEventListener('message', handler);
       reject(new Error('Request timed out'));
