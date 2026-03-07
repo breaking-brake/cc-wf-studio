@@ -336,7 +336,7 @@ export async function executeUploadedSkillStreaming(
   onChunk: (chunk: string) => void,
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>,
   containerId?: string,
-  mcpServers?: Array<{ id: string; url: string }>,
+  mcpServers?: Array<{ id: string; url: string; authorization_token?: string }>,
   additionalSkillIds?: string[]
 ): Promise<{
   responseText: string;
@@ -380,6 +380,7 @@ export async function executeUploadedSkillStreaming(
       type: 'url',
       url: s.url,
       name: s.id,
+      ...(s.authorization_token ? { authorization_token: s.authorization_token } : {}),
     }));
   }
 

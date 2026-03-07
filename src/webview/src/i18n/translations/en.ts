@@ -387,7 +387,11 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'terms.malware': 'Malware and ransomware creation',
   'terms.personalDataTheft': 'Unauthorized collection or misuse of personal information',
   'terms.otherIllegalActs': 'Other illegal activities or actions causing harm to others',
-  'terms.liability': 'Users are solely responsible for any violations.',
+  'terms.apiKeyLiabilityHeading': 'API Usage (Added)',
+  'terms.apiKeyLiability':
+    'When using the Claude API integration, users are solely responsible for the management of their API keys and any costs incurred through API usage.',
+  'terms.liability':
+    'Users are solely responsible for any violations or damages arising from use of this tool.',
   'terms.agree': 'I agree to the above',
   'terms.agreeButton': 'Agree and Start',
   'terms.cancelButton': 'Cancel',

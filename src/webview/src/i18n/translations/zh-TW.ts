@@ -372,7 +372,10 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'terms.malware': '惡意軟體和勒索軟體的創建',
   'terms.personalDataTheft': '未經授權收集或濫用個人資訊',
   'terms.otherIllegalActs': '其他非法活動或對他人造成傷害的行為',
-  'terms.liability': '違規時用戶將承擔全部責任。',
+  'terms.apiKeyLiabilityHeading': 'API 使用須知（新增）',
+  'terms.apiKeyLiability':
+    '使用 Claude API 整合功能時，API 金鑰的管理以及 API 使用產生的費用由使用者自行承擔。',
+  'terms.liability': '因使用本工具而產生的任何違規行為或損害，使用者將承擔全部責任。',
   'terms.agree': '我同意以上內容',
   'terms.agreeButton': '同意並開始',
   'terms.cancelButton': '取消',

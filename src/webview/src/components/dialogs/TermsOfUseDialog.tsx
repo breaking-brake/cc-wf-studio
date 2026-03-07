@@ -93,6 +93,12 @@ export const TermsOfUseDialog: React.FC<TermsOfUseDialogProps> = ({
                   <li style={{ marginBottom: '4px' }}>{t('terms.otherIllegalActs')}</li>
                 </ul>
 
+                {/* API Key Liability */}
+                <p style={{ marginBottom: '8px', fontWeight: 500 }}>
+                  {t('terms.apiKeyLiabilityHeading')}
+                </p>
+                <p style={{ marginBottom: '16px' }}>{t('terms.apiKeyLiability')}</p>
+
                 {/* Liability */}
                 <p style={{ marginBottom: '16px', fontWeight: 500 }}>{t('terms.liability')}</p>
               </div>

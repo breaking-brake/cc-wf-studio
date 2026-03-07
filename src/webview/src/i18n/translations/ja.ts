@@ -386,7 +386,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'terms.malware': 'マルウェア・ランサムウェアの作成',
   'terms.personalDataTheft': '個人情報の不正取得・悪用',
   'terms.otherIllegalActs': 'その他の違法行為や他者への損害行為',
-  'terms.liability': '違反した場合、利用者が全責任を負います。',
+  'terms.apiKeyLiabilityHeading': 'API 利用について（追加）',
+  'terms.apiKeyLiability':
+    'Claude API 連携機能を利用する場合、API キーの管理および API 利用により発生する費用は利用者の自己責任となります。',
+  'terms.liability': '本ツールの利用により生じた違反行為や損害について、利用者が全責任を負います。',
   'terms.agree': '上記に同意します',
   'terms.agreeButton': '同意して開始',
   'terms.cancelButton': 'キャンセル',

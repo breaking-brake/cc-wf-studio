@@ -1179,7 +1179,7 @@ export function executeUploadedSkill(
   onProgress?: (payload: { chunk: string; accumulatedText: string }) => void,
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>,
   containerId?: string,
-  mcpServers?: Array<{ id: string; url: string }>,
+  mcpServers?: Array<{ id: string; url: string; authorization_token?: string }>,
   additionalSkillIds?: string[]
 ): Promise<ExecuteUploadedSkillSuccessPayload> {
   return new Promise((resolve, reject) => {

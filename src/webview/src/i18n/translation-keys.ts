@@ -351,6 +351,8 @@ export interface WebviewTranslationKeys {
   'terms.malware': string;
   'terms.personalDataTheft': string;
   'terms.otherIllegalActs': string;
+  'terms.apiKeyLiabilityHeading': string;
+  'terms.apiKeyLiability': string;
   'terms.liability': string;
   'terms.agree': string;
   'terms.agreeButton': string;

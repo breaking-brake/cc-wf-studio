@@ -204,8 +204,10 @@ export function registerOpenEditorCommand(
         mcpManager.setWebview(currentPanel.webview);
       }
 
-      // Check if user has accepted terms of use
-      const hasAcceptedTerms = context.globalState.get<boolean>('hasAcceptedTerms', false);
+      // Check if user has accepted terms of use (version-based)
+      const CURRENT_TERMS_VERSION = 2;
+      const acceptedVersion = context.globalState.get<number>('acceptedTermsVersion', 0);
+      const hasAcceptedTerms = acceptedVersion >= CURRENT_TERMS_VERSION;
 
       // Store import params for use when WEBVIEW_READY is received
       // This replaces the unreliable setTimeout-based approach (fixes Issue #396)
@@ -777,8 +779,8 @@ export function registerOpenEditorCommand(
               break;
 
             case 'ACCEPT_TERMS':
-              // User accepted terms of use
-              await context.globalState.update('hasAcceptedTerms', true);
+              // User accepted terms of use (save current version)
+              await context.globalState.update('acceptedTermsVersion', CURRENT_TERMS_VERSION);
               // Update webview with new state
               webview.postMessage({
                 type: 'INITIAL_STATE',

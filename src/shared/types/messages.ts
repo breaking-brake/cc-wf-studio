@@ -746,7 +746,7 @@ export interface ExecuteUploadedSkillPayload {
   model: string;
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
   containerId?: string;
-  mcpServers?: Array<{ id: string; url: string }>;
+  mcpServers?: Array<{ id: string; url: string; authorization_token?: string }>;
   additionalSkillIds?: string[];
 }
 
