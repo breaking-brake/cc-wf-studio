@@ -1006,6 +1006,20 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
     missingDependentSkillNames.length > 0 ||
     requiredSkillIds.some((id) => !additionalSkillIds.includes(id));
 
+  // Debug logging for Additional Skills / lockedValues
+  console.log('[AdditionalSkills Debug]', {
+    state,
+    dependentSkillNames,
+    requiredSkillIds,
+    missingDependentSkillNames,
+    additionalSkillIds,
+    isRequiredSkillsMissing,
+    selectedSkillId,
+    resultSkillId: result?.skillId ?? null,
+    skillsList: skills.map((s) => ({ id: s.id, displayTitle: s.displayTitle })),
+    canvasDependentSkillNames,
+  });
+
   const reset = useCallback(() => {
     setState('check-api-key');
     setApiKeyInput('');
@@ -1192,6 +1206,24 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
         isNewVersion: uploadResult.isNewVersion,
       });
       setSelectedSkillId(uploadResult.skillId);
+
+      // Set dependent skill names from canvas so Additional Skills works
+      // without closing and reopening the dialog
+      if (canvasDependentSkillNames.length > 0) {
+        setDependentSkillNames(canvasDependentSkillNames);
+        // Auto-select matching uploaded skills as additional skills
+        const matchedIds = skills
+          .filter(
+            (s) =>
+              canvasDependentSkillNames.includes(s.displayTitle) && s.id !== uploadResult.skillId
+          )
+          .map((s) => s.id);
+        if (matchedIds.length > 0) {
+          setAdditionalSkillIds(matchedIds);
+          setAdditionalSkillsOpen(true);
+        }
+      }
+
       setState('success');
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed');
@@ -2016,7 +2048,8 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                       fontSize: '11px',
                                       backgroundColor: 'var(--vscode-button-secondaryBackground)',
                                       color: 'var(--vscode-button-secondaryForeground)',
-                                      border: 'none',
+                                      border:
+                                        '1px solid var(--vscode-button-border, var(--vscode-contrastBorder, transparent))',
                                       borderRadius: '2px',
                                       cursor: 'pointer',
                                     }}
@@ -2067,7 +2100,8 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                 fontSize: '11px',
                                 backgroundColor: 'var(--vscode-button-background)',
                                 color: 'var(--vscode-button-foreground)',
-                                border: 'none',
+                                border:
+                                  '1px solid var(--vscode-button-border, var(--vscode-contrastBorder, transparent))',
                                 borderRadius: '2px',
                                 cursor: Object.values(uploadingSkills).some(
                                   (s) => s === 'uploading'

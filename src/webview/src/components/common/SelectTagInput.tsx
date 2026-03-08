@@ -32,6 +32,13 @@ export function SelectTagInput({
   disabled = false,
   lockedValues = [],
 }: SelectTagInputProps) {
+  console.log('[SelectTagInput Debug]', {
+    selectedValues,
+    lockedValues,
+    optionsCount: options.length,
+    options: options.map((o) => ({ value: o.value, label: o.label })),
+  });
+
   const [inputValue, setInputValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
