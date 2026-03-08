@@ -7,7 +7,7 @@
  */
 
 import * as Popover from '@radix-ui/react-popover';
-import { Check, X } from 'lucide-react';
+import { Check, Lock, X } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
 
 interface SelectOption {
@@ -21,6 +21,7 @@ interface SelectTagInputProps {
   onChange: (values: string[]) => void;
   placeholder?: string;
   disabled?: boolean;
+  lockedValues?: string[];
 }
 
 export function SelectTagInput({
@@ -29,6 +30,7 @@ export function SelectTagInput({
   onChange,
   placeholder = 'Select...',
   disabled = false,
+  lockedValues = [],
 }: SelectTagInputProps) {
   const [inputValue, setInputValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -57,9 +59,10 @@ export function SelectTagInput({
     (value: string, e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
+      if (lockedValues.includes(value)) return;
       onChange(selectedValues.filter((v) => v !== value));
     },
-    [selectedValues, onChange]
+    [selectedValues, onChange, lockedValues]
   );
 
   const handleContainerClick = useCallback(() => {
@@ -92,7 +95,11 @@ export function SelectTagInput({
         setHighlightedIndex(0);
         inputRef.current?.blur();
       } else if (e.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
-        onChange(selectedValues.slice(0, -1));
+        // Find the last non-locked value to remove
+        const lastRemovable = [...selectedValues].reverse().find((v) => !lockedValues.includes(v));
+        if (lastRemovable) {
+          onChange(selectedValues.filter((v) => v !== lastRemovable));
+        }
       } else if (e.key === 'Tab' && filteredOptions.length > 0) {
         e.preventDefault();
         setIsOpen(true);
@@ -117,7 +124,16 @@ export function SelectTagInput({
         setHighlightedIndex(0);
       }
     },
-    [inputValue, selectedValues, onChange, filteredOptions, handleToggle, isOpen, highlightedIndex]
+    [
+      inputValue,
+      selectedValues,
+      onChange,
+      filteredOptions,
+      handleToggle,
+      isOpen,
+      highlightedIndex,
+      lockedValues,
+    ]
   );
 
   const getLabel = useCallback(
@@ -145,56 +161,66 @@ export function SelectTagInput({
             opacity: disabled ? 0.5 : 1,
           }}
         >
-          {selectedValues.map((value) => (
-            <span
-              key={value}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '2px',
-                padding: '1px 6px',
-                backgroundColor: 'var(--vscode-badge-background)',
-                color: 'var(--vscode-badge-foreground)',
-                borderRadius: '10px',
-                fontSize: '11px',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {getLabel(value)}
-              {!disabled && (
-                <button
-                  type="button"
-                  onClick={(e) => handleRemoveTag(value, e)}
-                  onPointerDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '0',
-                    marginLeft: '2px',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    color: 'var(--vscode-badge-foreground)',
-                    opacity: 0.7,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.opacity = '0.7';
-                  }}
-                  aria-label={`Remove ${getLabel(value)}`}
-                >
-                  <X size={12} />
-                </button>
-              )}
-            </span>
-          ))}
+          {selectedValues.map((value) => {
+            const isLocked = lockedValues.includes(value);
+            return (
+              <span
+                key={value}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '2px',
+                  padding: '1px 6px',
+                  backgroundColor: 'var(--vscode-badge-background)',
+                  color: 'var(--vscode-badge-foreground)',
+                  borderRadius: '10px',
+                  fontSize: '11px',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {getLabel(value)}
+                {!disabled && !isLocked && (
+                  <button
+                    type="button"
+                    onClick={(e) => handleRemoveTag(value, e)}
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '0',
+                      marginLeft: '2px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      borderRadius: '50%',
+                      cursor: 'pointer',
+                      color: 'var(--vscode-badge-foreground)',
+                      opacity: 0.7,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = '1';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = '0.7';
+                    }}
+                    aria-label={`Remove ${getLabel(value)}`}
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+                {isLocked && (
+                  <Lock
+                    size={10}
+                    style={{ marginLeft: '2px', opacity: 0.6 }}
+                    aria-label="Required"
+                  />
+                )}
+              </span>
+            );
+          })}
 
           {!disabled && (
             <input
