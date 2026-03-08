@@ -1182,7 +1182,8 @@ export function executeUploadedSkill(
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>,
   containerId?: string,
   mcpServers?: Array<{ id: string; url: string; authorization_token?: string }>,
-  additionalSkillIds?: string[]
+  additionalSkillIds?: string[],
+  system?: string
 ): Promise<ExecuteUploadedSkillSuccessPayload> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
@@ -1217,6 +1218,7 @@ export function executeUploadedSkill(
       containerId,
       mcpServers,
       additionalSkillIds,
+      system,
     };
     vscode.postMessage({ type: 'EXECUTE_UPLOADED_SKILL', requestId, payload });
 
@@ -1416,6 +1418,39 @@ export function getMcpServerTypes(serverIds: string[]): Promise<GetMcpServerType
       reject(new Error('Request timed out'));
     }, 10000);
   });
+}
+
+/**
+ * Get saved response language from global state
+ */
+export function getResponseLanguage(): Promise<string | null> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+        if (message.type === 'GET_RESPONSE_LANGUAGE_RESULT') {
+          resolve((message.payload as { language: string | null }).language);
+        } else {
+          reject(new Error('Failed to get response language'));
+        }
+      }
+    };
+    window.addEventListener('message', handler);
+    vscode.postMessage({ type: 'GET_RESPONSE_LANGUAGE', requestId });
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 10000);
+  });
+}
+
+/**
+ * Save response language to global state
+ */
+export function saveResponseLanguage(language: string): void {
+  vscode.postMessage({ type: 'SET_RESPONSE_LANGUAGE', payload: { language } });
 }
 
 /**

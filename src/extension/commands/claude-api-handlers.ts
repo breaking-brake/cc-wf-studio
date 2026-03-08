@@ -295,7 +295,8 @@ export async function handleExecuteUploadedSkill(
       payload.conversationHistory,
       payload.containerId,
       payload.mcpServers,
-      payload.additionalSkillIds
+      payload.additionalSkillIds,
+      payload.system
     );
 
     const successPayload: ExecuteUploadedSkillSuccessPayload = {

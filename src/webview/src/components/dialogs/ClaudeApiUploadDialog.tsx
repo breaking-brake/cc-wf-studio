@@ -28,6 +28,8 @@ import {
   saveMcpServerUrls,
   storeAnthropicApiKey,
   openExternalUrl,
+  getResponseLanguage,
+  saveResponseLanguage,
   uploadDependentSkill,
   uploadToClaudeApi,
 } from '../../services/vscode-bridge';
@@ -62,12 +64,22 @@ interface ChatMessage {
   usage?: { input_tokens: number; output_tokens: number };
 }
 
+function localeToLanguageName(locale: string): string {
+  try {
+    const name = new Intl.DisplayNames(['en'], { type: 'language' }).of(locale);
+    return name || locale;
+  } catch {
+    return locale;
+  }
+}
+
 function generateSampleCode(
   skillId: string,
   lang: SampleCodeLang,
   skillName?: string,
   mcpServers?: Array<{ id: string; url: string; authorization_token?: string }>,
-  model?: string
+  model?: string,
+  system?: string
 ): string {
   const modelId = model || 'claude-haiku-4-5-20251001';
   const promptContent = skillName ? `/${skillName}` : `/${skillId}`;
@@ -94,6 +106,11 @@ ${mcpServers.map((s) => `      {"type": "url", "url": "${s.url || ''}", "name": 
         ? 'code-execution-2025-08-25,skills-2025-10-02,mcp-client-2025-11-20'
         : 'code-execution-2025-08-25,skills-2025-10-02';
 
+      const systemSection = system
+        ? `,
+    "system": "${system.replace(/"/g, '\\"')}"`
+        : '';
+
       return `curl https://api.anthropic.com/v1/messages \\
   -H "x-api-key: $ANTHROPIC_API_KEY" \\
   -H "anthropic-version: 2023-06-01" \\
@@ -106,7 +123,7 @@ ${mcpServers.map((s) => `      {"type": "url", "url": "${s.url || ''}", "name": 
       "skills": [{"type": "custom", "skill_id": "${skillId}", "version": "latest"}]
     }${mcpServersSection},
     "tools": [${toolsArray.join(', ')}],
-    "messages": [{"role": "user", "content": "${promptContent}"}]
+    "messages": [{"role": "user", "content": "${promptContent}"}]${systemSection}
   }'`;
     }
 
@@ -125,6 +142,11 @@ ${mcpServers.map((s) => `        {"type": "url", "url": "${s.url || ''}", "name"
         ? ', extra_headers={"anthropic-beta": "code-execution-2025-08-25,skills-2025-10-02,mcp-client-2025-11-20"}'
         : '';
 
+      const systemParam = system
+        ? `,
+    system="${system.replace(/"/g, '\\"')}"`
+        : '';
+
       return `import anthropic
 
 client = anthropic.Anthropic()  # uses ANTHROPIC_API_KEY env var
@@ -134,7 +156,7 @@ response = client.messages.create(
     max_tokens=4096,
     container={"skills": [{"type": "custom", "skill_id": "${skillId}", "version": "latest"}]}${mcpServersSection},
     tools=${toolsArray},
-    messages=[{"role": "user", "content": "${promptContent}"}]${extraHeaders},
+    messages=[{"role": "user", "content": "${promptContent}"}]${systemParam}${extraHeaders},
 )
 print(response.content[0].text)`;
     }
@@ -155,13 +177,18 @@ ${mcpServers.map((s) => `      { type: "url", url: "${s.url || ''}", name: "${s.
   headers: { "anthropic-beta": "code-execution-2025-08-25,skills-2025-10-02,mcp-client-2025-11-20" }`
         : '';
 
+      const systemField = system
+        ? `
+  system: "${system.replace(/"/g, '\\"')}",`
+        : '';
+
       return `import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic(); // uses ANTHROPIC_API_KEY env var
 
 const response = await client.messages.create({
   model: "${modelId}",
-  max_tokens: 4096,
+  max_tokens: 4096,${systemField}
   container: { skills: [{ type: "custom", skill_id: "${skillId}", version: "latest" }] }${mcpServersSection},
   tools: ${toolsArray}${extraHeaders},
   messages: [{ role: "user", content: "${promptContent}" }],
@@ -875,7 +902,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [state, setState] = useState<DialogState>('check-api-key');
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
@@ -898,6 +925,9 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
   const [skillListError, setSkillListError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Response language state
+  const [responseLanguage, setResponseLanguage] = useState(localeToLanguageName(locale));
 
   // Test chat state
   const [testModel, setTestModel] = useState('claude-haiku-4-5-20251001');
@@ -1081,6 +1111,20 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
         setState('enter-api-key');
       });
   }, [isOpen, reset, loadSkillList]);
+
+  // Load saved response language when dialog opens
+  useEffect(() => {
+    if (!isOpen) return;
+    getResponseLanguage()
+      .then((saved) => {
+        if (saved) {
+          setResponseLanguage(saved);
+        }
+      })
+      .catch(() => {
+        // Use default locale-based value
+      });
+  }, [isOpen]);
 
   // Auto-scroll chat when new messages or streaming updates arrive
   // biome-ignore lint/correctness/useExhaustiveDependencies: chatMessages triggers scroll on each update
@@ -1445,6 +1489,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
         .map((m) => ({ role: m.role, content: m.content }));
 
       const activeMcpServers = mcpServersForCode.filter((s) => s.url.trim());
+      const systemPrompt = responseLanguage ? `Respond in ${responseLanguage}.` : undefined;
       const execResult = await executeUploadedSkill(
         targetSkillId,
         userMessage.content,
@@ -1460,7 +1505,8 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
         historyForApi,
         activeContainerId ?? undefined,
         activeMcpServers.length > 0 ? activeMcpServers : undefined,
-        additionalSkillIds.length > 0 ? additionalSkillIds : undefined
+        additionalSkillIds.length > 0 ? additionalSkillIds : undefined,
+        systemPrompt
       );
       setChatMessages((prev) => {
         const updated = [...prev];
@@ -1587,7 +1633,27 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                       }}
                     >
                       Enter your Anthropic API key to deploy and manage skills. The key will be
-                      stored securely in VS Code's secret storage.
+                      stored securely in VS Code's secret storage. You can create an API key{' '}
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => openExternalUrl('https://platform.claude.com/settings/keys')}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            openExternalUrl('https://platform.claude.com/settings/keys');
+                          }
+                        }}
+                        style={{
+                          cursor: 'pointer',
+                          color: 'var(--vscode-textLink-foreground)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '2px',
+                        }}
+                      >
+                        here <ExternalLink size={11} />
+                      </span>
+                      .
                     </Dialog.Description>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -2389,6 +2455,34 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                               <option value="claude-opus-4-5-20251101">Opus 4.5</option>
                               <option value="claude-opus-4-6">Opus 4.6</option>
                             </select>
+                            <div
+                              style={{
+                                fontSize: '11px',
+                                fontWeight: 500,
+                                color: 'var(--vscode-foreground)',
+                                marginTop: '8px',
+                                marginBottom: '4px',
+                              }}
+                            >
+                              Language
+                            </div>
+                            <input
+                              type="text"
+                              value={responseLanguage}
+                              onChange={(e) => setResponseLanguage(e.target.value)}
+                              onBlur={(e) => saveResponseLanguage(e.target.value)}
+                              placeholder="e.g. Japanese, English"
+                              style={{
+                                width: '100%',
+                                padding: '4px 8px',
+                                backgroundColor: 'var(--vscode-input-background)',
+                                color: 'var(--vscode-input-foreground)',
+                                border: '1px solid var(--vscode-input-border)',
+                                borderRadius: '2px',
+                                fontSize: '11px',
+                                boxSizing: 'border-box',
+                              }}
+                            />
                           </div>
 
                           {/* Additional Skills (Code tab) */}
@@ -2555,13 +2649,17 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                             onCopy={() => {
                               const targetId = selectedSkillId || result?.skillId;
                               if (targetId) {
+                                const systemPrompt = responseLanguage
+                                  ? `Respond in ${responseLanguage}.`
+                                  : undefined;
                                 navigator.clipboard.writeText(
                                   generateSampleCode(
                                     targetId,
                                     sampleCodeLang,
                                     undefined,
                                     mcpServersForCode,
-                                    testModel
+                                    testModel,
+                                    systemPrompt
                                   )
                                 );
                               }
@@ -2577,7 +2675,8 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                               sampleCodeLang,
                               selectedSkillDisplayTitle || undefined,
                               mcpServersForCode,
-                              testModel
+                              testModel,
+                              responseLanguage ? `Respond in ${responseLanguage}.` : undefined
                             )}
                           </CodeBlock>
 
@@ -2646,6 +2745,36 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                               <option value="claude-opus-4-5-20251101">Opus 4.5</option>
                               <option value="claude-opus-4-6">Opus 4.6</option>
                             </select>
+                            <div
+                              style={{
+                                fontSize: '11px',
+                                fontWeight: 500,
+                                color: 'var(--vscode-foreground)',
+                                marginTop: '8px',
+                                marginBottom: '4px',
+                              }}
+                            >
+                              Language
+                            </div>
+                            <input
+                              type="text"
+                              value={responseLanguage}
+                              onChange={(e) => setResponseLanguage(e.target.value)}
+                              onBlur={(e) => saveResponseLanguage(e.target.value)}
+                              disabled={isExecuting}
+                              placeholder="e.g. Japanese, English"
+                              style={{
+                                width: '100%',
+                                padding: '4px 8px',
+                                backgroundColor: 'var(--vscode-input-background)',
+                                color: 'var(--vscode-input-foreground)',
+                                border: '1px solid var(--vscode-input-border)',
+                                borderRadius: '2px',
+                                fontSize: '11px',
+                                boxSizing: 'border-box',
+                                opacity: isExecuting ? 0.6 : 1,
+                              }}
+                            />
                           </div>
 
                           {/* Additional Skills (collapsible) */}

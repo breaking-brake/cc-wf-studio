@@ -453,7 +453,8 @@ export async function executeUploadedSkillStreaming(
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>,
   containerId?: string,
   mcpServers?: Array<{ id: string; url: string; authorization_token?: string }>,
-  additionalSkillIds?: string[]
+  additionalSkillIds?: string[],
+  system?: string
 ): Promise<{
   responseText: string;
   stopReason: string;
@@ -491,6 +492,9 @@ export async function executeUploadedSkillStreaming(
     messages: [...(conversationHistory ?? []), { role: 'user', content: prompt }],
     tools,
   };
+  if (system) {
+    requestBody.system = system;
+  }
   if (hasMcp) {
     requestBody.mcp_servers = mcpServers.map((s) => ({
       type: 'url',

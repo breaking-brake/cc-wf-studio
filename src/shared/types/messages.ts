@@ -748,6 +748,7 @@ export interface ExecuteUploadedSkillPayload {
   containerId?: string;
   mcpServers?: Array<{ id: string; url: string; authorization_token?: string }>;
   additionalSkillIds?: string[];
+  system?: string;
 }
 
 /**
@@ -1062,6 +1063,7 @@ export type ExtensionMessage =
   | Message<void, 'STORE_ANTHROPIC_API_KEY_SUCCESS'>
   | Message<void, 'CLEAR_ANTHROPIC_API_KEY_SUCCESS'>
   | Message<GetMcpServerTypesResultPayload, 'GET_MCP_SERVER_TYPES_RESULT'>
+  | Message<{ language: string | null }, 'GET_RESPONSE_LANGUAGE_RESULT'>
   | Message<UploadDependentSkillSuccessPayload, 'UPLOAD_DEPENDENT_SKILL_SUCCESS'>
   | Message<UploadDependentSkillFailedPayload, 'UPLOAD_DEPENDENT_SKILL_FAILED'>
   | Message<GetSavedMcpServerUrlsResultPayload, 'GET_SAVED_MCP_SERVER_URLS_RESULT'>
@@ -2142,6 +2144,8 @@ export type WebviewMessage =
   | Message<void, 'LIST_CUSTOM_SKILLS'>
   | Message<DeleteCustomSkillPayload, 'DELETE_CUSTOM_SKILL'>
   | Message<GetMcpServerTypesPayload, 'GET_MCP_SERVER_TYPES'>
+  | Message<void, 'GET_RESPONSE_LANGUAGE'>
+  | Message<{ language: string }, 'SET_RESPONSE_LANGUAGE'>
   | Message<UploadDependentSkillPayload, 'UPLOAD_DEPENDENT_SKILL'>
   | Message<void, 'GET_SAVED_MCP_SERVER_URLS'>
   | Message<SaveMcpServerUrlsPayload, 'SAVE_MCP_SERVER_URLS'>

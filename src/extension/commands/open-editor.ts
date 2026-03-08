@@ -1225,6 +1225,30 @@ export function registerOpenEditorCommand(
               }
               break;
 
+            case 'GET_RESPONSE_LANGUAGE':
+              {
+                const savedLanguage = context.globalState.get<string>(
+                  'claude-api-response-language'
+                );
+                webview.postMessage({
+                  type: 'GET_RESPONSE_LANGUAGE_RESULT',
+                  requestId: message.requestId,
+                  payload: {
+                    language: savedLanguage || null,
+                  },
+                });
+              }
+              break;
+
+            case 'SET_RESPONSE_LANGUAGE':
+              if (message.payload?.language) {
+                await context.globalState.update(
+                  'claude-api-response-language',
+                  message.payload.language
+                );
+              }
+              break;
+
             case 'OPEN_IN_EDITOR':
               // Open text content in VSCode native editor
               if (message.payload) {
