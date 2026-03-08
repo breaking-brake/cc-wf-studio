@@ -5,7 +5,10 @@
  */
 
 import * as vscode from 'vscode';
+import * as path from 'node:path';
 import type {
+  DeleteCustomSkillFailedPayload,
+  DeleteCustomSkillPayload,
   ExecuteSkillProgressPayload,
   ExecuteUploadedSkillFailedPayload,
   ExecuteUploadedSkillPayload,
@@ -20,15 +23,20 @@ import type {
   ListCustomSkillsFailedPayload,
   SaveMcpServerUrlsPayload,
   StoreAnthropicApiKeyPayload,
+  UploadDependentSkillFailedPayload,
+  UploadDependentSkillPayload,
+  UploadDependentSkillSuccessPayload,
   UploadToClaudeApiFailedPayload,
   UploadToClaudeApiPayload,
   UploadToClaudeApiSuccessPayload,
 } from '../../shared/types/messages';
 import {
+  deleteCustomSkill,
   executeUploadedSkillStreaming,
   getSkillVersionDetails,
   listCustomSkills,
   parseSkillDescription,
+  uploadSkillFile,
   uploadWorkflow,
 } from '../services/claude-api-upload-service';
 import { getMcpServerConfig } from '../services/mcp-config-reader';
@@ -191,6 +199,49 @@ export async function handleListCustomSkills(
     };
     webview.postMessage({
       type: 'LIST_CUSTOM_SKILLS_FAILED',
+      requestId,
+      payload: failedPayload,
+    });
+  }
+}
+
+/**
+ * Handle Delete Custom Skill request
+ */
+export async function handleDeleteCustomSkill(
+  webview: vscode.Webview,
+  payload: DeleteCustomSkillPayload,
+  apiKeyManager: AnthropicApiKeyManager,
+  requestId?: string
+): Promise<void> {
+  try {
+    const apiKey = await apiKeyManager.getApiKey();
+    if (!apiKey) {
+      const failedPayload: DeleteCustomSkillFailedPayload = {
+        errorCode: 'API_KEY_NOT_SET',
+        errorMessage: 'Anthropic API key is not configured',
+      };
+      webview.postMessage({
+        type: 'DELETE_CUSTOM_SKILL_FAILED',
+        requestId,
+        payload: failedPayload,
+      });
+      return;
+    }
+
+    await deleteCustomSkill(apiKey, payload.skillId);
+    webview.postMessage({
+      type: 'DELETE_CUSTOM_SKILL_SUCCESS',
+      requestId,
+      payload: { skillId: payload.skillId },
+    });
+  } catch (error) {
+    const failedPayload: DeleteCustomSkillFailedPayload = {
+      errorCode: 'DELETE_FAILED',
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+    };
+    webview.postMessage({
+      type: 'DELETE_CUSTOM_SKILL_FAILED',
       requestId,
       payload: failedPayload,
     });
@@ -401,6 +452,68 @@ export async function handleLookupMcpRegistry(
     requestId,
     payload: resultPayload,
   });
+}
+
+/**
+ * Handle Upload Dependent Skill request
+ */
+export async function handleUploadDependentSkill(
+  webview: vscode.Webview,
+  payload: UploadDependentSkillPayload,
+  apiKeyManager: AnthropicApiKeyManager,
+  requestId?: string
+): Promise<void> {
+  try {
+    const apiKey = await apiKeyManager.getApiKey();
+    if (!apiKey) {
+      const failedPayload: UploadDependentSkillFailedPayload = {
+        skillName: payload.skillName,
+        errorCode: 'API_KEY_NOT_SET',
+        errorMessage: 'Anthropic API key is not configured',
+      };
+      webview.postMessage({
+        type: 'UPLOAD_DEPENDENT_SKILL_FAILED',
+        requestId,
+        payload: failedPayload,
+      });
+      return;
+    }
+
+    // Resolve relative paths against workspace root
+    let absolutePath = payload.skillPath;
+    if (!path.isAbsolute(absolutePath)) {
+      const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      if (workspacePath) {
+        absolutePath = path.join(workspacePath, absolutePath);
+      }
+    }
+
+    const result = await uploadSkillFile(apiKey, payload.skillName, absolutePath);
+
+    const successPayload: UploadDependentSkillSuccessPayload = {
+      skillName: payload.skillName,
+      skillId: result.skillId,
+      version: result.version,
+      isNewVersion: result.isNewVersion,
+    };
+
+    webview.postMessage({
+      type: 'UPLOAD_DEPENDENT_SKILL_SUCCESS',
+      requestId,
+      payload: successPayload,
+    });
+  } catch (error) {
+    const failedPayload: UploadDependentSkillFailedPayload = {
+      skillName: payload.skillName,
+      errorCode: 'UPLOAD_FAILED',
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+    };
+    webview.postMessage({
+      type: 'UPLOAD_DEPENDENT_SKILL_FAILED',
+      requestId,
+      payload: failedPayload,
+    });
+  }
 }
 
 /**

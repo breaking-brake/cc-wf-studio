@@ -8,6 +8,7 @@
 import type {
   AiEditingProvider,
   CheckAnthropicApiKeyResultPayload,
+  DeleteCustomSkillSuccessPayload,
   EditorContentUpdatedPayload,
   ExecuteSkillProgressPayload,
   ExecuteUploadedSkillPayload,
@@ -50,6 +51,7 @@ import type {
   RunForRooCodePayload,
   RunForRooCodeSuccessPayload,
   SaveWorkflowPayload,
+  UploadDependentSkillSuccessPayload,
   UploadToClaudeApiPayload,
   UploadToClaudeApiSuccessPayload,
   Workflow,
@@ -1259,6 +1261,37 @@ export function listCustomSkills(): Promise<ListCustomSkillsSuccessPayload> {
 }
 
 /**
+ * Delete a custom skill from Claude API
+ */
+export function deleteCustomSkill(skillId: string): Promise<DeleteCustomSkillSuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (message.type === 'DELETE_CUSTOM_SKILL_SUCCESS') {
+          resolve(message.payload as DeleteCustomSkillSuccessPayload);
+        } else if (message.type === 'DELETE_CUSTOM_SKILL_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to delete skill'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+    vscode.postMessage({ type: 'DELETE_CUSTOM_SKILL', requestId, payload: { skillId } });
+
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 10000);
+  });
+}
+
+/**
  * Store Anthropic API key in secure storage
  */
 export function storeAnthropicApiKey(apiKey: string): Promise<void> {
@@ -1382,6 +1415,39 @@ export function getMcpServerTypes(serverIds: string[]): Promise<GetMcpServerType
       window.removeEventListener('message', handler);
       reject(new Error('Request timed out'));
     }, 10000);
+  });
+}
+
+/**
+ * Upload a dependent skill file directly to Claude API
+ */
+export function uploadDependentSkill(
+  skillName: string,
+  skillPath: string
+): Promise<UploadDependentSkillSuccessPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+        if (message.type === 'UPLOAD_DEPENDENT_SKILL_SUCCESS') {
+          resolve(message.payload as UploadDependentSkillSuccessPayload);
+        } else if (message.type === 'UPLOAD_DEPENDENT_SKILL_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to upload dependent skill'));
+        }
+      }
+    };
+    window.addEventListener('message', handler);
+    vscode.postMessage({
+      type: 'UPLOAD_DEPENDENT_SKILL',
+      requestId,
+      payload: { skillName, skillPath },
+    });
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 60000);
   });
 }
 

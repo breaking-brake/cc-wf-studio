@@ -5,6 +5,7 @@
  * Generates SKILL.md, packages as ZIP, and uploads via /v1/skills endpoint.
  */
 
+import * as fs from 'node:fs';
 import { strToU8, zipSync } from 'fflate';
 import type { McpNode, SkillNode, Workflow } from '../../shared/types/workflow-definition';
 import { NodeType } from '../../shared/types/workflow-definition';
@@ -291,6 +292,75 @@ export async function listCustomSkills(apiKey: string): Promise<CustomSkillInfo[
 }
 
 /**
+ * List all versions of a custom skill from Claude API.
+ */
+export async function listSkillVersions(apiKey: string, skillId: string): Promise<string[]> {
+  const response = await fetch(`${API_BASE}/v1/skills/${skillId}/versions`, {
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': API_VERSION,
+      'anthropic-beta': BETA_SKILLS,
+    },
+  });
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Failed to list skill versions (${response.status}): ${errorBody}`);
+  }
+  const result = (await response.json()) as {
+    data: { version: string }[];
+  };
+  return result.data.map((v) => v.version);
+}
+
+/**
+ * Delete a specific version of a custom skill from Claude API.
+ */
+export async function deleteSkillVersion(
+  apiKey: string,
+  skillId: string,
+  version: string
+): Promise<void> {
+  const response = await fetch(`${API_BASE}/v1/skills/${skillId}/versions/${version}`, {
+    method: 'DELETE',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': API_VERSION,
+      'anthropic-beta': BETA_SKILLS,
+    },
+  });
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Failed to delete skill version (${response.status}): ${errorBody}`);
+  }
+}
+
+/**
+ * Delete a custom skill from Claude API.
+ * Automatically deletes all versions first, then deletes the skill itself.
+ */
+export async function deleteCustomSkill(apiKey: string, skillId: string): Promise<void> {
+  // First, delete all versions
+  const versions = await listSkillVersions(apiKey, skillId);
+  for (const version of versions) {
+    await deleteSkillVersion(apiKey, skillId, version);
+  }
+
+  // Then delete the skill itself
+  const response = await fetch(`${API_BASE}/v1/skills/${skillId}`, {
+    method: 'DELETE',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': API_VERSION,
+      'anthropic-beta': BETA_SKILLS,
+    },
+  });
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Failed to delete skill (${response.status}): ${errorBody}`);
+  }
+}
+
+/**
  * Get skill version details from Claude API.
  */
 export async function getSkillVersionDetails(
@@ -322,6 +392,52 @@ export async function getSkillVersionDetails(
     version: result.version,
     name: result.name,
     description: result.description || '',
+  };
+}
+
+/**
+ * Upload a SKILL.md file directly as a Custom Skill to Claude API.
+ * Used for uploading dependent skills referenced by workflows.
+ */
+export async function uploadSkillFile(
+  apiKey: string,
+  skillName: string,
+  skillFilePath: string
+): Promise<UploadResult> {
+  const content = await fs.promises.readFile(skillFilePath, 'utf-8');
+
+  // Ensure description has [cc-wf-studio] prefix
+  const contentWithPrefix = content.replace(
+    /^(---\n(?:.*\n)*?description:\s*)(["']?)(.+?)\2(\n---)/m,
+    (_match, before, _quote, desc, after) => {
+      const prefixed = desc.startsWith('[cc-wf-studio]') ? desc : `[cc-wf-studio] ${desc}`;
+      return `${before}"${prefixed.replace(/"/g, '\\"')}"${after}`;
+    }
+  );
+
+  const sanitizedName = sanitizeSkillName(skillName);
+
+  const zipData = zipSync({
+    [`${sanitizedName}/SKILL.md`]: strToU8(contentWithPrefix),
+  });
+
+  const displayTitle = skillName;
+  const existing = await findExistingSkill(apiKey, displayTitle);
+
+  if (existing) {
+    const newVersion = await createNewVersion(apiKey, existing.id, zipData);
+    return {
+      skillId: existing.id,
+      version: newVersion.version,
+      isNewVersion: true,
+    };
+  }
+
+  const result = await createNewSkill(apiKey, displayTitle, zipData);
+  return {
+    skillId: result.id,
+    version: result.latestVersion,
+    isNewVersion: false,
   };
 }
 

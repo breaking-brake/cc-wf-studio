@@ -47,10 +47,12 @@ import {
   handleGetMcpServerTypes,
   handleGetSavedMcpServerUrls,
   handleGetSkillVersionDetails,
+  handleDeleteCustomSkill,
   handleListCustomSkills,
   handleLookupMcpRegistry,
   handleSaveMcpServerUrls,
   handleStoreAnthropicApiKey,
+  handleUploadDependentSkill,
   handleUploadToClaudeApi,
 } from './claude-api-handlers';
 import { handleExportForCodexCli, handleRunForCodexCli } from './codex-handlers';
@@ -1629,8 +1631,26 @@ export function registerOpenEditorCommand(
               await handleListCustomSkills(webview, anthropicApiKeyManager, message.requestId);
               break;
 
+            case 'DELETE_CUSTOM_SKILL':
+              await handleDeleteCustomSkill(
+                webview,
+                message.payload,
+                anthropicApiKeyManager,
+                message.requestId
+              );
+              break;
+
             case 'GET_MCP_SERVER_TYPES':
               await handleGetMcpServerTypes(webview, message.payload, message.requestId);
+              break;
+
+            case 'UPLOAD_DEPENDENT_SKILL':
+              await handleUploadDependentSkill(
+                webview,
+                message.payload,
+                anthropicApiKeyManager,
+                message.requestId
+              );
               break;
 
             case 'GET_SAVED_MCP_SERVER_URLS':

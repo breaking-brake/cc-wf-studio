@@ -787,6 +787,28 @@ export interface ListCustomSkillsFailedPayload {
 }
 
 /**
+ * Delete custom skill payload (Webview → Extension)
+ */
+export interface DeleteCustomSkillPayload {
+  skillId: string;
+}
+
+/**
+ * Delete custom skill success payload (Extension → Webview)
+ */
+export interface DeleteCustomSkillSuccessPayload {
+  skillId: string;
+}
+
+/**
+ * Delete custom skill failed payload (Extension → Webview)
+ */
+export interface DeleteCustomSkillFailedPayload {
+  errorCode: string;
+  errorMessage: string;
+}
+
+/**
  * Execute skill progress payload (Extension → Webview)
  * Sent during streaming execution with each new chunk
  */
@@ -823,6 +845,33 @@ export interface GetMcpServerTypesPayload {
  */
 export interface GetMcpServerTypesResultPayload {
   serverTypes: Record<string, 'stdio' | 'http' | 'sse' | null>;
+}
+
+/**
+ * Upload a dependent skill file directly (Webview → Extension)
+ */
+export interface UploadDependentSkillPayload {
+  skillName: string;
+  skillPath: string;
+}
+
+/**
+ * Upload dependent skill success payload (Extension → Webview)
+ */
+export interface UploadDependentSkillSuccessPayload {
+  skillName: string;
+  skillId: string;
+  version: string;
+  isNewVersion: boolean;
+}
+
+/**
+ * Upload dependent skill failed payload (Extension → Webview)
+ */
+export interface UploadDependentSkillFailedPayload {
+  skillName: string;
+  errorCode: string;
+  errorMessage: string;
 }
 
 /**
@@ -1007,10 +1056,14 @@ export type ExtensionMessage =
   | Message<ExecuteSkillProgressPayload, 'EXECUTE_SKILL_PROGRESS'>
   | Message<ListCustomSkillsSuccessPayload, 'LIST_CUSTOM_SKILLS_SUCCESS'>
   | Message<ListCustomSkillsFailedPayload, 'LIST_CUSTOM_SKILLS_FAILED'>
+  | Message<DeleteCustomSkillSuccessPayload, 'DELETE_CUSTOM_SKILL_SUCCESS'>
+  | Message<DeleteCustomSkillFailedPayload, 'DELETE_CUSTOM_SKILL_FAILED'>
   | Message<CheckAnthropicApiKeyResultPayload, 'CHECK_ANTHROPIC_API_KEY_RESULT'>
   | Message<void, 'STORE_ANTHROPIC_API_KEY_SUCCESS'>
   | Message<void, 'CLEAR_ANTHROPIC_API_KEY_SUCCESS'>
   | Message<GetMcpServerTypesResultPayload, 'GET_MCP_SERVER_TYPES_RESULT'>
+  | Message<UploadDependentSkillSuccessPayload, 'UPLOAD_DEPENDENT_SKILL_SUCCESS'>
+  | Message<UploadDependentSkillFailedPayload, 'UPLOAD_DEPENDENT_SKILL_FAILED'>
   | Message<GetSavedMcpServerUrlsResultPayload, 'GET_SAVED_MCP_SERVER_URLS_RESULT'>
   | Message<void, 'SAVE_MCP_SERVER_URLS_SUCCESS'>
   | Message<LookupMcpRegistryResultPayload, 'LOOKUP_MCP_REGISTRY_RESULT'>
@@ -2087,7 +2140,9 @@ export type WebviewMessage =
   | Message<void, 'CHECK_ANTHROPIC_API_KEY'>
   | Message<void, 'CLEAR_ANTHROPIC_API_KEY'>
   | Message<void, 'LIST_CUSTOM_SKILLS'>
+  | Message<DeleteCustomSkillPayload, 'DELETE_CUSTOM_SKILL'>
   | Message<GetMcpServerTypesPayload, 'GET_MCP_SERVER_TYPES'>
+  | Message<UploadDependentSkillPayload, 'UPLOAD_DEPENDENT_SKILL'>
   | Message<void, 'GET_SAVED_MCP_SERVER_URLS'>
   | Message<SaveMcpServerUrlsPayload, 'SAVE_MCP_SERVER_URLS'>
   | Message<LookupMcpRegistryPayload, 'LOOKUP_MCP_REGISTRY'>

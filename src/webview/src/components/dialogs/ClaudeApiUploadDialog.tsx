@@ -19,6 +19,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   checkAnthropicApiKey,
   clearAnthropicApiKey,
+  deleteCustomSkill,
   executeUploadedSkill,
   getSavedMcpServerUrls,
   getSkillVersionDetails,
@@ -27,6 +28,7 @@ import {
   saveMcpServerUrls,
   storeAnthropicApiKey,
   openExternalUrl,
+  uploadDependentSkill,
   uploadToClaudeApi,
 } from '../../services/vscode-bridge';
 import { serializeWorkflow, validateWorkflow } from '../../services/workflow-service';
@@ -70,7 +72,6 @@ function generateSampleCode(
   const modelId = model || 'claude-haiku-4-5-20251001';
   const promptContent = skillName ? `/${skillName}` : `/${skillId}`;
   const hasMcpServers = mcpServers && mcpServers.length > 0;
-  const maskToken = (token?: string) => (token ? '********' : undefined);
 
   switch (lang) {
     case 'curl': {
@@ -79,13 +80,7 @@ function generateSampleCode(
         hasMcpServers && mcpServers
           ? `,
     "mcp_servers": [
-${mcpServers
-  .map((s) => {
-    const token = maskToken(s.authorization_token);
-    const tokenPart = token ? `, "authorization_token": "${token}"` : '';
-    return `      {"type": "url", "url": "${s.url || ''}", "name": "${s.id}"${tokenPart}}`;
-  })
-  .join(',\n')}
+${mcpServers.map((s) => `      {"type": "url", "url": "${s.url || ''}", "name": "${s.id}"}`).join(',\n')}
     ]`
           : '';
 
@@ -121,13 +116,7 @@ ${mcpServers
         hasMcpServers && mcpServers
           ? `,
     mcp_servers=[
-${mcpServers
-  .map((s) => {
-    const token = maskToken(s.authorization_token);
-    const tokenPart = token ? `, "authorization_token": "${token}"` : '';
-    return `        {"type": "url", "url": "${s.url || ''}", "name": "${s.id}"${tokenPart}}`;
-  })
-  .join(',\n')}
+${mcpServers.map((s) => `        {"type": "url", "url": "${s.url || ''}", "name": "${s.id}"}`).join(',\n')}
     ]`
           : '';
       const toolsArray = `[${toolsList}${hasMcpServers && mcpServers ? `, ${mcpServers.map((s) => `{"type": "mcp_toolset", "mcp_server_name": "${s.id}"}`).join(', ')}` : ''}]`;
@@ -156,13 +145,7 @@ print(response.content[0].text)`;
         hasMcpServers && mcpServers
           ? `,
     mcp_servers: [
-${mcpServers
-  .map((s) => {
-    const token = maskToken(s.authorization_token);
-    const tokenPart = token ? `, authorization_token: "${token}"` : '';
-    return `      { type: "url", url: "${s.url || ''}", name: "${s.id}"${tokenPart} }`;
-  })
-  .join(',\n')}
+${mcpServers.map((s) => `      { type: "url", url: "${s.url || ''}", name: "${s.id}" }`).join(',\n')}
     ]`
           : '';
       const toolsArray = `[${toolsList}${hasMcpServers && mcpServers ? `, ${mcpServers.map((s) => `{ type: "mcp_toolset", mcp_server_name: "${s.id}" }`).join(', ')}` : ''}]`;
@@ -188,10 +171,18 @@ console.log(response.content[0].text);`;
   }
 }
 
-function generateWebAppCode(
-  lang: 'python' | 'typescript',
+function generateAuthSampleCode(
+  lang: SampleCodeLang,
   mcpServers: Array<{ id: string; url: string }>
 ): string {
+  if (lang === 'curl') {
+    return `# MCP servers with authorization_token
+# Replace YOUR_ACCESS_TOKEN with actual OAuth token
+"mcp_servers": [
+${mcpServers.map((s) => `  {"type": "url", "url": "${s.url}", "name": "${s.id}", "authorization_token": "YOUR_ACCESS_TOKEN"}`).join(',\n')}
+]`;
+  }
+
   if (lang === 'python') {
     return `# Web App Integration - OAuth token management
 import anthropic
@@ -244,12 +235,13 @@ ${mcpServers
 }`;
 }
 
-const WebAppCodeSnippet: React.FC<{
+const AuthCodeSnippet: React.FC<{
   mcpServers: Array<{ id: string; url: string }>;
-  lang: 'python' | 'typescript';
+  lang: SampleCodeLang;
 }> = ({ mcpServers, lang }) => {
   const [open, setOpen] = useState(false);
-  const code = generateWebAppCode(lang, mcpServers);
+  const [copiedCmd, setCopiedCmd] = useState(false);
+  const code = generateAuthSampleCode(lang, mcpServers);
 
   return (
     <div style={{ marginTop: '8px' }}>
@@ -282,7 +274,7 @@ const WebAppCodeSnippet: React.FC<{
         >
           ▶
         </span>
-        Need authentication? Web App Integration
+        Need authentication?
       </button>
       {open && (
         <div>
@@ -294,9 +286,76 @@ const WebAppCodeSnippet: React.FC<{
               lineHeight: '1.5',
             }}
           >
-            For MCP servers requiring OAuth, handle the token flow in your backend and pass the
-            access_token via authorization_token.
+            For MCP servers requiring OAuth, obtain an access_token via{' '}
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={() =>
+                openExternalUrl('https://modelcontextprotocol.io/docs/tools/inspector')
+              }
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  openExternalUrl('https://modelcontextprotocol.io/docs/tools/inspector');
+                }
+              }}
+              style={{
+                cursor: 'pointer',
+                color: 'var(--vscode-textLink-foreground)',
+                textDecoration: 'underline',
+              }}
+            >
+              MCP Inspector <ExternalLink size={10} style={{ verticalAlign: 'middle' }} />
+            </span>
+            :
           </div>
+          <ol
+            style={{
+              margin: '0 0 8px 16px',
+              padding: 0,
+              fontSize: '10px',
+              color: 'var(--vscode-descriptionForeground)',
+              lineHeight: '1.6',
+            }}
+          >
+            <li style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+              Run: <code style={{ fontSize: '10px' }}>npx @modelcontextprotocol/inspector</code>
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  navigator.clipboard.writeText('npx @modelcontextprotocol/inspector');
+                  setCopiedCmd(true);
+                  setTimeout(() => setCopiedCmd(false), 2000);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    navigator.clipboard.writeText('npx @modelcontextprotocol/inspector');
+                    setCopiedCmd(true);
+                    setTimeout(() => setCopiedCmd(false), 2000);
+                  }
+                }}
+                style={{
+                  cursor: 'pointer',
+                  color: copiedCmd
+                    ? 'var(--vscode-testing-iconPassed, #73c991)'
+                    : 'var(--vscode-descriptionForeground)',
+                  display: 'inline-flex',
+                }}
+                title={copiedCmd ? 'Copied!' : 'Copy to clipboard'}
+              >
+                {copiedCmd ? <Check size={10} /> : <Copy size={10} />}
+              </span>
+            </li>
+            <li>
+              In the sidebar: select transport type, enter the server URL, and click "Connect"
+            </li>
+            <li>In the main area: click "Open Auth Settings" → "Quick OAuth Flow"</li>
+            <li>
+              Complete authorization, expand "Access Token" at the bottom of OAuth Flow Progress,
+              and copy the <code style={{ fontSize: '10px' }}>access_token</code> value from the
+              JSON
+            </li>
+          </ol>
           <CodeBlock
             onCopy={() => navigator.clipboard.writeText(code)}
             style={{
@@ -837,6 +896,8 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
   const [selectedSkillDisplayTitle, setSelectedSkillDisplayTitle] = useState<string | null>(null);
   const [skillListError, setSkillListError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Test chat state
   const [testModel, setTestModel] = useState('claude-haiku-4-5-20251001');
@@ -850,6 +911,16 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
   const [additionalSkillsOpen, setAdditionalSkillsOpen] = useState(false);
   // MCP server IDs per additional skill: { skillId: ["server1", "server2"] }
   const [additionalSkillMcpMap, setAdditionalSkillMcpMap] = useState<Record<string, string[]>>({});
+
+  // Dependent skills state
+  const [dependentSkillNames, setDependentSkillNames] = useState<string[]>([]);
+  const [showSkillValidation, setShowSkillValidation] = useState(false);
+
+  // Dependent skill upload state
+  const [uploadingSkills, setUploadingSkills] = useState<
+    Record<string, 'uploading' | 'success' | 'error'>
+  >({});
+  const [uploadSkillErrors, setUploadSkillErrors] = useState<Record<string, string>>({});
 
   // MCP server URLs and tokens state
   const [mcpServerUrls, setMcpServerUrls] = useState<Record<string, string>>({});
@@ -884,6 +955,16 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
     .map((n) => (n as McpNode).data.serverId)
     .filter(Boolean);
 
+  const canvasDependentSkills = nodes
+    .filter((n) => n.type === 'skill')
+    .map((n) => {
+      const data = n.data as { name?: string; skillPath?: string };
+      return { name: data.name, skillPath: data.skillPath };
+    })
+    .filter((s): s is { name: string; skillPath: string } => Boolean(s.name && s.skillPath));
+
+  const canvasDependentSkillNames = canvasDependentSkills.map((s) => s.name);
+
   // Use canvas MCP server IDs after upload, or API-fetched IDs when viewing from list
   // Also include MCP servers required by additional skills
   const effectiveMcpServerIds = useMemo(() => {
@@ -904,6 +985,26 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
     }
     return map;
   }, [additionalSkillMcpMap, skills]);
+
+  // Required skill IDs (uploaded skills matching dependent skill names)
+  const requiredSkillIds = useMemo(() => {
+    const targetId = selectedSkillId || result?.skillId;
+    return skills
+      .filter((s) => dependentSkillNames.includes(s.displayTitle) && s.id !== targetId)
+      .map((s) => s.id);
+  }, [skills, dependentSkillNames, selectedSkillId, result]);
+
+  // Dependent skill names that are not yet uploaded
+  const missingDependentSkillNames = useMemo(() => {
+    const targetId = selectedSkillId || result?.skillId;
+    const uploadedTitles = skills.filter((s) => s.id !== targetId).map((s) => s.displayTitle);
+    return dependentSkillNames.filter((name) => !uploadedTitles.includes(name));
+  }, [dependentSkillNames, skills, selectedSkillId, result]);
+
+  // Required skills missing (not uploaded or not selected)
+  const isRequiredSkillsMissing =
+    missingDependentSkillNames.length > 0 ||
+    requiredSkillIds.some((id) => !additionalSkillIds.includes(id));
 
   const reset = useCallback(() => {
     setState('check-api-key');
@@ -926,6 +1027,10 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
     setAdditionalSkillIds([]);
     setAdditionalSkillsOpen(false);
     setAdditionalSkillMcpMap({});
+    setDependentSkillNames([]);
+    setShowSkillValidation(false);
+    setUploadingSkills({});
+    setUploadSkillErrors({});
     setSkillMcpServerIds(null);
     setIsLoadingSkillDetails(false);
   }, []);
@@ -1041,6 +1146,37 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
     }
   };
 
+  const handleUploadDependentSkill = async (skillName: string, skillPath: string) => {
+    setUploadingSkills((prev) => ({ ...prev, [skillName]: 'uploading' }));
+    setUploadSkillErrors((prev) => {
+      const next = { ...prev };
+      delete next[skillName];
+      return next;
+    });
+    try {
+      await uploadDependentSkill(skillName, skillPath);
+      setUploadingSkills((prev) => ({ ...prev, [skillName]: 'success' }));
+      // Refresh skills list to update ✅/❌ status
+      const result = await listCustomSkills();
+      setSkills(result.skills);
+    } catch (err) {
+      setUploadingSkills((prev) => ({ ...prev, [skillName]: 'error' }));
+      setUploadSkillErrors((prev) => ({
+        ...prev,
+        [skillName]: err instanceof Error ? err.message : 'Upload failed',
+      }));
+    }
+  };
+
+  const handleUploadAllMissing = async () => {
+    const missing = canvasDependentSkills.filter(
+      (s) => !skills.some((sk) => sk.displayTitle === s.name)
+    );
+    for (const skill of missing) {
+      await handleUploadDependentSkill(skill.name, skill.skillPath);
+    }
+  };
+
   const handleUpload = async () => {
     setState('uploading');
     setUploadError(null);
@@ -1119,13 +1255,14 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
         setSkillMcpServerIds(details.mcpServerIds);
         // Auto-select additional skills based on dependent skill names
         if (details.dependentSkillNames.length > 0) {
+          setDependentSkillNames(details.dependentSkillNames);
           const matchedIds = skills
             .filter(
               (s) => details.dependentSkillNames.includes(s.displayTitle) && s.id !== targetId
             )
             .map((s) => s.id);
           setAdditionalSkillIds(matchedIds);
-          if (matchedIds.length > 0) setAdditionalSkillsOpen(true);
+          setAdditionalSkillsOpen(true);
         }
       } catch {
         setSkillMcpServerIds([]);
@@ -1175,13 +1312,14 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
         setSkillMcpServerIds(details.mcpServerIds);
         // Auto-select additional skills based on dependent skill names
         if (details.dependentSkillNames.length > 0) {
+          setDependentSkillNames(details.dependentSkillNames);
           const matchedIds = skills
             .filter(
               (s) => details.dependentSkillNames.includes(s.displayTitle) && s.id !== targetId
             )
             .map((s) => s.id);
           setAdditionalSkillIds(matchedIds);
-          if (matchedIds.length > 0) setAdditionalSkillsOpen(true);
+          setAdditionalSkillsOpen(true);
         }
       } catch {
         setSkillMcpServerIds([]);
@@ -1194,6 +1332,14 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
   const handleAdditionalSkillsChange = useCallback(
     async (newIds: string[]) => {
       setAdditionalSkillIds(newIds);
+
+      // Clear skill validation if all required skills are now selected
+      if (
+        requiredSkillIds.every((id) => newIds.includes(id)) &&
+        missingDependentSkillNames.length === 0
+      ) {
+        setShowSkillValidation(false);
+      }
 
       // Remove entries for deselected skills
       setAdditionalSkillMcpMap((prev) => {
@@ -1217,7 +1363,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
         }
       }
     },
-    [skills, additionalSkillMcpMap]
+    [skills, additionalSkillMcpMap, requiredSkillIds, missingDependentSkillNames]
   );
 
   const totalUsage = useMemo(() => {
@@ -1243,7 +1389,15 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
 
   const handleSendMessage = async () => {
     const targetSkillId = selectedSkillId || result?.skillId;
-    if (!targetSkillId || !chatInput.trim() || isExecuting || isMcpUrlsMissing) return;
+    if (!targetSkillId || !chatInput.trim() || isExecuting) return;
+
+    if (isRequiredSkillsMissing) {
+      setShowSkillValidation(true);
+      setAdditionalSkillsOpen(true);
+      return;
+    }
+
+    if (isMcpUrlsMissing) return;
 
     const userMessage: ChatMessage = { role: 'user', content: chatInput.trim() };
     const assistantMessage: ChatMessage = { role: 'assistant', content: '', isStreaming: true };
@@ -1349,8 +1503,10 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                 border: '1px solid var(--vscode-panel-border)',
                 borderRadius: '4px',
                 padding: '24px',
-                minWidth: state === 'sample-code' ? '800px' : '540px',
-                maxWidth: state === 'sample-code' ? '960px' : '720px',
+                width: state === 'sample-code' ? '90vw' : undefined,
+                minWidth: state === 'sample-code' ? '90vw' : '540px',
+                maxWidth: state === 'sample-code' ? '90vw' : '720px',
+                height: state === 'sample-code' ? '90vh' : undefined,
                 maxHeight: '90vh',
                 transition: 'min-width 0.2s, max-width 0.2s',
                 display: 'flex',
@@ -1669,6 +1825,27 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                             >
                               API Test
                             </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setDeleteTarget({
+                                  id: skill.id,
+                                  title: skill.displayTitle,
+                                })
+                              }
+                              style={{
+                                padding: '4px 12px',
+                                backgroundColor: 'transparent',
+                                color: 'var(--vscode-errorForeground)',
+                                border: '1px solid var(--vscode-errorForeground)',
+                                borderRadius: '2px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              Delete
+                            </button>
                           </div>
                         ))}
                       </div>
@@ -1771,6 +1948,157 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                           servers cannot be used. You will need to set the server URLs in the Sample
                           Code / Test screen after uploading.
                         </div>
+                      </div>
+                    )}
+
+                    {canvasDependentSkillNames.length > 0 && (
+                      <div
+                        style={{
+                          padding: '10px 12px',
+                          backgroundColor: canvasDependentSkillNames.some(
+                            (name) => !skills.some((s) => s.displayTitle === name)
+                          )
+                            ? 'var(--vscode-inputValidation-warningBackground)'
+                            : 'var(--vscode-editor-inactiveSelectionBackground)',
+                          border: `1px solid ${
+                            canvasDependentSkillNames.some(
+                              (name) => !skills.some((s) => s.displayTitle === name)
+                            )
+                              ? 'var(--vscode-inputValidation-warningBorder)'
+                              : 'var(--vscode-panel-border)'
+                          }`,
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          lineHeight: '1.5',
+                          color: 'var(--vscode-foreground)',
+                        }}
+                      >
+                        <div style={{ fontWeight: 600, marginBottom: '4px' }}>
+                          This workflow depends on other skills
+                        </div>
+                        {canvasDependentSkills.map((skill) => {
+                          const isUploaded = skills.some((s) => s.displayTitle === skill.name);
+                          const uploadState = uploadingSkills[skill.name];
+                          const uploadErr = uploadSkillErrors[skill.name];
+                          return (
+                            <div
+                              key={skill.name}
+                              style={{
+                                paddingLeft: '4px',
+                                lineHeight: '1.6',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                flexWrap: 'wrap',
+                              }}
+                            >
+                              <span
+                                style={{
+                                  color:
+                                    isUploaded || uploadState === 'success'
+                                      ? 'var(--vscode-foreground)'
+                                      : 'var(--vscode-errorForeground)',
+                                }}
+                              >
+                                {isUploaded || uploadState === 'success' ? '\u2705' : '\u274C'}{' '}
+                                {skill.name}
+                              </span>
+                              {!isUploaded &&
+                                uploadState !== 'success' &&
+                                uploadState !== 'uploading' && (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleUploadDependentSkill(skill.name, skill.skillPath)
+                                    }
+                                    style={{
+                                      padding: '1px 8px',
+                                      fontSize: '11px',
+                                      backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                                      color: 'var(--vscode-button-secondaryForeground)',
+                                      border: 'none',
+                                      borderRadius: '2px',
+                                      cursor: 'pointer',
+                                    }}
+                                  >
+                                    {uploadState === 'error' ? 'Retry' : 'Upload'}
+                                  </button>
+                                )}
+                              {uploadState === 'uploading' && (
+                                <span
+                                  style={{
+                                    display: 'inline-block',
+                                    width: '12px',
+                                    height: '12px',
+                                    border: '2px solid var(--vscode-descriptionForeground)',
+                                    borderTopColor: 'transparent',
+                                    borderRadius: '50%',
+                                    animation: 'spin 1s linear infinite',
+                                  }}
+                                />
+                              )}
+                              {uploadState === 'error' && uploadErr && (
+                                <span
+                                  style={{
+                                    fontSize: '11px',
+                                    color: 'var(--vscode-errorForeground)',
+                                  }}
+                                >
+                                  {uploadErr}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {canvasDependentSkills.filter(
+                          (s) =>
+                            !skills.some((sk) => sk.displayTitle === s.name) &&
+                            uploadingSkills[s.name] !== 'success'
+                        ).length >= 2 && (
+                          <div style={{ marginTop: '6px' }}>
+                            <button
+                              type="button"
+                              onClick={handleUploadAllMissing}
+                              disabled={Object.values(uploadingSkills).some(
+                                (s) => s === 'uploading'
+                              )}
+                              style={{
+                                padding: '3px 12px',
+                                fontSize: '11px',
+                                backgroundColor: 'var(--vscode-button-background)',
+                                color: 'var(--vscode-button-foreground)',
+                                border: 'none',
+                                borderRadius: '2px',
+                                cursor: Object.values(uploadingSkills).some(
+                                  (s) => s === 'uploading'
+                                )
+                                  ? 'not-allowed'
+                                  : 'pointer',
+                                opacity: Object.values(uploadingSkills).some(
+                                  (s) => s === 'uploading'
+                                )
+                                  ? 0.6
+                                  : 1,
+                              }}
+                            >
+                              Upload All Missing
+                            </button>
+                          </div>
+                        )}
+                        {canvasDependentSkillNames.some(
+                          (name) => !skills.some((s) => s.displayTitle === name)
+                        ) &&
+                          !Object.values(uploadingSkills).some((s) => s === 'uploading') && (
+                            <div
+                              style={{
+                                marginTop: '6px',
+                                color: 'var(--vscode-descriptionForeground)',
+                              }}
+                            >
+                              Dependent skills must be uploaded before this skill can work
+                              correctly. You can still upload now and add dependencies later.
+                            </div>
+                          )}
                       </div>
                     )}
 
@@ -1877,6 +2205,39 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                       >
                         Version: {result.version}
                       </div>
+
+                      {canvasDependentSkillNames.length > 0 && (
+                        <div style={{ marginTop: '4px' }}>
+                          <div
+                            style={{
+                              fontSize: '12px',
+                              color: 'var(--vscode-descriptionForeground)',
+                              marginBottom: '4px',
+                            }}
+                          >
+                            Dependent Skills:
+                          </div>
+                          {canvasDependentSkillNames.map((name) => {
+                            const isUploaded = skills.some((s) => s.displayTitle === name);
+                            return (
+                              <div
+                                key={name}
+                                style={{
+                                  fontSize: '12px',
+                                  color: isUploaded
+                                    ? 'var(--vscode-foreground)'
+                                    : 'var(--vscode-errorForeground)',
+                                  paddingLeft: '4px',
+                                  lineHeight: '1.6',
+                                }}
+                              >
+                                {isUploaded ? '\u2705' : '\u274C'} {name}
+                                {!isUploaded && ' (not uploaded)'}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
@@ -1996,55 +2357,109 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                             </select>
                           </div>
 
-                          {/* Language selector */}
+                          {/* Additional Skills (Code tab) */}
                           <div
                             style={{
                               backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
                               border: '1px solid var(--vscode-panel-border)',
                               borderRadius: '4px',
-                              padding: '8px 10px',
                             }}
                           >
-                            <div
+                            <button
+                              type="button"
+                              onClick={() => setAdditionalSkillsOpen((v) => !v)}
                               style={{
+                                width: '100%',
+                                padding: '8px 10px',
                                 fontSize: '11px',
                                 fontWeight: 500,
                                 color: 'var(--vscode-foreground)',
-                                marginBottom: '6px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                background: 'none',
+                                border: 'none',
+                                userSelect: 'none',
+                                textAlign: 'left',
                               }}
                             >
-                              Language
-                            </div>
-                            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                              {(['curl', 'python', 'typescript'] as const).map((lang) => (
-                                <button
-                                  key={lang}
-                                  type="button"
-                                  onClick={() => setSampleCodeLang(lang)}
+                              <span
+                                style={{
+                                  display: 'inline-block',
+                                  transition: 'transform 0.15s',
+                                  fontSize: '10px',
+                                  transform: additionalSkillsOpen
+                                    ? 'rotate(90deg)'
+                                    : 'rotate(0deg)',
+                                }}
+                              >
+                                ▶
+                              </span>
+                              Additional Skills
+                              {additionalSkillIds.length > 0 && (
+                                <span
                                   style={{
-                                    padding: '3px 10px',
-                                    backgroundColor:
-                                      sampleCodeLang === lang
-                                        ? 'var(--vscode-button-background)'
-                                        : 'var(--vscode-button-secondaryBackground)',
-                                    color:
-                                      sampleCodeLang === lang
-                                        ? 'var(--vscode-button-foreground)'
-                                        : 'var(--vscode-button-secondaryForeground)',
-                                    border: 'none',
-                                    borderRadius: '2px',
-                                    cursor: 'pointer',
-                                    fontSize: '11px',
+                                    fontSize: '10px',
+                                    padding: '1px 5px',
+                                    borderRadius: '8px',
+                                    backgroundColor: 'var(--vscode-badge-background)',
+                                    color: 'var(--vscode-badge-foreground)',
+                                    fontWeight: 400,
                                   }}
                                 >
-                                  {lang === 'curl'
-                                    ? 'curl'
-                                    : lang === 'python'
-                                      ? 'Python'
-                                      : 'TypeScript'}
-                                </button>
-                              ))}
-                            </div>
+                                  {additionalSkillIds.length}
+                                </span>
+                              )}
+                              {dependentSkillNames.length > 0 && (
+                                <span
+                                  style={{
+                                    fontSize: '10px',
+                                    padding: '1px 5px',
+                                    borderRadius: '3px',
+                                    backgroundColor:
+                                      'var(--vscode-inputValidation-errorBackground, rgba(255,0,0,0.1))',
+                                    color: 'var(--vscode-errorForeground)',
+                                    border:
+                                      '1px solid var(--vscode-inputValidation-errorBorder, rgba(255,0,0,0.3))',
+                                    fontWeight: 400,
+                                  }}
+                                >
+                                  required
+                                </span>
+                              )}
+                            </button>
+                            {additionalSkillsOpen && (
+                              <div style={{ padding: '0 10px 8px' }}>
+                                <SelectTagInput
+                                  options={skills
+                                    .filter(
+                                      (s) => s.id !== selectedSkillId && s.id !== result?.skillId
+                                    )
+                                    .map((s) => ({ value: s.id, label: s.displayTitle }))}
+                                  selectedValues={additionalSkillIds}
+                                  onChange={handleAdditionalSkillsChange}
+                                  placeholder="Select uploaded skills..."
+                                  lockedValues={requiredSkillIds}
+                                />
+                                {missingDependentSkillNames.length > 0 && (
+                                  <div
+                                    style={{
+                                      marginTop: '6px',
+                                      padding: '6px 8px',
+                                      fontSize: '11px',
+                                      lineHeight: '1.4',
+                                      backgroundColor: '#fffbea',
+                                      border: '1px solid #ffda6a',
+                                      borderRadius: '3px',
+                                      color: '#3d3d00',
+                                    }}
+                                  >
+                                    ⚠ Not yet uploaded: {missingDependentSkillNames.join(', ')}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
 
                           {effectiveMcpServerIds.length > 0 && (
@@ -2065,6 +2480,43 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
 
                         {/* Right: Code preview */}
                         <div style={{ flex: 1, minWidth: 0 }}>
+                          {/* Language tabs */}
+                          <div
+                            style={{
+                              display: 'flex',
+                              gap: '4px',
+                              marginBottom: '6px',
+                            }}
+                          >
+                            {(['curl', 'python', 'typescript'] as const).map((lang) => (
+                              <button
+                                key={lang}
+                                type="button"
+                                onClick={() => setSampleCodeLang(lang)}
+                                style={{
+                                  padding: '3px 10px',
+                                  backgroundColor:
+                                    sampleCodeLang === lang
+                                      ? 'var(--vscode-button-background)'
+                                      : 'var(--vscode-button-secondaryBackground)',
+                                  color:
+                                    sampleCodeLang === lang
+                                      ? 'var(--vscode-button-foreground)'
+                                      : 'var(--vscode-button-secondaryForeground)',
+                                  border: 'none',
+                                  borderRadius: '2px',
+                                  cursor: 'pointer',
+                                  fontSize: '11px',
+                                }}
+                              >
+                                {lang === 'curl'
+                                  ? 'curl'
+                                  : lang === 'python'
+                                    ? 'Python'
+                                    : 'TypeScript'}
+                              </button>
+                            ))}
+                          </div>
                           <CodeBlock
                             onCopy={() => {
                               const targetId = selectedSkillId || result?.skillId;
@@ -2095,12 +2547,9 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                             )}
                           </CodeBlock>
 
-                          {/* Web App Integration snippet */}
-                          {effectiveMcpServerIds.length > 0 && sampleCodeLang !== 'curl' && (
-                            <WebAppCodeSnippet
-                              mcpServers={mcpServersForCode}
-                              lang={sampleCodeLang}
-                            />
+                          {/* Auth code snippet */}
+                          {effectiveMcpServerIds.length > 0 && (
+                            <AuthCodeSnippet mcpServers={mcpServersForCode} lang={sampleCodeLang} />
                           )}
                         </div>
                       </div>
@@ -2219,6 +2668,23 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                   {additionalSkillIds.length}
                                 </span>
                               )}
+                              {dependentSkillNames.length > 0 && (
+                                <span
+                                  style={{
+                                    fontSize: '10px',
+                                    padding: '1px 5px',
+                                    borderRadius: '3px',
+                                    backgroundColor:
+                                      'var(--vscode-inputValidation-errorBackground, rgba(255,0,0,0.1))',
+                                    color: 'var(--vscode-errorForeground)',
+                                    border:
+                                      '1px solid var(--vscode-inputValidation-errorBorder, rgba(255,0,0,0.3))',
+                                    fontWeight: 400,
+                                  }}
+                                >
+                                  required
+                                </span>
+                              )}
                             </button>
                             {additionalSkillsOpen && (
                               <div style={{ padding: '0 10px 8px' }}>
@@ -2231,7 +2697,24 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                   selectedValues={additionalSkillIds}
                                   onChange={handleAdditionalSkillsChange}
                                   placeholder="Select uploaded skills..."
+                                  lockedValues={requiredSkillIds}
                                 />
+                                {missingDependentSkillNames.length > 0 && (
+                                  <div
+                                    style={{
+                                      marginTop: '6px',
+                                      padding: '6px 8px',
+                                      fontSize: '11px',
+                                      lineHeight: '1.4',
+                                      backgroundColor: '#fffbea',
+                                      border: '1px solid #ffda6a',
+                                      borderRadius: '3px',
+                                      color: '#3d3d00',
+                                    }}
+                                  >
+                                    ⚠ Not yet uploaded: {missingDependentSkillNames.join(', ')}
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
@@ -2366,7 +2849,24 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                             <div ref={chatEndRef} />
                           </div>
 
-                          {/* Validation error */}
+                          {/* Skill validation error */}
+                          {showSkillValidation && isRequiredSkillsMissing && (
+                            <div
+                              style={{
+                                fontSize: '12px',
+                                color: 'var(--vscode-errorForeground)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                              }}
+                            >
+                              {missingDependentSkillNames.length > 0
+                                ? `⚠ Upload the following skills first: ${missingDependentSkillNames.join(', ')}`
+                                : '⚠ Required additional skills are not selected'}
+                            </div>
+                          )}
+
+                          {/* MCP Validation error */}
                           {showMcpValidation && isMcpUrlsMissing && (
                             <div
                               style={{
@@ -2399,7 +2899,10 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                   e.preventDefault();
-                                  if (isMcpUrlsMissing) {
+                                  if (isRequiredSkillsMissing) {
+                                    setShowSkillValidation(true);
+                                    setAdditionalSkillsOpen(true);
+                                  } else if (isMcpUrlsMissing) {
                                     setShowMcpValidation(true);
                                   } else {
                                     handleSendMessage();
@@ -2477,6 +2980,11 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => {
+                                    if (isRequiredSkillsMissing) {
+                                      setShowSkillValidation(true);
+                                      setAdditionalSkillsOpen(true);
+                                      return;
+                                    }
                                     if (isMcpUrlsMissing) {
                                       setShowMcpValidation(true);
                                       return;
@@ -2484,9 +2992,11 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                     handleSendMessage();
                                   }}
                                   title={
-                                    isMcpUrlsMissing
-                                      ? 'Enter MCP server URLs first'
-                                      : 'Send message'
+                                    isRequiredSkillsMissing
+                                      ? 'Required additional skills are missing'
+                                      : isMcpUrlsMissing
+                                        ? 'Enter MCP server URLs first'
+                                        : 'Send message'
                                   }
                                   style={{
                                     display: 'flex',
@@ -2494,17 +3004,26 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                     justifyContent: 'center',
                                     padding: '4px 8px',
                                     backgroundColor:
-                                      isExecuting || !chatInput.trim() || isMcpUrlsMissing
+                                      isExecuting ||
+                                      !chatInput.trim() ||
+                                      isMcpUrlsMissing ||
+                                      isRequiredSkillsMissing
                                         ? 'var(--vscode-button-secondaryBackground)'
                                         : 'var(--vscode-button-background)',
                                     color:
-                                      isExecuting || !chatInput.trim() || isMcpUrlsMissing
+                                      isExecuting ||
+                                      !chatInput.trim() ||
+                                      isMcpUrlsMissing ||
+                                      isRequiredSkillsMissing
                                         ? 'var(--vscode-button-secondaryForeground)'
                                         : 'var(--vscode-button-foreground)',
                                     border: 'none',
                                     borderRadius: '3px',
                                     cursor:
-                                      isExecuting || !chatInput.trim() || isMcpUrlsMissing
+                                      isExecuting ||
+                                      !chatInput.trim() ||
+                                      isMcpUrlsMissing ||
+                                      isRequiredSkillsMissing
                                         ? 'not-allowed'
                                         : 'pointer',
                                   }}
@@ -2572,6 +3091,29 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
         cancelLabel="Cancel"
         onConfirm={() => confirmAction?.onConfirm()}
         onCancel={() => setConfirmAction(null)}
+      />
+
+      <ConfirmDialog
+        isOpen={deleteTarget !== null}
+        title="Delete Skill"
+        message={`Are you sure you want to delete "${deleteTarget?.title ?? ''}"? This action cannot be undone.`}
+        confirmLabel={isDeleting ? 'Deleting...' : 'Delete'}
+        cancelLabel="Cancel"
+        onConfirm={async () => {
+          if (!deleteTarget || isDeleting) return;
+          setIsDeleting(true);
+          try {
+            await deleteCustomSkill(deleteTarget.id);
+            setDeleteTarget(null);
+            loadSkillList();
+          } catch (err) {
+            setSkillListError(err instanceof Error ? err.message : 'Failed to delete skill');
+            setDeleteTarget(null);
+          } finally {
+            setIsDeleting(false);
+          }
+        }}
+        onCancel={() => setDeleteTarget(null)}
       />
     </>
   );
