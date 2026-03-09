@@ -92,7 +92,7 @@ function generateSampleCode(
         hasMcpServers && mcpServers
           ? `,
     "mcp_servers": [
-${mcpServers.map((s) => `      {"type": "url", "url": "${s.url || ''}", "name": "${s.id}"}`).join(',\n')}
+${mcpServers.map((s) => `      {"type": "url", "url": "${s.url || ''}", "name": "${s.id}"${s.authorization_token ? `, "authorization_token": "${s.authorization_token}"` : ''}}`).join(',\n')}
     ]`
           : '';
 
@@ -135,7 +135,7 @@ ${mcpServers.map((s) => `      {"type": "url", "url": "${s.url || ''}", "name": 
         ? `,
     extra_body={
         "mcp_servers": [
-${mcpServers?.map((s) => `            {"type": "url", "url": "${s.url || ''}", "name": "${s.id}"}`).join(',\n')}
+${mcpServers?.map((s) => `            {"type": "url", "url": "${s.url || ''}", "name": "${s.id}"${s.authorization_token ? `, "authorization_token": "${s.authorization_token}"` : ''}}`).join(',\n')}
         ]
     }`
         : '';
@@ -171,7 +171,7 @@ print(response.content[0].text)`;
       const mcpServersField = hasMcpServers
         ? `
   mcp_servers: [
-${mcpServers?.map((s) => `    { type: "url", url: "${s.url || ''}", name: "${s.id}" }`).join(',\n')}
+${mcpServers?.map((s) => `    { type: "url", url: "${s.url || ''}", name: "${s.id}"${s.authorization_token ? `, authorization_token: "${s.authorization_token}"` : ''} }`).join(',\n')}
   ],`
         : '';
 
@@ -211,7 +211,14 @@ function generateAuthSampleCode(
   const baseUrl = firstServer ? firstServer.url.replace(/\/mcp$/, '') : 'https://mcp.example.com';
 
   if (lang === 'curl') {
-    return `# Step 1: OAuth Discovery
+    return `# ===== Option A: Bearer Token (PAT / API Key) =====
+# Set the token directly in mcp_servers.authorization_token:
+"mcp_servers": [
+${mcpServers.map((s) => `  {"type": "url", "url": "${s.url}", "name": "${s.id}", "authorization_token": "YOUR_TOKEN"}`).join(',\n')}
+]
+
+# ===== Option B: OAuth Flow =====
+# Step 1: OAuth Discovery
 curl ${baseUrl}/.well-known/oauth-authorization-server
 
 # Step 2: Dynamic Client Registration
@@ -233,7 +240,12 @@ ${mcpServers.map((s) => `  {"type": "url", "url": "${s.url}", "name": "${s.id}",
   }
 
   if (lang === 'python') {
-    return `# MCP OAuth Authentication + Claude API Integration
+    return `# ===== Option A: Bearer Token (PAT / API Key) =====
+# Simply pass the token to call_with_mcp:
+# response = call_with_mcp(access_token="YOUR_TOKEN", prompt="your prompt")
+
+# ===== Option B: OAuth Flow =====
+# MCP OAuth Authentication + Claude API Integration
 import anthropic
 import requests
 import secrets
@@ -308,7 +320,12 @@ ${mcpServers
 # response = call_with_mcp(token_data["access_token"], "your prompt")`;
   }
 
-  return `// MCP OAuth Authentication + Claude API Integration
+  return `// ===== Option A: Bearer Token (PAT / API Key) =====
+// Simply pass the token to callWithMcp:
+// const response = await callWithMcp("YOUR_TOKEN", "your prompt");
+
+// ===== Option B: OAuth Flow =====
+// MCP OAuth Authentication + Claude API Integration
 import Anthropic from "@anthropic-ai/sdk";
 import crypto from "crypto";
 
@@ -715,116 +732,251 @@ const McpServerUrlForm: React.FC<{
           {authOpen && (
             <div
               style={{
-                padding: '8px 0 0 12px',
+                padding: '8px 0 0 0',
                 fontSize: '11px',
                 color: 'var(--vscode-descriptionForeground)',
                 lineHeight: '1.5',
               }}
             >
-              <div style={{ marginBottom: '8px' }}>
-                Get an OAuth token via{' '}
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onClick={() =>
-                    openExternalUrl('https://modelcontextprotocol.io/docs/tools/inspector')
-                  }
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      openExternalUrl('https://modelcontextprotocol.io/docs/tools/inspector');
-                    }
-                  }}
-                  style={{
-                    cursor: 'pointer',
-                    color: 'var(--vscode-textLink-foreground)',
-                    textDecoration: 'underline',
-                  }}
-                >
-                  MCP Inspector <ExternalLink size={10} style={{ verticalAlign: 'middle' }} />
-                </span>
-                :
-              </div>
-              <ol
+              {/* Section 1: Bearer Token */}
+              <div
                 style={{
-                  margin: '0 0 8px 16px',
-                  padding: 0,
-                  fontSize: '10px',
-                  lineHeight: '1.6',
+                  padding: '8px 10px',
+                  backgroundColor: 'var(--vscode-textCodeBlock-background)',
+                  border: '1px solid var(--vscode-panel-border)',
+                  borderRadius: '4px',
                 }}
               >
-                <li style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-                  Run: <code style={{ fontSize: '10px' }}>npx @modelcontextprotocol/inspector</code>
+                <div
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    color: 'var(--vscode-foreground)',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Enter Bearer Token
+                </div>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    color: 'var(--vscode-descriptionForeground)',
+                    marginBottom: '8px',
+                  }}
+                >
+                  Paste a PAT or API key.
+                </div>
+                {serverIds.map((id) => (
+                  <div key={`bearer-${id}`} style={{ marginBottom: '6px' }}>
+                    <label
+                      htmlFor={`mcp-bearer-${id}`}
+                      style={{
+                        fontSize: '10px',
+                        fontFamily: 'monospace',
+                        color: 'var(--vscode-descriptionForeground)',
+                        display: 'block',
+                        marginBottom: '2px',
+                      }}
+                    >
+                      {id}
+                    </label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontFamily: 'monospace',
+                          color: 'var(--vscode-descriptionForeground)',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        Bearer
+                      </span>
+                      <input
+                        id={`mcp-bearer-${id}`}
+                        type="password"
+                        placeholder="Paste token here"
+                        value={tokens?.[id] || ''}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/^Bearer\s+/i, '');
+                          onTokenChange(id, val);
+                        }}
+                        style={{
+                          flex: 1,
+                          padding: '4px 8px',
+                          backgroundColor: 'var(--vscode-input-background)',
+                          color: 'var(--vscode-input-foreground)',
+                          border: '1px solid var(--vscode-input-border)',
+                          borderRadius: '2px',
+                          fontSize: '11px',
+                          fontFamily: 'monospace',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* "or" divider */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  margin: '10px 0',
+                }}
+              >
+                <div
+                  style={{
+                    flex: 1,
+                    height: '1px',
+                    backgroundColor: 'var(--vscode-panel-border)',
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: '10px',
+                    color: 'var(--vscode-descriptionForeground)',
+                  }}
+                >
+                  or
+                </span>
+                <div
+                  style={{
+                    flex: 1,
+                    height: '1px',
+                    backgroundColor: 'var(--vscode-panel-border)',
+                  }}
+                />
+              </div>
+
+              {/* Section 2: OAuth via MCP Inspector */}
+              <div
+                style={{
+                  padding: '8px 10px',
+                  backgroundColor: 'var(--vscode-textCodeBlock-background)',
+                  border: '1px solid var(--vscode-panel-border)',
+                  borderRadius: '4px',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    color: 'var(--vscode-foreground)',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Obtain Token via OAuth
+                </div>
+                <div style={{ fontSize: '10px', marginBottom: '8px' }}>
+                  Use{' '}
                   <span
                     role="button"
                     tabIndex={0}
-                    onClick={() => {
-                      navigator.clipboard.writeText('npx @modelcontextprotocol/inspector');
-                      setCopiedCmd(true);
-                      setTimeout(() => setCopiedCmd(false), 2000);
-                    }}
+                    onClick={() =>
+                      openExternalUrl('https://modelcontextprotocol.io/docs/tools/inspector')
+                    }
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
-                        navigator.clipboard.writeText('npx @modelcontextprotocol/inspector');
-                        setCopiedCmd(true);
-                        setTimeout(() => setCopiedCmd(false), 2000);
+                        openExternalUrl('https://modelcontextprotocol.io/docs/tools/inspector');
                       }
                     }}
                     style={{
                       cursor: 'pointer',
-                      color: copiedCmd
-                        ? 'var(--vscode-testing-iconPassed, #73c991)'
-                        : 'var(--vscode-descriptionForeground)',
-                      display: 'inline-flex',
-                    }}
-                    title={copiedCmd ? 'Copied!' : 'Copy to clipboard'}
-                  >
-                    {copiedCmd ? <Check size={10} /> : <Copy size={10} />}
-                  </span>
-                </li>
-                <li>
-                  In the sidebar: select transport type, enter the server URL, and click "Connect"
-                </li>
-                <li>In the main area: click "Open Auth Settings" → "Quick OAuth Flow"</li>
-                <li>
-                  Complete authorization, expand "Access Token" at the bottom of OAuth Flow
-                  Progress, and copy the <code style={{ fontSize: '10px' }}>access_token</code>{' '}
-                  value from the JSON
-                </li>
-              </ol>
-              {serverIds.map((id) => (
-                <div key={`token-${id}`} style={{ marginBottom: '6px' }}>
-                  <label
-                    htmlFor={`mcp-token-${id}`}
-                    style={{
-                      fontSize: '10px',
-                      fontFamily: 'monospace',
-                      color: 'var(--vscode-descriptionForeground)',
-                      display: 'block',
-                      marginBottom: '2px',
+                      color: 'var(--vscode-textLink-foreground)',
+                      textDecoration: 'underline',
                     }}
                   >
-                    {id}
-                  </label>
-                  <input
-                    id={`mcp-token-${id}`}
-                    type="password"
-                    placeholder="Paste access_token here"
-                    value={tokens?.[id] || ''}
-                    onChange={(e) => onTokenChange(id, e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '4px 8px',
-                      backgroundColor: 'var(--vscode-input-background)',
-                      color: 'var(--vscode-input-foreground)',
-                      border: '1px solid var(--vscode-input-border)',
-                      borderRadius: '2px',
-                      fontSize: '11px',
-                      fontFamily: 'monospace',
-                      boxSizing: 'border-box',
-                    }}
-                  />
+                    MCP Inspector <ExternalLink size={10} style={{ verticalAlign: 'middle' }} />
+                  </span>{' '}
+                  to complete OAuth flow:
                 </div>
-              ))}
+                <ol
+                  style={{
+                    margin: '0 0 8px 16px',
+                    padding: 0,
+                    fontSize: '10px',
+                    lineHeight: '1.6',
+                  }}
+                >
+                  <li
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}
+                  >
+                    Run:{' '}
+                    <code style={{ fontSize: '10px' }}>npx @modelcontextprotocol/inspector</code>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => {
+                        navigator.clipboard.writeText('npx @modelcontextprotocol/inspector');
+                        setCopiedCmd(true);
+                        setTimeout(() => setCopiedCmd(false), 2000);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          navigator.clipboard.writeText('npx @modelcontextprotocol/inspector');
+                          setCopiedCmd(true);
+                          setTimeout(() => setCopiedCmd(false), 2000);
+                        }
+                      }}
+                      style={{
+                        cursor: 'pointer',
+                        color: copiedCmd
+                          ? 'var(--vscode-testing-iconPassed, #73c991)'
+                          : 'var(--vscode-descriptionForeground)',
+                        display: 'inline-flex',
+                      }}
+                      title={copiedCmd ? 'Copied!' : 'Copy to clipboard'}
+                    >
+                      {copiedCmd ? <Check size={10} /> : <Copy size={10} />}
+                    </span>
+                  </li>
+                  <li>
+                    In the sidebar: select transport type, enter the server URL, and click "Connect"
+                  </li>
+                  <li>In the main area: click "Open Auth Settings" → "Quick OAuth Flow"</li>
+                  <li>
+                    Complete authorization, expand "Access Token" at the bottom of OAuth Flow
+                    Progress, and copy the <code style={{ fontSize: '10px' }}>access_token</code>{' '}
+                    value from the JSON
+                  </li>
+                </ol>
+                {serverIds.map((id) => (
+                  <div key={`oauth-${id}`} style={{ marginBottom: '6px' }}>
+                    <label
+                      htmlFor={`mcp-token-${id}`}
+                      style={{
+                        fontSize: '10px',
+                        fontFamily: 'monospace',
+                        color: 'var(--vscode-descriptionForeground)',
+                        display: 'block',
+                        marginBottom: '2px',
+                      }}
+                    >
+                      {id}
+                    </label>
+                    <input
+                      id={`mcp-token-${id}`}
+                      type="password"
+                      placeholder="Paste access_token here"
+                      value={tokens?.[id] || ''}
+                      onChange={(e) => onTokenChange(id, e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '4px 8px',
+                        backgroundColor: 'var(--vscode-input-background)',
+                        color: 'var(--vscode-input-foreground)',
+                        border: '1px solid var(--vscode-input-border)',
+                        borderRadius: '2px',
+                        fontSize: '11px',
+                        fontFamily: 'monospace',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -1486,7 +1638,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
 
   const isMcpUrlsMissing =
     effectiveMcpServerIds.length > 0 &&
-    effectiveMcpServerIds.some((id) => !mcpServerUrls[id]?.trim());
+    effectiveMcpServerIds.some((id) => !mcpServerUrls[id]?.trim() && !mcpServerTokens[id]?.trim());
 
   const handleStartTest = async (
     skillId?: string,
@@ -3169,9 +3321,11 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                 gap: '4px',
                               }}
                             >
-                              ⚠ MCP Server URL が未入力です:{' '}
+                              ⚠ MCP Server の URL または Token が未入力です:{' '}
                               {effectiveMcpServerIds
-                                .filter((id) => !mcpServerUrls[id]?.trim())
+                                .filter(
+                                  (id) => !mcpServerUrls[id]?.trim() && !mcpServerTokens[id]?.trim()
+                                )
                                 .join(', ')}
                             </div>
                           )}
