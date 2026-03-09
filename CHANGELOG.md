@@ -1,3 +1,9 @@
+## [3.26.3](https://github.com/breaking-brake/cc-wf-studio/compare/v3.26.2...v3.26.3) (2026-03-09)
+
+### Bug Fixes
+
+* pass configured headers to HTTP MCP transport and add token management UI ([#632](https://github.com/breaking-brake/cc-wf-studio/issues/632)) ([a6b6fe9](https://github.com/breaking-brake/cc-wf-studio/commit/a6b6fe9409912039fd2dafe12a92ed937db1262e))
+
 ## [3.26.2](https://github.com/breaking-brake/cc-wf-studio/compare/v3.26.1...v3.26.2) (2026-03-01)
 
 ### Bug Fixes
