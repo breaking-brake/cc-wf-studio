@@ -637,7 +637,8 @@ export interface McpToolSchemaResultPayload {
       | 'MCP_CONNECTION_TIMEOUT'
       | 'MCP_CONNECTION_ERROR'
       | 'MCP_UNSUPPORTED_TRANSPORT'
-      | 'MCP_INVALID_CONFIG';
+      | 'MCP_INVALID_CONFIG'
+      | 'MCP_AUTH_REQUIRED';
     message: string;
     details?: string;
   };

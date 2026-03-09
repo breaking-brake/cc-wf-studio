@@ -70,9 +70,11 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
     if (!wizard.state.selectedServer?.id) return;
     setRemovingToken(true);
     try {
-      await deleteMcpBearerToken(wizard.state.selectedServer.id);
-      setHasToken(false);
-      setToolListRefreshKey((k) => k + 1);
+      const result = await deleteMcpBearerToken(wizard.state.selectedServer.id);
+      if (result.success) {
+        setHasToken(false);
+        setToolListRefreshKey((k) => k + 1);
+      }
     } catch {
       // ignore
     } finally {
