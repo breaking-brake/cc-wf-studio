@@ -12,6 +12,8 @@
 
 import * as vscode from 'vscode';
 import type {
+  CheckMcpBearerTokenPayload,
+  DeleteMcpBearerTokenPayload,
   GetMcpToolSchemaPayload,
   GetMcpToolsPayload,
   ListMcpServersPayload,
@@ -20,6 +22,7 @@ import type {
   McpToolSchemaResultPayload,
   McpToolsResultPayload,
   RefreshMcpCachePayload,
+  SaveMcpBearerTokenPayload,
 } from '../../shared/types/messages';
 import { log } from '../extension';
 import {
@@ -253,7 +256,8 @@ export async function handleListMcpServers(
 export async function handleGetMcpTools(
   payload: GetMcpToolsPayload,
   webview: vscode.Webview,
-  requestId: string
+  requestId: string,
+  secretStorage?: vscode.SecretStorage
 ): Promise<void> {
   const startTime = Date.now();
 
@@ -267,7 +271,7 @@ export async function handleGetMcpTools(
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 
     // Use getTools() with built-in caching (T045, T046)
-    const result = await getTools(payload.serverId, workspaceFolder);
+    const result = await getTools(payload.serverId, workspaceFolder, secretStorage);
     const executionTimeMs = Date.now() - startTime;
 
     if (!result.success || !result.data) {
@@ -361,7 +365,8 @@ export async function handleGetMcpTools(
 export async function handleGetMcpToolSchema(
   payload: GetMcpToolSchemaPayload,
   webview: vscode.Webview,
-  requestId: string
+  requestId: string,
+  secretStorage?: vscode.SecretStorage
 ): Promise<void> {
   const startTime = Date.now();
 
@@ -376,7 +381,12 @@ export async function handleGetMcpToolSchema(
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 
     // Execute tool schema retrieval
-    const result = await getToolSchema(payload.serverId, payload.toolName, workspaceFolder);
+    const result = await getToolSchema(
+      payload.serverId,
+      payload.toolName,
+      workspaceFolder,
+      secretStorage
+    );
     const executionTimeMs = Date.now() - startTime;
 
     if (!result.success || !result.data) {
@@ -524,6 +534,92 @@ export async function handleRefreshMcpCache(
       type: 'MCP_CACHE_REFRESHED',
       requestId,
       payload: errorPayload,
+    });
+  }
+}
+
+/**
+ * Handle SAVE_MCP_BEARER_TOKEN request from Webview
+ *
+ * Saves a Bearer token for an MCP server to SecretStorage,
+ * then invalidates the tools cache so a retry will use the new token.
+ */
+export async function handleSaveMcpBearerToken(
+  payload: SaveMcpBearerTokenPayload,
+  secretStorage: vscode.SecretStorage
+): Promise<void> {
+  log('INFO', 'SAVE_MCP_BEARER_TOKEN request', { serverId: payload.serverId });
+  await secretStorage.store(`mcp-bearer-token-${payload.serverId}`, payload.token);
+  // Invalidate cache so the next GET_MCP_TOOLS call retries with the new token
+  const { invalidateServerCache } = await import('../services/mcp-cache-service');
+  invalidateServerCache(payload.serverId);
+  log('INFO', 'Bearer token saved and cache invalidated', { serverId: payload.serverId });
+}
+
+/**
+ * Handle DELETE_MCP_BEARER_TOKEN request from Webview
+ *
+ * Deletes a saved Bearer token for an MCP server from SecretStorage,
+ * then invalidates the tools cache.
+ */
+export async function handleDeleteMcpBearerToken(
+  payload: DeleteMcpBearerTokenPayload,
+  secretStorage: vscode.SecretStorage,
+  webview: vscode.Webview,
+  requestId: string
+): Promise<void> {
+  log('INFO', 'DELETE_MCP_BEARER_TOKEN request', { serverId: payload.serverId });
+  try {
+    await secretStorage.delete(`mcp-bearer-token-${payload.serverId}`);
+    const { invalidateServerCache } = await import('../services/mcp-cache-service');
+    invalidateServerCache(payload.serverId);
+    log('INFO', 'Bearer token deleted and cache invalidated', { serverId: payload.serverId });
+    webview.postMessage({
+      type: 'DELETE_MCP_BEARER_TOKEN_RESULT',
+      requestId,
+      payload: { success: true },
+    });
+  } catch (error) {
+    log('ERROR', 'Failed to delete bearer token', {
+      serverId: payload.serverId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    webview.postMessage({
+      type: 'DELETE_MCP_BEARER_TOKEN_RESULT',
+      requestId,
+      payload: { success: false },
+    });
+  }
+}
+
+/**
+ * Handle CHECK_MCP_BEARER_TOKEN request from Webview
+ *
+ * Checks if a Bearer token exists for a given MCP server in SecretStorage.
+ */
+export async function handleCheckMcpBearerToken(
+  payload: CheckMcpBearerTokenPayload,
+  secretStorage: vscode.SecretStorage,
+  webview: vscode.Webview,
+  requestId: string
+): Promise<void> {
+  log('INFO', 'CHECK_MCP_BEARER_TOKEN request', { serverId: payload.serverId });
+  try {
+    const token = await secretStorage.get(`mcp-bearer-token-${payload.serverId}`);
+    webview.postMessage({
+      type: 'CHECK_MCP_BEARER_TOKEN_RESULT',
+      requestId,
+      payload: { exists: !!token },
+    });
+  } catch (error) {
+    log('ERROR', 'Failed to check bearer token', {
+      serverId: payload.serverId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    webview.postMessage({
+      type: 'CHECK_MCP_BEARER_TOKEN_RESULT',
+      requestId,
+      payload: { exists: false },
     });
   }
 }

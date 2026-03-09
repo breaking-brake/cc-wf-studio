@@ -68,10 +68,13 @@ import { handleExportForGeminiCli, handleRunForGeminiCli } from './gemini-handle
 import { loadWorkflow } from './load-workflow';
 import { loadWorkflowList } from './load-workflow-list';
 import {
+  handleCheckMcpBearerToken,
+  handleDeleteMcpBearerToken,
   handleGetMcpToolSchema,
   handleGetMcpTools,
   handleListMcpServers,
   handleRefreshMcpCache,
+  handleSaveMcpBearerToken,
 } from './mcp-handlers';
 import { handleExportForRooCode, handleRunForRooCode } from './roo-code-handlers';
 import { saveWorkflow } from './save-workflow';
@@ -906,7 +909,12 @@ export function registerOpenEditorCommand(
             case 'GET_MCP_TOOLS':
               // Get tools from a specific MCP server (T019)
               if (message.payload?.serverId) {
-                await handleGetMcpTools(message.payload, webview, message.requestId || '');
+                await handleGetMcpTools(
+                  message.payload,
+                  webview,
+                  message.requestId || '',
+                  context.secrets
+                );
               } else {
                 webview.postMessage({
                   type: 'ERROR',
@@ -922,7 +930,12 @@ export function registerOpenEditorCommand(
             case 'GET_MCP_TOOL_SCHEMA':
               // Get detailed schema for a specific tool (T028)
               if (message.payload?.serverId && message.payload?.toolName) {
-                await handleGetMcpToolSchema(message.payload, webview, message.requestId || '');
+                await handleGetMcpToolSchema(
+                  message.payload,
+                  webview,
+                  message.requestId || '',
+                  context.secrets
+                );
               } else {
                 webview.postMessage({
                   type: 'ERROR',
@@ -932,6 +945,34 @@ export function registerOpenEditorCommand(
                     message: 'Server ID and Tool Name are required',
                   },
                 });
+              }
+              break;
+
+            case 'SAVE_MCP_BEARER_TOKEN':
+              if (message.payload?.serverId && message.payload?.token) {
+                await handleSaveMcpBearerToken(message.payload, context.secrets);
+              }
+              break;
+
+            case 'DELETE_MCP_BEARER_TOKEN':
+              if (message.payload?.serverId) {
+                await handleDeleteMcpBearerToken(
+                  message.payload,
+                  context.secrets,
+                  webview,
+                  message.requestId || ''
+                );
+              }
+              break;
+
+            case 'CHECK_MCP_BEARER_TOKEN':
+              if (message.payload?.serverId) {
+                await handleCheckMcpBearerToken(
+                  message.payload,
+                  context.secrets,
+                  webview,
+                  message.requestId || ''
+                );
               }
               break;
 

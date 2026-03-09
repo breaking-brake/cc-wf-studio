@@ -571,7 +571,8 @@ export interface McpToolsResultPayload {
       | 'MCP_UNSUPPORTED_TRANSPORT'
       | 'MCP_INVALID_CONFIG'
       | 'MCP_CONNECTION_TIMEOUT'
-      | 'MCP_CONNECTION_ERROR';
+      | 'MCP_CONNECTION_ERROR'
+      | 'MCP_AUTH_REQUIRED';
     message: string;
     details?: string;
   };
@@ -579,6 +580,26 @@ export interface McpToolsResultPayload {
   timestamp: string; // ISO 8601
   /** Execution time in milliseconds */
   executionTimeMs: number;
+}
+
+/**
+ * Save MCP Bearer token payload (webview → extension)
+ */
+export interface DeleteMcpBearerTokenPayload {
+  /** MCP server identifier */
+  serverId: string;
+}
+
+export interface CheckMcpBearerTokenPayload {
+  /** MCP server identifier */
+  serverId: string;
+}
+
+export interface SaveMcpBearerTokenPayload {
+  /** MCP server identifier */
+  serverId: string;
+  /** Bearer token value */
+  token: string;
 }
 
 /**
@@ -616,7 +637,8 @@ export interface McpToolSchemaResultPayload {
       | 'MCP_CONNECTION_TIMEOUT'
       | 'MCP_CONNECTION_ERROR'
       | 'MCP_UNSUPPORTED_TRANSPORT'
-      | 'MCP_INVALID_CONFIG';
+      | 'MCP_INVALID_CONFIG'
+      | 'MCP_AUTH_REQUIRED';
     message: string;
     details?: string;
   };
@@ -1071,7 +1093,9 @@ export type ExtensionMessage =
   | Message<void, 'SAVE_MCP_SERVER_URLS_SUCCESS'>
   | Message<LookupMcpRegistryResultPayload, 'LOOKUP_MCP_REGISTRY_RESULT'>
   | Message<GetSkillVersionDetailsSuccessPayload, 'GET_SKILL_VERSION_DETAILS_SUCCESS'>
-  | Message<GetSkillVersionDetailsFailedPayload, 'GET_SKILL_VERSION_DETAILS_FAILED'>;
+  | Message<GetSkillVersionDetailsFailedPayload, 'GET_SKILL_VERSION_DETAILS_FAILED'>
+  | Message<{ success: boolean }, 'DELETE_MCP_BEARER_TOKEN_RESULT'>
+  | Message<{ exists: boolean }, 'CHECK_MCP_BEARER_TOKEN_RESULT'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -2090,6 +2114,9 @@ export type WebviewMessage =
   | Message<ListMcpServersPayload, 'LIST_MCP_SERVERS'>
   | Message<GetMcpToolsPayload, 'GET_MCP_TOOLS'>
   | Message<GetMcpToolSchemaPayload, 'GET_MCP_TOOL_SCHEMA'>
+  | Message<SaveMcpBearerTokenPayload, 'SAVE_MCP_BEARER_TOKEN'>
+  | Message<DeleteMcpBearerTokenPayload, 'DELETE_MCP_BEARER_TOKEN'>
+  | Message<CheckMcpBearerTokenPayload, 'CHECK_MCP_BEARER_TOKEN'>
   | Message<ValidateMcpNodePayload, 'VALIDATE_MCP_NODE'>
   | Message<UpdateMcpNodePayload, 'UPDATE_MCP_NODE'>
   | Message<RefreshMcpCachePayload, 'REFRESH_MCP_CACHE'>

@@ -272,3 +272,77 @@ export async function refreshMcpCache(
     }, REQUEST_TIMEOUT);
   });
 }
+
+/**
+ * Save a Bearer token for an MCP server (fire-and-forget)
+ */
+export function saveMcpBearerToken(serverId: string, token: string): void {
+  vscode.postMessage({
+    type: 'SAVE_MCP_BEARER_TOKEN',
+    payload: { serverId, token },
+  });
+}
+
+/**
+ * Delete a saved Bearer token for an MCP server
+ */
+export async function deleteMcpBearerToken(serverId: string): Promise<{ success: boolean }> {
+  return new Promise((resolve, reject) => {
+    const requestId = `delete-bearer-token-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message = event.data;
+      if (message.requestId !== requestId) return;
+
+      if (message.type === 'DELETE_MCP_BEARER_TOKEN_RESULT') {
+        window.removeEventListener('message', handler);
+        resolve(message.payload);
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    vscode.postMessage({
+      type: 'DELETE_MCP_BEARER_TOKEN',
+      requestId,
+      payload: { serverId },
+    });
+
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timeout: DELETE_MCP_BEARER_TOKEN'));
+    }, 10000);
+  });
+}
+
+/**
+ * Check if a Bearer token exists for an MCP server
+ */
+export async function checkMcpBearerToken(serverId: string): Promise<{ exists: boolean }> {
+  return new Promise((resolve, reject) => {
+    const requestId = `check-bearer-token-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message = event.data;
+      if (message.requestId !== requestId) return;
+
+      if (message.type === 'CHECK_MCP_BEARER_TOKEN_RESULT') {
+        window.removeEventListener('message', handler);
+        resolve(message.payload);
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    vscode.postMessage({
+      type: 'CHECK_MCP_BEARER_TOKEN',
+      requestId,
+      payload: { serverId },
+    });
+
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timeout: CHECK_MCP_BEARER_TOKEN'));
+    }, 10000);
+  });
+}
