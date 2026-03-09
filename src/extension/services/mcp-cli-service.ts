@@ -18,6 +18,27 @@ import { getClaudeSpawnCommand } from './claude-cli-path';
 import { getCachedTools, setCachedTools } from './mcp-cache-service';
 
 /**
+ * Prompt the user for a Bearer token via VSCode InputBox.
+ * Shows instructions for using MCP Inspector to obtain the token.
+ */
+/**
+ * Check if an error indicates HTTP 401 Unauthorized.
+ * Covers the SDK's UnauthorizedError and generic HTTP error messages.
+ */
+function isUnauthorizedError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const name = (error as { name?: string }).name;
+  const message = (error as { message?: string }).message ?? '';
+  const code = (error as { code?: number | string }).code;
+  return (
+    name === 'UnauthorizedError' ||
+    code === 401 ||
+    message.includes('Unauthorized') ||
+    message.includes('401')
+  );
+}
+
+/**
  * nano-spawn type definitions (manually defined for compatibility)
  */
 interface SubprocessError extends Error {
@@ -61,7 +82,8 @@ export type McpErrorCode =
   | 'MCP_UNSUPPORTED_TRANSPORT'
   | 'MCP_INVALID_CONFIG'
   | 'MCP_CONNECTION_TIMEOUT'
-  | 'MCP_CONNECTION_ERROR';
+  | 'MCP_CONNECTION_ERROR'
+  | 'MCP_AUTH_REQUIRED';
 
 export interface McpExecutionError {
   code: McpErrorCode;
@@ -598,7 +620,8 @@ function parseMcpGetOutput(output: string, serverId: string): McpServerReference
  */
 export async function listTools(
   serverId: string,
-  workspacePath?: string
+  workspacePath?: string,
+  secretStorage?: import('vscode').SecretStorage
 ): Promise<McpExecutionResult<McpToolReference[]>> {
   const startTime = Date.now();
 
@@ -636,7 +659,18 @@ export async function listTools(
     }
 
     try {
-      const tools = await listToolsFromMcpServerHttp(serverId, serverConfig.url);
+      // Build headers: static config headers + Bearer token from SecretStorage
+      const headers: Record<string, string> = { ...serverConfig.headers };
+      if (secretStorage) {
+        const storedToken = await secretStorage.get(`mcp-bearer-token-${serverId}`);
+        if (storedToken) {
+          headers.Authorization = `Bearer ${storedToken}`;
+        }
+      }
+
+      const tools = await listToolsFromMcpServerHttp(serverId, serverConfig.url, {
+        headers: Object.keys(headers).length > 0 ? headers : undefined,
+      });
 
       log('INFO', 'Successfully listed MCP tools via HTTP', {
         serverId,
@@ -659,6 +693,20 @@ export async function listTools(
             code: 'MCP_CONNECTION_TIMEOUT',
             message: `Connection to MCP server '${serverId}' timed out`,
             details: error.message,
+          },
+          executionTimeMs,
+        };
+      }
+
+      // 401 Unauthorized: return MCP_AUTH_REQUIRED so the webview can show token input UI
+      if (isUnauthorizedError(error)) {
+        log('INFO', 'HTTP MCP server returned 401, auth required', { serverId });
+        return {
+          success: false,
+          error: {
+            code: 'MCP_AUTH_REQUIRED',
+            message: `MCP server '${serverId}' requires authentication.`,
+            details: serverConfig.url,
           },
           executionTimeMs,
         };
@@ -787,7 +835,8 @@ export async function listTools(
  */
 export async function getTools(
   serverId: string,
-  workspacePath?: string
+  workspacePath?: string,
+  secretStorage?: import('vscode').SecretStorage
 ): Promise<McpExecutionResult<McpToolReference[]>> {
   // Check cache first
   const cachedTools = getCachedTools(serverId);
@@ -808,7 +857,7 @@ export async function getTools(
   // Cache miss - fetch from MCP server
   log('INFO', 'getTools - cache miss, fetching from server', { serverId });
 
-  const result = await listTools(serverId, workspacePath);
+  const result = await listTools(serverId, workspacePath, secretStorage);
 
   // Cache successful results
   if (result.success && result.data) {
@@ -834,7 +883,8 @@ export async function getTools(
 export async function getToolSchema(
   serverId: string,
   toolName: string,
-  workspacePath?: string
+  workspacePath?: string,
+  secretStorage?: import('vscode').SecretStorage
 ): Promise<McpExecutionResult<McpToolReference>> {
   const startTime = Date.now();
 
@@ -877,7 +927,18 @@ export async function getToolSchema(
     }
 
     try {
-      const tools = await listToolsFromMcpServerHttp(serverId, serverConfig.url);
+      // Build headers: static config headers + Bearer token from SecretStorage
+      const headers: Record<string, string> = { ...serverConfig.headers };
+      if (secretStorage) {
+        const storedToken = await secretStorage.get(`mcp-bearer-token-${serverId}`);
+        if (storedToken) {
+          headers.Authorization = `Bearer ${storedToken}`;
+        }
+      }
+
+      const tools = await listToolsFromMcpServerHttp(serverId, serverConfig.url, {
+        headers: Object.keys(headers).length > 0 ? headers : undefined,
+      });
       const tool = tools.find((t) => t.name === toolName);
 
       if (!tool) {
@@ -914,6 +975,20 @@ export async function getToolSchema(
             code: 'MCP_CONNECTION_TIMEOUT',
             message: `Connection to MCP server '${serverId}' timed out`,
             details: error.message,
+          },
+          executionTimeMs,
+        };
+      }
+
+      // 401 Unauthorized: return MCP_AUTH_REQUIRED so the webview can show token input UI
+      if (isUnauthorizedError(error)) {
+        log('INFO', 'HTTP MCP server returned 401, auth required', { serverId, toolName });
+        return {
+          success: false,
+          error: {
+            code: 'MCP_AUTH_REQUIRED',
+            message: `MCP server '${serverId}' requires authentication.`,
+            details: serverConfig.url,
           },
           executionTimeMs,
         };

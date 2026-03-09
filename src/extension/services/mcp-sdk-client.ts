@@ -211,13 +211,23 @@ export async function listToolsFromMcpServer(
  * @param timeoutMs - Connection timeout in milliseconds (default: 5000)
  * @returns Connected MCP client
  */
-export async function connectToMcpServerHttp(url: string, timeoutMs = 5000): Promise<Client> {
+export async function connectToMcpServerHttp(
+  url: string,
+  options?: {
+    headers?: Record<string, string>;
+    timeoutMs?: number;
+  }
+): Promise<Client> {
+  const timeoutMs = options?.timeoutMs ?? 5000;
+
   log('INFO', 'Connecting to MCP server via HTTP transport', {
     url,
     timeoutMs,
   });
 
-  const transport = new StreamableHTTPClientTransport(new URL(url));
+  const transport = new StreamableHTTPClientTransport(new URL(url), {
+    ...(options?.headers ? { requestInit: { headers: options.headers } } : {}),
+  });
 
   const client = new Client(
     {
@@ -260,7 +270,10 @@ export async function connectToMcpServerHttp(url: string, timeoutMs = 5000): Pro
  */
 export async function listToolsFromMcpServerHttp(
   serverId: string,
-  url: string
+  url: string,
+  options?: {
+    headers?: Record<string, string>;
+  }
 ): Promise<McpToolReference[]> {
   const startTime = Date.now();
 
@@ -272,7 +285,9 @@ export async function listToolsFromMcpServerHttp(
   let client: Client | null = null;
 
   try {
-    client = await connectToMcpServerHttp(url);
+    client = await connectToMcpServerHttp(url, {
+      headers: options?.headers,
+    });
 
     const response = await client.listTools();
 
