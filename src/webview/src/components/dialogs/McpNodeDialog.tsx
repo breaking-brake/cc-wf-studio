@@ -12,6 +12,7 @@ import { NodeType } from '@shared/types/workflow-definition';
 import { useEffect, useState } from 'react';
 import { useMcpCreationWizard, WizardStep } from '../../hooks/useMcpCreationWizard';
 import { useTranslation } from '../../i18n/i18n-context';
+import { checkMcpBearerToken, deleteMcpBearerToken } from '../../services/mcp-service';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { WizardStepIndicator } from '../common/WizardStepIndicator';
 import { McpServerList } from '../mcp/McpServerList';
@@ -33,6 +34,10 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
   const [error, setError] = useState<string | null>(null);
   const [showValidation, setShowValidation] = useState(false);
 
+  const [hasToken, setHasToken] = useState(false);
+  const [removingToken, setRemovingToken] = useState(false);
+  const [toolListRefreshKey, setToolListRefreshKey] = useState(0);
+
   const wizard = useMcpCreationWizard();
   const { addNode, nodes } = useWorkflowStore();
 
@@ -44,6 +49,38 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
     setShowValidation(false);
     setError(null);
   }, [wizard.state.currentStep]);
+
+  /**
+   * Check if a Bearer token exists for the selected server when entering ToolOrTaskConfig step
+   */
+  useEffect(() => {
+    if (
+      wizard.state.currentStep === WizardStep.ToolOrTaskConfig &&
+      wizard.state.selectedServer?.id
+    ) {
+      checkMcpBearerToken(wizard.state.selectedServer.id)
+        .then((result) => setHasToken(result.exists))
+        .catch(() => setHasToken(false));
+    } else {
+      setHasToken(false);
+    }
+  }, [wizard.state.currentStep, wizard.state.selectedServer?.id]);
+
+  const handleRemoveToken = async () => {
+    if (!wizard.state.selectedServer?.id) return;
+    setRemovingToken(true);
+    try {
+      const result = await deleteMcpBearerToken(wizard.state.selectedServer.id);
+      if (result.success) {
+        setHasToken(false);
+        setToolListRefreshKey((k) => k + 1);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setRemovingToken(false);
+    }
+  };
 
   /**
    * Calculate non-overlapping position for new node
@@ -259,6 +296,42 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
         // aiParameterConfig / manualParameterConfig → Tool selection
         return (
           <div>
+            {hasToken && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '8px 12px',
+                  marginBottom: '12px',
+                  backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
+                  border: '1px solid var(--vscode-panel-border)',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                }}
+              >
+                <span style={{ color: 'var(--vscode-foreground)' }}>
+                  Saved authentication token
+                </span>
+                <button
+                  type="button"
+                  onClick={handleRemoveToken}
+                  disabled={removingToken}
+                  style={{
+                    padding: '3px 10px',
+                    backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                    color: 'var(--vscode-button-secondaryForeground)',
+                    border: 'none',
+                    borderRadius: '3px',
+                    fontSize: '11px',
+                    cursor: removingToken ? 'not-allowed' : 'pointer',
+                    opacity: removingToken ? 0.6 : 1,
+                  }}
+                >
+                  {removingToken ? 'Removing...' : 'Remove'}
+                </button>
+              </div>
+            )}
             <h3
               style={{
                 margin: '0 0 12px 0',
@@ -279,6 +352,8 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
                 }}
                 selectedToolName={wizard.state.selectedTool?.name}
                 searchQuery={searchQuery}
+                refreshKey={toolListRefreshKey}
+                onTokenSaved={() => setHasToken(true)}
               />
             </div>
           </div>
