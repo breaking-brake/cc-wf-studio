@@ -129,17 +129,20 @@ ${mcpServers.map((s) => `      {"type": "url", "url": "${s.url || ''}", "name": 
 
     case 'python': {
       const toolsList = '{"type": "code_execution_20250825", "name": "code_execution"}';
-      const mcpServersSection =
-        hasMcpServers && mcpServers
-          ? `,
-    mcp_servers=[
-${mcpServers.map((s) => `        {"type": "url", "url": "${s.url || ''}", "name": "${s.id}"}`).join(',\n')}
-    ]`
-          : '';
       const toolsArray = `[${toolsList}${hasMcpServers && mcpServers ? `, ${mcpServers.map((s) => `{"type": "mcp_toolset", "mcp_server_name": "${s.id}"}`).join(', ')}` : ''}]`;
 
+      const extraBody = hasMcpServers
+        ? `,
+    extra_body={
+        "mcp_servers": [
+${mcpServers?.map((s) => `            {"type": "url", "url": "${s.url || ''}", "name": "${s.id}"}`).join(',\n')}
+        ]
+    }`
+        : '';
+
       const extraHeaders = hasMcpServers
-        ? ', extra_headers={"anthropic-beta": "code-execution-2025-08-25,skills-2025-10-02,mcp-client-2025-11-20"}'
+        ? `,
+    extra_headers={"anthropic-beta": "code-execution-2025-08-25,skills-2025-10-02,mcp-client-2025-11-20"}`
         : '';
 
       const systemParam = system
@@ -154,27 +157,28 @@ client = anthropic.Anthropic()  # uses ANTHROPIC_API_KEY env var
 response = client.messages.create(
     model="${modelId}",
     max_tokens=4096,
-    container={"skills": [{"type": "custom", "skill_id": "${skillId}", "version": "latest"}]}${mcpServersSection},
+    container={"skills": [{"type": "custom", "skill_id": "${skillId}", "version": "latest"}]},
     tools=${toolsArray},
-    messages=[{"role": "user", "content": "${promptContent}"}]${systemParam}${extraHeaders},
+    messages=[{"role": "user", "content": "${promptContent}"}]${systemParam}${extraHeaders}${extraBody},
 )
 print(response.content[0].text)`;
     }
 
     case 'typescript': {
       const toolsList = '{ type: "code_execution_20250825", name: "code_execution" }';
-      const mcpServersSection =
-        hasMcpServers && mcpServers
-          ? `,
-    mcp_servers: [
-${mcpServers.map((s) => `      { type: "url", url: "${s.url || ''}", name: "${s.id}" }`).join(',\n')}
-    ]`
-          : '';
       const toolsArray = `[${toolsList}${hasMcpServers && mcpServers ? `, ${mcpServers.map((s) => `{ type: "mcp_toolset", mcp_server_name: "${s.id}" }`).join(', ')}` : ''}]`;
 
-      const extraHeaders = hasMcpServers
-        ? `,
-  headers: { "anthropic-beta": "code-execution-2025-08-25,skills-2025-10-02,mcp-client-2025-11-20" }`
+      const mcpServersField = hasMcpServers
+        ? `
+  mcp_servers: [
+${mcpServers?.map((s) => `    { type: "url", url: "${s.url || ''}", name: "${s.id}" }`).join(',\n')}
+  ],`
+        : '';
+
+      const requestOptions = hasMcpServers
+        ? `, {
+  headers: { "anthropic-beta": "code-execution-2025-08-25,skills-2025-10-02,mcp-client-2025-11-20" },
+}`
         : '';
 
       const systemField = system
@@ -189,10 +193,10 @@ const client = new Anthropic(); // uses ANTHROPIC_API_KEY env var
 const response = await client.messages.create({
   model: "${modelId}",
   max_tokens: 4096,${systemField}
-  container: { skills: [{ type: "custom", skill_id: "${skillId}", version: "latest" }] }${mcpServersSection},
-  tools: ${toolsArray}${extraHeaders},
+  container: { skills: [{ type: "custom", skill_id: "${skillId}", version: "latest" }] },
+  tools: ${toolsArray},${mcpServersField}
   messages: [{ role: "user", content: "${promptContent}" }],
-});
+}${requestOptions});
 console.log(response.content[0].text);`;
     }
   }
@@ -202,64 +206,183 @@ function generateAuthSampleCode(
   lang: SampleCodeLang,
   mcpServers: Array<{ id: string; url: string }>
 ): string {
+  // Extract base URL for OAuth discovery (remove /mcp path)
+  const firstServer = mcpServers[0];
+  const baseUrl = firstServer ? firstServer.url.replace(/\/mcp$/, '') : 'https://mcp.example.com';
+
   if (lang === 'curl') {
-    return `# MCP servers with authorization_token
-# Replace YOUR_ACCESS_TOKEN with actual OAuth token
+    return `# Step 1: OAuth Discovery
+curl ${baseUrl}/.well-known/oauth-authorization-server
+
+# Step 2: Dynamic Client Registration
+curl -X POST ${baseUrl}/register \\
+  -H "content-type: application/json" \\
+  -d '{"client_name": "my-app", "redirect_uris": ["http://localhost:3000/callback"], "grant_types": ["authorization_code"], "token_endpoint_auth_method": "none"}'
+
+# Step 3: Open browser for authorization (use client_id from Step 2)
+# ${baseUrl}/authorize?response_type=code&client_id=CLIENT_ID&redirect_uri=http://localhost:3000/callback&code_challenge=CHALLENGE&code_challenge_method=S256
+
+# Step 4: Exchange code for token
+curl -X POST ${baseUrl}/token \\
+  -d "grant_type=authorization_code&code=AUTH_CODE&redirect_uri=http://localhost:3000/callback&client_id=CLIENT_ID&code_verifier=VERIFIER"
+
+# Step 5: Use the access_token in your API call
 "mcp_servers": [
-${mcpServers.map((s) => `  {"type": "url", "url": "${s.url}", "name": "${s.id}", "authorization_token": "YOUR_ACCESS_TOKEN"}`).join(',\n')}
+${mcpServers.map((s) => `  {"type": "url", "url": "${s.url}", "name": "${s.id}", "authorization_token": "ACCESS_TOKEN"}`).join(',\n')}
 ]`;
   }
 
   if (lang === 'python') {
-    return `# Web App Integration - OAuth token management
+    return `# MCP OAuth Authentication + Claude API Integration
 import anthropic
-from your_auth_module import get_or_refresh_token  # your OAuth implementation
+import requests
+import secrets
+import hashlib
+import base64
 
-def call_with_mcp(user_id: str, prompt: str):
+# --- Step 1: OAuth Discovery ---
+def discover_oauth(mcp_base_url: str) -> dict:
+    resp = requests.get(f"{mcp_base_url}/.well-known/oauth-authorization-server")
+    resp.raise_for_status()
+    return resp.json()
+
+# --- Step 2: Dynamic Client Registration ---
+def register_client(registration_endpoint: str, redirect_uri: str) -> dict:
+    resp = requests.post(registration_endpoint, json={
+        "client_name": "my-app",
+        "redirect_uris": [redirect_uri],
+        "grant_types": ["authorization_code", "refresh_token"],
+        "token_endpoint_auth_method": "none",
+    })
+    resp.raise_for_status()
+    return resp.json()
+
+# --- Step 3: PKCE helpers ---
+def generate_pkce():
+    verifier = secrets.token_urlsafe(64)
+    digest = hashlib.sha256(verifier.encode("ascii")).digest()
+    challenge = base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii")
+    return verifier, challenge
+
+# --- Step 4: Token Exchange ---
+def exchange_token(token_endpoint: str, client_id: str, code: str,
+                   redirect_uri: str, code_verifier: str) -> dict:
+    resp = requests.post(token_endpoint, data={
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": redirect_uri,
+        "client_id": client_id,
+        "code_verifier": code_verifier,
+    })
+    resp.raise_for_status()
+    return resp.json()
+
+# --- Step 5: Call Claude API with OAuth token ---
+def call_with_mcp(access_token: str, prompt: str):
     client = anthropic.Anthropic()
-${mcpServers.map((s) => `    ${s.id.replace(/[^a-zA-Z0-9]/g, '_')}_token = get_or_refresh_token(user_id, "${s.id}")`).join('\n')}
-
     return client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=4096,
-        mcp_servers=[
-${mcpServers
-  .map((s) => {
-    const varName = s.id.replace(/[^a-zA-Z0-9]/g, '_') + '_token';
-    return `            {"type": "url", "url": "${s.url}", "name": "${s.id}", "authorization_token": ${varName}}`;
-  })
-  .join(',\n')}
-        ],
-        tools=[${mcpServers.map((s) => `{"type": "mcp_toolset", "mcp_server_name": "${s.id}"}`).join(', ')}],
+        tools=[{"type": "code_execution_20250825", "name": "code_execution"}, ${mcpServers.map((s) => `{"type": "mcp_toolset", "mcp_server_name": "${s.id}"}`).join(', ')}],
         messages=[{"role": "user", "content": prompt}],
         extra_headers={"anthropic-beta": "code-execution-2025-08-25,skills-2025-10-02,mcp-client-2025-11-20"},
-    )`;
+        extra_body={
+            "mcp_servers": [
+${mcpServers
+  .map(
+    (s) =>
+      `                {"type": "url", "url": "${s.url}", "name": "${s.id}", "authorization_token": access_token}`
+  )
+  .join(',\n')}
+            ]
+        },
+    )
+
+# --- Usage ---
+# metadata = discover_oauth("${baseUrl}")
+# client_info = register_client(metadata["registration_endpoint"], "http://localhost:3000/callback")
+# verifier, challenge = generate_pkce()
+# # Redirect user to: metadata["authorization_endpoint"]?client_id=...&code_challenge=...
+# # After callback, exchange the code:
+# token_data = exchange_token(metadata["token_endpoint"], client_info["client_id"], code, redirect_uri, verifier)
+# response = call_with_mcp(token_data["access_token"], "your prompt")`;
   }
 
-  return `// Web App Integration - OAuth token management
+  return `// MCP OAuth Authentication + Claude API Integration
 import Anthropic from "@anthropic-ai/sdk";
-import { getOrRefreshToken } from "./your-auth-module"; // your OAuth implementation
+import crypto from "crypto";
 
-async function callWithMcp(userId: string, prompt: string) {
+// --- Step 1: OAuth Discovery ---
+async function discoverOAuth(mcpBaseUrl: string) {
+  const resp = await fetch(\`\${mcpBaseUrl}/.well-known/oauth-authorization-server\`);
+  return resp.json();
+}
+
+// --- Step 2: Dynamic Client Registration ---
+async function registerClient(registrationEndpoint: string, redirectUri: string) {
+  const resp = await fetch(registrationEndpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      client_name: "my-app",
+      redirect_uris: [redirectUri],
+      grant_types: ["authorization_code", "refresh_token"],
+      token_endpoint_auth_method: "none",
+    }),
+  });
+  return resp.json();
+}
+
+// --- Step 3: PKCE helpers ---
+function generatePkce() {
+  const verifier = crypto.randomBytes(48).toString("base64url");
+  const challenge = crypto.createHash("sha256").update(verifier).digest("base64url");
+  return { verifier, challenge };
+}
+
+// --- Step 4: Token Exchange ---
+async function exchangeToken(tokenEndpoint: string, clientId: string, code: string,
+                             redirectUri: string, codeVerifier: string) {
+  const resp = await fetch(tokenEndpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "authorization_code", code, redirect_uri: redirectUri,
+      client_id: clientId, code_verifier: codeVerifier,
+    }),
+  });
+  return resp.json();
+}
+
+// --- Step 5: Call Claude API with OAuth token ---
+async function callWithMcp(accessToken: string, prompt: string) {
   const client = new Anthropic();
-${mcpServers.map((s) => `  const ${s.id.replace(/[^a-zA-Z0-9]/g, '_')}Token = await getOrRefreshToken(userId, "${s.id}");`).join('\n')}
-
   return client.messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 4096,
+    tools: [{ type: "code_execution_20250825", name: "code_execution" }, ${mcpServers.map((s) => `{ type: "mcp_toolset", mcp_server_name: "${s.id}" }`).join(', ')}],
     mcp_servers: [
 ${mcpServers
-  .map((s) => {
-    const varName = s.id.replace(/[^a-zA-Z0-9]/g, '_') + 'Token';
-    return `      { type: "url", url: "${s.url}", name: "${s.id}", authorization_token: ${varName} }`;
-  })
+  .map(
+    (s) =>
+      `      { type: "url", url: "${s.url}", name: "${s.id}", authorization_token: accessToken }`
+  )
   .join(',\n')}
     ],
-    tools: [${mcpServers.map((s) => `{ type: "mcp_toolset", mcp_server_name: "${s.id}" }`).join(', ')}],
     messages: [{ role: "user", content: prompt }],
+  } as any, {
     headers: { "anthropic-beta": "code-execution-2025-08-25,skills-2025-10-02,mcp-client-2025-11-20" },
   });
-}`;
+}
+
+// --- Usage ---
+// const metadata = await discoverOAuth("${baseUrl}");
+// const clientInfo = await registerClient(metadata.registration_endpoint, "http://localhost:3000/callback");
+// const { verifier, challenge } = generatePkce();
+// // Redirect user to: metadata.authorization_endpoint?client_id=...&code_challenge=...
+// // After callback, exchange the code:
+// const tokenData = await exchangeToken(metadata.token_endpoint, clientInfo.client_id, code, redirectUri, verifier);
+// const response = await callWithMcp(tokenData.access_token, "your prompt");`;
 }
 
 const AuthCodeSnippet: React.FC<{
@@ -1330,8 +1453,8 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
         const details = await getSkillVersionDetails(targetId, latestVersion);
         setSkillMcpServerIds(details.mcpServerIds);
         // Auto-select additional skills based on dependent skill names
+        setDependentSkillNames(details.dependentSkillNames);
         if (details.dependentSkillNames.length > 0) {
-          setDependentSkillNames(details.dependentSkillNames);
           const matchedIds = skills
             .filter(
               (s) => details.dependentSkillNames.includes(s.displayTitle) && s.id !== targetId
@@ -1339,6 +1462,9 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
             .map((s) => s.id);
           setAdditionalSkillIds(matchedIds);
           setAdditionalSkillsOpen(true);
+        } else {
+          setAdditionalSkillIds([]);
+          setAdditionalSkillsOpen(false);
         }
       } catch {
         setSkillMcpServerIds([]);
@@ -1387,8 +1513,8 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
         const details = await getSkillVersionDetails(targetId, latestVersion);
         setSkillMcpServerIds(details.mcpServerIds);
         // Auto-select additional skills based on dependent skill names
+        setDependentSkillNames(details.dependentSkillNames);
         if (details.dependentSkillNames.length > 0) {
-          setDependentSkillNames(details.dependentSkillNames);
           const matchedIds = skills
             .filter(
               (s) => details.dependentSkillNames.includes(s.displayTitle) && s.id !== targetId
@@ -1396,6 +1522,9 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
             .map((s) => s.id);
           setAdditionalSkillIds(matchedIds);
           setAdditionalSkillsOpen(true);
+        } else {
+          setAdditionalSkillIds([]);
+          setAdditionalSkillsOpen(false);
         }
       } catch {
         setSkillMcpServerIds([]);
@@ -2656,7 +2785,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                   generateSampleCode(
                                     targetId,
                                     sampleCodeLang,
-                                    undefined,
+                                    selectedSkillDisplayTitle || undefined,
                                     mcpServersForCode,
                                     testModel,
                                     systemPrompt
