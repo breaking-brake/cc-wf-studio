@@ -10,31 +10,31 @@ import * as Dialog from '@radix-ui/react-dialog';
 import type { Workflow } from '@shared/types/messages';
 import type { McpNode } from '@shared/types/workflow-definition';
 import { Check, Copy, ExternalLink, Send } from 'lucide-react';
-import { useTranslation } from '../../i18n/i18n-context';
-import { ConfirmDialog } from './ConfirmDialog';
-import { CodeBlock } from '../common/CodeBlock';
-import { SelectTagInput } from '../common/SelectTagInput';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from '../../i18n/i18n-context';
 import {
   checkAnthropicApiKey,
   clearAnthropicApiKey,
   deleteCustomSkill,
   executeUploadedSkill,
+  getResponseLanguage,
   getSavedMcpServerUrls,
   getSkillVersionDetails,
   listCustomSkills,
   lookupMcpRegistry,
-  saveMcpServerUrls,
-  storeAnthropicApiKey,
   openExternalUrl,
-  getResponseLanguage,
+  saveMcpServerUrls,
   saveResponseLanguage,
+  storeAnthropicApiKey,
   uploadDependentSkill,
   uploadToClaudeApi,
 } from '../../services/vscode-bridge';
 import { serializeWorkflow, validateWorkflow } from '../../services/workflow-service';
 import { useWorkflowStore } from '../../stores/workflow-store';
+import { CodeBlock } from '../common/CodeBlock';
+import { SelectTagInput } from '../common/SelectTagInput';
+import { ConfirmDialog } from './ConfirmDialog';
 
 type DialogState =
   | 'check-api-key'
@@ -1235,6 +1235,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
   // Skill version details state (for list-selected skills)
   const [skillMcpServerIds, setSkillMcpServerIds] = useState<string[] | null>(null);
   const [isLoadingSkillDetails, setIsLoadingSkillDetails] = useState(false);
+  const [isFromStudio, setIsFromStudio] = useState(false);
 
   // Confirm dialog state
   const [confirmAction, setConfirmAction] = useState<{
@@ -1598,12 +1599,18 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
     setChatInput(title ? `/${title}` : 'Please execute the workflow.');
     setState('sample-code');
 
+    // After upload, skill is always from studio
+    if (result) {
+      setIsFromStudio(true);
+    }
+
     // Fetch skill version details for list-selected skills (not after upload)
     if (!result && targetId && latestVersion) {
       setIsLoadingSkillDetails(true);
       try {
         const details = await getSkillVersionDetails(targetId, latestVersion);
         setSkillMcpServerIds(details.mcpServerIds);
+        setIsFromStudio(details.isFromStudio);
         // Auto-select additional skills based on dependent skill names
         setDependentSkillNames(details.dependentSkillNames);
         if (details.dependentSkillNames.length > 0) {
@@ -1620,6 +1627,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
         }
       } catch {
         setSkillMcpServerIds([]);
+        setIsFromStudio(false);
       } finally {
         setIsLoadingSkillDetails(false);
       }
@@ -1664,6 +1672,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
       try {
         const details = await getSkillVersionDetails(targetId, latestVersion);
         setSkillMcpServerIds(details.mcpServerIds);
+        setIsFromStudio(details.isFromStudio);
         // Auto-select additional skills based on dependent skill names
         setDependentSkillNames(details.dependentSkillNames);
         if (details.dependentSkillNames.length > 0) {
@@ -1680,6 +1689,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
         }
       } catch {
         setSkillMcpServerIds([]);
+        setIsFromStudio(false);
       } finally {
         setIsLoadingSkillDetails(false);
       }
@@ -2651,9 +2661,24 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                         fontSize: '11px',
                         fontFamily: 'monospace',
                         color: 'var(--vscode-descriptionForeground)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
                       }}
                     >
                       Skill: {selectedSkillId || result?.skillId}
+                      {isFromStudio && (
+                        <span
+                          style={{
+                            fontSize: '10px',
+                            color: 'var(--vscode-descriptionForeground)',
+                            fontFamily: 'sans-serif',
+                            opacity: 0.7,
+                          }}
+                        >
+                          (uploaded by cc-wf-studio)
+                        </span>
+                      )}
                     </div>
 
                     {isLoadingSkillDetails && (

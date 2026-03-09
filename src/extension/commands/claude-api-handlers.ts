@@ -4,8 +4,8 @@
  * Handles Upload to Claude API integration
  */
 
-import * as vscode from 'vscode';
 import * as path from 'node:path';
+import * as vscode from 'vscode';
 import type {
   DeleteCustomSkillFailedPayload,
   DeleteCustomSkillPayload,
@@ -15,12 +15,12 @@ import type {
   ExecuteUploadedSkillSuccessPayload,
   GetMcpServerTypesPayload,
   GetMcpServerTypesResultPayload,
+  GetSavedMcpServerUrlsResultPayload,
   GetSkillVersionDetailsFailedPayload,
   GetSkillVersionDetailsPayload,
-  GetSavedMcpServerUrlsResultPayload,
+  ListCustomSkillsFailedPayload,
   LookupMcpRegistryPayload,
   LookupMcpRegistryResultPayload,
-  ListCustomSkillsFailedPayload,
   SaveMcpServerUrlsPayload,
   StoreAnthropicApiKeyPayload,
   UploadDependentSkillFailedPayload,
@@ -364,6 +364,7 @@ export async function handleGetSkillVersionDetails(
         description: details.description,
         mcpServerIds: parsed.mcpServerIds,
         dependentSkillNames: parsed.dependentSkillNames,
+        isFromStudio: parsed.isFromStudio,
       },
     });
   } catch (error) {

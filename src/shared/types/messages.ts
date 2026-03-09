@@ -921,6 +921,7 @@ export interface GetSkillVersionDetailsSuccessPayload {
   description: string;
   mcpServerIds: string[];
   dependentSkillNames: string[];
+  isFromStudio: boolean;
 }
 
 /**

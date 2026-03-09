@@ -43,11 +43,11 @@ import { handleExportForAntigravity, handleRunForAntigravity } from './antigravi
 import {
   handleCheckAnthropicApiKey,
   handleClearAnthropicApiKey,
+  handleDeleteCustomSkill,
   handleExecuteUploadedSkill,
   handleGetMcpServerTypes,
   handleGetSavedMcpServerUrls,
   handleGetSkillVersionDetails,
-  handleDeleteCustomSkill,
   handleListCustomSkills,
   handleLookupMcpRegistry,
   handleSaveMcpServerUrls,
