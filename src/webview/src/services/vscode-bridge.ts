@@ -1583,7 +1583,8 @@ export function getSkillVersionDetails(
         } else {
           reject(
             new Error(
-              (message.payload as any)?.errorMessage || 'Failed to get skill version details'
+              (message.payload as { errorMessage?: string })?.errorMessage ||
+                'Failed to get skill version details'
             )
           );
         }
