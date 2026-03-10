@@ -54,6 +54,7 @@ export interface WorkflowListPayload {
 
 export interface InitialStatePayload {
   hasAcceptedTerms: boolean;
+  isFirstTimeUser: boolean;
   unreadReleaseCount: number;
   showWhatsNewBadge: boolean;
 }

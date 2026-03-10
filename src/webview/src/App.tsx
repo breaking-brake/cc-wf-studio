@@ -176,6 +176,7 @@ const App: React.FC = () => {
   const [isLoadingImportedWorkflow, setIsLoadingImportedWorkflow] = useState(false);
   const [isLoadingWorkflowFromPreview, setIsLoadingWorkflowFromPreview] = useState(false);
   const [showTermsDialog, setShowTermsDialog] = useState(false);
+  const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   const [isSlackConnectionRequiredDialogOpen, setIsSlackConnectionRequiredDialogOpen] =
     useState(false);
   const [isSlackManualTokenDialogOpen, setIsSlackManualTokenDialogOpen] = useState(false);
@@ -271,8 +272,11 @@ const App: React.FC = () => {
       type: 'ACCEPT_TERMS',
     });
     setShowTermsDialog(false);
-    // Start onboarding tour after accepting terms
-    handleStartTour();
+    // Start onboarding tour only for first-time users
+    // (skip for existing users who are re-accepting updated terms)
+    if (isFirstTimeUser) {
+      handleStartTour();
+    }
   };
 
   const handleCancelTerms = () => {
@@ -298,6 +302,7 @@ const App: React.FC = () => {
         // Switch to edit mode
         setMode('edit');
         const payload = message.payload as InitialStatePayload;
+        setIsFirstTimeUser(payload.isFirstTimeUser ?? false);
         if (!payload.hasAcceptedTerms) {
           // Show terms dialog if not accepted
           setShowTermsDialog(true);

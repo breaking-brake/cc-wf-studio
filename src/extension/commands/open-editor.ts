@@ -214,6 +214,9 @@ export function registerOpenEditorCommand(
       const CURRENT_TERMS_VERSION = 2;
       const acceptedVersion = context.globalState.get<number>('acceptedTermsVersion', 0);
       const hasAcceptedTerms = acceptedVersion >= CURRENT_TERMS_VERSION;
+      // First-time user: never accepted any version (no legacy boolean either)
+      const legacyAccepted = context.globalState.get<boolean>('hasAcceptedTerms', false);
+      const isFirstTimeUser = acceptedVersion === 0 && !legacyAccepted;
 
       // Store import params for use when WEBVIEW_READY is received
       // This replaces the unreliable setTimeout-based approach (fixes Issue #396)
@@ -261,6 +264,7 @@ export function registerOpenEditorCommand(
                 type: 'INITIAL_STATE',
                 payload: {
                   hasAcceptedTerms,
+                  isFirstTimeUser,
                   unreadReleaseCount: showWhatsNewBadge ? unreadReleaseCount : 0,
                   showWhatsNewBadge,
                 },
@@ -820,6 +824,7 @@ export function registerOpenEditorCommand(
                 type: 'INITIAL_STATE',
                 payload: {
                   hasAcceptedTerms: true,
+                  isFirstTimeUser,
                   unreadReleaseCount: 0,
                   showWhatsNewBadge: context.globalState.get<boolean>('showWhatsNewBadge', true),
                 },
