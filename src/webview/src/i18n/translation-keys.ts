@@ -349,21 +349,6 @@ export interface WebviewTranslationKeys {
   'tour.button.next': string;
   'tour.button.skip': string;
 
-  // Terms of Use
-  'terms.title': string;
-  'terms.introduction': string;
-  'terms.prohibitedUse': string;
-  'terms.cyberAttack': string;
-  'terms.malware': string;
-  'terms.personalDataTheft': string;
-  'terms.otherIllegalActs': string;
-  'terms.apiKeyLiabilityHeading': string;
-  'terms.apiKeyLiability': string;
-  'terms.liability': string;
-  'terms.agree': string;
-  'terms.agreeButton': string;
-  'terms.cancelButton': string;
-
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': string;
   'dialog.deleteNode.message': string;

@@ -27,7 +27,6 @@ import { SlackConnectionRequiredDialog } from './components/dialogs/SlackConnect
 import { SlackManualTokenDialog } from './components/dialogs/SlackManualTokenDialog';
 import { SlackShareDialog } from './components/dialogs/SlackShareDialog';
 import { SubAgentFlowDialog } from './components/dialogs/SubAgentFlowDialog';
-import { TermsOfUseDialog } from './components/dialogs/TermsOfUseDialog';
 import { ErrorNotification } from './components/ErrorNotification';
 import { NodePalette } from './components/NodePalette';
 import { PropertyOverlay } from './components/PropertyOverlay';
@@ -175,8 +174,6 @@ const App: React.FC = () => {
   const [isSlackShareDialogOpen, setIsSlackShareDialogOpen] = useState(false);
   const [isLoadingImportedWorkflow, setIsLoadingImportedWorkflow] = useState(false);
   const [isLoadingWorkflowFromPreview, setIsLoadingWorkflowFromPreview] = useState(false);
-  const [showTermsDialog, setShowTermsDialog] = useState(false);
-  const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   const [isSlackConnectionRequiredDialogOpen, setIsSlackConnectionRequiredDialogOpen] =
     useState(false);
   const [isSlackManualTokenDialogOpen, setIsSlackManualTokenDialogOpen] = useState(false);
@@ -217,10 +214,10 @@ const App: React.FC = () => {
     setRunTour(false);
   };
 
-  const handleStartTour = () => {
+  const handleStartTour = useCallback(() => {
     setRunTour(true);
     setTourKey((prev) => prev + 1); // Increment key to force remount and reset tour state
-  };
+  }, []);
 
   const handleShareToSlack = () => {
     setIsSlackShareDialogOpen(true);
@@ -266,26 +263,6 @@ const App: React.FC = () => {
     setPendingMcpApply(null);
   }, []);
 
-  const handleAcceptTerms = () => {
-    // Send accept message to Extension
-    vscode.postMessage({
-      type: 'ACCEPT_TERMS',
-    });
-    setShowTermsDialog(false);
-    // Start onboarding tour only for first-time users
-    // (skip for existing users who are re-accepting updated terms)
-    if (isFirstTimeUser) {
-      handleStartTour();
-    }
-  };
-
-  const handleCancelTerms = () => {
-    // Send cancel message to Extension to close the panel
-    vscode.postMessage({
-      type: 'CANCEL_TERMS',
-    });
-  };
-
   // Listen for messages from Extension
   useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
@@ -302,10 +279,8 @@ const App: React.FC = () => {
         // Switch to edit mode
         setMode('edit');
         const payload = message.payload as InitialStatePayload;
-        setIsFirstTimeUser(payload.isFirstTimeUser ?? false);
-        if (!payload.hasAcceptedTerms) {
-          // Show terms dialog if not accepted
-          setShowTermsDialog(true);
+        if (payload.isFirstTimeUser) {
+          handleStartTour();
         }
         setUnreadReleaseCount(payload.unreadReleaseCount ?? 0);
         setShowWhatsNewBadge(payload.showWhatsNewBadge ?? true);
@@ -483,6 +458,7 @@ const App: React.FC = () => {
     workflowDescription,
     subAgentFlows,
     mode,
+    handleStartTour,
   ]);
 
   // Render loading state (waiting for mode to be determined)
@@ -610,13 +586,6 @@ const App: React.FC = () => {
 
       {/* Error Notification Overlay */}
       <ErrorNotification error={error} onDismiss={handleDismissError} />
-
-      {/* Terms of Use Dialog */}
-      <TermsOfUseDialog
-        isOpen={showTermsDialog}
-        onAccept={handleAcceptTerms}
-        onCancel={handleCancelTerms}
-      />
 
       {/* Interactive Tour */}
       <Tour key={tourKey} run={runTour} onFinish={handleTourFinish} />

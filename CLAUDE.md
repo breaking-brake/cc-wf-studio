@@ -407,7 +407,7 @@ Confirm        10001     確認ダイアログ（最優先）
 | z-index | 用途 | 例 |
 |---------|------|-----|
 | **9999** | 単独ダイアログ、親ダイアログ | McpNodeDialog, SkillBrowserDialog, SlackShareDialog |
-| **10000** | ネストされた子ダイアログ | SkillCreationDialog（SkillBrowserDialog内）, TermsOfUseDialog |
+| **10000** | ネストされた子ダイアログ | SkillCreationDialog（SkillBrowserDialog内）, SlackManualTokenDialog |
 | **10001** | 確認・警告ダイアログ | ConfirmDialog（削除確認など） |
 
 ### 実装パターン
@@ -481,7 +481,6 @@ export function MyDialog({ isOpen, onClose }: Props) {
 | ConfirmDialog | 10001 | 確認ダイアログ | ✅ |
 | SkillCreationDialog | 10000 | 子ダイアログ | ✅ |
 | SlackManualTokenDialog | 10000 | 子ダイアログ | ✅ |
-| TermsOfUseDialog | 10000 | 単独（優先表示） | ✅ |
 | SkillBrowserDialog | 9999 | 親ダイアログ | ✅ |
 | McpNodeDialog | 9999 | 単独 | ✅ |
 | SubAgentFlowDialog | 9999 | 親ダイアログ | ✅ |

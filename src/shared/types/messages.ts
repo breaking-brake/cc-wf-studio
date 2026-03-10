@@ -53,7 +53,6 @@ export interface WorkflowListPayload {
 }
 
 export interface InitialStatePayload {
-  hasAcceptedTerms: boolean;
   isFirstTimeUser: boolean;
   unreadReleaseCount: number;
   showWhatsNewBadge: boolean;
@@ -2135,8 +2134,6 @@ export type WebviewMessage =
   | Message<void, 'LOAD_WORKFLOW_LIST'>
   | Message<LoadWorkflowRequestPayload, 'LOAD_WORKFLOW'>
   | Message<StateUpdatePayload, 'STATE_UPDATE'>
-  | Message<void, 'ACCEPT_TERMS'>
-  | Message<void, 'CANCEL_TERMS'>
   | Message<void, 'BROWSE_SKILLS'>
   | Message<CreateSkillPayload, 'CREATE_SKILL'>
   | Message<ValidateSkillFilePayload, 'VALIDATE_SKILL_FILE'>

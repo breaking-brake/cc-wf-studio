@@ -382,22 +382,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.next': '次へ',
   'tour.button.skip': 'スキップ',
 
-  // Terms of Use
-  'terms.title': 'CC Workflow Studio - 利用規約',
-  'terms.introduction': '本ツールは正当な目的でのワークフロー作成を支援します。',
-  'terms.prohibitedUse': '以下の用途での使用を禁止します：',
-  'terms.cyberAttack': 'サイバー攻撃（DDoS攻撃、不正アクセス等）',
-  'terms.malware': 'マルウェア・ランサムウェアの作成',
-  'terms.personalDataTheft': '個人情報の不正取得・悪用',
-  'terms.otherIllegalActs': 'その他の違法行為や他者への損害行為',
-  'terms.apiKeyLiabilityHeading': 'API 利用について（追加）',
-  'terms.apiKeyLiability':
-    'Claude API 連携機能を利用する場合、API キーの管理および API 利用により発生する費用は利用者の自己責任となります。',
-  'terms.liability': '本ツールの利用により生じた違反行為や損害について、利用者が全責任を負います。',
-  'terms.agree': '上記に同意します',
-  'terms.agreeButton': '同意して開始',
-  'terms.cancelButton': 'キャンセル',
-
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'ノードを削除',
   'dialog.deleteNode.message': 'このノードを削除してもよろしいですか？',

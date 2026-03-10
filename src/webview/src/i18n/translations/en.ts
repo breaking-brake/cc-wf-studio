@@ -383,23 +383,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.next': 'Next',
   'tour.button.skip': 'Skip',
 
-  // Terms of Use
-  'terms.title': 'CC Workflow Studio - Terms of Use',
-  'terms.introduction': 'This tool supports workflow creation for legitimate purposes.',
-  'terms.prohibitedUse': 'The following uses are prohibited:',
-  'terms.cyberAttack': 'Cyber attacks (DDoS attacks, unauthorized access, etc.)',
-  'terms.malware': 'Malware and ransomware creation',
-  'terms.personalDataTheft': 'Unauthorized collection or misuse of personal information',
-  'terms.otherIllegalActs': 'Other illegal activities or actions causing harm to others',
-  'terms.apiKeyLiabilityHeading': 'API Usage (Added)',
-  'terms.apiKeyLiability':
-    'When using the Claude API integration, users are solely responsible for the management of their API keys and any costs incurred through API usage.',
-  'terms.liability':
-    'Users are solely responsible for any violations or damages arising from use of this tool.',
-  'terms.agree': 'I agree to the above',
-  'terms.agreeButton': 'Agree and Start',
-  'terms.cancelButton': 'Cancel',
-
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'Delete Node',
   'dialog.deleteNode.message': 'Are you sure you want to delete this node?',
