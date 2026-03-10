@@ -373,7 +373,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'tour.refineWithAI':
     '"AI로 편집" 버튼을 사용하여 AI와 대화하며 워크플로우를 생성하거나 개선할 수 있습니다.\n\n빈 캔버스에서 시작하거나 기존 워크플로우를 대화형으로 수정할 수 있습니다.',
   'tour.moreActions':
-    '"더보기" 메뉴에서 추가 작업을 사용할 수 있습니다:<br><br>• Slack에 공유 - 팀과 워크플로우 공유<br>• 초기화 - 캔버스 지우기<br>• 도움말 - 이 투어 다시 보기<br><br>워크플로우 생성을 즐기세요!',
+    '"더보기" 메뉴에서 추가 작업을 사용할 수 있습니다:<br><br>• Claude API - 워크플로우를 Claude API에 업로드<br>• Slack에 공유 - 팀과 워크플로우 공유<br>• 초기화 - 캔버스 지우기<br>• 집중 모드 - 집중 편집 모드 전환<br>• AI 에이전트 - 다른 AI 에이전트에서 워크플로우 열기<br>• 새소식 - 최신 업데이트 확인<br>• 도움말 - 이 투어 다시 보기<br><br>워크플로우 생성을 즐기세요!',
 
   // Tour buttons
   'tour.button.back': '뒤로',

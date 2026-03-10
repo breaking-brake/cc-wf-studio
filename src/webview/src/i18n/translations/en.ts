@@ -374,7 +374,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'tour.refineWithAI':
     'Use the "Edit with AI" button to create or improve workflows through an interactive chat with AI.\n\nYou can start from an empty canvas or edit existing workflows conversationally.',
   'tour.moreActions':
-    'The "More" menu provides additional actions:<br><br>• Share to Slack - Share workflows with your team<br>• Reset Workflow - Clear the canvas<br>• Help - View this tour again<br><br>Enjoy creating workflows!',
+    'The "More" menu provides additional actions:<br><br>• Claude API - Upload workflows to Claude API<br>• Share to Slack - Share workflows with your team<br>• Reset Workflow - Clear the canvas<br>• Focus Mode - Toggle distraction-free editing<br>• AI Agents - Open workflows in other AI agents<br>• What\'s New - View latest updates<br>• Help - View this tour again<br><br>Enjoy creating workflows!',
 
   // Tour buttons
   'tour.button.back': 'Back',

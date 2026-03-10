@@ -359,7 +359,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'tour.refineWithAI':
     '使用「AI編輯」按鈕透過與AI對話建立或改善工作流程。\n\n可以從空白畫布開始或以對話方式編輯現有工作流程。',
   'tour.moreActions':
-    '「更多」選單提供以下功能：<br><br>• 分享到Slack - 與團隊分享工作流程<br>• 重置 - 清空畫布<br>• 說明 - 再次檢視此導覽<br><br>享受建立工作流程的樂趣！',
+    '「更多」選單提供以下功能：<br><br>• Claude API - 將工作流程上傳到Claude API<br>• 分享到Slack - 與團隊分享工作流程<br>• 重置 - 清空畫布<br>• 專注模式 - 切換無干擾編輯模式<br>• AI代理 - 在其他AI代理中開啟工作流程<br>• 最新消息 - 檢視最新更新<br>• 說明 - 再次檢視此導覽<br><br>享受建立工作流程的樂趣！',
 
   // Tour buttons
   'tour.button.back': '返回',

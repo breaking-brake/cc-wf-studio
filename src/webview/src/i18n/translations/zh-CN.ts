@@ -359,7 +359,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'tour.refineWithAI':
     '使用"AI编辑"按钮通过与AI对话创建或改进工作流。\n\n可以从空画布开始或以对话方式编辑现有工作流。',
   'tour.moreActions':
-    '"更多"菜单提供以下功能：<br><br>• 分享到Slack - 与团队分享工作流<br>• 重置 - 清空画布<br>• 帮助 - 再次查看此导览<br><br>享受创建工作流的乐趣！',
+    '"更多"菜单提供以下功能：<br><br>• Claude API - 将工作流上传到Claude API<br>• 分享到Slack - 与团队分享工作流<br>• 重置 - 清空画布<br>• 专注模式 - 切换无干扰编辑模式<br>• AI代理 - 在其他AI代理中打开工作流<br>• 最新动态 - 查看最新更新<br>• 帮助 - 再次查看此导览<br><br>享受创建工作流的乐趣！',
 
   // Tour buttons
   'tour.button.back': '返回',
