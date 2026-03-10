@@ -29,6 +29,10 @@ npm-debug.log*
 .vscode/workflows/
 .mcp.json
 
+# POC files
+poc/
+.vscode/poc/
+
 # Temporary files
 *.tmp
 *.swp

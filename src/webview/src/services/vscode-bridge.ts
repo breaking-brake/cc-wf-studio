@@ -1580,7 +1580,11 @@ export function getSkillVersionDetails(
         if (message.type === 'GET_SKILL_VERSION_DETAILS_SUCCESS') {
           resolve(message.payload as GetSkillVersionDetailsSuccessPayload);
         } else {
-          reject(new Error('Failed to get skill version details'));
+          reject(
+            new Error(
+              (message.payload as any)?.errorMessage || 'Failed to get skill version details'
+            )
+          );
         }
       }
     };

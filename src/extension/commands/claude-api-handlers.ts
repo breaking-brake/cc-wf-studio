@@ -361,7 +361,7 @@ export async function handleGetSkillVersionDetails(
         skillId: details.skillId,
         version: details.version,
         name: details.name,
-        description: details.description,
+        description: parsed.originalDescription,
         mcpServerIds: parsed.mcpServerIds,
         dependentSkillNames: parsed.dependentSkillNames,
         isFromStudio: parsed.isFromStudio,

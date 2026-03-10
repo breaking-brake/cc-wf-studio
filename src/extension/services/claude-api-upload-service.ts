@@ -163,7 +163,10 @@ async function findExistingSkill(
     },
   });
 
-  if (!response.ok) return null;
+  if (!response.ok) {
+    if (response.status === 404) return null;
+    throw new Error(`Failed to list skills: ${response.status} ${response.statusText}`);
+  }
 
   const result = (await response.json()) as {
     data: { id: string; display_title: string; latest_version: string }[];

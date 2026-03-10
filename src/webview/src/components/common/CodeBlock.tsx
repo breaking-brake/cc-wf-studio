@@ -22,6 +22,7 @@ export function CodeBlock({ children, onCopy, style }: CodeBlockProps) {
         type="button"
         onClick={handleCopy}
         title={copied ? 'Copied!' : 'Copy to clipboard'}
+        aria-label={copied ? 'Copied!' : 'Copy to clipboard'}
         style={{
           position: 'absolute',
           top: '6px',
