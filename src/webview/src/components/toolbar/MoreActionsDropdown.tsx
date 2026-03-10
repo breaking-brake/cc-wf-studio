@@ -12,6 +12,7 @@ import {
   Bot,
   Check,
   ChevronLeft,
+  Cloud,
   Focus,
   HelpCircle,
   MoreHorizontal,
@@ -28,6 +29,7 @@ const FONT_SIZES = {
 } as const;
 
 interface MoreActionsDropdownProps {
+  onOpenClaudeApi: () => void;
   onShareToSlack: () => void;
   onResetWorkflow: () => void;
   onStartTour: () => void;
@@ -52,6 +54,7 @@ interface MoreActionsDropdownProps {
 }
 
 export function MoreActionsDropdown({
+  onOpenClaudeApi,
   onShareToSlack,
   onResetWorkflow,
   onStartTour,
@@ -115,6 +118,25 @@ export function MoreActionsDropdown({
             padding: '4px',
           }}
         >
+          {/* Claude API */}
+          <DropdownMenu.Item
+            onSelect={onOpenClaudeApi}
+            style={{
+              padding: '8px 12px',
+              fontSize: `${FONT_SIZES.small}px`,
+              color: 'var(--vscode-foreground)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              outline: 'none',
+              borderRadius: '2px',
+            }}
+          >
+            <Cloud size={14} />
+            <span>Claude API</span>
+          </DropdownMenu.Item>
+
           {/* Share to Slack */}
           <DropdownMenu.Item
             onSelect={onShareToSlack}

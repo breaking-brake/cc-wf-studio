@@ -5,7 +5,7 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
-import { Cloud, FileDown, Play, Save, Sparkles, SquareSlash } from 'lucide-react';
+import { FileDown, Play, Save, Sparkles, SquareSlash } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
@@ -2303,31 +2303,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               {!isCompact && t('toolbar.refineWithAI')}
             </button>
 
-            {/* Custom Skills Button */}
-            <button
-              type="button"
-              onClick={() => setIsClaudeApiUploadDialogOpen(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: isCompact ? '0' : '4px',
-                padding: isCompact ? '4px 8px' : '4px 12px',
-                backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                color: 'var(--vscode-button-secondaryForeground)',
-                border: 'none',
-                borderRadius: '2px',
-                cursor: 'pointer',
-                fontSize: '13px',
-                whiteSpace: 'nowrap',
-              }}
-              title="Claude API"
-            >
-              <Cloud size={14} />
-              {!isCompact && 'Claude API'}
-            </button>
-
             {/* More Actions Dropdown */}
             <MoreActionsDropdown
+              onOpenClaudeApi={() => setIsClaudeApiUploadDialogOpen(true)}
               onShareToSlack={onShareToSlack}
               onResetWorkflow={() => setShowResetConfirm(true)}
               onStartTour={onStartTour}
