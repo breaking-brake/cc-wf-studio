@@ -91,6 +91,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Toolbar more actions dropdown
   'toolbar.moreActions': 'その他',
   'toolbar.help': 'ヘルプ',
+  'toolbar.whatsNew': '更新情報',
+  'whatsNew.title': '更新情報',
+  'whatsNew.viewAllReleases': 'すべての更新情報を見る',
+  'whatsNew.showBadge': '未読バッジ',
 
   // Copilot Execution Mode
   'copilot.mode.tooltip': 'Copilot実行モードを選択',

@@ -88,6 +88,10 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   // Toolbar more actions dropdown
   'toolbar.moreActions': '更多',
   'toolbar.help': '說明',
+  'toolbar.whatsNew': '更新內容',
+  'whatsNew.title': '更新內容',
+  'whatsNew.viewAllReleases': '查看所有更新內容',
+  'whatsNew.showBadge': '未讀徽章',
 
   // Copilot Execution Mode
   'copilot.mode.tooltip': '選擇 Copilot 執行模式',

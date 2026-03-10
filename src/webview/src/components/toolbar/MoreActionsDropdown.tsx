@@ -15,6 +15,7 @@ import {
   Cloud,
   Focus,
   HelpCircle,
+  Info,
   MoreHorizontal,
   Share2,
   Terminal,
@@ -49,6 +50,8 @@ interface MoreActionsDropdownProps {
   onToggleAntigravityBeta: () => void;
   isCursorEnabled: boolean;
   onToggleCursorBeta: () => void;
+  onOpenWhatsNew: () => void;
+  unreadReleaseCount: number;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -74,6 +77,8 @@ export function MoreActionsDropdown({
   onToggleAntigravityBeta,
   isCursorEnabled,
   onToggleCursorBeta,
+  onOpenWhatsNew,
+  unreadReleaseCount,
   open,
   onOpenChange,
 }: MoreActionsDropdownProps) {
@@ -97,10 +102,33 @@ export function MoreActionsDropdown({
             display: 'flex',
             alignItems: 'center',
             gap: '4px',
+            position: 'relative',
           }}
         >
           <MoreHorizontal size={16} />
           {!isCompact && <span>{t('toolbar.moreActions')}</span>}
+          {unreadReleaseCount > 0 && (
+            <span
+              style={{
+                position: 'absolute',
+                top: -4,
+                right: -4,
+                backgroundColor: 'var(--vscode-badge-background)',
+                color: 'var(--vscode-badge-foreground)',
+                borderRadius: '50%',
+                minWidth: '16px',
+                height: '16px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '10px',
+                fontWeight: 600,
+                lineHeight: 1,
+              }}
+            >
+              {unreadReleaseCount}
+            </span>
+          )}
         </button>
       </DropdownMenu.Trigger>
 
@@ -403,6 +431,44 @@ export function MoreActionsDropdown({
               margin: '4px 0',
             }}
           />
+
+          {/* What's New */}
+          <DropdownMenu.Item
+            onSelect={onOpenWhatsNew}
+            style={{
+              padding: '8px 12px',
+              fontSize: `${FONT_SIZES.small}px`,
+              color: 'var(--vscode-foreground)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              outline: 'none',
+              borderRadius: '2px',
+            }}
+          >
+            <Info size={14} />
+            <span style={{ flex: 1 }}>{t('toolbar.whatsNew')}</span>
+            {unreadReleaseCount > 0 && (
+              <span
+                style={{
+                  backgroundColor: 'var(--vscode-badge-background)',
+                  color: 'var(--vscode-badge-foreground)',
+                  borderRadius: '50%',
+                  minWidth: '16px',
+                  height: '16px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  lineHeight: 1,
+                }}
+              >
+                {unreadReleaseCount}
+              </span>
+            )}
+          </DropdownMenu.Item>
 
           {/* Help / Start Tour */}
           <DropdownMenu.Item

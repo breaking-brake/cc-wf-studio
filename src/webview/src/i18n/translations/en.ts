@@ -91,6 +91,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Toolbar more actions dropdown
   'toolbar.moreActions': 'More',
   'toolbar.help': 'Help',
+  'toolbar.whatsNew': "What's New",
+  'whatsNew.title': "What's New",
+  'whatsNew.viewAllReleases': 'View all releases',
+  'whatsNew.showBadge': 'Unread badge',
 
   // Copilot Execution Mode
   'copilot.mode.tooltip': 'Select Copilot execution mode',

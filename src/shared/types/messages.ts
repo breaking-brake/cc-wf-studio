@@ -54,6 +54,36 @@ export interface WorkflowListPayload {
 
 export interface InitialStatePayload {
   hasAcceptedTerms: boolean;
+  unreadReleaseCount: number;
+  showWhatsNewBadge: boolean;
+}
+
+// ============================================================================
+// Changelog Payloads
+// ============================================================================
+
+export interface ChangelogEntry {
+  version: string;
+  date: string;
+  compareUrl: string;
+  sections: ChangelogSection[];
+}
+
+export interface ChangelogSection {
+  title: string;
+  items: ChangelogItem[];
+}
+
+export interface ChangelogItem {
+  text: string;
+  prNumber?: string;
+  prUrl?: string;
+}
+
+export interface GetChangelogResultPayload {
+  entries: ChangelogEntry[];
+  unreadCount: number;
+  currentVersion: string;
 }
 
 // ============================================================================
@@ -1015,6 +1045,7 @@ export type ExtensionMessage =
   | Message<SlackErrorPayload, 'SLACK_OAUTH_FAILED'>
   | Message<void, 'SLACK_OAUTH_CANCELLED'>
   | Message<GetLastSharedChannelSuccessPayload, 'GET_LAST_SHARED_CHANNEL_SUCCESS'>
+  | Message<GetChangelogResultPayload, 'GET_CHANGELOG_RESULT'>
   | Message<SlackDescriptionSuccessPayload, 'SLACK_DESCRIPTION_SUCCESS'>
   | Message<SlackDescriptionFailedPayload, 'SLACK_DESCRIPTION_FAILED'>
   | Message<WorkflowNameSuccessPayload, 'WORKFLOW_NAME_SUCCESS'>
@@ -2178,7 +2209,10 @@ export type WebviewMessage =
   | Message<void, 'GET_SAVED_MCP_SERVER_URLS'>
   | Message<SaveMcpServerUrlsPayload, 'SAVE_MCP_SERVER_URLS'>
   | Message<LookupMcpRegistryPayload, 'LOOKUP_MCP_REGISTRY'>
-  | Message<GetSkillVersionDetailsPayload, 'GET_SKILL_VERSION_DETAILS'>;
+  | Message<GetSkillVersionDetailsPayload, 'GET_SKILL_VERSION_DETAILS'>
+  | Message<void, 'GET_CHANGELOG'>
+  | Message<void, 'MARK_CHANGELOG_READ'>
+  | Message<{ show: boolean }, 'SET_WHATS_NEW_BADGE'>;
 
 // ============================================================================
 // Error Codes

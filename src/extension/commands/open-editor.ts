@@ -35,6 +35,7 @@ import { SlackApiService } from '../services/slack-api-service';
 import { executeSlashCommandInTerminal } from '../services/terminal-execution-service';
 import { listCopilotModels } from '../services/vscode-lm-service';
 import { AnthropicApiKeyManager } from '../utils/anthropic-api-key-manager';
+import { countUnreadVersions, extractVersions, parseChangelog } from '../utils/changelog-parser';
 import { migrateWorkflow } from '../utils/migrate-workflow';
 import { SlackTokenManager } from '../utils/slack-token-manager';
 import { validateWorkflowFile } from '../utils/workflow-validator';
@@ -228,13 +229,40 @@ export function registerOpenEditorCommand(
           const webview = currentPanel.webview;
 
           switch (message.type) {
-            case 'WEBVIEW_READY':
+            case 'WEBVIEW_READY': {
+              // Calculate unread release count for What's New badge
+              let unreadReleaseCount = 0;
+              try {
+                const changelogUri = vscode.Uri.joinPath(
+                  vscode.Uri.file(context.extensionPath),
+                  'CHANGELOG.md'
+                );
+                const changelogBytes = await vscode.workspace.fs.readFile(changelogUri);
+                const changelogContent = Buffer.from(changelogBytes).toString('utf-8');
+                const lastViewedVersion = context.globalState.get<string>(
+                  'whatsNewLastViewedVersion'
+                );
+                if (lastViewedVersion === undefined) {
+                  const versions = extractVersions(changelogContent);
+                  if (versions[0]) {
+                    await context.globalState.update('whatsNewLastViewedVersion', versions[0]);
+                  }
+                } else {
+                  unreadReleaseCount = countUnreadVersions(changelogContent, lastViewedVersion);
+                }
+              } catch {
+                // CHANGELOG.md not found or unreadable - ignore
+              }
+
               // Webview is fully initialized and ready to receive messages
               // This is more reliable than setTimeout (fixes Issue #396)
+              const showWhatsNewBadge = context.globalState.get<boolean>('showWhatsNewBadge', true);
               webview.postMessage({
                 type: 'INITIAL_STATE',
                 payload: {
                   hasAcceptedTerms,
+                  unreadReleaseCount: showWhatsNewBadge ? unreadReleaseCount : 0,
+                  showWhatsNewBadge,
                 },
               });
 
@@ -252,6 +280,7 @@ export function registerOpenEditorCommand(
                 }, 100);
               }
               break;
+            }
 
             case 'SAVE_WORKFLOW':
               // Save workflow
@@ -786,11 +815,13 @@ export function registerOpenEditorCommand(
             case 'ACCEPT_TERMS':
               // User accepted terms of use (save current version)
               await context.globalState.update('acceptedTermsVersion', CURRENT_TERMS_VERSION);
-              // Update webview with new state
+              // Update webview with new state (unreadReleaseCount stays at whatever was set in INITIAL_STATE)
               webview.postMessage({
                 type: 'INITIAL_STATE',
                 payload: {
                   hasAcceptedTerms: true,
+                  unreadReleaseCount: 0,
+                  showWhatsNewBadge: context.globalState.get<boolean>('showWhatsNewBadge', true),
                 },
               });
               break;
@@ -1738,6 +1769,67 @@ export function registerOpenEditorCommand(
                 message.requestId
               );
               break;
+
+            case 'GET_CHANGELOG': {
+              try {
+                const changelogUri = vscode.Uri.joinPath(
+                  vscode.Uri.file(context.extensionPath),
+                  'CHANGELOG.md'
+                );
+                const changelogBytes = await vscode.workspace.fs.readFile(changelogUri);
+                const changelogContent = Buffer.from(changelogBytes).toString('utf-8');
+                const entries = parseChangelog(changelogContent, 5);
+                const lastViewed = context.globalState.get<string>('whatsNewLastViewedVersion');
+                const extensionPkg = require(
+                  vscode.Uri.joinPath(vscode.Uri.file(context.extensionPath), 'package.json').fsPath
+                );
+                webview.postMessage({
+                  type: 'GET_CHANGELOG_RESULT',
+                  requestId: message.requestId,
+                  payload: {
+                    entries,
+                    unreadCount: countUnreadVersions(changelogContent, lastViewed),
+                    currentVersion: extensionPkg.version,
+                  },
+                });
+              } catch {
+                webview.postMessage({
+                  type: 'GET_CHANGELOG_RESULT',
+                  requestId: message.requestId,
+                  payload: {
+                    entries: [],
+                    unreadCount: 0,
+                    currentVersion: '',
+                  },
+                });
+              }
+              break;
+            }
+
+            case 'MARK_CHANGELOG_READ': {
+              try {
+                const changelogUri = vscode.Uri.joinPath(
+                  vscode.Uri.file(context.extensionPath),
+                  'CHANGELOG.md'
+                );
+                const changelogBytes = await vscode.workspace.fs.readFile(changelogUri);
+                const changelogContent = Buffer.from(changelogBytes).toString('utf-8');
+                const versions = extractVersions(changelogContent);
+                const latestVersion = versions[0];
+                if (latestVersion) {
+                  await context.globalState.update('whatsNewLastViewedVersion', latestVersion);
+                }
+              } catch {
+                // Ignore errors
+              }
+              break;
+            }
+
+            case 'SET_WHATS_NEW_BADGE': {
+              const show = message.payload?.show ?? true;
+              await context.globalState.update('showWhatsNewBadge', show);
+              break;
+            }
 
             default:
               console.warn('Unknown message type:', message);

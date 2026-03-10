@@ -183,6 +183,8 @@ const App: React.FC = () => {
     string | undefined
   >(undefined);
   const [isMoreActionsOpen, setIsMoreActionsOpen] = useState(false);
+  const [unreadReleaseCount, setUnreadReleaseCount] = useState(0);
+  const [showWhatsNewBadge, setShowWhatsNewBadge] = useState(true);
 
   // Pending MCP apply state for diff preview
   const [pendingMcpApply, setPendingMcpApply] = useState<{
@@ -300,6 +302,8 @@ const App: React.FC = () => {
           // Show terms dialog if not accepted
           setShowTermsDialog(true);
         }
+        setUnreadReleaseCount(payload.unreadReleaseCount ?? 0);
+        setShowWhatsNewBadge(payload.showWhatsNewBadge ?? true);
       } else if (message.type === 'IMPORT_WORKFLOW_FROM_SLACK') {
         // Handle import workflow request from Extension Host
         // Simply forward the message back to Extension Host to trigger the import process
@@ -536,6 +540,9 @@ const App: React.FC = () => {
         onShareToSlack={handleShareToSlack}
         moreActionsOpen={isMoreActionsOpen}
         onMoreActionsOpenChange={setIsMoreActionsOpen}
+        initialUnreadReleaseCount={unreadReleaseCount}
+        showWhatsNewBadge={showWhatsNewBadge}
+        onShowWhatsNewBadgeChange={setShowWhatsNewBadge}
       />
 
       {/* Main Content: 3-column layout */}

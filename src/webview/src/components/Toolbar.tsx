@@ -45,6 +45,7 @@ import { ProcessingOverlay } from './common/ProcessingOverlay';
 import { StyledTooltipProvider } from './common/StyledTooltip';
 import { ClaudeApiUploadDialog } from './dialogs/ClaudeApiUploadDialog';
 import { ConfirmDialog } from './dialogs/ConfirmDialog';
+import { WhatsNewDialog } from './dialogs/WhatsNewDialog';
 import { MoreActionsDropdown } from './toolbar/MoreActionsDropdown';
 import { SlashCommandOptionsDropdown } from './toolbar/SlashCommandOptionsDropdown';
 
@@ -54,6 +55,9 @@ interface ToolbarProps {
   onShareToSlack: () => void;
   moreActionsOpen?: boolean;
   onMoreActionsOpenChange?: (open: boolean) => void;
+  initialUnreadReleaseCount?: number;
+  showWhatsNewBadge?: boolean;
+  onShowWhatsNewBadgeChange?: (show: boolean) => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -62,6 +66,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onShareToSlack,
   moreActionsOpen,
   onMoreActionsOpenChange,
+  initialUnreadReleaseCount = 0,
+  showWhatsNewBadge = true,
+  onShowWhatsNewBadgeChange,
 }) => {
   const { t, locale } = useTranslation();
   const isCompact = useIsCompactMode();
@@ -144,6 +151,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [isCursorRunning, setIsCursorRunning] = useState(false);
   // Claude API Upload
   const [isClaudeApiUploadDialogOpen, setIsClaudeApiUploadDialogOpen] = useState(false);
+  // What's New
+  const [isWhatsNewDialogOpen, setIsWhatsNewDialogOpen] = useState(false);
+  const [unreadReleaseCount, setUnreadReleaseCount] = useState(initialUnreadReleaseCount);
+
+  useEffect(() => {
+    setUnreadReleaseCount(initialUnreadReleaseCount);
+  }, [initialUnreadReleaseCount]);
+
   const generationNameRequestIdRef = useRef<string | null>(null);
 
   // Workflow name validation pattern (lowercase, numbers, hyphens, underscores only)
@@ -2325,6 +2340,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onToggleAntigravityBeta={toggleAntigravityEnabled}
               isCursorEnabled={isCursorEnabled}
               onToggleCursorBeta={toggleCursorEnabled}
+              onOpenWhatsNew={() => setIsWhatsNewDialogOpen(true)}
+              unreadReleaseCount={unreadReleaseCount}
               open={moreActionsOpen}
               onOpenChange={onMoreActionsOpenChange}
             />
@@ -2349,6 +2366,22 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           cancelLabel={t('common.cancel')}
           onConfirm={handleResetWorkflow}
           onCancel={() => setShowResetConfirm(false)}
+        />
+
+        {/* What's New Dialog */}
+        <WhatsNewDialog
+          isOpen={isWhatsNewDialogOpen}
+          onClose={() => {
+            setIsWhatsNewDialogOpen(false);
+            setUnreadReleaseCount(0);
+          }}
+          showBadge={showWhatsNewBadge}
+          onShowBadgeChange={(show) => {
+            onShowWhatsNewBadgeChange?.(show);
+            if (!show) {
+              setUnreadReleaseCount(0);
+            }
+          }}
         />
       </div>
     </StyledTooltipProvider>

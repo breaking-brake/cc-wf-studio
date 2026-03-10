@@ -85,6 +85,12 @@ export interface WebviewTranslationKeys {
   // Toolbar more actions dropdown
   'toolbar.moreActions': string;
   'toolbar.help': string;
+  'toolbar.whatsNew': string;
+
+  // What's New dialog
+  'whatsNew.title': string;
+  'whatsNew.viewAllReleases': string;
+  'whatsNew.showBadge': string;
 
   // Copilot Execution Mode
   'copilot.mode.tooltip': string;

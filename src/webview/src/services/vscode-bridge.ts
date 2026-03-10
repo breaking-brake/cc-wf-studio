@@ -29,6 +29,7 @@ import type {
   ExportForRooCodeSuccessPayload,
   ExportWorkflowPayload,
   ExtensionMessage,
+  GetChangelogResultPayload,
   GetMcpServerTypesResultPayload,
   GetSavedMcpServerUrlsResultPayload,
   GetSkillVersionDetailsSuccessPayload,
@@ -1599,4 +1600,44 @@ export function getSkillVersionDetails(
       reject(new Error('Request timed out'));
     }, 10000);
   });
+}
+
+/**
+ * Get changelog entries from CHANGELOG.md
+ */
+export function getChangelog(): Promise<GetChangelogResultPayload> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+        if (message.type === 'GET_CHANGELOG_RESULT') {
+          resolve(message.payload as GetChangelogResultPayload);
+        } else {
+          reject(new Error('Failed to get changelog'));
+        }
+      }
+    };
+    window.addEventListener('message', handler);
+    vscode.postMessage({ type: 'GET_CHANGELOG', requestId });
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 10000);
+  });
+}
+
+/**
+ * Mark changelog as read (fire-and-forget)
+ */
+export function markChangelogRead(): void {
+  vscode.postMessage({ type: 'MARK_CHANGELOG_READ' });
+}
+
+/**
+ * Set whether to show the What's New badge (fire-and-forget)
+ */
+export function setWhatsNewBadge(show: boolean): void {
+  vscode.postMessage({ type: 'SET_WHATS_NEW_BADGE', payload: { show } });
 }

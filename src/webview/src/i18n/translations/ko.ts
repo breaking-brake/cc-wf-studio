@@ -90,6 +90,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Toolbar more actions dropdown
   'toolbar.moreActions': '더보기',
   'toolbar.help': '도움말',
+  'toolbar.whatsNew': '새 소식',
+  'whatsNew.title': '새 소식',
+  'whatsNew.viewAllReleases': '모든 업데이트 보기',
+  'whatsNew.showBadge': '읽지 않은 배지',
 
   // Copilot Execution Mode
   'copilot.mode.tooltip': 'Copilot 실행 모드 선택',
