@@ -1,52 +1,110 @@
+import { Lexer, type Token, type Tokens } from 'marked';
 import type { ChangelogEntry, ChangelogItem, ChangelogSection } from '../../shared/types/messages';
 
-const VERSION_HEADER = /^## \[([^\]]+)\]\(([^)]+)\) \(([^)]+)\)/;
-const SECTION_HEADER = /^### (.+)/;
-// Match: * text ([#num](prUrl)) ([commitHash](commitUrl))
-// Captures: text, optional PR number, optional PR URL
-const ITEM_LINE = /^\* (.+?)(?:\s*\(\[#(\d+)\]\(([^)]+)\)\))?(?:\s*\(\[[a-f0-9]+\]\([^)]+\)\))?$/;
+/**
+ * Extract plain text and the first PR link from a list of inline tokens.
+ * Handles semantic-release format:
+ *   "description ([#num](url)) ([hash](url)), closes [#n](url) ..."
+ */
+function extractItemFromTokens(tokens: Token[]): ChangelogItem {
+  let text = '';
+  let prNumber: string | undefined;
+  let prUrl: string | undefined;
+  let foundPr = false;
+
+  for (const token of tokens) {
+    if (token.type === 'link' && !foundPr) {
+      // First link starting with # is the PR reference
+      if (token.text.startsWith('#')) {
+        prNumber = token.text;
+        prUrl = token.href;
+        foundPr = true;
+        continue;
+      }
+    }
+    // Skip commit hash links and "closes" references after PR link
+    if (foundPr) continue;
+
+    if (token.type === 'text') {
+      text += token.raw;
+    } else if (token.type === 'codespan') {
+      text += `\`${(token as Tokens.Codespan).text}\``;
+    } else if (token.type === 'strong') {
+      text += (token as Tokens.Strong).text;
+    } else if (token.type === 'em') {
+      text += (token as Tokens.Em).text;
+    }
+  }
+
+  const item: ChangelogItem = { text: text.replace(/\s*\($/, '').trim() };
+  if (prNumber) item.prNumber = prNumber;
+  if (prUrl) item.prUrl = prUrl;
+  return item;
+}
 
 export function parseChangelog(content: string, maxEntries = 5): ChangelogEntry[] {
-  const lines = content.split('\n');
+  const lexer = new Lexer();
+  const tokens = lexer.lex(content);
   const entries: ChangelogEntry[] = [];
   let currentEntry: ChangelogEntry | null = null;
   let currentSection: ChangelogSection | null = null;
 
-  for (const line of lines) {
-    const versionMatch = line.match(VERSION_HEADER);
-    if (versionMatch) {
+  for (const token of tokens) {
+    // ## [version](compareUrl) (date)
+    if (token.type === 'heading' && token.depth === 2) {
       if (currentSection && currentEntry) {
         currentEntry.sections.push(currentSection);
+        currentSection = null;
       }
       if (currentEntry) {
         entries.push(currentEntry);
         if (entries.length >= maxEntries) break;
       }
-      currentEntry = {
-        version: versionMatch[1],
-        compareUrl: versionMatch[2],
-        date: versionMatch[3],
-        sections: [],
-      };
-      currentSection = null;
+
+      // Parse version heading inline tokens
+      const inlineTokens = (token as Tokens.Heading).tokens || [];
+      let version = '';
+      let compareUrl = '';
+      let date = '';
+
+      for (const t of inlineTokens) {
+        if (t.type === 'link' && !version) {
+          version = t.text;
+          compareUrl = t.href;
+        } else if (t.type === 'text') {
+          const dateMatch = t.raw.match(/\(([^)]+)\)/);
+          if (dateMatch) date = dateMatch[1];
+        }
+      }
+
+      currentEntry = { version, compareUrl, date, sections: [] };
       continue;
     }
 
-    const sectionMatch = line.match(SECTION_HEADER);
-    if (sectionMatch && currentEntry) {
+    // ### Section Title
+    if (token.type === 'heading' && token.depth === 3 && currentEntry) {
       if (currentSection) {
         currentEntry.sections.push(currentSection);
       }
-      currentSection = { title: sectionMatch[1], items: [] };
+      currentSection = { title: token.text, items: [] };
       continue;
     }
 
-    const itemMatch = line.match(ITEM_LINE);
-    if (itemMatch && currentSection) {
-      const item: ChangelogItem = { text: itemMatch[1].trim() };
-      if (itemMatch[2]) item.prNumber = `#${itemMatch[2]}`;
-      if (itemMatch[3]) item.prUrl = itemMatch[3];
-      currentSection.items.push(item);
+    // List items
+    if (token.type === 'list' && currentSection) {
+      for (const listItem of (token as Tokens.List).items) {
+        const inlineTokens = (listItem as Tokens.ListItem).tokens;
+        // Flatten: list item may wrap content in a paragraph
+        let flatTokens: Token[] = [];
+        for (const t of inlineTokens) {
+          if (t.type === 'paragraph' || t.type === 'text') {
+            flatTokens = flatTokens.concat((t as Tokens.Paragraph).tokens || [t]);
+          } else {
+            flatTokens.push(t);
+          }
+        }
+        currentSection.items.push(extractItemFromTokens(flatTokens));
+      }
     }
   }
 
@@ -61,10 +119,12 @@ export function parseChangelog(content: string, maxEntries = 5): ChangelogEntry[
   return entries;
 }
 
+const VERSION_HEADING = /^## \[([^\]]+)\]/;
+
 export function extractVersions(content: string): string[] {
   const versions: string[] = [];
   for (const line of content.split('\n')) {
-    const match = line.match(VERSION_HEADER);
+    const match = line.match(VERSION_HEADING);
     if (match) {
       versions.push(match[1]);
     }
