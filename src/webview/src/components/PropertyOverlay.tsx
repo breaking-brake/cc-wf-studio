@@ -14,6 +14,7 @@ import {
   type CodexNodeData,
   type IfElseNodeData,
   type SkillNodeData,
+  SUB_AGENT_COLORS,
   type SubAgentData,
   type SubAgentFlowNodeData,
   type SwitchNodeData,
@@ -25,6 +26,7 @@ import type { Node } from 'reactflow';
 import { getNodeTypeLabel } from '../constants/node-type-labels';
 import { useResizablePanel } from '../hooks/useResizablePanel';
 import { useTranslation } from '../i18n/i18n-context';
+import { createSubAgent } from '../services/command-browser-service';
 import { openExternalUrl } from '../services/vscode-bridge';
 import { useWorkflowStore } from '../stores/workflow-store';
 import type { PromptNodeData } from '../types/node-types';
@@ -34,6 +36,7 @@ import { EditInEditorButton } from './common/EditInEditorButton';
 import { ResizeHandle } from './common/ResizeHandle';
 import { McpNodeEditDialog } from './dialogs/McpNodeEditDialog';
 import { SkillNodeEditDialog } from './dialogs/SkillNodeEditDialog';
+import { SubAgentFormDialog } from './dialogs/SubAgentFormDialog';
 
 /**
  * PropertyOverlay Props
@@ -193,6 +196,10 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
                     );
                   }
                 }}
+                disabled={
+                  selectedNode.type === 'subAgent' &&
+                  !!(selectedNode.data as SubAgentData).commandFilePath
+                }
                 className="nodrag"
                 placeholder={t('property.nodeName.placeholder')}
                 style={{
@@ -209,6 +216,10 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
                   }`,
                   borderRadius: '2px',
                   fontSize: '13px',
+                  ...(selectedNode.type === 'subAgent' &&
+                  !!(selectedNode.data as SubAgentData).commandFilePath
+                    ? { opacity: 0.6, cursor: 'not-allowed' }
+                    : {}),
                 }}
               />
               <div
@@ -355,7 +366,7 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
 };
 
 /**
- * Sub-Agent Properties Editor
+ * Sub-Agent Properties Editor (Read-Only + Edit Modal)
  */
 const SubAgentProperties: React.FC<{
   node: Node<SubAgentData>;
@@ -363,246 +374,194 @@ const SubAgentProperties: React.FC<{
 }> = ({ node, updateNodeData }) => {
   const { t } = useTranslation();
   const data = node.data;
-  const [isEditingPrompt, setIsEditingPrompt] = useState(false);
+  const agentType = data.agentType || 'claudeCode';
+  const isClaudeCode = agentType === 'claudeCode';
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: '12px',
+    fontWeight: 600,
+    color: 'var(--vscode-descriptionForeground)',
+    marginBottom: '2px',
+  };
+
+  const valueStyle: React.CSSProperties = {
+    fontSize: '13px',
+    color: 'var(--vscode-foreground)',
+    wordBreak: 'break-word',
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      {/* Description */}
-      <div>
-        <label
-          htmlFor="description-input"
-          style={{
-            display: 'block',
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--vscode-foreground)',
-            marginBottom: '6px',
-          }}
-        >
-          {t('property.description')}
-        </label>
-        <input
-          id="description-input"
-          type="text"
-          value={data.description}
-          onChange={(e) => updateNodeData(node.id, { description: e.target.value })}
-          className="nodrag"
-          style={{
-            width: '100%',
-            padding: '6px 8px',
-            backgroundColor: 'var(--vscode-input-background)',
-            color: 'var(--vscode-input-foreground)',
-            border: '1px solid var(--vscode-input-border)',
-            borderRadius: '2px',
-            fontSize: '13px',
-          }}
-        />
-      </div>
-
-      {/* Prompt */}
-      <div>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '6px',
-          }}
-        >
-          <label
-            htmlFor="prompt-textarea"
+      {/* Linked Command Badge (show at top when linked) */}
+      {data.commandFilePath && (
+        <div>
+          <div style={labelStyle}>{t('subAgent.property.linkedCommand')}</div>
+          <div
             style={{
-              display: 'block',
+              padding: '8px 10px',
+              backgroundColor: 'var(--vscode-textBlockQuote-background)',
+              border: '1px solid var(--vscode-textBlockQuote-border)',
+              borderRadius: '4px',
               fontSize: '12px',
-              fontWeight: 600,
-              color: 'var(--vscode-foreground)',
+              fontFamily: 'var(--vscode-editor-font-family)',
+              color: 'var(--vscode-descriptionForeground)',
+              wordBreak: 'break-all',
             }}
           >
-            {t('property.prompt')}
-          </label>
-          <EditInEditorButton
-            content={data.prompt}
-            onContentUpdated={(newContent) => updateNodeData(node.id, { prompt: newContent })}
-            label={t('property.prompt')}
-            language="markdown"
-            onEditingStateChange={setIsEditingPrompt}
-          />
+            <span
+              style={{
+                display: 'inline-block',
+                padding: '1px 6px',
+                backgroundColor: 'var(--vscode-badge-background)',
+                color: 'var(--vscode-badge-foreground)',
+                borderRadius: '3px',
+                fontSize: '10px',
+                fontWeight: 600,
+                marginRight: '6px',
+                textTransform: 'uppercase',
+              }}
+            >
+              {data.commandScope || 'project'}
+            </span>
+            {data.commandFilePath}
+          </div>
         </div>
-        <textarea
-          id="prompt-textarea"
-          value={data.prompt}
-          onChange={(e) => updateNodeData(node.id, { prompt: e.target.value })}
-          className="nodrag"
-          rows={6}
-          readOnly={isEditingPrompt}
+      )}
+
+      {/* Edit Button */}
+      <button
+        type="button"
+        onClick={() => setIsEditDialogOpen(true)}
+        style={{
+          width: '100%',
+          padding: '8px 16px',
+          fontSize: '13px',
+          fontWeight: 600,
+          border: 'none',
+          borderRadius: '4px',
+          backgroundColor: 'var(--vscode-button-background)',
+          color: 'var(--vscode-button-foreground)',
+          cursor: 'pointer',
+        }}
+      >
+        {t('subAgent.property.editButton')}
+      </button>
+
+      {/* Agent Type (read-only) */}
+      <div>
+        <div style={labelStyle}>{t('subAgent.form.agentTypeLabel')}</div>
+        <div style={valueStyle}>
+          {isClaudeCode
+            ? t('subAgent.form.agentType.claudeCode')
+            : t('subAgent.form.agentType.other')}
+        </div>
+      </div>
+
+      {/* Description (read-only) */}
+      <div>
+        <div style={labelStyle}>{t('property.description')}</div>
+        <div style={valueStyle}>{data.description || '-'}</div>
+      </div>
+
+      {/* Prompt (read-only, max 3 lines) */}
+      <div>
+        <div style={labelStyle}>{t('property.prompt')}</div>
+        <div
           style={{
-            width: '100%',
-            padding: '6px 8px',
-            backgroundColor: 'var(--vscode-input-background)',
-            color: 'var(--vscode-input-foreground)',
-            border: '1px solid var(--vscode-input-border)',
-            borderRadius: '2px',
-            fontSize: '13px',
+            ...valueStyle,
             fontFamily: 'var(--vscode-editor-font-family)',
-            resize: 'vertical',
-            opacity: isEditingPrompt ? 0.5 : 1,
-            cursor: isEditingPrompt ? 'not-allowed' : 'text',
-          }}
-        />
-      </div>
-
-      {/* Model */}
-      <div>
-        <label
-          htmlFor="model-select"
-          style={{
-            display: 'block',
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--vscode-foreground)',
-            marginBottom: '6px',
+            whiteSpace: 'pre-wrap',
+            maxHeight: '4.5em',
+            lineHeight: '1.5',
+            overflow: 'hidden',
           }}
         >
-          {t('property.model')}
-        </label>
-        <select
-          id="model-select"
-          value={data.model || 'sonnet'}
-          onChange={(e) =>
-            updateNodeData(node.id, {
-              model: e.target.value as 'sonnet' | 'opus' | 'haiku' | 'inherit',
-            })
-          }
-          className="nodrag"
-          style={{
-            width: '100%',
-            padding: '6px 8px',
-            backgroundColor: 'var(--vscode-input-background)',
-            color: 'var(--vscode-input-foreground)',
-            border: '1px solid var(--vscode-input-border)',
-            borderRadius: '2px',
-            fontSize: '13px',
-          }}
-        >
-          <option value="sonnet">Sonnet</option>
-          <option value="opus">Opus</option>
-          <option value="haiku">Haiku</option>
-          <option value="inherit">Inherit</option>
-        </select>
-      </div>
-
-      {/* Memory Scope */}
-      <div>
-        <label
-          htmlFor="memory-select"
-          style={{
-            display: 'block',
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--vscode-foreground)',
-            marginBottom: '6px',
-          }}
-        >
-          {t('property.memory')}
-        </label>
-        <select
-          id="memory-select"
-          value={data.memory || ''}
-          onChange={(e) =>
-            updateNodeData(node.id, {
-              memory:
-                e.target.value === ''
-                  ? undefined
-                  : (e.target.value as 'user' | 'project' | 'local'),
-            })
-          }
-          className="nodrag"
-          style={{
-            width: '100%',
-            padding: '6px 8px',
-            backgroundColor: 'var(--vscode-input-background)',
-            color: 'var(--vscode-input-foreground)',
-            border: '1px solid var(--vscode-input-border)',
-            borderRadius: '2px',
-            fontSize: '13px',
-          }}
-        >
-          <option value="">-</option>
-          <option value="user">user</option>
-          <option value="project">project</option>
-          <option value="local">local</option>
-        </select>
-        <div
-          style={{
-            fontSize: '11px',
-            marginTop: '4px',
-            textAlign: 'right',
-          }}
-        >
-          <span
-            role="button"
-            tabIndex={0}
-            onClick={() => openExternalUrl(t('property.memory.referenceUrl'))}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                openExternalUrl(t('property.memory.referenceUrl'));
-              }
-            }}
-            style={{
-              color: 'var(--vscode-textLink-foreground)',
-              cursor: 'pointer',
-              textDecoration: 'none',
-            }}
-          >
-            Persistent Memory Reference
-          </span>
+          {data.prompt || '-'}
         </div>
       </div>
 
-      {/* Tools */}
-      <div>
-        <label
-          htmlFor="tools-input"
-          style={{
-            display: 'block',
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--vscode-foreground)',
-            marginBottom: '6px',
-          }}
-        >
-          {t('property.tools')}
-        </label>
-        <input
-          id="tools-input"
-          type="text"
-          value={data.tools || ''}
-          onChange={(e) => updateNodeData(node.id, { tools: e.target.value })}
-          placeholder={t('property.tools.placeholder')}
-          className="nodrag"
-          style={{
-            width: '100%',
-            padding: '6px 8px',
-            backgroundColor: 'var(--vscode-input-background)',
-            color: 'var(--vscode-input-foreground)',
-            border: '1px solid var(--vscode-input-border)',
-            borderRadius: '2px',
-            fontSize: '13px',
-          }}
-        />
-        <div
-          style={{
-            fontSize: '11px',
-            color: 'var(--vscode-descriptionForeground)',
-            marginTop: '4px',
-          }}
-        >
-          {t('property.tools.help')}
-        </div>
-      </div>
+      {/* Claude Code-specific fields (read-only) */}
+      {isClaudeCode && (
+        <>
+          {/* Model */}
+          <div>
+            <div style={labelStyle}>{t('property.model')}</div>
+            <div style={valueStyle}>
+              {(data.model || 'sonnet').charAt(0).toUpperCase() + (data.model || 'sonnet').slice(1)}
+            </div>
+          </div>
 
-      {/* Color */}
-      <ColorPicker value={data.color} onChange={(color) => updateNodeData(node.id, { color })} />
+          {/* Tools */}
+          <div>
+            <div style={labelStyle}>{t('property.tools')}</div>
+            <div style={valueStyle}>{data.tools || '-'}</div>
+          </div>
+
+          {/* Memory */}
+          <div>
+            <div style={labelStyle}>{t('property.memory')}</div>
+            <div style={valueStyle}>{data.memory || '-'}</div>
+          </div>
+
+          {/* Color */}
+          <div>
+            <div style={labelStyle}>{t('properties.subAgent.color')}</div>
+            <div style={{ ...valueStyle, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {data.color ? (
+                <>
+                  <div
+                    style={{
+                      width: '14px',
+                      height: '14px',
+                      backgroundColor: SUB_AGENT_COLORS[data.color],
+                      borderRadius: '2px',
+                    }}
+                  />
+                  <span style={{ textTransform: 'capitalize' }}>{data.color}</span>
+                </>
+              ) : (
+                '-'
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Edit Dialog */}
+      <SubAgentFormDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        initialData={{
+          description: data.description,
+          prompt: data.prompt,
+          agentType: agentType,
+          model: data.model || 'sonnet',
+          tools: data.tools || '',
+          memory: data.memory || '',
+          color: data.color,
+        }}
+        onSubmit={async (formData) => {
+          updateNodeData(node.id, {
+            description: formData.description,
+            prompt: formData.prompt,
+            agentType: formData.agentType,
+            model: formData.agentType === 'claudeCode' ? formData.model : undefined,
+            tools: formData.agentType === 'claudeCode' ? formData.tools || undefined : undefined,
+            memory: formData.agentType === 'claudeCode' ? formData.memory || undefined : undefined,
+            color: formData.agentType === 'claudeCode' ? formData.color : undefined,
+          });
+
+          if (data.commandFilePath) {
+            await createSubAgent({
+              ...formData,
+              commandFilePath: data.commandFilePath,
+            });
+          }
+
+          setIsEditDialogOpen(false);
+        }}
+      />
     </div>
   );
 };

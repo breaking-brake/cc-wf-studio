@@ -914,6 +914,53 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'description.panel.show': '説明パネルを表示',
   'description.panel.hide': '説明パネルを非表示',
 
+  // Sub-Agent Creation Dialog (Feature: 636 - Use Existing Agent)
+  'subAgent.dialog.title': 'Sub-Agentを参照',
+  'subAgent.dialog.createNew': '新規作成',
+  'subAgent.dialog.createNew.description': '新しいSub-Agentをゼロから作成',
+  'subAgent.dialog.useExisting': '既存エージェントを使用',
+  'subAgent.dialog.useExisting.description': '既存の.claude/agents/*.mdファイルを再利用',
+  'subAgent.dialog.selectCommand': 'コマンドを選択',
+  'subAgent.dialog.userTab': 'ユーザー',
+  'subAgent.dialog.projectTab': 'プロジェクト',
+  'subAgent.dialog.filterPlaceholder': '名前でフィルタ...',
+  'subAgent.dialog.noCommands': 'このディレクトリにコマンドが見つかりません',
+  'subAgent.dialog.loading': 'コマンドを読み込み中...',
+  'subAgent.dialog.addButton': 'ワークフローに追加',
+  'subAgent.dialog.cancelButton': 'キャンセル',
+  'subAgent.dialog.backButton': '戻る',
+  'subAgent.dialog.loadFailed':
+    'コマンドの読み込みに失敗しました。コマンドディレクトリを確認してください。',
+  'subAgent.dialog.description':
+    '既存のコマンドファイルを選択して、Sub-Agentノードとして使用します。',
+  'subAgent.dialog.userDescription':
+    '~/.claude/agents/ のコマンド — すべてのプロジェクトで利用可能。',
+  'subAgent.dialog.projectDescription': '.claude/agents/ のコマンド — このプロジェクト固有。',
+  'subAgent.property.linkedCommand': 'リンク済みコマンド',
+
+  // Sub-Agent Form Dialog (Create New)
+  'subAgent.form.title': '新しいSub-Agentを作成',
+  'subAgent.form.description': 'カスタム設定で新しいSub-Agentノードを定義します。',
+  'subAgent.form.agentTypeLabel': 'エージェントタイプ',
+  'subAgent.form.agentType.claudeCode': 'Claude Code',
+  'subAgent.form.agentType.other': 'その他',
+  'subAgent.form.descriptionLabel': '説明',
+  'subAgent.form.descriptionPlaceholder': 'このエージェントの簡単な説明...',
+  'subAgent.form.promptLabel': 'プロンプト',
+  'subAgent.form.promptPlaceholder': 'このエージェントへの指示を入力...',
+  'subAgent.form.modelLabel': 'モデル',
+  'subAgent.form.toolsLabel': 'ツール',
+  'subAgent.form.toolsHint': '許可するツールをカンマ区切りで入力（例: Read, Grep, Glob）',
+  'subAgent.form.memoryLabel': 'メモリスコープ',
+  'subAgent.form.memoryNone': 'なし',
+  'subAgent.form.cancelButton': 'キャンセル',
+  'subAgent.form.createButton': '作成',
+  'subAgent.form.editTitle': 'サブエージェントの編集',
+  'subAgent.form.saveButton': '保存',
+  'subAgent.property.editButton': '編集',
+  'subAgent.form.error.descriptionRequired': '説明は必須です。',
+  'subAgent.form.error.promptRequired': 'プロンプトは必須です。',
+
   // Claude API Upload Dialog
   'claudeApi.description':
     'ワークフローを Agent Skills として Claude API にアップロードし、Messages API 経由で実行できます。\nMCP サーバー、コード実行、他のスキルと組み合わせることで、ドキュメント処理・データ分析・カスタマーサポートなど、専門的な AI エージェントを API として公開できます。',

@@ -36,9 +36,10 @@ export async function checkExistingFiles(
   const agentsDir = path.join(workspacePath, '.claude', 'agents');
   const commandsDir = path.join(workspacePath, '.claude', 'commands');
 
-  // Check Sub-Agent files
+  // Check Sub-Agent files (skip linked command nodes — they already exist externally)
   const subAgentNodes = workflow.nodes.filter((node) => node.type === 'subAgent') as SubAgentNode[];
   for (const node of subAgentNodes) {
+    if (node.data.commandFilePath) continue;
     const fileName = nodeNameToFileName(node.name);
     const filePath = path.join(agentsDir, `${fileName}.md`);
     if (await fileService.fileExists(filePath)) {
@@ -92,9 +93,10 @@ export async function exportWorkflow(
   await fileService.createDirectory(agentsDir);
   await fileService.createDirectory(commandsDir);
 
-  // Export Sub-Agent nodes
+  // Export Sub-Agent nodes (skip linked command nodes — they already exist externally)
   const subAgentNodes = workflow.nodes.filter((node) => node.type === 'subAgent') as SubAgentNode[];
   for (const node of subAgentNodes) {
+    if (node.data.commandFilePath) continue;
     const fileName = nodeNameToFileName(node.name);
     const filePath = path.join(agentsDir, `${fileName}.md`);
     const content = generateSubAgentFile(node);

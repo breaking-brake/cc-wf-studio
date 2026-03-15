@@ -242,6 +242,32 @@ export function getCursorProjectSkillsDir(): string | null {
 }
 
 // =====================================================================
+// Command Paths
+// =====================================================================
+
+/**
+ * Get the user-scope Commands directory path
+ *
+ * @returns Absolute path to ~/.claude/agents/
+ */
+export function getUserCommandsDir(): string {
+  return path.join(os.homedir(), '.claude', 'agents');
+}
+
+/**
+ * Get the project-scope Commands directory path
+ *
+ * @returns Absolute path to .claude/agents/ in workspace root, or null if no workspace
+ */
+export function getProjectCommandsDir(): string | null {
+  const workspaceRoot = getWorkspaceRoot();
+  if (!workspaceRoot) {
+    return null;
+  }
+  return path.join(workspaceRoot, '.claude', 'agents');
+}
+
+// =====================================================================
 // MCP Configuration Paths
 // =====================================================================
 

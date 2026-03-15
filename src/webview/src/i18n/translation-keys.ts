@@ -836,6 +836,50 @@ export interface WebviewTranslationKeys {
   'description.panel.show': string;
   'description.panel.hide': string;
 
+  // Sub-Agent Creation Dialog (Feature: 636 - Use Existing Agent)
+  'subAgent.dialog.title': string;
+  'subAgent.dialog.createNew': string;
+  'subAgent.dialog.createNew.description': string;
+  'subAgent.dialog.useExisting': string;
+  'subAgent.dialog.useExisting.description': string;
+  'subAgent.dialog.selectCommand': string;
+  'subAgent.dialog.userTab': string;
+  'subAgent.dialog.projectTab': string;
+  'subAgent.dialog.filterPlaceholder': string;
+  'subAgent.dialog.noCommands': string;
+  'subAgent.dialog.loading': string;
+  'subAgent.dialog.addButton': string;
+  'subAgent.dialog.cancelButton': string;
+  'subAgent.dialog.backButton': string;
+  'subAgent.dialog.loadFailed': string;
+  'subAgent.dialog.description': string;
+  'subAgent.dialog.userDescription': string;
+  'subAgent.dialog.projectDescription': string;
+  'subAgent.property.linkedCommand': string;
+
+  // Sub-Agent Form Dialog (Create New)
+  'subAgent.form.title': string;
+  'subAgent.form.description': string;
+  'subAgent.form.agentTypeLabel': string;
+  'subAgent.form.agentType.claudeCode': string;
+  'subAgent.form.agentType.other': string;
+  'subAgent.form.descriptionLabel': string;
+  'subAgent.form.descriptionPlaceholder': string;
+  'subAgent.form.promptLabel': string;
+  'subAgent.form.promptPlaceholder': string;
+  'subAgent.form.modelLabel': string;
+  'subAgent.form.toolsLabel': string;
+  'subAgent.form.toolsHint': string;
+  'subAgent.form.memoryLabel': string;
+  'subAgent.form.memoryNone': string;
+  'subAgent.form.cancelButton': string;
+  'subAgent.form.createButton': string;
+  'subAgent.form.editTitle': string;
+  'subAgent.form.saveButton': string;
+  'subAgent.property.editButton': string;
+  'subAgent.form.error.descriptionRequired': string;
+  'subAgent.form.error.promptRequired': string;
+
   // Claude API Upload Dialog
   'claudeApi.description': string;
 }

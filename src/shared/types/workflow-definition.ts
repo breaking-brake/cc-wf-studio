@@ -109,12 +109,18 @@ export interface WorkflowHooks {
 export interface SubAgentData {
   description: string;
   prompt: string;
+  /** Agent type: 'claudeCode' shows Claude Code-specific fields, 'other' hides them */
+  agentType?: 'claudeCode' | 'other';
   tools?: string;
   model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
   /** Persistent memory scope for cross-conversation knowledge retention */
   memory?: 'user' | 'project' | 'local';
   color?: 'red' | 'blue' | 'green' | 'yellow' | 'purple' | 'orange' | 'pink' | 'cyan';
   outputPorts: number;
+  /** Path to the source .claude/agents/*.md file (reference info for linked commands) */
+  commandFilePath?: string;
+  /** Scope of the linked command file */
+  commandScope?: 'user' | 'project';
 }
 
 // Color codes for SubAgent color property

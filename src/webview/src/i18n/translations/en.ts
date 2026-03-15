@@ -921,6 +921,52 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'description.panel.show': 'Show description panel',
   'description.panel.hide': 'Hide description panel',
 
+  // Sub-Agent Creation Dialog (Feature: 636 - Use Existing Agent)
+  'subAgent.dialog.title': 'Browse Sub-Agent',
+  'subAgent.dialog.createNew': 'Create New',
+  'subAgent.dialog.createNew.description': 'Create a new Sub-Agent from scratch',
+  'subAgent.dialog.useExisting': 'Use Existing Agent',
+  'subAgent.dialog.useExisting.description': 'Reuse an existing .claude/agents/*.md file',
+  'subAgent.dialog.selectCommand': 'Select a Command',
+  'subAgent.dialog.userTab': 'User',
+  'subAgent.dialog.projectTab': 'Project',
+  'subAgent.dialog.filterPlaceholder': 'Filter by name...',
+  'subAgent.dialog.noCommands': 'No commands found in this directory',
+  'subAgent.dialog.loading': 'Loading commands...',
+  'subAgent.dialog.addButton': 'Add to Workflow',
+  'subAgent.dialog.cancelButton': 'Cancel',
+  'subAgent.dialog.backButton': 'Back',
+  'subAgent.dialog.loadFailed': 'Failed to load commands. Please check the commands directory.',
+  'subAgent.dialog.description':
+    'Browse and select an existing command file to use as a Sub-Agent node.',
+  'subAgent.dialog.userDescription':
+    'Commands from ~/.claude/agents/ — available across all projects.',
+  'subAgent.dialog.projectDescription': 'Commands from .claude/agents/ — specific to this project.',
+  'subAgent.property.linkedCommand': 'Linked Command',
+
+  // Sub-Agent Form Dialog (Create New)
+  'subAgent.form.title': 'Create New Sub-Agent',
+  'subAgent.form.description': 'Define a new Sub-Agent node with custom settings.',
+  'subAgent.form.agentTypeLabel': 'Agent Type',
+  'subAgent.form.agentType.claudeCode': 'Claude Code',
+  'subAgent.form.agentType.other': 'Other',
+  'subAgent.form.descriptionLabel': 'Description',
+  'subAgent.form.descriptionPlaceholder': 'Brief description of this agent...',
+  'subAgent.form.promptLabel': 'Prompt',
+  'subAgent.form.promptPlaceholder': 'Enter the instructions for this agent...',
+  'subAgent.form.modelLabel': 'Model',
+  'subAgent.form.toolsLabel': 'Tools',
+  'subAgent.form.toolsHint': 'Comma-separated list of allowed tools (e.g., Read, Grep, Glob)',
+  'subAgent.form.memoryLabel': 'Memory Scope',
+  'subAgent.form.memoryNone': 'None',
+  'subAgent.form.cancelButton': 'Cancel',
+  'subAgent.form.createButton': 'Create',
+  'subAgent.form.editTitle': 'Edit Sub-Agent',
+  'subAgent.form.saveButton': 'Save',
+  'subAgent.property.editButton': 'Edit',
+  'subAgent.form.error.descriptionRequired': 'Description is required.',
+  'subAgent.form.error.promptRequired': 'Prompt is required.',
+
   // Claude API Upload Dialog
   'claudeApi.description':
     'Upload workflows as Agent Skills to Claude API and run them via the Messages API.\nCombined with MCP servers, code execution, and other skills, you can publish specialized AI agents as APIs for document processing, data analysis, customer support, and more.',
