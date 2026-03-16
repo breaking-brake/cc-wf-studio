@@ -20,6 +20,7 @@ import type {
   ApplyWorkflowFromMcpResponsePayload,
   GetCurrentWorkflowResponsePayload,
   McpConfigTarget,
+  PlannedSubAgentFile,
 } from '../../shared/types/messages';
 import type { Workflow } from '../../shared/types/workflow-definition';
 import { log } from '../extension';
@@ -277,7 +278,11 @@ export class McpServerManager {
   }
 
   // Called by MCP tools to apply workflow to canvas
-  async applyWorkflowToCanvas(workflow: Workflow, description?: string): Promise<boolean> {
+  async applyWorkflowToCanvas(
+    workflow: Workflow,
+    description?: string,
+    plannedFiles?: PlannedSubAgentFile[]
+  ): Promise<boolean> {
     if (!this.webview) {
       throw new Error('Webview is not open. Please open CC Workflow Studio first.');
     }
@@ -296,7 +301,13 @@ export class McpServerManager {
 
       this.webview?.postMessage({
         type: 'APPLY_WORKFLOW_FROM_MCP',
-        payload: { correlationId, workflow, requireConfirmation, description },
+        payload: {
+          correlationId,
+          workflow,
+          requireConfirmation,
+          description,
+          ...(plannedFiles && plannedFiles.length > 0 ? { plannedFiles } : {}),
+        },
       });
     });
   }

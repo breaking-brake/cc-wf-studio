@@ -11,6 +11,29 @@ import { Check, X } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
 import { HOOKS_MATCHER_TOOLS } from '../../stores/refinement-store';
 
+const SIZE_STYLES = {
+  sm: {
+    containerPadding: '2px 4px',
+    containerMinHeight: '24px',
+    tagPadding: '1px 6px',
+    tagFontSize: '11px',
+    inputPadding: '2px 4px',
+    inputFontSize: '11px',
+    dropdownItemPadding: '6px 12px',
+    dropdownItemFontSize: '11px',
+  },
+  md: {
+    containerPadding: '4px 8px',
+    containerMinHeight: '32px',
+    tagPadding: '2px 8px',
+    tagFontSize: '12px',
+    inputPadding: '4px 4px',
+    inputFontSize: '13px',
+    dropdownItemPadding: '6px 12px',
+    dropdownItemFontSize: '13px',
+  },
+} as const;
+
 interface ToolSelectTagInputProps {
   /** Selected tools array */
   selectedTools: string[];
@@ -20,6 +43,10 @@ interface ToolSelectTagInputProps {
   disabled?: boolean;
   /** Additional className */
   className?: string;
+  /** Custom available tools list (defaults to HOOKS_MATCHER_TOOLS) */
+  availableTools?: string[];
+  /** Size variant: 'sm' for compact (hooks), 'md' for standard (dialogs) */
+  size?: 'sm' | 'md';
 }
 
 /**
@@ -36,13 +63,17 @@ export function ToolSelectTagInput({
   onChange,
   disabled = false,
   className,
+  availableTools,
+  size = 'sm',
 }: ToolSelectTagInputProps) {
+  const s = SIZE_STYLES[size];
   const [inputValue, setInputValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const filteredTools = HOOKS_MATCHER_TOOLS.filter(
+  const toolsList = availableTools ?? HOOKS_MATCHER_TOOLS;
+  const filteredTools = toolsList.filter(
     (tool) => tool.toLowerCase().includes(inputValue.toLowerCase()) && !selectedTools.includes(tool)
   );
 
@@ -142,8 +173,8 @@ export function ToolSelectTagInput({
             flexWrap: 'wrap',
             alignItems: 'center',
             gap: '4px',
-            padding: '2px 4px',
-            minHeight: '24px',
+            padding: s.containerPadding,
+            minHeight: s.containerMinHeight,
             backgroundColor: 'var(--vscode-input-background)',
             border: '1px solid var(--vscode-input-border)',
             borderRadius: '2px',
@@ -159,11 +190,11 @@ export function ToolSelectTagInput({
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '2px',
-                padding: '1px 6px',
+                padding: s.tagPadding,
                 backgroundColor: 'var(--vscode-badge-background)',
                 color: 'var(--vscode-badge-foreground)',
                 borderRadius: '10px',
-                fontSize: '11px',
+                fontSize: s.tagFontSize,
                 fontFamily: 'monospace',
                 whiteSpace: 'nowrap',
               }}
@@ -217,12 +248,12 @@ export function ToolSelectTagInput({
               style={{
                 flex: 1,
                 minWidth: '60px',
-                padding: '2px 4px',
+                padding: s.inputPadding,
                 backgroundColor: 'transparent',
                 color: 'var(--vscode-input-foreground)',
                 border: 'none',
                 outline: 'none',
-                fontSize: '11px',
+                fontSize: s.inputFontSize,
                 fontFamily: 'monospace',
               }}
             />
@@ -260,8 +291,8 @@ export function ToolSelectTagInput({
                 }}
                 onMouseEnter={() => setHighlightedIndex(index)}
                 style={{
-                  padding: '6px 12px',
-                  fontSize: '11px',
+                  padding: s.dropdownItemPadding,
+                  fontSize: s.dropdownItemFontSize,
                   color: 'var(--vscode-foreground)',
                   cursor: 'pointer',
                   display: 'flex',
@@ -292,7 +323,7 @@ export function ToolSelectTagInput({
             <div
               style={{
                 padding: '8px 12px',
-                fontSize: '11px',
+                fontSize: s.dropdownItemFontSize,
                 color: 'var(--vscode-descriptionForeground)',
                 textAlign: 'center',
               }}

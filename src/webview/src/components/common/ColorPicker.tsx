@@ -82,7 +82,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({ value, onChange, disab
               border: '1px solid var(--vscode-dropdown-border)',
               borderRadius: '2px',
               boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
-              zIndex: 9999,
+              zIndex: 10001,
               minWidth: '200px',
             }}
           >

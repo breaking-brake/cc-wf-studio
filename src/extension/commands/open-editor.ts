@@ -57,6 +57,7 @@ import {
   handleUploadToClaudeApi,
 } from './claude-api-handlers';
 import { handleExportForCodexCli, handleRunForCodexCli } from './codex-handlers';
+import { handleBrowseCommands, handleCreateSubAgent } from './command-operations';
 import {
   handleExportForCopilot,
   handleExportForCopilotCli,
@@ -815,6 +816,18 @@ export function registerOpenEditorCommand(
             case 'CONFIRM_OVERWRITE':
               // TODO: Will be implemented in Phase 4
               console.log('CONFIRM_OVERWRITE:', message.payload);
+              break;
+
+            case 'BROWSE_COMMANDS':
+              // Browse available Claude Code Commands for Sub-Agent reuse
+              await handleBrowseCommands(webview, message.requestId || '');
+              break;
+
+            case 'CREATE_SUB_AGENT':
+              // Write .claude/agents/{name}.md immediately on Sub-Agent creation
+              if (message.payload) {
+                await handleCreateSubAgent(message.payload, webview, message.requestId || '');
+              }
               break;
 
             case 'BROWSE_SKILLS':

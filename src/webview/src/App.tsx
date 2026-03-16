@@ -12,6 +12,7 @@ import type {
   GetCurrentWorkflowRequestPayload,
   ImportWorkflowFromSlackPayload,
   InitialStatePayload,
+  PlannedSubAgentFile,
   PreviewModeInitPayload,
   Workflow,
 } from '@shared/types/messages';
@@ -190,6 +191,7 @@ const App: React.FC = () => {
     workflow: Workflow;
     diffSummary: WorkflowDiffSummary;
     description?: string;
+    plannedFiles?: PlannedSubAgentFile[];
   } | null>(null);
   const pendingMcpApplyRef = useRef(pendingMcpApply);
   pendingMcpApplyRef.current = pendingMcpApply;
@@ -409,6 +411,7 @@ const App: React.FC = () => {
             workflow: payload.workflow,
             diffSummary,
             description: payload.description,
+            plannedFiles: payload.plannedFiles,
           });
         } else {
           // Direct apply without confirmation
@@ -606,6 +609,7 @@ const App: React.FC = () => {
         isOpen={pendingMcpApply !== null}
         diffSummary={pendingMcpApply?.diffSummary ?? null}
         description={pendingMcpApply?.description}
+        plannedFiles={pendingMcpApply?.plannedFiles}
         onAccept={handleAcceptMcpApply}
         onReject={handleRejectMcpApply}
       />

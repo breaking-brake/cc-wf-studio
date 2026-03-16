@@ -226,6 +226,60 @@ export interface SkillReference {
   source?: 'claude' | 'copilot' | 'codex' | 'roo' | 'gemini' | 'antigravity' | 'cursor';
 }
 
+// ============================================================================
+// Command Browse Types (for Sub-Agent "Use Existing Command" feature)
+// ============================================================================
+
+export interface CommandReference {
+  /** Command name (filename without .md extension) */
+  name: string;
+  /** Description extracted from file content (first non-empty line, max 100 chars) */
+  description: string;
+  /** Absolute path to the .md command file */
+  commandPath: string;
+  /** Scope: user (~/.claude/agents/) or project (.claude/agents/) */
+  scope: 'user' | 'project';
+  /** Full prompt content of the command file */
+  promptContent: string;
+}
+
+// ============================================================================
+// Sub-Agent Creation Payloads (Webview → Extension → Webview)
+// ============================================================================
+
+/**
+ * Create Sub-Agent file request payload (Webview → Extension)
+ * Writes .claude/agents/{name}.md immediately on node creation
+ */
+export interface CreateSubAgentPayload {
+  description: string;
+  prompt: string;
+  agentType: 'claudeCode' | 'other';
+  model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
+  tools?: string;
+  commandFilePath?: string;
+  memory?: 'user' | 'project' | 'local' | '';
+}
+
+/**
+ * Sub-Agent file creation success payload (Extension → Webview)
+ */
+export interface SubAgentCreationSuccessPayload {
+  filePath: string;
+  fileName: string;
+  timestamp: string;
+}
+
+export interface CommandListLoadedPayload {
+  /** All discovered commands */
+  commands: CommandReference[];
+  /** Timestamp of scan */
+  timestamp: string;
+  /** Count by scope */
+  userCount: number;
+  projectCount: number;
+}
+
 export interface CreateSkillPayload {
   /** Skill name (lowercase, hyphens, max 64 chars) */
   name: string;
@@ -1001,6 +1055,8 @@ export type ExtensionMessage =
   | Message<PreviewParseErrorPayload, 'PREVIEW_PARSE_ERROR'>
   | Message<void, 'SAVE_CANCELLED'>
   | Message<void, 'EXPORT_CANCELLED'>
+  | Message<CommandListLoadedPayload, 'COMMAND_LIST_LOADED'>
+  | Message<SubAgentCreationSuccessPayload, 'SUB_AGENT_CREATION_SUCCESS'>
   | Message<SkillListLoadedPayload, 'SKILL_LIST_LOADED'>
   | Message<SkillCreationSuccessPayload, 'SKILL_CREATION_SUCCESS'>
   | Message<SkillValidationErrorPayload, 'SKILL_CREATION_FAILED'>
@@ -2041,6 +2097,16 @@ export interface GetCurrentWorkflowResponsePayload {
 /**
  * Apply workflow from MCP payload (Extension → Webview)
  */
+/**
+ * Planned sub-agent file to be created on disk after user approval.
+ * Used to show file creation preview in DiffPreviewDialog.
+ */
+export interface PlannedSubAgentFile {
+  nodeId: string;
+  nodeName: string;
+  filePath: string;
+}
+
 export interface ApplyWorkflowFromMcpPayload {
   /** Correlation ID for response */
   correlationId: string;
@@ -2050,6 +2116,8 @@ export interface ApplyWorkflowFromMcpPayload {
   requireConfirmation: boolean;
   /** AI agent's description of the changes (optional) */
   description?: string;
+  /** Files planned to be created for sub-agent nodes (shown in diff preview) */
+  plannedFiles?: PlannedSubAgentFile[];
 }
 
 /**
@@ -2134,6 +2202,8 @@ export type WebviewMessage =
   | Message<void, 'LOAD_WORKFLOW_LIST'>
   | Message<LoadWorkflowRequestPayload, 'LOAD_WORKFLOW'>
   | Message<StateUpdatePayload, 'STATE_UPDATE'>
+  | Message<void, 'BROWSE_COMMANDS'>
+  | Message<CreateSubAgentPayload, 'CREATE_SUB_AGENT'>
   | Message<void, 'BROWSE_SKILLS'>
   | Message<CreateSkillPayload, 'CREATE_SKILL'>
   | Message<ValidateSkillFilePayload, 'VALIDATE_SKILL_FILE'>

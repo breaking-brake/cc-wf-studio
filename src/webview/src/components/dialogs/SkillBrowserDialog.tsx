@@ -337,15 +337,15 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
 
             {!showSettingsStep && (
               <>
-                {/* Filter Input */}
-                <div style={{ marginBottom: '16px' }}>
+                {/* Filter Input + Create New Button */}
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                   <input
                     type="text"
                     placeholder={t('skill.browser.filterPlaceholder')}
                     value={filterText}
                     onChange={(e) => setFilterText(e.target.value)}
                     style={{
-                      width: '100%',
+                      flex: 1,
                       padding: '8px 12px',
                       fontSize: '13px',
                       backgroundColor: 'var(--vscode-input-background)',
@@ -355,6 +355,33 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                       outline: 'none',
                     }}
                   />
+                  {!loading && (
+                    <button
+                      type="button"
+                      onClick={() => setIsSkillCreationOpen(true)}
+                      style={{
+                        padding: '8px 16px',
+                        fontSize: '13px',
+                        whiteSpace: 'nowrap',
+                        border: '1px solid var(--vscode-button-border)',
+                        borderRadius: '4px',
+                        backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                        color: 'var(--vscode-button-secondaryForeground)',
+                        cursor: 'pointer',
+                        fontWeight: 500,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                          'var(--vscode-button-secondaryHoverBackground)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                          'var(--vscode-button-secondaryBackground)';
+                      }}
+                    >
+                      + Create New Skill
+                    </button>
+                  )}
                 </div>
 
                 {/* Tabs */}
@@ -709,37 +736,6 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                       </div>
                     ))}
                   </div>
-                )}
-
-                {/* Create New Skill Button */}
-                {!loading && (
-                  <button
-                    type="button"
-                    onClick={() => setIsSkillCreationOpen(true)}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      marginTop: '16px',
-                      fontSize: '13px',
-                      border: '1px solid var(--vscode-button-border)',
-                      borderRadius: '4px',
-                      backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                      color: 'var(--vscode-button-secondaryForeground)',
-                      cursor: 'pointer',
-                      textAlign: 'center',
-                      fontWeight: 500,
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor =
-                        'var(--vscode-button-secondaryHoverBackground)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor =
-                        'var(--vscode-button-secondaryBackground)';
-                    }}
-                  >
-                    + Create New Skill
-                  </button>
                 )}
 
                 {/* Actions - Browse Step */}
