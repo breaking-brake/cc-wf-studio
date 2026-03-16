@@ -39,6 +39,8 @@ export interface WebviewTranslationKeys {
   'toolbar.interactionMode.rangeSelectionButton': string;
   'toolbar.interactionMode.switchToPan': string;
   'toolbar.interactionMode.switchToSelection': string;
+  'toolbar.edgeAnimation.enable': string;
+  'toolbar.edgeAnimation.disable': string;
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.show': string;

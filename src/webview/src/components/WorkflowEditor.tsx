@@ -5,7 +5,7 @@
  * Based on: /specs/001-cc-wf-studio/research.md section 3.4
  */
 
-import { PanelLeftOpen } from 'lucide-react';
+import { Activity, PanelLeftOpen } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactFlow, {
@@ -18,6 +18,7 @@ import ReactFlow, {
   type Node,
   type NodeTypes,
   Panel,
+  applyNodeChanges,
 } from 'reactflow';
 import { CURRENT_ANNOUNCEMENT, cleanupDismissedAnnouncements } from '../constants/announcements';
 import { useAutoFocusNode } from '../hooks/useAutoFocusNode';
@@ -25,6 +26,7 @@ import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { FeatureAnnouncementBanner } from './common/FeatureAnnouncementBanner';
+import { StyledTooltipItem, StyledTooltipProvider } from './common/StyledTooltip';
 import { DescriptionPanel } from './DescriptionPanel';
 // Custom edge with delete button
 import { DeletableEdge } from './edges/DeletableEdge';
@@ -115,8 +117,27 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     onEdgesChange,
     onConnect,
     setSelectedNodeId,
+    syncSelectedNodeId,
+    selectedNodeId,
     interactionMode,
   } = useWorkflowStore();
+
+  // Edge animation toggle (respects prefers-reduced-motion by default)
+  const [isEdgeAnimationEnabled, setIsEdgeAnimationEnabled] = useState(
+    () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+
+  // Animate edges: selected edge itself, or edges connected to selected node
+  const animatedEdges = useMemo(() => {
+    if (!isEdgeAnimationEnabled) return edges;
+    return edges.map((edge) => ({
+      ...edge,
+      animated:
+        edge.selected ||
+        (selectedNodeId != null &&
+          (edge.source === selectedNodeId || edge.target === selectedNodeId)),
+    }));
+  }, [edges, selectedNodeId, isEdgeAnimationEnabled]);
 
   /**
    * 接続制約の検証
@@ -149,12 +170,32 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     [nodes]
   );
 
-  // Memoize callbacks for performance (research.md section 3.1)
-  const handleNodesChange = useCallback(onNodesChange, [onNodesChange]);
+  // Sync selectedNodeId from post-change node state (side-effect-free)
+  const handleNodesChange = useCallback(
+    (changes: Parameters<typeof onNodesChange>[0]) => {
+      const hasSelectionChanges = changes.some((c) => c.type === 'select');
+      onNodesChange(changes);
+
+      if (hasSelectionChanges) {
+        // Determine selection from full post-change state, not from delta
+        const updatedNodes = applyNodeChanges(changes, nodes);
+        const selectedNodes = updatedNodes.filter((n) => n.selected);
+
+        if (selectedNodes.length === 1) {
+          syncSelectedNodeId(selectedNodes[0].id);
+        } else {
+          // Multi-select or no selection: clear selectedNodeId
+          syncSelectedNodeId(null);
+        }
+      }
+    },
+    [onNodesChange, syncSelectedNodeId, nodes]
+  );
+
   const handleEdgesChange = useCallback(onEdgesChange, [onEdgesChange]);
   const handleConnect = useCallback(onConnect, [onConnect]);
 
-  // Handle node selection
+  // Handle explicit node click (opens property overlay)
   const handleNodeClick = useCallback(
     (_event: React.MouseEvent, node: Node) => {
       setSelectedNodeId(node.id);
@@ -164,8 +205,8 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
   // Handle pane click (deselect)
   const handlePaneClick = useCallback(() => {
-    setSelectedNodeId(null);
-  }, [setSelectedNodeId]);
+    syncSelectedNodeId(null);
+  }, [syncSelectedNodeId]);
 
   // Memoize snap grid
   const snapGrid = useMemo<[number, number]>(() => [15, 15], []);
@@ -226,11 +267,12 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       <div style={{ flex: 1, position: 'relative' }}>
         <ReactFlow
           nodes={nodes}
-          edges={edges}
+          edges={animatedEdges}
           onNodesChange={handleNodesChange}
           onEdgesChange={handleEdgesChange}
           onConnect={handleConnect}
           onNodeClick={handleNodeClick}
+          onEdgeClick={() => syncSelectedNodeId(null)}
           onPaneClick={handlePaneClick}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
@@ -293,9 +335,48 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
             </MinimapContainer>
           </Panel>
 
-          {/* Interaction Mode Toggle */}
+          {/* Interaction Mode Toggle & Edge Animation Toggle */}
           <Panel position="top-left">
-            <InteractionModeToggle />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <InteractionModeToggle />
+              <StyledTooltipProvider>
+                <StyledTooltipItem
+                  content={
+                    isEdgeAnimationEnabled
+                      ? t('toolbar.edgeAnimation.disable')
+                      : t('toolbar.edgeAnimation.enable')
+                  }
+                >
+                  <button
+                    type="button"
+                    onClick={() => setIsEdgeAnimationEnabled((prev) => !prev)}
+                    aria-label={
+                      isEdgeAnimationEnabled
+                        ? t('toolbar.edgeAnimation.disable')
+                        : t('toolbar.edgeAnimation.enable')
+                    }
+                    style={{
+                      all: 'unset',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '20px',
+                      backgroundColor: 'var(--vscode-editor-background)',
+                      border: '1px solid var(--vscode-panel-border)',
+                      cursor: 'pointer',
+                      opacity: 0.85,
+                      color: isEdgeAnimationEnabled
+                        ? 'var(--vscode-foreground)'
+                        : 'var(--vscode-disabledForeground)',
+                    }}
+                  >
+                    <Activity size={14} />
+                  </button>
+                </StyledTooltipItem>
+              </StyledTooltipProvider>
+            </div>
           </Panel>
 
           {/* Description Panel for workflow description */}

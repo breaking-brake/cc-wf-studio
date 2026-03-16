@@ -77,6 +77,8 @@ interface WorkflowStore {
   setNodes: (nodes: Node[]) => void;
   setEdges: (edges: Edge[]) => void;
   setSelectedNodeId: (id: string | null) => void;
+  /** Update selectedNodeId without opening property overlay (for React Flow selection sync) */
+  syncSelectedNodeId: (id: string | null) => void;
   setInteractionMode: (mode: InteractionMode) => void;
   toggleInteractionMode: () => void;
   setWorkflowName: (name: string) => void;
@@ -326,8 +328,13 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   },
 
   onConnect: (connection) => {
+    const currentNodes = get().nodes.map((node) => ({ ...node, selected: false }));
+    const currentEdges = get().edges.map((e) => ({ ...e, selected: false }));
+    const newEdges = addEdge({ ...connection, selected: true }, currentEdges);
     set({
-      edges: addEdge(connection, get().edges),
+      nodes: currentNodes,
+      edges: newEdges,
+      selectedNodeId: null,
     });
   },
 
@@ -343,6 +350,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     } else {
       set({ selectedNodeId });
     }
+  },
+
+  syncSelectedNodeId: (selectedNodeId) => {
+    set({ selectedNodeId });
   },
 
   setInteractionMode: (interactionMode) => set({ interactionMode }),

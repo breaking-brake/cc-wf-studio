@@ -41,6 +41,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.rangeSelectionButton': 'Select',
   'toolbar.interactionMode.switchToPan': 'Switch to Hand Tool mode',
   'toolbar.interactionMode.switchToSelection': 'Switch to Selection mode',
+  'toolbar.edgeAnimation.enable': 'Enable edge animation',
+  'toolbar.edgeAnimation.disable': 'Disable edge animation',
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.show': 'Show Minimap',

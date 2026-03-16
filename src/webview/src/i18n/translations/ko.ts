@@ -41,6 +41,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.rangeSelectionButton': '범위 선택',
   'toolbar.interactionMode.switchToPan': '손바닥 모드로 전환',
   'toolbar.interactionMode.switchToSelection': '선택 모드로 전환',
+  'toolbar.edgeAnimation.enable': '엣지 애니메이션 활성화',
+  'toolbar.edgeAnimation.disable': '엣지 애니메이션 비활성화',
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.show': '미니맵 표시',

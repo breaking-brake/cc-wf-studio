@@ -41,6 +41,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.rangeSelectionButton': '范围选择',
   'toolbar.interactionMode.switchToPan': '切换到手掌模式',
   'toolbar.interactionMode.switchToSelection': '切换到选择模式',
+  'toolbar.edgeAnimation.enable': '启用边动画',
+  'toolbar.edgeAnimation.disable': '禁用边动画',
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.show': '显示迷你地图',

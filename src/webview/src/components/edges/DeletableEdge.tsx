@@ -5,8 +5,15 @@
  * Shows delete button only when edge is selected.
  */
 
+import { X } from 'lucide-react';
 import type React from 'react';
-import { BaseEdge, type EdgeProps, getBezierPath, useReactFlow } from 'reactflow';
+import {
+  BaseEdge,
+  EdgeLabelRenderer,
+  type EdgeProps,
+  getBezierPath,
+  useReactFlow,
+} from 'reactflow';
 
 /**
  * Deletable edge component
@@ -48,20 +55,17 @@ export const DeletableEdge: React.FC<EdgeProps> = ({
       {/* Base edge */}
       <BaseEdge path={edgePath} style={style} markerEnd={markerEnd} />
 
-      {/* Show delete button only when selected */}
+      {/* Delete button rendered in HTML layer (outside SVG) to avoid animation flicker */}
       {selected && (
-        <foreignObject
-          x={labelX - 9}
-          y={labelY - 9}
-          width={18}
-          height={18}
-          className="edgebutton-foreignobject"
-          requiredExtensions="http://www.w3.org/1999/xhtml"
-        >
+        <EdgeLabelRenderer>
           <button
             type="button"
             onClick={handleDeleteClick}
+            className="nodrag nopan"
             style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+              pointerEvents: 'all',
               width: '18px',
               height: '18px',
               borderRadius: '3px',
@@ -72,8 +76,6 @@ export const DeletableEdge: React.FC<EdgeProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '14px',
-              fontWeight: 'bold',
               padding: 0,
             }}
             onMouseEnter={(e) => {
@@ -84,25 +86,9 @@ export const DeletableEdge: React.FC<EdgeProps> = ({
             }}
             title="Delete connection"
           >
-            <svg
-              width="8"
-              height="8"
-              viewBox="0 0 8 8"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              style={{ display: 'block' }}
-              aria-labelledby="delete-edge-icon-title"
-            >
-              <title id="delete-edge-icon-title">Delete</title>
-              <path
-                d="M1 1L7 7M7 1L1 7"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </svg>
+            <X size={12} strokeWidth={2.5} />
           </button>
-        </foreignObject>
+        </EdgeLabelRenderer>
       )}
     </>
   );
