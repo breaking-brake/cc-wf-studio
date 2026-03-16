@@ -2097,6 +2097,16 @@ export interface GetCurrentWorkflowResponsePayload {
 /**
  * Apply workflow from MCP payload (Extension → Webview)
  */
+/**
+ * Planned sub-agent file to be created on disk after user approval.
+ * Used to show file creation preview in DiffPreviewDialog.
+ */
+export interface PlannedSubAgentFile {
+  nodeId: string;
+  nodeName: string;
+  filePath: string;
+}
+
 export interface ApplyWorkflowFromMcpPayload {
   /** Correlation ID for response */
   correlationId: string;
@@ -2106,6 +2116,8 @@ export interface ApplyWorkflowFromMcpPayload {
   requireConfirmation: boolean;
   /** AI agent's description of the changes (optional) */
   description?: string;
+  /** Files planned to be created for sub-agent nodes (shown in diff preview) */
+  plannedFiles?: PlannedSubAgentFile[];
 }
 
 /**

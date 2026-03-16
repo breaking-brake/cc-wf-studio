@@ -273,9 +273,13 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
       errors.push(...subAgentFlowErrors);
     }
 
-    // Validate SubAgent memory enum (Feature: 540-persistent-memory)
+    // Validate SubAgent fields (Feature: 540-persistent-memory, 636-reference-model)
     if (node.type === NodeType.SubAgent) {
-      const subAgentData = node.data as { memory?: string };
+      const subAgentData = node.data as {
+        memory?: string;
+        commandFilePath?: string;
+        commandScope?: string;
+      };
       if (subAgentData.memory !== undefined) {
         const validMemoryScopes = ['user', 'project', 'local'];
         if (!validMemoryScopes.includes(subAgentData.memory)) {
@@ -283,6 +287,17 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
             code: 'SUBAGENT_INVALID_MEMORY',
             message: `SubAgent memory must be one of: ${validMemoryScopes.join(', ')}`,
             field: `nodes[${node.id}].data.memory`,
+          });
+        }
+      }
+      // commandScope enum validation
+      if (subAgentData.commandScope !== undefined) {
+        const validScopes = ['user', 'project'];
+        if (!validScopes.includes(subAgentData.commandScope)) {
+          errors.push({
+            code: 'SUBAGENT_INVALID_COMMAND_SCOPE',
+            message: `SubAgent commandScope must be one of: ${validScopes.join(', ')}`,
+            field: `nodes[${node.id}].data.commandScope`,
           });
         }
       }

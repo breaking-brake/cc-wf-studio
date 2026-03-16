@@ -407,6 +407,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'dialog.diffPreview.connectionsRemoved': '削除',
   'dialog.diffPreview.noChanges': '変更はありません。',
   'dialog.diffPreview.agentDescription': 'エージェントの説明',
+  'dialog.diffPreview.filesToCreate': '作成されるファイル',
   'dialog.diffPreview.accept': '適用',
   'dialog.diffPreview.reject': '却下',
 

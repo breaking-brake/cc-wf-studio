@@ -66,12 +66,41 @@ nodeTypes:
         required: false
         enum[3]: user,project,local
         description: "Persistent memory scope. 'user'=cross-project, 'project'=VCS-trackable, 'local'=local-only"
+      agentType:
+        type: string
+        required: false
+        enum[2]: claudeCode,other
+        default: claudeCode
+        description: "Agent runtime type. Set 'claudeCode' if the agent runs on Claude Code, 'other' for different AI agents (Cursor, Copilot, etc.). This controls which fields are shown in the property panel."
+      commandFilePath:
+        type: string
+        required: true
+        description: "Absolute path to .claude/agents/*.md file. Use list_available_commands to discover existing commands, or create a new .md file first."
+      commandScope:
+        type: string
+        required: true
+        enum[2]: user,project
+        description: "'user' = ~/.claude/agents/, 'project' = .claude/agents/"
       outputPorts:
         type: number
         required: true
         value: 1
     inputPorts: 1
     outputPorts: 1
+    aiGenerationGuidance:
+      workflow: SubAgent nodes MUST reference external .claude/agents/*.md files. Never embed prompt content inline.
+      agentType: "Set 'claudeCode' if you are Claude Code, 'other' if you are a different AI agent (Cursor, Copilot, etc.). You know what you are."
+      steps[4]: Call list_available_commands to discover existing agent files,"If a matching agent exists, use its commandPath and scope","If no match, provide description/prompt/model etc. without commandFilePath — apply_workflow will auto-create the .md file",Set agentType based on your own runtime identity
+      frontmatterFormat: "---\ndescription: Short description\nmodel: sonnet\ntools: Bash, Read, Write\nmemory: project\n---\nPrompt content here..."
+      example:
+        type: subAgent
+        data:
+          description: Code reviewer
+          prompt: Review the code for bugs
+          model: sonnet
+          commandFilePath: /path/to/.claude/agents/code-reviewer.md
+          commandScope: project
+          outputPorts: 1
   askUserQuestion:
     description: Present a question with multiple-choice options
     fields:

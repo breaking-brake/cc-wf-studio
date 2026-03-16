@@ -372,6 +372,7 @@ export interface WebviewTranslationKeys {
   'dialog.diffPreview.connectionsRemoved': string;
   'dialog.diffPreview.noChanges': string;
   'dialog.diffPreview.agentDescription': string;
+  'dialog.diffPreview.filesToCreate': string;
   'dialog.diffPreview.accept': string;
   'dialog.diffPreview.reject': string;
 

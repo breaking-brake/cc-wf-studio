@@ -391,6 +391,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'dialog.diffPreview.connectionsRemoved': '移除',
   'dialog.diffPreview.noChanges': '未偵測到變更。',
   'dialog.diffPreview.agentDescription': '代理說明',
+  'dialog.diffPreview.filesToCreate': '將建立的檔案',
   'dialog.diffPreview.accept': '接受',
   'dialog.diffPreview.reject': '拒絕',
 

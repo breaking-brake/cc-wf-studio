@@ -391,6 +391,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'dialog.diffPreview.connectionsRemoved': '删除',
   'dialog.diffPreview.noChanges': '未检测到更改。',
   'dialog.diffPreview.agentDescription': '代理说明',
+  'dialog.diffPreview.filesToCreate': '将创建的文件',
   'dialog.diffPreview.accept': '接受',
   'dialog.diffPreview.reject': '拒绝',
 

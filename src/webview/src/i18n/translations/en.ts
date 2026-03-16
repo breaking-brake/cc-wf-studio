@@ -408,6 +408,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'dialog.diffPreview.connectionsRemoved': 'removed',
   'dialog.diffPreview.noChanges': 'No changes detected.',
   'dialog.diffPreview.agentDescription': 'Agent description',
+  'dialog.diffPreview.filesToCreate': 'Files to be created',
   'dialog.diffPreview.accept': 'Accept',
   'dialog.diffPreview.reject': 'Reject',
 

@@ -406,6 +406,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'dialog.diffPreview.connectionsRemoved': '삭제',
   'dialog.diffPreview.noChanges': '변경 사항이 없습니다.',
   'dialog.diffPreview.agentDescription': '에이전트 설명',
+  'dialog.diffPreview.filesToCreate': '생성될 파일',
   'dialog.diffPreview.accept': '적용',
   'dialog.diffPreview.reject': '거부',
 
