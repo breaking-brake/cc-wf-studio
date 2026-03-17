@@ -330,6 +330,8 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
               node={selectedNode as Node<CodexNodeData>}
               updateNodeData={updateNodeData}
             />
+          ) : selectedNode.type === 'group' ? (
+            <GroupProperties node={selectedNode} updateNodeData={updateNodeData} />
           ) : selectedNode.type === 'start' || selectedNode.type === 'end' ? (
             <div
               style={{
@@ -3289,6 +3291,66 @@ const CodexProperties: React.FC<{
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+};
+
+/**
+ * GroupProperties - Property editor for Group nodes
+ * Only shows label editing since group nodes are layout-only containers.
+ */
+const GroupProperties: React.FC<{
+  node: Node;
+  updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
+}> = ({ node, updateNodeData }) => {
+  const { t } = useTranslation();
+  const data = node.data as { label: string };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div>
+        <label
+          htmlFor={`group-label-${node.id}`}
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('property.nodeName')}
+        </label>
+        <input
+          id={`group-label-${node.id}`}
+          type="text"
+          value={data.label || ''}
+          onChange={(e) => updateNodeData(node.id, { label: e.target.value })}
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+            boxSizing: 'border-box',
+          }}
+          placeholder="Group"
+        />
+      </div>
+      <div
+        style={{
+          padding: '12px',
+          backgroundColor: 'var(--vscode-textBlockQuote-background)',
+          border: '1px solid var(--vscode-textBlockQuote-border)',
+          borderRadius: '4px',
+          fontSize: '12px',
+          color: 'var(--vscode-descriptionForeground)',
+        }}
+      >
+        {t('node.group.description')}
       </div>
     </div>
   );

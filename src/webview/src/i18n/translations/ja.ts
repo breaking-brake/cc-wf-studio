@@ -108,6 +108,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'palette.basicNodes': '基本ノード',
   'palette.specialNodes': '特殊ノード',
   'palette.controlFlow': '制御フロー',
+  'palette.layout': 'レイアウト',
   'palette.quickStart': '💡 クイックスタート',
 
   // Node types
@@ -128,6 +129,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'node.askUserQuestion.description': 'ユーザーの選択に基づいて分岐',
   'node.skill.title': 'Skill',
   'node.skill.description': 'Claude Code Skillを実行',
+
+  // Group Node
+  'node.group.title': 'Group',
+  'node.group.description': 'ノードの視覚的グループ化',
 
   // Codex Node (Feature: 518-codex-agent-node)
   'node.codex.title': 'Codex Agent',

@@ -65,42 +65,58 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
   lines.push('```mermaid');
   lines.push('flowchart TD');
 
-  // Generate node definitions
+  // Identify group nodes and their children
+  const groupNodes = nodes.filter((n) => (n.type as string) === 'group');
+  const childParentMap = new Map<string, string>();
   for (const node of nodes) {
+    if (node.parentId) {
+      childParentMap.set(node.id, node.parentId);
+    }
+  }
+
+  // Collect nodes by group
+  const groupChildIds = new Map<string, string[]>();
+  for (const group of groupNodes) {
+    const children = nodes.filter((n) => childParentMap.get(n.id) === group.id).map((n) => n.id);
+    groupChildIds.set(group.id, children);
+  }
+
+  // Helper to generate a single node definition line
+  const generateNodeLine = (node: (typeof nodes)[0], indent: string): string | null => {
     const nodeId = sanitizeNodeId(node.id);
     const nodeType = node.type as string;
 
-    if (nodeType === 'start') {
-      lines.push(`    ${nodeId}([Start])`);
-    } else if (nodeType === 'end') {
-      lines.push(`    ${nodeId}([End])`);
-    } else if (nodeType === 'subAgent') {
+    if (nodeType === 'group') return null; // handled as subgraph
+    if (nodeType === 'start') return `${indent}${nodeId}([Start])`;
+    if (nodeType === 'end') return `${indent}${nodeId}([End])`;
+    if (nodeType === 'subAgent') {
       const agentName = node.name || 'Sub-Agent';
-      lines.push(`    ${nodeId}[${escapeLabel(`Sub-Agent: ${agentName}`)}]`);
-    } else if (nodeType === 'askUserQuestion') {
+      return `${indent}${nodeId}[${escapeLabel(`Sub-Agent: ${agentName}`)}]`;
+    }
+    if (nodeType === 'askUserQuestion') {
       const askNode = node as AskUserQuestionNode;
       const questionText = askNode.data.questionText || 'Question';
-      lines.push(
-        `    ${nodeId}{${escapeLabel('AskUserQuestion')}:<br/>${escapeLabel(questionText)}}`
-      );
-    } else if (nodeType === 'branch') {
+      return `${indent}${nodeId}{${escapeLabel('AskUserQuestion')}:<br/>${escapeLabel(questionText)}}`;
+    }
+    if (nodeType === 'branch') {
       const branchNode = node as BranchNode;
       const branchType = branchNode.data.branchType === 'conditional' ? 'Branch' : 'Switch';
-      lines.push(`    ${nodeId}{${escapeLabel(branchType)}:<br/>Conditional Branch}`);
-    } else if (nodeType === 'ifElse') {
-      lines.push(`    ${nodeId}{If/Else:<br/>Conditional Branch}`);
-    } else if (nodeType === 'switch') {
-      lines.push(`    ${nodeId}{Switch:<br/>Conditional Branch}`);
-    } else if (nodeType === 'prompt') {
+      return `${indent}${nodeId}{${escapeLabel(branchType)}:<br/>Conditional Branch}`;
+    }
+    if (nodeType === 'ifElse') return `${indent}${nodeId}{If/Else:<br/>Conditional Branch}`;
+    if (nodeType === 'switch') return `${indent}${nodeId}{Switch:<br/>Conditional Branch}`;
+    if (nodeType === 'prompt') {
       const promptNode = node as PromptNode;
       const promptText = promptNode.data.prompt?.split('\n')[0] || 'Prompt';
       const label = promptText.length > 30 ? `${promptText.substring(0, 27)}...` : promptText;
-      lines.push(`    ${nodeId}[${escapeLabel(label)}]`);
-    } else if (nodeType === 'skill') {
+      return `${indent}${nodeId}[${escapeLabel(label)}]`;
+    }
+    if (nodeType === 'skill') {
       const skillNode = node as SkillNode;
       const skillName = skillNode.data.name || 'Skill';
-      lines.push(`    ${nodeId}[[${escapeLabel(`Skill: ${skillName}`)}]]`);
-    } else if (nodeType === 'mcp') {
+      return `${indent}${nodeId}[[${escapeLabel(`Skill: ${skillName}`)}]]`;
+    }
+    if (nodeType === 'mcp') {
       const mcpNode = node as McpNode;
       const mcpData = mcpNode.data;
       let mcpLabel = 'MCP Tool';
@@ -114,15 +130,52 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
           mcpLabel = `MCP: ${mcpData.serverId || 'Tool'}`;
         }
       }
-      lines.push(`    ${nodeId}[[${escapeLabel(mcpLabel)}]]`);
-    } else if (nodeType === 'subAgentFlow') {
+      return `${indent}${nodeId}[[${escapeLabel(mcpLabel)}]]`;
+    }
+    if (nodeType === 'subAgentFlow') {
       const label = node.name || 'Sub-Agent Flow';
-      lines.push(`    ${nodeId}[["${escapeLabel(label)}"]]`);
-    } else if (nodeType === 'codex') {
+      return `${indent}${nodeId}[["${escapeLabel(label)}"]]`;
+    }
+    if (nodeType === 'codex') {
       const codexNode = node as CodexNode;
       const codexName = codexNode.data.label || 'Codex Agent';
-      lines.push(`    ${nodeId}[[${escapeLabel(`Codex: ${codexName}`)}]]`);
+      return `${indent}${nodeId}[[${escapeLabel(`Codex: ${codexName}`)}]]`;
     }
+    return null;
+  };
+
+  // Set of node IDs that belong to a group
+  const nodesInGroups = new Set<string>();
+  for (const children of groupChildIds.values()) {
+    for (const childId of children) {
+      nodesInGroups.add(childId);
+    }
+  }
+
+  // Generate subgraph blocks for group nodes
+  for (const group of groupNodes) {
+    const groupId = sanitizeNodeId(group.id);
+    const groupLabel =
+      ('data' in group && group.data && 'label' in group.data
+        ? (group.data as { label: string }).label
+        : group.name) || 'Group';
+    lines.push(`    subgraph ${groupId}["${escapeLabel(groupLabel)}"]`);
+    const childIds = groupChildIds.get(group.id) || [];
+    for (const childId of childIds) {
+      const childNode = nodes.find((n) => n.id === childId);
+      if (childNode) {
+        const line = generateNodeLine(childNode, '        ');
+        if (line) lines.push(line);
+      }
+    }
+    lines.push('    end');
+  }
+
+  // Generate top-level node definitions (not in any group)
+  for (const node of nodes) {
+    if (nodesInGroups.has(node.id)) continue;
+    const line = generateNodeLine(node, '    ');
+    if (line) lines.push(line);
   }
 
   lines.push('');

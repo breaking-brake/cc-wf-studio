@@ -14,7 +14,8 @@
       "skill",
       "mcp",
       "subAgentFlow",
-      "codex"
+      "codex",
+      "group"
     ]
   },
   "nodeTypes": {
@@ -569,6 +570,14 @@
       },
       "inputPorts": 1,
       "outputPorts": 1
+    },
+    "group": {
+      "description": "Visual grouping container for organizing nodes. Does not affect execution flow.",
+      "fields": {
+        "label": { "type": "string", "required": true, "default": "Group" }
+      },
+      "inputPorts": 0,
+      "outputPorts": 0
     }
   },
   "connections": {

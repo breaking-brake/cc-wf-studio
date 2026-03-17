@@ -2,7 +2,7 @@ schemaVersion: 1.0.0
 metadata:
   description: Workflow schema for CC Workflow Studio
   maxNodes: 50
-  supportedNodeTypes[11]: start,end,prompt,subAgent,askUserQuestion,ifElse,switch,skill,mcp,subAgentFlow,codex
+  supportedNodeTypes[12]: start,end,prompt,subAgent,askUserQuestion,ifElse,switch,skill,mcp,subAgentFlow,codex,group
 nodeTypes:
   start:
     description: Workflow entry point. Exactly one required per workflow.
@@ -500,6 +500,15 @@ nodeTypes:
         description: "Skip Git repository trust check. When true, allows execution outside trusted Git repositories. Use with caution."
     inputPorts: 1
     outputPorts: 1
+  group:
+    description: Visual grouping container for organizing nodes. Does not affect execution flow.
+    fields:
+      label:
+        type: string
+        required: true
+        default: Group
+    inputPorts: 0
+    outputPorts: 0
 connections:
   description: "Comprehensive specification for workflow connections. Defines connection object structure, port naming conventions, and completeness rules for AI-generated workflows."
   overview:

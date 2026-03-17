@@ -21,6 +21,7 @@ export enum NodeType {
   Mcp = 'mcp', // New: MCP (Model Context Protocol) tool integration
   SubAgentFlow = 'subAgentFlow', // New: Sub-Agent Flow reference node
   Codex = 'codex', // New: OpenAI Codex CLI integration
+  Group = 'group', // New: Visual grouping container
 }
 
 // ============================================================================
@@ -392,6 +393,8 @@ export interface BaseNode {
   type: NodeType;
   name: string;
   position: Position;
+  parentId?: string;
+  style?: { width?: number; height?: number };
 }
 
 export interface SubAgentNode extends BaseNode {
@@ -454,6 +457,15 @@ export interface CodexNode extends BaseNode {
   data: CodexNodeData;
 }
 
+export interface GroupNodeData {
+  label: string;
+}
+
+export interface GroupNode extends BaseNode {
+  type: NodeType.Group;
+  data: GroupNodeData;
+}
+
 export type WorkflowNode =
   | SubAgentNode
   | AskUserQuestionNode
@@ -466,7 +478,8 @@ export type WorkflowNode =
   | SkillNode
   | McpNode
   | SubAgentFlowNode
-  | CodexNode;
+  | CodexNode
+  | GroupNode;
 
 // ============================================================================
 // Connection Type

@@ -43,6 +43,14 @@ export function serializeWorkflow(
     name: node.data.name || node.id,
     position: node.position,
     data: node.data,
+    ...(node.parentId && { parentId: node.parentId }),
+    ...(node.style &&
+      (node.style.width || node.style.height) && {
+        style: {
+          ...(node.style.width && { width: node.style.width }),
+          ...(node.style.height && { height: node.style.height }),
+        },
+      }),
   })) as WorkflowNode[];
 
   // Convert React Flow edges to Connections
@@ -114,11 +122,22 @@ export function deserializeWorkflow(workflow: Workflow): {
   edges: Edge[];
 } {
   // Convert WorkflowNodes to React Flow nodes
-  const nodes: Node[] = workflow.nodes.map((node) => ({
+  // Sort so parent (group) nodes come before their children
+  const sortedNodes = [...workflow.nodes].sort((a, b) => {
+    if (a.type === 'group' && b.parentId === a.id) return -1;
+    if (b.type === 'group' && a.parentId === b.id) return 1;
+    if (a.type === 'group' && b.type !== 'group') return -1;
+    if (b.type === 'group' && a.type !== 'group') return 1;
+    return 0;
+  });
+
+  const nodes: Node[] = sortedNodes.map((node) => ({
     id: node.id,
     type: node.type,
     position: node.position,
     data: node.data,
+    ...(node.parentId && { parentId: node.parentId, expandParent: true }),
+    ...(node.style && { style: node.style }),
   }));
 
   // Convert Connections to React Flow edges

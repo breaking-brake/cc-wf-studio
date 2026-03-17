@@ -108,6 +108,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'palette.basicNodes': 'Basic Nodes',
   'palette.specialNodes': 'Special Nodes',
   'palette.controlFlow': 'Control Flow',
+  'palette.layout': 'Layout',
   'palette.quickStart': '💡 Quick Start',
 
   // Node types
@@ -128,6 +129,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'node.askUserQuestion.description': 'Branch based on user choice',
   'node.skill.title': 'Skill',
   'node.skill.description': 'Execute a Claude Code Skill',
+
+  // Group Node
+  'node.group.title': 'Group',
+  'node.group.description': 'Visual grouping container for nodes',
 
   // Codex Node (Feature: 518-codex-agent-node)
   'node.codex.title': 'Codex Agent',

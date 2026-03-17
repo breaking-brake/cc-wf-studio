@@ -99,6 +99,9 @@ interface WorkflowStore {
   removeHookEntry: (hookType: HookType, entryIndex: number) => void;
   updateHookEntry: (hookType: HookType, entryIndex: number, entry: Partial<HookEntry>) => void;
 
+  // Group Node Actions
+  onNodeDragStop: (node: Node) => void;
+
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
   addNode: (node: Node) => void;
@@ -126,6 +129,17 @@ interface WorkflowStore {
 // ============================================================================
 // Store Implementation
 // ============================================================================
+
+/**
+ * Sort nodes so that parent (group) nodes come before their children.
+ * Required by React Flow for correct rendering of nested nodes.
+ */
+function sortNodesParentFirst(nodes: Node[]): Node[] {
+  const parentIds = new Set(nodes.filter((n) => n.parentId).map((n) => n.parentId as string));
+  const parents = nodes.filter((n) => parentIds.has(n.id));
+  const others = nodes.filter((n) => !parentIds.has(n.id));
+  return [...parents, ...others];
+}
 
 /**
  * デフォルトのStartノード
@@ -222,6 +236,14 @@ export function createWorkflowFromCanvas(nodes: Node[], edges: Edge[]): Workflow
       type: node.type as NodeType,
       position: node.position,
       data: node.data,
+      ...(node.parentId && { parentId: node.parentId }),
+      ...(node.style &&
+        (node.style.width || node.style.height) && {
+          style: {
+            ...(node.style.width && { width: node.style.width }),
+            ...(node.style.height && { height: node.style.height }),
+          },
+        }),
     })) as WorkflowNode[];
   }
 
@@ -480,6 +502,90 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     }));
   },
 
+  // Group Node Actions
+  onNodeDragStop: (draggedNode: Node) => {
+    // Skip if the dragged node is a group node (no nesting)
+    if (draggedNode.type === 'group') return;
+
+    const currentNodes = get().nodes;
+
+    // Find all group nodes
+    const groupNodes = currentNodes.filter((n) => n.type === 'group');
+    if (groupNodes.length === 0) return;
+
+    // Calculate the absolute position of the dragged node
+    const draggedAbsX = draggedNode.parentId
+      ? (() => {
+          const parent = currentNodes.find((n) => n.id === draggedNode.parentId);
+          return parent ? draggedNode.position.x + parent.position.x : draggedNode.position.x;
+        })()
+      : draggedNode.position.x;
+    const draggedAbsY = draggedNode.parentId
+      ? (() => {
+          const parent = currentNodes.find((n) => n.id === draggedNode.parentId);
+          return parent ? draggedNode.position.y + parent.position.y : draggedNode.position.y;
+        })()
+      : draggedNode.position.y;
+
+    // Check if the dragged node is within any group node's bounds
+    let targetGroup: Node | null = null;
+    for (const group of groupNodes) {
+      const gw = group.style?.width ?? group.width ?? 400;
+      const gh = group.style?.height ?? group.height ?? 300;
+      const gx = group.position.x;
+      const gy = group.position.y;
+
+      if (
+        draggedAbsX >= gx &&
+        draggedAbsX <= gx + (gw as number) &&
+        draggedAbsY >= gy &&
+        draggedAbsY <= gy + (gh as number)
+      ) {
+        targetGroup = group;
+        break;
+      }
+    }
+
+    const currentParentId = draggedNode.parentId;
+
+    if (targetGroup && targetGroup.id !== currentParentId) {
+      // Moving into a new group: set parentId and convert to relative coordinates
+      const updatedNodes = currentNodes.map((n) => {
+        if (n.id === draggedNode.id) {
+          return {
+            ...n,
+            parentId: targetGroup.id,
+            expandParent: true,
+            position: {
+              x: draggedAbsX - targetGroup.position.x,
+              y: draggedAbsY - targetGroup.position.y,
+            },
+          };
+        }
+        return n;
+      });
+      // Sort so parents come before children
+      set({ nodes: sortNodesParentFirst(updatedNodes) });
+    } else if (!targetGroup && currentParentId) {
+      // Moving out of a group: remove parentId and convert to absolute coordinates
+      const updatedNodes = currentNodes.map((n) => {
+        if (n.id === draggedNode.id) {
+          return {
+            ...n,
+            parentId: undefined,
+            expandParent: undefined,
+            position: {
+              x: draggedAbsX,
+              y: draggedAbsY,
+            },
+          };
+        }
+        return n;
+      });
+      set({ nodes: sortNodesParentFirst(updatedNodes) });
+    }
+  },
+
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => {
     set({
@@ -514,8 +620,28 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     // Clear selection if the deleted node is currently selected
     const shouldClearSelection = get().selectedNodeId === nodeId;
 
+    // If removing a group node, release child nodes (convert to absolute coordinates)
+    const isGroupNode = nodeToRemove?.type === 'group';
+    let updatedNodes = get().nodes;
+    if (isGroupNode) {
+      const groupPos = nodeToRemove.position;
+      updatedNodes = updatedNodes.map((node) => {
+        if (node.parentId === nodeId) {
+          return {
+            ...node,
+            parentId: undefined,
+            position: {
+              x: node.position.x + groupPos.x,
+              y: node.position.y + groupPos.y,
+            },
+          };
+        }
+        return node;
+      });
+    }
+
     set({
-      nodes: get().nodes.filter((node) => node.id !== nodeId),
+      nodes: updatedNodes.filter((node) => node.id !== nodeId),
       edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
       ...(shouldClearSelection && { selectedNodeId: null }),
     });
@@ -543,9 +669,31 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     const shouldClearSelection =
       currentSelectedNodeId !== null && nodeIds.includes(currentSelectedNodeId);
 
+    // Release child nodes from group nodes being deleted
+    let updatedNodes = get().nodes;
+    for (const nodeId of nodeIds) {
+      const nodeToRemove = updatedNodes.find((n) => n.id === nodeId);
+      if (nodeToRemove?.type === 'group') {
+        const groupPos = nodeToRemove.position;
+        updatedNodes = updatedNodes.map((node) => {
+          if (node.parentId === nodeId) {
+            return {
+              ...node,
+              parentId: undefined,
+              position: {
+                x: node.position.x + groupPos.x,
+                y: node.position.y + groupPos.y,
+              },
+            };
+          }
+          return node;
+        });
+      }
+    }
+
     // Delete all pending nodes
     set({
-      nodes: get().nodes.filter((node) => !nodeIds.includes(node.id)),
+      nodes: updatedNodes.filter((node) => !nodeIds.includes(node.id)),
       edges: get().edges.filter(
         (edge) => !nodeIds.includes(edge.source) && !nodeIds.includes(edge.target)
       ),
@@ -589,16 +737,20 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   addGeneratedWorkflow: (workflow: Workflow) => {
     // Convert workflow nodes to ReactFlow nodes
-    const newNodes: Node[] = workflow.nodes.map((node) => ({
-      id: node.id,
-      type: node.type,
-      position: {
-        x: node.position.x,
-        y: node.position.y,
-      },
-      // Normalize MCP node data for backwards compatibility
-      data: node.type === 'mcp' ? normalizeMcpNodeData(node.data as McpNodeData) : node.data,
-    }));
+    const newNodes: Node[] = sortNodesParentFirst(
+      workflow.nodes.map((node) => ({
+        id: node.id,
+        type: node.type,
+        position: {
+          x: node.position.x,
+          y: node.position.y,
+        },
+        // Normalize MCP node data for backwards compatibility
+        data: node.type === 'mcp' ? normalizeMcpNodeData(node.data as McpNodeData) : node.data,
+        ...(node.parentId && { parentId: node.parentId, expandParent: true }),
+        ...(node.style && { style: node.style }),
+      }))
+    );
 
     // Convert workflow connections to ReactFlow edges
     const newEdges: Edge[] = workflow.connections.map((conn) => ({
@@ -627,16 +779,20 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   updateWorkflow: (workflow: Workflow) => {
     // Convert workflow nodes to ReactFlow nodes
-    const newNodes: Node[] = workflow.nodes.map((node) => ({
-      id: node.id,
-      type: node.type,
-      position: {
-        x: node.position.x,
-        y: node.position.y,
-      },
-      // Normalize MCP node data for backwards compatibility
-      data: node.type === 'mcp' ? normalizeMcpNodeData(node.data as McpNodeData) : node.data,
-    }));
+    const newNodes: Node[] = sortNodesParentFirst(
+      workflow.nodes.map((node) => ({
+        id: node.id,
+        type: node.type,
+        position: {
+          x: node.position.x,
+          y: node.position.y,
+        },
+        // Normalize MCP node data for backwards compatibility
+        data: node.type === 'mcp' ? normalizeMcpNodeData(node.data as McpNodeData) : node.data,
+        ...(node.parentId && { parentId: node.parentId, expandParent: true }),
+        ...(node.style && { style: node.style }),
+      }))
+    );
 
     // Convert workflow connections to ReactFlow edges
     const newEdges: Edge[] = workflow.connections.map((conn) => ({
@@ -660,15 +816,19 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   // Phase 3.12: Set active workflow and update canvas
   setActiveWorkflow: (workflow: Workflow) => {
     // Convert workflow nodes to ReactFlow nodes
-    const newNodes: Node[] = workflow.nodes.map((node) => ({
-      id: node.id,
-      type: node.type,
-      position: {
-        x: node.position.x,
-        y: node.position.y,
-      },
-      data: node.data,
-    }));
+    const newNodes: Node[] = sortNodesParentFirst(
+      workflow.nodes.map((node) => ({
+        id: node.id,
+        type: node.type,
+        position: {
+          x: node.position.x,
+          y: node.position.y,
+        },
+        data: node.data,
+        ...(node.parentId && { parentId: node.parentId, expandParent: true }),
+        ...(node.style && { style: node.style }),
+      }))
+    );
 
     // Convert workflow connections to ReactFlow edges
     const newEdges: Edge[] = workflow.connections.map((conn) => ({
@@ -722,6 +882,14 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       type: node.type as NodeType,
       position: node.position,
       data: node.data,
+      ...(node.parentId && { parentId: node.parentId }),
+      ...(node.style &&
+        (node.style.width || node.style.height) && {
+          style: {
+            ...(node.style.width && { width: node.style.width }),
+            ...(node.style.height && { height: node.style.height }),
+          },
+        }),
     })) as WorkflowNode[];
 
     const connections = edges.map((edge) => ({

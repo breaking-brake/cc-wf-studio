@@ -125,6 +125,20 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
     return { x: newX, y: newY };
   };
 
+  const handleAddGroup = () => {
+    const position = calculateNonOverlappingPosition(200, 100);
+    const newNode = {
+      id: `group-${Date.now()}`,
+      type: 'group' as const,
+      position,
+      data: {
+        label: 'Group',
+      },
+      style: { width: 400, height: 300 },
+    };
+    addNode(newNode);
+  };
+
   const handleAddSubAgent = () => {
     setIsSubAgentDialogOpen(true);
   };
@@ -693,6 +707,63 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
           </button>
         </>
       )}
+
+      {/* Section: Layout */}
+      <div
+        style={{
+          fontSize: isCompact ? '10px' : '11px',
+          fontWeight: 600,
+          color: 'var(--vscode-descriptionForeground)',
+          marginBottom: isCompact ? '4px' : '8px',
+          marginTop: isCompact ? '8px' : '16px',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+        }}
+      >
+        {t('palette.layout')}
+      </div>
+
+      {/* Group Node Button */}
+      <button
+        type="button"
+        onClick={handleAddGroup}
+        data-tour="add-group-button"
+        style={{
+          width: '100%',
+          padding: isCompact ? '8px' : '12px',
+          marginBottom: isCompact ? '8px' : '12px',
+          backgroundColor: 'var(--vscode-button-background)',
+          color: 'var(--vscode-button-foreground)',
+          border: '1px solid var(--vscode-button-border)',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: isCompact ? '11px' : '13px',
+          fontWeight: 500,
+          textAlign: 'left',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+        }}
+      >
+        <div style={{ fontWeight: 600 }}>{t('node.group.title')}</div>
+        {!isCompact && (
+          <div
+            style={{
+              fontSize: '11px',
+              color: 'var(--vscode-button-foreground)',
+              opacity: 0.8,
+            }}
+          >
+            {t('node.group.description')}
+          </div>
+        )}
+      </button>
 
       {/* Section: Control Flow */}
       <div
