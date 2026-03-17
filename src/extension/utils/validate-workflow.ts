@@ -218,13 +218,15 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
     }
     nodeIds.add(node.id);
 
-    // Validate node name
-    if (!node.name || !VALIDATION_RULES.NODE.NAME_PATTERN.test(node.name)) {
-      errors.push({
-        code: 'INVALID_NODE_NAME',
-        message: `Node name must match pattern ${VALIDATION_RULES.NODE.NAME_PATTERN}`,
-        field: `nodes[${node.id}].name`,
-      });
+    // Validate node name (Group nodes use data.label instead of name)
+    if (node.type !== NodeType.Group) {
+      if (!node.name || !VALIDATION_RULES.NODE.NAME_PATTERN.test(node.name)) {
+        errors.push({
+          code: 'INVALID_NODE_NAME',
+          message: `Node name must match pattern ${VALIDATION_RULES.NODE.NAME_PATTERN}`,
+          field: `nodes[${node.id}].name`,
+        });
+      }
     }
 
     // Validate node type
@@ -271,6 +273,36 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
     if (node.type === NodeType.SubAgentFlow) {
       const subAgentFlowErrors = validateSubAgentFlowNode(node);
       errors.push(...subAgentFlowErrors);
+    }
+
+    // Validate Group nodes
+    if (node.type === NodeType.Group) {
+      const groupData = node.data as Partial<{ label: string }>;
+      if (!groupData.label || typeof groupData.label !== 'string') {
+        errors.push({
+          code: 'GROUP_MISSING_LABEL',
+          message: 'Group node must have a label',
+          field: `nodes[${node.id}].data.label`,
+        });
+      }
+    }
+
+    // Validate parentId references
+    if (node.parentId) {
+      const parentNode = nodes.find((n) => n.id === node.parentId);
+      if (!parentNode) {
+        errors.push({
+          code: 'INVALID_PARENT_ID',
+          message: `Node "${node.id}" references non-existent parent node: ${node.parentId}`,
+          field: `nodes[${node.id}].parentId`,
+        });
+      } else if (parentNode.type !== NodeType.Group) {
+        errors.push({
+          code: 'INVALID_PARENT_TYPE',
+          message: `Node "${node.id}" parentId must reference a group node, but "${node.parentId}" is type "${parentNode.type}"`,
+          field: `nodes[${node.id}].parentId`,
+        });
+      }
     }
 
     // Validate SubAgent fields (Feature: 540-persistent-memory, 636-reference-model)
@@ -905,6 +937,23 @@ function validateConnections(connections: Connection[], nodes: WorkflowNode[]): 
       errors.push({
         code: 'INVALID_CONNECTION',
         message: 'End node cannot have output connections',
+        field: `connections[${conn.id}]`,
+      });
+    }
+
+    // Group nodes cannot have connections
+    if (fromNode?.type === NodeType.Group) {
+      errors.push({
+        code: 'INVALID_CONNECTION',
+        message: 'Group node cannot have output connections',
+        field: `connections[${conn.id}]`,
+      });
+    }
+
+    if (toNode?.type === NodeType.Group) {
+      errors.push({
+        code: 'INVALID_CONNECTION',
+        message: 'Group node cannot have input connections',
         field: `connections[${conn.id}]`,
       });
     }
