@@ -108,8 +108,25 @@ function getStandardSkillPatterns(targetCli: TargetCli): string[] {
  * @param targetCli - Target CLI for execution
  * @returns True if the skill is from a standard directory for this CLI
  */
-function isSkillFromStandardDir(skillPath: string, targetCli: TargetCli): boolean {
+function isSkillFromStandardDir(
+  skillPath: string,
+  targetCli: TargetCli,
+  scope?: 'user' | 'project' | 'local'
+): boolean {
+  // Plugin skills and user-scope skills are resolved by name,
+  // not by path - no need to copy them to .claude/skills/
+  if (scope === 'local' || scope === 'user') {
+    return true;
+  }
+
   const normalizedPath = skillPath.replace(/\\/g, '/');
+
+  // Plugin skills (from .claude/plugins/) are always resolved by name
+  if (normalizedPath.includes('.claude/plugins/')) {
+    return true;
+  }
+
+  // Path-based check for project scope
   const standardPatterns = getStandardSkillPatterns(targetCli);
 
   return standardPatterns.some((pattern) => normalizedPath.includes(pattern));
@@ -305,7 +322,7 @@ export async function checkSkillsToNormalize(
     processedNames.add(skillName);
 
     // Skip skills from standard directories for the target CLI
-    if (isSkillFromStandardDir(skillPath, targetCli)) {
+    if (isSkillFromStandardDir(skillPath, targetCli, skillNode.data.scope)) {
       skippedSkills.push(skillName);
       continue;
     }
@@ -513,7 +530,9 @@ export async function normalizeSkillsWithoutPrompt(
  */
 export function hasNonStandardSkills(workflow: Workflow, targetCli: TargetCli = 'claude'): boolean {
   const skillNodes = extractSkillNodes(workflow);
-  return skillNodes.some((node) => !isSkillFromStandardDir(node.data.skillPath, targetCli));
+  return skillNodes.some(
+    (node) => !isSkillFromStandardDir(node.data.skillPath, targetCli, node.data.scope)
+  );
 }
 
 // ============================================================================

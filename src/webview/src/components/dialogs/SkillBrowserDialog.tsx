@@ -212,6 +212,7 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
         allowedTools: selectedSkill.allowedTools,
         outputPorts: 1,
         source: selectedSkill.source,
+        pluginName: selectedSkill.pluginName,
         executionMode: pendingExecutionMode,
         executionPrompt:
           pendingExecutionMode === 'execute' ? pendingExecutionPrompt || undefined : undefined,
@@ -251,16 +252,21 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
   // Compute filtered skills for ALL tabs simultaneously
   const filterLower = filterText.toLowerCase().trim();
 
+  const getSkillDisplayName = (skill: SkillReference): string =>
+    skill.pluginName ? `${skill.pluginName}:${skill.name}` : skill.name;
+
   const filteredUserSkills = filterLower
-    ? userSkills.filter((skill) => skill.name.toLowerCase().includes(filterLower))
+    ? userSkills.filter((skill) => getSkillDisplayName(skill).toLowerCase().includes(filterLower))
     : userSkills;
 
   const filteredProjectSkills = filterLower
-    ? projectSkills.filter((skill) => skill.name.toLowerCase().includes(filterLower))
+    ? projectSkills.filter((skill) =>
+        getSkillDisplayName(skill).toLowerCase().includes(filterLower)
+      )
     : projectSkills;
 
   const filteredLocalSkills = filterLower
-    ? localSkills.filter((skill) => skill.name.toLowerCase().includes(filterLower))
+    ? localSkills.filter((skill) => getSkillDisplayName(skill).toLowerCase().includes(filterLower))
     : localSkills;
 
   // Get skills for current tab (for list rendering)
@@ -665,7 +671,7 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                                     color: 'var(--vscode-foreground)',
                                   }}
                                 >
-                                  {skill.name}
+                                  {getSkillDisplayName(skill)}
                                 </span>
                                 <span
                                   style={{
@@ -808,7 +814,7 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
                       marginBottom: '4px',
                     }}
                   >
-                    {selectedSkill.name}
+                    {getSkillDisplayName(selectedSkill)}
                   </div>
                   <div
                     style={{

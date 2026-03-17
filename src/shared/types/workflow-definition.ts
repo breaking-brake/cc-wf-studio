@@ -232,6 +232,8 @@ export interface SkillNodeData {
    * Only used when executionMode is 'execute' (or undefined).
    */
   executionPrompt?: string;
+  /** Plugin name for plugin-provided skills (e.g., 'with-me' for 'with-me:skill-name') */
+  pluginName?: string;
 }
 
 /**

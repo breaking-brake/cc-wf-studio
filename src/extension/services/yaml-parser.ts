@@ -59,13 +59,13 @@ export function parseSkillFrontmatter(content: string): SkillMetadata | null {
   // Extract optional field
   const allowedTools = yaml.match(/^allowed-tools:\s*(.+)$/m)?.[1]?.trim();
 
-  // Validate required fields
-  if (!name || !description) {
-    return null; // Required fields missing
+  // Validate: at least description is required
+  if (!description) {
+    return null; // Description is required
   }
 
   return {
-    name,
+    name: name || '', // May be empty; callers can fall back to directory name
     description,
     allowedTools,
   };
