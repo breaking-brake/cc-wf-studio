@@ -42,6 +42,14 @@ body {
   height: 100%;
 }
 
+/* Group Node: remove ReactFlow default node-group border/background/padding */
+.react-flow__node-group {
+  border: none;
+  background: transparent;
+  padding: 0;
+  width: auto;
+}
+
 /* Custom node styles */
 .sub-agent-node,
 .ask-user-question-node {
