@@ -28,7 +28,9 @@ import { StyledTooltip } from '../common/StyledTooltip';
 import { DeletableEdge } from '../edges/DeletableEdge';
 import { AskUserQuestionNodeComponent } from '../nodes/AskUserQuestionNode';
 import { BranchNodeComponent } from '../nodes/BranchNode';
+import { CodexNodeComponent } from '../nodes/CodexNode';
 import { EndNode } from '../nodes/EndNode';
+import { GroupNodeComponent } from '../nodes/GroupNode';
 import { IfElseNodeComponent } from '../nodes/IfElseNode';
 import { McpNodeComponent } from '../nodes/McpNode/McpNode';
 import { PromptNode } from '../nodes/PromptNode';
@@ -53,6 +55,8 @@ const nodeTypes: NodeTypes = {
   skill: SkillNodeComponent,
   mcp: McpNodeComponent,
   subAgentFlow: SubAgentFlowNodeComponent,
+  codex: CodexNodeComponent,
+  group: GroupNodeComponent,
 };
 
 /**
