@@ -2,7 +2,7 @@
   "name": "cc-wf-studio",
   "displayName": "Claude Code Workflow Studio",
   "description": "Visual Workflow Editor for Claude Code, GitHub Copilot, and more AI agents",
-  "version": "3.28.0",
+  "version": "3.28.1",
   "publisher": "breaking-brake",
   "icon": "resources/icon.png",
   "repository": {

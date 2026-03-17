@@ -1,3 +1,9 @@
+## [3.28.1](https://github.com/breaking-brake/cc-wf-studio/compare/v3.28.0...v3.28.1) (2026-03-17)
+
+### Improvements
+
+* add edge animation on node/edge selection ([#649](https://github.com/breaking-brake/cc-wf-studio/issues/649)) ([3355db5](https://github.com/breaking-brake/cc-wf-studio/commit/3355db5803bd32c0c2ad2ace814144cde37b0d39))
+
 ## [3.28.0](https://github.com/breaking-brake/cc-wf-studio/compare/v3.27.1...v3.28.0) (2026-03-16)
 
 ### Features
