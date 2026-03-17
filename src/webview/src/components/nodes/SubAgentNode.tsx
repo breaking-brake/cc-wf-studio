@@ -7,6 +7,7 @@
 
 import type { SubAgentData } from '@shared/types/workflow-definition';
 import { SUB_AGENT_COLORS } from '@shared/types/workflow-definition';
+import { Bot } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import { DeleteButton } from './DeleteButton';
@@ -40,8 +41,12 @@ export const SubAgentNodeComponent: React.FC<NodeProps<SubAgentData>> = React.me
             marginBottom: '8px',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
         >
+          <Bot size={18} />
           Sub-Agent
         </div>
 

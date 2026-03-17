@@ -10,7 +10,7 @@
 
 import type { SubAgentFlowNodeData } from '@shared/types/workflow-definition';
 import { SUB_AGENT_COLORS } from '@shared/types/workflow-definition';
-import { GitBranch } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import { useTranslation } from '../../i18n/i18n-context';
@@ -62,7 +62,7 @@ export const SubAgentFlowNodeComponent: React.FC<NodeProps<SubAgentFlowNodeData>
             gap: '6px',
           }}
         >
-          <GitBranch size={12} />
+          <Bot size={18} />
           <span>{t('node.subAgentFlow.title')}</span>
           {/* Warning indicator for unlinked state */}
           {!isLinked && (

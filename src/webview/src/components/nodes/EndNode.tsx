@@ -11,6 +11,7 @@
  * Based on: /specs/001-node-types-extension/quickstart.md
  */
 
+import { Square } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import type { EndNodeData } from '../../types/node-types';
@@ -51,7 +52,7 @@ export const EndNode: React.FC<NodeProps<EndNodeData>> = React.memo(({ id, data,
           gap: '8px',
         }}
       >
-        <span aria-hidden="true">■</span>
+        <Square size={18} />
         <span>{label}</span>
       </div>
 

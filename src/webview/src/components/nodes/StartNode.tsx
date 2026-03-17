@@ -11,6 +11,7 @@
  * Based on: /specs/001-node-types-extension/quickstart.md
  */
 
+import { Play } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import type { StartNodeData } from '../../types/node-types';
@@ -46,7 +47,7 @@ export const StartNode: React.FC<NodeProps<StartNodeData>> = React.memo(({ data,
           gap: '8px',
         }}
       >
-        <span aria-hidden="true">▶</span>
+        <Play size={18} />
         <span>{label}</span>
       </div>
 

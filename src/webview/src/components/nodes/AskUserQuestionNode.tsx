@@ -6,6 +6,7 @@
  */
 
 import type { AskUserQuestionData } from '@shared/types/workflow-definition';
+import { ShieldQuestion } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { Handle, type NodeProps, Position, useUpdateNodeInternals } from 'reactflow';
 import { DeleteButton } from './DeleteButton';
@@ -53,8 +54,12 @@ export const AskUserQuestionNodeComponent: React.FC<NodeProps<AskUserQuestionDat
               color: 'var(--vscode-descriptionForeground)',
               textTransform: 'uppercase',
               letterSpacing: '0.5px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
+            <ShieldQuestion size={18} />
             Ask User Question
           </div>
           <div style={{ display: 'flex', gap: '4px' }}>

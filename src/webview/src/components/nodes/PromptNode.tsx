@@ -11,6 +11,7 @@
  * Based on: /specs/001-node-types-extension/quickstart.md
  */
 
+import { MessageSquare } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import type { PromptNodeData } from '../../types/node-types';
@@ -58,8 +59,12 @@ export const PromptNode: React.FC<NodeProps<PromptNodeData>> = React.memo(
             marginBottom: '8px',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
         >
+          <MessageSquare size={18} />
           Prompt
         </div>
 

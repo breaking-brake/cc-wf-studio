@@ -6,6 +6,7 @@
  */
 
 import type { SwitchNodeData } from '@shared/types/workflow-definition';
+import { GitFork } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { Handle, type NodeProps, Position, useUpdateNodeInternals } from 'reactflow';
 import { DeleteButton } from './DeleteButton';
@@ -46,8 +47,12 @@ export const SwitchNodeComponent: React.FC<NodeProps<SwitchNodeData>> = React.me
             marginBottom: '8px',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
         >
+          <GitFork size={18} />
           Switch
         </div>
 

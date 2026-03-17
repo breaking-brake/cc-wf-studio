@@ -8,6 +8,7 @@
  */
 
 import type { CodexNodeData } from '@shared/types/workflow-definition';
+import { Terminal } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import { useTranslation } from '../../i18n/i18n-context';
@@ -131,8 +132,12 @@ export const CodexNodeComponent: React.FC<NodeProps<CodexNodeData>> = React.memo
             marginBottom: '8px',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
         >
+          <Terminal size={18} />
           {t('node.codex.title')}
         </div>
 

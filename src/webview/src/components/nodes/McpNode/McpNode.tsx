@@ -9,6 +9,7 @@
  */
 
 import type { McpNodeData } from '@shared/types/workflow-definition';
+import { Plug } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import { useTranslation } from '../../../i18n/i18n-context';
@@ -131,6 +132,7 @@ export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
             gap: '6px',
           }}
         >
+          <Plug size={18} />
           <span>MCP Tool</span>
           {/* Source Provider Badge */}
           <AIProviderBadge provider={(data.source || 'claude') as AIProviderType} size="small" />

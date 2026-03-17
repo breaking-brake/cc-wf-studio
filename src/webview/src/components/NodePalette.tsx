@@ -8,7 +8,19 @@
 import type { CommandReference } from '@shared/types/messages';
 import type { SubAgentFlow } from '@shared/types/workflow-definition';
 import { NodeType } from '@shared/types/workflow-definition';
-import { PanelLeftClose } from 'lucide-react';
+import {
+  Bot,
+  GitBranch,
+  GitFork,
+  MessageSquare,
+  PanelLeftClose,
+  Plug,
+  ShieldQuestion,
+  Square,
+  SquareDashed,
+  Terminal,
+  Zap,
+} from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
@@ -450,7 +462,10 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
           e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
         }}
       >
-        <div style={{ fontWeight: 600 }}>{t('node.prompt.title')}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+          <MessageSquare size={14} />
+          {t('node.prompt.title')}
+        </div>
         {!isCompact && (
           <div
             style={{
@@ -493,7 +508,10 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
             e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
           }}
         >
-          <div style={{ fontWeight: 600 }}>{t('node.subAgent.title')}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+            <Bot size={14} />
+            {t('node.subAgent.title')}
+          </div>
           {!isCompact && (
             <div
               style={{
@@ -537,7 +555,10 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
             e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
           }}
         >
-          <div style={{ fontWeight: 600 }}>{t('node.subAgentFlow.title')}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+            <Bot size={14} />
+            {t('node.subAgentFlow.title')}
+          </div>
           {!isCompact && (
             <div
               style={{
@@ -580,7 +601,10 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
           e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
         }}
       >
-        <div style={{ fontWeight: 600 }}>{t('node.skill.title')}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+          <Zap size={14} />
+          {t('node.skill.title')}
+        </div>
         {!isCompact && (
           <div
             style={{
@@ -622,7 +646,10 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
           e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
         }}
       >
-        <div style={{ fontWeight: 600 }}>{t('node.mcp.title')}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+          <Plug size={14} />
+          {t('node.mcp.title')}
+        </div>
         {!isCompact && (
           <div
             style={{
@@ -690,6 +717,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
                 fontWeight: 600,
               }}
             >
+              <Terminal size={14} />
               {t('node.codex.title')}
               <BetaBadge style={{ borderRadius: '3px' }} />
             </div>
@@ -751,7 +779,10 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
           e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
         }}
       >
-        <div style={{ fontWeight: 600 }}>{t('node.group.title')}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+          <SquareDashed size={14} />
+          {t('node.group.title')}
+        </div>
         {!isCompact && (
           <div
             style={{
@@ -808,7 +839,10 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
           e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
         }}
       >
-        <div style={{ fontWeight: 600 }}>{t('node.ifElse.title')}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+          <GitBranch size={14} />
+          {t('node.ifElse.title')}
+        </div>
         {!isCompact && (
           <div
             style={{
@@ -850,7 +884,10 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
           e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
         }}
       >
-        <div style={{ fontWeight: 600 }}>{t('node.switch.title')}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+          <GitFork size={14} />
+          {t('node.switch.title')}
+        </div>
         {!isCompact && (
           <div
             style={{
@@ -893,7 +930,10 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
             e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
           }}
         >
-          <div style={{ fontWeight: 600 }}>{t('node.askUserQuestion.title')}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+            <ShieldQuestion size={14} />
+            {t('node.askUserQuestion.title')}
+          </div>
           {!isCompact && (
             <div
               style={{
@@ -936,7 +976,10 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
           e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
         }}
       >
-        <div style={{ fontWeight: 600 }}>{t('node.end.title')}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+          <Square size={14} />
+          {t('node.end.title')}
+        </div>
         {!isCompact && (
           <div
             style={{
@@ -979,7 +1022,8 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
             e.currentTarget.style.opacity = '0.7';
           }}
         >
-          <div style={{ fontWeight: 600 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+            <GitBranch size={14} />
             {t('node.branch.title')}{' '}
             <span style={{ fontSize: isCompact ? '9px' : '10px' }}>(Legacy)</span>
           </div>

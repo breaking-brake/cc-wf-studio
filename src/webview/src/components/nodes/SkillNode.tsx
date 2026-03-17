@@ -8,6 +8,7 @@
  */
 
 import type { SkillNodeData } from '@shared/types/workflow-definition';
+import { Zap } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import { useTranslation } from '../../i18n/i18n-context';
@@ -91,6 +92,7 @@ export const SkillNodeComponent: React.FC<NodeProps<SkillNodeData>> = React.memo
             gap: '6px',
           }}
         >
+          <Zap size={18} />
           <span>Skill</span>
           {/* Validation Status Icon */}
           <span

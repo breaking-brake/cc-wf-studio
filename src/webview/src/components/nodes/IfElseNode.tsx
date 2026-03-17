@@ -6,6 +6,7 @@
  */
 
 import type { IfElseNodeData } from '@shared/types/workflow-definition';
+import { GitBranch } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { Handle, type NodeProps, Position, useUpdateNodeInternals } from 'reactflow';
 import { DeleteButton } from './DeleteButton';
@@ -49,8 +50,12 @@ export const IfElseNodeComponent: React.FC<NodeProps<IfElseNodeData>> = React.me
             marginBottom: '8px',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
         >
+          <GitBranch size={18} />
           If/Else
         </div>
 
