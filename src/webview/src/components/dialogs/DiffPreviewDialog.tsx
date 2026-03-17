@@ -2,6 +2,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import type { PlannedSubAgentFile } from '@shared/types/messages';
 import { FileText } from 'lucide-react';
 import type React from 'react';
+import { getNodeTypeIcon } from '../../constants/node-type-icons';
 import { useTranslation } from '../../i18n/i18n-context';
 import type { WorkflowDiffSummary } from '../../utils/workflow-diff';
 
@@ -147,54 +148,133 @@ export const DiffPreviewDialog: React.FC<DiffPreviewDialogProps> = ({
                   >
                     {t('dialog.diffPreview.nodes')}:
                   </div>
-                  {diffSummary.addedNodes.map((node) => (
-                    <div key={`add-${node.id}`} style={{ paddingLeft: '8px' }}>
-                      <span
+                  {diffSummary.addedNodes.map((node) => {
+                    const Icon = getNodeTypeIcon(node.type);
+                    return (
+                      <div
+                        key={`add-${node.id}`}
                         style={{
-                          color: 'var(--vscode-gitDecoration-addedResourceForeground, #73c991)',
+                          paddingLeft: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
                         }}
                       >
-                        + {node.name}
-                      </span>
-                      <span
-                        style={{ color: 'var(--vscode-descriptionForeground)', marginLeft: '4px' }}
-                      >
-                        ({node.type})
-                      </span>
-                    </div>
-                  ))}
-                  {diffSummary.removedNodes.map((node) => (
-                    <div key={`rm-${node.id}`} style={{ paddingLeft: '8px' }}>
-                      <span
+                        <span
+                          style={{
+                            color: 'var(--vscode-gitDecoration-addedResourceForeground, #73c991)',
+                          }}
+                        >
+                          +
+                        </span>
+                        {Icon && (
+                          <Icon
+                            size={13}
+                            style={{
+                              color: 'var(--vscode-gitDecoration-addedResourceForeground, #73c991)',
+                              flexShrink: 0,
+                            }}
+                          />
+                        )}
+                        <span
+                          style={{
+                            color: 'var(--vscode-gitDecoration-addedResourceForeground, #73c991)',
+                          }}
+                        >
+                          {node.name}
+                        </span>
+                        <span style={{ color: 'var(--vscode-descriptionForeground)' }}>
+                          ({node.type})
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {diffSummary.removedNodes.map((node) => {
+                    const Icon = getNodeTypeIcon(node.type);
+                    return (
+                      <div
+                        key={`rm-${node.id}`}
                         style={{
-                          color: 'var(--vscode-gitDecoration-deletedResourceForeground, #e06c75)',
+                          paddingLeft: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
                         }}
                       >
-                        - {node.name}
-                      </span>
-                      <span
-                        style={{ color: 'var(--vscode-descriptionForeground)', marginLeft: '4px' }}
-                      >
-                        ({node.type})
-                      </span>
-                    </div>
-                  ))}
-                  {diffSummary.modifiedNodes.map((node) => (
-                    <div key={`mod-${node.id}`} style={{ paddingLeft: '8px' }}>
-                      <span
+                        <span
+                          style={{
+                            color: 'var(--vscode-gitDecoration-deletedResourceForeground, #e06c75)',
+                          }}
+                        >
+                          -
+                        </span>
+                        {Icon && (
+                          <Icon
+                            size={13}
+                            style={{
+                              color:
+                                'var(--vscode-gitDecoration-deletedResourceForeground, #e06c75)',
+                              flexShrink: 0,
+                            }}
+                          />
+                        )}
+                        <span
+                          style={{
+                            color: 'var(--vscode-gitDecoration-deletedResourceForeground, #e06c75)',
+                          }}
+                        >
+                          {node.name}
+                        </span>
+                        <span style={{ color: 'var(--vscode-descriptionForeground)' }}>
+                          ({node.type})
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {diffSummary.modifiedNodes.map((node) => {
+                    const Icon = getNodeTypeIcon(node.type);
+                    return (
+                      <div
+                        key={`mod-${node.id}`}
                         style={{
-                          color: 'var(--vscode-gitDecoration-modifiedResourceForeground, #e2c08d)',
+                          paddingLeft: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
                         }}
                       >
-                        ~ {node.name}
-                      </span>
-                      <span
-                        style={{ color: 'var(--vscode-descriptionForeground)', marginLeft: '4px' }}
-                      >
-                        ({node.type})
-                      </span>
-                    </div>
-                  ))}
+                        <span
+                          style={{
+                            color:
+                              'var(--vscode-gitDecoration-modifiedResourceForeground, #e2c08d)',
+                          }}
+                        >
+                          ~
+                        </span>
+                        {Icon && (
+                          <Icon
+                            size={13}
+                            style={{
+                              color:
+                                'var(--vscode-gitDecoration-modifiedResourceForeground, #e2c08d)',
+                              flexShrink: 0,
+                            }}
+                          />
+                        )}
+                        <span
+                          style={{
+                            color:
+                              'var(--vscode-gitDecoration-modifiedResourceForeground, #e2c08d)',
+                          }}
+                        >
+                          {node.name}
+                        </span>
+                        <span style={{ color: 'var(--vscode-descriptionForeground)' }}>
+                          ({node.type})
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
 
