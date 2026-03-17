@@ -224,6 +224,8 @@ export interface SkillReference {
    * - undefined: for local scope or legacy data
    */
   source?: 'claude' | 'copilot' | 'codex' | 'roo' | 'gemini' | 'antigravity' | 'cursor';
+  /** Plugin name for plugin-provided skills (e.g., 'with-me' for 'with-me:skill-name') */
+  pluginName?: string;
 }
 
 // ============================================================================

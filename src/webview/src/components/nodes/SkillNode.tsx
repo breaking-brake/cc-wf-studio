@@ -116,7 +116,7 @@ export const SkillNodeComponent: React.FC<NodeProps<SkillNodeData>> = React.memo
             fontWeight: 500,
           }}
         >
-          {data.name || 'Untitled Skill'}
+          {data.pluginName ? `${data.pluginName}:${data.name}` : data.name || 'Untitled Skill'}
         </div>
 
         {/* Description or Execution Prompt */}
@@ -161,9 +161,9 @@ export const SkillNodeComponent: React.FC<NodeProps<SkillNodeData>> = React.memo
           >
             {data.scope}
           </div>
-          {/* Source Badge for project and user skills */}
-          {(data.scope === 'project' || data.scope === 'user') && data.source && (
-            <AIProviderBadge provider={data.source as AIProviderType} size="small" />
+          {/* Source Badge - show provider badge for skills with source, default to 'claude' for plugin skills */}
+          {(data.source || data.pluginName) && (
+            <AIProviderBadge provider={(data.source || 'claude') as AIProviderType} size="small" />
           )}
           {/* Execution Mode Badge (only show for 'load' mode) */}
           {data.executionMode === 'load' && (

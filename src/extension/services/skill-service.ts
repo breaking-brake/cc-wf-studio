@@ -71,10 +71,12 @@ export async function scanSkills(
         if (metadata) {
           // Convert to relative path for project Skills (T020)
           const pathToStore = scope === 'project' ? toRelativePath(skillPath, scope) : skillPath;
+          // Fall back to directory name if frontmatter has no name field
+          const skillName = metadata.name || dirent.name;
 
           skills.push({
             skillPath: pathToStore,
-            name: metadata.name,
+            name: skillName,
             description: metadata.description,
             scope,
             validationStatus: 'valid',
@@ -280,7 +282,8 @@ export async function scanPluginSkills(): Promise<SkillReference[]> {
         marketplace.installLocation,
         parsed.pluginName,
         skillScope,
-        skills
+        skills,
+        selectedInstallation.installPath
       );
     }
   } catch (_err) {
@@ -291,13 +294,66 @@ export async function scanPluginSkills(): Promise<SkillReference[]> {
 }
 
 /**
+ * Scan a skills directory and add found skills to the array
+ *
+ * @returns true if any skills were found
+ */
+async function scanSkillsDirectory(
+  skillsDir: string,
+  scope: 'user' | 'project' | 'local',
+  skills: SkillReference[],
+  pluginName?: string
+): Promise<boolean> {
+  try {
+    const skillDirs = await fs.readdir(skillsDir, { withFileTypes: true });
+    let found = false;
+
+    for (const skillDir of skillDirs) {
+      if (!skillDir.isDirectory()) continue;
+
+      const skillPath = path.join(skillsDir, skillDir.name, 'SKILL.md');
+
+      try {
+        const content = await fs.readFile(skillPath, 'utf-8');
+        const metadata = parseSkillFrontmatter(content);
+
+        if (metadata) {
+          // Fall back to directory name if frontmatter has no name field
+          const skillName = metadata.name || skillDir.name;
+          if (skills.some((s) => s.name === skillName)) continue;
+
+          skills.push({
+            skillPath,
+            name: skillName,
+            description: metadata.description,
+            scope,
+            validationStatus: 'valid',
+            allowedTools: metadata.allowedTools,
+            pluginName,
+          });
+          found = true;
+        }
+      } catch {
+        // Skill file not found or invalid - skip
+      }
+    }
+
+    return found;
+  } catch {
+    // Directory doesn't exist
+    return false;
+  }
+}
+
+/**
  * Scan skills from a specific plugin within a marketplace
  */
 async function scanMarketplacePlugin(
   marketplaceLocation: string,
   pluginName: string,
   scope: 'user' | 'project' | 'local',
-  skills: SkillReference[]
+  skills: SkillReference[],
+  installPath?: string
 ): Promise<void> {
   const marketplaceJsonPath = path.join(marketplaceLocation, '.claude-plugin', 'marketplace.json');
 
@@ -319,16 +375,19 @@ async function scanMarketplacePlugin(
           const metadata = parseSkillFrontmatter(content);
 
           if (metadata) {
+            // Fall back to directory name if frontmatter has no name field
+            const skillName = metadata.name || path.basename(skillDir);
             // Skip if skill with same name already exists (name-based dedup)
-            if (skills.some((s) => s.name === metadata.name)) continue;
+            if (skills.some((s) => s.name === skillName)) continue;
 
             skills.push({
               skillPath,
-              name: metadata.name,
+              name: skillName,
               description: metadata.description,
               scope,
               validationStatus: 'valid',
               allowedTools: metadata.allowedTools,
+              pluginName,
             });
           }
         } catch {
@@ -336,37 +395,17 @@ async function scanMarketplacePlugin(
         }
       }
     } else {
-      // Fallback: scan default 'skills/' directory
+      // Fallback 1: scan default 'skills/' directory in marketplace
       const defaultSkillsDir = path.join(marketplaceLocation, 'skills');
-      try {
-        const skillDirs = await fs.readdir(defaultSkillsDir, { withFileTypes: true });
-        for (const skillDir of skillDirs) {
-          if (!skillDir.isDirectory()) continue;
+      const foundSkills = await scanSkillsDirectory(defaultSkillsDir, scope, skills, pluginName);
 
-          const skillPath = path.join(defaultSkillsDir, skillDir.name, 'SKILL.md');
-
-          try {
-            const content = await fs.readFile(skillPath, 'utf-8');
-            const metadata = parseSkillFrontmatter(content);
-
-            if (metadata) {
-              if (skills.some((s) => s.name === metadata.name)) continue;
-
-              skills.push({
-                skillPath,
-                name: metadata.name,
-                description: metadata.description,
-                scope,
-                validationStatus: 'valid',
-                allowedTools: metadata.allowedTools,
-              });
-            }
-          } catch {
-            // Skill file not found or invalid - skip
-          }
+      // Fallback 2: scan 'skills/' directory in plugin installPath
+      if (!foundSkills && installPath) {
+        const installPathSkillsDir = path.join(installPath, 'skills');
+        // Avoid scanning same directory twice
+        if (path.normalize(installPathSkillsDir) !== path.normalize(defaultSkillsDir)) {
+          await scanSkillsDirectory(installPathSkillsDir, scope, skills, pluginName);
         }
-      } catch {
-        // No default skills directory
       }
     }
   } catch {

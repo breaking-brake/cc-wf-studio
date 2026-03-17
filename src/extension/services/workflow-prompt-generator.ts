@@ -644,7 +644,10 @@ export function generateExecutionInstructions(
     for (const node of skillNodes) {
       const nodeId = sanitizeNodeId(node.id);
       const executionMode = node.data.executionMode || 'execute';
-      const skillName = node.data.name;
+      // Plugin skills use 'pluginName:skillName' format for Claude Code resolution
+      const skillName = node.data.pluginName
+        ? `${node.data.pluginName}:${node.data.name}`
+        : node.data.name;
 
       sections.push(`#### ${nodeId}(${skillName})`);
       sections.push('');
