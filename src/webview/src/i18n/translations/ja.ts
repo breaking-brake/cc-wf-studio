@@ -133,6 +133,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Group Node
   'node.group.title': 'Group',
   'node.group.description': 'ノードの視覚的グループ化',
+  'property.group.members': 'メンバー',
+  'property.group.empty': 'ノードをこのグループにドラッグして整理できます。',
 
   // Codex Node (Feature: 518-codex-agent-node)
   'node.codex.title': 'Codex Agent',

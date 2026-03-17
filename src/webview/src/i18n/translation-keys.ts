@@ -129,6 +129,8 @@ export interface WebviewTranslationKeys {
   // Group Node
   'node.group.title': string;
   'node.group.description': string;
+  'property.group.members': string;
+  'property.group.empty': string;
 
   // Codex Node (Feature: 518-codex-agent-node)
   'node.codex.title': string;

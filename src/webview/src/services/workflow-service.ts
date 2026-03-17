@@ -136,7 +136,7 @@ export function deserializeWorkflow(workflow: Workflow): {
     type: node.type,
     position: node.position,
     data: node.data,
-    ...(node.parentId && { parentId: node.parentId, expandParent: true }),
+    ...(node.parentId && { parentId: node.parentId }),
     ...(node.style && { style: node.style }),
   }));
 

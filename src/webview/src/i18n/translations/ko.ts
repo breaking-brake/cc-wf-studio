@@ -133,6 +133,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Group Node
   'node.group.title': 'Group',
   'node.group.description': '노드 시각적 그룹화',
+  'property.group.members': '멤버',
+  'property.group.empty': '노드를 이 그룹으로 드래그하여 워크플로를 정리하세요.',
 
   // Codex Node (Feature: 518-codex-agent-node)
   'node.codex.title': 'Codex Agent',

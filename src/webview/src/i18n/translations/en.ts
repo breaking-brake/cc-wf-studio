@@ -133,6 +133,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Group Node
   'node.group.title': 'Group',
   'node.group.description': 'Visual grouping container for nodes',
+  'property.group.members': 'Members',
+  'property.group.empty': 'Drag nodes into this group to organize your workflow.',
 
   // Codex Node (Feature: 518-codex-agent-node)
   'node.codex.title': 'Codex Agent',

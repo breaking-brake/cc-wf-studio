@@ -555,7 +555,6 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           return {
             ...n,
             parentId: targetGroup.id,
-            expandParent: true,
             position: {
               x: draggedAbsX - targetGroup.position.x,
               y: draggedAbsY - targetGroup.position.y,
@@ -573,7 +572,6 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           return {
             ...n,
             parentId: undefined,
-            expandParent: undefined,
             position: {
               x: draggedAbsX,
               y: draggedAbsY,

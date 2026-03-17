@@ -130,6 +130,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // Group Node
   'node.group.title': 'Group',
   'node.group.description': '节点视觉分组容器',
+  'property.group.members': '成员',
+  'property.group.empty': '将节点拖入此分组以整理工作流。',
 
   // Codex Node (Feature: 518-codex-agent-node)
   'node.codex.title': 'Codex Agent',
