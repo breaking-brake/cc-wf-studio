@@ -131,16 +131,32 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   );
 
   // Animate edges: selected edge itself, or edges connected to selected node
+  // For group nodes: also animate edges connected to any child node
   const animatedEdges = useMemo(() => {
     if (!isEdgeAnimationEnabled) return edges;
+
+    // If a group node is selected, collect its child node IDs
+    let targetNodeIds: Set<string> | null = null;
+    if (selectedNodeId != null) {
+      const selectedNode = nodes.find((n) => n.id === selectedNodeId);
+      if (selectedNode?.type === 'group') {
+        targetNodeIds = new Set(
+          nodes.filter((n) => n.parentId === selectedNodeId).map((n) => n.id)
+        );
+      }
+    }
+
     return edges.map((edge) => ({
       ...edge,
       animated:
         edge.selected ||
         (selectedNodeId != null &&
-          (edge.source === selectedNodeId || edge.target === selectedNodeId)),
+          (edge.source === selectedNodeId ||
+            edge.target === selectedNodeId ||
+            (targetNodeIds != null &&
+              (targetNodeIds.has(edge.source) || targetNodeIds.has(edge.target))))),
     }));
-  }, [edges, selectedNodeId, isEdgeAnimationEnabled]);
+  }, [edges, nodes, selectedNodeId, isEdgeAnimationEnabled]);
 
   /**
    * 接続制約の検証
