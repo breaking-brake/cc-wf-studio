@@ -745,7 +745,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         },
         // Normalize MCP node data for backwards compatibility
         data: node.type === 'mcp' ? normalizeMcpNodeData(node.data as McpNodeData) : node.data,
-        ...(node.parentId && { parentId: node.parentId, expandParent: true }),
+        ...(node.parentId && { parentId: node.parentId }),
         ...(node.style && { style: node.style }),
       }))
     );
@@ -787,7 +787,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         },
         // Normalize MCP node data for backwards compatibility
         data: node.type === 'mcp' ? normalizeMcpNodeData(node.data as McpNodeData) : node.data,
-        ...(node.parentId && { parentId: node.parentId, expandParent: true }),
+        ...(node.parentId && { parentId: node.parentId }),
         ...(node.style && { style: node.style }),
       }))
     );
@@ -823,7 +823,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           y: node.position.y,
         },
         data: node.data,
-        ...(node.parentId && { parentId: node.parentId, expandParent: true }),
+        ...(node.parentId && { parentId: node.parentId }),
         ...(node.style && { style: node.style }),
       }))
     );
