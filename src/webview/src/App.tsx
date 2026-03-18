@@ -10,8 +10,10 @@ import type {
   ApplyWorkflowFromMcpPayload,
   ErrorPayload,
   GetCurrentWorkflowRequestPayload,
+  HighlightGroupNodePayload,
   ImportWorkflowFromSlackPayload,
   InitialStatePayload,
+  McpServerStatusPayload,
   PlannedSubAgentFile,
   PreviewModeInitPayload,
   Workflow,
@@ -369,6 +371,15 @@ const App: React.FC = () => {
             workflow: currentWorkflow,
           },
         });
+      } else if (message.type === 'MCP_SERVER_STATUS') {
+        const payload = message.payload as McpServerStatusPayload;
+        useWorkflowStore.getState().setMcpServerStatus(payload.running, payload.port);
+      } else if (message.type === 'HIGHLIGHT_GROUP_NODE') {
+        // MCP Server highlighting a group node during execution
+        const payload = message.payload as HighlightGroupNodePayload;
+        if (useWorkflowStore.getState().isHighlightEnabled) {
+          useWorkflowStore.getState().setHighlightedGroupNodeId(payload.groupNodeId);
+        }
       } else if (message.type === 'APPLY_WORKFLOW_FROM_MCP') {
         // MCP Server applying workflow to canvas
         const payload = message.payload as ApplyWorkflowFromMcpPayload;

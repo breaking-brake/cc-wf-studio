@@ -92,7 +92,9 @@ export async function handleExportForGeminiCli(
     }
 
     // Export workflow as skill to .gemini/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsGeminiSkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsGeminiSkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: GeminiOperationFailedPayload = {

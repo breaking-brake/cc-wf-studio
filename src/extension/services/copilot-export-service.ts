@@ -113,7 +113,8 @@ export async function checkExistingCopilotFiles(
 export async function exportWorkflowForCopilot(
   workflow: Workflow,
   fileService: FileService,
-  options: CopilotExportOptions
+  options: CopilotExportOptions,
+  exportOptions?: { highlightEnabled?: boolean }
 ): Promise<CopilotExportResult> {
   const exportedFiles: string[] = [];
   const errors: string[] = [];
@@ -129,7 +130,7 @@ export async function exportWorkflowForCopilot(
     // Generate Copilot prompt file
     const workflowBaseName = nodeNameToFileName(workflow.name);
     const filePath = path.join(promptsDir, `${workflowBaseName}.prompt.md`);
-    const content = generateCopilotPromptFile(workflow, options);
+    const content = generateCopilotPromptFile(workflow, options, exportOptions);
 
     await fileService.writeFile(filePath, content);
     exportedFiles.push(filePath);
@@ -330,7 +331,11 @@ async function syncMcpConfigForCopilot(
  * @param options - Copilot export options
  * @returns Markdown content with YAML frontmatter
  */
-function generateCopilotPromptFile(workflow: Workflow, options: CopilotExportOptions): string {
+function generateCopilotPromptFile(
+  workflow: Workflow,
+  options: CopilotExportOptions,
+  exportOptions?: { highlightEnabled?: boolean }
+): string {
   const workflowName = nodeNameToFileName(workflow.name);
 
   // YAML frontmatter
@@ -382,6 +387,7 @@ function generateCopilotPromptFile(workflow: Workflow, options: CopilotExportOpt
     parentWorkflowName: workflowBaseName,
     subAgentFlows: workflow.subAgentFlows,
     provider: 'copilot',
+    highlightEnabled: exportOptions?.highlightEnabled,
   });
 
   return `${frontmatter}${mermaidFlowchart}\n\n${executionInstructions}`;

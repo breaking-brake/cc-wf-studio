@@ -29,7 +29,10 @@ export interface GeminiSkillExportResult {
  * @param workflow - Workflow to convert
  * @returns SKILL.md content as string
  */
-export function generateGeminiSkillContent(workflow: Workflow): string {
+export function generateGeminiSkillContent(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): string {
   const skillName = nodeNameToFileName(workflow.name);
 
   // Generate description from workflow metadata or create default
@@ -52,6 +55,7 @@ description: ${description}
   // Generate execution instructions
   const instructions = generateExecutionInstructions(workflow, {
     provider: 'gemini',
+    highlightEnabled: options?.highlightEnabled,
   });
 
   // Compose SKILL.md body
@@ -100,7 +104,8 @@ export async function checkExistingGeminiSkill(
  */
 export async function exportWorkflowAsGeminiSkill(
   workflow: Workflow,
-  fileService: FileService
+  fileService: FileService,
+  options?: { highlightEnabled?: boolean }
 ): Promise<GeminiSkillExportResult> {
   try {
     const workspacePath = fileService.getWorkspacePath();
@@ -112,7 +117,7 @@ export async function exportWorkflowAsGeminiSkill(
     await fileService.createDirectory(skillDir);
 
     // Generate and write SKILL.md content
-    const content = generateGeminiSkillContent(workflow);
+    const content = generateGeminiSkillContent(workflow, options);
     await fileService.writeFile(skillPath, content);
 
     return {

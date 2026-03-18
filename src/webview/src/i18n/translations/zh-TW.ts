@@ -43,6 +43,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.switchToSelection': '切換到選擇模式',
   'toolbar.edgeAnimation.enable': '啟用邊動畫',
   'toolbar.edgeAnimation.disable': '停用邊動畫',
+  'toolbar.highlight.enable': '啟用群組節點高亮',
+  'toolbar.highlight.disable': '停用群組節點高亮',
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.show': '顯示迷你地圖',

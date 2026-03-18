@@ -5,7 +5,7 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
-import { FileDown, Play, Save, Sparkles, SquareSlash } from 'lucide-react';
+import { FileDown, Play, Save, Sparkles, Square, SquareSlash } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
@@ -87,6 +87,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     subAgentFlows,
     isFocusMode,
     toggleFocusMode,
+    mcpServerRunning,
+    mcpServerPort,
     slashCommandOptions,
     setSlashCommandOptions,
     setSlashCommandContext,
@@ -357,9 +359,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       validateWorkflow(workflow);
 
       // Request export
+      const { isHighlightEnabled } = useWorkflowStore.getState();
       vscode.postMessage({
         type: 'EXPORT_WORKFLOW',
-        payload: { workflow },
+        payload: { workflow, highlightEnabled: isHighlightEnabled },
       });
     } catch (error) {
       // Translate error messages
@@ -421,7 +424,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       validateWorkflow(workflow);
 
       // Run as slash command
-      await runAsSlashCommand(workflow);
+      const { isHighlightEnabled } = useWorkflowStore.getState();
+      await runAsSlashCommand(workflow, { highlightEnabled: isHighlightEnabled });
       console.log('Workflow run as slash command:', workflowName);
     } catch (error) {
       // Translate error messages
@@ -481,7 +485,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      const result = await exportForCopilot(workflow);
+      const { isHighlightEnabled } = useWorkflowStore.getState();
+      const result = await exportForCopilot(workflow, { highlightEnabled: isHighlightEnabled });
       console.log('Workflow exported for Copilot Chat:', result.exportedFiles);
     } catch (error) {
       onError({
@@ -528,7 +533,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      const result = await runForCopilot(workflow);
+      const { isHighlightEnabled } = useWorkflowStore.getState();
+      const result = await runForCopilot(workflow, { highlightEnabled: isHighlightEnabled });
       console.log('Workflow run for Copilot Chat:', result.workflowName);
     } catch (error) {
       onError({
@@ -575,7 +581,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      const result = await exportForCopilotCli(workflow);
+      const { isHighlightEnabled } = useWorkflowStore.getState();
+      const result = await exportForCopilotCli(workflow, { highlightEnabled: isHighlightEnabled });
       console.log('Workflow exported as skill for Copilot CLI:', result.skillPath);
     } catch (error) {
       onError({
@@ -622,7 +629,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      const result = await runForCopilotCli(workflow);
+      const { isHighlightEnabled } = useWorkflowStore.getState();
+      const result = await runForCopilotCli(workflow, { highlightEnabled: isHighlightEnabled });
       console.log('Workflow run for Copilot CLI:', result.workflowName);
     } catch (error) {
       onError({
@@ -673,7 +681,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      const result = await exportForCodexCli(workflow);
+      const { isHighlightEnabled } = useWorkflowStore.getState();
+      const result = await exportForCodexCli(workflow, { highlightEnabled: isHighlightEnabled });
       console.log('Workflow exported as skill for Codex CLI:', result.skillPath);
     } catch (error) {
       onError({
@@ -720,7 +729,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      const result = await runForCodexCli(workflow);
+      const { isHighlightEnabled } = useWorkflowStore.getState();
+      const result = await runForCodexCli(workflow, { highlightEnabled: isHighlightEnabled });
       console.log('Workflow run for Codex CLI:', result.workflowName);
     } catch (error) {
       onError({
@@ -771,7 +781,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      const result = await exportForRooCode(workflow);
+      const { isHighlightEnabled } = useWorkflowStore.getState();
+      const result = await exportForRooCode(workflow, { highlightEnabled: isHighlightEnabled });
       console.log('Workflow exported as skill for Roo Code:', result.skillPath);
     } catch (error) {
       onError({
@@ -818,7 +829,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      const result = await runForRooCode(workflow);
+      const { isHighlightEnabled } = useWorkflowStore.getState();
+      const result = await runForRooCode(workflow, { highlightEnabled: isHighlightEnabled });
       console.log('Workflow run for Roo Code:', result.workflowName);
     } catch (error) {
       onError({
@@ -869,7 +881,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      const result = await exportForGeminiCli(workflow);
+      const { isHighlightEnabled } = useWorkflowStore.getState();
+      const result = await exportForGeminiCli(workflow, { highlightEnabled: isHighlightEnabled });
       console.log('Workflow exported as skill for Gemini CLI:', result.skillPath);
     } catch (error) {
       onError({
@@ -916,7 +929,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      const result = await runForGeminiCli(workflow);
+      const { isHighlightEnabled } = useWorkflowStore.getState();
+      const result = await runForGeminiCli(workflow, { highlightEnabled: isHighlightEnabled });
       console.log('Workflow run for Gemini CLI:', result.workflowName);
     } catch (error) {
       onError({
@@ -967,7 +981,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      const result = await exportForAntigravity(workflow);
+      const { isHighlightEnabled } = useWorkflowStore.getState();
+      const result = await exportForAntigravity(workflow, { highlightEnabled: isHighlightEnabled });
       console.log('Workflow exported as skill for Antigravity:', result.skillPath);
     } catch (error) {
       onError({
@@ -1014,7 +1029,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      const result = await runForAntigravity(workflow);
+      const { isHighlightEnabled } = useWorkflowStore.getState();
+      const result = await runForAntigravity(workflow, { highlightEnabled: isHighlightEnabled });
       console.log('Workflow run for Antigravity:', result.workflowName);
     } catch (error) {
       onError({
@@ -1065,7 +1081,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      const result = await exportForCursor(workflow);
+      const { isHighlightEnabled } = useWorkflowStore.getState();
+      const result = await exportForCursor(workflow, { highlightEnabled: isHighlightEnabled });
       console.log('Workflow exported as skill for Cursor:', result.skillPath);
     } catch (error) {
       onError({
@@ -1112,7 +1129,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       validateWorkflow(workflow);
 
-      const result = await runForCursor(workflow);
+      const { isHighlightEnabled } = useWorkflowStore.getState();
+      const result = await runForCursor(workflow, { highlightEnabled: isHighlightEnabled });
       console.log('Workflow run for Cursor:', result.workflowName);
     } catch (error) {
       onError({
@@ -1245,6 +1263,57 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     initConversation,
     openChat,
   ]);
+
+  const renderMcpBadge = () => {
+    if (!mcpServerRunning || !mcpServerPort) return null;
+    return (
+      <>
+        <span
+          title={`MCP Server running on Port:${mcpServerPort}`}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '3px',
+            fontSize: '10px',
+            color: '#22c55e',
+            marginLeft: '14px',
+          }}
+        >
+          cc-wf-studio MCP{' '}
+          <span
+            style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              backgroundColor: '#22c55e',
+            }}
+          />
+          Port:{mcpServerPort}
+        </span>
+        <button
+          type="button"
+          onClick={() => vscode.postMessage({ type: 'STOP_MCP_SERVER' })}
+          title="Stop MCP Server"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '1px 6px',
+            fontSize: '10px',
+            backgroundColor: 'var(--vscode-button-secondaryBackground)',
+            color: 'var(--vscode-button-secondaryForeground)',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer',
+            marginLeft: '4px',
+          }}
+        >
+          <Square size={8} />
+          Stop
+        </button>
+      </>
+    );
+  };
 
   return (
     <StyledTooltipProvider>
@@ -1392,15 +1461,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             }}
           >
             {/* Group Label */}
-            <span
-              style={{
-                fontSize: '10px',
-                color: 'var(--vscode-descriptionForeground)',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Slash Command / Skill
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span
+                style={{
+                  fontSize: '10px',
+                  color: 'var(--vscode-descriptionForeground)',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Slash Command / Skill
+              </span>
+              {renderMcpBadge()}
+            </div>
 
             {/* Two-column layout with divider */}
             <div
@@ -2162,15 +2234,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             }}
           >
             {/* Group Label */}
-            <span
-              style={{
-                fontSize: '10px',
-                color: 'var(--vscode-descriptionForeground)',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Slash Command
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span
+                style={{
+                  fontSize: '10px',
+                  color: 'var(--vscode-descriptionForeground)',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Slash Command
+              </span>
+              {renderMcpBadge()}
+            </div>
 
             {/* Button Group */}
             <div

@@ -559,6 +559,8 @@ export interface ExecutionInstructionsOptions {
   subAgentFlows?: Workflow['subAgentFlows'];
   /** Provider type for generating provider-specific descriptions */
   provider: ExportProvider;
+  /** Whether group node highlight tracking is enabled (default: true) */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -592,6 +594,34 @@ export function generateExecutionInstructions(
     '- **Rectangle nodes (Prompt nodes)**: Execute the prompts described in the details section below'
   );
   sections.push('');
+
+  // Group Node Execution Tracking (skipped when highlight is disabled)
+  const highlightEnabled = options.highlightEnabled !== false;
+  const groupNodes = nodes.filter((n) => (n.type as string) === 'group');
+  if (groupNodes.length > 0 && highlightEnabled) {
+    sections.push('### Group Node Execution Tracking');
+    sections.push('');
+    sections.push(
+      'This workflow contains group nodes. Before executing nodes within each group, call the `highlight_group_node` MCP tool on the `cc-workflow-studio` server to visually highlight the active group on the canvas.'
+    );
+    sections.push('');
+    sections.push('| Group ID | Label |');
+    sections.push('|----------|-------|');
+    for (const group of groupNodes) {
+      const groupLabel =
+        ('data' in group && group.data && 'label' in group.data
+          ? (group.data as { label: string }).label
+          : group.name) || 'Group';
+      sections.push(`| ${group.id} | ${groupLabel} |`);
+    }
+    sections.push('');
+    sections.push('Call example: `highlight_group_node({ groupNodeId: "<group-id>" })`');
+    sections.push('');
+    sections.push(
+      'When the workflow completes, call `highlight_group_node({ groupNodeId: "" })` to clear the highlight.'
+    );
+    sections.push('');
+  }
 
   // Collect nodes by type
   const subAgentNodes = nodes.filter((n) => n.type === 'subAgent') as SubAgentNode[];

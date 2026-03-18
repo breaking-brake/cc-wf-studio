@@ -229,6 +229,44 @@ export function registerOpenEditorCommand(
           }
           const webview = currentPanel.webview;
 
+          // Helper: ensure MCP server is running and config written for Run operations
+          async function ensureMcpServerForRun(
+            provider: AiEditingProvider,
+            highlightEnabled: boolean | undefined,
+            workspacePath: string | undefined
+          ): Promise<void> {
+            if (highlightEnabled === false) return;
+            const mcpManager = getMcpServerManager();
+            if (!mcpManager) return;
+
+            let serverPort = mcpManager.getPort();
+            if (!mcpManager.isRunning()) {
+              serverPort = await mcpManager.start(context.extensionPath);
+            }
+            const serverUrl = `http://127.0.0.1:${serverPort}/mcp`;
+
+            if (workspacePath) {
+              const requiredTargets = getConfigTargetsForProvider(provider);
+              const alreadyWritten = mcpManager.getWrittenConfigs();
+              const newTargets = requiredTargets.filter((t) => !alreadyWritten.has(t));
+              if (newTargets.length > 0) {
+                const written = await writeAllAgentConfigs(newTargets, serverUrl, workspacePath);
+                mcpManager.addWrittenConfigs(written);
+              }
+            }
+
+            // Notify Webview of MCP server status
+            webview.postMessage({
+              type: 'MCP_SERVER_STATUS',
+              payload: {
+                running: true,
+                port: serverPort,
+                configTargets: Array.from(mcpManager.getWrittenConfigs()),
+                reviewBeforeApply: mcpManager.getReviewBeforeApply(),
+              },
+            });
+          }
+
           switch (message.type) {
             case 'WEBVIEW_READY': {
               // Calculate unread release count for What's New badge
@@ -334,10 +372,13 @@ export function registerOpenEditorCommand(
               // Run workflow as slash command in terminal
               if (message.payload?.workflow) {
                 try {
+                  const highlightEnabled = message.payload.highlightEnabled !== false;
+
                   // First, export the workflow to .claude format
                   const exportResult = await handleExportWorkflowForExecution(
                     message.payload.workflow,
-                    fileService
+                    fileService,
+                    { highlightEnabled }
                   );
 
                   if (!exportResult.success) {
@@ -360,8 +401,21 @@ export function registerOpenEditorCommand(
                     break;
                   }
 
-                  // Run the slash command in terminal
+                  // Auto-start MCP server if not running (for highlight_group_node support)
                   const workspacePath = fileService.getWorkspacePath();
+                  try {
+                    await ensureMcpServerForRun('claude-code', highlightEnabled, workspacePath);
+                    if (highlightEnabled) {
+                      log('INFO', 'MCP Server auto-started for workflow run');
+                    }
+                  } catch (mcpError) {
+                    log('WARN', 'Failed to auto-start MCP server for workflow run', {
+                      error: mcpError instanceof Error ? mcpError.message : String(mcpError),
+                    });
+                    // Non-fatal: continue with run even if MCP auto-start fails
+                  }
+
+                  // Run the slash command in terminal
                   const result = executeSlashCommandInTerminal({
                     workflowName: message.payload.workflow.name,
                     workingDirectory: workspacePath,
@@ -437,6 +491,17 @@ export function registerOpenEditorCommand(
             case 'RUN_FOR_COPILOT':
               // Run workflow for Copilot - VSCode Copilot Chat mode
               if (message.payload?.workflow) {
+                try {
+                  await ensureMcpServerForRun(
+                    'copilot-chat',
+                    message.payload.highlightEnabled,
+                    fileService.getWorkspacePath()
+                  );
+                } catch (mcpError) {
+                  log('WARN', 'Failed to auto-start MCP server for Copilot run', {
+                    error: mcpError instanceof Error ? mcpError.message : String(mcpError),
+                  });
+                }
                 await handleRunForCopilot(fileService, webview, message.payload, message.requestId);
               } else {
                 webview.postMessage({
@@ -454,6 +519,17 @@ export function registerOpenEditorCommand(
             case 'RUN_FOR_COPILOT_CLI':
               // Run workflow for Copilot CLI mode (via Claude Code terminal)
               if (message.payload?.workflow) {
+                try {
+                  await ensureMcpServerForRun(
+                    'copilot-cli',
+                    message.payload.highlightEnabled,
+                    fileService.getWorkspacePath()
+                  );
+                } catch (mcpError) {
+                  log('WARN', 'Failed to auto-start MCP server for Copilot CLI run', {
+                    error: mcpError instanceof Error ? mcpError.message : String(mcpError),
+                  });
+                }
                 await handleRunForCopilotCli(
                   fileService,
                   webview,
@@ -520,6 +596,17 @@ export function registerOpenEditorCommand(
             case 'RUN_FOR_CODEX_CLI':
               // Run workflow for Codex CLI mode (via Codex CLI terminal)
               if (message.payload?.workflow) {
+                try {
+                  await ensureMcpServerForRun(
+                    'codex',
+                    message.payload.highlightEnabled,
+                    fileService.getWorkspacePath()
+                  );
+                } catch (mcpError) {
+                  log('WARN', 'Failed to auto-start MCP server for Codex CLI run', {
+                    error: mcpError instanceof Error ? mcpError.message : String(mcpError),
+                  });
+                }
                 await handleRunForCodexCli(
                   fileService,
                   webview,
@@ -564,6 +651,17 @@ export function registerOpenEditorCommand(
             case 'RUN_FOR_ROO_CODE':
               // Run workflow for Roo Code (via Extension API)
               if (message.payload?.workflow) {
+                try {
+                  await ensureMcpServerForRun(
+                    'roo-code',
+                    message.payload.highlightEnabled,
+                    fileService.getWorkspacePath()
+                  );
+                } catch (mcpError) {
+                  log('WARN', 'Failed to auto-start MCP server for Roo Code run', {
+                    error: mcpError instanceof Error ? mcpError.message : String(mcpError),
+                  });
+                }
                 await handleRunForRooCode(fileService, webview, message.payload, message.requestId);
               } else {
                 webview.postMessage({
@@ -603,6 +701,17 @@ export function registerOpenEditorCommand(
             case 'RUN_FOR_GEMINI_CLI':
               // Run workflow for Gemini CLI (via Gemini CLI terminal)
               if (message.payload?.workflow) {
+                try {
+                  await ensureMcpServerForRun(
+                    'gemini',
+                    message.payload.highlightEnabled,
+                    fileService.getWorkspacePath()
+                  );
+                } catch (mcpError) {
+                  log('WARN', 'Failed to auto-start MCP server for Gemini CLI run', {
+                    error: mcpError instanceof Error ? mcpError.message : String(mcpError),
+                  });
+                }
                 await handleRunForGeminiCli(
                   fileService,
                   webview,
@@ -647,6 +756,17 @@ export function registerOpenEditorCommand(
             case 'RUN_FOR_ANTIGRAVITY':
               // Run workflow for Antigravity (via Cascade)
               if (message.payload?.workflow) {
+                try {
+                  await ensureMcpServerForRun(
+                    'antigravity',
+                    message.payload.highlightEnabled,
+                    fileService.getWorkspacePath()
+                  );
+                } catch (mcpError) {
+                  log('WARN', 'Failed to auto-start MCP server for Antigravity run', {
+                    error: mcpError instanceof Error ? mcpError.message : String(mcpError),
+                  });
+                }
                 await handleRunForAntigravity(
                   fileService,
                   webview,
@@ -691,6 +811,17 @@ export function registerOpenEditorCommand(
             case 'RUN_FOR_CURSOR':
               // Run workflow for Cursor
               if (message.payload?.workflow) {
+                try {
+                  await ensureMcpServerForRun(
+                    'cursor',
+                    message.payload.highlightEnabled,
+                    fileService.getWorkspacePath()
+                  );
+                } catch (mcpError) {
+                  log('WARN', 'Failed to auto-start MCP server for Cursor run', {
+                    error: mcpError instanceof Error ? mcpError.message : String(mcpError),
+                  });
+                }
                 await handleRunForCursor(fileService, webview, message.payload, message.requestId);
               } else {
                 webview.postMessage({

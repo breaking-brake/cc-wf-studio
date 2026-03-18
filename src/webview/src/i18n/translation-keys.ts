@@ -41,6 +41,8 @@ export interface WebviewTranslationKeys {
   'toolbar.interactionMode.switchToSelection': string;
   'toolbar.edgeAnimation.enable': string;
   'toolbar.edgeAnimation.disable': string;
+  'toolbar.highlight.enable': string;
+  'toolbar.highlight.disable': string;
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.show': string;

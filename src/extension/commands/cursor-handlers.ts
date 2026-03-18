@@ -61,7 +61,9 @@ export async function handleExportForCursor(
     }
 
     // Export workflow as skill to .cursor/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsCursorSkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsCursorSkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: CursorOperationFailedPayload = {

@@ -96,7 +96,9 @@ export async function handleExportWorkflow(
     }
 
     // Export workflow
-    const exportedFiles = await exportWorkflow(payload.workflow, fileService);
+    const exportedFiles = await exportWorkflow(payload.workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     // Validate exported files
     const validationErrors: string[] = [];
@@ -178,7 +180,8 @@ export interface ExportForExecutionResult {
  */
 export async function handleExportWorkflowForExecution(
   workflow: Workflow,
-  fileService: FileService
+  fileService: FileService,
+  options?: { highlightEnabled?: boolean }
 ): Promise<ExportForExecutionResult> {
   try {
     // Validate workflow structure before export
@@ -240,7 +243,7 @@ export async function handleExportWorkflowForExecution(
     }
 
     // Export workflow
-    const exportedFiles = await exportWorkflow(workflow, fileService);
+    const exportedFiles = await exportWorkflow(workflow, fileService, options);
 
     // Validate exported files
     const validationErrors: string[] = [];

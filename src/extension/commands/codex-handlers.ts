@@ -92,7 +92,9 @@ export async function handleExportForCodexCli(
     }
 
     // Export workflow as skill to .codex/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsCodexSkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsCodexSkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: CodexOperationFailedPayload = {

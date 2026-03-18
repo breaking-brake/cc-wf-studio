@@ -297,6 +297,49 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
       }
     }
   );
+  // Tool 5: highlight_group_node
+  server.tool(
+    'highlight_group_node',
+    'Highlight a group node on the CC Workflow Studio canvas to indicate it is currently being executed. Call this before executing nodes within a group to visually track progress.',
+    {
+      groupNodeId: z
+        .string()
+        .describe(
+          'The ID of the group node to highlight on the canvas. Pass an empty string to clear the highlight.'
+        ),
+    },
+    async ({ groupNodeId }) => {
+      try {
+        // Empty string clears the highlight
+        const effectiveId = groupNodeId || null;
+        manager.highlightGroupNode(effectiveId);
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({
+                success: true,
+                highlightedGroupNodeId: effectiveId,
+              }),
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({
+                success: false,
+                error: error instanceof Error ? error.message : String(error),
+              }),
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
 }
 
 /**

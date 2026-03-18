@@ -141,6 +141,7 @@ export interface SaveWorkflowPayload {
 export interface ExportWorkflowPayload {
   workflow: Workflow;
   overwriteExisting?: boolean;
+  highlightEnabled?: boolean;
 }
 
 export interface ConfirmOverwritePayload {
@@ -181,6 +182,8 @@ export interface CancelRefinementPayload {
 export interface RunAsSlashCommandPayload {
   /** Workflow to run */
   workflow: Workflow;
+  /** Whether group node highlight is enabled (default: true) */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -1157,6 +1160,7 @@ export type ExtensionMessage =
   | Message<GetCurrentWorkflowRequestPayload, 'GET_CURRENT_WORKFLOW_REQUEST'>
   | Message<ApplyWorkflowFromMcpPayload, 'APPLY_WORKFLOW_FROM_MCP'>
   | Message<McpServerStatusPayload, 'MCP_SERVER_STATUS'>
+  | Message<HighlightGroupNodePayload, 'HIGHLIGHT_GROUP_NODE'>
   | Message<RunAiEditingSkillSuccessPayload, 'RUN_AI_EDITING_SKILL_SUCCESS'>
   | Message<RunAiEditingSkillFailedPayload, 'RUN_AI_EDITING_SKILL_FAILED'>
   | Message<LaunchAiAgentSuccessPayload, 'LAUNCH_AI_AGENT_SUCCESS'>
@@ -1586,6 +1590,8 @@ export interface ShareWorkflowFailedPayload {
 export interface ExportForCopilotPayload {
   /** Workflow to export */
   workflow: Workflow;
+  /** Whether group node highlight tracking is enabled */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -1604,6 +1610,8 @@ export interface ExportForCopilotSuccessPayload {
 export interface RunForCopilotPayload {
   /** Workflow to run */
   workflow: Workflow;
+  /** Whether highlight is enabled (for MCP server auto-start) */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -1637,6 +1645,8 @@ export interface CopilotOperationFailedPayload {
 export interface RunForCopilotCliPayload {
   /** Workflow to run */
   workflow: Workflow;
+  /** Whether highlight is enabled (for MCP server auto-start) */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -1657,6 +1667,8 @@ export interface RunForCopilotCliSuccessPayload {
 export interface ExportForCopilotCliPayload {
   /** Workflow to export */
   workflow: Workflow;
+  /** Whether group node highlight tracking is enabled */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -1682,6 +1694,8 @@ export interface ExportForCopilotCliSuccessPayload {
 export interface ExportForCodexCliPayload {
   /** Workflow to export */
   workflow: Workflow;
+  /** Whether group node highlight tracking is enabled */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -1703,6 +1717,8 @@ export interface ExportForCodexCliSuccessPayload {
 export interface RunForCodexCliPayload {
   /** Workflow to run */
   workflow: Workflow;
+  /** Whether highlight is enabled (for MCP server auto-start) */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -1740,6 +1756,8 @@ export interface CodexOperationFailedPayload {
 export interface ExportForRooCodePayload {
   /** Workflow to export */
   workflow: Workflow;
+  /** Whether group node highlight tracking is enabled */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -1761,6 +1779,8 @@ export interface ExportForRooCodeSuccessPayload {
 export interface RunForRooCodePayload {
   /** Workflow to run */
   workflow: Workflow;
+  /** Whether highlight is enabled (for MCP server auto-start) */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -1798,6 +1818,8 @@ export interface RooCodeOperationFailedPayload {
 export interface ExportForGeminiCliPayload {
   /** Workflow to export */
   workflow: Workflow;
+  /** Whether group node highlight tracking is enabled */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -1818,6 +1840,8 @@ export interface ExportForGeminiCliSuccessPayload {
 export interface RunForGeminiCliPayload {
   /** Workflow to run */
   workflow: Workflow;
+  /** Whether highlight is enabled (for MCP server auto-start) */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -1855,6 +1879,8 @@ export interface GeminiOperationFailedPayload {
 export interface ExportForAntigravityPayload {
   /** Workflow to export */
   workflow: Workflow;
+  /** Whether group node highlight tracking is enabled */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -1875,6 +1901,8 @@ export interface ExportForAntigravitySuccessPayload {
 export interface RunForAntigravityPayload {
   /** Workflow to run */
   workflow: Workflow;
+  /** Whether highlight is enabled (for MCP server auto-start) */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -1912,6 +1940,8 @@ export interface AntigravityOperationFailedPayload {
 export interface ExportForCursorPayload {
   /** Workflow to export */
   workflow: Workflow;
+  /** Whether group node highlight tracking is enabled */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -1932,6 +1962,8 @@ export interface ExportForCursorSuccessPayload {
 export interface RunForCursorPayload {
   /** Workflow to run */
   workflow: Workflow;
+  /** Whether highlight is enabled (for MCP server auto-start) */
+  highlightEnabled?: boolean;
 }
 
 /**
@@ -2055,6 +2087,14 @@ export type McpConfigTarget =
 export interface StartMcpServerPayload {
   /** Config targets to write server URL to */
   configTargets: McpConfigTarget[];
+}
+
+/**
+ * Highlight group node payload (Extension → Webview)
+ * Sent by MCP tool to highlight the currently executing group node on canvas
+ */
+export interface HighlightGroupNodePayload {
+  groupNodeId: string | null;
 }
 
 /**

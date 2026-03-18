@@ -38,7 +38,10 @@ export interface CursorSkillExportResult {
  * @param workflow - Workflow to convert
  * @returns SKILL.md content as string
  */
-export function generateCursorSkillContent(workflow: Workflow): string {
+export function generateCursorSkillContent(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): string {
   const skillName = nodeNameToFileName(workflow.name);
 
   // Generate description from workflow metadata or create default
@@ -63,6 +66,7 @@ description: ${description}
     provider: 'cursor',
     parentWorkflowName: nodeNameToFileName(workflow.name),
     subAgentFlows: workflow.subAgentFlows,
+    highlightEnabled: options?.highlightEnabled,
   });
 
   // Compose SKILL.md body
@@ -136,7 +140,8 @@ export async function checkExistingCursorSkill(
  */
 export async function exportWorkflowAsCursorSkill(
   workflow: Workflow,
-  fileService: FileService
+  fileService: FileService,
+  options?: { highlightEnabled?: boolean }
 ): Promise<CursorSkillExportResult> {
   try {
     const workspacePath = fileService.getWorkspacePath();
@@ -148,7 +153,7 @@ export async function exportWorkflowAsCursorSkill(
     await fileService.createDirectory(skillDir);
 
     // Generate and write SKILL.md content
-    const content = generateCursorSkillContent(workflow);
+    const content = generateCursorSkillContent(workflow, options);
     await fileService.writeFile(skillPath, content);
 
     // Export Sub-Agent node files to .cursor/agents/
@@ -177,7 +182,12 @@ export async function exportWorkflowAsCursorSkill(
           const fileName = `${workflowBaseName}_${flowFileName}`;
           const filePath = path.join(agentsDir, `${fileName}.md`);
           const referencingNode = subAgentFlowNodes.find((n) => n.data.subAgentFlowId === flow.id);
-          const agentContent = generateSubAgentFlowAgentFile(flow, fileName, referencingNode);
+          const agentContent = generateSubAgentFlowAgentFile(
+            flow,
+            fileName,
+            referencingNode,
+            options
+          );
           await fileService.writeFile(filePath, agentContent);
         }
       }

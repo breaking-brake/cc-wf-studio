@@ -64,7 +64,9 @@ export async function handleExportForAntigravity(
     }
 
     // Export workflow as skill to .agent/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsAntigravitySkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsAntigravitySkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: AntigravityOperationFailedPayload = {
