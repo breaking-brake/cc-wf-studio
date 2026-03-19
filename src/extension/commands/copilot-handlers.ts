@@ -64,8 +64,7 @@ export async function handleExportForCopilot(
       const result = await vscode.window.showWarningMessage(
         `The following files already exist:\n${existingFiles.join('\n')}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
 
       if (result !== 'Overwrite') {
@@ -181,8 +180,7 @@ export async function handleRunForCopilot(
       const result = await vscode.window.showWarningMessage(
         `The following files already exist:\n${existingFiles.join('\n')}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
 
       if (result !== 'Overwrite') {
@@ -377,8 +375,7 @@ export async function handleRunForCopilotCli(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({
@@ -478,8 +475,7 @@ export async function handleExportForCopilotCli(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({

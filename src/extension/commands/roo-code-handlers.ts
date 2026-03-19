@@ -57,8 +57,7 @@ export async function handleExportForRooCode(
       const result = await vscode.window.showWarningMessage(
         'This workflow contains Sub-Agent nodes.\n\nRoo Code does not have a Sub-Agent feature. Sub-Agents will be substituted with child tasks (new_task), which cannot run in parallel.',
         { modal: true },
-        'Continue',
-        'Cancel'
+        'Continue'
       );
       if (result !== 'Continue') {
         webview.postMessage({
@@ -75,8 +74,7 @@ export async function handleExportForRooCode(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({
@@ -187,8 +185,7 @@ export async function handleRunForRooCode(
       const result = await vscode.window.showWarningMessage(
         'This workflow contains Sub-Agent nodes.\n\nRoo Code does not have a Sub-Agent feature. Sub-Agents will be substituted with child tasks (new_task), which cannot run in parallel.',
         { modal: true },
-        'Continue',
-        'Cancel'
+        'Continue'
       );
       if (result !== 'Continue') {
         webview.postMessage({
@@ -224,8 +221,7 @@ export async function handleRunForRooCode(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({

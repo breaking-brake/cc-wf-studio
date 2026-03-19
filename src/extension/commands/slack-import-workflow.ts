@@ -167,8 +167,7 @@ export async function handleImportWorkflowFromSlack(
         const userChoice = await vscode.window.showWarningMessage(
           `Workflow "${workflow.name}" already exists. Do you want to overwrite it?`,
           { modal: true },
-          'Overwrite',
-          'Cancel'
+          'Overwrite'
         );
 
         if (userChoice !== 'Overwrite') {

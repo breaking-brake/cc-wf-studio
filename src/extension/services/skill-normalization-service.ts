@@ -457,12 +457,7 @@ export async function promptAndNormalizeSkills(
   message += '\n\nDo you want to copy these skills?';
 
   // Show confirmation dialog
-  const answer = await vscode.window.showWarningMessage(
-    message,
-    { modal: true },
-    'Copy Skills',
-    'Cancel'
-  );
+  const answer = await vscode.window.showWarningMessage(message, { modal: true }, 'Copy Skills');
 
   if (answer !== 'Copy Skills') {
     return { success: false, cancelled: true };

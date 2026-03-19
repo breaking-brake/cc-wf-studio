@@ -51,8 +51,7 @@ export async function handleExportForAntigravity(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({
@@ -126,7 +125,8 @@ export async function handleRunForAntigravity(
   fileService: FileService,
   webview: vscode.Webview,
   payload: RunForAntigravityPayload,
-  requestId?: string
+  requestId?: string,
+  options?: { skipCascadeLaunch?: boolean }
 ): Promise<void> {
   try {
     const { workflow } = payload;
@@ -161,8 +161,7 @@ export async function handleRunForAntigravity(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({
@@ -186,6 +185,21 @@ export async function handleRunForAntigravity(
         type: 'RUN_FOR_ANTIGRAVITY_FAILED',
         requestId,
         payload: failedPayload,
+      });
+      return;
+    }
+
+    // If skipCascadeLaunch is set, stop after export (MCP refresh dialog will handle launch)
+    if (options?.skipCascadeLaunch) {
+      const successPayload: RunForAntigravitySuccessPayload = {
+        workflowName: workflow.name,
+        antigravityOpened: false,
+        timestamp: new Date().toISOString(),
+      };
+      webview.postMessage({
+        type: 'RUN_FOR_ANTIGRAVITY_SUCCESS',
+        requestId,
+        payload: successPayload,
       });
       return;
     }
