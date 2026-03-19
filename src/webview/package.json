@@ -1,6 +1,6 @@
 {
   "name": "cc-wf-studio-webview",
-  "version": "3.29.2",
+  "version": "3.30.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",

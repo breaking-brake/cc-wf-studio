@@ -1,3 +1,14 @@
+## [3.30.0](https://github.com/breaking-brake/cc-wf-studio/compare/v3.29.2...v3.30.0) (2026-03-19)
+
+### Features
+
+* add group node highlight toggle, MCP improvements, and bug fixes ([#661](https://github.com/breaking-brake/cc-wf-studio/issues/661)) ([5158e37](https://github.com/breaking-brake/cc-wf-studio/commit/5158e37b5e87e891a1c5cb4c8972ca3feb4d3427))
+
+### Bug Fixes
+
+* detect Cursor editor via appName instead of extension ID ([#662](https://github.com/breaking-brake/cc-wf-studio/issues/662)) ([ffbb163](https://github.com/breaking-brake/cc-wf-studio/commit/ffbb163f700230906330879ed9116de2fcb35ebf))
+* support plugin agents in workflow detection and export ([#651](https://github.com/breaking-brake/cc-wf-studio/issues/651)) ([#663](https://github.com/breaking-brake/cc-wf-studio/issues/663)) ([3aa2023](https://github.com/breaking-brake/cc-wf-studio/commit/3aa20236d44ec69ccce181a0e72e868f43e8045c))
+
 ## [3.29.2](https://github.com/breaking-brake/cc-wf-studio/compare/v3.29.1...v3.29.2) (2026-03-17)
 
 ### Bug Fixes
