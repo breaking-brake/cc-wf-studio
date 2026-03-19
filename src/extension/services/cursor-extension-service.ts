@@ -7,15 +7,18 @@
 
 import * as vscode from 'vscode';
 
-const CURSOR_EXTENSION_ID = 'anysphere.cursor-agent';
-
 /**
- * Check if Cursor extension is installed
+ * Check if running inside Cursor editor
  *
- * @returns True if Cursor extension is installed
+ * Cursor is a VSCode fork, so built-in agent functionality
+ * is not a separate extension. Detect via appName or uriScheme.
+ *
+ * @returns True if running in Cursor
  */
 export function isCursorInstalled(): boolean {
-  return vscode.extensions.getExtension(CURSOR_EXTENSION_ID) !== undefined;
+  const appName = vscode.env.appName?.toLowerCase() ?? '';
+  const uriScheme = vscode.env.uriScheme?.toLowerCase() ?? '';
+  return appName.includes('cursor') || uriScheme.includes('cursor');
 }
 
 /**
@@ -27,13 +30,8 @@ export function isCursorInstalled(): boolean {
  * @returns True if the task was started successfully
  */
 export async function startCursorTask(skillName: string): Promise<boolean> {
-  const extension = vscode.extensions.getExtension(CURSOR_EXTENSION_ID);
-  if (!extension) {
+  if (!isCursorInstalled()) {
     return false;
-  }
-
-  if (!extension.isActive) {
-    await extension.activate();
   }
 
   const prompt = `/${skillName}`;
