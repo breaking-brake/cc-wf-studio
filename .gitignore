@@ -28,7 +28,6 @@ npm-debug.log*
 .claude/*
 !.claude/skills/
 .vscode/workflows/
-.mcp.json
 
 # POC files
 poc/
