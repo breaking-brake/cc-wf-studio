@@ -234,17 +234,25 @@ export function registerOpenEditorCommand(
             provider: AiEditingProvider,
             highlightEnabled: boolean | undefined,
             workspacePath: string | undefined
-          ): Promise<void> {
-            if (highlightEnabled === false) return;
+          ): Promise<{ configWritten: boolean }> {
+            if (highlightEnabled === false) return { configWritten: false };
             const mcpManager = getMcpServerManager();
-            if (!mcpManager) return;
+            if (!mcpManager) return { configWritten: false };
 
-            let serverPort = mcpManager.getPort();
+            const previousPort = mcpManager.getPort();
+            let serverPort = previousPort;
             if (!mcpManager.isRunning()) {
               serverPort = await mcpManager.start(context.extensionPath);
             }
             const serverUrl = `http://127.0.0.1:${serverPort}/mcp`;
 
+            // If the port changed (server restarted), clear written configs so they get rewritten
+            const portChanged = previousPort !== null && previousPort !== serverPort;
+            if (portChanged) {
+              mcpManager.getWrittenConfigs().clear();
+            }
+
+            let configWritten = false;
             if (workspacePath) {
               const requiredTargets = getConfigTargetsForProvider(provider);
               const alreadyWritten = mcpManager.getWrittenConfigs();
@@ -252,6 +260,7 @@ export function registerOpenEditorCommand(
               if (newTargets.length > 0) {
                 const written = await writeAllAgentConfigs(newTargets, serverUrl, workspacePath);
                 mcpManager.addWrittenConfigs(written);
+                configWritten = written.length > 0;
               }
             }
 
@@ -265,6 +274,8 @@ export function registerOpenEditorCommand(
                 reviewBeforeApply: mcpManager.getReviewBeforeApply(),
               },
             });
+
+            return { configWritten };
           }
 
           switch (message.type) {
@@ -756,23 +767,47 @@ export function registerOpenEditorCommand(
             case 'RUN_FOR_ANTIGRAVITY':
               // Run workflow for Antigravity (via Cascade)
               if (message.payload?.workflow) {
+                let configWritten = false;
                 try {
-                  await ensureMcpServerForRun(
+                  const result = await ensureMcpServerForRun(
                     'antigravity',
                     message.payload.highlightEnabled,
                     fileService.getWorkspacePath()
                   );
+                  configWritten = result.configWritten;
                 } catch (mcpError) {
                   log('WARN', 'Failed to auto-start MCP server for Antigravity run', {
                     error: mcpError instanceof Error ? mcpError.message : String(mcpError),
                   });
                 }
-                await handleRunForAntigravity(
-                  fileService,
-                  webview,
-                  message.payload,
-                  message.requestId
-                );
+
+                if (configWritten) {
+                  // MCP config was newly written: export only, then show refresh dialog
+                  // Cascade launch will happen via CONFIRM_ANTIGRAVITY_CASCADE_LAUNCH
+                  await handleRunForAntigravity(
+                    fileService,
+                    webview,
+                    message.payload,
+                    message.requestId,
+                    { skipCascadeLaunch: true }
+                  );
+                  webview.postMessage({
+                    type: 'ANTIGRAVITY_MCP_REFRESH_NEEDED',
+                    requestId: message.requestId,
+                    payload: {
+                      context: 'run' as const,
+                      skillName: message.payload.workflow.name,
+                    },
+                  });
+                } else {
+                  // No new config written: run normally
+                  await handleRunForAntigravity(
+                    fileService,
+                    webview,
+                    message.payload,
+                    message.requestId
+                  );
+                }
               } else {
                 webview.postMessage({
                   type: 'RUN_FOR_ANTIGRAVITY_FAILED',
@@ -1720,6 +1755,10 @@ export function registerOpenEditorCommand(
                   webview.postMessage({
                     type: 'ANTIGRAVITY_MCP_REFRESH_NEEDED',
                     requestId: message.requestId,
+                    payload: {
+                      context: 'ai-editing' as const,
+                      skillName: 'cc-workflow-ai-editor',
+                    },
                   });
                   log('INFO', 'Antigravity MCP refresh needed, waiting for user', {
                     port: serverPort,
@@ -1764,7 +1803,8 @@ export function registerOpenEditorCommand(
 
             case 'CONFIRM_ANTIGRAVITY_CASCADE_LAUNCH': {
               try {
-                await startAntigravityTask('cc-workflow-ai-editor');
+                const skillName = message.payload?.skillName || 'cc-workflow-ai-editor';
+                await startAntigravityTask(skillName);
                 webview.postMessage({
                   type: 'LAUNCH_AI_AGENT_SUCCESS',
                   requestId: message.requestId,

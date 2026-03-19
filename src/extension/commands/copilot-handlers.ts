@@ -214,7 +214,9 @@ export async function handleRunForCopilot(
       skipMcpSync: true,
     };
 
-    const exportResult = await exportWorkflowForCopilot(workflow, fileService, copilotOptions);
+    const exportResult = await exportWorkflowForCopilot(workflow, fileService, copilotOptions, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: CopilotOperationFailedPayload = {
@@ -387,7 +389,9 @@ export async function handleRunForCopilotCli(
     }
 
     // Step 3: Export workflow as skill to .github/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsSkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsSkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: CopilotOperationFailedPayload = {

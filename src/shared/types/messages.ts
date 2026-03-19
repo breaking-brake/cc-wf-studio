@@ -1165,7 +1165,7 @@ export type ExtensionMessage =
   | Message<RunAiEditingSkillFailedPayload, 'RUN_AI_EDITING_SKILL_FAILED'>
   | Message<LaunchAiAgentSuccessPayload, 'LAUNCH_AI_AGENT_SUCCESS'>
   | Message<LaunchAiAgentFailedPayload, 'LAUNCH_AI_AGENT_FAILED'>
-  | Message<void, 'ANTIGRAVITY_MCP_REFRESH_NEEDED'>
+  | Message<AntigravityMcpRefreshNeededPayload, 'ANTIGRAVITY_MCP_REFRESH_NEEDED'>
   | Message<UploadToClaudeApiSuccessPayload, 'UPLOAD_TO_CLAUDE_API_SUCCESS'>
   | Message<UploadToClaudeApiFailedPayload, 'UPLOAD_TO_CLAUDE_API_FAILED'>
   | Message<ExecuteUploadedSkillSuccessPayload, 'EXECUTE_UPLOADED_SKILL_SUCCESS'>
@@ -2064,6 +2064,28 @@ export interface LaunchAiAgentFailedPayload {
   timestamp: string; // ISO 8601
 }
 
+/**
+ * Antigravity MCP refresh needed payload (Extension → Webview)
+ *
+ * Sent when MCP config was newly written and Antigravity needs to reload MCP settings.
+ */
+export interface AntigravityMcpRefreshNeededPayload {
+  /** Context: 'run' for Run flow, 'ai-editing' for AI editing flow */
+  context: 'run' | 'ai-editing';
+  /** Skill name to launch after MCP refresh */
+  skillName: string;
+}
+
+/**
+ * Confirm Antigravity Cascade launch payload (Webview → Extension)
+ *
+ * Sent after user confirms MCP refresh in the dialog.
+ */
+export interface ConfirmAntigravityCascadeLaunchPayload {
+  /** Skill name to launch */
+  skillName: string;
+}
+
 // ============================================================================
 // MCP Server Management Payloads (Built-in MCP Server)
 // ============================================================================
@@ -2304,7 +2326,7 @@ export type WebviewMessage =
   | Message<LaunchAiAgentPayload, 'LAUNCH_AI_AGENT'>
   | Message<SetReviewBeforeApplyPayload, 'SET_REVIEW_BEFORE_APPLY'>
   | Message<void, 'OPEN_ANTIGRAVITY_MCP_SETTINGS'>
-  | Message<void, 'CONFIRM_ANTIGRAVITY_CASCADE_LAUNCH'>
+  | Message<ConfirmAntigravityCascadeLaunchPayload, 'CONFIRM_ANTIGRAVITY_CASCADE_LAUNCH'>
   | Message<UploadToClaudeApiPayload, 'UPLOAD_TO_CLAUDE_API'>
   | Message<ExecuteUploadedSkillPayload, 'EXECUTE_UPLOADED_SKILL'>
   | Message<StoreAnthropicApiKeyPayload, 'STORE_ANTHROPIC_API_KEY'>

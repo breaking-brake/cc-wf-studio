@@ -233,7 +233,9 @@ export async function handleRunForRooCode(
     }
 
     // Step 3: Export workflow as skill to .roo/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsRooCodeSkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsRooCodeSkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: RooCodeOperationFailedPayload = {
