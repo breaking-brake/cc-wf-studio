@@ -127,7 +127,9 @@ export async function handleRunForAntigravity(
   payload: RunForAntigravityPayload,
   requestId?: string,
   options?: { skipCascadeLaunch?: boolean }
-): Promise<void> {
+): Promise<
+  { status: 'success'; skillName: string } | { status: 'cancelled' | 'failed' } | undefined
+> {
   try {
     const { workflow } = payload;
 
@@ -168,7 +170,7 @@ export async function handleRunForAntigravity(
           type: 'RUN_FOR_ANTIGRAVITY_CANCELLED',
           requestId,
         });
-        return;
+        return { status: 'cancelled' };
       }
     }
 
@@ -188,7 +190,7 @@ export async function handleRunForAntigravity(
         requestId,
         payload: failedPayload,
       });
-      return;
+      return { status: 'failed' };
     }
 
     // If skipCascadeLaunch is set, stop after export (MCP refresh dialog will handle launch)
@@ -203,7 +205,7 @@ export async function handleRunForAntigravity(
         requestId,
         payload: successPayload,
       });
-      return;
+      return { status: 'success', skillName: exportResult.skillName };
     }
 
     // Step 3: Check if Antigravity is installed

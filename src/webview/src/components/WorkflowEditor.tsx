@@ -468,9 +468,11 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
                       boxShadow: highlightedGroupNodeId
                         ? '0 0 8px rgba(79, 195, 247, 0.4)'
                         : 'none',
-                      animation: highlightedGroupNodeId
-                        ? 'highlightBtnPulse 1.5s ease-in-out infinite'
-                        : 'none',
+                      animation:
+                        highlightedGroupNodeId &&
+                        !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                          ? 'highlight-btn-pulse 1.5s ease-in-out infinite'
+                          : 'none',
                     }}
                   >
                     {isHighlightEnabled ? <Lightbulb size={14} /> : <LightbulbOff size={14} />}

@@ -198,7 +198,7 @@ button {
    Synced with GroupNode's highlightPulse to visually connect the two
    ============================================================================ */
 
-@keyframes highlightBtnPulse {
+@keyframes highlight-btn-pulse {
   0%,
   100% {
     box-shadow: 0 0 8px rgba(79, 195, 247, 0.4);

@@ -46,7 +46,10 @@ export const GroupNodeComponent: React.FC<NodeProps<GroupNodeData>> = ({ id, dat
           boxShadow: isHighlighted
             ? '0 0 12px rgba(79, 195, 247, 0.4), 0 0 4px rgba(79, 195, 247, 0.2)'
             : 'none',
-          animation: isHighlighted ? 'highlightPulse 1.5s ease-in-out infinite' : 'none',
+          animation:
+            isHighlighted && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+              ? 'highlightPulse 1.5s ease-in-out infinite'
+              : 'none',
         }}
       >
         <NodeResizer

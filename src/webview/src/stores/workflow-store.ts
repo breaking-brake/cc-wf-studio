@@ -746,6 +746,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       nodes: [DEFAULT_START_NODE, DEFAULT_END_NODE],
       edges: [],
       selectedNodeId: null,
+      highlightedGroupNodeId: null,
       workflowDescription: '', // Reset description
       slashCommandOptions: {
         context: 'default',
@@ -804,6 +805,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       nodes: newNodes,
       edges: newEdges,
       selectedNodeId: firstSelectableNode?.id || null,
+      highlightedGroupNodeId: null,
       activeWorkflow: workflow,
       subAgentFlows: workflow.subAgentFlows || [],
     });
@@ -840,6 +842,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set({
       nodes: newNodes,
       edges: newEdges,
+      highlightedGroupNodeId: null,
       activeWorkflow: workflow,
       subAgentFlows: workflow.subAgentFlows || [],
     });
@@ -876,6 +879,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set({
       nodes: newNodes,
       edges: newEdges,
+      highlightedGroupNodeId: null,
       activeWorkflow: workflow,
       subAgentFlows: workflow.subAgentFlows || [],
     });

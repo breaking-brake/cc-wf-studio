@@ -397,7 +397,8 @@ const App: React.FC = () => {
       } else if (message.type === 'HIGHLIGHT_GROUP_NODE') {
         // MCP Server highlighting a group node during execution
         const payload = message.payload as HighlightGroupNodePayload;
-        if (useWorkflowStore.getState().isHighlightEnabled) {
+        // Always allow clearing (null), but only set highlight when enabled
+        if (payload.groupNodeId === null || useWorkflowStore.getState().isHighlightEnabled) {
           useWorkflowStore.getState().setHighlightedGroupNodeId(payload.groupNodeId);
         }
       } else if (message.type === 'ANTIGRAVITY_MCP_REFRESH_NEEDED') {

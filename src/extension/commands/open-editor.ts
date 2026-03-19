@@ -784,21 +784,23 @@ export function registerOpenEditorCommand(
                 if (configWritten) {
                   // MCP config was newly written: export only, then show refresh dialog
                   // Cascade launch will happen via CONFIRM_ANTIGRAVITY_CASCADE_LAUNCH
-                  await handleRunForAntigravity(
+                  const runResult = await handleRunForAntigravity(
                     fileService,
                     webview,
                     message.payload,
                     message.requestId,
                     { skipCascadeLaunch: true }
                   );
-                  webview.postMessage({
-                    type: 'ANTIGRAVITY_MCP_REFRESH_NEEDED',
-                    requestId: message.requestId,
-                    payload: {
-                      context: 'run' as const,
-                      skillName: message.payload.workflow.name,
-                    },
-                  });
+                  if (runResult?.status === 'success' && runResult.skillName) {
+                    webview.postMessage({
+                      type: 'ANTIGRAVITY_MCP_REFRESH_NEEDED',
+                      requestId: message.requestId,
+                      payload: {
+                        context: 'run' as const,
+                        skillName: runResult.skillName,
+                      },
+                    });
+                  }
                 } else {
                   // No new config written: run normally
                   await handleRunForAntigravity(

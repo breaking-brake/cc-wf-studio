@@ -612,7 +612,8 @@ export function generateExecutionInstructions(
         ('data' in group && group.data && 'label' in group.data
           ? (group.data as { label: string }).label
           : group.name) || 'Group';
-      sections.push(`| ${group.id} | ${groupLabel} |`);
+      const escapeCell = (v: string) => v.replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
+      sections.push(`| ${escapeCell(group.id)} | ${escapeCell(groupLabel)} |`);
     }
     sections.push('');
     sections.push('Call example: `highlight_group_node({ groupNodeId: "<group-id>" })`');
