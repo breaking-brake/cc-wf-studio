@@ -7,6 +7,7 @@
 
 import * as Collapsible from '@radix-ui/react-collapsible';
 import type {
+  AntigravityMcpRefreshNeededPayload,
   ApplyWorkflowFromMcpPayload,
   ErrorPayload,
   GetCurrentWorkflowRequestPayload,
@@ -23,6 +24,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ProcessingOverlay } from './components/common/ProcessingOverlay';
 import { SimpleOverlay } from './components/common/SimpleOverlay';
 import { Spinner } from './components/common/Spinner';
+import { AntigravityMcpRefreshDialog } from './components/dialogs/AntigravityMcpRefreshDialog';
 import { ConfirmDialog } from './components/dialogs/ConfirmDialog';
 import { DiffPreviewDialog } from './components/dialogs/DiffPreviewDialog';
 import { RefinementChatPanel } from './components/dialogs/RefinementChatPanel';
@@ -186,6 +188,8 @@ const App: React.FC = () => {
   const [isMoreActionsOpen, setIsMoreActionsOpen] = useState(false);
   const [unreadReleaseCount, setUnreadReleaseCount] = useState(0);
   const [showWhatsNewBadge, setShowWhatsNewBadge] = useState(true);
+  const [showMcpRefreshDialog, setShowMcpRefreshDialog] = useState(false);
+  const [mcpRefreshSkillName, setMcpRefreshSkillName] = useState<string>('cc-workflow-ai-editor');
 
   // Pending MCP apply state for diff preview
   const [pendingMcpApply, setPendingMcpApply] = useState<{
@@ -252,6 +256,22 @@ const App: React.FC = () => {
     }
     setPendingMcpApply(null);
   }, [setNodes, setEdges, setWorkflowName, setActiveWorkflow]);
+
+  const handleMcpRefreshRun = useCallback(() => {
+    setShowMcpRefreshDialog(false);
+    vscode.postMessage({
+      type: 'CONFIRM_ANTIGRAVITY_CASCADE_LAUNCH',
+      payload: { skillName: mcpRefreshSkillName },
+    });
+  }, [mcpRefreshSkillName]);
+
+  const handleMcpRefreshOpenSettings = useCallback(() => {
+    vscode.postMessage({ type: 'OPEN_ANTIGRAVITY_MCP_SETTINGS' });
+  }, []);
+
+  const handleMcpRefreshCancel = useCallback(() => {
+    setShowMcpRefreshDialog(false);
+  }, []);
 
   const handleRejectMcpApply = useCallback(() => {
     const pending = pendingMcpApplyRef.current;
@@ -380,6 +400,10 @@ const App: React.FC = () => {
         if (useWorkflowStore.getState().isHighlightEnabled) {
           useWorkflowStore.getState().setHighlightedGroupNodeId(payload.groupNodeId);
         }
+      } else if (message.type === 'ANTIGRAVITY_MCP_REFRESH_NEEDED') {
+        const refreshPayload = message.payload as AntigravityMcpRefreshNeededPayload | undefined;
+        setMcpRefreshSkillName(refreshPayload?.skillName || 'cc-workflow-ai-editor');
+        setShowMcpRefreshDialog(true);
       } else if (message.type === 'APPLY_WORKFLOW_FROM_MCP') {
         // MCP Server applying workflow to canvas
         const payload = message.payload as ApplyWorkflowFromMcpPayload;
@@ -600,6 +624,14 @@ const App: React.FC = () => {
 
       {/* Error Notification Overlay */}
       <ErrorNotification error={error} onDismiss={handleDismissError} />
+
+      {/* Antigravity MCP Refresh Dialog */}
+      <AntigravityMcpRefreshDialog
+        isOpen={showMcpRefreshDialog}
+        onOpenMcpSettings={handleMcpRefreshOpenSettings}
+        onRun={handleMcpRefreshRun}
+        onCancel={handleMcpRefreshCancel}
+      />
 
       {/* Interactive Tour */}
       <Tour key={tourKey} run={runTour} onFinish={handleTourFinish} />

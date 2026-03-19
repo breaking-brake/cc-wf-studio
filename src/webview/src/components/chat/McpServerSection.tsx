@@ -18,7 +18,6 @@ import { useTranslation } from '../../i18n/i18n-context';
 import { vscode } from '../../main';
 import { launchAiAgent, openExternalUrl } from '../../services/vscode-bridge';
 import { useRefinementStore } from '../../stores/refinement-store';
-import { AntigravityMcpRefreshDialog } from '../dialogs/AntigravityMcpRefreshDialog';
 
 interface AiEditButton {
   provider: AiEditingProvider;
@@ -47,8 +46,6 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
   const [port, setPort] = useState<number | null>(null);
   const [launchingProvider, setLaunchingProvider] = useState<AiEditingProvider | null>(null);
   const [reviewBeforeApply, setReviewBeforeApply] = useState(true);
-  const [showMcpRefreshDialog, setShowMcpRefreshDialog] = useState(false);
-
   const {
     isCopilotChatEnabled,
     isCopilotCliEnabled,
@@ -102,10 +99,6 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
         setPort(payload.port);
         setReviewBeforeApply(payload.reviewBeforeApply);
       }
-      if (message.type === 'ANTIGRAVITY_MCP_REFRESH_NEEDED') {
-        setLaunchingProvider(null);
-        setShowMcpRefreshDialog(true);
-      }
     };
 
     window.addEventListener('message', handler);
@@ -131,19 +124,6 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
     [launchingProvider]
   );
 
-  const handleMcpRefreshOpenSettings = useCallback(() => {
-    vscode.postMessage({ type: 'OPEN_ANTIGRAVITY_MCP_SETTINGS' });
-  }, []);
-
-  const handleMcpRefreshRun = useCallback(() => {
-    setShowMcpRefreshDialog(false);
-    vscode.postMessage({ type: 'CONFIRM_ANTIGRAVITY_CASCADE_LAUNCH' });
-  }, []);
-
-  const handleMcpRefreshCancel = useCallback(() => {
-    setShowMcpRefreshDialog(false);
-  }, []);
-
   const handleStop = useCallback(() => {
     vscode.postMessage({ type: 'STOP_MCP_SERVER' });
   }, []);
@@ -164,14 +144,6 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
         overflow: 'hidden',
       }}
     >
-      {/* Antigravity MCP Refresh Dialog */}
-      <AntigravityMcpRefreshDialog
-        isOpen={showMcpRefreshDialog}
-        onOpenMcpSettings={handleMcpRefreshOpenSettings}
-        onRun={handleMcpRefreshRun}
-        onCancel={handleMcpRefreshCancel}
-      />
-
       {/* Header */}
       <button
         type="button"
