@@ -79,8 +79,7 @@ export async function handleExportForCodexCli(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({
@@ -92,7 +91,9 @@ export async function handleExportForCodexCli(
     }
 
     // Export workflow as skill to .codex/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsCodexSkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsCodexSkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: CodexOperationFailedPayload = {
@@ -232,8 +233,7 @@ export async function handleRunForCodexCli(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({
@@ -245,7 +245,9 @@ export async function handleRunForCodexCli(
     }
 
     // Step 3: Export workflow as skill to .codex/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsCodexSkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsCodexSkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: CodexOperationFailedPayload = {

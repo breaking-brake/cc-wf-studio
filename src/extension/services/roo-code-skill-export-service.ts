@@ -30,7 +30,10 @@ export interface RooCodeSkillExportResult {
  * @param workflow - Workflow to convert
  * @returns SKILL.md content as string
  */
-export function generateRooCodeSkillContent(workflow: Workflow): string {
+export function generateRooCodeSkillContent(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): string {
   const skillName = nodeNameToFileName(workflow.name);
 
   const description =
@@ -52,6 +55,7 @@ description: ${description}
   // Generate execution instructions
   const instructions = generateExecutionInstructions(workflow, {
     provider: 'roo-code',
+    highlightEnabled: options?.highlightEnabled,
   });
 
   // Compose SKILL.md body
@@ -100,7 +104,8 @@ export async function checkExistingRooCodeSkill(
  */
 export async function exportWorkflowAsRooCodeSkill(
   workflow: Workflow,
-  fileService: FileService
+  fileService: FileService,
+  options?: { highlightEnabled?: boolean }
 ): Promise<RooCodeSkillExportResult> {
   try {
     const workspacePath = fileService.getWorkspacePath();
@@ -112,7 +117,7 @@ export async function exportWorkflowAsRooCodeSkill(
     await fileService.createDirectory(skillDir);
 
     // Generate and write SKILL.md content
-    const content = generateRooCodeSkillContent(workflow);
+    const content = generateRooCodeSkillContent(workflow, options);
     await fileService.writeFile(skillPath, content);
 
     return {

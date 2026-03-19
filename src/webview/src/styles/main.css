@@ -192,3 +192,20 @@ button {
 .driver-overlay {
   z-index: 10000;
 }
+
+/* ============================================================================
+   Highlight Toggle Button Pulse Animation
+   Synced with GroupNode's highlightPulse to visually connect the two
+   ============================================================================ */
+
+@keyframes highlight-btn-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(79, 195, 247, 0.4);
+  }
+  50% {
+    box-shadow:
+      0 0 14px rgba(79, 195, 247, 0.6),
+      0 0 4px rgba(79, 195, 247, 0.3);
+  }
+}

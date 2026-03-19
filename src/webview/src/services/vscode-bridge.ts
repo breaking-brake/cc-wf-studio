@@ -223,7 +223,10 @@ export function sendStateUpdate(
  * @param workflow - Workflow to run
  * @returns Promise that resolves when run starts successfully
  */
-export function runAsSlashCommand(workflow: Workflow): Promise<void> {
+export function runAsSlashCommand(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): Promise<void> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
 
@@ -248,7 +251,10 @@ export function runAsSlashCommand(workflow: Workflow): Promise<void> {
     window.addEventListener('message', handler);
 
     // Send request
-    const payload: RunAsSlashCommandPayload = { workflow };
+    const payload: RunAsSlashCommandPayload = {
+      workflow,
+      highlightEnabled: options?.highlightEnabled,
+    };
     vscode.postMessage({
       type: 'RUN_AS_SLASH_COMMAND',
       requestId,
@@ -321,7 +327,10 @@ export function openInEditor(
  * @param workflow - Workflow to export
  * @returns Promise that resolves with export result
  */
-export function exportForCopilot(workflow: Workflow): Promise<ExportForCopilotSuccessPayload> {
+export function exportForCopilot(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): Promise<ExportForCopilotSuccessPayload> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
 
@@ -347,7 +356,10 @@ export function exportForCopilot(workflow: Workflow): Promise<ExportForCopilotSu
 
     window.addEventListener('message', handler);
 
-    const payload: ExportForCopilotPayload = { workflow };
+    const payload: ExportForCopilotPayload = {
+      workflow,
+      highlightEnabled: options?.highlightEnabled,
+    };
     vscode.postMessage({
       type: 'EXPORT_FOR_COPILOT',
       requestId,
@@ -371,7 +383,8 @@ export function exportForCopilot(workflow: Workflow): Promise<ExportForCopilotSu
  * @returns Promise that resolves with export result
  */
 export function exportForCopilotCli(
-  workflow: Workflow
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
 ): Promise<ExportForCopilotCliSuccessPayload> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
@@ -399,7 +412,10 @@ export function exportForCopilotCli(
 
     window.addEventListener('message', handler);
 
-    const payload: ExportForCopilotCliPayload = { workflow };
+    const payload: ExportForCopilotCliPayload = {
+      workflow,
+      highlightEnabled: options?.highlightEnabled,
+    };
     vscode.postMessage({
       type: 'EXPORT_FOR_COPILOT_CLI',
       requestId,
@@ -423,7 +439,10 @@ export function exportForCopilotCli(
  * @param workflow - Workflow to run
  * @returns Promise that resolves with run result
  */
-export function runForCopilot(workflow: Workflow): Promise<RunForCopilotSuccessPayload> {
+export function runForCopilot(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): Promise<RunForCopilotSuccessPayload> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
 
@@ -443,7 +462,7 @@ export function runForCopilot(workflow: Workflow): Promise<RunForCopilotSuccessP
 
     window.addEventListener('message', handler);
 
-    const payload: RunForCopilotPayload = { workflow };
+    const payload: RunForCopilotPayload = { workflow, highlightEnabled: options?.highlightEnabled };
     vscode.postMessage({
       type: 'RUN_FOR_COPILOT',
       requestId,
@@ -467,7 +486,10 @@ export function runForCopilot(workflow: Workflow): Promise<RunForCopilotSuccessP
  * @param workflow - Workflow to run
  * @returns Promise that resolves with run result
  */
-export function runForCopilotCli(workflow: Workflow): Promise<RunForCopilotCliSuccessPayload> {
+export function runForCopilotCli(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): Promise<RunForCopilotCliSuccessPayload> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
 
@@ -487,7 +509,10 @@ export function runForCopilotCli(workflow: Workflow): Promise<RunForCopilotCliSu
 
     window.addEventListener('message', handler);
 
-    const payload: RunForCopilotCliPayload = { workflow };
+    const payload: RunForCopilotCliPayload = {
+      workflow,
+      highlightEnabled: options?.highlightEnabled,
+    };
     vscode.postMessage({
       type: 'RUN_FOR_COPILOT_CLI',
       requestId,
@@ -514,7 +539,10 @@ export function runForCopilotCli(workflow: Workflow): Promise<RunForCopilotCliSu
  * @param workflow - Workflow to export
  * @returns Promise that resolves with export result
  */
-export function exportForCodexCli(workflow: Workflow): Promise<ExportForCodexCliSuccessPayload> {
+export function exportForCodexCli(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): Promise<ExportForCodexCliSuccessPayload> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
 
@@ -541,7 +569,10 @@ export function exportForCodexCli(workflow: Workflow): Promise<ExportForCodexCli
 
     window.addEventListener('message', handler);
 
-    const payload: ExportForCodexCliPayload = { workflow };
+    const payload: ExportForCodexCliPayload = {
+      workflow,
+      highlightEnabled: options?.highlightEnabled,
+    };
     vscode.postMessage({
       type: 'EXPORT_FOR_CODEX_CLI',
       requestId,
@@ -565,7 +596,10 @@ export function exportForCodexCli(workflow: Workflow): Promise<ExportForCodexCli
  * @param workflow - Workflow to run
  * @returns Promise that resolves with run result
  */
-export function runForCodexCli(workflow: Workflow): Promise<RunForCodexCliSuccessPayload> {
+export function runForCodexCli(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): Promise<RunForCodexCliSuccessPayload> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
 
@@ -592,7 +626,10 @@ export function runForCodexCli(workflow: Workflow): Promise<RunForCodexCliSucces
 
     window.addEventListener('message', handler);
 
-    const payload: RunForCodexCliPayload = { workflow };
+    const payload: RunForCodexCliPayload = {
+      workflow,
+      highlightEnabled: options?.highlightEnabled,
+    };
     vscode.postMessage({
       type: 'RUN_FOR_CODEX_CLI',
       requestId,
@@ -619,7 +656,10 @@ export function runForCodexCli(workflow: Workflow): Promise<RunForCodexCliSucces
  * @param workflow - Workflow to export
  * @returns Promise that resolves with export result
  */
-export function exportForRooCode(workflow: Workflow): Promise<ExportForRooCodeSuccessPayload> {
+export function exportForRooCode(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): Promise<ExportForRooCodeSuccessPayload> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
 
@@ -646,7 +686,10 @@ export function exportForRooCode(workflow: Workflow): Promise<ExportForRooCodeSu
 
     window.addEventListener('message', handler);
 
-    const payload: ExportForRooCodePayload = { workflow };
+    const payload: ExportForRooCodePayload = {
+      workflow,
+      highlightEnabled: options?.highlightEnabled,
+    };
     vscode.postMessage({
       type: 'EXPORT_FOR_ROO_CODE',
       requestId,
@@ -670,7 +713,10 @@ export function exportForRooCode(workflow: Workflow): Promise<ExportForRooCodeSu
  * @param workflow - Workflow to run
  * @returns Promise that resolves with run result
  */
-export function runForRooCode(workflow: Workflow): Promise<RunForRooCodeSuccessPayload> {
+export function runForRooCode(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): Promise<RunForRooCodeSuccessPayload> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
 
@@ -697,7 +743,10 @@ export function runForRooCode(workflow: Workflow): Promise<RunForRooCodeSuccessP
 
     window.addEventListener('message', handler);
 
-    const payload: RunForRooCodePayload = { workflow };
+    const payload: RunForRooCodePayload = {
+      workflow,
+      highlightEnabled: options?.highlightEnabled,
+    };
     vscode.postMessage({
       type: 'RUN_FOR_ROO_CODE',
       requestId,
@@ -724,7 +773,10 @@ export function runForRooCode(workflow: Workflow): Promise<RunForRooCodeSuccessP
  * @param workflow - Workflow to export
  * @returns Promise that resolves with export result
  */
-export function exportForGeminiCli(workflow: Workflow): Promise<ExportForGeminiCliSuccessPayload> {
+export function exportForGeminiCli(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): Promise<ExportForGeminiCliSuccessPayload> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
 
@@ -751,7 +803,10 @@ export function exportForGeminiCli(workflow: Workflow): Promise<ExportForGeminiC
 
     window.addEventListener('message', handler);
 
-    const payload: ExportForGeminiCliPayload = { workflow };
+    const payload: ExportForGeminiCliPayload = {
+      workflow,
+      highlightEnabled: options?.highlightEnabled,
+    };
     vscode.postMessage({
       type: 'EXPORT_FOR_GEMINI_CLI',
       requestId,
@@ -775,7 +830,10 @@ export function exportForGeminiCli(workflow: Workflow): Promise<ExportForGeminiC
  * @param workflow - Workflow to run
  * @returns Promise that resolves with run result
  */
-export function runForGeminiCli(workflow: Workflow): Promise<RunForGeminiCliSuccessPayload> {
+export function runForGeminiCli(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): Promise<RunForGeminiCliSuccessPayload> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
 
@@ -802,7 +860,10 @@ export function runForGeminiCli(workflow: Workflow): Promise<RunForGeminiCliSucc
 
     window.addEventListener('message', handler);
 
-    const payload: RunForGeminiCliPayload = { workflow };
+    const payload: RunForGeminiCliPayload = {
+      workflow,
+      highlightEnabled: options?.highlightEnabled,
+    };
     vscode.postMessage({
       type: 'RUN_FOR_GEMINI_CLI',
       requestId,
@@ -830,7 +891,8 @@ export function runForGeminiCli(workflow: Workflow): Promise<RunForGeminiCliSucc
  * @returns Promise that resolves with export result
  */
 export function exportForAntigravity(
-  workflow: Workflow
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
 ): Promise<ExportForAntigravitySuccessPayload> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
@@ -858,7 +920,10 @@ export function exportForAntigravity(
 
     window.addEventListener('message', handler);
 
-    const payload: ExportForAntigravityPayload = { workflow };
+    const payload: ExportForAntigravityPayload = {
+      workflow,
+      highlightEnabled: options?.highlightEnabled,
+    };
     vscode.postMessage({
       type: 'EXPORT_FOR_ANTIGRAVITY',
       requestId,
@@ -881,7 +946,10 @@ export function exportForAntigravity(
  * @param workflow - Workflow to run
  * @returns Promise that resolves with run result
  */
-export function runForAntigravity(workflow: Workflow): Promise<RunForAntigravitySuccessPayload> {
+export function runForAntigravity(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): Promise<RunForAntigravitySuccessPayload> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
 
@@ -908,7 +976,10 @@ export function runForAntigravity(workflow: Workflow): Promise<RunForAntigravity
 
     window.addEventListener('message', handler);
 
-    const payload: RunForAntigravityPayload = { workflow };
+    const payload: RunForAntigravityPayload = {
+      workflow,
+      highlightEnabled: options?.highlightEnabled,
+    };
     vscode.postMessage({
       type: 'RUN_FOR_ANTIGRAVITY',
       requestId,
@@ -935,7 +1006,10 @@ export function runForAntigravity(workflow: Workflow): Promise<RunForAntigravity
  * @param workflow - Workflow to export
  * @returns Promise that resolves with export result
  */
-export function exportForCursor(workflow: Workflow): Promise<ExportForCursorSuccessPayload> {
+export function exportForCursor(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): Promise<ExportForCursorSuccessPayload> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
 
@@ -962,7 +1036,10 @@ export function exportForCursor(workflow: Workflow): Promise<ExportForCursorSucc
 
     window.addEventListener('message', handler);
 
-    const payload: ExportForCursorPayload = { workflow };
+    const payload: ExportForCursorPayload = {
+      workflow,
+      highlightEnabled: options?.highlightEnabled,
+    };
     vscode.postMessage({
       type: 'EXPORT_FOR_CURSOR',
       requestId,
@@ -985,7 +1062,10 @@ export function exportForCursor(workflow: Workflow): Promise<ExportForCursorSucc
  * @param workflow - Workflow to run
  * @returns Promise that resolves with run result
  */
-export function runForCursor(workflow: Workflow): Promise<RunForCursorSuccessPayload> {
+export function runForCursor(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): Promise<RunForCursorSuccessPayload> {
   return new Promise((resolve, reject) => {
     const requestId = `req-${Date.now()}-${Math.random()}`;
 
@@ -1012,7 +1092,10 @@ export function runForCursor(workflow: Workflow): Promise<RunForCursorSuccessPay
 
     window.addEventListener('message', handler);
 
-    const payload: RunForCursorPayload = { workflow };
+    const payload: RunForCursorPayload = {
+      workflow,
+      highlightEnabled: options?.highlightEnabled,
+    };
     vscode.postMessage({
       type: 'RUN_FOR_CURSOR',
       requestId,

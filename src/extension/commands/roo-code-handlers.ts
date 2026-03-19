@@ -57,8 +57,7 @@ export async function handleExportForRooCode(
       const result = await vscode.window.showWarningMessage(
         'This workflow contains Sub-Agent nodes.\n\nRoo Code does not have a Sub-Agent feature. Sub-Agents will be substituted with child tasks (new_task), which cannot run in parallel.',
         { modal: true },
-        'Continue',
-        'Cancel'
+        'Continue'
       );
       if (result !== 'Continue') {
         webview.postMessage({
@@ -75,8 +74,7 @@ export async function handleExportForRooCode(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({
@@ -88,7 +86,9 @@ export async function handleExportForRooCode(
     }
 
     // Export workflow as skill to .roo/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsRooCodeSkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsRooCodeSkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: RooCodeOperationFailedPayload = {
@@ -185,8 +185,7 @@ export async function handleRunForRooCode(
       const result = await vscode.window.showWarningMessage(
         'This workflow contains Sub-Agent nodes.\n\nRoo Code does not have a Sub-Agent feature. Sub-Agents will be substituted with child tasks (new_task), which cannot run in parallel.',
         { modal: true },
-        'Continue',
-        'Cancel'
+        'Continue'
       );
       if (result !== 'Continue') {
         webview.postMessage({
@@ -222,8 +221,7 @@ export async function handleRunForRooCode(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({
@@ -235,7 +233,9 @@ export async function handleRunForRooCode(
     }
 
     // Step 3: Export workflow as skill to .roo/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsRooCodeSkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsRooCodeSkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: RooCodeOperationFailedPayload = {

@@ -51,8 +51,7 @@ export async function handleExportForAntigravity(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({
@@ -64,7 +63,9 @@ export async function handleExportForAntigravity(
     }
 
     // Export workflow as skill to .agent/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsAntigravitySkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsAntigravitySkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: AntigravityOperationFailedPayload = {
@@ -124,8 +125,11 @@ export async function handleRunForAntigravity(
   fileService: FileService,
   webview: vscode.Webview,
   payload: RunForAntigravityPayload,
-  requestId?: string
-): Promise<void> {
+  requestId?: string,
+  options?: { skipCascadeLaunch?: boolean }
+): Promise<
+  { status: 'success'; skillName: string } | { status: 'cancelled' | 'failed' } | undefined
+> {
   try {
     const { workflow } = payload;
 
@@ -159,20 +163,21 @@ export async function handleRunForAntigravity(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({
           type: 'RUN_FOR_ANTIGRAVITY_CANCELLED',
           requestId,
         });
-        return;
+        return { status: 'cancelled' };
       }
     }
 
     // Step 2: Export workflow as skill to .claude/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsAntigravitySkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsAntigravitySkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: AntigravityOperationFailedPayload = {
@@ -185,7 +190,22 @@ export async function handleRunForAntigravity(
         requestId,
         payload: failedPayload,
       });
-      return;
+      return { status: 'failed' };
+    }
+
+    // If skipCascadeLaunch is set, stop after export (MCP refresh dialog will handle launch)
+    if (options?.skipCascadeLaunch) {
+      const successPayload: RunForAntigravitySuccessPayload = {
+        workflowName: workflow.name,
+        antigravityOpened: false,
+        timestamp: new Date().toISOString(),
+      };
+      webview.postMessage({
+        type: 'RUN_FOR_ANTIGRAVITY_SUCCESS',
+        requestId,
+        payload: successPayload,
+      });
+      return { status: 'success', skillName: exportResult.skillName };
     }
 
     // Step 3: Check if Antigravity is installed

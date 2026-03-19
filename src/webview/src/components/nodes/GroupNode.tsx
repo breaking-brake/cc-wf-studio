@@ -3,32 +3,53 @@
  *
  * Visual grouping container for organizing nodes on the canvas.
  * Does not affect execution flow - purely a layout/label mechanism.
+ * Supports highlight state for MCP execution tracking.
  */
 
-import React from 'react';
+import type React from 'react';
 import { type NodeProps, NodeResizer } from 'reactflow';
+import { useWorkflowStore } from '../../stores/workflow-store';
 import { DeleteButton } from './DeleteButton';
 
 export interface GroupNodeData {
   label: string;
 }
 
-export const GroupNodeComponent: React.FC<NodeProps<GroupNodeData>> = React.memo(
-  ({ id, data, selected }) => {
-    const label = data.label || 'Group';
+export const GroupNodeComponent: React.FC<NodeProps<GroupNodeData>> = ({ id, data, selected }) => {
+  const label = data.label || 'Group';
+  const highlightedGroupNodeId = useWorkflowStore((s) => s.highlightedGroupNodeId);
+  const isHighlighted = highlightedGroupNodeId === id;
 
-    return (
+  const borderColor = isHighlighted
+    ? 'var(--vscode-focusBorder)'
+    : selected
+      ? 'var(--vscode-focusBorder)'
+      : 'var(--vscode-panel-border)';
+
+  const backgroundColor = isHighlighted
+    ? 'rgba(79, 195, 247, 0.08)'
+    : selected
+      ? 'rgba(var(--vscode-focusBorder-rgb, 0, 120, 212), 0.05)'
+      : 'rgba(128, 128, 128, 0.03)';
+
+  return (
+    <>
       <div
         style={{
           width: '100%',
           height: '100%',
           borderRadius: '8px',
-          border: `2px dashed ${selected ? 'var(--vscode-focusBorder)' : 'var(--vscode-panel-border)'}`,
-          backgroundColor: selected
-            ? 'rgba(var(--vscode-focusBorder-rgb, 0, 120, 212), 0.05)'
-            : 'rgba(128, 128, 128, 0.03)',
+          border: `2px ${isHighlighted ? 'solid' : 'dashed'} ${borderColor}`,
+          backgroundColor,
           padding: 0,
           position: 'relative',
+          boxShadow: isHighlighted
+            ? '0 0 12px rgba(79, 195, 247, 0.4), 0 0 4px rgba(79, 195, 247, 0.2)'
+            : 'none',
+          animation:
+            isHighlighted && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+              ? 'highlightPulse 1.5s ease-in-out infinite'
+              : 'none',
         }}
       >
         <NodeResizer
@@ -56,7 +77,7 @@ export const GroupNodeComponent: React.FC<NodeProps<GroupNodeData>> = React.memo
             color: 'var(--vscode-descriptionForeground)',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
-            borderBottom: `1px dashed ${selected ? 'var(--vscode-focusBorder)' : 'var(--vscode-panel-border)'}`,
+            borderBottom: `1px dashed ${isHighlighted ? 'var(--vscode-focusBorder)' : selected ? 'var(--vscode-focusBorder)' : 'var(--vscode-panel-border)'}`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -66,10 +87,20 @@ export const GroupNodeComponent: React.FC<NodeProps<GroupNodeData>> = React.memo
           <DeleteButton nodeId={id} selected={selected} />
         </div>
       </div>
-    );
-  }
-);
-
-GroupNodeComponent.displayName = 'GroupNodeComponent';
+      <style>
+        {`
+            @keyframes highlightPulse {
+              0%, 100% {
+                box-shadow: 0 0 12px rgba(79, 195, 247, 0.4), 0 0 4px rgba(79, 195, 247, 0.2);
+              }
+              50% {
+                box-shadow: 0 0 20px rgba(79, 195, 247, 0.6), 0 0 8px rgba(79, 195, 247, 0.3);
+              }
+            }
+          `}
+      </style>
+    </>
+  );
+};
 
 export default GroupNodeComponent;

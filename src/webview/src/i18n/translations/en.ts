@@ -43,6 +43,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.switchToSelection': 'Switch to Selection mode',
   'toolbar.edgeAnimation.enable': 'Enable edge animation',
   'toolbar.edgeAnimation.disable': 'Disable edge animation',
+  'toolbar.highlight.enable': 'Enable group node highlight',
+  'toolbar.highlight.disable': 'Disable group node highlight',
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.show': 'Show Minimap',

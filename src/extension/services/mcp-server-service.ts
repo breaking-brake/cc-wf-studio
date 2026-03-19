@@ -312,6 +312,14 @@ export class McpServerManager {
     });
   }
 
+  // Highlight a group node on the canvas (called by MCP tool)
+  highlightGroupNode(groupNodeId: string | null): void {
+    this.webview?.postMessage({
+      type: 'HIGHLIGHT_GROUP_NODE',
+      payload: { groupNodeId },
+    });
+  }
+
   // Response handlers called from open-editor.ts
   handleWorkflowResponse(payload: GetCurrentWorkflowResponsePayload): void {
     const pending = this.pendingWorkflowRequests.get(payload.correlationId);

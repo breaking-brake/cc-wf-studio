@@ -30,7 +30,10 @@ export interface CodexSkillExportResult {
  * @param workflow - Workflow to convert
  * @returns SKILL.md content as string
  */
-export function generateCodexSkillContent(workflow: Workflow): string {
+export function generateCodexSkillContent(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): string {
   const skillName = nodeNameToFileName(workflow.name);
 
   // Generate description from workflow metadata or create default
@@ -53,6 +56,7 @@ description: ${description}
   // Generate execution instructions
   const instructions = generateExecutionInstructions(workflow, {
     provider: 'codex',
+    highlightEnabled: options?.highlightEnabled,
   });
 
   // Compose SKILL.md body
@@ -102,7 +106,8 @@ export async function checkExistingCodexSkill(
  */
 export async function exportWorkflowAsCodexSkill(
   workflow: Workflow,
-  fileService: FileService
+  fileService: FileService,
+  options?: { highlightEnabled?: boolean }
 ): Promise<CodexSkillExportResult> {
   try {
     const workspacePath = fileService.getWorkspacePath();
@@ -114,7 +119,7 @@ export async function exportWorkflowAsCodexSkill(
     await fileService.createDirectory(skillDir);
 
     // Generate and write SKILL.md content
-    const content = generateCodexSkillContent(workflow);
+    const content = generateCodexSkillContent(workflow, options);
     await fileService.writeFile(skillPath, content);
 
     return {

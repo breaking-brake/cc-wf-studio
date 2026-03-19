@@ -30,7 +30,10 @@ export interface SkillExportResult {
  * @param workflow - Workflow to convert
  * @returns SKILL.md content as string
  */
-export function generateSkillContent(workflow: Workflow): string {
+export function generateSkillContent(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): string {
   const skillName = nodeNameToFileName(workflow.name);
 
   // Generate description from workflow metadata or create default
@@ -53,6 +56,7 @@ description: ${description}
   // Generate execution instructions
   const instructions = generateExecutionInstructions(workflow, {
     provider: 'copilot-cli',
+    highlightEnabled: options?.highlightEnabled,
   });
 
   // Compose SKILL.md body
@@ -100,7 +104,8 @@ export async function checkExistingSkill(
  */
 export async function exportWorkflowAsSkill(
   workflow: Workflow,
-  fileService: FileService
+  fileService: FileService,
+  options?: { highlightEnabled?: boolean }
 ): Promise<SkillExportResult> {
   try {
     const workspacePath = fileService.getWorkspacePath();
@@ -112,7 +117,7 @@ export async function exportWorkflowAsSkill(
     await fileService.createDirectory(skillDir);
 
     // Generate and write SKILL.md content
-    const content = generateSkillContent(workflow);
+    const content = generateSkillContent(workflow, options);
     await fileService.writeFile(skillPath, content);
 
     return {

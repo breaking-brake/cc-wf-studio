@@ -79,8 +79,7 @@ export async function handleExportForGeminiCli(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({
@@ -92,7 +91,9 @@ export async function handleExportForGeminiCli(
     }
 
     // Export workflow as skill to .gemini/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsGeminiSkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsGeminiSkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: GeminiOperationFailedPayload = {
@@ -230,8 +231,7 @@ export async function handleRunForGeminiCli(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({
@@ -243,7 +243,9 @@ export async function handleRunForGeminiCli(
     }
 
     // Step 3: Export workflow as skill to .gemini/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsGeminiSkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsGeminiSkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: GeminiOperationFailedPayload = {

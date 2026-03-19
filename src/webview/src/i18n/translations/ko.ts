@@ -43,6 +43,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.switchToSelection': '선택 모드로 전환',
   'toolbar.edgeAnimation.enable': '엣지 애니메이션 활성화',
   'toolbar.edgeAnimation.disable': '엣지 애니메이션 비활성화',
+  'toolbar.highlight.enable': '그룹 노드 하이라이트 활성화',
+  'toolbar.highlight.disable': '그룹 노드 하이라이트 비활성화',
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.show': '미니맵 표시',

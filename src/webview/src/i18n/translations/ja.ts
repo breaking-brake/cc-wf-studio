@@ -43,6 +43,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.switchToSelection': '範囲選択モードに切り替え',
   'toolbar.edgeAnimation.enable': 'エッジアニメーションを有効化',
   'toolbar.edgeAnimation.disable': 'エッジアニメーションを無効化',
+  'toolbar.highlight.enable': 'グループノードハイライトを有効化',
+  'toolbar.highlight.disable': 'グループノードハイライトを無効化',
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.show': 'ミニマップを表示',

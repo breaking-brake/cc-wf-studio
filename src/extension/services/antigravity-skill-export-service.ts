@@ -30,7 +30,10 @@ export interface AntigravitySkillExportResult {
  * @param workflow - Workflow to convert
  * @returns SKILL.md content as string
  */
-export function generateAntigravitySkillContent(workflow: Workflow): string {
+export function generateAntigravitySkillContent(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): string {
   const skillName = nodeNameToFileName(workflow.name);
 
   // Generate description from workflow metadata or create default
@@ -53,6 +56,7 @@ description: ${description}
   // Generate execution instructions
   const instructions = generateExecutionInstructions(workflow, {
     provider: 'antigravity',
+    highlightEnabled: options?.highlightEnabled,
   });
 
   // Compose SKILL.md body
@@ -101,7 +105,8 @@ export async function checkExistingAntigravitySkill(
  */
 export async function exportWorkflowAsAntigravitySkill(
   workflow: Workflow,
-  fileService: FileService
+  fileService: FileService,
+  options?: { highlightEnabled?: boolean }
 ): Promise<AntigravitySkillExportResult> {
   try {
     const workspacePath = fileService.getWorkspacePath();
@@ -113,7 +118,7 @@ export async function exportWorkflowAsAntigravitySkill(
     await fileService.createDirectory(skillDir);
 
     // Generate and write SKILL.md content
-    const content = generateAntigravitySkillContent(workflow);
+    const content = generateAntigravitySkillContent(workflow, options);
     await fileService.writeFile(skillPath, content);
 
     return {

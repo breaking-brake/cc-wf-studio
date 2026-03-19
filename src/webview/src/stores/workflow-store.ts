@@ -63,6 +63,14 @@ interface WorkflowStore {
   slashCommandOptions: SlashCommandOptions;
   lastAddedNodeId: string | null;
 
+  // Group Node Highlight State (for MCP execution tracking)
+  highlightedGroupNodeId: string | null;
+  isHighlightEnabled: boolean;
+
+  // MCP Server Status
+  mcpServerRunning: boolean;
+  mcpServerPort: number | null;
+
   // Sub-Agent Flow State (Feature: 089-subworkflow)
   subAgentFlows: SubAgentFlow[];
   activeSubAgentFlowId: string | null;
@@ -98,6 +106,13 @@ interface WorkflowStore {
   addHookEntry: (hookType: HookType, matcher: string, command: string, once?: boolean) => void;
   removeHookEntry: (hookType: HookType, entryIndex: number) => void;
   updateHookEntry: (hookType: HookType, entryIndex: number, entry: Partial<HookEntry>) => void;
+
+  // Group Node Highlight
+  setHighlightedGroupNodeId: (id: string | null) => void;
+  toggleHighlightEnabled: () => void;
+
+  // MCP Server Status
+  setMcpServerStatus: (running: boolean, port: number | null) => void;
 
   // Group Node Actions
   onNodeDragStop: (node: Node) => void;
@@ -299,6 +314,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     hooks: undefined,
   },
   lastAddedNodeId: null,
+  highlightedGroupNodeId: null,
+  isHighlightEnabled: true,
+  mcpServerRunning: false,
+  mcpServerPort: null,
 
   // Sub-Agent Flow Initial State (Feature: 089-subworkflow)
   subAgentFlows: [],
@@ -606,6 +625,21 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set({ lastAddedNodeId: null });
   },
 
+  setHighlightedGroupNodeId: (id: string | null) => {
+    set({ highlightedGroupNodeId: id });
+  },
+
+  toggleHighlightEnabled: () => {
+    const current = get().isHighlightEnabled;
+    if (current) {
+      set({ isHighlightEnabled: false, highlightedGroupNodeId: null });
+    } else {
+      set({ isHighlightEnabled: true });
+    }
+  },
+
+  setMcpServerStatus: (running, port) => set({ mcpServerRunning: running, mcpServerPort: port }),
+
   removeNode: (nodeId: string) => {
     // Startノードの削除のみ防止
     // Endノードは自由に削除可能（Export時にバリデーション）
@@ -712,6 +746,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       nodes: [DEFAULT_START_NODE, DEFAULT_END_NODE],
       edges: [],
       selectedNodeId: null,
+      highlightedGroupNodeId: null,
       workflowDescription: '', // Reset description
       slashCommandOptions: {
         context: 'default',
@@ -770,6 +805,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       nodes: newNodes,
       edges: newEdges,
       selectedNodeId: firstSelectableNode?.id || null,
+      highlightedGroupNodeId: null,
       activeWorkflow: workflow,
       subAgentFlows: workflow.subAgentFlows || [],
     });
@@ -806,6 +842,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set({
       nodes: newNodes,
       edges: newEdges,
+      highlightedGroupNodeId: null,
       activeWorkflow: workflow,
       subAgentFlows: workflow.subAgentFlows || [],
     });
@@ -842,6 +879,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set({
       nodes: newNodes,
       edges: newEdges,
+      highlightedGroupNodeId: null,
       activeWorkflow: workflow,
       subAgentFlows: workflow.subAgentFlows || [],
     });

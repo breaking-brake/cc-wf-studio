@@ -5,7 +5,7 @@
  * Based on: /specs/001-cc-wf-studio/research.md section 3.4
  */
 
-import { Activity, PanelLeftOpen } from 'lucide-react';
+import { Activity, Lightbulb, LightbulbOff, PanelLeftOpen } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactFlow, {
@@ -123,6 +123,9 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     selectedNodeId,
     interactionMode,
     onNodeDragStop,
+    isHighlightEnabled,
+    toggleHighlightEnabled,
+    highlightedGroupNodeId,
   } = useWorkflowStore();
 
   // Edge animation toggle (respects prefers-reduced-motion by default)
@@ -132,31 +135,50 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
   // Animate edges: selected edge itself, or edges connected to selected node
   // For group nodes: also animate edges connected to any child node
+  // Highlight-driven animation is always active (runtime status indicator)
   const animatedEdges = useMemo(() => {
-    if (!isEdgeAnimationEnabled) return edges;
+    // Highlight-driven animation: always active (runtime status indicator)
+    let highlightChildIds: Set<string> | null = null;
+    if (highlightedGroupNodeId != null) {
+      highlightChildIds = new Set(
+        nodes.filter((n) => n.parentId === highlightedGroupNodeId).map((n) => n.id)
+      );
+    }
 
-    // If a group node is selected, collect its child node IDs
-    let targetNodeIds: Set<string> | null = null;
-    if (selectedNodeId != null) {
+    // Selection-driven animation: respects user toggle
+    let selectionChildIds: Set<string> | null = null;
+    if (isEdgeAnimationEnabled && selectedNodeId != null) {
       const selectedNode = nodes.find((n) => n.id === selectedNodeId);
       if (selectedNode?.type === 'group') {
-        targetNodeIds = new Set(
+        selectionChildIds = new Set(
           nodes.filter((n) => n.parentId === selectedNodeId).map((n) => n.id)
         );
       }
     }
 
-    return edges.map((edge) => ({
-      ...edge,
-      animated:
-        edge.selected ||
-        (selectedNodeId != null &&
-          (edge.source === selectedNodeId ||
-            edge.target === selectedNodeId ||
-            (targetNodeIds != null &&
-              (targetNodeIds.has(edge.source) || targetNodeIds.has(edge.target))))),
-    }));
-  }, [edges, nodes, selectedNodeId, isEdgeAnimationEnabled]);
+    const hasHighlight = highlightedGroupNodeId != null;
+    const hasSelection = isEdgeAnimationEnabled && selectedNodeId != null;
+    if (!hasHighlight && !hasSelection) return edges;
+
+    return edges.map((edge) => {
+      const isHighlightAnimated =
+        hasHighlight &&
+        (edge.source === highlightedGroupNodeId ||
+          edge.target === highlightedGroupNodeId ||
+          (highlightChildIds != null &&
+            (highlightChildIds.has(edge.source) || highlightChildIds.has(edge.target))));
+
+      const isSelectionAnimated =
+        hasSelection &&
+        (edge.selected ||
+          edge.source === selectedNodeId ||
+          edge.target === selectedNodeId ||
+          (selectionChildIds != null &&
+            (selectionChildIds.has(edge.source) || selectionChildIds.has(edge.target))));
+
+      return { ...edge, animated: isHighlightAnimated || isSelectionAnimated };
+    });
+  }, [edges, nodes, selectedNodeId, highlightedGroupNodeId, isEdgeAnimationEnabled]);
 
   /**
    * 接続制約の検証
@@ -409,6 +431,51 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
                     }}
                   >
                     <Activity size={14} />
+                  </button>
+                </StyledTooltipItem>
+                <StyledTooltipItem
+                  content={
+                    isHighlightEnabled
+                      ? t('toolbar.highlight.disable')
+                      : t('toolbar.highlight.enable')
+                  }
+                >
+                  <button
+                    type="button"
+                    onClick={toggleHighlightEnabled}
+                    aria-label={
+                      isHighlightEnabled
+                        ? t('toolbar.highlight.disable')
+                        : t('toolbar.highlight.enable')
+                    }
+                    style={{
+                      all: 'unset',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '20px',
+                      backgroundColor: 'var(--vscode-editor-background)',
+                      border: highlightedGroupNodeId
+                        ? '1px solid rgba(79, 195, 247, 0.6)'
+                        : '1px solid var(--vscode-panel-border)',
+                      cursor: 'pointer',
+                      opacity: 0.85,
+                      color: isHighlightEnabled
+                        ? 'var(--vscode-foreground)'
+                        : 'var(--vscode-disabledForeground)',
+                      boxShadow: highlightedGroupNodeId
+                        ? '0 0 8px rgba(79, 195, 247, 0.4)'
+                        : 'none',
+                      animation:
+                        highlightedGroupNodeId &&
+                        !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                          ? 'highlight-btn-pulse 1.5s ease-in-out infinite'
+                          : 'none',
+                    }}
+                  >
+                    {isHighlightEnabled ? <Lightbulb size={14} /> : <LightbulbOff size={14} />}
                   </button>
                 </StyledTooltipItem>
               </StyledTooltipProvider>

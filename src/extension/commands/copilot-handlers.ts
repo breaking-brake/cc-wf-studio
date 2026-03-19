@@ -64,8 +64,7 @@ export async function handleExportForCopilot(
       const result = await vscode.window.showWarningMessage(
         `The following files already exist:\n${existingFiles.join('\n')}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
 
       if (result !== 'Overwrite') {
@@ -99,7 +98,9 @@ export async function handleExportForCopilot(
       skipMcpSync: true,
     };
 
-    const copilotResult = await exportWorkflowForCopilot(workflow, fileService, copilotOptions);
+    const copilotResult = await exportWorkflowForCopilot(workflow, fileService, copilotOptions, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!copilotResult.success) {
       const failedPayload: CopilotOperationFailedPayload = {
@@ -179,8 +180,7 @@ export async function handleRunForCopilot(
       const result = await vscode.window.showWarningMessage(
         `The following files already exist:\n${existingFiles.join('\n')}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
 
       if (result !== 'Overwrite') {
@@ -214,7 +214,9 @@ export async function handleRunForCopilot(
       skipMcpSync: true,
     };
 
-    const exportResult = await exportWorkflowForCopilot(workflow, fileService, copilotOptions);
+    const exportResult = await exportWorkflowForCopilot(workflow, fileService, copilotOptions, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: CopilotOperationFailedPayload = {
@@ -375,8 +377,7 @@ export async function handleRunForCopilotCli(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({
@@ -388,7 +389,9 @@ export async function handleRunForCopilotCli(
     }
 
     // Step 3: Export workflow as skill to .github/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsSkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsSkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: CopilotOperationFailedPayload = {
@@ -476,8 +479,7 @@ export async function handleExportForCopilotCli(
       const result = await vscode.window.showWarningMessage(
         `Skill already exists: ${existingSkillPath}\n\nOverwrite?`,
         { modal: true },
-        'Overwrite',
-        'Cancel'
+        'Overwrite'
       );
       if (result !== 'Overwrite') {
         webview.postMessage({
@@ -489,7 +491,9 @@ export async function handleExportForCopilotCli(
     }
 
     // Export workflow as skill to .github/skills/{name}/SKILL.md
-    const exportResult = await exportWorkflowAsSkill(workflow, fileService);
+    const exportResult = await exportWorkflowAsSkill(workflow, fileService, {
+      highlightEnabled: payload.highlightEnabled,
+    });
 
     if (!exportResult.success) {
       const failedPayload: CopilotOperationFailedPayload = {

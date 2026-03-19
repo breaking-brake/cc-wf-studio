@@ -80,7 +80,8 @@ export async function checkExistingFiles(
  */
 export async function exportWorkflow(
   workflow: Workflow,
-  fileService: FileService
+  fileService: FileService,
+  options?: { highlightEnabled?: boolean }
 ): Promise<string[]> {
   const exportedFiles: string[] = [];
   const workspacePath = fileService.getWorkspacePath();
@@ -127,7 +128,12 @@ export async function exportWorkflow(
         (node) => node.data.subAgentFlowId === subAgentFlow.id
       );
 
-      const content = generateSubAgentFlowAgentFile(subAgentFlow, fileName, referencingNode);
+      const content = generateSubAgentFlowAgentFile(
+        subAgentFlow,
+        fileName,
+        referencingNode,
+        options
+      );
       await fileService.writeFile(filePath, content);
       exportedFiles.push(filePath);
     }
@@ -136,7 +142,7 @@ export async function exportWorkflow(
   // Export SlashCommand
   const commandFileName = workflowBaseName;
   const commandFilePath = path.join(commandsDir, `${commandFileName}.md`);
-  const commandContent = generateSlashCommandFile(workflow);
+  const commandContent = generateSlashCommandFile(workflow, options);
   await fileService.writeFile(commandFilePath, commandContent);
   exportedFiles.push(commandFilePath);
 
@@ -268,7 +274,8 @@ export function generateSubAgentFile(node: SubAgentNode): string {
 export function generateSubAgentFlowAgentFile(
   subAgentFlow: SubAgentFlow,
   agentFileName: string,
-  referencingNode?: SubAgentFlowNode
+  referencingNode?: SubAgentFlowNode,
+  options?: { highlightEnabled?: boolean }
 ): string {
   const agentName = agentFileName;
 
@@ -320,6 +327,7 @@ export function generateSubAgentFlowAgentFile(
   // Generate execution logic using shared module
   const executionLogic = generateExecutionInstructions(pseudoWorkflow, {
     provider: 'claude-code',
+    highlightEnabled: options?.highlightEnabled,
   });
 
   return `${frontmatter.join('\n')}${mermaidFlowchart}\n\n${executionLogic}`;
@@ -359,7 +367,10 @@ export function escapeYamlString(value: string, alwaysQuote = false): string {
  * @param workflow - Workflow definition
  * @returns Markdown content with YAML frontmatter
  */
-function generateSlashCommandFile(workflow: Workflow): string {
+function generateSlashCommandFile(
+  workflow: Workflow,
+  options?: { highlightEnabled?: boolean }
+): string {
   // YAML frontmatter
   const frontmatterLines = [
     '---',
@@ -432,6 +443,7 @@ function generateSlashCommandFile(workflow: Workflow): string {
     parentWorkflowName: workflowBaseName,
     subAgentFlows: workflow.subAgentFlows,
     provider: 'claude-code',
+    highlightEnabled: options?.highlightEnabled,
   });
 
   return `${frontmatter}${mermaidFlowchart}\n\n${executionLogic}`;
