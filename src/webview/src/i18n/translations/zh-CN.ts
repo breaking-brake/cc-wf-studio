@@ -909,6 +909,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.description': '浏览并选择现有命令文件作为 Sub-Agent 节点使用。',
   'subAgent.dialog.userDescription': '~/.claude/agents/ 中的命令 — 所有项目可用。',
   'subAgent.dialog.projectDescription': '.claude/agents/ 中的命令 — 仅限此项目。',
+  'subAgent.dialog.localDescription':
+    '由已安装的 Claude Code 插件提供的代理。这些代理为只读，由各自的插件管理。',
   'subAgent.property.linkedCommand': '关联命令',
 
   // Sub-Agent Form Dialog (Create New)

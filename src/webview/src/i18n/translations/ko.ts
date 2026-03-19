@@ -941,6 +941,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.description': '기존 커맨드 파일을 선택하여 Sub-Agent 노드로 사용합니다.',
   'subAgent.dialog.userDescription': '~/.claude/agents/의 커맨드 — 모든 프로젝트에서 사용 가능.',
   'subAgent.dialog.projectDescription': '.claude/agents/의 커맨드 — 이 프로젝트에만 해당.',
+  'subAgent.dialog.localDescription':
+    '설치된 Claude Code 플러그인이 제공하는 에이전트입니다. 읽기 전용이며 각 플러그인에 의해 관리됩니다.',
   'subAgent.property.linkedCommand': '연결된 커맨드',
 
   // Sub-Agent Form Dialog (Create New)

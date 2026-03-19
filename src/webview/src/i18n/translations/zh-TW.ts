@@ -910,6 +910,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.description': '瀏覽並選擇現有命令檔案作為 Sub-Agent 節點使用。',
   'subAgent.dialog.userDescription': '~/.claude/agents/ 中的命令 — 所有專案可用。',
   'subAgent.dialog.projectDescription': '.claude/agents/ 中的命令 — 僅限此專案。',
+  'subAgent.dialog.localDescription':
+    '由已安裝的 Claude Code 外掛程式提供的代理。這些代理為唯讀，由各自的外掛程式管理。',
   'subAgent.property.linkedCommand': '關聯命令',
 
   // Sub-Agent Form Dialog (Create New)

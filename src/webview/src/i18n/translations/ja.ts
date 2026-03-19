@@ -948,6 +948,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.userDescription':
     '~/.claude/agents/ のコマンド — すべてのプロジェクトで利用可能。',
   'subAgent.dialog.projectDescription': '.claude/agents/ のコマンド — このプロジェクト固有。',
+  'subAgent.dialog.localDescription':
+    'インストール済みの Claude Code プラグインが提供するエージェント。読み取り専用で、各プラグインによって管理されます。',
   'subAgent.property.linkedCommand': 'リンク済みコマンド',
 
   // Sub-Agent Form Dialog (Create New)

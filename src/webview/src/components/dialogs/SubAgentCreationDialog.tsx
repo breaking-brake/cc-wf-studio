@@ -259,8 +259,7 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
             >
               {activeTab === 'user' && t('subAgent.dialog.userDescription')}
               {activeTab === 'project' && t('subAgent.dialog.projectDescription')}
-              {activeTab === 'local' &&
-                'Agents provided by installed Claude Code plugins. These agents are read-only and managed by their respective plugins.'}
+              {activeTab === 'local' && t('subAgent.dialog.localDescription')}
             </div>
 
             {/* Loading State */}

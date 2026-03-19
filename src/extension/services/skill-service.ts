@@ -230,8 +230,8 @@ export async function scanPluginSkills(): Promise<SkillReference[]> {
 
       // Find the best matching installation for current workspace
       // Priority: project (matching projectPath) > local > user
-      let selectedInstallation = installations[0];
-      let skillScope = mapPluginScope(selectedInstallation.scope);
+      let selectedInstallation: (typeof installations)[0] | undefined;
+      let skillScope: 'user' | 'project' | 'local' = 'user';
 
       for (const installation of installations) {
         const installScope = mapPluginScope(installation.scope);
@@ -254,20 +254,15 @@ export async function scanPluginSkills(): Promise<SkillReference[]> {
           continue;
         }
 
-        // Prefer local over user
-        if (installScope === 'local' && skillScope === 'user') {
+        // First non-project installation, or prefer local over user
+        if (!selectedInstallation || (installScope === 'local' && skillScope === 'user')) {
           selectedInstallation = installation;
-          skillScope = 'local';
+          skillScope = installScope;
         }
       }
 
-      // If the selected installation is project-scoped but doesn't match, skip it
-      if (skillScope === 'project' && selectedInstallation.projectPath) {
-        if (!currentWorkspace) continue;
-        const normalizedProjectPath = path.normalize(selectedInstallation.projectPath);
-        const normalizedWorkspace = path.normalize(currentWorkspace);
-        if (normalizedProjectPath !== normalizedWorkspace) continue;
-      }
+      // No valid installation found
+      if (!selectedInstallation) continue;
 
       // Parse plugin ID to get marketplace name
       const parsed = parsePluginId(pluginId);
@@ -519,13 +514,13 @@ export async function scanAllSkills(): Promise<{
     if (skill.scope === 'local') {
       local.push(skill);
     } else if (skill.scope === 'user') {
-      // Add to user skills, but avoid duplicates by name
-      if (!user.some((s) => s.name === skill.name)) {
+      // Add to user skills, but avoid duplicates by name and pluginName
+      if (!user.some((s) => s.name === skill.name && s.pluginName === skill.pluginName)) {
         user.push(skill);
       }
     } else if (skill.scope === 'project') {
-      // Add to project skills, but avoid duplicates by name
-      if (!project.some((s) => s.name === skill.name)) {
+      // Add to project skills, but avoid duplicates by name and pluginName
+      if (!project.some((s) => s.name === skill.name && s.pluginName === skill.pluginName)) {
         project.push(skill);
       }
     }

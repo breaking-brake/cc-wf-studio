@@ -867,6 +867,7 @@ export interface WebviewTranslationKeys {
   'subAgent.dialog.description': string;
   'subAgent.dialog.userDescription': string;
   'subAgent.dialog.projectDescription': string;
+  'subAgent.dialog.localDescription': string;
   'subAgent.property.linkedCommand': string;
 
   // Sub-Agent Form Dialog (Create New)

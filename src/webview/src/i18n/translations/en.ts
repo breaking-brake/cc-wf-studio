@@ -954,6 +954,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.userDescription':
     'Commands from ~/.claude/agents/ — available across all projects.',
   'subAgent.dialog.projectDescription': 'Commands from .claude/agents/ — specific to this project.',
+  'subAgent.dialog.localDescription':
+    'Agents provided by installed Claude Code plugins. These agents are read-only and managed by their respective plugins.',
   'subAgent.property.linkedCommand': 'Linked Command',
 
   // Sub-Agent Form Dialog (Create New)

@@ -311,8 +311,8 @@ export async function scanPluginAgents(): Promise<CommandReference[]> {
       if (!installations || installations.length === 0) continue;
 
       // Find the best matching installation for current workspace
-      let selectedInstallation = installations[0];
-      let commandScope = mapPluginScope(selectedInstallation.scope);
+      let selectedInstallation: (typeof installations)[0] | undefined;
+      let commandScope: 'user' | 'project' | 'local' = 'user';
 
       for (const installation of installations) {
         const installScope = mapPluginScope(installation.scope);
@@ -331,19 +331,15 @@ export async function scanPluginAgents(): Promise<CommandReference[]> {
           continue;
         }
 
-        if (installScope === 'local' && commandScope === 'user') {
+        // First non-project installation, or prefer local over user
+        if (!selectedInstallation || (installScope === 'local' && commandScope === 'user')) {
           selectedInstallation = installation;
-          commandScope = 'local';
+          commandScope = installScope;
         }
       }
 
-      // Skip project-scoped installations that don't match current workspace
-      if (commandScope === 'project' && selectedInstallation.projectPath) {
-        if (!currentWorkspace) continue;
-        const normalizedProjectPath = path.normalize(selectedInstallation.projectPath);
-        const normalizedWorkspace = path.normalize(currentWorkspace);
-        if (normalizedProjectPath !== normalizedWorkspace) continue;
-      }
+      // No valid installation found
+      if (!selectedInstallation) continue;
 
       const parsed = parsePluginId(pluginId);
       if (!parsed) continue;
@@ -393,11 +389,11 @@ export async function scanAllCommands(): Promise<{
     if (agent.scope === 'local') {
       local.push(agent);
     } else if (agent.scope === 'user') {
-      if (!user.some((c) => c.name === agent.name)) {
+      if (!user.some((c) => c.name === agent.name && c.pluginName === agent.pluginName)) {
         user.push(agent);
       }
     } else if (agent.scope === 'project') {
-      if (!project.some((c) => c.name === agent.name)) {
+      if (!project.some((c) => c.name === agent.name && c.pluginName === agent.pluginName)) {
         project.push(agent);
       }
     }
