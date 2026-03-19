@@ -212,6 +212,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
         outputPorts: 1,
         commandFilePath: command.commandPath,
         commandScope: command.scope,
+        pluginName: command.pluginName,
       },
     };
     addNode(newNode);

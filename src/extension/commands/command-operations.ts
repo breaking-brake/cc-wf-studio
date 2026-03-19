@@ -28,12 +28,12 @@ export async function handleBrowseCommands(
   outputChannel.appendLine(`[Command Browse] Starting scan (requestId: ${requestId})`);
 
   try {
-    const { user, project } = await scanAllCommands();
-    const allCommands = [...user, ...project];
+    const { user, project, local } = await scanAllCommands();
+    const allCommands = [...user, ...project, ...local];
 
     const executionTime = Date.now() - startTime;
     outputChannel.appendLine(
-      `[Command Browse] Scan completed in ${executionTime}ms - Found ${user.length} user, ${project.length} project commands`
+      `[Command Browse] Scan completed in ${executionTime}ms - Found ${user.length} user, ${project.length} project, ${local.length} plugin commands`
     );
 
     webview.postMessage({

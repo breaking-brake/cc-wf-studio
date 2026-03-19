@@ -122,6 +122,8 @@ export interface SubAgentData {
   commandFilePath?: string;
   /** Scope of the linked command file */
   commandScope?: 'user' | 'project';
+  /** Plugin name for plugin-provided agents (e.g., 'with-me' for 'with-me:agent-name') */
+  pluginName?: string;
 }
 
 // Color codes for SubAgent color property

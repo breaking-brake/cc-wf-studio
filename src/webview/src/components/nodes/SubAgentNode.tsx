@@ -10,6 +10,7 @@ import { SUB_AGENT_COLORS } from '@shared/types/workflow-definition';
 import { Bot } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
+import { AIProviderBadge } from '../common/AIProviderBadge';
 import { DeleteButton } from './DeleteButton';
 
 /**
@@ -59,7 +60,9 @@ export const SubAgentNodeComponent: React.FC<NodeProps<SubAgentData>> = React.me
             fontWeight: 500,
           }}
         >
-          {data.description || 'Untitled Sub-Agent'}
+          {data.pluginName
+            ? `${data.pluginName}:${data.description || 'Untitled Sub-Agent'}`
+            : data.description || 'Untitled Sub-Agent'}
         </div>
 
         {/* Prompt Preview */}
@@ -83,6 +86,9 @@ export const SubAgentNodeComponent: React.FC<NodeProps<SubAgentData>> = React.me
 
         {/* Badges */}
         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+          {/* Plugin Badge */}
+          {data.pluginName && <AIProviderBadge provider="claude" size="small" />}
+
           {/* Model Badge */}
           {data.model && (
             <div

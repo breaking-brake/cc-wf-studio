@@ -242,10 +242,12 @@ export interface CommandReference {
   description: string;
   /** Absolute path to the .md command file */
   commandPath: string;
-  /** Scope: user (~/.claude/agents/) or project (.claude/agents/) */
-  scope: 'user' | 'project';
+  /** Scope: user (~/.claude/agents/), project (.claude/agents/), or local (plugin) */
+  scope: 'user' | 'project' | 'local';
   /** Full prompt content of the command file */
   promptContent: string;
+  /** Plugin name for plugin-provided agents (e.g., 'with-me' for 'with-me:agent-name') */
+  pluginName?: string;
 }
 
 // ============================================================================

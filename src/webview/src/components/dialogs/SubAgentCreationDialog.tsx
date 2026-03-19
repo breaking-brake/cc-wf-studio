@@ -24,7 +24,7 @@ interface SubAgentCreationDialogProps {
   onSelectCommand: (command: CommandReference) => void;
 }
 
-type Tab = 'user' | 'project';
+type Tab = 'user' | 'project' | 'local';
 
 export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
   isOpen,
@@ -87,11 +87,13 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
     const tabCommands = commands.filter((c) => c.scope === activeTab);
     if (!filter) return tabCommands;
     const lowerFilter = filter.toLowerCase();
-    return tabCommands.filter(
-      (c) =>
-        c.name.toLowerCase().includes(lowerFilter) ||
+    return tabCommands.filter((c) => {
+      const displayName = c.pluginName ? `${c.pluginName}:${c.name}` : c.name;
+      return (
+        displayName.toLowerCase().includes(lowerFilter) ||
         c.description.toLowerCase().includes(lowerFilter)
-    );
+      );
+    });
   }, [commands, activeTab, filter]);
 
   const userCount = useMemo(() => commands.filter((c) => c.scope === 'user').length, [commands]);
@@ -99,6 +101,7 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
     () => commands.filter((c) => c.scope === 'project').length,
     [commands]
   );
+  const localCount = useMemo(() => commands.filter((c) => c.scope === 'local').length, [commands]);
 
   const tabStyle = (isActive: boolean): React.CSSProperties => ({
     padding: '8px 16px',
@@ -230,6 +233,15 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
               >
                 {t('subAgent.dialog.userTab')} ({userCount})
               </button>
+              {localCount > 0 && (
+                <button
+                  type="button"
+                  style={tabStyle(activeTab === 'local')}
+                  onClick={() => setActiveTab('local')}
+                >
+                  Plugin ({localCount})
+                </button>
+              )}
             </div>
 
             {/* Scope Description */}
@@ -247,6 +259,8 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
             >
               {activeTab === 'user' && t('subAgent.dialog.userDescription')}
               {activeTab === 'project' && t('subAgent.dialog.projectDescription')}
+              {activeTab === 'local' &&
+                'Agents provided by installed Claude Code plugins. These agents are read-only and managed by their respective plugins.'}
             </div>
 
             {/* Loading State */}
@@ -353,7 +367,7 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
                               : 'var(--vscode-foreground)',
                           }}
                         >
-                          {cmd.name}
+                          {cmd.pluginName ? `${cmd.pluginName}:${cmd.name}` : cmd.name}
                         </span>
                         <span
                           style={{
@@ -361,19 +375,25 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
                             padding: '2px 6px',
                             borderRadius: '3px',
                             backgroundColor:
-                              cmd.scope === 'user'
-                                ? 'var(--vscode-badge-background)'
-                                : 'var(--vscode-button-secondaryBackground)',
+                              cmd.scope === 'local'
+                                ? 'var(--vscode-terminal-ansiGreen)'
+                                : cmd.scope === 'user'
+                                  ? 'var(--vscode-badge-background)'
+                                  : 'var(--vscode-button-secondaryBackground)',
                             color:
-                              cmd.scope === 'user'
-                                ? 'var(--vscode-badge-foreground)'
-                                : 'var(--vscode-button-secondaryForeground)',
+                              cmd.scope === 'local'
+                                ? '#ffffff'
+                                : cmd.scope === 'user'
+                                  ? 'var(--vscode-badge-foreground)'
+                                  : 'var(--vscode-button-secondaryForeground)',
                             fontWeight: 500,
                           }}
                         >
-                          {cmd.scope === 'user'
-                            ? t('subAgent.dialog.userTab')
-                            : t('subAgent.dialog.projectTab')}
+                          {cmd.scope === 'local'
+                            ? 'Claude Code'
+                            : cmd.scope === 'user'
+                              ? t('subAgent.dialog.userTab')
+                              : t('subAgent.dialog.projectTab')}
                         </span>
                       </div>
                       {cmd.description && (

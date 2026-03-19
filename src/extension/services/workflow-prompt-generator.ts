@@ -644,7 +644,10 @@ export function generateExecutionInstructions(
     sections.push('');
     for (const node of subAgentNodes) {
       const nodeId = sanitizeNodeId(node.id);
-      const agentName = node.name || 'Sub-Agent';
+      // Plugin agents use 'pluginName:agentName' format for Claude Code resolution
+      const agentName = node.data.pluginName
+        ? `${node.data.pluginName}:${node.name || 'Sub-Agent'}`
+        : node.name || 'Sub-Agent';
       sections.push(`#### ${nodeId}(Sub-Agent: ${agentName})`);
       sections.push('');
       if (node.data.description) {

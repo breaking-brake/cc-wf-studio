@@ -36,10 +36,11 @@ export async function checkExistingFiles(
   const agentsDir = path.join(workspacePath, '.claude', 'agents');
   const commandsDir = path.join(workspacePath, '.claude', 'commands');
 
-  // Check Sub-Agent files (skip linked command nodes — they already exist externally)
+  // Check Sub-Agent files (skip linked command nodes and plugin agents — they already exist externally)
   const subAgentNodes = workflow.nodes.filter((node) => node.type === 'subAgent') as SubAgentNode[];
   for (const node of subAgentNodes) {
     if (node.data.commandFilePath) continue;
+    if (node.data.pluginName) continue;
     const fileName = nodeNameToFileName(node.name);
     const filePath = path.join(agentsDir, `${fileName}.md`);
     if (await fileService.fileExists(filePath)) {
@@ -94,10 +95,11 @@ export async function exportWorkflow(
   await fileService.createDirectory(agentsDir);
   await fileService.createDirectory(commandsDir);
 
-  // Export Sub-Agent nodes (skip reference nodes — they already have external .md files)
+  // Export Sub-Agent nodes (skip reference nodes and plugin agents — they already have external .md files)
   const subAgentNodes = workflow.nodes.filter((node) => node.type === 'subAgent') as SubAgentNode[];
   for (const node of subAgentNodes) {
     if (node.data.commandFilePath) continue;
+    if (node.data.pluginName) continue; // Plugin agents exist in plugin directory
     // Legacy inline node — warn and generate file for backward compatibility
     console.warn(
       `[Export] SubAgent node "${node.name}" has no commandFilePath (inline definition). Consider migrating to reference model.`
