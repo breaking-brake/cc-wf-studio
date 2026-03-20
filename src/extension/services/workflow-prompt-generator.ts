@@ -34,7 +34,31 @@ export interface MermaidSource {
  * Sanitize node ID for Mermaid (remove special characters)
  */
 export function sanitizeNodeId(id: string): string {
-  return id.replace(/[^a-zA-Z0-9_]/g, '_');
+  // Mermaid reserved words that conflict with node IDs
+  const reservedWords = [
+    'end',
+    'subgraph',
+    'graph',
+    'flowchart',
+    'style',
+    'linkStyle',
+    'classDef',
+    'class',
+    'click',
+    'href',
+    'call',
+    'interpolate',
+    'default',
+  ];
+  // Check if the ID starts with a reserved word (e.g., "end-1" → parsed as "end" + "-1")
+  for (const word of reservedWords) {
+    if (id === word || id.startsWith(`${word}-`) || id.startsWith(`${word}_`)) {
+      return id.replace(/[^a-zA-Z0-9_]/g, '_');
+    }
+  }
+  // Hyphens and other common characters are safe in Mermaid IDs
+  // Only sanitize truly problematic characters (syntax operators, brackets, etc.)
+  return id.replace(/[^a-zA-Z0-9_-]/g, '_');
 }
 
 /**
