@@ -254,7 +254,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
   const handleAddEndNode = () => {
     const position = calculateNonOverlappingPosition(600, 200);
     const newNode = {
-      id: `end-${Date.now()}`,
+      id: `end_${Date.now()}`,
       type: 'end' as const,
       position,
       data: {
@@ -339,7 +339,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
           data: { label: 'Start' },
         },
         {
-          id: `end-${timestamp + 1}`,
+          id: `end_${timestamp + 1}`,
           type: NodeType.End,
           name: 'End',
           position: { x: 600, y: 200 },

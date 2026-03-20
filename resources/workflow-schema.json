@@ -951,9 +951,9 @@
             }
           },
           {
-            "id": "end-1",
+            "id": "end_1",
             "type": "end",
-            "name": "end-node",
+            "name": "end_node",
             "position": { "x": 700, "y": 300 },
             "data": { "label": "End" }
           }
@@ -966,7 +966,7 @@
             "fromPort": "output",
             "toPort": "input"
           },
-          { "id": "c2", "from": "agent-1", "to": "end-1", "fromPort": "output", "toPort": "input" }
+          { "id": "c2", "from": "agent-1", "to": "end_1", "fromPort": "output", "toPort": "input" }
         ],
         "createdAt": "2025-11-06T00:00:00Z",
         "updatedAt": "2025-11-06T00:00:00Z"
@@ -1035,9 +1035,9 @@
             }
           },
           {
-            "id": "end-1",
+            "id": "end_1",
             "type": "end",
-            "name": "end-node",
+            "name": "end_node",
             "position": { "x": 1300, "y": 300 },
             "data": { "label": "End" }
           }
@@ -1059,8 +1059,8 @@
           },
           { "id": "c3", "from": "ask-1", "to": "fix-1", "fromPort": "branch-0", "toPort": "input" },
           { "id": "c4", "from": "ask-1", "to": "fix-2", "fromPort": "branch-1", "toPort": "input" },
-          { "id": "c5", "from": "fix-1", "to": "end-1", "fromPort": "output", "toPort": "input" },
-          { "id": "c6", "from": "fix-2", "to": "end-1", "fromPort": "output", "toPort": "input" }
+          { "id": "c5", "from": "fix-1", "to": "end_1", "fromPort": "output", "toPort": "input" },
+          { "id": "c6", "from": "fix-2", "to": "end_1", "fromPort": "output", "toPort": "input" }
         ],
         "createdAt": "2025-11-06T00:00:00Z",
         "updatedAt": "2025-11-06T00:00:00Z"
@@ -1168,14 +1168,14 @@
             "data": { "description": "HTML format", "prompt": "Format as HTML.", "outputPorts": 1 }
           },
           {
-            "id": "end-ok",
+            "id": "end_ok",
             "type": "end",
             "name": "success",
             "position": { "x": 1900, "y": 175 },
             "data": { "label": "Success" }
           },
           {
-            "id": "end-err",
+            "id": "end_err",
             "type": "end",
             "name": "error",
             "position": { "x": 1300, "y": 525 },
@@ -1242,28 +1242,28 @@
           {
             "id": "c9",
             "from": "fmt-pdf",
-            "to": "end-ok",
+            "to": "end_ok",
             "fromPort": "output",
             "toPort": "input"
           },
           {
             "id": "c10",
             "from": "fmt-md",
-            "to": "end-ok",
+            "to": "end_ok",
             "fromPort": "output",
             "toPort": "input"
           },
           {
             "id": "c11",
             "from": "fmt-html",
-            "to": "end-ok",
+            "to": "end_ok",
             "fromPort": "output",
             "toPort": "input"
           },
           {
             "id": "c12",
             "from": "error-1",
-            "to": "end-err",
+            "to": "end_err",
             "fromPort": "output",
             "toPort": "input"
           }

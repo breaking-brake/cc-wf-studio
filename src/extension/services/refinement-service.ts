@@ -859,7 +859,7 @@ function createMinimalSubAgentFlow(
         data: { label: 'Start' },
       },
       {
-        id: `${subAgentFlowId}-end`,
+        id: `${subAgentFlowId}_end`,
         type: NodeType.End,
         name: 'End',
         position: { x: 400, y: 200 },
@@ -870,7 +870,7 @@ function createMinimalSubAgentFlow(
       {
         id: `${subAgentFlowId}-conn`,
         from: `${subAgentFlowId}-start`,
-        to: `${subAgentFlowId}-end`,
+        to: `${subAgentFlowId}_end`,
         fromPort: 'output',
         toPort: 'input',
       },

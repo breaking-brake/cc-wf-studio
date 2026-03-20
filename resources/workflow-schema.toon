@@ -764,9 +764,9 @@ examples[3]:
             prompt: Analyze data and generate insights.
             model: sonnet
             outputPorts: 1
-        - id: end-1
+        - id: end_1
           type: end
-          name: end-node
+          name: end_node
           position:
             x: 700
             y: 300
@@ -774,7 +774,7 @@ examples[3]:
             label: End
       connections[2]{id,from,to,fromPort,toPort}:
         c1,start-1,agent-1,output,input
-        c2,agent-1,end-1,output,input
+        c2,agent-1,end_1,output,input
       createdAt: "2025-11-06T00:00:00Z"
       updatedAt: "2025-11-06T00:00:00Z"
   - name: Code Review with Priority
@@ -834,9 +834,9 @@ examples[3]:
             description: All fixes
             prompt: Generate all fixes.
             outputPorts: 1
-        - id: end-1
+        - id: end_1
           type: end
-          name: end-node
+          name: end_node
           position:
             x: 1300
             y: 300
@@ -847,8 +847,8 @@ examples[3]:
         c2,scanner-1,ask-1,output,input
         c3,ask-1,fix-1,branch-0,input
         c4,ask-1,fix-2,branch-1,input
-        c5,fix-1,end-1,output,input
-        c6,fix-2,end-1,output,input
+        c5,fix-1,end_1,output,input
+        c6,fix-2,end_1,output,input
       createdAt: "2025-11-06T00:00:00Z"
       updatedAt: "2025-11-06T00:00:00Z"
   - name: Document Processing Pipeline
@@ -950,7 +950,7 @@ examples[3]:
             description: HTML format
             prompt: Format as HTML.
             outputPorts: 1
-        - id: end-ok
+        - id: end_ok
           type: end
           name: success
           position:
@@ -958,7 +958,7 @@ examples[3]:
             y: 175
           data:
             label: Success
-        - id: end-err
+        - id: end_err
           type: end
           name: error
           position:
@@ -975,9 +975,9 @@ examples[3]:
         c6,ask-1,fmt-pdf,branch-0,input
         c7,ask-1,fmt-md,branch-1,input
         c8,ask-1,fmt-html,branch-2,input
-        c9,fmt-pdf,end-ok,output,input
-        c10,fmt-md,end-ok,output,input
-        c11,fmt-html,end-ok,output,input
-        c12,error-1,end-err,output,input
+        c9,fmt-pdf,end_ok,output,input
+        c10,fmt-md,end_ok,output,input
+        c11,fmt-html,end_ok,output,input
+        c12,error-1,end_err,output,input
       createdAt: "2025-11-06T00:00:00Z"
       updatedAt: "2025-11-06T00:00:00Z"

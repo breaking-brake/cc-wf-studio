@@ -172,7 +172,7 @@ const DEFAULT_START_NODE: Node = {
  * ワークフローは常にEndノードで終わる
  */
 const DEFAULT_END_NODE: Node = {
-  id: 'end-node-default',
+  id: 'end_node_default',
   type: 'end',
   position: { x: 600, y: 200 },
   data: { label: 'End' },
@@ -201,7 +201,7 @@ export function createEmptyWorkflow(): Workflow {
         data: { label: 'Start' },
       },
       {
-        id: 'end-node-default',
+        id: 'end_node_default',
         name: 'End',
         type: NodeType.End,
         position: { x: 600, y: 200 },
@@ -236,7 +236,7 @@ export function createWorkflowFromCanvas(nodes: Node[], edges: Edge[]): Workflow
         data: { label: 'Start' },
       },
       {
-        id: 'end-node-default',
+        id: 'end_node_default',
         name: 'End',
         type: NodeType.End,
         position: { x: 600, y: 200 },
