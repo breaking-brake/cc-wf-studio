@@ -1,3 +1,14 @@
+## [3.30.2](https://github.com/breaking-brake/cc-wf-studio/compare/v3.30.1...v3.30.2) (2026-03-22)
+
+### Bug Fixes
+
+* rename MCP tool list_available_commands to list_available_agents ([#668](https://github.com/breaking-brake/cc-wf-studio/issues/668)) ([e99e624](https://github.com/breaking-brake/cc-wf-studio/commit/e99e6242d5248c3692db8e73438c89e4324dc19c))
+
+### Improvements
+
+* add Classic/Freehand scroll mode toggle to canvas ([#669](https://github.com/breaking-brake/cc-wf-studio/issues/669)) ([5a5e326](https://github.com/breaking-brake/cc-wf-studio/commit/5a5e326d35dfa198e790662c41b69bd108e60389))
+* compact hover-expand UX for canvas toolbar toggles ([#672](https://github.com/breaking-brake/cc-wf-studio/issues/672)) ([73b40c9](https://github.com/breaking-brake/cc-wf-studio/commit/73b40c9c0967c79af8a4e3513d7d7f4d63623e6b))
+
 ## [3.30.1](https://github.com/breaking-brake/cc-wf-studio/compare/v3.30.0...v3.30.1) (2026-03-20)
 
 ### Bug Fixes
