@@ -435,8 +435,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Skill Browser Dialog
   'skill.browser.title': 'Browse Skills',
-  'skill.browser.description':
-    'Select a Claude Code Skill to add to your workflow.\nSkills are specialized capabilities that Claude Code automatically utilizes.',
+  'skill.browser.description': 'Select an Agent Skill to add to your workflow.',
+  'skill.browser.selectSkill': 'Select Skill',
   'skill.browser.browseSkills': 'Browse Skills',
   'skill.browser.userTab': 'User',
   'skill.browser.projectTab': 'Project',

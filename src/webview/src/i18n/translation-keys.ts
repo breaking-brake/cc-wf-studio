@@ -399,6 +399,7 @@ export interface WebviewTranslationKeys {
   // Skill Browser Dialog
   'skill.browser.title': string;
   'skill.browser.description': string;
+  'skill.browser.selectSkill': string;
   'skill.browser.browseSkills': string;
   'skill.browser.userTab': string;
   'skill.browser.projectTab': string;

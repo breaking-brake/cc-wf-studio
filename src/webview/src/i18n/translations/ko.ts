@@ -433,8 +433,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Skill Browser Dialog
   'skill.browser.title': 'Skill 탐색',
-  'skill.browser.description':
-    '워크플로에 추가할 Claude Code Skill을 선택하세요.\nSkill은 Claude Code가 자동으로 활용하는 전문적인 능력입니다.',
+  'skill.browser.description': '워크플로에 추가할 Agent Skill을 선택하세요.',
+  'skill.browser.selectSkill': 'Skill 선택',
   'skill.browser.browseSkills': 'Skill 찾아보기',
   'skill.browser.userTab': '사용자',
   'skill.browser.projectTab': '프로젝트',
