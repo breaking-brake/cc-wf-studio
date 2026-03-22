@@ -5,7 +5,7 @@
  * Based on: /specs/001-cc-wf-studio/research.md section 3.4
  */
 
-import { Activity, Lightbulb, LightbulbOff, PanelLeftOpen } from 'lucide-react';
+import { PanelLeftOpen } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactFlow, {
@@ -26,12 +26,11 @@ import { useAutoFocusNode } from '../hooks/useAutoFocusNode';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
+import { CanvasToolbar } from './CanvasToolbar';
 import { FeatureAnnouncementBanner } from './common/FeatureAnnouncementBanner';
-import { StyledTooltipItem, StyledTooltipProvider } from './common/StyledTooltip';
 import { DescriptionPanel } from './DescriptionPanel';
 // Custom edge with delete button
 import { DeletableEdge } from './edges/DeletableEdge';
-import { InteractionModeToggle } from './InteractionModeToggle';
 import { MinimapContainer } from './MinimapContainer';
 import { AskUserQuestionNodeComponent } from './nodes/AskUserQuestionNode';
 import { BranchNodeComponent } from './nodes/BranchNode';
@@ -47,7 +46,6 @@ import { StartNode } from './nodes/StartNode';
 import { SubAgentFlowNodeComponent } from './nodes/SubAgentFlowNode';
 import { SubAgentNodeComponent } from './nodes/SubAgentNode';
 import { SwitchNodeComponent } from './nodes/SwitchNode';
-import { ScrollModeToggle } from './ScrollModeToggle';
 
 /**
  * Node types registration (memoized outside component for performance)
@@ -126,8 +124,6 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     interactionMode,
     scrollMode,
     onNodeDragStop,
-    isHighlightEnabled,
-    toggleHighlightEnabled,
     highlightedGroupNodeId,
   } = useWorkflowStore();
 
@@ -400,94 +396,12 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
             </MinimapContainer>
           </Panel>
 
-          {/* Interaction Mode Toggle & Edge Animation Toggle */}
+          {/* Canvas Toolbar */}
           <Panel position="top-left">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <ScrollModeToggle />
-              <InteractionModeToggle />
-              <StyledTooltipProvider>
-                <StyledTooltipItem
-                  content={
-                    isEdgeAnimationEnabled
-                      ? t('toolbar.edgeAnimation.disable')
-                      : t('toolbar.edgeAnimation.enable')
-                  }
-                >
-                  <button
-                    type="button"
-                    onClick={() => setIsEdgeAnimationEnabled((prev) => !prev)}
-                    aria-label={
-                      isEdgeAnimationEnabled
-                        ? t('toolbar.edgeAnimation.disable')
-                        : t('toolbar.edgeAnimation.enable')
-                    }
-                    style={{
-                      all: 'unset',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '28px',
-                      height: '28px',
-                      borderRadius: '20px',
-                      backgroundColor: 'var(--vscode-editor-background)',
-                      border: '1px solid var(--vscode-panel-border)',
-                      cursor: 'pointer',
-                      opacity: 0.85,
-                      color: isEdgeAnimationEnabled
-                        ? 'var(--vscode-foreground)'
-                        : 'var(--vscode-disabledForeground)',
-                    }}
-                  >
-                    <Activity size={14} />
-                  </button>
-                </StyledTooltipItem>
-                <StyledTooltipItem
-                  content={
-                    isHighlightEnabled
-                      ? t('toolbar.highlight.disable')
-                      : t('toolbar.highlight.enable')
-                  }
-                >
-                  <button
-                    type="button"
-                    onClick={toggleHighlightEnabled}
-                    aria-label={
-                      isHighlightEnabled
-                        ? t('toolbar.highlight.disable')
-                        : t('toolbar.highlight.enable')
-                    }
-                    style={{
-                      all: 'unset',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '28px',
-                      height: '28px',
-                      borderRadius: '20px',
-                      backgroundColor: 'var(--vscode-editor-background)',
-                      border: highlightedGroupNodeId
-                        ? '1px solid rgba(79, 195, 247, 0.6)'
-                        : '1px solid var(--vscode-panel-border)',
-                      cursor: 'pointer',
-                      opacity: 0.85,
-                      color: isHighlightEnabled
-                        ? 'var(--vscode-foreground)'
-                        : 'var(--vscode-disabledForeground)',
-                      boxShadow: highlightedGroupNodeId
-                        ? '0 0 8px rgba(79, 195, 247, 0.4)'
-                        : 'none',
-                      animation:
-                        highlightedGroupNodeId &&
-                        !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-                          ? 'highlight-btn-pulse 1.5s ease-in-out infinite'
-                          : 'none',
-                    }}
-                  >
-                    {isHighlightEnabled ? <Lightbulb size={14} /> : <LightbulbOff size={14} />}
-                  </button>
-                </StyledTooltipItem>
-              </StyledTooltipProvider>
-            </div>
+            <CanvasToolbar
+              isEdgeAnimationEnabled={isEdgeAnimationEnabled}
+              onToggleEdgeAnimation={() => setIsEdgeAnimationEnabled((prev) => !prev)}
+            />
           </Panel>
 
           {/* Description Panel for workflow description */}
