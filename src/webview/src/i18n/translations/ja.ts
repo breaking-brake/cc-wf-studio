@@ -436,6 +436,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.title': 'Skillを参照',
   'skill.browser.description':
     'ワークフローに追加するClaude Code Skillを選択してください。\nSkillはClaude Codeが自動的に活用する専門的な能力です。',
+  'skill.browser.browseSkills': 'Skillを探す',
   'skill.browser.userTab': 'ユーザー',
   'skill.browser.projectTab': 'プロジェクト',
   'skill.browser.localTab': 'ローカル',

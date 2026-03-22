@@ -419,6 +419,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.title': '浏览Skill',
   'skill.browser.description':
     '选择要添加到工作流的Claude Code Skill。\nSkill是Claude Code自动利用的专业能力。',
+  'skill.browser.browseSkills': '浏览Skill',
   'skill.browser.userTab': '用户',
   'skill.browser.projectTab': '项目',
   'skill.browser.localTab': '本地',
