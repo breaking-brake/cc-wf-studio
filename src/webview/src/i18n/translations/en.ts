@@ -662,6 +662,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': 'No tools found matching "{query}"',
   'mcp.search.serverPlaceholder': 'Filter servers by name...',
   'mcp.search.noServers': 'No servers found matching "{query}"',
+  'mcp.browse.servers': 'Browse MCP Servers',
 
   // MCP Node Dialog
   'mcp.dialog.title': 'MCP Tool Configuration',

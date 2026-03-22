@@ -631,6 +631,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': '未找到與"{query}"匹配的工具',
   'mcp.search.serverPlaceholder': '按名稱篩選伺服器...',
   'mcp.search.noServers': '未找到與"{query}"匹配的伺服器',
+  'mcp.browse.servers': '瀏覽MCP伺服器',
 
   // MCP Node Dialog
   'mcp.dialog.title': 'MCP Tool配置',
