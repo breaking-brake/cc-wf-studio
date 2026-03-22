@@ -1,31 +1,31 @@
 /**
- * Claude Code Workflow Studio - Scroll Mode Toggle Component
+ * Claude Code Workflow Studio - Edge Animation Toggle Component
  *
- * Canvas scroll mode toggle (classic/freehand)
+ * Canvas edge animation toggle (on/off)
  * Compact icon when not hovered, expands to full toggle on hover.
  */
 
 import * as Switch from '@radix-ui/react-switch';
-import { Move, ZoomIn } from 'lucide-react';
+import { ChevronsLeftRightEllipsis } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { useTranslation } from '../i18n/i18n-context';
-import { useWorkflowStore } from '../stores/workflow-store';
 import { StyledTooltipItem, StyledTooltipProvider } from './common/StyledTooltip';
 
 const TRANSITION_DURATION = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   ? '0ms'
   : '200ms';
 
-/**
- * ScrollModeToggle Component
- *
- * Provides UI to switch between classic (scroll = zoom) and freehand (scroll = pan) modes.
- * Shows compact 28x28 icon button when not hovered, expands to full toggle on hover.
- */
-export const ScrollModeToggle: React.FC = () => {
+interface EdgeAnimationToggleProps {
+  isEnabled: boolean;
+  onToggle: () => void;
+}
+
+export const EdgeAnimationToggle: React.FC<EdgeAnimationToggleProps> = ({
+  isEnabled,
+  onToggle,
+}) => {
   const { t } = useTranslation();
-  const { scrollMode, toggleScrollMode } = useWorkflowStore();
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -34,29 +34,27 @@ export const ScrollModeToggle: React.FC = () => {
         content={
           isHovered
             ? ''
-            : scrollMode === 'classic'
-              ? t('toolbar.scrollMode.switchToFreehand')
-              : t('toolbar.scrollMode.switchToClassic')
+            : isEnabled
+              ? t('toolbar.edgeAnimation.disable')
+              : t('toolbar.edgeAnimation.enable')
         }
       >
         <div
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           onClick={() => {
-            if (!isHovered) toggleScrollMode();
+            if (!isHovered) onToggle();
           }}
           onKeyDown={(e) => {
             if (!isHovered && (e.key === 'Enter' || e.key === ' ')) {
               e.preventDefault();
-              toggleScrollMode();
+              onToggle();
             }
           }}
           role="button"
           tabIndex={isHovered ? -1 : 0}
           aria-label={
-            scrollMode === 'classic'
-              ? t('toolbar.scrollMode.switchToFreehand')
-              : t('toolbar.scrollMode.switchToClassic')
+            isEnabled ? t('toolbar.edgeAnimation.disable') : t('toolbar.edgeAnimation.enable')
           }
           style={{
             display: 'flex',
@@ -78,32 +76,32 @@ export const ScrollModeToggle: React.FC = () => {
             transition: `width ${TRANSITION_DURATION} ease, padding ${TRANSITION_DURATION} ease, gap ${TRANSITION_DURATION} ease`,
           }}
         >
-          {/* Classic Mode Icon (Left) */}
+          {/* Off Icon (Left) */}
           <div
             style={{
-              width: isHovered || scrollMode === 'classic' ? '20px' : '0px',
-              opacity: isHovered || scrollMode === 'classic' ? 1 : 0,
+              width: isHovered || !isEnabled ? '20px' : '0px',
+              opacity: isHovered || !isEnabled ? 1 : 0,
               overflow: 'hidden',
               flexShrink: 0,
               transition: `width ${TRANSITION_DURATION} ease, opacity ${TRANSITION_DURATION} ease`,
             }}
           >
             {isHovered ? (
-              <StyledTooltipItem content={t('toolbar.scrollMode.switchToClassic')}>
+              <StyledTooltipItem content={t('toolbar.edgeAnimation.disable')}>
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (scrollMode !== 'classic') toggleScrollMode();
+                    if (isEnabled) onToggle();
                   }}
                   onKeyDown={(e) => {
-                    if ((e.key === 'Enter' || e.key === ' ') && scrollMode !== 'classic') {
+                    if ((e.key === 'Enter' || e.key === ' ') && isEnabled) {
                       e.preventDefault();
-                      toggleScrollMode();
+                      onToggle();
                     }
                   }}
                   role="button"
-                  tabIndex={scrollMode === 'classic' ? -1 : 0}
-                  aria-label={t('toolbar.scrollMode.switchToClassic')}
+                  tabIndex={isEnabled ? 0 : -1}
+                  aria-label={t('toolbar.edgeAnimation.disable')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -111,21 +109,35 @@ export const ScrollModeToggle: React.FC = () => {
                     width: '20px',
                     height: '20px',
                     borderRadius: '50%',
-                    backgroundColor:
-                      scrollMode === 'classic' ? 'var(--vscode-badge-background)' : 'transparent',
-                    transition: `background-color 150ms`,
-                    cursor: scrollMode === 'classic' ? 'default' : 'pointer',
+                    backgroundColor: !isEnabled ? 'var(--vscode-badge-background)' : 'transparent',
+                    transition: 'background-color 150ms',
+                    cursor: isEnabled ? 'pointer' : 'default',
                   }}
                 >
-                  <ZoomIn
-                    size={12}
-                    style={{
-                      color:
-                        scrollMode === 'classic'
+                  <div style={{ position: 'relative', display: 'flex' }}>
+                    <ChevronsLeftRightEllipsis
+                      size={12}
+                      style={{
+                        color: !isEnabled
                           ? 'var(--vscode-badge-foreground)'
                           : 'var(--vscode-disabledForeground)',
-                    }}
-                  />
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '10%',
+                        left: '50%',
+                        width: '1.5px',
+                        height: '80%',
+                        backgroundColor: !isEnabled
+                          ? 'var(--vscode-badge-foreground)'
+                          : 'var(--vscode-disabledForeground)',
+                        transform: 'translateX(-50%) rotate(-45deg)',
+                        transformOrigin: 'center',
+                      }}
+                    />
+                  </div>
                 </div>
               </StyledTooltipItem>
             ) : (
@@ -136,9 +148,25 @@ export const ScrollModeToggle: React.FC = () => {
                   justifyContent: 'center',
                   width: '20px',
                   height: '20px',
+                  position: 'relative',
                 }}
               >
-                <ZoomIn size={14} style={{ color: 'var(--vscode-foreground)' }} />
+                <ChevronsLeftRightEllipsis
+                  size={14}
+                  style={{ color: 'var(--vscode-disabledForeground)' }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '10%',
+                    left: '50%',
+                    width: '1.5px',
+                    height: '80%',
+                    backgroundColor: 'var(--vscode-disabledForeground)',
+                    transform: 'translateX(-50%) rotate(-45deg)',
+                    transformOrigin: 'center',
+                  }}
+                />
               </div>
             )}
           </div>
@@ -154,12 +182,12 @@ export const ScrollModeToggle: React.FC = () => {
             }}
           >
             <Switch.Root
-              checked={scrollMode === 'freehand'}
+              checked={isEnabled}
               onCheckedChange={() => {
-                toggleScrollMode();
+                onToggle();
               }}
               onClick={(e) => e.stopPropagation()}
-              aria-label="Canvas scroll mode"
+              aria-label="Edge animation"
               style={{
                 all: 'unset',
                 width: '32px',
@@ -180,7 +208,7 @@ export const ScrollModeToggle: React.FC = () => {
                   backgroundColor: 'var(--vscode-button-background)',
                   borderRadius: '7px',
                   transition: 'transform 100ms',
-                  transform: scrollMode === 'freehand' ? 'translateX(16px)' : 'translateX(2px)',
+                  transform: isEnabled ? 'translateX(16px)' : 'translateX(2px)',
                   willChange: 'transform',
                   margin: '1px',
                 }}
@@ -188,32 +216,32 @@ export const ScrollModeToggle: React.FC = () => {
             </Switch.Root>
           </div>
 
-          {/* Freehand Mode Icon (Right) */}
+          {/* On Icon (Right) */}
           <div
             style={{
-              width: isHovered || scrollMode === 'freehand' ? '20px' : '0px',
-              opacity: isHovered || scrollMode === 'freehand' ? 1 : 0,
+              width: isHovered || isEnabled ? '20px' : '0px',
+              opacity: isHovered || isEnabled ? 1 : 0,
               overflow: 'hidden',
               flexShrink: 0,
               transition: `width ${TRANSITION_DURATION} ease, opacity ${TRANSITION_DURATION} ease`,
             }}
           >
             {isHovered ? (
-              <StyledTooltipItem content={t('toolbar.scrollMode.switchToFreehand')}>
+              <StyledTooltipItem content={t('toolbar.edgeAnimation.enable')}>
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (scrollMode !== 'freehand') toggleScrollMode();
+                    if (!isEnabled) onToggle();
                   }}
                   onKeyDown={(e) => {
-                    if ((e.key === 'Enter' || e.key === ' ') && scrollMode !== 'freehand') {
+                    if ((e.key === 'Enter' || e.key === ' ') && !isEnabled) {
                       e.preventDefault();
-                      toggleScrollMode();
+                      onToggle();
                     }
                   }}
                   role="button"
-                  tabIndex={scrollMode === 'freehand' ? -1 : 0}
-                  aria-label={t('toolbar.scrollMode.switchToFreehand')}
+                  tabIndex={isEnabled ? -1 : 0}
+                  aria-label={t('toolbar.edgeAnimation.enable')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -221,19 +249,17 @@ export const ScrollModeToggle: React.FC = () => {
                     width: '20px',
                     height: '20px',
                     borderRadius: '50%',
-                    backgroundColor:
-                      scrollMode === 'freehand' ? 'var(--vscode-badge-background)' : 'transparent',
-                    transition: `background-color 150ms`,
-                    cursor: scrollMode === 'freehand' ? 'default' : 'pointer',
+                    backgroundColor: isEnabled ? 'var(--vscode-badge-background)' : 'transparent',
+                    transition: 'background-color 150ms',
+                    cursor: isEnabled ? 'default' : 'pointer',
                   }}
                 >
-                  <Move
+                  <ChevronsLeftRightEllipsis
                     size={12}
                     style={{
-                      color:
-                        scrollMode === 'freehand'
-                          ? 'var(--vscode-badge-foreground)'
-                          : 'var(--vscode-disabledForeground)',
+                      color: isEnabled
+                        ? 'var(--vscode-badge-foreground)'
+                        : 'var(--vscode-disabledForeground)',
                     }}
                   />
                 </div>
@@ -248,7 +274,10 @@ export const ScrollModeToggle: React.FC = () => {
                   height: '20px',
                 }}
               >
-                <Move size={14} style={{ color: 'var(--vscode-foreground)' }} />
+                <ChevronsLeftRightEllipsis
+                  size={14}
+                  style={{ color: 'var(--vscode-foreground)' }}
+                />
               </div>
             )}
           </div>

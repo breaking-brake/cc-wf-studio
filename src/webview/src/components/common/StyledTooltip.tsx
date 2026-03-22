@@ -85,12 +85,14 @@ export const StyledTooltipItem: React.FC<{
   return (
     <Tooltip.Root>
       <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>
-      <Tooltip.Portal>
-        <Tooltip.Content side={side} sideOffset={sideOffset} style={tooltipContentStyle}>
-          {content}
-          <Tooltip.Arrow style={tooltipArrowStyle} />
-        </Tooltip.Content>
-      </Tooltip.Portal>
+      {content ? (
+        <Tooltip.Portal>
+          <Tooltip.Content side={side} sideOffset={sideOffset} style={tooltipContentStyle}>
+            {content}
+            <Tooltip.Arrow style={tooltipArrowStyle} />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      ) : null}
     </Tooltip.Root>
   );
 };

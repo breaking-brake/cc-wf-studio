@@ -1,12 +1,12 @@
 /**
- * Claude Code Workflow Studio - Scroll Mode Toggle Component
+ * Claude Code Workflow Studio - Highlight Toggle Component
  *
- * Canvas scroll mode toggle (classic/freehand)
+ * Canvas group node highlight toggle (on/off)
  * Compact icon when not hovered, expands to full toggle on hover.
  */
 
 import * as Switch from '@radix-ui/react-switch';
-import { Move, ZoomIn } from 'lucide-react';
+import { Lightbulb, LightbulbOff } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { useTranslation } from '../i18n/i18n-context';
@@ -17,16 +17,21 @@ const TRANSITION_DURATION = window.matchMedia('(prefers-reduced-motion: reduce)'
   ? '0ms'
   : '200ms';
 
-/**
- * ScrollModeToggle Component
- *
- * Provides UI to switch between classic (scroll = zoom) and freehand (scroll = pan) modes.
- * Shows compact 28x28 icon button when not hovered, expands to full toggle on hover.
- */
-export const ScrollModeToggle: React.FC = () => {
+export const HighlightToggle: React.FC = () => {
   const { t } = useTranslation();
-  const { scrollMode, toggleScrollMode } = useWorkflowStore();
+  const { isHighlightEnabled, toggleHighlightEnabled, highlightedGroupNodeId } = useWorkflowStore();
   const [isHovered, setIsHovered] = useState(false);
+
+  const highlightBorder = isHovered
+    ? '1px solid var(--vscode-focusBorder)'
+    : highlightedGroupNodeId
+      ? '1px solid rgba(79, 195, 247, 0.6)'
+      : '1px solid var(--vscode-panel-border)';
+  const highlightShadow = highlightedGroupNodeId ? '0 0 8px rgba(79, 195, 247, 0.4)' : 'none';
+  const highlightAnimation =
+    highlightedGroupNodeId && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      ? 'highlight-btn-pulse 1.5s ease-in-out infinite'
+      : 'none';
 
   return (
     <StyledTooltipProvider>
@@ -34,29 +39,27 @@ export const ScrollModeToggle: React.FC = () => {
         content={
           isHovered
             ? ''
-            : scrollMode === 'classic'
-              ? t('toolbar.scrollMode.switchToFreehand')
-              : t('toolbar.scrollMode.switchToClassic')
+            : isHighlightEnabled
+              ? t('toolbar.highlight.disable')
+              : t('toolbar.highlight.enable')
         }
       >
         <div
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           onClick={() => {
-            if (!isHovered) toggleScrollMode();
+            if (!isHovered) toggleHighlightEnabled();
           }}
           onKeyDown={(e) => {
             if (!isHovered && (e.key === 'Enter' || e.key === ' ')) {
               e.preventDefault();
-              toggleScrollMode();
+              toggleHighlightEnabled();
             }
           }}
           role="button"
           tabIndex={isHovered ? -1 : 0}
           aria-label={
-            scrollMode === 'classic'
-              ? t('toolbar.scrollMode.switchToFreehand')
-              : t('toolbar.scrollMode.switchToClassic')
+            isHighlightEnabled ? t('toolbar.highlight.disable') : t('toolbar.highlight.enable')
           }
           style={{
             display: 'flex',
@@ -64,9 +67,7 @@ export const ScrollModeToggle: React.FC = () => {
             justifyContent: 'center',
             gap: isHovered ? '6px' : '0px',
             backgroundColor: 'var(--vscode-editor-background)',
-            border: isHovered
-              ? '1px solid var(--vscode-focusBorder)'
-              : '1px solid var(--vscode-panel-border)',
+            border: highlightBorder,
             borderRadius: '20px',
             padding: isHovered ? '4px 6px' : '0px',
             opacity: 0.85,
@@ -75,35 +76,37 @@ export const ScrollModeToggle: React.FC = () => {
             overflow: 'hidden',
             cursor: isHovered ? 'default' : 'pointer',
             boxSizing: 'border-box',
+            boxShadow: highlightShadow,
+            animation: highlightAnimation,
             transition: `width ${TRANSITION_DURATION} ease, padding ${TRANSITION_DURATION} ease, gap ${TRANSITION_DURATION} ease`,
           }}
         >
-          {/* Classic Mode Icon (Left) */}
+          {/* Off Icon (Left) */}
           <div
             style={{
-              width: isHovered || scrollMode === 'classic' ? '20px' : '0px',
-              opacity: isHovered || scrollMode === 'classic' ? 1 : 0,
+              width: isHovered || !isHighlightEnabled ? '20px' : '0px',
+              opacity: isHovered || !isHighlightEnabled ? 1 : 0,
               overflow: 'hidden',
               flexShrink: 0,
               transition: `width ${TRANSITION_DURATION} ease, opacity ${TRANSITION_DURATION} ease`,
             }}
           >
             {isHovered ? (
-              <StyledTooltipItem content={t('toolbar.scrollMode.switchToClassic')}>
+              <StyledTooltipItem content={t('toolbar.highlight.disable')}>
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (scrollMode !== 'classic') toggleScrollMode();
+                    if (isHighlightEnabled) toggleHighlightEnabled();
                   }}
                   onKeyDown={(e) => {
-                    if ((e.key === 'Enter' || e.key === ' ') && scrollMode !== 'classic') {
+                    if ((e.key === 'Enter' || e.key === ' ') && isHighlightEnabled) {
                       e.preventDefault();
-                      toggleScrollMode();
+                      toggleHighlightEnabled();
                     }
                   }}
                   role="button"
-                  tabIndex={scrollMode === 'classic' ? -1 : 0}
-                  aria-label={t('toolbar.scrollMode.switchToClassic')}
+                  tabIndex={isHighlightEnabled ? 0 : -1}
+                  aria-label={t('toolbar.highlight.disable')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -111,19 +114,19 @@ export const ScrollModeToggle: React.FC = () => {
                     width: '20px',
                     height: '20px',
                     borderRadius: '50%',
-                    backgroundColor:
-                      scrollMode === 'classic' ? 'var(--vscode-badge-background)' : 'transparent',
-                    transition: `background-color 150ms`,
-                    cursor: scrollMode === 'classic' ? 'default' : 'pointer',
+                    backgroundColor: !isHighlightEnabled
+                      ? 'var(--vscode-badge-background)'
+                      : 'transparent',
+                    transition: 'background-color 150ms',
+                    cursor: isHighlightEnabled ? 'pointer' : 'default',
                   }}
                 >
-                  <ZoomIn
+                  <LightbulbOff
                     size={12}
                     style={{
-                      color:
-                        scrollMode === 'classic'
-                          ? 'var(--vscode-badge-foreground)'
-                          : 'var(--vscode-disabledForeground)',
+                      color: !isHighlightEnabled
+                        ? 'var(--vscode-badge-foreground)'
+                        : 'var(--vscode-disabledForeground)',
                     }}
                   />
                 </div>
@@ -138,7 +141,7 @@ export const ScrollModeToggle: React.FC = () => {
                   height: '20px',
                 }}
               >
-                <ZoomIn size={14} style={{ color: 'var(--vscode-foreground)' }} />
+                <LightbulbOff size={14} style={{ color: 'var(--vscode-disabledForeground)' }} />
               </div>
             )}
           </div>
@@ -154,12 +157,12 @@ export const ScrollModeToggle: React.FC = () => {
             }}
           >
             <Switch.Root
-              checked={scrollMode === 'freehand'}
+              checked={isHighlightEnabled}
               onCheckedChange={() => {
-                toggleScrollMode();
+                toggleHighlightEnabled();
               }}
               onClick={(e) => e.stopPropagation()}
-              aria-label="Canvas scroll mode"
+              aria-label="Group node highlight"
               style={{
                 all: 'unset',
                 width: '32px',
@@ -180,7 +183,7 @@ export const ScrollModeToggle: React.FC = () => {
                   backgroundColor: 'var(--vscode-button-background)',
                   borderRadius: '7px',
                   transition: 'transform 100ms',
-                  transform: scrollMode === 'freehand' ? 'translateX(16px)' : 'translateX(2px)',
+                  transform: isHighlightEnabled ? 'translateX(16px)' : 'translateX(2px)',
                   willChange: 'transform',
                   margin: '1px',
                 }}
@@ -188,32 +191,32 @@ export const ScrollModeToggle: React.FC = () => {
             </Switch.Root>
           </div>
 
-          {/* Freehand Mode Icon (Right) */}
+          {/* On Icon (Right) */}
           <div
             style={{
-              width: isHovered || scrollMode === 'freehand' ? '20px' : '0px',
-              opacity: isHovered || scrollMode === 'freehand' ? 1 : 0,
+              width: isHovered || isHighlightEnabled ? '20px' : '0px',
+              opacity: isHovered || isHighlightEnabled ? 1 : 0,
               overflow: 'hidden',
               flexShrink: 0,
               transition: `width ${TRANSITION_DURATION} ease, opacity ${TRANSITION_DURATION} ease`,
             }}
           >
             {isHovered ? (
-              <StyledTooltipItem content={t('toolbar.scrollMode.switchToFreehand')}>
+              <StyledTooltipItem content={t('toolbar.highlight.enable')}>
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (scrollMode !== 'freehand') toggleScrollMode();
+                    if (!isHighlightEnabled) toggleHighlightEnabled();
                   }}
                   onKeyDown={(e) => {
-                    if ((e.key === 'Enter' || e.key === ' ') && scrollMode !== 'freehand') {
+                    if ((e.key === 'Enter' || e.key === ' ') && !isHighlightEnabled) {
                       e.preventDefault();
-                      toggleScrollMode();
+                      toggleHighlightEnabled();
                     }
                   }}
                   role="button"
-                  tabIndex={scrollMode === 'freehand' ? -1 : 0}
-                  aria-label={t('toolbar.scrollMode.switchToFreehand')}
+                  tabIndex={isHighlightEnabled ? -1 : 0}
+                  aria-label={t('toolbar.highlight.enable')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -221,19 +224,19 @@ export const ScrollModeToggle: React.FC = () => {
                     width: '20px',
                     height: '20px',
                     borderRadius: '50%',
-                    backgroundColor:
-                      scrollMode === 'freehand' ? 'var(--vscode-badge-background)' : 'transparent',
-                    transition: `background-color 150ms`,
-                    cursor: scrollMode === 'freehand' ? 'default' : 'pointer',
+                    backgroundColor: isHighlightEnabled
+                      ? 'var(--vscode-badge-background)'
+                      : 'transparent',
+                    transition: 'background-color 150ms',
+                    cursor: isHighlightEnabled ? 'default' : 'pointer',
                   }}
                 >
-                  <Move
+                  <Lightbulb
                     size={12}
                     style={{
-                      color:
-                        scrollMode === 'freehand'
-                          ? 'var(--vscode-badge-foreground)'
-                          : 'var(--vscode-disabledForeground)',
+                      color: isHighlightEnabled
+                        ? 'var(--vscode-badge-foreground)'
+                        : 'var(--vscode-disabledForeground)',
                     }}
                   />
                 </div>
@@ -248,7 +251,7 @@ export const ScrollModeToggle: React.FC = () => {
                   height: '20px',
                 }}
               >
-                <Move size={14} style={{ color: 'var(--vscode-foreground)' }} />
+                <Lightbulb size={14} style={{ color: 'var(--vscode-foreground)' }} />
               </div>
             )}
           </div>
