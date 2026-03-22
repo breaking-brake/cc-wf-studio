@@ -49,8 +49,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.scrollMode.switchToFreehand': 'Switch to Freehand mode (scroll = pan)',
 
   // Toolbar minimap toggle
-  'toolbar.minimapToggle.show': 'Show Minimap',
-  'toolbar.minimapToggle.hide': 'Hide Minimap',
+  'toolbar.minimapToggle.hidden': 'Hidden',
+  'toolbar.minimapToggle.auto': 'Show on Scroll',
+  'toolbar.minimapToggle.always': 'Always Show',
 
   // Toolbar errors
   'toolbar.error.workflowNameRequired': 'Workflow name is required',

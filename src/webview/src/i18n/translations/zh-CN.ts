@@ -49,8 +49,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.scrollMode.switchToFreehand': '切换到Freehand模式（滚动=平移）',
 
   // Toolbar minimap toggle
-  'toolbar.minimapToggle.show': '显示迷你地图',
-  'toolbar.minimapToggle.hide': '隐藏迷你地图',
+  'toolbar.minimapToggle.hidden': '隐藏',
+  'toolbar.minimapToggle.auto': '滚动时显示',
+  'toolbar.minimapToggle.always': '始终显示',
 
   // Toolbar errors
   'toolbar.error.workflowNameRequired': '工作流名称必填',

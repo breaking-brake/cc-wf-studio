@@ -120,7 +120,7 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
     mainWorkflowSnapshot,
     updateActiveWorkflowMetadata,
     ensureActiveWorkflow,
-    isMinimapVisible,
+    minimapDisplayMode,
     isMinimapShown,
     setMinimapShown,
   } = useWorkflowStore();
@@ -132,21 +132,21 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
   const minimapHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleMoveStart = useCallback(() => {
-    if (!isMinimapVisible) return;
+    if (minimapDisplayMode !== 'auto') return;
     if (minimapHideTimerRef.current) {
       clearTimeout(minimapHideTimerRef.current);
       minimapHideTimerRef.current = null;
     }
     setMinimapShown(true);
-  }, [isMinimapVisible, setMinimapShown]);
+  }, [minimapDisplayMode, setMinimapShown]);
 
   const handleMoveEnd = useCallback(() => {
-    if (!isMinimapVisible) return;
+    if (minimapDisplayMode !== 'auto') return;
     minimapHideTimerRef.current = setTimeout(() => {
       setMinimapShown(false);
       minimapHideTimerRef.current = null;
     }, 800);
-  }, [isMinimapVisible, setMinimapShown]);
+  }, [minimapDisplayMode, setMinimapShown]);
 
   useEffect(() => {
     return () => {
@@ -733,14 +733,15 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
                   <Background color="rgba(136, 87, 229, 0.3)" gap={15} size={1} />
                   <Controls />
 
-                  {/* Mini map with container (auto-show on scroll) */}
-                  {isMinimapVisible && (
+                  {/* Mini map with container */}
+                  {minimapDisplayMode !== 'hidden' && (
                     <Panel position="bottom-right">
                       <div
                         style={{
-                          opacity: isMinimapShown ? 1 : 0,
+                          opacity: minimapDisplayMode === 'always' || isMinimapShown ? 1 : 0,
                           transition: 'opacity 300ms ease',
-                          pointerEvents: isMinimapShown ? 'auto' : 'none',
+                          pointerEvents:
+                            minimapDisplayMode === 'always' || isMinimapShown ? 'auto' : 'none',
                         }}
                       >
                         <MinimapContainer>

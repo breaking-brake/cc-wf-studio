@@ -49,8 +49,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.scrollMode.switchToFreehand': 'Freehand 모드로 전환 (스크롤 = 팬)',
 
   // Toolbar minimap toggle
-  'toolbar.minimapToggle.show': '미니맵 표시',
-  'toolbar.minimapToggle.hide': '미니맵 숨기기',
+  'toolbar.minimapToggle.hidden': '숨김',
+  'toolbar.minimapToggle.auto': '스크롤 시 표시',
+  'toolbar.minimapToggle.always': '항상 표시',
 
   // Toolbar errors
   'toolbar.error.workflowNameRequired': '워크플로 이름이 필요합니다',

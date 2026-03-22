@@ -47,8 +47,9 @@ export interface WebviewTranslationKeys {
   'toolbar.scrollMode.switchToFreehand': string;
 
   // Toolbar minimap toggle
-  'toolbar.minimapToggle.show': string;
-  'toolbar.minimapToggle.hide': string;
+  'toolbar.minimapToggle.hidden': string;
+  'toolbar.minimapToggle.auto': string;
+  'toolbar.minimapToggle.always': string;
 
   // Toolbar errors
   'toolbar.error.workflowNameRequired': string;

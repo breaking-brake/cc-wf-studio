@@ -64,7 +64,7 @@ interface WorkflowStore {
   workflowName: string;
   workflowDescription: string;
   isPropertyOverlayOpen: boolean;
-  isMinimapVisible: boolean;
+  minimapDisplayMode: 'hidden' | 'auto' | 'always';
   isMinimapShown: boolean;
   isDescriptionPanelVisible: boolean;
   isFocusMode: boolean;
@@ -103,7 +103,7 @@ interface WorkflowStore {
   setWorkflowDescription: (description: string) => void;
   openPropertyOverlay: () => void;
   closePropertyOverlay: () => void;
-  toggleMinimapVisibility: () => void;
+  setMinimapDisplayMode: (mode: 'hidden' | 'auto' | 'always') => void;
   setMinimapShown: (shown: boolean) => void;
   toggleDescriptionPanelVisibility: () => void;
   toggleFocusMode: () => void;
@@ -311,11 +311,12 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   workflowName: 'my-workflow', // Default workflow name
   workflowDescription: '', // Default workflow description
   isPropertyOverlayOpen: true, // Property overlay is open by default
-  isMinimapVisible: (() => {
-    const saved = localStorage.getItem('cc-wf-studio.minimapVisible');
-    return saved !== null ? saved === 'true' : true; // Default: visible
-  })(),
-  isMinimapShown: false, // Controlled by scroll events
+  minimapDisplayMode: (() => {
+    const saved = localStorage.getItem('cc-wf-studio.minimapDisplayMode');
+    if (saved === 'hidden' || saved === 'auto' || saved === 'always') return saved;
+    return 'auto'; // Default: auto (show on scroll)
+  })() as 'hidden' | 'auto' | 'always',
+  isMinimapShown: false, // Controlled by scroll events (for 'auto' mode)
   isDescriptionPanelVisible: (() => {
     const saved = localStorage.getItem('cc-wf-studio.descriptionPanelVisible');
     return saved !== null ? saved === 'true' : false; // Default: collapsed
@@ -434,10 +435,9 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   closePropertyOverlay: () => set({ isPropertyOverlayOpen: false }),
 
-  toggleMinimapVisibility: () => {
-    const newValue = !get().isMinimapVisible;
-    localStorage.setItem('cc-wf-studio.minimapVisible', newValue.toString());
-    set({ isMinimapVisible: newValue, isMinimapShown: false });
+  setMinimapDisplayMode: (mode) => {
+    localStorage.setItem('cc-wf-studio.minimapDisplayMode', mode);
+    set({ minimapDisplayMode: mode, isMinimapShown: false });
   },
 
   setMinimapShown: (shown) => set({ isMinimapShown: shown }),

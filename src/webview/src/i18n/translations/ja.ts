@@ -49,8 +49,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.scrollMode.switchToFreehand': 'Freehandモードに切り替え（スクロール=パン）',
 
   // Toolbar minimap toggle
-  'toolbar.minimapToggle.show': 'ミニマップを表示',
-  'toolbar.minimapToggle.hide': 'ミニマップを非表示',
+  'toolbar.minimapToggle.hidden': '非表示',
+  'toolbar.minimapToggle.auto': 'スクロール時に表示',
+  'toolbar.minimapToggle.always': '常に表示',
 
   // Toolbar errors
   'toolbar.error.workflowNameRequired': 'ワークフロー名は必須です',
