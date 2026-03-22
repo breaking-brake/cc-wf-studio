@@ -659,6 +659,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': '"{query}" に一致するツールが見つかりません',
   'mcp.search.serverPlaceholder': 'サーバー名でフィルタ...',
   'mcp.search.noServers': '"{query}" に一致するサーバーが見つかりません',
+  'mcp.browse.servers': 'MCPサーバーを探す',
 
   // MCP Node Dialog
   'mcp.dialog.title': 'MCP Toolの設定',

@@ -597,6 +597,7 @@ export interface WebviewTranslationKeys {
   'mcp.search.noResults': string;
   'mcp.search.serverPlaceholder': string;
   'mcp.search.noServers': string;
+  'mcp.browse.servers': string;
 
   // MCP Node Dialog
   'mcp.dialog.title': string;
