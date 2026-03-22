@@ -159,7 +159,7 @@ Generated changelog groups commits by type:
 - **Improvements** (`improvement:`)
 - **Performance Improvements** (`perf:`)
 - **Reverts** (`revert:`)
-- **Code Refactoring** (`refactor:`) - visible
+- **Code Refactoring** (`refactor:`) - hidden
 - **Documentation** (`docs:`) - visible
 - **Styles** (`style:`) - hidden
 - **Tests** (`test:`) - hidden
