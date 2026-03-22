@@ -7,11 +7,15 @@
 
 import * as Dialog from '@radix-ui/react-dialog';
 import type { CommandReference } from '@shared/types/messages';
+import { ExternalLink } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { browseCommands } from '../../services/command-browser-service';
+import { openExternalUrl } from '../../services/vscode-bridge';
 import { type SubAgentFormData, SubAgentFormDialog } from './SubAgentFormDialog';
+
+const AWESOME_SUBAGENTS_URL = 'https://github.com/VoltAgent/awesome-claude-code-subagents';
 
 const Z_INDEX = {
   DIALOG_BASE: 9999,
@@ -162,6 +166,49 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
             >
               {t('subAgent.dialog.description')}
             </Dialog.Description>
+
+            {/* Select Sub-Agent label + discovery link */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                margin: '0 0 12px 0',
+              }}
+            >
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                }}
+              >
+                {t('subAgent.dialog.selectSubAgent')}
+              </h3>
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={() => openExternalUrl(AWESOME_SUBAGENTS_URL)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    openExternalUrl(AWESOME_SUBAGENTS_URL);
+                  }
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  cursor: 'pointer',
+                  color: 'var(--vscode-textLink-foreground)',
+                  fontSize: '12px',
+                }}
+                title={AWESOME_SUBAGENTS_URL}
+              >
+                {t('subAgent.dialog.browseSubAgents')} (awesome list by VoltAgent)
+                <ExternalLink size={11} />
+              </span>
+            </div>
 
             {/* Filter Input + Create New Button */}
             <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>

@@ -942,7 +942,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.cancelButton': '취소',
   'subAgent.dialog.backButton': '뒤로',
   'subAgent.dialog.loadFailed': '커맨드를 로드하지 못했습니다. 커맨드 디렉토리를 확인하세요.',
-  'subAgent.dialog.description': '기존 커맨드 파일을 선택하여 Sub-Agent 노드로 사용합니다.',
+  'subAgent.dialog.description': '워크플로에 추가할 Sub-Agent를 선택하세요.',
+  'subAgent.dialog.selectSubAgent': 'Sub-Agent 선택',
+  'subAgent.dialog.browseSubAgents': 'Sub-Agent 찾아보기',
   'subAgent.dialog.userDescription': '~/.claude/agents/의 커맨드 — 모든 프로젝트에서 사용 가능.',
   'subAgent.dialog.projectDescription': '.claude/agents/의 커맨드 — 이 프로젝트에만 해당.',
   'subAgent.dialog.localDescription':

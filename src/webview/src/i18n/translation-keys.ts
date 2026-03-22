@@ -870,6 +870,8 @@ export interface WebviewTranslationKeys {
   'subAgent.dialog.backButton': string;
   'subAgent.dialog.loadFailed': string;
   'subAgent.dialog.description': string;
+  'subAgent.dialog.selectSubAgent': string;
+  'subAgent.dialog.browseSubAgents': string;
   'subAgent.dialog.userDescription': string;
   'subAgent.dialog.projectDescription': string;
   'subAgent.dialog.localDescription': string;

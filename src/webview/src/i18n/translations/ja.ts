@@ -947,8 +947,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.backButton': '戻る',
   'subAgent.dialog.loadFailed':
     'コマンドの読み込みに失敗しました。コマンドディレクトリを確認してください。',
-  'subAgent.dialog.description':
-    '既存のコマンドファイルを選択して、Sub-Agentノードとして使用します。',
+  'subAgent.dialog.description': 'ワークフローに追加するSub-Agentを選択してください。',
+  'subAgent.dialog.selectSubAgent': 'Sub-Agentを選択',
+  'subAgent.dialog.browseSubAgents': 'Sub-Agentを探す',
   'subAgent.dialog.userDescription':
     '~/.claude/agents/ のコマンド — すべてのプロジェクトで利用可能。',
   'subAgent.dialog.projectDescription': '.claude/agents/ のコマンド — このプロジェクト固有。',
