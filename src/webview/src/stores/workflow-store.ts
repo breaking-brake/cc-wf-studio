@@ -65,6 +65,7 @@ interface WorkflowStore {
   workflowDescription: string;
   isPropertyOverlayOpen: boolean;
   isMinimapVisible: boolean;
+  isMinimapShown: boolean;
   isDescriptionPanelVisible: boolean;
   isFocusMode: boolean;
   /** Slash Command export options (context, model, hooks) */
@@ -103,6 +104,7 @@ interface WorkflowStore {
   openPropertyOverlay: () => void;
   closePropertyOverlay: () => void;
   toggleMinimapVisibility: () => void;
+  setMinimapShown: (shown: boolean) => void;
   toggleDescriptionPanelVisibility: () => void;
   toggleFocusMode: () => void;
   setSlashCommandOptions: (options: SlashCommandOptions) => void;
@@ -313,6 +315,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     const saved = localStorage.getItem('cc-wf-studio.minimapVisible');
     return saved !== null ? saved === 'true' : true; // Default: visible
   })(),
+  isMinimapShown: false, // Controlled by scroll events
   isDescriptionPanelVisible: (() => {
     const saved = localStorage.getItem('cc-wf-studio.descriptionPanelVisible');
     return saved !== null ? saved === 'true' : false; // Default: collapsed
@@ -434,8 +437,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   toggleMinimapVisibility: () => {
     const newValue = !get().isMinimapVisible;
     localStorage.setItem('cc-wf-studio.minimapVisible', newValue.toString());
-    set({ isMinimapVisible: newValue });
+    set({ isMinimapVisible: newValue, isMinimapShown: false });
   },
+
+  setMinimapShown: (shown) => set({ isMinimapShown: shown }),
 
   toggleDescriptionPanelVisibility: () => {
     const newValue = !get().isDescriptionPanelVisible;

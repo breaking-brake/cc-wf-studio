@@ -7,7 +7,7 @@
 
 import { PanelLeftOpen } from 'lucide-react';
 import type React from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactFlow, {
   applyNodeChanges,
   Background,
@@ -125,6 +125,9 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     scrollMode,
     onNodeDragStop,
     highlightedGroupNodeId,
+    isMinimapVisible,
+    isMinimapShown,
+    setMinimapShown,
   } = useWorkflowStore();
 
   // Edge animation toggle (respects prefers-reduced-motion by default)
@@ -291,6 +294,34 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     };
   }, []);
 
+  // Minimap auto-show on scroll/pan/zoom
+  const minimapHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleMoveStart = useCallback(() => {
+    if (!isMinimapVisible) return;
+    if (minimapHideTimerRef.current) {
+      clearTimeout(minimapHideTimerRef.current);
+      minimapHideTimerRef.current = null;
+    }
+    setMinimapShown(true);
+  }, [isMinimapVisible, setMinimapShown]);
+
+  const handleMoveEnd = useCallback(() => {
+    if (!isMinimapVisible) return;
+    minimapHideTimerRef.current = setTimeout(() => {
+      setMinimapShown(false);
+      minimapHideTimerRef.current = null;
+    }, 800);
+  }, [isMinimapVisible, setMinimapShown]);
+
+  useEffect(() => {
+    return () => {
+      if (minimapHideTimerRef.current) {
+        clearTimeout(minimapHideTimerRef.current);
+      }
+    };
+  }, []);
+
   // Calculate effective interaction mode based on base mode and modifier key
   const effectiveMode = useMemo(() => {
     if (isModifierKeyPressed) {
@@ -341,6 +372,8 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           panOnScrollMode={PanOnScrollMode.Free}
           zoomOnScroll={scrollMode === 'classic'}
           zoomOnPinch={true}
+          onMoveStart={handleMoveStart}
+          onMoveEnd={handleMoveEnd}
           fitView
           attributionPosition="bottom-left"
         >
@@ -350,51 +383,61 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           {/* Controls (zoom, fit view, etc.) */}
           <Controls />
 
-          {/* Mini map with container */}
-          <Panel position="bottom-right">
-            <MinimapContainer>
-              <MiniMap
-                nodeColor={(node) => {
-                  switch (node.type) {
-                    case 'subAgent':
-                      return 'var(--vscode-charts-blue)';
-                    case 'askUserQuestion':
-                      return 'var(--vscode-charts-orange)';
-                    case 'branch': // Legacy
-                      return 'var(--vscode-charts-yellow)';
-                    case 'ifElse':
-                      return 'var(--vscode-charts-yellow)';
-                    case 'switch':
-                      return 'var(--vscode-charts-yellow)';
-                    case 'start':
-                      return 'var(--vscode-charts-green)';
-                    case 'end':
-                      return 'var(--vscode-charts-red)';
-                    case 'prompt':
-                      return 'var(--vscode-charts-purple)';
-                    case 'skill':
-                      return 'var(--vscode-charts-cyan)';
-                    case 'subAgentFlow':
-                      return 'var(--vscode-charts-purple)';
-                    case 'codex':
-                      return 'var(--vscode-charts-orange)';
-                    case 'group':
-                      return 'var(--vscode-panel-border)';
-                    default:
-                      return 'var(--vscode-foreground)';
-                  }
-                }}
-                maskColor="rgba(0, 0, 0, 0.5)"
+          {/* Mini map with container (auto-show on scroll) */}
+          {isMinimapVisible && (
+            <Panel position="bottom-right">
+              <div
                 style={{
-                  position: 'relative',
-                  backgroundColor: 'var(--vscode-editor-background)',
-                  width: isCompact ? 120 : 200,
-                  height: isCompact ? 80 : 150,
-                  margin: '4px 16px',
+                  opacity: isMinimapShown ? 1 : 0,
+                  transition: 'opacity 300ms ease',
+                  pointerEvents: isMinimapShown ? 'auto' : 'none',
                 }}
-              />
-            </MinimapContainer>
-          </Panel>
+              >
+                <MinimapContainer>
+                  <MiniMap
+                    nodeColor={(node) => {
+                      switch (node.type) {
+                        case 'subAgent':
+                          return 'var(--vscode-charts-blue)';
+                        case 'askUserQuestion':
+                          return 'var(--vscode-charts-orange)';
+                        case 'branch': // Legacy
+                          return 'var(--vscode-charts-yellow)';
+                        case 'ifElse':
+                          return 'var(--vscode-charts-yellow)';
+                        case 'switch':
+                          return 'var(--vscode-charts-yellow)';
+                        case 'start':
+                          return 'var(--vscode-charts-green)';
+                        case 'end':
+                          return 'var(--vscode-charts-red)';
+                        case 'prompt':
+                          return 'var(--vscode-charts-purple)';
+                        case 'skill':
+                          return 'var(--vscode-charts-cyan)';
+                        case 'subAgentFlow':
+                          return 'var(--vscode-charts-purple)';
+                        case 'codex':
+                          return 'var(--vscode-charts-orange)';
+                        case 'group':
+                          return 'var(--vscode-panel-border)';
+                        default:
+                          return 'var(--vscode-foreground)';
+                      }
+                    }}
+                    maskColor="rgba(0, 0, 0, 0.5)"
+                    style={{
+                      position: 'relative',
+                      backgroundColor: 'var(--vscode-editor-background)',
+                      width: isCompact ? 120 : 200,
+                      height: isCompact ? 80 : 150,
+                      margin: '4px 16px',
+                    }}
+                  />
+                </MinimapContainer>
+              </div>
+            </Panel>
+          )}
 
           {/* Canvas Toolbar */}
           <Panel position="top-left">
