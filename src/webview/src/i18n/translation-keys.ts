@@ -43,6 +43,8 @@ export interface WebviewTranslationKeys {
   'toolbar.edgeAnimation.disable': string;
   'toolbar.highlight.enable': string;
   'toolbar.highlight.disable': string;
+  'toolbar.scrollMode.switchToClassic': string;
+  'toolbar.scrollMode.switchToFreehand': string;
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.show': string;

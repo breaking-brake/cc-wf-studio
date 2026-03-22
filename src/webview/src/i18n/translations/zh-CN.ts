@@ -45,6 +45,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.edgeAnimation.disable': '禁用边动画',
   'toolbar.highlight.enable': '启用组节点高亮',
   'toolbar.highlight.disable': '禁用组节点高亮',
+  'toolbar.scrollMode.switchToClassic': '切换到Classic模式（滚动=缩放）',
+  'toolbar.scrollMode.switchToFreehand': '切换到Freehand模式（滚动=平移）',
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.show': '显示迷你地图',

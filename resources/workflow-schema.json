@@ -79,7 +79,7 @@
         "commandFilePath": {
           "type": "string",
           "required": true,
-          "description": "Absolute path to .claude/agents/*.md file. Use list_available_commands to discover existing commands, or create a new .md file first."
+          "description": "Absolute path to .claude/agents/*.md file. Use list_available_agents to discover existing commands, or create a new .md file first."
         },
         "commandScope": {
           "type": "string",
@@ -95,7 +95,7 @@
         "workflow": "SubAgent nodes MUST reference external .claude/agents/*.md files. Never embed prompt content inline.",
         "agentType": "Set 'claudeCode' if you are Claude Code, 'other' if you are a different AI agent (Cursor, Copilot, etc.). You know what you are.",
         "steps": [
-          "Call list_available_commands to discover existing agent files",
+          "Call list_available_agents to discover existing agent files",
           "If a matching agent exists, use its commandPath and scope",
           "If no match, provide description/prompt/model etc. without commandFilePath — apply_workflow will auto-create the .md file",
           "Set agentType based on your own runtime identity"

@@ -1,12 +1,12 @@
 /**
- * Claude Code Workflow Studio - Interaction Mode Toggle Component
+ * Claude Code Workflow Studio - Scroll Mode Toggle Component
  *
- * Canvas interaction mode toggle (pan/selection)
+ * Canvas scroll mode toggle (classic/freehand)
  * Compact icon when not hovered, expands to full toggle on hover.
  */
 
 import * as Switch from '@radix-ui/react-switch';
-import { Hand, MousePointerClick } from 'lucide-react';
+import { Move, ZoomIn } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { useTranslation } from '../i18n/i18n-context';
@@ -18,14 +18,14 @@ const TRANSITION_DURATION = window.matchMedia('(prefers-reduced-motion: reduce)'
   : '200ms';
 
 /**
- * InteractionModeToggle Component
+ * ScrollModeToggle Component
  *
- * Provides UI to switch between pan and selection modes.
+ * Provides UI to switch between classic (scroll = zoom) and freehand (scroll = pan) modes.
  * Shows compact 28x28 icon button when not hovered, expands to full toggle on hover.
  */
-export const InteractionModeToggle: React.FC = () => {
+export const ScrollModeToggle: React.FC = () => {
   const { t } = useTranslation();
-  const { interactionMode, toggleInteractionMode } = useWorkflowStore();
+  const { scrollMode, toggleScrollMode } = useWorkflowStore();
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -34,29 +34,29 @@ export const InteractionModeToggle: React.FC = () => {
         content={
           isHovered
             ? ''
-            : interactionMode === 'pan'
-              ? t('toolbar.interactionMode.switchToSelection')
-              : t('toolbar.interactionMode.switchToPan')
+            : scrollMode === 'classic'
+              ? t('toolbar.scrollMode.switchToFreehand')
+              : t('toolbar.scrollMode.switchToClassic')
         }
       >
         <div
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           onClick={() => {
-            if (!isHovered) toggleInteractionMode();
+            if (!isHovered) toggleScrollMode();
           }}
           onKeyDown={(e) => {
             if (!isHovered && (e.key === 'Enter' || e.key === ' ')) {
               e.preventDefault();
-              toggleInteractionMode();
+              toggleScrollMode();
             }
           }}
           role="button"
           tabIndex={isHovered ? -1 : 0}
           aria-label={
-            interactionMode === 'pan'
-              ? t('toolbar.interactionMode.switchToSelection')
-              : t('toolbar.interactionMode.switchToPan')
+            scrollMode === 'classic'
+              ? t('toolbar.scrollMode.switchToFreehand')
+              : t('toolbar.scrollMode.switchToClassic')
           }
           style={{
             display: 'flex',
@@ -78,32 +78,32 @@ export const InteractionModeToggle: React.FC = () => {
             transition: `width ${TRANSITION_DURATION} ease, padding ${TRANSITION_DURATION} ease, gap ${TRANSITION_DURATION} ease`,
           }}
         >
-          {/* Pan Mode Icon (Left) */}
+          {/* Classic Mode Icon (Left) */}
           <div
             style={{
-              width: isHovered || interactionMode === 'pan' ? '20px' : '0px',
-              opacity: isHovered || interactionMode === 'pan' ? 1 : 0,
+              width: isHovered || scrollMode === 'classic' ? '20px' : '0px',
+              opacity: isHovered || scrollMode === 'classic' ? 1 : 0,
               overflow: 'hidden',
               flexShrink: 0,
               transition: `width ${TRANSITION_DURATION} ease, opacity ${TRANSITION_DURATION} ease`,
             }}
           >
             {isHovered ? (
-              <StyledTooltipItem content={t('toolbar.interactionMode.switchToPan')}>
+              <StyledTooltipItem content={t('toolbar.scrollMode.switchToClassic')}>
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (interactionMode !== 'pan') toggleInteractionMode();
+                    if (scrollMode !== 'classic') toggleScrollMode();
                   }}
                   onKeyDown={(e) => {
-                    if ((e.key === 'Enter' || e.key === ' ') && interactionMode !== 'pan') {
+                    if ((e.key === 'Enter' || e.key === ' ') && scrollMode !== 'classic') {
                       e.preventDefault();
-                      toggleInteractionMode();
+                      toggleScrollMode();
                     }
                   }}
                   role="button"
-                  tabIndex={interactionMode === 'pan' ? -1 : 0}
-                  aria-label={t('toolbar.interactionMode.switchToPan')}
+                  tabIndex={scrollMode === 'classic' ? -1 : 0}
+                  aria-label={t('toolbar.scrollMode.switchToClassic')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -112,16 +112,16 @@ export const InteractionModeToggle: React.FC = () => {
                     height: '20px',
                     borderRadius: '50%',
                     backgroundColor:
-                      interactionMode === 'pan' ? 'var(--vscode-badge-background)' : 'transparent',
+                      scrollMode === 'classic' ? 'var(--vscode-badge-background)' : 'transparent',
                     transition: `background-color 150ms`,
-                    cursor: interactionMode === 'pan' ? 'default' : 'pointer',
+                    cursor: scrollMode === 'classic' ? 'default' : 'pointer',
                   }}
                 >
-                  <Hand
+                  <ZoomIn
                     size={12}
                     style={{
                       color:
-                        interactionMode === 'pan'
+                        scrollMode === 'classic'
                           ? 'var(--vscode-badge-foreground)'
                           : 'var(--vscode-disabledForeground)',
                     }}
@@ -138,7 +138,7 @@ export const InteractionModeToggle: React.FC = () => {
                   height: '20px',
                 }}
               >
-                <Hand size={14} style={{ color: 'var(--vscode-foreground)' }} />
+                <ZoomIn size={14} style={{ color: 'var(--vscode-foreground)' }} />
               </div>
             )}
           </div>
@@ -154,12 +154,12 @@ export const InteractionModeToggle: React.FC = () => {
             }}
           >
             <Switch.Root
-              checked={interactionMode === 'selection'}
+              checked={scrollMode === 'freehand'}
               onCheckedChange={() => {
-                toggleInteractionMode();
+                toggleScrollMode();
               }}
               onClick={(e) => e.stopPropagation()}
-              aria-label="Canvas interaction mode"
+              aria-label="Canvas scroll mode"
               style={{
                 all: 'unset',
                 width: '32px',
@@ -180,8 +180,7 @@ export const InteractionModeToggle: React.FC = () => {
                   backgroundColor: 'var(--vscode-button-background)',
                   borderRadius: '7px',
                   transition: 'transform 100ms',
-                  transform:
-                    interactionMode === 'selection' ? 'translateX(16px)' : 'translateX(2px)',
+                  transform: scrollMode === 'freehand' ? 'translateX(16px)' : 'translateX(2px)',
                   willChange: 'transform',
                   margin: '1px',
                 }}
@@ -189,32 +188,32 @@ export const InteractionModeToggle: React.FC = () => {
             </Switch.Root>
           </div>
 
-          {/* Selection Mode Icon (Right) */}
+          {/* Freehand Mode Icon (Right) */}
           <div
             style={{
-              width: isHovered || interactionMode === 'selection' ? '20px' : '0px',
-              opacity: isHovered || interactionMode === 'selection' ? 1 : 0,
+              width: isHovered || scrollMode === 'freehand' ? '20px' : '0px',
+              opacity: isHovered || scrollMode === 'freehand' ? 1 : 0,
               overflow: 'hidden',
               flexShrink: 0,
               transition: `width ${TRANSITION_DURATION} ease, opacity ${TRANSITION_DURATION} ease`,
             }}
           >
             {isHovered ? (
-              <StyledTooltipItem content={t('toolbar.interactionMode.switchToSelection')}>
+              <StyledTooltipItem content={t('toolbar.scrollMode.switchToFreehand')}>
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (interactionMode !== 'selection') toggleInteractionMode();
+                    if (scrollMode !== 'freehand') toggleScrollMode();
                   }}
                   onKeyDown={(e) => {
-                    if ((e.key === 'Enter' || e.key === ' ') && interactionMode !== 'selection') {
+                    if ((e.key === 'Enter' || e.key === ' ') && scrollMode !== 'freehand') {
                       e.preventDefault();
-                      toggleInteractionMode();
+                      toggleScrollMode();
                     }
                   }}
                   role="button"
-                  tabIndex={interactionMode === 'selection' ? -1 : 0}
-                  aria-label={t('toolbar.interactionMode.switchToSelection')}
+                  tabIndex={scrollMode === 'freehand' ? -1 : 0}
+                  aria-label={t('toolbar.scrollMode.switchToFreehand')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -223,18 +222,16 @@ export const InteractionModeToggle: React.FC = () => {
                     height: '20px',
                     borderRadius: '50%',
                     backgroundColor:
-                      interactionMode === 'selection'
-                        ? 'var(--vscode-badge-background)'
-                        : 'transparent',
+                      scrollMode === 'freehand' ? 'var(--vscode-badge-background)' : 'transparent',
                     transition: `background-color 150ms`,
-                    cursor: interactionMode === 'selection' ? 'default' : 'pointer',
+                    cursor: scrollMode === 'freehand' ? 'default' : 'pointer',
                   }}
                 >
-                  <MousePointerClick
+                  <Move
                     size={12}
                     style={{
                       color:
-                        interactionMode === 'selection'
+                        scrollMode === 'freehand'
                           ? 'var(--vscode-badge-foreground)'
                           : 'var(--vscode-disabledForeground)',
                     }}
@@ -251,7 +248,7 @@ export const InteractionModeToggle: React.FC = () => {
                   height: '20px',
                 }}
               >
-                <MousePointerClick size={14} style={{ color: 'var(--vscode-foreground)' }} />
+                <Move size={14} style={{ color: 'var(--vscode-foreground)' }} />
               </div>
             )}
           </div>

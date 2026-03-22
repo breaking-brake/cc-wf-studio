@@ -21,6 +21,7 @@ import ReactFlow, {
   type Node,
   type NodeTypes,
   Panel,
+  PanOnScrollMode,
   ReactFlowProvider,
 } from 'reactflow';
 import { useAutoFocusNode } from '../../hooks/useAutoFocusNode';
@@ -32,11 +33,11 @@ import {
   generateWorkflowName,
 } from '../../services/ai-generation-service';
 import { useWorkflowStore } from '../../stores/workflow-store';
+import { CanvasToolbar } from '../CanvasToolbar';
 import { EditableNameField } from '../common/EditableNameField';
 import { StyledTooltip } from '../common/StyledTooltip';
 // Custom edge with delete button
 import { DeletableEdge } from '../edges/DeletableEdge';
-import { InteractionModeToggle } from '../InteractionModeToggle';
 import { MinimapContainer } from '../MinimapContainer';
 import { NodePalette } from '../NodePalette';
 import { AskUserQuestionNodeComponent } from '../nodes/AskUserQuestionNode';
@@ -110,6 +111,8 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
     onEdgesChange,
     onConnect,
     interactionMode,
+    scrollMode,
+    highlightedGroupNodeId,
     activeSubAgentFlowId,
     subAgentFlows,
     updateSubAgentFlow,
@@ -121,6 +124,54 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
 
   // Local state for panel display (independent from main canvas)
   const [localSelectedNodeId, setLocalSelectedNodeId] = useState<string | null>(null);
+
+  // Edge animation toggle (respects prefers-reduced-motion by default)
+  const [isEdgeAnimationEnabled, setIsEdgeAnimationEnabled] = useState(
+    () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+
+  // Animate edges based on selection and highlight state
+  const animatedEdges = useMemo(() => {
+    let highlightChildIds: Set<string> | null = null;
+    if (highlightedGroupNodeId != null) {
+      highlightChildIds = new Set(
+        nodes.filter((n) => n.parentId === highlightedGroupNodeId).map((n) => n.id)
+      );
+    }
+
+    let selectionChildIds: Set<string> | null = null;
+    if (isEdgeAnimationEnabled && localSelectedNodeId != null) {
+      const selectedNode = nodes.find((n) => n.id === localSelectedNodeId);
+      if (selectedNode?.type === 'group') {
+        selectionChildIds = new Set(
+          nodes.filter((n) => n.parentId === localSelectedNodeId).map((n) => n.id)
+        );
+      }
+    }
+
+    const hasHighlight = highlightedGroupNodeId != null;
+    const hasSelection = isEdgeAnimationEnabled && localSelectedNodeId != null;
+    if (!hasHighlight && !hasSelection) return edges;
+
+    return edges.map((edge) => {
+      const isHighlightAnimated =
+        hasHighlight &&
+        (edge.source === highlightedGroupNodeId ||
+          edge.target === highlightedGroupNodeId ||
+          (highlightChildIds != null &&
+            (highlightChildIds.has(edge.source) || highlightChildIds.has(edge.target))));
+
+      const isSelectionAnimated =
+        hasSelection &&
+        (edge.selected ||
+          edge.source === localSelectedNodeId ||
+          edge.target === localSelectedNodeId ||
+          (selectionChildIds != null &&
+            (selectionChildIds.has(edge.source) || selectionChildIds.has(edge.target))));
+
+      return { ...edge, animated: isHighlightAnimated || isSelectionAnimated };
+    });
+  }, [edges, nodes, localSelectedNodeId, highlightedGroupNodeId, isEdgeAnimationEnabled]);
   const [isLocalPropertyOverlayOpen, setIsLocalPropertyOverlayOpen] = useState(false);
   const [isLocalRefinementPanelOpen, setIsLocalRefinementPanelOpen] = useState(false);
 
@@ -625,7 +676,7 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
               <div style={{ flex: 1, position: 'relative' }}>
                 <ReactFlow
                   nodes={nodes}
-                  edges={edges}
+                  edges={animatedEdges}
                   onNodesChange={onNodesChange}
                   onEdgesChange={onEdgesChange}
                   onConnect={onConnect}
@@ -639,6 +690,10 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
                   snapGrid={snapGrid}
                   panOnDrag={panOnDrag}
                   selectionOnDrag={selectionOnDrag}
+                  panOnScroll={scrollMode === 'freehand'}
+                  panOnScrollMode={PanOnScrollMode.Free}
+                  zoomOnScroll={scrollMode === 'classic'}
+                  zoomOnPinch={true}
                   fitView
                   attributionPosition="bottom-left"
                 >
@@ -687,9 +742,12 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
                     </MinimapContainer>
                   </Panel>
 
-                  {/* Interaction Mode Toggle */}
+                  {/* Canvas Toolbar */}
                   <Panel position="top-left">
-                    <InteractionModeToggle />
+                    <CanvasToolbar
+                      isEdgeAnimationEnabled={isEdgeAnimationEnabled}
+                      onToggleEdgeAnimation={() => setIsEdgeAnimationEnabled((prev) => !prev)}
+                    />
                   </Panel>
                 </ReactFlow>
 

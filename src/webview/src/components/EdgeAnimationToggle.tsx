@@ -1,31 +1,31 @@
 /**
- * Claude Code Workflow Studio - Interaction Mode Toggle Component
+ * Claude Code Workflow Studio - Edge Animation Toggle Component
  *
- * Canvas interaction mode toggle (pan/selection)
+ * Canvas edge animation toggle (on/off)
  * Compact icon when not hovered, expands to full toggle on hover.
  */
 
 import * as Switch from '@radix-ui/react-switch';
-import { Hand, MousePointerClick } from 'lucide-react';
+import { ChevronsLeftRightEllipsis } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { useTranslation } from '../i18n/i18n-context';
-import { useWorkflowStore } from '../stores/workflow-store';
 import { StyledTooltipItem, StyledTooltipProvider } from './common/StyledTooltip';
 
 const TRANSITION_DURATION = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   ? '0ms'
   : '200ms';
 
-/**
- * InteractionModeToggle Component
- *
- * Provides UI to switch between pan and selection modes.
- * Shows compact 28x28 icon button when not hovered, expands to full toggle on hover.
- */
-export const InteractionModeToggle: React.FC = () => {
+interface EdgeAnimationToggleProps {
+  isEnabled: boolean;
+  onToggle: () => void;
+}
+
+export const EdgeAnimationToggle: React.FC<EdgeAnimationToggleProps> = ({
+  isEnabled,
+  onToggle,
+}) => {
   const { t } = useTranslation();
-  const { interactionMode, toggleInteractionMode } = useWorkflowStore();
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -34,29 +34,27 @@ export const InteractionModeToggle: React.FC = () => {
         content={
           isHovered
             ? ''
-            : interactionMode === 'pan'
-              ? t('toolbar.interactionMode.switchToSelection')
-              : t('toolbar.interactionMode.switchToPan')
+            : isEnabled
+              ? t('toolbar.edgeAnimation.disable')
+              : t('toolbar.edgeAnimation.enable')
         }
       >
         <div
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           onClick={() => {
-            if (!isHovered) toggleInteractionMode();
+            if (!isHovered) onToggle();
           }}
           onKeyDown={(e) => {
             if (!isHovered && (e.key === 'Enter' || e.key === ' ')) {
               e.preventDefault();
-              toggleInteractionMode();
+              onToggle();
             }
           }}
           role="button"
           tabIndex={isHovered ? -1 : 0}
           aria-label={
-            interactionMode === 'pan'
-              ? t('toolbar.interactionMode.switchToSelection')
-              : t('toolbar.interactionMode.switchToPan')
+            isEnabled ? t('toolbar.edgeAnimation.disable') : t('toolbar.edgeAnimation.enable')
           }
           style={{
             display: 'flex',
@@ -78,32 +76,32 @@ export const InteractionModeToggle: React.FC = () => {
             transition: `width ${TRANSITION_DURATION} ease, padding ${TRANSITION_DURATION} ease, gap ${TRANSITION_DURATION} ease`,
           }}
         >
-          {/* Pan Mode Icon (Left) */}
+          {/* Off Icon (Left) */}
           <div
             style={{
-              width: isHovered || interactionMode === 'pan' ? '20px' : '0px',
-              opacity: isHovered || interactionMode === 'pan' ? 1 : 0,
+              width: isHovered || !isEnabled ? '20px' : '0px',
+              opacity: isHovered || !isEnabled ? 1 : 0,
               overflow: 'hidden',
               flexShrink: 0,
               transition: `width ${TRANSITION_DURATION} ease, opacity ${TRANSITION_DURATION} ease`,
             }}
           >
             {isHovered ? (
-              <StyledTooltipItem content={t('toolbar.interactionMode.switchToPan')}>
+              <StyledTooltipItem content={t('toolbar.edgeAnimation.disable')}>
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (interactionMode !== 'pan') toggleInteractionMode();
+                    if (isEnabled) onToggle();
                   }}
                   onKeyDown={(e) => {
-                    if ((e.key === 'Enter' || e.key === ' ') && interactionMode !== 'pan') {
+                    if ((e.key === 'Enter' || e.key === ' ') && isEnabled) {
                       e.preventDefault();
-                      toggleInteractionMode();
+                      onToggle();
                     }
                   }}
                   role="button"
-                  tabIndex={interactionMode === 'pan' ? -1 : 0}
-                  aria-label={t('toolbar.interactionMode.switchToPan')}
+                  tabIndex={isEnabled ? 0 : -1}
+                  aria-label={t('toolbar.edgeAnimation.disable')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -111,21 +109,35 @@ export const InteractionModeToggle: React.FC = () => {
                     width: '20px',
                     height: '20px',
                     borderRadius: '50%',
-                    backgroundColor:
-                      interactionMode === 'pan' ? 'var(--vscode-badge-background)' : 'transparent',
-                    transition: `background-color 150ms`,
-                    cursor: interactionMode === 'pan' ? 'default' : 'pointer',
+                    backgroundColor: !isEnabled ? 'var(--vscode-badge-background)' : 'transparent',
+                    transition: 'background-color 150ms',
+                    cursor: isEnabled ? 'pointer' : 'default',
                   }}
                 >
-                  <Hand
-                    size={12}
-                    style={{
-                      color:
-                        interactionMode === 'pan'
+                  <div style={{ position: 'relative', display: 'flex' }}>
+                    <ChevronsLeftRightEllipsis
+                      size={12}
+                      style={{
+                        color: !isEnabled
                           ? 'var(--vscode-badge-foreground)'
                           : 'var(--vscode-disabledForeground)',
-                    }}
-                  />
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '10%',
+                        left: '50%',
+                        width: '1.5px',
+                        height: '80%',
+                        backgroundColor: !isEnabled
+                          ? 'var(--vscode-badge-foreground)'
+                          : 'var(--vscode-disabledForeground)',
+                        transform: 'translateX(-50%) rotate(-45deg)',
+                        transformOrigin: 'center',
+                      }}
+                    />
+                  </div>
                 </div>
               </StyledTooltipItem>
             ) : (
@@ -136,9 +148,25 @@ export const InteractionModeToggle: React.FC = () => {
                   justifyContent: 'center',
                   width: '20px',
                   height: '20px',
+                  position: 'relative',
                 }}
               >
-                <Hand size={14} style={{ color: 'var(--vscode-foreground)' }} />
+                <ChevronsLeftRightEllipsis
+                  size={14}
+                  style={{ color: 'var(--vscode-disabledForeground)' }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '10%',
+                    left: '50%',
+                    width: '1.5px',
+                    height: '80%',
+                    backgroundColor: 'var(--vscode-disabledForeground)',
+                    transform: 'translateX(-50%) rotate(-45deg)',
+                    transformOrigin: 'center',
+                  }}
+                />
               </div>
             )}
           </div>
@@ -154,12 +182,12 @@ export const InteractionModeToggle: React.FC = () => {
             }}
           >
             <Switch.Root
-              checked={interactionMode === 'selection'}
+              checked={isEnabled}
               onCheckedChange={() => {
-                toggleInteractionMode();
+                onToggle();
               }}
               onClick={(e) => e.stopPropagation()}
-              aria-label="Canvas interaction mode"
+              aria-label="Edge animation"
               style={{
                 all: 'unset',
                 width: '32px',
@@ -180,8 +208,7 @@ export const InteractionModeToggle: React.FC = () => {
                   backgroundColor: 'var(--vscode-button-background)',
                   borderRadius: '7px',
                   transition: 'transform 100ms',
-                  transform:
-                    interactionMode === 'selection' ? 'translateX(16px)' : 'translateX(2px)',
+                  transform: isEnabled ? 'translateX(16px)' : 'translateX(2px)',
                   willChange: 'transform',
                   margin: '1px',
                 }}
@@ -189,32 +216,32 @@ export const InteractionModeToggle: React.FC = () => {
             </Switch.Root>
           </div>
 
-          {/* Selection Mode Icon (Right) */}
+          {/* On Icon (Right) */}
           <div
             style={{
-              width: isHovered || interactionMode === 'selection' ? '20px' : '0px',
-              opacity: isHovered || interactionMode === 'selection' ? 1 : 0,
+              width: isHovered || isEnabled ? '20px' : '0px',
+              opacity: isHovered || isEnabled ? 1 : 0,
               overflow: 'hidden',
               flexShrink: 0,
               transition: `width ${TRANSITION_DURATION} ease, opacity ${TRANSITION_DURATION} ease`,
             }}
           >
             {isHovered ? (
-              <StyledTooltipItem content={t('toolbar.interactionMode.switchToSelection')}>
+              <StyledTooltipItem content={t('toolbar.edgeAnimation.enable')}>
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (interactionMode !== 'selection') toggleInteractionMode();
+                    if (!isEnabled) onToggle();
                   }}
                   onKeyDown={(e) => {
-                    if ((e.key === 'Enter' || e.key === ' ') && interactionMode !== 'selection') {
+                    if ((e.key === 'Enter' || e.key === ' ') && !isEnabled) {
                       e.preventDefault();
-                      toggleInteractionMode();
+                      onToggle();
                     }
                   }}
                   role="button"
-                  tabIndex={interactionMode === 'selection' ? -1 : 0}
-                  aria-label={t('toolbar.interactionMode.switchToSelection')}
+                  tabIndex={isEnabled ? -1 : 0}
+                  aria-label={t('toolbar.edgeAnimation.enable')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -222,21 +249,17 @@ export const InteractionModeToggle: React.FC = () => {
                     width: '20px',
                     height: '20px',
                     borderRadius: '50%',
-                    backgroundColor:
-                      interactionMode === 'selection'
-                        ? 'var(--vscode-badge-background)'
-                        : 'transparent',
-                    transition: `background-color 150ms`,
-                    cursor: interactionMode === 'selection' ? 'default' : 'pointer',
+                    backgroundColor: isEnabled ? 'var(--vscode-badge-background)' : 'transparent',
+                    transition: 'background-color 150ms',
+                    cursor: isEnabled ? 'default' : 'pointer',
                   }}
                 >
-                  <MousePointerClick
+                  <ChevronsLeftRightEllipsis
                     size={12}
                     style={{
-                      color:
-                        interactionMode === 'selection'
-                          ? 'var(--vscode-badge-foreground)'
-                          : 'var(--vscode-disabledForeground)',
+                      color: isEnabled
+                        ? 'var(--vscode-badge-foreground)'
+                        : 'var(--vscode-disabledForeground)',
                     }}
                   />
                 </div>
@@ -251,7 +274,10 @@ export const InteractionModeToggle: React.FC = () => {
                   height: '20px',
                 }}
               >
-                <MousePointerClick size={14} style={{ color: 'var(--vscode-foreground)' }} />
+                <ChevronsLeftRightEllipsis
+                  size={14}
+                  style={{ color: 'var(--vscode-foreground)' }}
+                />
               </div>
             )}
           </div>
