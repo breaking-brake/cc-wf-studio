@@ -910,7 +910,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.cancelButton': '取消',
   'subAgent.dialog.backButton': '返回',
   'subAgent.dialog.loadFailed': '加载命令失败。请检查命令目录。',
-  'subAgent.dialog.description': '浏览并选择现有命令文件作为 Sub-Agent 节点使用。',
+  'subAgent.dialog.description': '选择要添加到工作流的 Sub-Agent。',
+  'subAgent.dialog.selectSubAgent': '选择 Sub-Agent',
+  'subAgent.dialog.browseSubAgents': '浏览 Sub-Agent',
   'subAgent.dialog.userDescription': '~/.claude/agents/ 中的命令 — 所有项目可用。',
   'subAgent.dialog.projectDescription': '.claude/agents/ 中的命令 — 仅限此项目。',
   'subAgent.dialog.localDescription':

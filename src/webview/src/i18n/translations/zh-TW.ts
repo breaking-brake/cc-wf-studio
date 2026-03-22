@@ -911,7 +911,9 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.cancelButton': '取消',
   'subAgent.dialog.backButton': '返回',
   'subAgent.dialog.loadFailed': '載入命令失敗。請檢查命令目錄。',
-  'subAgent.dialog.description': '瀏覽並選擇現有命令檔案作為 Sub-Agent 節點使用。',
+  'subAgent.dialog.description': '選擇要新增到工作流的 Sub-Agent。',
+  'subAgent.dialog.selectSubAgent': '選擇 Sub-Agent',
+  'subAgent.dialog.browseSubAgents': '瀏覽 Sub-Agent',
   'subAgent.dialog.userDescription': '~/.claude/agents/ 中的命令 — 所有專案可用。',
   'subAgent.dialog.projectDescription': '.claude/agents/ 中的命令 — 僅限此專案。',
   'subAgent.dialog.localDescription':

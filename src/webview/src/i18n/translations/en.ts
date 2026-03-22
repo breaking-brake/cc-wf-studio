@@ -953,8 +953,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.cancelButton': 'Cancel',
   'subAgent.dialog.backButton': 'Back',
   'subAgent.dialog.loadFailed': 'Failed to load commands. Please check the commands directory.',
-  'subAgent.dialog.description':
-    'Browse and select an existing command file to use as a Sub-Agent node.',
+  'subAgent.dialog.description': 'Select a Sub-Agent to add to your workflow.',
+  'subAgent.dialog.selectSubAgent': 'Select Sub-Agent',
+  'subAgent.dialog.browseSubAgents': 'Browse Sub-Agents',
   'subAgent.dialog.userDescription':
     'Commands from ~/.claude/agents/ — available across all projects.',
   'subAgent.dialog.projectDescription': 'Commands from .claude/agents/ — specific to this project.',
