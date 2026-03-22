@@ -35,6 +35,13 @@ import { create } from 'zustand';
 export type InteractionMode = 'pan' | 'selection';
 
 /**
+ * Canvas scroll mode
+ * - classic: Scroll wheel zooms (default ReactFlow behavior)
+ * - freehand: Scroll wheel pans canvas (Miro/Figma-style), Ctrl+scroll to zoom
+ */
+export type ScrollMode = 'classic' | 'freehand';
+
+/**
  * Snapshot of main workflow state for restoration after Sub-Agent Flow editing
  */
 interface MainWorkflowSnapshot {
@@ -53,6 +60,7 @@ interface WorkflowStore {
   pendingDeleteNodeIds: string[];
   activeWorkflow: Workflow | null;
   interactionMode: InteractionMode;
+  scrollMode: ScrollMode;
   workflowName: string;
   workflowDescription: string;
   isPropertyOverlayOpen: boolean;
@@ -89,6 +97,7 @@ interface WorkflowStore {
   syncSelectedNodeId: (id: string | null) => void;
   setInteractionMode: (mode: InteractionMode) => void;
   toggleInteractionMode: () => void;
+  toggleScrollMode: () => void;
   setWorkflowName: (name: string) => void;
   setWorkflowDescription: (description: string) => void;
   openPropertyOverlay: () => void;
@@ -293,6 +302,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   pendingDeleteNodeIds: [],
   activeWorkflow: null,
   interactionMode: 'pan', // Default: pan mode
+  scrollMode: (() => {
+    const saved = localStorage.getItem('cc-wf-studio.scrollMode');
+    return saved === 'freehand' ? 'freehand' : 'classic'; // Default: classic
+  })() as ScrollMode,
   workflowName: 'my-workflow', // Default workflow name
   workflowDescription: '', // Default workflow description
   isPropertyOverlayOpen: true, // Property overlay is open by default
@@ -402,6 +415,12 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   toggleInteractionMode: () => {
     const currentMode = get().interactionMode;
     set({ interactionMode: currentMode === 'pan' ? 'selection' : 'pan' });
+  },
+
+  toggleScrollMode: () => {
+    const newMode = get().scrollMode === 'classic' ? 'freehand' : 'classic';
+    localStorage.setItem('cc-wf-studio.scrollMode', newMode);
+    set({ scrollMode: newMode });
   },
 
   setWorkflowName: (workflowName) => set({ workflowName }),

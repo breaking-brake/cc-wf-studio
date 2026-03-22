@@ -19,6 +19,7 @@ import ReactFlow, {
   type Node,
   type NodeTypes,
   Panel,
+  PanOnScrollMode,
 } from 'reactflow';
 import { CURRENT_ANNOUNCEMENT, cleanupDismissedAnnouncements } from '../constants/announcements';
 import { useAutoFocusNode } from '../hooks/useAutoFocusNode';
@@ -46,6 +47,7 @@ import { StartNode } from './nodes/StartNode';
 import { SubAgentFlowNodeComponent } from './nodes/SubAgentFlowNode';
 import { SubAgentNodeComponent } from './nodes/SubAgentNode';
 import { SwitchNodeComponent } from './nodes/SwitchNode';
+import { ScrollModeToggle } from './ScrollModeToggle';
 
 /**
  * Node types registration (memoized outside component for performance)
@@ -122,6 +124,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     syncSelectedNodeId,
     selectedNodeId,
     interactionMode,
+    scrollMode,
     onNodeDragStop,
     isHighlightEnabled,
     toggleHighlightEnabled,
@@ -338,6 +341,10 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           snapGrid={snapGrid}
           panOnDrag={panOnDrag}
           selectionOnDrag={selectionOnDrag}
+          panOnScroll={scrollMode === 'freehand'}
+          panOnScrollMode={PanOnScrollMode.Free}
+          zoomOnScroll={scrollMode === 'classic'}
+          zoomOnPinch={true}
           fitView
           attributionPosition="bottom-left"
         >
@@ -396,6 +403,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           {/* Interaction Mode Toggle & Edge Animation Toggle */}
           <Panel position="top-left">
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <ScrollModeToggle />
               <InteractionModeToggle />
               <StyledTooltipProvider>
                 <StyledTooltipItem

@@ -21,6 +21,7 @@ import ReactFlow, {
   type Node,
   type NodeTypes,
   Panel,
+  PanOnScrollMode,
   ReactFlowProvider,
 } from 'reactflow';
 import { useAutoFocusNode } from '../../hooks/useAutoFocusNode';
@@ -110,6 +111,7 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
     onEdgesChange,
     onConnect,
     interactionMode,
+    scrollMode,
     activeSubAgentFlowId,
     subAgentFlows,
     updateSubAgentFlow,
@@ -639,6 +641,10 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
                   snapGrid={snapGrid}
                   panOnDrag={panOnDrag}
                   selectionOnDrag={selectionOnDrag}
+                  panOnScroll={scrollMode === 'freehand'}
+                  panOnScrollMode={PanOnScrollMode.Free}
+                  zoomOnScroll={scrollMode === 'classic'}
+                  zoomOnPinch={true}
                   fitView
                   attributionPosition="bottom-left"
                 >
