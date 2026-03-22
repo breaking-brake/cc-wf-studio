@@ -8,7 +8,7 @@
  * - get_current_workflow: Get the currently active workflow from the canvas
  * - get_workflow_schema: Get the workflow JSON schema for generating valid workflows
  * - apply_workflow: Apply a workflow to the canvas (validates first)
- * - list_available_commands: List available .claude/agents/*.md command files
+ * - list_available_agents: List available .claude/agents/*.md agent files
  */
 
 import * as fs from 'node:fs/promises';
@@ -241,10 +241,10 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
     }
   );
 
-  // Tool 4: list_available_commands
+  // Tool 4: list_available_agents
   server.tool(
-    'list_available_commands',
-    'List available .claude/agents/*.md command files that can be referenced as sub-agent nodes in workflows. Returns both user-scope (~/.claude/agents/) and project-scope (.claude/agents/) commands.',
+    'list_available_agents',
+    'List available .claude/agents/*.md agent files that can be referenced as sub-agent nodes in workflows. Returns both user-scope (~/.claude/agents/) and project-scope (.claude/agents/) agents.',
     {
       includeContent: z
         .boolean()
