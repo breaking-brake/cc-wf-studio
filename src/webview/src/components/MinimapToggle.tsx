@@ -11,7 +11,7 @@
 
 import { Map as MapIcon, MapPinned } from 'lucide-react';
 import type React from 'react';
-import { useState } from 'react';
+import { useStableHover } from '../hooks/useStableHover';
 import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { StyledTooltipItem, StyledTooltipProvider } from './common/StyledTooltip';
@@ -25,7 +25,7 @@ type MinimapDisplayMode = 'hidden' | 'auto' | 'always';
 export const MinimapToggle: React.FC = () => {
   const { t } = useTranslation();
   const { minimapDisplayMode, setMinimapDisplayMode } = useWorkflowStore();
-  const [isHovered, setIsHovered] = useState(false);
+  const { ref, isHovered, onMouseEnter, onMouseLeave } = useStableHover();
 
   const tooltipForMode = (mode: MinimapDisplayMode) => {
     switch (mode) {
@@ -171,8 +171,9 @@ export const MinimapToggle: React.FC = () => {
     <StyledTooltipProvider>
       <StyledTooltipItem content={isHovered ? '' : tooltipForMode(minimapDisplayMode)}>
         <div
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
+          ref={ref}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
           onClick={() => {
             if (!isHovered) cycleMode();
           }}

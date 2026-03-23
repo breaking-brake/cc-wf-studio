@@ -8,7 +8,7 @@
 import * as Switch from '@radix-ui/react-switch';
 import { Hand, MousePointerClick } from 'lucide-react';
 import type React from 'react';
-import { useState } from 'react';
+import { useStableHover } from '../hooks/useStableHover';
 import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { StyledTooltipItem, StyledTooltipProvider } from './common/StyledTooltip';
@@ -26,7 +26,7 @@ const TRANSITION_DURATION = window.matchMedia('(prefers-reduced-motion: reduce)'
 export const InteractionModeToggle: React.FC = () => {
   const { t } = useTranslation();
   const { interactionMode, toggleInteractionMode } = useWorkflowStore();
-  const [isHovered, setIsHovered] = useState(false);
+  const { ref, isHovered, onMouseEnter, onMouseLeave } = useStableHover();
 
   return (
     <StyledTooltipProvider>
@@ -40,8 +40,9 @@ export const InteractionModeToggle: React.FC = () => {
         }
       >
         <div
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
+          ref={ref}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
           onClick={() => {
             if (!isHovered) toggleInteractionMode();
           }}
