@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "metadata": {
     "description": "Workflow schema for CC Workflow Studio",
-    "maxNodes": 50,
+    "maxNodes": 100,
     "supportedNodeTypes": [
       "start",
       "end",
@@ -465,7 +465,7 @@
         "constraints": [
           "SubAgentFlow nodes array can only contain: start, end, prompt, ifElse, switch, skill, mcp",
           "SubAgentFlow nodes array CANNOT contain: subAgent, subAgentFlow, askUserQuestion",
-          "Maximum 30 nodes per SubAgentFlow"
+          "Maximum 100 nodes per SubAgentFlow"
         ],
         "example": {
           "nodeInWorkflow": {
@@ -837,7 +837,7 @@
   },
   "validationRules": {
     "workflow": {
-      "maxNodes": 50,
+      "maxNodes": 100,
       "nameMaxLength": 100,
       "namePattern": "^[a-z0-9_-]+$",
       "versionPattern": "^\\d+\\.\\d+\\.\\d+$"
@@ -850,7 +850,7 @@
   },
   "subAgentFlowConstraints": {
     "description": "Constraints specific to Sub-Agent Flow editing. When refining a Sub-Agent Flow, these rules MUST be followed.",
-    "maxNodes": 30,
+    "maxNodes": 100,
     "supportedNodeTypes": ["start", "end", "prompt", "ifElse", "switch", "skill", "mcp", "codex"],
     "prohibitedNodeTypes": ["subAgent", "subAgentFlow", "askUserQuestion"],
     "rules": [
@@ -858,7 +858,7 @@
       "Sub-Agent Flows cannot contain SubAgentFlow nodes (no nesting allowed in Phase 1 MVP)",
       "Sub-Agent Flows cannot contain AskUserQuestion nodes (user interaction not supported in sub-agent context)",
       "Sub-Agent Flows must have exactly one Start node and at least one End node",
-      "Maximum 30 nodes per Sub-Agent Flow"
+      "Maximum 100 nodes per Sub-Agent Flow"
     ]
   },
   "workflowStructure": {

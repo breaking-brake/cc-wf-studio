@@ -1,7 +1,7 @@
 schemaVersion: 1.0.0
 metadata:
   description: Workflow schema for CC Workflow Studio
-  maxNodes: 50
+  maxNodes: 100
   supportedNodeTypes[12]: start,end,prompt,subAgent,askUserQuestion,ifElse,switch,skill,mcp,subAgentFlow,codex,group
 nodeTypes:
   start:
@@ -415,7 +415,7 @@ nodeTypes:
         description: Optional description
         nodes: MUST include at least Start and End nodes
         connections: Connect Start to End (minimum structure)
-      constraints[3]: "SubAgentFlow nodes array can only contain: start, end, prompt, ifElse, switch, skill, mcp","SubAgentFlow nodes array CANNOT contain: subAgent, subAgentFlow, askUserQuestion",Maximum 30 nodes per SubAgentFlow
+      constraints[3]: "SubAgentFlow nodes array can only contain: start, end, prompt, ifElse, switch, skill, mcp","SubAgentFlow nodes array CANNOT contain: subAgent, subAgentFlow, askUserQuestion",Maximum 100 nodes per SubAgentFlow
       example:
         nodeInWorkflow:
           id: subflow-ref-1
@@ -659,7 +659,7 @@ connections:
       items[10]: ✓ Exactly 1 Start node with output connected,✓ At least 1 End node with input(s) connected,✓ All non-Start nodes have input connected,✓ All non-End nodes have output(s) connected,"✓ IfElse nodes: both branches connected","✓ Switch nodes: all branches connected","✓ AskUserQuestion nodes (single-select): all options connected",✓ No dangling nodes,✓ No circular references,✓ All node IDs in connections exist in nodes array
 validationRules:
   workflow:
-    maxNodes: 50
+    maxNodes: 100
     nameMaxLength: 100
     namePattern: "^[a-z0-9_-]+$"
     versionPattern: "^\\d+\\.\\d+\\.\\d+$"
@@ -669,10 +669,10 @@ validationRules:
     namePatternDescription: "IMPORTANT: Node names must use ASCII alphanumeric characters, hyphens, and underscores only. NO spaces or non-ASCII characters allowed."
 subAgentFlowConstraints:
   description: "Constraints specific to Sub-Agent Flow editing. When refining a Sub-Agent Flow, these rules MUST be followed."
-  maxNodes: 30
+  maxNodes: 100
   supportedNodeTypes[8]: start,end,prompt,ifElse,switch,skill,mcp,codex
   prohibitedNodeTypes[3]: subAgent,subAgentFlow,askUserQuestion
-  rules[5]: Sub-Agent Flows cannot contain SubAgent nodes (Claude Code constraint for sequential execution),Sub-Agent Flows cannot contain SubAgentFlow nodes (no nesting allowed in Phase 1 MVP),Sub-Agent Flows cannot contain AskUserQuestion nodes (user interaction not supported in sub-agent context),Sub-Agent Flows must have exactly one Start node and at least one End node,Maximum 30 nodes per Sub-Agent Flow
+  rules[5]: Sub-Agent Flows cannot contain SubAgent nodes (Claude Code constraint for sequential execution),Sub-Agent Flows cannot contain SubAgentFlow nodes (no nesting allowed in Phase 1 MVP),Sub-Agent Flows cannot contain AskUserQuestion nodes (user interaction not supported in sub-agent context),Sub-Agent Flows must have exactly one Start node and at least one End node,Maximum 100 nodes per Sub-Agent Flow
 workflowStructure:
   description: Top-level workflow structure fields
   fields:

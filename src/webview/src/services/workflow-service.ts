@@ -5,13 +5,14 @@
  * Based on: /specs/001-cc-wf-studio/data-model.md
  */
 
-import type {
-  Connection,
-  ConversationHistory,
-  SlashCommandOptions,
-  SubAgentFlow,
-  Workflow,
-  WorkflowNode,
+import {
+  type Connection,
+  type ConversationHistory,
+  type SlashCommandOptions,
+  type SubAgentFlow,
+  VALIDATION_RULES,
+  type Workflow,
+  type WorkflowNode,
 } from '@shared/types/workflow-definition';
 import type { Edge, Node } from 'reactflow';
 
@@ -188,9 +189,9 @@ export function validateWorkflow(workflow: Workflow): void {
     throw new Error('Workflow version must follow semantic versioning (e.g., 1.0.0)');
   }
 
-  // Check max nodes (50)
-  if (workflow.nodes.length > 50) {
-    throw new Error('Workflow cannot have more than 50 nodes');
+  // Check max nodes
+  if (workflow.nodes.length > VALIDATION_RULES.WORKFLOW.MAX_NODES) {
+    throw new Error(`Workflow cannot have more than ${VALIDATION_RULES.WORKFLOW.MAX_NODES} nodes`);
   }
 
   // Validate nodes

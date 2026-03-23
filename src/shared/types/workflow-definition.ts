@@ -599,7 +599,7 @@ export interface Workflow {
 
 export const VALIDATION_RULES = {
   WORKFLOW: {
-    MAX_NODES: 50,
+    MAX_NODES: 100,
     NAME_MIN_LENGTH: 1,
     NAME_MAX_LENGTH: 100,
     NAME_PATTERN: /^[a-z0-9_-]+$/, // Lowercase only (for cross-platform file system compatibility)
@@ -676,7 +676,7 @@ export const VALIDATION_RULES = {
     NAME_MAX_LENGTH: 50,
     NAME_PATTERN: /^[a-z0-9_-]+$/, // Lowercase only (for cross-platform file system compatibility)
     DESCRIPTION_MAX_LENGTH: 200,
-    MAX_NODES: 30, // Smaller than main workflow
+    MAX_NODES: 100,
     // Node-specific validation (for SubAgentFlow reference nodes)
     LABEL_MIN_LENGTH: 1,
     LABEL_MAX_LENGTH: 50,

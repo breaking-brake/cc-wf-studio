@@ -10,6 +10,7 @@ import * as vscode from 'vscode';
 import type { SaveSuccessPayload } from '../../shared/types/messages';
 import type { Workflow } from '../../shared/types/workflow-definition';
 import type { FileService } from '../services/file-service';
+import { getMaxNodes } from '../services/workflow-settings-service';
 
 /**
  * Save workflow to file
@@ -130,8 +131,9 @@ function validateWorkflow(workflow: Workflow): void {
     throw new Error('Workflow version must follow semantic versioning (e.g., 1.0.0)');
   }
 
-  // Check max nodes (50)
-  if (workflow.nodes.length > 50) {
-    throw new Error('Workflow cannot have more than 50 nodes');
+  // Check max nodes (configurable via settings)
+  const maxNodes = getMaxNodes();
+  if (workflow.nodes.length > maxNodes) {
+    throw new Error(`Workflow cannot have more than ${maxNodes} nodes`);
   }
 }

@@ -19,6 +19,7 @@ import {
   type WorkflowHooks,
   type WorkflowNode,
 } from '../../shared/types/workflow-definition';
+import { getMaxNodes } from '../services/workflow-settings-service';
 
 export interface ValidationError {
   code: string;
@@ -99,10 +100,11 @@ export function validateAIGeneratedWorkflow(workflow: unknown): ValidationResult
   }
 
   // Node count validation
-  if (wf.nodes.length > VALIDATION_RULES.WORKFLOW.MAX_NODES) {
+  const maxNodes = getMaxNodes();
+  if (wf.nodes.length > maxNodes) {
     errors.push({
       code: 'MAX_NODES_EXCEEDED',
-      message: `Generated workflow exceeds maximum node limit (${VALIDATION_RULES.WORKFLOW.MAX_NODES}). Please simplify your description.`,
+      message: `Generated workflow exceeds maximum node limit (${maxNodes}). Please simplify your description.`,
       field: 'nodes',
     });
   }
