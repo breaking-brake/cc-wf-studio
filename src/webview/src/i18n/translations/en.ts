@@ -49,8 +49,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.scrollMode.switchToFreehand': 'Switch to Freehand mode (scroll = pan)',
 
   // Toolbar minimap toggle
-  'toolbar.minimapToggle.show': 'Show Minimap',
-  'toolbar.minimapToggle.hide': 'Hide Minimap',
+  'toolbar.minimapToggle.hidden': 'Hidden',
+  'toolbar.minimapToggle.auto': 'Show on Scroll',
+  'toolbar.minimapToggle.always': 'Always Show',
 
   // Toolbar errors
   'toolbar.error.workflowNameRequired': 'Workflow name is required',
@@ -435,8 +436,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Skill Browser Dialog
   'skill.browser.title': 'Browse Skills',
-  'skill.browser.description':
-    'Select a Claude Code Skill to add to your workflow.\nSkills are specialized capabilities that Claude Code automatically utilizes.',
+  'skill.browser.description': 'Select an Agent Skill to add to your workflow.',
+  'skill.browser.selectSkill': 'Select Skill',
+  'skill.browser.browseSkills': 'Browse Skills',
   'skill.browser.userTab': 'User',
   'skill.browser.projectTab': 'Project',
   'skill.browser.localTab': 'Local',
@@ -662,6 +664,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': 'No tools found matching "{query}"',
   'mcp.search.serverPlaceholder': 'Filter servers by name...',
   'mcp.search.noServers': 'No servers found matching "{query}"',
+  'mcp.browse.servers': 'Browse MCP Servers',
 
   // MCP Node Dialog
   'mcp.dialog.title': 'MCP Tool Configuration',
@@ -951,8 +954,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.cancelButton': 'Cancel',
   'subAgent.dialog.backButton': 'Back',
   'subAgent.dialog.loadFailed': 'Failed to load commands. Please check the commands directory.',
-  'subAgent.dialog.description':
-    'Browse and select an existing command file to use as a Sub-Agent node.',
+  'subAgent.dialog.description': 'Select a Sub-Agent to add to your workflow.',
+  'subAgent.dialog.selectSubAgent': 'Select Sub-Agent',
+  'subAgent.dialog.browseSubAgents': 'Browse Sub-Agents',
   'subAgent.dialog.userDescription':
     'Commands from ~/.claude/agents/ — available across all projects.',
   'subAgent.dialog.projectDescription': 'Commands from .claude/agents/ — specific to this project.',

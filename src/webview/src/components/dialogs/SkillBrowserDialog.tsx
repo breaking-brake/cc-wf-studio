@@ -10,12 +10,16 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import type { SkillReference } from '@shared/types/messages';
 import { NodeType, VALIDATION_RULES } from '@shared/types/workflow-definition';
+import { ExternalLink } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { browseSkills, createSkill } from '../../services/skill-browser-service';
+import { openExternalUrl } from '../../services/vscode-bridge';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { AIProviderBadge, type AIProviderType } from '../common/AIProviderBadge';
 import { type CreateSkillFormData, SkillCreationDialog } from './SkillCreationDialog';
+
+const SKILLS_MP_URL = 'https://skillsmp.com';
 
 type SourceType = 'claude' | 'copilot' | 'codex' | 'roo' | 'gemini' | 'antigravity' | 'cursor';
 
@@ -343,6 +347,49 @@ export function SkillBrowserDialog({ isOpen, onClose }: SkillBrowserDialogProps)
 
             {!showSettingsStep && (
               <>
+                {/* Select Skill label + discovery link */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    margin: '0 0 12px 0',
+                  }}
+                >
+                  <h3
+                    style={{
+                      margin: 0,
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      color: 'var(--vscode-foreground)',
+                    }}
+                  >
+                    {t('skill.browser.selectSkill')}
+                  </h3>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => openExternalUrl(SKILLS_MP_URL)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        openExternalUrl(SKILLS_MP_URL);
+                      }
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      cursor: 'pointer',
+                      color: 'var(--vscode-textLink-foreground)',
+                      fontSize: '12px',
+                    }}
+                    title={SKILLS_MP_URL}
+                  >
+                    {t('skill.browser.browseSkills')} (skillsmp.com)
+                    <ExternalLink size={11} />
+                  </span>
+                </div>
+
                 {/* Filter Input + Create New Button */}
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                   <input

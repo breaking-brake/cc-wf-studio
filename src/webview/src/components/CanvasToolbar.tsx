@@ -9,6 +9,7 @@ import type React from 'react';
 import { EdgeAnimationToggle } from './EdgeAnimationToggle';
 import { HighlightToggle } from './HighlightToggle';
 import { InteractionModeToggle } from './InteractionModeToggle';
+import { MinimapToggle } from './MinimapToggle';
 import { ScrollModeToggle } from './ScrollModeToggle';
 
 interface CanvasToolbarProps {
@@ -26,6 +27,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
       <InteractionModeToggle />
       <EdgeAnimationToggle isEnabled={isEdgeAnimationEnabled} onToggle={onToggleEdgeAnimation} />
       <HighlightToggle />
+      <MinimapToggle />
     </div>
   );
 };

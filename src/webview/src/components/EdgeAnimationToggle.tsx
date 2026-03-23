@@ -8,7 +8,7 @@
 import * as Switch from '@radix-ui/react-switch';
 import { ChevronsLeftRightEllipsis } from 'lucide-react';
 import type React from 'react';
-import { useState } from 'react';
+import { useStableHover } from '../hooks/useStableHover';
 import { useTranslation } from '../i18n/i18n-context';
 import { StyledTooltipItem, StyledTooltipProvider } from './common/StyledTooltip';
 
@@ -26,7 +26,7 @@ export const EdgeAnimationToggle: React.FC<EdgeAnimationToggleProps> = ({
   onToggle,
 }) => {
   const { t } = useTranslation();
-  const [isHovered, setIsHovered] = useState(false);
+  const { ref, isHovered, onMouseEnter, onMouseLeave } = useStableHover();
 
   return (
     <StyledTooltipProvider>
@@ -40,8 +40,9 @@ export const EdgeAnimationToggle: React.FC<EdgeAnimationToggleProps> = ({
         }
       >
         <div
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
+          ref={ref}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
           onClick={() => {
             if (!isHovered) onToggle();
           }}

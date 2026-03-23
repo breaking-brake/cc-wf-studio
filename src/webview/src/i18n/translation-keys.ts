@@ -47,8 +47,9 @@ export interface WebviewTranslationKeys {
   'toolbar.scrollMode.switchToFreehand': string;
 
   // Toolbar minimap toggle
-  'toolbar.minimapToggle.show': string;
-  'toolbar.minimapToggle.hide': string;
+  'toolbar.minimapToggle.hidden': string;
+  'toolbar.minimapToggle.auto': string;
+  'toolbar.minimapToggle.always': string;
 
   // Toolbar errors
   'toolbar.error.workflowNameRequired': string;
@@ -399,6 +400,8 @@ export interface WebviewTranslationKeys {
   // Skill Browser Dialog
   'skill.browser.title': string;
   'skill.browser.description': string;
+  'skill.browser.selectSkill': string;
+  'skill.browser.browseSkills': string;
   'skill.browser.userTab': string;
   'skill.browser.projectTab': string;
   'skill.browser.localTab': string;
@@ -597,6 +600,7 @@ export interface WebviewTranslationKeys {
   'mcp.search.noResults': string;
   'mcp.search.serverPlaceholder': string;
   'mcp.search.noServers': string;
+  'mcp.browse.servers': string;
 
   // MCP Node Dialog
   'mcp.dialog.title': string;
@@ -867,6 +871,8 @@ export interface WebviewTranslationKeys {
   'subAgent.dialog.backButton': string;
   'subAgent.dialog.loadFailed': string;
   'subAgent.dialog.description': string;
+  'subAgent.dialog.selectSubAgent': string;
+  'subAgent.dialog.browseSubAgents': string;
   'subAgent.dialog.userDescription': string;
   'subAgent.dialog.projectDescription': string;
   'subAgent.dialog.localDescription': string;

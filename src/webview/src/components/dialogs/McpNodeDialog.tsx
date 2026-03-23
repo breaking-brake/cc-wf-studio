@@ -9,15 +9,20 @@
 
 import * as Dialog from '@radix-ui/react-dialog';
 import { NodeType } from '@shared/types/workflow-definition';
+import { ExternalLink } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useMcpCreationWizard, WizardStep } from '../../hooks/useMcpCreationWizard';
 import { useTranslation } from '../../i18n/i18n-context';
 import { checkMcpBearerToken, deleteMcpBearerToken } from '../../services/mcp-service';
+import { openExternalUrl } from '../../services/vscode-bridge';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { WizardStepIndicator } from '../common/WizardStepIndicator';
 import { McpServerList } from '../mcp/McpServerList';
 import { McpToolList } from '../mcp/McpToolList';
 import { McpToolSearch } from '../mcp/McpToolSearch';
+
+const PULSE_MCP_URL = 'https://www.pulsemcp.com/servers';
+
 import { AiParameterConfigInput } from '../mode-selection/AiParameterConfigInput';
 import { AiToolSelectionInput } from '../mode-selection/AiToolSelectionInput';
 import { McpModeSelectionStep } from '../mode-selection/McpModeSelectionStep';
@@ -246,16 +251,47 @@ export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
       case WizardStep.ServerSelection:
         return (
           <div>
-            <h3
+            <div
               style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
                 margin: '0 0 12px 0',
-                fontSize: '14px',
-                fontWeight: 600,
-                color: 'var(--vscode-foreground)',
               }}
             >
-              {t('mcp.dialog.selectServer')}
-            </h3>
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                }}
+              >
+                {t('mcp.dialog.selectServer')}
+              </h3>
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={() => openExternalUrl(PULSE_MCP_URL)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    openExternalUrl(PULSE_MCP_URL);
+                  }
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  cursor: 'pointer',
+                  color: 'var(--vscode-textLink-foreground)',
+                  fontSize: '12px',
+                }}
+                title={PULSE_MCP_URL}
+              >
+                {t('mcp.browse.servers')} (pulsemcp.com)
+                <ExternalLink size={11} />
+              </span>
+            </div>
             <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
               <McpServerList
                 onServerSelect={(server) => {

@@ -78,6 +78,13 @@
           "type": "boolean",
           "default": false,
           "description": "Collect and log metrics for A/B comparison of schema formats. Note: Prompt format is always 'toon'."
+        },
+        "cc-wf-studio.workflow.maxNodes": {
+          "type": "number",
+          "default": 100,
+          "minimum": 10,
+          "maximum": 500,
+          "description": "Maximum number of nodes allowed in a workflow."
         }
       }
     }

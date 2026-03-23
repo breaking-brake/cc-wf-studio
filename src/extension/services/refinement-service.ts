@@ -35,6 +35,7 @@ import { RefinementPromptBuilder } from './refinement-prompt-builder';
 import { loadWorkflowSchemaByFormat, type SchemaLoadResult } from './schema-loader-service';
 import { filterSkillsByRelevance, type SkillRelevanceScore } from './skill-relevance-matcher';
 import { scanAllSkills } from './skill-service';
+import { getMaxNodes } from './workflow-settings-service';
 
 /** Validation error structure */
 export interface ValidationErrorInfo {
@@ -976,9 +977,8 @@ export interface SubAgentFlowRefinementResult {
 const SUBAGENTFLOW_PROHIBITED_NODE_TYPES = ['subAgent', 'subAgentFlow', 'askUserQuestion'];
 
 /**
- * Maximum nodes allowed in SubAgentFlow
+ * Maximum nodes allowed in SubAgentFlow (reads from user settings)
  */
-const SUBAGENTFLOW_MAX_NODES = 30;
 
 /**
  * Construct refinement prompt for SubAgentFlow
@@ -1091,7 +1091,7 @@ Sub-Agent Flows have strict constraints that MUST be followed:
    - subAgentFlow (no nesting allowed)
    - askUserQuestion (user interaction not supported in sub-agent context)
 2. **Allowed Node Types**: start, end, prompt, ifElse, switch, skill, mcp, codex
-3. **Maximum Nodes**: ${SUBAGENTFLOW_MAX_NODES} nodes maximum
+3. **Maximum Nodes**: ${getMaxNodes()} nodes maximum
 4. **Must have exactly one Start node and at least one End node**
 
 **Current Sub-Agent Flow**:
@@ -1488,11 +1488,11 @@ export async function refineSubAgentFlow(
     }
 
     // Step 7: Validate node count
-    if (refinedInnerWorkflow.nodes.length > SUBAGENTFLOW_MAX_NODES) {
+    if (refinedInnerWorkflow.nodes.length > getMaxNodes()) {
       log('ERROR', 'SubAgentFlow exceeds maximum node count', {
         requestId,
         nodeCount: refinedInnerWorkflow.nodes.length,
-        maxNodes: SUBAGENTFLOW_MAX_NODES,
+        maxNodes: getMaxNodes(),
         executionTimeMs: cliResult.executionTimeMs,
       });
 
@@ -1500,7 +1500,7 @@ export async function refineSubAgentFlow(
         success: false,
         error: {
           code: 'VALIDATION_ERROR',
-          message: `Sub-Agent Flow cannot exceed ${SUBAGENTFLOW_MAX_NODES} nodes`,
+          message: `Sub-Agent Flow cannot exceed ${getMaxNodes()} nodes`,
           details: `Current count: ${refinedInnerWorkflow.nodes.length}`,
         },
         executionTimeMs: cliResult.executionTimeMs,

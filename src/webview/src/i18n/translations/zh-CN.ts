@@ -49,8 +49,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.scrollMode.switchToFreehand': '切换到Freehand模式（滚动=平移）',
 
   // Toolbar minimap toggle
-  'toolbar.minimapToggle.show': '显示迷你地图',
-  'toolbar.minimapToggle.hide': '隐藏迷你地图',
+  'toolbar.minimapToggle.hidden': '隐藏',
+  'toolbar.minimapToggle.auto': '滚动时显示',
+  'toolbar.minimapToggle.always': '始终显示',
 
   // Toolbar errors
   'toolbar.error.workflowNameRequired': '工作流名称必填',
@@ -417,8 +418,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
 
   // Skill Browser Dialog
   'skill.browser.title': '浏览Skill',
-  'skill.browser.description':
-    '选择要添加到工作流的Claude Code Skill。\nSkill是Claude Code自动利用的专业能力。',
+  'skill.browser.description': '选择要添加到工作流的Agent Skill。',
+  'skill.browser.selectSkill': '选择Skill',
+  'skill.browser.browseSkills': '浏览Skill',
   'skill.browser.userTab': '用户',
   'skill.browser.projectTab': '项目',
   'skill.browser.localTab': '本地',
@@ -631,6 +633,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': '未找到与"{query}"匹配的工具',
   'mcp.search.serverPlaceholder': '按名称筛选服务器...',
   'mcp.search.noServers': '未找到与"{query}"匹配的服务器',
+  'mcp.browse.servers': '浏览MCP服务器',
 
   // MCP Node Dialog
   'mcp.dialog.title': 'MCP Tool配置',
@@ -908,7 +911,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.cancelButton': '取消',
   'subAgent.dialog.backButton': '返回',
   'subAgent.dialog.loadFailed': '加载命令失败。请检查命令目录。',
-  'subAgent.dialog.description': '浏览并选择现有命令文件作为 Sub-Agent 节点使用。',
+  'subAgent.dialog.description': '选择要添加到工作流的 Sub-Agent。',
+  'subAgent.dialog.selectSubAgent': '选择 Sub-Agent',
+  'subAgent.dialog.browseSubAgents': '浏览 Sub-Agent',
   'subAgent.dialog.userDescription': '~/.claude/agents/ 中的命令 — 所有项目可用。',
   'subAgent.dialog.projectDescription': '.claude/agents/ 中的命令 — 仅限此项目。',
   'subAgent.dialog.localDescription':

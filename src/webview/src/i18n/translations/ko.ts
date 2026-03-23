@@ -49,8 +49,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.scrollMode.switchToFreehand': 'Freehand 모드로 전환 (스크롤 = 팬)',
 
   // Toolbar minimap toggle
-  'toolbar.minimapToggle.show': '미니맵 표시',
-  'toolbar.minimapToggle.hide': '미니맵 숨기기',
+  'toolbar.minimapToggle.hidden': '숨김',
+  'toolbar.minimapToggle.auto': '스크롤 시 표시',
+  'toolbar.minimapToggle.always': '항상 표시',
 
   // Toolbar errors
   'toolbar.error.workflowNameRequired': '워크플로 이름이 필요합니다',
@@ -433,8 +434,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Skill Browser Dialog
   'skill.browser.title': 'Skill 탐색',
-  'skill.browser.description':
-    '워크플로에 추가할 Claude Code Skill을 선택하세요.\nSkill은 Claude Code가 자동으로 활용하는 전문적인 능력입니다.',
+  'skill.browser.description': '워크플로에 추가할 Agent Skill을 선택하세요.',
+  'skill.browser.selectSkill': 'Skill 선택',
+  'skill.browser.browseSkills': 'Skill 찾아보기',
   'skill.browser.userTab': '사용자',
   'skill.browser.projectTab': '프로젝트',
   'skill.browser.localTab': '로컬',
@@ -654,6 +656,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': '"{query}"와 일치하는 도구를 찾을 수 없습니다',
   'mcp.search.serverPlaceholder': '서버 이름으로 필터...',
   'mcp.search.noServers': '"{query}"와 일치하는 서버를 찾을 수 없습니다',
+  'mcp.browse.servers': 'MCP 서버 찾아보기',
 
   // MCP Node Dialog
   'mcp.dialog.title': 'MCP Tool 설정',
@@ -940,7 +943,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.cancelButton': '취소',
   'subAgent.dialog.backButton': '뒤로',
   'subAgent.dialog.loadFailed': '커맨드를 로드하지 못했습니다. 커맨드 디렉토리를 확인하세요.',
-  'subAgent.dialog.description': '기존 커맨드 파일을 선택하여 Sub-Agent 노드로 사용합니다.',
+  'subAgent.dialog.description': '워크플로에 추가할 Sub-Agent를 선택하세요.',
+  'subAgent.dialog.selectSubAgent': 'Sub-Agent 선택',
+  'subAgent.dialog.browseSubAgents': 'Sub-Agent 찾아보기',
   'subAgent.dialog.userDescription': '~/.claude/agents/의 커맨드 — 모든 프로젝트에서 사용 가능.',
   'subAgent.dialog.projectDescription': '.claude/agents/의 커맨드 — 이 프로젝트에만 해당.',
   'subAgent.dialog.localDescription':

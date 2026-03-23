@@ -49,8 +49,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.scrollMode.switchToFreehand': 'Freehandモードに切り替え（スクロール=パン）',
 
   // Toolbar minimap toggle
-  'toolbar.minimapToggle.show': 'ミニマップを表示',
-  'toolbar.minimapToggle.hide': 'ミニマップを非表示',
+  'toolbar.minimapToggle.hidden': '非表示',
+  'toolbar.minimapToggle.auto': 'スクロール時に表示',
+  'toolbar.minimapToggle.always': '常に表示',
 
   // Toolbar errors
   'toolbar.error.workflowNameRequired': 'ワークフロー名は必須です',
@@ -434,8 +435,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Skill Browser Dialog
   'skill.browser.title': 'Skillを参照',
-  'skill.browser.description':
-    'ワークフローに追加するClaude Code Skillを選択してください。\nSkillはClaude Codeが自動的に活用する専門的な能力です。',
+  'skill.browser.description': 'ワークフローに追加するAgent Skillを選択してください。',
+  'skill.browser.selectSkill': 'Skillを選択',
+  'skill.browser.browseSkills': 'Skillを探す',
   'skill.browser.userTab': 'ユーザー',
   'skill.browser.projectTab': 'プロジェクト',
   'skill.browser.localTab': 'ローカル',
@@ -659,6 +661,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'mcp.search.noResults': '"{query}" に一致するツールが見つかりません',
   'mcp.search.serverPlaceholder': 'サーバー名でフィルタ...',
   'mcp.search.noServers': '"{query}" に一致するサーバーが見つかりません',
+  'mcp.browse.servers': 'MCPサーバーを探す',
 
   // MCP Node Dialog
   'mcp.dialog.title': 'MCP Toolの設定',
@@ -945,8 +948,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.backButton': '戻る',
   'subAgent.dialog.loadFailed':
     'コマンドの読み込みに失敗しました。コマンドディレクトリを確認してください。',
-  'subAgent.dialog.description':
-    '既存のコマンドファイルを選択して、Sub-Agentノードとして使用します。',
+  'subAgent.dialog.description': 'ワークフローに追加するSub-Agentを選択してください。',
+  'subAgent.dialog.selectSubAgent': 'Sub-Agentを選択',
+  'subAgent.dialog.browseSubAgents': 'Sub-Agentを探す',
   'subAgent.dialog.userDescription':
     '~/.claude/agents/ のコマンド — すべてのプロジェクトで利用可能。',
   'subAgent.dialog.projectDescription': '.claude/agents/ のコマンド — このプロジェクト固有。',
