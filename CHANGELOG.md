@@ -1,3 +1,17 @@
+## [3.30.3](https://github.com/breaking-brake/cc-wf-studio/compare/v3.30.2...v3.30.3) (2026-03-23)
+
+### Bug Fixes
+
+* canvas toolbar toggles getting stuck open on rapid hover ([#679](https://github.com/breaking-brake/cc-wf-studio/issues/679)) ([7b42494](https://github.com/breaking-brake/cc-wf-studio/commit/7b4249415e464a1ce68bb1748325b784cc89b398))
+
+### Improvements
+
+* add minimap 3-state display mode with scroll auto-show ([#677](https://github.com/breaking-brake/cc-wf-studio/issues/677)) ([fb26d73](https://github.com/breaking-brake/cc-wf-studio/commit/fb26d73920ba8215fe0020106fd29d404a75c7da))
+* add PulseMCP discovery link to MCP server selection ([#674](https://github.com/breaking-brake/cc-wf-studio/issues/674)) ([e6f2b6c](https://github.com/breaking-brake/cc-wf-studio/commit/e6f2b6c00e4348b96386b878fac7add362b907da))
+* add SkillsMP discovery link to Skill Browser dialog ([#675](https://github.com/breaking-brake/cc-wf-studio/issues/675)) ([7638fdf](https://github.com/breaking-brake/cc-wf-studio/commit/7638fdf65e3572bb72947912be11586a07ab3f84))
+* add sub-agent discovery link to Sub-Agent Creation dialog ([#676](https://github.com/breaking-brake/cc-wf-studio/issues/676)) ([3523da8](https://github.com/breaking-brake/cc-wf-studio/commit/3523da8f57ce833ac508c7ae092f73916fe69328))
+* increase max node limit to 100 with user-configurable setting ([#678](https://github.com/breaking-brake/cc-wf-studio/issues/678)) ([e4318db](https://github.com/breaking-brake/cc-wf-studio/commit/e4318dbbd069a405b3b52fe9f5f0dacc4d4fda24))
+
 ## [3.30.2](https://github.com/breaking-brake/cc-wf-studio/compare/v3.30.1...v3.30.2) (2026-03-22)
 
 ### Bug Fixes
