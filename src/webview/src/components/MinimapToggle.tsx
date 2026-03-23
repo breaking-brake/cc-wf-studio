@@ -198,7 +198,7 @@ export const MinimapToggle: React.FC = () => {
             borderRadius: '20px',
             padding: isHovered ? '4px 5px' : '0px',
             opacity: 0.85,
-            width: isHovered ? '106px' : '28px',
+            width: isHovered ? '106px' : '34px',
             height: '34px',
             overflow: 'hidden',
             cursor: isHovered ? 'default' : 'pointer',
