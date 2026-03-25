@@ -45,6 +45,11 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.edgeAnimation.disable': 'Disable edge animation',
   'toolbar.highlight.enable': 'Enable group node highlight',
   'toolbar.highlight.disable': 'Disable group node highlight',
+  'toolbar.highlight.confirmDisable.title': 'Disable Group Node Highlight',
+  'toolbar.highlight.confirmDisable.message':
+    'A group node is currently highlighted. Are you sure you want to disable the highlight?',
+  'toolbar.highlight.confirmDisable.confirm': 'Disable',
+  'toolbar.highlight.confirmDisable.cancel': 'Cancel',
   'toolbar.scrollMode.switchToClassic': 'Switch to Classic mode (scroll = zoom)',
   'toolbar.scrollMode.switchToFreehand': 'Switch to Freehand mode (scroll = pan)',
 

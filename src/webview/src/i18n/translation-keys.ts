@@ -43,6 +43,10 @@ export interface WebviewTranslationKeys {
   'toolbar.edgeAnimation.disable': string;
   'toolbar.highlight.enable': string;
   'toolbar.highlight.disable': string;
+  'toolbar.highlight.confirmDisable.title': string;
+  'toolbar.highlight.confirmDisable.message': string;
+  'toolbar.highlight.confirmDisable.confirm': string;
+  'toolbar.highlight.confirmDisable.cancel': string;
   'toolbar.scrollMode.switchToClassic': string;
   'toolbar.scrollMode.switchToFreehand': string;
 

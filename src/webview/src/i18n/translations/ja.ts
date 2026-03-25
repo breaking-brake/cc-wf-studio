@@ -45,6 +45,11 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.edgeAnimation.disable': 'エッジアニメーションを無効化',
   'toolbar.highlight.enable': 'グループノードハイライトを有効化',
   'toolbar.highlight.disable': 'グループノードハイライトを無効化',
+  'toolbar.highlight.confirmDisable.title': 'グループノードハイライトを無効化',
+  'toolbar.highlight.confirmDisable.message':
+    '現在グループノードがハイライトされています。ハイライトを無効化しますか？',
+  'toolbar.highlight.confirmDisable.confirm': '無効化',
+  'toolbar.highlight.confirmDisable.cancel': 'キャンセル',
   'toolbar.scrollMode.switchToClassic': 'Classicモードに切り替え（スクロール=ズーム）',
   'toolbar.scrollMode.switchToFreehand': 'Freehandモードに切り替え（スクロール=パン）',
 
