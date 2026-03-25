@@ -45,6 +45,10 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.edgeAnimation.disable': '停用邊動畫',
   'toolbar.highlight.enable': '啟用群組節點高亮',
   'toolbar.highlight.disable': '停用群組節點高亮',
+  'toolbar.highlight.confirmDisable.title': '停用群組節點高亮',
+  'toolbar.highlight.confirmDisable.message': '目前有群組節點正在高亮顯示。確定要停用高亮嗎？',
+  'toolbar.highlight.confirmDisable.confirm': '停用',
+  'toolbar.highlight.confirmDisable.cancel': '取消',
   'toolbar.scrollMode.switchToClassic': '切換到Classic模式（滾動=縮放）',
   'toolbar.scrollMode.switchToFreehand': '切換到Freehand模式（滾動=平移）',
 
