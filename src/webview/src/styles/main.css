@@ -198,6 +198,50 @@ button {
    Synced with GroupNode's highlightPulse to visually connect the two
    ============================================================================ */
 
+/* ============================================================================
+   Canvas Toolbar Toggle Popover Animation
+   Expands horizontally from center when opening
+   ============================================================================ */
+
+@keyframes toggle-popover-open {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes toggle-popover-close {
+  from {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  to {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+}
+
+.toggle-popover-content[data-state="open"] {
+  animation: toggle-popover-open 200ms ease forwards;
+  transform-origin: center;
+}
+
+.toggle-popover-content[data-state="closed"] {
+  animation: toggle-popover-close 150ms ease forwards;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle-popover-content[data-state="open"],
+  .toggle-popover-content[data-state="closed"] {
+    animation: none;
+  }
+}
+
 @keyframes highlight-btn-pulse {
   0%,
   100% {

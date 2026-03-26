@@ -6,26 +6,24 @@
  * - auto: show on scroll, fade out after idle
  * - always: always visible
  *
- * Compact icon when not hovered, expands to 3-segment control on hover.
+ * Compact icon button; hover shows a popover with 3-segment control
+ * centered on the button via Radix Popover portal.
  */
 
+import * as Popover from '@radix-ui/react-popover';
 import { Map as MapIcon, MapPinned } from 'lucide-react';
 import type React from 'react';
-import { useStableHover } from '../hooks/useStableHover';
+import { usePopoverHover } from '../hooks/usePopoverHover';
 import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { StyledTooltipItem, StyledTooltipProvider } from './common/StyledTooltip';
-
-const TRANSITION_DURATION = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  ? '0ms'
-  : '200ms';
 
 type MinimapDisplayMode = 'hidden' | 'auto' | 'always';
 
 export const MinimapToggle: React.FC = () => {
   const { t } = useTranslation();
   const { minimapDisplayMode, setMinimapDisplayMode } = useWorkflowStore();
-  const { ref, isHovered, onMouseEnter, onMouseLeave } = useStableHover();
+  const { isHovered, triggerProps, contentProps } = usePopoverHover();
 
   const tooltipForMode = (mode: MinimapDisplayMode) => {
     switch (mode) {
@@ -44,7 +42,6 @@ export const MinimapToggle: React.FC = () => {
     setMinimapDisplayMode(modes[nextIndex]);
   };
 
-  // Icon for current mode (collapsed state)
   const renderCollapsedIcon = () => {
     if (minimapDisplayMode === 'hidden') {
       return (
@@ -78,7 +75,6 @@ export const MinimapToggle: React.FC = () => {
     return <MapIcon size={14} style={{ color: 'var(--vscode-foreground)' }} />;
   };
 
-  // Segment button for expanded state
   const renderSegment = (mode: MinimapDisplayMode) => {
     const isActive = minimapDisplayMode === mode;
 
@@ -170,61 +166,67 @@ export const MinimapToggle: React.FC = () => {
   return (
     <StyledTooltipProvider>
       <StyledTooltipItem content={isHovered ? '' : tooltipForMode(minimapDisplayMode)}>
-        <div
-          ref={ref}
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
-          onClick={() => {
-            if (!isHovered) cycleMode();
-          }}
-          onKeyDown={(e) => {
-            if (!isHovered && (e.key === 'Enter' || e.key === ' ')) {
-              e.preventDefault();
-              cycleMode();
-            }
-          }}
-          role="button"
-          tabIndex={isHovered ? -1 : 0}
-          aria-label={`Minimap: ${tooltipForMode(minimapDisplayMode)}`}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: isHovered ? '4px' : '0px',
-            backgroundColor: 'var(--vscode-editor-background)',
-            border: isHovered
-              ? '1px solid var(--vscode-focusBorder)'
-              : '1px solid var(--vscode-panel-border)',
-            borderRadius: '20px',
-            padding: isHovered ? '4px 5px' : '0px',
-            opacity: 0.85,
-            width: isHovered ? '106px' : '34px',
-            height: '34px',
-            overflow: 'hidden',
-            cursor: isHovered ? 'default' : 'pointer',
-            boxSizing: 'border-box',
-            transition: `width ${TRANSITION_DURATION} ease, padding ${TRANSITION_DURATION} ease, gap ${TRANSITION_DURATION} ease`,
-          }}
-        >
-          {isHovered ? (
-            <>
-              {renderSegment('hidden')}
-              {renderSegment('auto')}
-              {renderSegment('always')}
-            </>
-          ) : (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '20px',
-                height: '20px',
-              }}
-            >
-              {renderCollapsedIcon()}
-            </div>
-          )}
+        <div {...triggerProps}>
+          <Popover.Root open={isHovered}>
+            <Popover.Trigger asChild>
+              <div
+                onClick={() => cycleMode()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    cycleMode();
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`Minimap: ${tooltipForMode(minimapDisplayMode)}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'var(--vscode-editor-background)',
+                  border: '1px solid var(--vscode-panel-border)',
+                  borderRadius: '20px',
+                  width: '34px',
+                  height: '34px',
+                  opacity: 0.85,
+                  cursor: 'pointer',
+                  boxSizing: 'border-box',
+                }}
+              >
+                {renderCollapsedIcon()}
+              </div>
+            </Popover.Trigger>
+            <Popover.Portal>
+              <Popover.Content
+                className="toggle-popover-content"
+                side="bottom"
+                sideOffset={-34}
+                align="center"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                onCloseAutoFocus={(e) => e.preventDefault()}
+                onPointerDownOutside={(e) => e.preventDefault()}
+                onInteractOutside={(e) => e.preventDefault()}
+                {...contentProps}
+                style={{
+                  backgroundColor: 'var(--vscode-editor-background)',
+                  border: '1px solid var(--vscode-focusBorder)',
+                  borderRadius: '20px',
+                  padding: '0px 5px',
+                  height: '34px',
+                  boxSizing: 'border-box',
+                  zIndex: 10000,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                {renderSegment('hidden')}
+                {renderSegment('auto')}
+                {renderSegment('always')}
+              </Popover.Content>
+            </Popover.Portal>
+          </Popover.Root>
         </div>
       </StyledTooltipItem>
     </StyledTooltipProvider>
