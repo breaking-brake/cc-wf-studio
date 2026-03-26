@@ -1,3 +1,14 @@
+## [3.31.0](https://github.com/breaking-brake/cc-wf-studio/compare/v3.30.4...v3.31.0) (2026-03-26)
+
+### Features
+
+* add built-in sub-agent presets with cross-platform export support ([#686](https://github.com/breaking-brake/cc-wf-studio/issues/686)) ([8188f84](https://github.com/breaking-brake/cc-wf-studio/commit/8188f84d234aa6ef3ee8e8af727ffa8d5f4ba4f7))
+
+### Improvements
+
+* add confirm dialog before disabling group highlight ([#685](https://github.com/breaking-brake/cc-wf-studio/issues/685)) ([ba74dff](https://github.com/breaking-brake/cc-wf-studio/commit/ba74dff34cb8038e8ea645c2b506d6277bef538b))
+* separate Agent Definition and Prompt in Sub-Agent node ([#687](https://github.com/breaking-brake/cc-wf-studio/issues/687)) ([b336890](https://github.com/breaking-brake/cc-wf-studio/commit/b336890a143805e0b44479bb303dcac2574a3444))
+
 ## [3.30.4](https://github.com/breaking-brake/cc-wf-studio/compare/v3.30.3...v3.30.4) (2026-03-23)
 
 ### Bug Fixes
