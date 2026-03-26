@@ -5,11 +5,10 @@ description: AI workflow editor for CC Workflow Studio. Create and edit visual A
 
 1. Call `get_workflow_schema` via `cc-workflow-studio` MCP server
 2. Call `get_current_workflow` via `cc-workflow-studio` MCP server
-3. Call `list_available_agents` via `cc-workflow-studio` MCP server to discover existing sub-agent files
-4. Ask the user what to create or modify
-5. Generate workflow JSON: existing sub-agents use commandFilePath reference, new sub-agents provide description/prompt/model etc. without commandFilePath (apply_workflow will auto-create .md files)
-6. Call `apply_workflow` via `cc-workflow-studio` MCP server, fix errors if any
-7. Ask for feedback, repeat from step 5
+3. Ask the user what to create or modify
+4. Generate workflow JSON: use built-in sub-agents (builtInType: explore/plan/general-purpose) by default. Only call `list_available_agents` when the user explicitly asks to use an existing custom sub-agent.
+5. Call `apply_workflow` via `cc-workflow-studio` MCP server, fix errors if any
+6. Ask for feedback, repeat from step 4
 
 ## Group Node
 

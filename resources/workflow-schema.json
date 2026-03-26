@@ -90,7 +90,7 @@
         "commandFilePath": {
           "type": "string",
           "required": false,
-          "description": "Absolute path to .claude/agents/*.md file. Required for custom agents, not needed for built-in agents. Use list_available_agents to discover existing commands."
+          "description": "Absolute path to .claude/agents/*.md file. Only needed when the user explicitly specifies a custom agent. Not needed for built-in agents."
         },
         "commandScope": {
           "type": "string",
@@ -109,15 +109,46 @@
       "inputPorts": 1,
       "outputPorts": 1,
       "aiGenerationGuidance": {
-        "workflow": "SubAgent nodes either reference external .claude/agents/*.md files (custom) or use builtInType (built-in Claude Code agents).",
+        "workflow": "SubAgent nodes use builtInType (built-in agents) or reference existing .claude/agents/*.md files (custom agents).",
         "agentType": "Set 'claudeCode' if you are Claude Code, 'other' if you are a different AI agent (Cursor, Copilot, etc.). You know what you are.",
-        "builtInAgents": "For built-in agents, set builtInType to 'general-purpose', 'explore', or 'plan'. Do NOT set commandFilePath or commandScope for built-in agents.",
+        "builtInAgents": {
+          "explore": {
+            "description": "Fast read-only agent for codebase exploration",
+            "useCases": [
+              "Investigate repository structure and project overview",
+              "Search for specific files, patterns, or keywords",
+              "Answer questions about the codebase",
+              "Analyze tech stack and dependencies",
+              "Research existing implementations"
+            ],
+            "whenToUse": "Any task that only needs to read and analyze code"
+          },
+          "plan": {
+            "description": "Read-only software architect agent",
+            "useCases": [
+              "Design implementation plans",
+              "Evaluate architecture trade-offs",
+              "Plan refactoring approaches",
+              "Identify critical files for a change"
+            ],
+            "whenToUse": "Any task that involves planning or design without code changes"
+          },
+          "general-purpose": {
+            "description": "Full-access general purpose agent",
+            "useCases": [
+              "Tasks requiring code modifications",
+              "File creation or editing",
+              "Shell command execution",
+              "Multi-step tasks requiring broad tool access"
+            ],
+            "whenToUse": "Tasks that require write access or shell execution"
+          },
+          "rule": "Do NOT set commandFilePath, commandScope, model, or tools for built-in agents."
+        },
         "steps": [
-          "Decide if a built-in agent fits: 'general-purpose' (all tools), 'explore' (read-only codebase search), 'plan' (read-only architecture planning)",
-          "If using built-in: set builtInType, description, agentDefinition, and prompt. Do NOT set commandFilePath/commandScope/model/tools.",
-          "If using custom: call list_available_agents to discover existing agent files",
-          "If a matching custom agent exists, use its commandPath and scope",
-          "If no match, provide description/prompt/model etc. without commandFilePath — apply_workflow will auto-create the .md file",
+          "Select a built-in agent that fits the task (explore for investigation/analysis, plan for design/planning, general-purpose for modifications)",
+          "Set builtInType, description, agentDefinition, and prompt",
+          "Only use a custom agent (commandFilePath) when the user explicitly specifies one",
           "Set agentType based on your own runtime identity"
         ],
         "frontmatterFormat": "---\ndescription: Short description\nmodel: sonnet\ntools: Bash, Read, Write\nmemory: project\n---\nAgent definition content here (what this agent IS)...",
