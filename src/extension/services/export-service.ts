@@ -41,6 +41,7 @@ export async function checkExistingFiles(
   for (const node of subAgentNodes) {
     if (node.data.commandFilePath) continue;
     if (node.data.pluginName) continue;
+    if (node.data.builtInType) continue;
     const fileName = nodeNameToFileName(node.name);
     const filePath = path.join(agentsDir, `${fileName}.md`);
     if (await fileService.fileExists(filePath)) {

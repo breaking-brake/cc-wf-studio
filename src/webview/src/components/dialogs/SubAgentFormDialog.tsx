@@ -12,6 +12,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
 import { BUILT_IN_SUB_AGENTS } from '@shared/constants/built-in-sub-agents';
+import type { BuiltInSubAgentType } from '@shared/types/workflow-definition';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import type { SubAgentColor } from '../common/ColorPicker';
@@ -53,7 +54,7 @@ export interface SubAgentFormData {
   tools?: string;
   memory?: 'user' | 'project' | 'local' | '';
   color?: SubAgentColor;
-  builtInType?: 'general-purpose' | 'explore' | 'plan';
+  builtInType?: BuiltInSubAgentType;
 }
 
 interface SubAgentFormDialogProps {

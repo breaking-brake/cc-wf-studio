@@ -5,11 +5,13 @@
  * Based on: /specs/001-cc-wf-studio/research.md section 3.2
  */
 
+import { BUILT_IN_SUB_AGENTS } from '@shared/constants/built-in-sub-agents';
 import type { SubAgentData } from '@shared/types/workflow-definition';
 import { SUB_AGENT_COLORS } from '@shared/types/workflow-definition';
 import { Bot } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
+import { useTranslation } from '../../i18n/i18n-context';
 import { AIProviderBadge } from '../common/AIProviderBadge';
 import { DeleteButton } from './DeleteButton';
 
@@ -18,6 +20,10 @@ import { DeleteButton } from './DeleteButton';
  */
 export const SubAgentNodeComponent: React.FC<NodeProps<SubAgentData>> = React.memo(
   ({ id, data, selected }) => {
+    const { t } = useTranslation();
+    const builtInPreset = data.builtInType
+      ? BUILT_IN_SUB_AGENTS.find((p) => p.type === data.builtInType)
+      : undefined;
     return (
       <div
         className={`sub-agent-node ${selected ? 'selected' : ''}`}
@@ -99,7 +105,8 @@ export const SubAgentNodeComponent: React.FC<NodeProps<SubAgentData>> = React.me
                 fontWeight: 600,
               }}
             >
-              built-in: {data.builtInType}
+              {t('subAgent.builtIn.badge')}:{' '}
+              {builtInPreset ? t(builtInPreset.nameKey) : data.builtInType}
             </div>
           )}
 

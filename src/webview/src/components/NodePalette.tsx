@@ -202,6 +202,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
     const newNode = {
       id: `agent-${Date.now()}`,
       type: 'subAgent' as const,
+      name: t(preset.nameKey),
       position,
       data: {
         description: t(preset.descriptionKey),

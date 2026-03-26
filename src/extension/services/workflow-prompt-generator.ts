@@ -682,11 +682,9 @@ export function generateExecutionInstructions(
         sections.push(`**Description**: ${node.data.description}`);
         sections.push('');
       }
-      if (
-        node.data.model &&
-        node.data.model !== 'inherit' &&
-        !(provider !== 'claude-code' && node.data.model === 'haiku')
-      ) {
+      const shouldOmitModelForBuiltIn =
+        provider !== 'claude-code' && node.data.builtInType && node.data.model === 'haiku';
+      if (node.data.model && node.data.model !== 'inherit' && !shouldOmitModelForBuiltIn) {
         sections.push(`**Model**: ${node.data.model}`);
         sections.push('');
       }

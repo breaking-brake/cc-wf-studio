@@ -113,6 +113,7 @@ nodeTypes:
             description: Code reviewer
             prompt: Review the code for bugs
             model: sonnet
+            agentType: claudeCode
             commandFilePath: /path/to/.claude/agents/code-reviewer.md
             commandScope: project
             outputPorts: 1

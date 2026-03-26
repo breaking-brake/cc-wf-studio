@@ -587,7 +587,7 @@ const SubAgentProperties: React.FC<{
           description: data.description,
           prompt: data.prompt,
           agentType: agentType,
-          model: data.model || 'sonnet',
+          model: data.model || (data.builtInType ? 'inherit' : 'sonnet'),
           tools: data.tools || '',
           memory: data.memory || '',
           color: data.color,

@@ -325,6 +325,21 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
             field: `nodes[${node.id}].data.builtInType`,
           });
         }
+        // builtInType and commandFilePath/commandScope are mutually exclusive
+        if (subAgentData.commandFilePath) {
+          errors.push({
+            code: 'SUBAGENT_BUILTIN_COMMAND_FILE_CONFLICT',
+            message: 'SubAgent builtInType cannot be used with commandFilePath',
+            field: `nodes[${node.id}].data.commandFilePath`,
+          });
+        }
+        if (subAgentData.commandScope) {
+          errors.push({
+            code: 'SUBAGENT_BUILTIN_COMMAND_SCOPE_CONFLICT',
+            message: 'SubAgent builtInType cannot be used with commandScope',
+            field: `nodes[${node.id}].data.commandScope`,
+          });
+        }
       }
       if (subAgentData.memory !== undefined) {
         const validMemoryScopes = ['user', 'project', 'local'];
