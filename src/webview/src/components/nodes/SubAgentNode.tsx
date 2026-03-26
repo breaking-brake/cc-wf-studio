@@ -86,11 +86,28 @@ export const SubAgentNodeComponent: React.FC<NodeProps<SubAgentData>> = React.me
 
         {/* Badges */}
         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+          {/* Built-in Badge */}
+          {data.builtInType && (
+            <div
+              style={{
+                fontSize: '10px',
+                color: '#ffffff',
+                backgroundColor: 'var(--vscode-terminal-ansiGreen)',
+                padding: '2px 6px',
+                borderRadius: '3px',
+                display: 'inline-block',
+                fontWeight: 600,
+              }}
+            >
+              built-in: {data.builtInType}
+            </div>
+          )}
+
           {/* Plugin Badge */}
           {data.pluginName && <AIProviderBadge provider="claude" size="small" />}
 
-          {/* Model Badge */}
-          {data.model && (
+          {/* Model Badge (hidden for built-in) */}
+          {!data.builtInType && data.model && (
             <div
               style={{
                 fontSize: '10px',

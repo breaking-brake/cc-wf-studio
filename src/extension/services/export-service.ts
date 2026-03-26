@@ -100,6 +100,7 @@ export async function exportWorkflow(
   for (const node of subAgentNodes) {
     if (node.data.commandFilePath) continue;
     if (node.data.pluginName) continue; // Plugin agents exist in plugin directory
+    if (node.data.builtInType) continue; // Built-in agents don't need file export
     // Legacy inline node — warn and generate file for backward compatibility
     console.warn(
       `[Export] SubAgent node "${node.name}" has no commandFilePath (inline definition). Consider migrating to reference model.`
@@ -220,13 +221,22 @@ export function nodeNameToFileName(name: string): string {
     .replace(/[^a-z0-9-_]/g, '');
 }
 
+/** Options for generating Sub-Agent files for different providers */
+export interface SubAgentFileOptions {
+  /** Output readonly: true in frontmatter (e.g., for Cursor) */
+  readonly?: boolean;
+  /** Omit model field entirely (e.g., for CC-specific models like haiku) */
+  omitModel?: boolean;
+}
+
 /**
  * Generate Sub-Agent configuration file content
  *
  * @param node - Sub-Agent node
+ * @param options - Provider-specific options
  * @returns Markdown content with YAML frontmatter
  */
-export function generateSubAgentFile(node: SubAgentNode): string {
+export function generateSubAgentFile(node: SubAgentNode, options?: SubAgentFileOptions): string {
   const { name, data } = node;
   const agentName = nodeNameToFileName(name);
 
@@ -238,10 +248,16 @@ export function generateSubAgentFile(node: SubAgentNode): string {
     frontmatter.push(`tools: ${data.tools}`);
   }
 
-  if (data.model) {
-    frontmatter.push(`model: ${data.model}`);
-  } else {
-    frontmatter.push('model: sonnet');
+  if (!options?.omitModel) {
+    if (data.model) {
+      frontmatter.push(`model: ${data.model}`);
+    } else {
+      frontmatter.push('model: sonnet');
+    }
+  }
+
+  if (options?.readonly) {
+    frontmatter.push('readonly: true');
   }
 
   if (data.color) {

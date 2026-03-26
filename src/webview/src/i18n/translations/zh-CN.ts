@@ -947,6 +947,24 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.error.descriptionRequired': '描述为必填项。',
   'subAgent.form.error.promptRequired': '提示词为必填项。',
 
+  // Sub-Agent Built-in Presets
+  'subAgent.dialog.builtInTab': '内置',
+  'subAgent.dialog.builtInDescription':
+    '选择 Claude Code 的内置子代理。导出到其他 AI 代理时，将以模拟类似行为的方式导出。',
+  'subAgent.builtIn.badge': '内置',
+  'subAgent.builtIn.controlledByPreset': '由预设控制',
+  'subAgent.builtIn.generalPurpose.name': '通用',
+  'subAgent.builtIn.generalPurpose.description':
+    '用于复杂研究、代码搜索和执行多步骤任务的通用代理。',
+  'subAgent.builtIn.generalPurpose.defaultPrompt': '研究并完成以下任务：',
+  'subAgent.builtIn.explore.name': 'Explore',
+  'subAgent.builtIn.explore.description':
+    '专用于代码库探索的快速只读代理。可进行文件搜索、代码搜索和问题回答。',
+  'subAgent.builtIn.explore.defaultPrompt': '探索代码库并回答以下问题：',
+  'subAgent.builtIn.plan.name': 'Plan',
+  'subAgent.builtIn.plan.description': '用于设计实现计划和识别关键文件的软件架构师代理。',
+  'subAgent.builtIn.plan.defaultPrompt': '为以下需求设计实现计划：',
+
   // Claude API Upload Dialog
   'claudeApi.description':
     '将工作流作为 Agent Skills 上传到 Claude API，并通过 Messages API 运行。\n结合 MCP 服务器、代码执行和其他技能，您可以将专业 AI 代理作为 API 发布，用于文档处理、数据分析、客户支持等场景。',

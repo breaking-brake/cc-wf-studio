@@ -5,8 +5,9 @@
  * Based on: /specs/001-cc-wf-studio/plan.md
  */
 
+import { BUILT_IN_SUB_AGENTS } from '@shared/constants/built-in-sub-agents';
 import type { CommandReference } from '@shared/types/messages';
-import type { SubAgentFlow } from '@shared/types/workflow-definition';
+import type { BuiltInSubAgentType, SubAgentFlow } from '@shared/types/workflow-definition';
 import { NodeType } from '@shared/types/workflow-definition';
 import {
   Bot,
@@ -188,6 +189,27 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
         outputPorts: 1,
         commandFilePath: result.filePath,
         commandScope: 'project' as const,
+      },
+    };
+    addNode(newNode);
+  };
+
+  const handleSelectBuiltInPreset = (type: BuiltInSubAgentType) => {
+    const preset = BUILT_IN_SUB_AGENTS.find((p) => p.type === type);
+    if (!preset) return;
+
+    const position = calculateNonOverlappingPosition(250, 100);
+    const newNode = {
+      id: `agent-${Date.now()}`,
+      type: 'subAgent' as const,
+      position,
+      data: {
+        description: t(preset.descriptionKey),
+        prompt: t(preset.defaultPromptKey),
+        agentType: 'claudeCode' as const,
+        builtInType: type,
+        model: preset.model,
+        outputPorts: 1,
       },
     };
     addNode(newNode);
@@ -1096,6 +1118,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
         onClose={() => setIsSubAgentDialogOpen(false)}
         onCreateWithForm={handleCreateNewSubAgent}
         onSelectCommand={handleSelectCommand}
+        onSelectBuiltInPreset={handleSelectBuiltInPreset}
       />
     </div>
   );

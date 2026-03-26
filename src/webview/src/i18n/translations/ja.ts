@@ -986,6 +986,26 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.error.descriptionRequired': '説明は必須です。',
   'subAgent.form.error.promptRequired': 'プロンプトは必須です。',
 
+  // Sub-Agent Built-in Presets
+  'subAgent.dialog.builtInTab': 'ビルトイン',
+  'subAgent.dialog.builtInDescription':
+    'Claude Codeのビルトインサブエージェントを選択します。他のAIエージェントでは、同様の振る舞いを再現するようにエクスポートされます。',
+  'subAgent.builtIn.badge': 'ビルトイン',
+  'subAgent.builtIn.controlledByPreset': 'プリセットが制御',
+  'subAgent.builtIn.generalPurpose.name': '汎用',
+  'subAgent.builtIn.generalPurpose.description':
+    '複雑な調査、コード検索、マルチステップタスクの実行に対応する汎用エージェント。',
+  'subAgent.builtIn.generalPurpose.defaultPrompt': '以下のタスクを調査して完了してください：',
+  'subAgent.builtIn.explore.name': 'Explore',
+  'subAgent.builtIn.explore.description':
+    'コードベース探索に特化した高速読み取り専用エージェント。ファイル検索、コード検索、質問回答が可能。',
+  'subAgent.builtIn.explore.defaultPrompt':
+    'コードベースを探索して、以下の質問に回答してください：',
+  'subAgent.builtIn.plan.name': 'Plan',
+  'subAgent.builtIn.plan.description':
+    '実装計画の設計と重要ファイルの特定を行うソフトウェアアーキテクトエージェント。',
+  'subAgent.builtIn.plan.defaultPrompt': '以下の要件に対する実装計画を設計してください：',
+
   // Claude API Upload Dialog
   'claudeApi.description':
     'ワークフローを Agent Skills として Claude API にアップロードし、Messages API 経由で実行できます。\nMCP サーバー、コード実行、他のスキルと組み合わせることで、ドキュメント処理・データ分析・カスタマーサポートなど、専門的な AI エージェントを API として公開できます。',

@@ -22,7 +22,14 @@ Auto-generated from all feature plans. Last updated: 2025-11-01
 ```text
 src/
 tests/
+resources/
+  workflow-schema.json   # ワークフロースキーマ定義（ソース）
+  workflow-schema.toon   # AI向け最適化フォーマット（ビルド時に .json から自動生成。手動編集しない）
 ```
+
+### Schema Files
+- `resources/workflow-schema.json` がスキーマのソースファイル
+- `resources/workflow-schema.toon` は `workflow-schema.json` からビルド時に自動生成される。**直接編集しないこと**
 
 ## Development Workflow & Commands
 

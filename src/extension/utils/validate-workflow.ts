@@ -307,13 +307,25 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
       }
     }
 
-    // Validate SubAgent fields (Feature: 540-persistent-memory, 636-reference-model)
+    // Validate SubAgent fields (Feature: 540-persistent-memory, 636-reference-model, 684-built-in-presets)
     if (node.type === NodeType.SubAgent) {
       const subAgentData = node.data as {
         memory?: string;
         commandFilePath?: string;
         commandScope?: string;
+        builtInType?: string;
       };
+      // builtInType enum validation
+      if (subAgentData.builtInType !== undefined) {
+        const validBuiltInTypes = ['general-purpose', 'explore', 'plan'];
+        if (!validBuiltInTypes.includes(subAgentData.builtInType)) {
+          errors.push({
+            code: 'SUBAGENT_INVALID_BUILT_IN_TYPE',
+            message: `SubAgent builtInType must be one of: ${validBuiltInTypes.join(', ')}`,
+            field: `nodes[${node.id}].data.builtInType`,
+          });
+        }
+      }
       if (subAgentData.memory !== undefined) {
         const validMemoryScopes = ['user', 'project', 'local'];
         if (!validMemoryScopes.includes(subAgentData.memory)) {

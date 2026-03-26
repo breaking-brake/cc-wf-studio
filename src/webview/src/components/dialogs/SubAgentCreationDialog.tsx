@@ -6,7 +6,9 @@
  */
 
 import * as Dialog from '@radix-ui/react-dialog';
+import { BUILT_IN_SUB_AGENTS } from '@shared/constants/built-in-sub-agents';
 import type { CommandReference } from '@shared/types/messages';
+import type { BuiltInSubAgentType } from '@shared/types/workflow-definition';
 import { ExternalLink } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -26,23 +28,26 @@ interface SubAgentCreationDialogProps {
   onClose: () => void;
   onCreateWithForm: (data: SubAgentFormData) => Promise<void>;
   onSelectCommand: (command: CommandReference) => void;
+  onSelectBuiltInPreset: (type: BuiltInSubAgentType) => void;
 }
 
-type Tab = 'user' | 'project' | 'local';
+type Tab = 'builtIn' | 'user' | 'project' | 'local';
 
 export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
   isOpen,
   onClose,
   onCreateWithForm,
   onSelectCommand,
+  onSelectBuiltInPreset,
 }) => {
   const { t } = useTranslation();
   const [commands, setCommands] = useState<CommandReference[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<Tab>('project');
+  const [activeTab, setActiveTab] = useState<Tab>('builtIn');
   const [filter, setFilter] = useState('');
   const [selectedCommand, setSelectedCommand] = useState<CommandReference | null>(null);
+  const [selectedBuiltIn, setSelectedBuiltIn] = useState<BuiltInSubAgentType | null>(null);
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
 
   // Load commands when dialog opens
@@ -52,6 +57,8 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
     setError(null);
     setFilter('');
     setSelectedCommand(null);
+    setSelectedBuiltIn(null);
+    setActiveTab('builtIn');
 
     const load = async () => {
       setLoading(true);
@@ -81,11 +88,21 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
   );
 
   const handleAdd = useCallback(() => {
-    if (selectedCommand) {
+    if (activeTab === 'builtIn' && selectedBuiltIn) {
+      onSelectBuiltInPreset(selectedBuiltIn);
+      onClose();
+    } else if (selectedCommand) {
       onSelectCommand(selectedCommand);
       onClose();
     }
-  }, [selectedCommand, onSelectCommand, onClose]);
+  }, [
+    activeTab,
+    selectedBuiltIn,
+    selectedCommand,
+    onSelectBuiltInPreset,
+    onSelectCommand,
+    onClose,
+  ]);
 
   const filteredCommands = useMemo(() => {
     const tabCommands = commands.filter((c) => c.scope === activeTab);
@@ -268,6 +285,13 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
             >
               <button
                 type="button"
+                style={tabStyle(activeTab === 'builtIn')}
+                onClick={() => setActiveTab('builtIn')}
+              >
+                {t('subAgent.dialog.builtInTab')} ({BUILT_IN_SUB_AGENTS.length})
+              </button>
+              <button
+                type="button"
                 style={tabStyle(activeTab === 'project')}
                 onClick={() => setActiveTab('project')}
               >
@@ -304,13 +328,118 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
                 lineHeight: '1.5',
               }}
             >
+              {activeTab === 'builtIn' && t('subAgent.dialog.builtInDescription')}
               {activeTab === 'user' && t('subAgent.dialog.userDescription')}
               {activeTab === 'project' && t('subAgent.dialog.projectDescription')}
               {activeTab === 'local' && t('subAgent.dialog.localDescription')}
             </div>
 
+            {/* Built-in presets list */}
+            {activeTab === 'builtIn' && (
+              <div
+                style={{
+                  border: '1px solid var(--vscode-panel-border)',
+                  borderRadius: '4px',
+                  maxHeight: '400px',
+                  overflow: 'auto',
+                }}
+              >
+                {BUILT_IN_SUB_AGENTS.map((preset) => {
+                  const isSelected = selectedBuiltIn === preset.type;
+                  return (
+                    <div
+                      key={preset.type}
+                      onClick={() => setSelectedBuiltIn(preset.type)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setSelectedBuiltIn(preset.type);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      style={{
+                        padding: '12px',
+                        borderBottom: '1px solid var(--vscode-panel-border)',
+                        cursor: 'pointer',
+                        backgroundColor: isSelected
+                          ? 'var(--vscode-list-activeSelectionBackground)'
+                          : 'transparent',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.backgroundColor =
+                            'var(--vscode-list-hoverBackground)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          marginBottom: '4px',
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            color: isSelected
+                              ? 'var(--vscode-list-activeSelectionForeground)'
+                              : 'var(--vscode-foreground)',
+                          }}
+                        >
+                          {t(preset.nameKey)}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '10px',
+                            padding: '2px 6px',
+                            borderRadius: '3px',
+                            backgroundColor: 'var(--vscode-terminal-ansiGreen)',
+                            color: '#ffffff',
+                            fontWeight: 500,
+                          }}
+                        >
+                          {t('subAgent.builtIn.badge')}
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          fontSize: '12px',
+                          color: isSelected
+                            ? 'var(--vscode-list-activeSelectionForeground)'
+                            : 'var(--vscode-descriptionForeground)',
+                          marginBottom: '4px',
+                        }}
+                      >
+                        {t(preset.descriptionKey)}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: '11px',
+                          color: isSelected
+                            ? 'var(--vscode-list-activeSelectionForeground)'
+                            : 'var(--vscode-descriptionForeground)',
+                          opacity: 0.8,
+                        }}
+                      >
+                        Model: {preset.modelDescription} | Tools: {preset.toolsDescription}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             {/* Loading State */}
-            {loading && (
+            {activeTab !== 'builtIn' && loading && (
               <div
                 style={{
                   textAlign: 'center',
@@ -323,7 +452,7 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
             )}
 
             {/* Error State */}
-            {error && !loading && (
+            {activeTab !== 'builtIn' && error && !loading && (
               <div
                 style={{
                   padding: '12px',
@@ -340,7 +469,7 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
             )}
 
             {/* Empty State */}
-            {!loading && !error && filteredCommands.length === 0 && (
+            {activeTab !== 'builtIn' && !loading && !error && filteredCommands.length === 0 && (
               <div
                 style={{
                   textAlign: 'center',
@@ -353,7 +482,7 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
             )}
 
             {/* Agent list */}
-            {!loading && !error && filteredCommands.length > 0 && (
+            {activeTab !== 'builtIn' && !loading && !error && filteredCommands.length > 0 && (
               <div
                 style={{
                   border: '1px solid var(--vscode-panel-border)',
@@ -490,21 +619,23 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
               <button
                 type="button"
                 onClick={handleAdd}
-                disabled={!selectedCommand}
+                disabled={activeTab === 'builtIn' ? !selectedBuiltIn : !selectedCommand}
                 style={{
                   padding: '8px 16px',
                   fontSize: '13px',
                   border: 'none',
                   borderRadius: '4px',
-                  backgroundColor: selectedCommand
+                  backgroundColor: (activeTab === 'builtIn' ? selectedBuiltIn : selectedCommand)
                     ? 'var(--vscode-button-background)'
                     : 'var(--vscode-button-secondaryBackground)',
-                  color: selectedCommand
+                  color: (activeTab === 'builtIn' ? selectedBuiltIn : selectedCommand)
                     ? 'var(--vscode-button-foreground)'
                     : 'var(--vscode-descriptionForeground)',
-                  cursor: selectedCommand ? 'pointer' : 'not-allowed',
+                  cursor: (activeTab === 'builtIn' ? selectedBuiltIn : selectedCommand)
+                    ? 'pointer'
+                    : 'not-allowed',
                   fontWeight: 600,
-                  opacity: selectedCommand ? 1 : 0.5,
+                  opacity: (activeTab === 'builtIn' ? selectedBuiltIn : selectedCommand) ? 1 : 0.5,
                 }}
               >
                 {t('subAgent.dialog.addButton')}

@@ -6,6 +6,7 @@
  */
 
 import * as path from 'node:path';
+import { BUILT_IN_SUB_AGENTS } from '../../shared/constants/built-in-sub-agents';
 import type {
   SubAgentFlowNode,
   SubAgentNode,
@@ -162,11 +163,17 @@ export async function exportWorkflowAsCursorSkill(
       const agentsDir = path.join(workspacePath, '.cursor', 'agents');
       await fileService.createDirectory(agentsDir);
 
-      // SubAgent nodes
+      // SubAgent nodes (adapt for Cursor compatibility)
       for (const node of subAgentNodes) {
+        const preset = node.data.builtInType
+          ? BUILT_IN_SUB_AGENTS.find((p) => p.type === node.data.builtInType)
+          : undefined;
         const fileName = nodeNameToFileName(node.name);
         const filePath = path.join(agentsDir, `${fileName}.md`);
-        const agentContent = generateSubAgentFile(node);
+        const agentContent = generateSubAgentFile(node, {
+          readonly: preset?.readonly,
+          omitModel: node.data.model === 'haiku',
+        });
         await fileService.writeFile(filePath, agentContent);
       }
 

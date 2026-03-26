@@ -11,6 +11,7 @@
 
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
+import { BUILT_IN_SUB_AGENTS } from '@shared/constants/built-in-sub-agents';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import type { SubAgentColor } from '../common/ColorPicker';
@@ -52,6 +53,7 @@ export interface SubAgentFormData {
   tools?: string;
   memory?: 'user' | 'project' | 'local' | '';
   color?: SubAgentColor;
+  builtInType?: 'general-purpose' | 'explore' | 'plan';
 }
 
 interface SubAgentFormDialogProps {
@@ -160,6 +162,10 @@ export function SubAgentFormDialog({
   };
 
   const isClaudeCode = agentType === 'claudeCode';
+  const isBuiltIn = !!formData.builtInType;
+  const builtInPreset = isBuiltIn
+    ? BUILT_IN_SUB_AGENTS.find((p) => p.type === formData.builtInType)
+    : undefined;
 
   const radioLabelStyle = (isActive: boolean): React.CSSProperties => ({
     display: 'flex',
@@ -231,49 +237,80 @@ export function SubAgentFormDialog({
 
             {/* Form */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* Agent Type Selector */}
-              <div>
+              {/* Built-in badge */}
+              {isBuiltIn && builtInPreset && (
                 <div
                   style={{
-                    display: 'block',
-                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 12px',
+                    backgroundColor: 'var(--vscode-textBlockQuote-background)',
+                    borderLeft: '3px solid var(--vscode-terminal-ansiGreen)',
+                    borderRadius: '0 4px 4px 0',
                     fontSize: '13px',
-                    fontWeight: 500,
-                    color: 'var(--vscode-foreground)',
                   }}
                 >
-                  {t('subAgent.form.agentTypeLabel')}
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      padding: '2px 6px',
+                      borderRadius: '3px',
+                      backgroundColor: 'var(--vscode-terminal-ansiGreen)',
+                      color: '#ffffff',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {t('subAgent.builtIn.badge')}
+                  </span>
+                  <span style={{ fontWeight: 600 }}>{t(builtInPreset.nameKey)}</span>
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <label style={radioLabelStyle(isClaudeCode)}>
-                    <input
-                      type="radio"
-                      name="agentType"
-                      value="claudeCode"
-                      checked={isClaudeCode}
-                      onChange={() => handleAgentTypeChange('claudeCode')}
-                      style={{ cursor: 'pointer' }}
-                    />
-                    {t('subAgent.form.agentType.claudeCode')}
-                  </label>
-                  <label style={radioLabelStyle(!isClaudeCode)}>
-                    <input
-                      type="radio"
-                      name="agentType"
-                      value="other"
-                      checked={!isClaudeCode}
-                      onChange={() => handleAgentTypeChange('other')}
-                      style={{ cursor: 'pointer' }}
-                    />
-                    {t('subAgent.form.agentType.other')}
-                  </label>
+              )}
+
+              {/* Agent Type Selector (hidden for built-in) */}
+              {!isBuiltIn && (
+                <div>
+                  <div
+                    style={{
+                      display: 'block',
+                      marginBottom: '8px',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      color: 'var(--vscode-foreground)',
+                    }}
+                  >
+                    {t('subAgent.form.agentTypeLabel')}
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <label style={radioLabelStyle(isClaudeCode)}>
+                      <input
+                        type="radio"
+                        name="agentType"
+                        value="claudeCode"
+                        checked={isClaudeCode}
+                        onChange={() => handleAgentTypeChange('claudeCode')}
+                        style={{ cursor: 'pointer' }}
+                      />
+                      {t('subAgent.form.agentType.claudeCode')}
+                    </label>
+                    <label style={radioLabelStyle(!isClaudeCode)}>
+                      <input
+                        type="radio"
+                        name="agentType"
+                        value="other"
+                        checked={!isClaudeCode}
+                        onChange={() => handleAgentTypeChange('other')}
+                        style={{ cursor: 'pointer' }}
+                      />
+                      {t('subAgent.form.agentType.other')}
+                    </label>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Description */}
               <div>
-                <label
-                  htmlFor={descriptionId}
+                <div
                   style={{
                     display: 'block',
                     marginBottom: '6px',
@@ -282,35 +319,53 @@ export function SubAgentFormDialog({
                     color: 'var(--vscode-foreground)',
                   }}
                 >
-                  {t('subAgent.form.descriptionLabel')} *
-                </label>
-                <input
-                  id={descriptionId}
-                  type="text"
-                  value={formData.description}
-                  onChange={(e) => handleFieldChange('description', e.target.value)}
-                  placeholder={t('subAgent.form.descriptionPlaceholder')}
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    fontSize: '13px',
-                    backgroundColor: 'var(--vscode-input-background)',
-                    color: 'var(--vscode-input-foreground)',
-                    border: `1px solid ${errors.description ? 'var(--vscode-inputValidation-errorBorder)' : 'var(--vscode-input-border)'}`,
-                    borderRadius: '4px',
-                    outline: 'none',
-                  }}
-                />
-                {errors.description && (
-                  <p
+                  {t('subAgent.form.descriptionLabel')} {!isBuiltIn && '*'}
+                </div>
+                {isBuiltIn ? (
+                  <div
                     style={{
-                      margin: '4px 0 0 0',
-                      fontSize: '12px',
-                      color: 'var(--vscode-inputValidation-errorForeground)',
+                      padding: '8px 12px',
+                      fontSize: '13px',
+                      backgroundColor: 'var(--vscode-input-background)',
+                      border: '1px solid var(--vscode-input-border)',
+                      borderRadius: '4px',
+                      color: 'var(--vscode-descriptionForeground)',
+                      opacity: 0.7,
                     }}
                   >
-                    {errors.description}
-                  </p>
+                    {formData.description}
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      id={descriptionId}
+                      type="text"
+                      value={formData.description}
+                      onChange={(e) => handleFieldChange('description', e.target.value)}
+                      placeholder={t('subAgent.form.descriptionPlaceholder')}
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        fontSize: '13px',
+                        backgroundColor: 'var(--vscode-input-background)',
+                        color: 'var(--vscode-input-foreground)',
+                        border: `1px solid ${errors.description ? 'var(--vscode-inputValidation-errorBorder)' : 'var(--vscode-input-border)'}`,
+                        borderRadius: '4px',
+                        outline: 'none',
+                      }}
+                    />
+                    {errors.description && (
+                      <p
+                        style={{
+                          margin: '4px 0 0 0',
+                          fontSize: '12px',
+                          color: 'var(--vscode-inputValidation-errorForeground)',
+                        }}
+                      >
+                        {errors.description}
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -380,204 +435,268 @@ export function SubAgentFormDialog({
               {/* Claude Code-specific fields */}
               {isClaudeCode && (
                 <>
-                  {/* Model */}
-                  <div>
-                    <label
-                      htmlFor={modelId}
-                      style={{
-                        display: 'block',
-                        marginBottom: '6px',
-                        fontSize: '13px',
-                        fontWeight: 500,
-                        color: 'var(--vscode-foreground)',
-                      }}
-                    >
-                      {t('subAgent.form.modelLabel')}
-                    </label>
-                    <Select.Root
-                      value={formData.model}
-                      onValueChange={(val) =>
-                        handleFieldChange('model', val as 'sonnet' | 'opus' | 'haiku' | 'inherit')
-                      }
-                    >
-                      <Select.Trigger
-                        id={modelId}
+                  {/* Model — read-only for built-in */}
+                  {isBuiltIn && builtInPreset ? (
+                    <div>
+                      <div
                         style={{
-                          width: '100%',
-                          padding: '6px 8px',
-                          backgroundColor: 'var(--vscode-input-background)',
-                          color: 'var(--vscode-input-foreground)',
-                          border: '1px solid var(--vscode-input-border)',
-                          borderRadius: '2px',
+                          display: 'block',
+                          marginBottom: '6px',
                           fontSize: '13px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          cursor: 'pointer',
+                          fontWeight: 500,
+                          color: 'var(--vscode-foreground)',
                         }}
                       >
-                        <Select.Value />
-                      </Select.Trigger>
-                      <Select.Portal>
-                        <Select.Content
-                          position="popper"
-                          sideOffset={4}
-                          style={{
-                            backgroundColor: 'var(--vscode-dropdown-background)',
-                            border: '1px solid var(--vscode-dropdown-border)',
-                            borderRadius: '2px',
-                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
-                            zIndex: 10001,
-                            minWidth: '200px',
-                          }}
-                        >
-                          <Select.Viewport style={{ padding: '4px' }}>
-                            {[
-                              { value: 'sonnet', label: 'Sonnet' },
-                              { value: 'opus', label: 'Opus' },
-                              { value: 'haiku', label: 'Haiku' },
-                              { value: 'inherit', label: 'Inherit' },
-                            ].map((item) => (
-                              <Select.Item
-                                key={item.value}
-                                value={item.value}
-                                style={{
-                                  padding: '6px 8px',
-                                  fontSize: '13px',
-                                  color: 'var(--vscode-foreground)',
-                                  cursor: 'pointer',
-                                  outline: 'none',
-                                  borderRadius: '2px',
-                                }}
-                              >
-                                <Select.ItemText>{item.label}</Select.ItemText>
-                              </Select.Item>
-                            ))}
-                          </Select.Viewport>
-                        </Select.Content>
-                      </Select.Portal>
-                    </Select.Root>
-                  </div>
-
-                  {/* Tools */}
-                  <div>
-                    <div
-                      style={{
-                        display: 'block',
-                        marginBottom: '6px',
-                        fontSize: '13px',
-                        fontWeight: 500,
-                        color: 'var(--vscode-foreground)',
-                      }}
-                    >
-                      {t('subAgent.form.toolsLabel')}
+                        {t('subAgent.form.modelLabel')}
+                      </div>
+                      <div
+                        style={{
+                          padding: '8px 12px',
+                          fontSize: '13px',
+                          backgroundColor: 'var(--vscode-input-background)',
+                          border: '1px solid var(--vscode-input-border)',
+                          borderRadius: '4px',
+                          color: 'var(--vscode-descriptionForeground)',
+                          opacity: 0.7,
+                        }}
+                      >
+                        {builtInPreset.modelDescription} —{' '}
+                        {t('subAgent.builtIn.controlledByPreset')}
+                      </div>
                     </div>
-                    <ToolSelectTagInput
-                      size="md"
-                      selectedTools={
-                        formData.tools
-                          ?.split(',')
-                          .map((s) => s.trim())
-                          .filter(Boolean) ?? []
-                      }
-                      onChange={(tools) => handleFieldChange('tools', tools.join(', '))}
-                      availableTools={[...SUBAGENT_AVAILABLE_TOOLS]}
-                    />
-                    <p
-                      style={{
-                        margin: '4px 0 0 0',
-                        fontSize: '11px',
-                        color: 'var(--vscode-descriptionForeground)',
-                      }}
-                    >
-                      {t('subAgent.form.toolsHint')}
-                    </p>
-                  </div>
-
-                  {/* Memory Scope */}
-                  <div>
-                    <label
-                      htmlFor={memoryId}
-                      style={{
-                        display: 'block',
-                        marginBottom: '6px',
-                        fontSize: '13px',
-                        fontWeight: 500,
-                        color: 'var(--vscode-foreground)',
-                      }}
-                    >
-                      {t('subAgent.form.memoryLabel')}
-                    </label>
-                    <Select.Root
-                      value={formData.memory || 'none'}
-                      onValueChange={(val) =>
-                        handleFieldChange('memory', val === 'none' ? '' : val)
-                      }
-                    >
-                      <Select.Trigger
-                        id={memoryId}
+                  ) : (
+                    <div>
+                      <label
+                        htmlFor={modelId}
                         style={{
-                          width: '100%',
-                          padding: '6px 8px',
-                          backgroundColor: 'var(--vscode-input-background)',
-                          color: 'var(--vscode-input-foreground)',
-                          border: '1px solid var(--vscode-input-border)',
-                          borderRadius: '2px',
+                          display: 'block',
+                          marginBottom: '6px',
                           fontSize: '13px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          cursor: 'pointer',
+                          fontWeight: 500,
+                          color: 'var(--vscode-foreground)',
                         }}
                       >
-                        <Select.Value />
-                      </Select.Trigger>
-                      <Select.Portal>
-                        <Select.Content
-                          position="popper"
-                          sideOffset={4}
+                        {t('subAgent.form.modelLabel')}
+                      </label>
+                      <Select.Root
+                        value={formData.model}
+                        onValueChange={(val) =>
+                          handleFieldChange('model', val as 'sonnet' | 'opus' | 'haiku' | 'inherit')
+                        }
+                      >
+                        <Select.Trigger
+                          id={modelId}
                           style={{
-                            backgroundColor: 'var(--vscode-dropdown-background)',
-                            border: '1px solid var(--vscode-dropdown-border)',
+                            width: '100%',
+                            padding: '6px 8px',
+                            backgroundColor: 'var(--vscode-input-background)',
+                            color: 'var(--vscode-input-foreground)',
+                            border: '1px solid var(--vscode-input-border)',
                             borderRadius: '2px',
-                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
-                            zIndex: 10001,
-                            minWidth: '200px',
+                            fontSize: '13px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
                           }}
                         >
-                          <Select.Viewport style={{ padding: '4px' }}>
-                            {[
-                              { value: 'none', label: t('subAgent.form.memoryNone') },
-                              { value: 'user', label: 'User' },
-                              { value: 'project', label: 'Project' },
-                              { value: 'local', label: 'Local' },
-                            ].map((item) => (
-                              <Select.Item
-                                key={item.value}
-                                value={item.value}
-                                style={{
-                                  padding: '6px 8px',
-                                  fontSize: '13px',
-                                  color: 'var(--vscode-foreground)',
-                                  cursor: 'pointer',
-                                  outline: 'none',
-                                  borderRadius: '2px',
-                                }}
-                              >
-                                <Select.ItemText>{item.label}</Select.ItemText>
-                              </Select.Item>
-                            ))}
-                          </Select.Viewport>
-                        </Select.Content>
-                      </Select.Portal>
-                    </Select.Root>
-                  </div>
+                          <Select.Value />
+                        </Select.Trigger>
+                        <Select.Portal>
+                          <Select.Content
+                            position="popper"
+                            sideOffset={4}
+                            style={{
+                              backgroundColor: 'var(--vscode-dropdown-background)',
+                              border: '1px solid var(--vscode-dropdown-border)',
+                              borderRadius: '2px',
+                              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+                              zIndex: 10001,
+                              minWidth: '200px',
+                            }}
+                          >
+                            <Select.Viewport style={{ padding: '4px' }}>
+                              {[
+                                { value: 'sonnet', label: 'Sonnet' },
+                                { value: 'opus', label: 'Opus' },
+                                { value: 'haiku', label: 'Haiku' },
+                                { value: 'inherit', label: 'Inherit' },
+                              ].map((item) => (
+                                <Select.Item
+                                  key={item.value}
+                                  value={item.value}
+                                  style={{
+                                    padding: '6px 8px',
+                                    fontSize: '13px',
+                                    color: 'var(--vscode-foreground)',
+                                    cursor: 'pointer',
+                                    outline: 'none',
+                                    borderRadius: '2px',
+                                  }}
+                                >
+                                  <Select.ItemText>{item.label}</Select.ItemText>
+                                </Select.Item>
+                              ))}
+                            </Select.Viewport>
+                          </Select.Content>
+                        </Select.Portal>
+                      </Select.Root>
+                    </div>
+                  )}
 
-                  {/* Color */}
-                  <ColorPicker
-                    value={formData.color}
-                    onChange={(color) => setFormData((prev) => ({ ...prev, color }))}
-                  />
+                  {/* Tools — read-only for built-in */}
+                  {isBuiltIn && builtInPreset ? (
+                    <div>
+                      <div
+                        style={{
+                          display: 'block',
+                          marginBottom: '6px',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          color: 'var(--vscode-foreground)',
+                        }}
+                      >
+                        {t('subAgent.form.toolsLabel')}
+                      </div>
+                      <div
+                        style={{
+                          padding: '8px 12px',
+                          fontSize: '13px',
+                          backgroundColor: 'var(--vscode-input-background)',
+                          border: '1px solid var(--vscode-input-border)',
+                          borderRadius: '4px',
+                          color: 'var(--vscode-descriptionForeground)',
+                          opacity: 0.7,
+                        }}
+                      >
+                        {builtInPreset.toolsDescription} —{' '}
+                        {t('subAgent.builtIn.controlledByPreset')}
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div
+                        style={{
+                          display: 'block',
+                          marginBottom: '6px',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          color: 'var(--vscode-foreground)',
+                        }}
+                      >
+                        {t('subAgent.form.toolsLabel')}
+                      </div>
+                      <ToolSelectTagInput
+                        size="md"
+                        selectedTools={
+                          formData.tools
+                            ?.split(',')
+                            .map((s) => s.trim())
+                            .filter(Boolean) ?? []
+                        }
+                        onChange={(tools) => handleFieldChange('tools', tools.join(', '))}
+                        availableTools={[...SUBAGENT_AVAILABLE_TOOLS]}
+                      />
+                      <p
+                        style={{
+                          margin: '4px 0 0 0',
+                          fontSize: '11px',
+                          color: 'var(--vscode-descriptionForeground)',
+                        }}
+                      >
+                        {t('subAgent.form.toolsHint')}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Memory Scope (hidden for built-in) */}
+                  {!isBuiltIn && (
+                    <div>
+                      <label
+                        htmlFor={memoryId}
+                        style={{
+                          display: 'block',
+                          marginBottom: '6px',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          color: 'var(--vscode-foreground)',
+                        }}
+                      >
+                        {t('subAgent.form.memoryLabel')}
+                      </label>
+                      <Select.Root
+                        value={formData.memory || 'none'}
+                        onValueChange={(val) =>
+                          handleFieldChange('memory', val === 'none' ? '' : val)
+                        }
+                      >
+                        <Select.Trigger
+                          id={memoryId}
+                          style={{
+                            width: '100%',
+                            padding: '6px 8px',
+                            backgroundColor: 'var(--vscode-input-background)',
+                            color: 'var(--vscode-input-foreground)',
+                            border: '1px solid var(--vscode-input-border)',
+                            borderRadius: '2px',
+                            fontSize: '13px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <Select.Value />
+                        </Select.Trigger>
+                        <Select.Portal>
+                          <Select.Content
+                            position="popper"
+                            sideOffset={4}
+                            style={{
+                              backgroundColor: 'var(--vscode-dropdown-background)',
+                              border: '1px solid var(--vscode-dropdown-border)',
+                              borderRadius: '2px',
+                              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+                              zIndex: 10001,
+                              minWidth: '200px',
+                            }}
+                          >
+                            <Select.Viewport style={{ padding: '4px' }}>
+                              {[
+                                { value: 'none', label: t('subAgent.form.memoryNone') },
+                                { value: 'user', label: 'User' },
+                                { value: 'project', label: 'Project' },
+                                { value: 'local', label: 'Local' },
+                              ].map((item) => (
+                                <Select.Item
+                                  key={item.value}
+                                  value={item.value}
+                                  style={{
+                                    padding: '6px 8px',
+                                    fontSize: '13px',
+                                    color: 'var(--vscode-foreground)',
+                                    cursor: 'pointer',
+                                    outline: 'none',
+                                    borderRadius: '2px',
+                                  }}
+                                >
+                                  <Select.ItemText>{item.label}</Select.ItemText>
+                                </Select.Item>
+                              ))}
+                            </Select.Viewport>
+                          </Select.Content>
+                        </Select.Portal>
+                      </Select.Root>
+                    </div>
+                  )}
+
+                  {/* Color (hidden for built-in) */}
+                  {!isBuiltIn && (
+                    <ColorPicker
+                      value={formData.color}
+                      onChange={(color) => setFormData((prev) => ({ ...prev, color }))}
+                    />
+                  )}
                 </>
               )}
             </div>

@@ -948,6 +948,24 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.error.descriptionRequired': '描述為必填項。',
   'subAgent.form.error.promptRequired': '提示詞為必填項。',
 
+  // Sub-Agent Built-in Presets
+  'subAgent.dialog.builtInTab': '內建',
+  'subAgent.dialog.builtInDescription':
+    '選擇 Claude Code 的內建子代理。匯出到其他 AI 代理時，將以模擬類似行為的方式匯出。',
+  'subAgent.builtIn.badge': '內建',
+  'subAgent.builtIn.controlledByPreset': '由預設控制',
+  'subAgent.builtIn.generalPurpose.name': '通用',
+  'subAgent.builtIn.generalPurpose.description':
+    '用於複雜研究、程式碼搜尋和執行多步驟任務的通用代理。',
+  'subAgent.builtIn.generalPurpose.defaultPrompt': '研究並完成以下任務：',
+  'subAgent.builtIn.explore.name': 'Explore',
+  'subAgent.builtIn.explore.description':
+    '專用於程式碼庫探索的快速唯讀代理。可進行檔案搜尋、程式碼搜尋和問題回答。',
+  'subAgent.builtIn.explore.defaultPrompt': '探索程式碼庫並回答以下問題：',
+  'subAgent.builtIn.plan.name': 'Plan',
+  'subAgent.builtIn.plan.description': '用於設計實作計畫和識別關鍵檔案的軟體架構師代理。',
+  'subAgent.builtIn.plan.defaultPrompt': '為以下需求設計實作計畫：',
+
   // Claude API Upload Dialog
   'claudeApi.description':
     '將工作流程作為 Agent Skills 上傳到 Claude API，並透過 Messages API 執行。\n結合 MCP 伺服器、程式碼執行和其他技能，您可以將專業 AI 代理作為 API 發佈，用於文件處理、資料分析、客戶支援等場景。',

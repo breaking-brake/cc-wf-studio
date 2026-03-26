@@ -1,0 +1,69 @@
+/**
+ * Built-in Claude Code Sub-Agent Presets
+ *
+ * Defines the core built-in sub-agent types provided by Claude Code.
+ * These agents have fixed model and tool configurations controlled by Claude Code.
+ */
+
+import type { BuiltInSubAgentType } from '../types/workflow-definition';
+
+/** i18n keys for built-in sub-agent presets (must match WebviewTranslationKeys) */
+type BuiltInI18nKey =
+  | 'subAgent.builtIn.generalPurpose.name'
+  | 'subAgent.builtIn.generalPurpose.description'
+  | 'subAgent.builtIn.generalPurpose.defaultPrompt'
+  | 'subAgent.builtIn.explore.name'
+  | 'subAgent.builtIn.explore.description'
+  | 'subAgent.builtIn.explore.defaultPrompt'
+  | 'subAgent.builtIn.plan.name'
+  | 'subAgent.builtIn.plan.description'
+  | 'subAgent.builtIn.plan.defaultPrompt';
+
+export interface BuiltInSubAgentPreset {
+  /** The built-in sub-agent type identifier */
+  type: BuiltInSubAgentType;
+  /** i18n key for the display name */
+  nameKey: BuiltInI18nKey;
+  /** i18n key for the description */
+  descriptionKey: BuiltInI18nKey;
+  /** i18n key for the default prompt template */
+  defaultPromptKey: BuiltInI18nKey;
+  /** Model used by this preset (e.g., 'haiku', 'inherit') */
+  model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
+  /** Whether this preset is read-only (no file writes/edits) */
+  readonly?: boolean;
+  /** Human-readable tools description (read-only, controlled by preset) */
+  toolsDescription: string;
+  /** Human-readable model description (read-only, controlled by preset) */
+  modelDescription: string;
+}
+
+export const BUILT_IN_SUB_AGENTS: readonly BuiltInSubAgentPreset[] = [
+  {
+    type: 'general-purpose',
+    nameKey: 'subAgent.builtIn.generalPurpose.name',
+    descriptionKey: 'subAgent.builtIn.generalPurpose.description',
+    defaultPromptKey: 'subAgent.builtIn.generalPurpose.defaultPrompt',
+    toolsDescription: 'All tools (*)',
+    modelDescription: 'Inherited from parent',
+  },
+  {
+    type: 'explore',
+    nameKey: 'subAgent.builtIn.explore.name',
+    descriptionKey: 'subAgent.builtIn.explore.description',
+    defaultPromptKey: 'subAgent.builtIn.explore.defaultPrompt',
+    model: 'haiku',
+    readonly: true,
+    toolsDescription: 'Read-only tools (no Write/Edit)',
+    modelDescription: 'Haiku (fast) — inherit on other AI agents',
+  },
+  {
+    type: 'plan',
+    nameKey: 'subAgent.builtIn.plan.name',
+    descriptionKey: 'subAgent.builtIn.plan.description',
+    defaultPromptKey: 'subAgent.builtIn.plan.defaultPrompt',
+    readonly: true,
+    toolsDescription: 'Read-only tools (no Write/Edit)',
+    modelDescription: 'Inherited from parent',
+  },
+] as const;

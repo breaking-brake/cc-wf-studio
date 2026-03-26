@@ -107,6 +107,9 @@ export interface WorkflowHooks {
 // Node Data Types
 // ============================================================================
 
+/** Built-in Claude Code sub-agent types */
+export type BuiltInSubAgentType = 'general-purpose' | 'explore' | 'plan';
+
 export interface SubAgentData {
   description: string;
   prompt: string;
@@ -124,6 +127,8 @@ export interface SubAgentData {
   commandScope?: 'user' | 'project';
   /** Plugin name for plugin-provided agents (e.g., 'with-me' for 'with-me:agent-name') */
   pluginName?: string;
+  /** Built-in Claude Code sub-agent type. When set, model and tools are controlled by Claude Code. */
+  builtInType?: BuiltInSubAgentType;
 }
 
 // Color codes for SubAgent color property

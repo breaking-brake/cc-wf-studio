@@ -364,7 +364,10 @@ async function planSubAgentFiles(
   }
 
   const subAgentNodes = wf.nodes.filter(
-    (n) => n.type === 'subAgent' && !(n.data as { commandFilePath?: string }).commandFilePath
+    (n) =>
+      n.type === 'subAgent' &&
+      !(n.data as { commandFilePath?: string }).commandFilePath &&
+      !(n.data as { builtInType?: string }).builtInType
   );
 
   if (subAgentNodes.length === 0) {

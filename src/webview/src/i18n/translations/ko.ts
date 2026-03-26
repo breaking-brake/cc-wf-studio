@@ -980,6 +980,25 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.error.descriptionRequired': '설명은 필수입니다.',
   'subAgent.form.error.promptRequired': '프롬프트는 필수입니다.',
 
+  // Sub-Agent Built-in Presets
+  'subAgent.dialog.builtInTab': '내장',
+  'subAgent.dialog.builtInDescription':
+    'Claude Code의 내장 서브 에이전트를 선택합니다. 다른 AI 에이전트에서는 유사한 동작을 재현하도록 내보내집니다.',
+  'subAgent.builtIn.badge': '내장',
+  'subAgent.builtIn.controlledByPreset': '프리셋에서 제어',
+  'subAgent.builtIn.generalPurpose.name': '범용',
+  'subAgent.builtIn.generalPurpose.description':
+    '복잡한 조사, 코드 검색, 멀티스텝 작업 실행을 위한 범용 에이전트.',
+  'subAgent.builtIn.generalPurpose.defaultPrompt': '다음 작업을 조사하고 완료하세요:',
+  'subAgent.builtIn.explore.name': 'Explore',
+  'subAgent.builtIn.explore.description':
+    '코드베이스 탐색에 특화된 빠른 읽기 전용 에이전트. 파일 검색, 코드 검색, 질문 응답 가능.',
+  'subAgent.builtIn.explore.defaultPrompt': '코드베이스를 탐색하고 다음 질문에 답하세요:',
+  'subAgent.builtIn.plan.name': 'Plan',
+  'subAgent.builtIn.plan.description':
+    '구현 계획 설계 및 중요 파일 식별을 위한 소프트웨어 아키텍트 에이전트.',
+  'subAgent.builtIn.plan.defaultPrompt': '다음 요구사항에 대한 구현 계획을 설계하세요:',
+
   // Claude API Upload Dialog
   'claudeApi.description':
     '워크플로우를 Agent Skills로 Claude API에 업로드하고 Messages API를 통해 실행할 수 있습니다.\nMCP 서버, 코드 실행, 기타 스킬과 결합하여 문서 처리, 데이터 분석, 고객 지원 등 전문 AI 에이전트를 API로 공개할 수 있습니다.',
