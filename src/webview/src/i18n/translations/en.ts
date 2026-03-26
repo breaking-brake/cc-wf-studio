@@ -977,8 +977,11 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.agentType.other': 'Other',
   'subAgent.form.descriptionLabel': 'Description',
   'subAgent.form.descriptionPlaceholder': 'Brief description of this agent...',
+  'subAgent.form.agentDefinitionLabel': 'Agent Definition',
+  'subAgent.form.agentDefinitionPlaceholder':
+    'Define what this agent IS — its capabilities, role, and behavior...',
   'subAgent.form.promptLabel': 'Prompt',
-  'subAgent.form.promptPlaceholder': 'Enter the instructions for this agent...',
+  'subAgent.form.promptPlaceholder': 'Enter what you want this agent to do...',
   'subAgent.form.modelLabel': 'Model',
   'subAgent.form.toolsLabel': 'Tools',
   'subAgent.form.toolsHint': 'Comma-separated list of allowed tools (e.g., Read, Grep, Glob)',
@@ -990,26 +993,33 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.saveButton': 'Save',
   'subAgent.property.editButton': 'Edit',
   'subAgent.form.error.descriptionRequired': 'Description is required.',
+  'subAgent.form.error.agentDefinitionRequired': 'Agent Definition is required.',
   'subAgent.form.error.promptRequired': 'Prompt is required.',
 
   // Sub-Agent Built-in Presets
   'subAgent.dialog.builtInTab': 'Built-in',
   'subAgent.dialog.builtInDescription':
-    'Built-in sub-agents optimized for Claude Code. For other targets, these presets are exported as regular sub-agents that emulate similar behavior.',
+    'Built-in sub-agents optimized for Claude Code.\nFor other AI Agents, these presets are exported as regular sub-agents that emulate similar behavior.',
   'subAgent.builtIn.badge': 'Built-in',
   'subAgent.builtIn.controlledByPreset': 'Controlled by preset',
   'subAgent.builtIn.generalPurpose.name': 'General Purpose',
   'subAgent.builtIn.generalPurpose.description':
     'General-purpose agent for researching complex questions, searching code, and executing multi-step tasks.',
+  'subAgent.builtIn.generalPurpose.defaultAgentDefinition':
+    'General-purpose agent for researching complex questions, searching for code, and executing multi-step tasks. Has access to all tools.',
   'subAgent.builtIn.generalPurpose.defaultPrompt': 'Research and complete the following task:',
   'subAgent.builtIn.explore.name': 'Explore',
   'subAgent.builtIn.explore.description':
     'Fast read-only agent for exploring codebases — find files, search code, and answer codebase questions.',
+  'subAgent.builtIn.explore.defaultAgentDefinition':
+    'Fast agent specialized for exploring codebases. Use for quick file searches, keyword searches, and answering questions about the codebase. Read-only — no Write/Edit tools.',
   'subAgent.builtIn.explore.defaultPrompt':
     'Explore the codebase and answer the following question:',
   'subAgent.builtIn.plan.name': 'Plan',
   'subAgent.builtIn.plan.description':
     'Software architect agent for designing implementation plans and identifying critical files.',
+  'subAgent.builtIn.plan.defaultAgentDefinition':
+    'Software architect agent for designing implementation plans. Returns step-by-step plans, identifies critical files, and considers architectural trade-offs. Read-only — no Write/Edit tools.',
   'subAgent.builtIn.plan.defaultPrompt':
     'Design an implementation plan for the following requirement:',
 

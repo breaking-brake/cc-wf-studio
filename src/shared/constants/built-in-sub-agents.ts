@@ -11,12 +11,15 @@ import type { BuiltInSubAgentType } from '../types/workflow-definition';
 type BuiltInI18nKey =
   | 'subAgent.builtIn.generalPurpose.name'
   | 'subAgent.builtIn.generalPurpose.description'
+  | 'subAgent.builtIn.generalPurpose.defaultAgentDefinition'
   | 'subAgent.builtIn.generalPurpose.defaultPrompt'
   | 'subAgent.builtIn.explore.name'
   | 'subAgent.builtIn.explore.description'
+  | 'subAgent.builtIn.explore.defaultAgentDefinition'
   | 'subAgent.builtIn.explore.defaultPrompt'
   | 'subAgent.builtIn.plan.name'
   | 'subAgent.builtIn.plan.description'
+  | 'subAgent.builtIn.plan.defaultAgentDefinition'
   | 'subAgent.builtIn.plan.defaultPrompt';
 
 export interface BuiltInSubAgentPreset {
@@ -26,7 +29,9 @@ export interface BuiltInSubAgentPreset {
   nameKey: BuiltInI18nKey;
   /** i18n key for the description */
   descriptionKey: BuiltInI18nKey;
-  /** i18n key for the default prompt template */
+  /** i18n key for the default agent definition (what this agent IS) */
+  defaultAgentDefinitionKey: BuiltInI18nKey;
+  /** i18n key for the default task prompt template (what to TELL this agent to do) */
   defaultPromptKey: BuiltInI18nKey;
   /** Model used by this preset (e.g., 'haiku', 'inherit') */
   model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
@@ -43,6 +48,7 @@ export const BUILT_IN_SUB_AGENTS: readonly BuiltInSubAgentPreset[] = [
     type: 'general-purpose',
     nameKey: 'subAgent.builtIn.generalPurpose.name',
     descriptionKey: 'subAgent.builtIn.generalPurpose.description',
+    defaultAgentDefinitionKey: 'subAgent.builtIn.generalPurpose.defaultAgentDefinition',
     defaultPromptKey: 'subAgent.builtIn.generalPurpose.defaultPrompt',
     toolsDescription: 'All tools (*)',
     modelDescription: 'Inherited from parent',
@@ -51,6 +57,7 @@ export const BUILT_IN_SUB_AGENTS: readonly BuiltInSubAgentPreset[] = [
     type: 'explore',
     nameKey: 'subAgent.builtIn.explore.name',
     descriptionKey: 'subAgent.builtIn.explore.description',
+    defaultAgentDefinitionKey: 'subAgent.builtIn.explore.defaultAgentDefinition',
     defaultPromptKey: 'subAgent.builtIn.explore.defaultPrompt',
     model: 'haiku',
     readonly: true,
@@ -61,6 +68,7 @@ export const BUILT_IN_SUB_AGENTS: readonly BuiltInSubAgentPreset[] = [
     type: 'plan',
     nameKey: 'subAgent.builtIn.plan.name',
     descriptionKey: 'subAgent.builtIn.plan.description',
+    defaultAgentDefinitionKey: 'subAgent.builtIn.plan.defaultAgentDefinition',
     defaultPromptKey: 'subAgent.builtIn.plan.defaultPrompt',
     readonly: true,
     toolsDescription: 'Read-only tools (no Write/Edit)',

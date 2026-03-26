@@ -971,8 +971,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.agentType.other': 'その他',
   'subAgent.form.descriptionLabel': '説明',
   'subAgent.form.descriptionPlaceholder': 'このエージェントの簡単な説明...',
+  'subAgent.form.agentDefinitionLabel': 'エージェント定義',
+  'subAgent.form.agentDefinitionPlaceholder': 'このエージェントの能力、役割、振る舞いを定義...',
   'subAgent.form.promptLabel': 'プロンプト',
-  'subAgent.form.promptPlaceholder': 'このエージェントへの指示を入力...',
+  'subAgent.form.promptPlaceholder': 'このエージェントに何をさせるかを入力...',
   'subAgent.form.modelLabel': 'モデル',
   'subAgent.form.toolsLabel': 'ツール',
   'subAgent.form.toolsHint': '許可するツールをカンマ区切りで入力（例: Read, Grep, Glob）',
@@ -984,26 +986,33 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.saveButton': '保存',
   'subAgent.property.editButton': '編集',
   'subAgent.form.error.descriptionRequired': '説明は必須です。',
+  'subAgent.form.error.agentDefinitionRequired': 'エージェント定義は必須です。',
   'subAgent.form.error.promptRequired': 'プロンプトは必須です。',
 
   // Sub-Agent Built-in Presets
   'subAgent.dialog.builtInTab': 'ビルトイン',
   'subAgent.dialog.builtInDescription':
-    'Claude Codeのビルトインサブエージェントを選択します。他のAIエージェントでは、同様の振る舞いを再現するようにエクスポートされます。',
+    'Claude Codeのビルトインサブエージェントを選択します。\n他のAIエージェントでは、同様の振る舞いを再現するようにエクスポートされます。',
   'subAgent.builtIn.badge': 'ビルトイン',
   'subAgent.builtIn.controlledByPreset': 'プリセットが制御',
   'subAgent.builtIn.generalPurpose.name': '汎用',
   'subAgent.builtIn.generalPurpose.description':
     '複雑な調査、コード検索、マルチステップタスクの実行に対応する汎用エージェント。',
+  'subAgent.builtIn.generalPurpose.defaultAgentDefinition':
+    '複雑な調査、コード検索、マルチステップタスクの実行に対応する汎用エージェント。全ツールへのアクセス権を持つ。',
   'subAgent.builtIn.generalPurpose.defaultPrompt': '以下のタスクを調査して完了してください：',
   'subAgent.builtIn.explore.name': 'Explore',
   'subAgent.builtIn.explore.description':
     'コードベース探索に特化した高速読み取り専用エージェント。ファイル検索、コード検索、質問回答が可能。',
+  'subAgent.builtIn.explore.defaultAgentDefinition':
+    'コードベース探索に特化した高速エージェント。ファイル検索、キーワード検索、コードベースに関する質問回答に使用。読み取り専用 — Write/Editツール不可。',
   'subAgent.builtIn.explore.defaultPrompt':
     'コードベースを探索して、以下の質問に回答してください：',
   'subAgent.builtIn.plan.name': 'Plan',
   'subAgent.builtIn.plan.description':
     '実装計画の設計と重要ファイルの特定を行うソフトウェアアーキテクトエージェント。',
+  'subAgent.builtIn.plan.defaultAgentDefinition':
+    '実装計画を設計するソフトウェアアーキテクトエージェント。ステップバイステップの計画を返し、重要ファイルを特定し、アーキテクチャのトレードオフを検討する。読み取り専用 — Write/Editツール不可。',
   'subAgent.builtIn.plan.defaultPrompt': '以下の要件に対する実装計画を設計してください：',
 
   // Claude API Upload Dialog

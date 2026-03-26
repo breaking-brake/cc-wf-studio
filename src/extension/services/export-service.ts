@@ -272,10 +272,10 @@ export function generateSubAgentFile(node: SubAgentNode, options?: SubAgentFileO
   frontmatter.push('---');
   frontmatter.push('');
 
-  // Prompt body
-  const prompt = data.prompt || '';
+  // Agent definition body (what this agent IS)
+  const agentDefinition = data.agentDefinition || '';
 
-  return frontmatter.join('\n') + prompt;
+  return frontmatter.join('\n') + agentDefinition;
 }
 
 /**

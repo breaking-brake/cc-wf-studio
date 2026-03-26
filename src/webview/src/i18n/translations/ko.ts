@@ -965,8 +965,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.agentType.other': '기타',
   'subAgent.form.descriptionLabel': '설명',
   'subAgent.form.descriptionPlaceholder': '이 에이전트에 대한 간단한 설명...',
+  'subAgent.form.agentDefinitionLabel': '에이전트 정의',
+  'subAgent.form.agentDefinitionPlaceholder': '이 에이전트의 기능, 역할, 동작을 정의...',
   'subAgent.form.promptLabel': '프롬프트',
-  'subAgent.form.promptPlaceholder': '이 에이전트에 대한 지시사항 입력...',
+  'subAgent.form.promptPlaceholder': '이 에이전트에게 무엇을 시킬지 입력...',
   'subAgent.form.modelLabel': '모델',
   'subAgent.form.toolsLabel': '도구',
   'subAgent.form.toolsHint': '허용할 도구를 쉼표로 구분하여 입력 (예: Read, Grep, Glob)',
@@ -978,25 +980,32 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.saveButton': '저장',
   'subAgent.property.editButton': '편집',
   'subAgent.form.error.descriptionRequired': '설명은 필수입니다.',
+  'subAgent.form.error.agentDefinitionRequired': '에이전트 정의는 필수입니다.',
   'subAgent.form.error.promptRequired': '프롬프트는 필수입니다.',
 
   // Sub-Agent Built-in Presets
   'subAgent.dialog.builtInTab': '내장',
   'subAgent.dialog.builtInDescription':
-    'Claude Code의 내장 서브 에이전트를 선택합니다. 다른 AI 에이전트에서는 유사한 동작을 재현하도록 내보내집니다.',
+    'Claude Code의 내장 서브 에이전트를 선택합니다.\n다른 AI 에이전트에서는 유사한 동작을 재현하도록 내보내집니다.',
   'subAgent.builtIn.badge': '내장',
   'subAgent.builtIn.controlledByPreset': '프리셋에서 제어',
   'subAgent.builtIn.generalPurpose.name': '범용',
   'subAgent.builtIn.generalPurpose.description':
     '복잡한 조사, 코드 검색, 멀티스텝 작업 실행을 위한 범용 에이전트.',
+  'subAgent.builtIn.generalPurpose.defaultAgentDefinition':
+    '복잡한 조사, 코드 검색, 멀티 스텝 작업 실행에 대응하는 범용 에이전트. 모든 도구에 대한 접근 권한을 가짐.',
   'subAgent.builtIn.generalPurpose.defaultPrompt': '다음 작업을 조사하고 완료하세요:',
   'subAgent.builtIn.explore.name': 'Explore',
   'subAgent.builtIn.explore.description':
     '코드베이스 탐색에 특화된 빠른 읽기 전용 에이전트. 파일 검색, 코드 검색, 질문 응답 가능.',
+  'subAgent.builtIn.explore.defaultAgentDefinition':
+    '코드베이스 탐색에 특화된 고속 에이전트. 파일 검색, 키워드 검색, 코드베이스 관련 질문 답변에 사용. 읽기 전용 — Write/Edit 도구 불가.',
   'subAgent.builtIn.explore.defaultPrompt': '코드베이스를 탐색하고 다음 질문에 답하세요:',
   'subAgent.builtIn.plan.name': 'Plan',
   'subAgent.builtIn.plan.description':
     '구현 계획 설계 및 중요 파일 식별을 위한 소프트웨어 아키텍트 에이전트.',
+  'subAgent.builtIn.plan.defaultAgentDefinition':
+    '구현 계획을 설계하는 소프트웨어 아키텍트 에이전트. 단계별 계획을 반환하고, 중요 파일을 식별하며, 아키텍처 트레이드오프를 고려. 읽기 전용 — Write/Edit 도구 불가.',
   'subAgent.builtIn.plan.defaultPrompt': '다음 요구사항에 대한 구현 계획을 설계하세요:',
 
   // Claude API Upload Dialog

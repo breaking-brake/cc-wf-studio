@@ -91,6 +91,7 @@ export async function handleCreateSubAgent(
       position: { x: 0, y: 0 },
       data: {
         description: payload.description,
+        agentDefinition: payload.agentDefinition,
         prompt: payload.prompt,
         model: payload.agentType === 'claudeCode' ? payload.model || 'sonnet' : undefined,
         tools: payload.agentType === 'claudeCode' ? payload.tools || undefined : undefined,

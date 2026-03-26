@@ -260,6 +260,7 @@ export interface CommandReference {
  */
 export interface CreateSubAgentPayload {
   description: string;
+  agentDefinition: string;
   prompt: string;
   agentType: 'claudeCode' | 'other';
   model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';

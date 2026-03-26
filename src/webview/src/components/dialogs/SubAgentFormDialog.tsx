@@ -48,6 +48,7 @@ type AgentType = 'claudeCode' | 'other';
 
 export interface SubAgentFormData {
   description: string;
+  agentDefinition: string;
   prompt: string;
   agentType: AgentType;
   model: 'sonnet' | 'opus' | 'haiku' | 'inherit';
@@ -66,6 +67,7 @@ interface SubAgentFormDialogProps {
 
 interface FormErrors {
   description?: string;
+  agentDefinition?: string;
   prompt?: string;
 }
 
@@ -77,6 +79,7 @@ export function SubAgentFormDialog({
 }: SubAgentFormDialogProps) {
   const { t } = useTranslation();
   const descriptionId = useId();
+  const agentDefinitionId = useId();
   const promptId = useId();
   const modelId = useId();
   const memoryId = useId();
@@ -84,6 +87,7 @@ export function SubAgentFormDialog({
   const [agentType, setAgentType] = useState<AgentType>('claudeCode');
   const [formData, setFormData] = useState<SubAgentFormData>({
     description: '',
+    agentDefinition: '',
     prompt: '',
     agentType: 'claudeCode',
     model: 'inherit',
@@ -91,6 +95,7 @@ export function SubAgentFormDialog({
     memory: '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
+  const [isEditingAgentDefinition, setIsEditingAgentDefinition] = useState(false);
   const [isEditingPrompt, setIsEditingPrompt] = useState(false);
 
   const isEditMode = !!initialData;
@@ -105,6 +110,7 @@ export function SubAgentFormDialog({
         setAgentType('claudeCode');
         setFormData({
           description: '',
+          agentDefinition: '',
           prompt: '',
           agentType: 'claudeCode',
           model: 'inherit',
@@ -137,6 +143,9 @@ export function SubAgentFormDialog({
 
     if (!formData.description.trim()) {
       validationErrors.description = t('subAgent.form.error.descriptionRequired');
+    }
+    if (!formData.agentDefinition.trim()) {
+      validationErrors.agentDefinition = t('subAgent.form.error.agentDefinitionRequired');
     }
     if (!formData.prompt.trim()) {
       validationErrors.prompt = t('subAgent.form.error.promptRequired');
@@ -370,7 +379,94 @@ export function SubAgentFormDialog({
                 )}
               </div>
 
-              {/* Prompt */}
+              {/* Agent Definition */}
+              <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '6px',
+                  }}
+                >
+                  <label
+                    htmlFor={agentDefinitionId}
+                    style={{
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      color: 'var(--vscode-foreground)',
+                    }}
+                  >
+                    {t('subAgent.form.agentDefinitionLabel')} *
+                  </label>
+                  {!isBuiltIn && (
+                    <EditInEditorButton
+                      content={formData.agentDefinition}
+                      onContentUpdated={(newContent) =>
+                        handleFieldChange('agentDefinition', newContent)
+                      }
+                      label={t('subAgent.form.agentDefinitionLabel')}
+                      language="markdown"
+                      onEditingStateChange={setIsEditingAgentDefinition}
+                    />
+                  )}
+                </div>
+                {isBuiltIn ? (
+                  <div
+                    style={{
+                      padding: '8px 12px',
+                      fontSize: '13px',
+                      backgroundColor: 'var(--vscode-input-background)',
+                      border: '1px solid var(--vscode-input-border)',
+                      borderRadius: '4px',
+                      color: 'var(--vscode-descriptionForeground)',
+                      opacity: 0.7,
+                      whiteSpace: 'pre-wrap',
+                      lineHeight: '1.5',
+                    }}
+                  >
+                    {formData.agentDefinition}
+                  </div>
+                ) : (
+                  <>
+                    <textarea
+                      id={agentDefinitionId}
+                      value={formData.agentDefinition}
+                      onChange={(e) => handleFieldChange('agentDefinition', e.target.value)}
+                      placeholder={t('subAgent.form.agentDefinitionPlaceholder')}
+                      readOnly={isEditingAgentDefinition}
+                      rows={6}
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        fontSize: '13px',
+                        backgroundColor: 'var(--vscode-input-background)',
+                        color: 'var(--vscode-input-foreground)',
+                        border: `1px solid ${errors.agentDefinition ? 'var(--vscode-inputValidation-errorBorder)' : 'var(--vscode-input-border)'}`,
+                        borderRadius: '4px',
+                        outline: 'none',
+                        resize: 'vertical',
+                        fontFamily: 'var(--vscode-editor-font-family)',
+                        opacity: isEditingAgentDefinition ? 0.5 : 1,
+                        cursor: isEditingAgentDefinition ? 'not-allowed' : 'text',
+                      }}
+                    />
+                    {errors.agentDefinition && (
+                      <p
+                        style={{
+                          margin: '4px 0 0 0',
+                          fontSize: '12px',
+                          color: 'var(--vscode-inputValidation-errorForeground)',
+                        }}
+                      >
+                        {errors.agentDefinition}
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Prompt (task instructions) */}
               <div>
                 <div
                   style={{
@@ -404,7 +500,7 @@ export function SubAgentFormDialog({
                   onChange={(e) => handleFieldChange('prompt', e.target.value)}
                   placeholder={t('subAgent.form.promptPlaceholder')}
                   readOnly={isEditingPrompt}
-                  rows={8}
+                  rows={6}
                   style={{
                     width: '100%',
                     padding: '8px',

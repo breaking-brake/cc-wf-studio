@@ -57,7 +57,7 @@ export const SubAgentNodeComponent: React.FC<NodeProps<SubAgentData>> = React.me
           Sub-Agent
         </div>
 
-        {/* Node Description */}
+        {/* Agent Name */}
         <div
           style={{
             fontSize: '13px',
@@ -66,12 +66,14 @@ export const SubAgentNodeComponent: React.FC<NodeProps<SubAgentData>> = React.me
             fontWeight: 500,
           }}
         >
-          {data.pluginName
-            ? `${data.pluginName}:${data.description || 'Untitled Sub-Agent'}`
-            : data.description || 'Untitled Sub-Agent'}
+          {builtInPreset
+            ? t(builtInPreset.nameKey)
+            : data.pluginName
+              ? `${data.pluginName}:${data.description || 'Untitled Sub-Agent'}`
+              : data.description || 'Untitled Sub-Agent'}
         </div>
 
-        {/* Prompt Preview */}
+        {/* Prompt Preview (task instructions) */}
         {data.prompt && (
           <div
             style={{
@@ -105,8 +107,7 @@ export const SubAgentNodeComponent: React.FC<NodeProps<SubAgentData>> = React.me
                 fontWeight: 600,
               }}
             >
-              {t('subAgent.builtIn.badge')}:{' '}
-              {builtInPreset ? t(builtInPreset.nameKey) : data.builtInType}
+              {t('subAgent.builtIn.badge')}
             </div>
           )}
 

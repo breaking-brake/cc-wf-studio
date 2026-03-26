@@ -46,10 +46,21 @@
       "outputPorts": 1
     },
     "subAgent": {
-      "description": "AI sub-agent executing a task with given prompt",
+      "description": "AI sub-agent with separate agent definition and task prompt",
       "fields": {
         "description": { "type": "string", "required": true, "maxLength": 200 },
-        "prompt": { "type": "string", "required": true, "maxLength": 10000 },
+        "agentDefinition": {
+          "type": "string",
+          "required": true,
+          "maxLength": 10000,
+          "description": "Defines what this agent IS — its capabilities, role, and behavior. Exported as the .md file body."
+        },
+        "prompt": {
+          "type": "string",
+          "required": true,
+          "maxLength": 10000,
+          "description": "Task instructions — what to TELL this agent to do. Exported in execution instructions of parent slash command/skill."
+        },
         "tools": { "type": "string", "required": false },
         "model": {
           "type": "string",
@@ -103,19 +114,20 @@
         "builtInAgents": "For built-in agents, set builtInType to 'general-purpose', 'explore', or 'plan'. Do NOT set commandFilePath or commandScope for built-in agents.",
         "steps": [
           "Decide if a built-in agent fits: 'general-purpose' (all tools), 'explore' (read-only codebase search), 'plan' (read-only architecture planning)",
-          "If using built-in: set builtInType, description, and prompt. Do NOT set commandFilePath/commandScope/model/tools.",
+          "If using built-in: set builtInType, description, agentDefinition, and prompt. Do NOT set commandFilePath/commandScope/model/tools.",
           "If using custom: call list_available_agents to discover existing agent files",
           "If a matching custom agent exists, use its commandPath and scope",
           "If no match, provide description/prompt/model etc. without commandFilePath — apply_workflow will auto-create the .md file",
           "Set agentType based on your own runtime identity"
         ],
-        "frontmatterFormat": "---\ndescription: Short description\nmodel: sonnet\ntools: Bash, Read, Write\nmemory: project\n---\nPrompt content here...",
+        "frontmatterFormat": "---\ndescription: Short description\nmodel: sonnet\ntools: Bash, Read, Write\nmemory: project\n---\nAgent definition content here (what this agent IS)...",
         "examples": [
           {
             "description": "Built-in explore agent",
             "type": "subAgent",
             "data": {
               "description": "Explore the codebase for authentication patterns",
+              "agentDefinition": "Fast agent specialized for exploring codebases. Use for quick file searches, keyword searches, and codebase questions.",
               "prompt": "Search the codebase and identify all authentication-related files and patterns.",
               "builtInType": "explore",
               "agentType": "claudeCode",
@@ -127,6 +139,7 @@
             "type": "subAgent",
             "data": {
               "description": "Code reviewer",
+              "agentDefinition": "Expert code reviewer that checks for bugs, security issues, and code quality.",
               "prompt": "Review the code for bugs",
               "model": "sonnet",
               "agentType": "claudeCode",

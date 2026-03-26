@@ -933,8 +933,10 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.agentType.other': '其他',
   'subAgent.form.descriptionLabel': '描述',
   'subAgent.form.descriptionPlaceholder': '簡要描述此代理...',
+  'subAgent.form.agentDefinitionLabel': '代理定義',
+  'subAgent.form.agentDefinitionPlaceholder': '定義此代理的能力、角色和行為...',
   'subAgent.form.promptLabel': '提示詞',
-  'subAgent.form.promptPlaceholder': '輸入此代理的指令...',
+  'subAgent.form.promptPlaceholder': '輸入讓此代理執行的任務...',
   'subAgent.form.modelLabel': '模型',
   'subAgent.form.toolsLabel': '工具',
   'subAgent.form.toolsHint': '以逗號分隔的允許工具列表（例如：Read, Grep, Glob）',
@@ -946,24 +948,31 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.saveButton': '儲存',
   'subAgent.property.editButton': '編輯',
   'subAgent.form.error.descriptionRequired': '描述為必填項。',
+  'subAgent.form.error.agentDefinitionRequired': '代理定義為必填項。',
   'subAgent.form.error.promptRequired': '提示詞為必填項。',
 
   // Sub-Agent Built-in Presets
   'subAgent.dialog.builtInTab': '內建',
   'subAgent.dialog.builtInDescription':
-    '選擇 Claude Code 的內建子代理。匯出到其他 AI 代理時，將以模擬類似行為的方式匯出。',
+    '選擇 Claude Code 的內建子代理。\n匯出到其他 AI 代理時，將以模擬類似行為的方式匯出。',
   'subAgent.builtIn.badge': '內建',
   'subAgent.builtIn.controlledByPreset': '由預設控制',
   'subAgent.builtIn.generalPurpose.name': '通用',
   'subAgent.builtIn.generalPurpose.description':
     '用於複雜研究、程式碼搜尋和執行多步驟任務的通用代理。',
+  'subAgent.builtIn.generalPurpose.defaultAgentDefinition':
+    '用於研究複雜問題、搜尋程式碼和執行多步驟任務的通用代理。擁有所有工具的存取權限。',
   'subAgent.builtIn.generalPurpose.defaultPrompt': '研究並完成以下任務：',
   'subAgent.builtIn.explore.name': 'Explore',
   'subAgent.builtIn.explore.description':
     '專用於程式碼庫探索的快速唯讀代理。可進行檔案搜尋、程式碼搜尋和問題回答。',
+  'subAgent.builtIn.explore.defaultAgentDefinition':
+    '專門用於探索程式碼庫的快速代理。用於快速檔案搜尋、關鍵字搜尋和回答程式碼庫相關問題。唯讀 — 無Write/Edit工具。',
   'subAgent.builtIn.explore.defaultPrompt': '探索程式碼庫並回答以下問題：',
   'subAgent.builtIn.plan.name': 'Plan',
   'subAgent.builtIn.plan.description': '用於設計實作計畫和識別關鍵檔案的軟體架構師代理。',
+  'subAgent.builtIn.plan.defaultAgentDefinition':
+    '用於設計實施計畫的軟體架構師代理。返回分步計畫，識別關鍵檔案，並考慮架構權衡。唯讀 — 無Write/Edit工具。',
   'subAgent.builtIn.plan.defaultPrompt': '為以下需求設計實作計畫：',
 
   // Claude API Upload Dialog

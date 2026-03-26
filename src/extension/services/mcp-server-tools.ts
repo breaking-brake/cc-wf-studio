@@ -385,6 +385,7 @@ async function planSubAgentFiles(
   for (const node of subAgentNodes) {
     const data = node.data as {
       description?: string;
+      agentDefinition?: string;
       prompt?: string;
       model?: string;
       tools?: string;
@@ -425,6 +426,7 @@ async function planSubAgentFiles(
       position: node.position,
       data: {
         description: data.description || '',
+        agentDefinition: data.agentDefinition || '',
         prompt: data.prompt || '',
         model: data.model,
         tools: data.tools,

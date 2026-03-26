@@ -504,9 +504,26 @@ const SubAgentProperties: React.FC<{
         <div style={valueStyle}>{data.description || '-'}</div>
       </div>
 
+      {/* Agent Definition (read-only, max 3 lines) */}
+      <div>
+        <div style={labelStyle}>{t('subAgent.form.agentDefinitionLabel')}</div>
+        <div
+          style={{
+            ...valueStyle,
+            fontFamily: 'var(--vscode-editor-font-family)',
+            whiteSpace: 'pre-wrap',
+            maxHeight: '4.5em',
+            lineHeight: '1.5',
+            overflow: 'hidden',
+          }}
+        >
+          {data.agentDefinition || '-'}
+        </div>
+      </div>
+
       {/* Prompt (read-only, max 3 lines) */}
       <div>
-        <div style={labelStyle}>{t('property.prompt')}</div>
+        <div style={labelStyle}>{t('subAgent.form.promptLabel')}</div>
         <div
           style={{
             ...valueStyle,
@@ -585,6 +602,7 @@ const SubAgentProperties: React.FC<{
         onClose={() => setIsEditDialogOpen(false)}
         initialData={{
           description: data.description,
+          agentDefinition: data.agentDefinition,
           prompt: data.prompt,
           agentType: agentType,
           model: data.model || (data.builtInType ? 'inherit' : 'sonnet'),
@@ -596,6 +614,7 @@ const SubAgentProperties: React.FC<{
         onSubmit={async (formData) => {
           updateNodeData(node.id, {
             description: formData.description,
+            agentDefinition: formData.agentDefinition,
             prompt: formData.prompt,
             agentType: formData.agentType,
             model: formData.agentType === 'claudeCode' ? formData.model : undefined,

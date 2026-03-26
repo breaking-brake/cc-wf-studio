@@ -15,6 +15,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { browseCommands } from '../../services/command-browser-service';
 import { openExternalUrl } from '../../services/vscode-bridge';
+import { parseAgentFrontmatter } from '../../utils/agent-frontmatter';
 import { type SubAgentFormData, SubAgentFormDialog } from './SubAgentFormDialog';
 
 const AWESOME_SUBAGENTS_URL = 'https://github.com/VoltAgent/awesome-claude-code-subagents';
@@ -27,8 +28,8 @@ interface SubAgentCreationDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onCreateWithForm: (data: SubAgentFormData) => Promise<void>;
-  onSelectCommand: (command: CommandReference) => void;
-  onSelectBuiltInPreset: (type: BuiltInSubAgentType) => void;
+  onSelectCommand: (command: CommandReference, formData: SubAgentFormData) => void;
+  onSelectBuiltInPreset: (type: BuiltInSubAgentType, formData: SubAgentFormData) => void;
 }
 
 type Tab = 'builtIn' | 'user' | 'project' | 'local';
@@ -80,29 +81,60 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
 
   const handleFormSubmit = useCallback(
     async (data: SubAgentFormData) => {
-      await onCreateWithForm(data);
+      if (data.builtInType && selectedBuiltIn) {
+        // Built-in preset selected → pass form data to built-in handler
+        onSelectBuiltInPreset(selectedBuiltIn, data);
+      } else if (selectedCommand) {
+        // Existing command selected → pass form data to command handler
+        onSelectCommand(selectedCommand, data);
+      } else {
+        // New agent creation
+        await onCreateWithForm(data);
+      }
       setIsFormDialogOpen(false);
+      setFormInitialData(undefined);
       onClose();
     },
-    [onCreateWithForm, onClose]
+    [
+      onCreateWithForm,
+      onSelectBuiltInPreset,
+      onSelectCommand,
+      onClose,
+      selectedBuiltIn,
+      selectedCommand,
+    ]
   );
+
+  // Pre-fill form data for selected preset/command and open form dialog
+  const [formInitialData, setFormInitialData] = useState<SubAgentFormData | undefined>(undefined);
 
   const handleAdd = useCallback(() => {
     if (activeTab === 'builtIn' && selectedBuiltIn) {
-      onSelectBuiltInPreset(selectedBuiltIn);
-      onClose();
+      const preset = BUILT_IN_SUB_AGENTS.find((p) => p.type === selectedBuiltIn);
+      if (!preset) return;
+      setFormInitialData({
+        description: t(preset.descriptionKey),
+        agentDefinition: t(preset.defaultAgentDefinitionKey),
+        prompt: t(preset.defaultPromptKey),
+        agentType: 'claudeCode',
+        model: preset.model || 'inherit',
+        builtInType: selectedBuiltIn,
+      });
+      setIsFormDialogOpen(true);
     } else if (selectedCommand) {
-      onSelectCommand(selectedCommand);
-      onClose();
+      const { frontmatter, body } = parseAgentFrontmatter(selectedCommand.promptContent || '');
+      setFormInitialData({
+        description: frontmatter.description || selectedCommand.description || selectedCommand.name,
+        agentDefinition: body,
+        prompt: 'Execute the following task:',
+        agentType: 'claudeCode',
+        model: (frontmatter.model as 'sonnet' | 'opus' | 'haiku' | 'inherit') || 'sonnet',
+        tools: frontmatter.tools || '',
+        memory: (frontmatter.memory as 'user' | 'project' | 'local' | '') || '',
+      });
+      setIsFormDialogOpen(true);
     }
-  }, [
-    activeTab,
-    selectedBuiltIn,
-    selectedCommand,
-    onSelectBuiltInPreset,
-    onSelectCommand,
-    onClose,
-  ]);
+  }, [activeTab, selectedBuiltIn, selectedCommand, t]);
 
   const filteredCommands = useMemo(() => {
     const tabCommands = commands.filter((c) => c.scope === activeTab);
@@ -326,6 +358,7 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
                 fontSize: '12px',
                 color: 'var(--vscode-descriptionForeground)',
                 lineHeight: '1.5',
+                whiteSpace: 'pre-line',
               }}
             >
               {activeTab === 'builtIn' && t('subAgent.dialog.builtInDescription')}
@@ -648,8 +681,12 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
       {/* Nested Form Dialog */}
       <SubAgentFormDialog
         isOpen={isFormDialogOpen}
-        onClose={() => setIsFormDialogOpen(false)}
+        onClose={() => {
+          setIsFormDialogOpen(false);
+          setFormInitialData(undefined);
+        }}
         onSubmit={handleFormSubmit}
+        initialData={formInitialData}
       />
     </Dialog.Root>
   );
