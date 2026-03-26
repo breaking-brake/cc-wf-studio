@@ -48,12 +48,10 @@ nodeTypes:
         type: string
         required: true
         maxLength: 10000
-        description: "Defines what this agent IS — its capabilities, role, and behavior. Exported as the .md file body."
       prompt:
         type: string
         required: true
         maxLength: 10000
-        description: Task instructions — what to TELL this agent to do. Exported in execution instructions of parent slash command/skill.
       tools:
         type: string
         required: false
@@ -66,32 +64,29 @@ nodeTypes:
         type: string
         required: false
         enum[8]: red,blue,green,yellow,purple,orange,pink,cyan
-        description: Visual indicator color for this sub-agent (optional)
       memory:
         type: string
         required: false
         enum[3]: user,project,local
-        description: "Persistent memory scope. 'user'=cross-project, 'project'=VCS-trackable, 'local'=local-only"
       agentType:
         type: string
         required: false
         enum[2]: claudeCode,other
         default: claudeCode
-        description: "Agent runtime type. Set 'claudeCode' if the agent runs on Claude Code, 'other' for different AI agents (Cursor, Copilot, etc.). This controls which fields are shown in the property panel."
       commandFilePath:
         type: string
         required: false
-        description: Absolute path to .claude/agents/*.md file. Only needed when the user explicitly specifies a custom agent. Not needed for built-in agents.
+        description: Path to .claude/agents/*.md file. Only for user-specified custom agents.
       commandScope:
         type: string
         required: false
         enum[2]: user,project
-        description: "'user' = ~/.claude/agents/, 'project' = .claude/agents/. Required when commandFilePath is set."
+        description: 'user' or 'project'. Required with commandFilePath.
       builtInType:
         type: string
         required: false
         enum[3]: general-purpose,explore,plan
-        description: "Built-in Claude Code sub-agent type. When set, model and tools are controlled by Claude Code and commandFilePath is not needed."
+        description: Built-in type. Model and tools are auto-controlled.
       outputPorts:
         type: number
         required: true
@@ -99,44 +94,22 @@ nodeTypes:
     inputPorts: 1
     outputPorts: 1
     aiGenerationGuidance:
-      workflow: SubAgent nodes use builtInType (built-in agents) or reference existing .claude/agents/*.md files (custom agents).
-      agentType: "Set 'claudeCode' if you are Claude Code, 'other' if you are a different AI agent (Cursor, Copilot, etc.). You know what you are."
+      agentType: "Set 'claudeCode' for Claude Code, 'other' for other AI agents."
       builtInAgents:
-        explore:
-          description: Fast read-only agent for codebase exploration
-          useCases[5]: Investigate repository structure and project overview,"Search for specific files, patterns, or keywords",Answer questions about the codebase,Analyze tech stack and dependencies,Research existing implementations
-          whenToUse: Any task that only needs to read and analyze code
-        plan:
-          description: Read-only software architect agent
-          useCases[4]: Design implementation plans,Evaluate architecture trade-offs,Plan refactoring approaches,Identify critical files for a change
-          whenToUse: Any task that involves planning or design without code changes
-        "general-purpose":
-          description: Full-access general purpose agent
-          useCases[4]: Tasks requiring code modifications,File creation or editing,Shell command execution,Multi-step tasks requiring broad tool access
-          whenToUse: Tasks that require write access or shell execution
+        explore[4]: Investigate repo structure,Search files/patterns/keywords,Answer codebase questions,Analyze tech stack
+        plan[3]: Design implementation plans,Evaluate architecture trade-offs,Plan refactoring
+        "general-purpose"[4]: Code modifications,File creation/editing,Shell execution,Multi-step tasks
         rule: "Do NOT set commandFilePath, commandScope, model, or tools for built-in agents."
-      steps[4]: "Select a built-in agent that fits the task (explore for investigation/analysis, plan for design/planning, general-purpose for modifications)","Set builtInType, description, agentDefinition, and prompt",Only use a custom agent (commandFilePath) when the user explicitly specifies one,Set agentType based on your own runtime identity
-      frontmatterFormat: "---\ndescription: Short description\nmodel: sonnet\ntools: Bash, Read, Write\nmemory: project\n---\nAgent definition content here (what this agent IS)..."
-      examples[2]:
+      steps[4]: "Select a built-in agent (explore for investigation/analysis, plan for design/planning, general-purpose for modifications)","Set builtInType, description, agentDefinition, and prompt",Only use custom agent (commandFilePath) when user explicitly specifies one,Set agentType based on your own runtime identity
+      examples[1]:
         - description: Built-in explore agent
           type: subAgent
           data:
             description: Explore the codebase for authentication patterns
-            agentDefinition: "Fast agent specialized for exploring codebases. Use for quick file searches, keyword searches, and codebase questions."
-            prompt: Search the codebase and identify all authentication-related files and patterns.
+            agentDefinition: Fast agent specialized for exploring codebases.
+            prompt: Search the codebase and identify all authentication-related files.
             builtInType: explore
             agentType: claudeCode
-            outputPorts: 1
-        - description: Custom agent with command file
-          type: subAgent
-          data:
-            description: Code reviewer
-            agentDefinition: "Expert code reviewer that checks for bugs, security issues, and code quality."
-            prompt: Review the code for bugs
-            model: sonnet
-            agentType: claudeCode
-            commandFilePath: /path/to/.claude/agents/code-reviewer.md
-            commandScope: project
             outputPorts: 1
   askUserQuestion:
     description: Present a question with multiple-choice options
