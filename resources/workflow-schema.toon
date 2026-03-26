@@ -771,6 +771,7 @@ examples[3]:
             y: 300
           data:
             description: Analyze data
+            agentDefinition: General-purpose data analysis agent.
             prompt: Analyze data and generate insights.
             model: sonnet
             outputPorts: 1
@@ -810,6 +811,7 @@ examples[3]:
             y: 300
           data:
             description: Scan code
+            agentDefinition: Code scanning agent for bug detection.
             prompt: Scan for bugs and issues.
             outputPorts: 1
         - id: ask-1
@@ -832,6 +834,7 @@ examples[3]:
             y: 125
           data:
             description: Critical fixes
+            agentDefinition: Agent for generating critical bug fixes.
             prompt: Generate critical fixes.
             outputPorts: 1
         - id: fix-2
@@ -842,6 +845,7 @@ examples[3]:
             y: 475
           data:
             description: All fixes
+            agentDefinition: Agent for generating all severity fixes.
             prompt: Generate all fixes.
             outputPorts: 1
         - id: end_1
@@ -884,6 +888,7 @@ examples[3]:
             y: 350
           data:
             description: Validate doc
+            agentDefinition: Document format validation agent.
             prompt: Validate document format.
             outputPorts: 1
         - id: if-1
@@ -905,6 +910,7 @@ examples[3]:
             y: 175
           data:
             description: Analyze content
+            agentDefinition: Content analysis agent.
             prompt: Analyze content.
             outputPorts: 1
         - id: error-1
@@ -915,6 +921,7 @@ examples[3]:
             y: 525
           data:
             description: Error report
+            agentDefinition: Error reporting agent.
             prompt: Generate error report.
             outputPorts: 1
         - id: ask-1
@@ -938,6 +945,7 @@ examples[3]:
             y: -175
           data:
             description: PDF format
+            agentDefinition: PDF formatting agent.
             prompt: Format as PDF.
             outputPorts: 1
         - id: fmt-md
@@ -948,6 +956,7 @@ examples[3]:
             y: 175
           data:
             description: MD format
+            agentDefinition: Markdown formatting agent.
             prompt: Format as Markdown.
             outputPorts: 1
         - id: fmt-html
@@ -958,6 +967,7 @@ examples[3]:
             y: 525
           data:
             description: HTML format
+            agentDefinition: HTML formatting agent.
             prompt: Format as HTML.
             outputPorts: 1
         - id: end_ok
