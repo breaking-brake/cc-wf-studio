@@ -1,3 +1,13 @@
+## [3.31.1](https://github.com/breaking-brake/cc-wf-studio/compare/v3.31.0...v3.31.1) (2026-03-27)
+
+### Bug Fixes
+
+* use non-localized labels for built-in sub-agent names and badge ([#691](https://github.com/breaking-brake/cc-wf-studio/issues/691)) ([d4100e8](https://github.com/breaking-brake/cc-wf-studio/commit/d4100e808e1251de0b37b30c1e3b5bc3b3ccb082))
+
+### Improvements
+
+* replace canvas toolbar toggle expansion with popover UI ([#690](https://github.com/breaking-brake/cc-wf-studio/issues/690)) ([7ece04a](https://github.com/breaking-brake/cc-wf-studio/commit/7ece04a159cb978ecf1acb20469a239fe3aec97a))
+
 ## [3.31.0](https://github.com/breaking-brake/cc-wf-studio/compare/v3.30.4...v3.31.0) (2026-03-26)
 
 ### Features
