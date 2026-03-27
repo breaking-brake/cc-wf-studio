@@ -455,7 +455,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
           {/* Expand Node Palette Button (when collapsed) */}
           {isNodePaletteCollapsed && onExpandNodePalette && (
-            <Panel position="top-left" style={{ marginTop: '48px' }}>
+            <Panel position="top-left" style={{ marginTop: '56px' }}>
               <button
                 type="button"
                 onClick={onExpandNodePalette}

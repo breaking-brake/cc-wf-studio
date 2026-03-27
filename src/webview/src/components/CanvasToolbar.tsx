@@ -22,7 +22,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   onToggleEdgeAnimation,
 }) => {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <ScrollModeToggle />
       <InteractionModeToggle />
       <EdgeAnimationToggle isEnabled={isEdgeAnimationEnabled} onToggle={onToggleEdgeAnimation} />
