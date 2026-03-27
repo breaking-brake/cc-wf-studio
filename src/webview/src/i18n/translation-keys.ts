@@ -911,17 +911,13 @@ export interface WebviewTranslationKeys {
   // Sub-Agent Built-in Presets
   'subAgent.dialog.builtInTab': string;
   'subAgent.dialog.builtInDescription': string;
-  'subAgent.builtIn.badge': string;
   'subAgent.builtIn.controlledByPreset': string;
-  'subAgent.builtIn.generalPurpose.name': string;
   'subAgent.builtIn.generalPurpose.description': string;
   'subAgent.builtIn.generalPurpose.defaultAgentDefinition': string;
   'subAgent.builtIn.generalPurpose.defaultPrompt': string;
-  'subAgent.builtIn.explore.name': string;
   'subAgent.builtIn.explore.description': string;
   'subAgent.builtIn.explore.defaultAgentDefinition': string;
   'subAgent.builtIn.explore.defaultPrompt': string;
-  'subAgent.builtIn.plan.name': string;
   'subAgent.builtIn.plan.description': string;
   'subAgent.builtIn.plan.defaultAgentDefinition': string;
   'subAgent.builtIn.plan.defaultPrompt': string;

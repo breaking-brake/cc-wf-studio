@@ -424,10 +424,10 @@ const SubAgentProperties: React.FC<{
                   fontWeight: 600,
                 }}
               >
-                {t('subAgent.builtIn.badge')}
+                Built-in
               </span>
               <span style={{ fontWeight: 600 }}>
-                {builtInPreset ? t(builtInPreset.nameKey) : data.builtInType}
+                {builtInPreset ? builtInPreset.displayName : data.builtInType}
               </span>
             </div>
           );

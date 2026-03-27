@@ -954,21 +954,17 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.builtInTab': '内置',
   'subAgent.dialog.builtInDescription':
     '选择 Claude Code 的内置子代理。\n导出到其他 AI 代理时，将以模拟类似行为的方式导出。',
-  'subAgent.builtIn.badge': '内置',
   'subAgent.builtIn.controlledByPreset': '由预设控制',
-  'subAgent.builtIn.generalPurpose.name': '通用',
   'subAgent.builtIn.generalPurpose.description':
     '用于复杂研究、代码搜索和执行多步骤任务的通用代理。',
   'subAgent.builtIn.generalPurpose.defaultAgentDefinition':
     '用于研究复杂问题、搜索代码和执行多步骤任务的通用代理。拥有所有工具的访问权限。',
   'subAgent.builtIn.generalPurpose.defaultPrompt': '研究并完成以下任务：',
-  'subAgent.builtIn.explore.name': 'Explore',
   'subAgent.builtIn.explore.description':
     '专用于代码库探索的快速只读代理。可进行文件搜索、代码搜索和问题回答。',
   'subAgent.builtIn.explore.defaultAgentDefinition':
     '专门用于探索代码库的快速代理。用于快速文件搜索、关键词搜索和回答代码库相关问题。只读 — 无Write/Edit工具。',
   'subAgent.builtIn.explore.defaultPrompt': '探索代码库并回答以下问题：',
-  'subAgent.builtIn.plan.name': 'Plan',
   'subAgent.builtIn.plan.description': '用于设计实现计划和识别关键文件的软件架构师代理。',
   'subAgent.builtIn.plan.defaultAgentDefinition':
     '用于设计实施计划的软件架构师代理。返回分步计划，识别关键文件，并考虑架构权衡。只读 — 无Write/Edit工具。',

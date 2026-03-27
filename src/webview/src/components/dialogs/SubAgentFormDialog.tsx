@@ -271,9 +271,9 @@ export function SubAgentFormDialog({
                       fontWeight: 500,
                     }}
                   >
-                    {t('subAgent.builtIn.badge')}
+                    Built-in
                   </span>
-                  <span style={{ fontWeight: 600 }}>{t(builtInPreset.nameKey)}</span>
+                  <span style={{ fontWeight: 600 }}>{builtInPreset.displayName}</span>
                 </div>
               )}
 

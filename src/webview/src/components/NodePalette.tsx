@@ -177,7 +177,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
     const newNode = {
       id: `agent-${Date.now()}`,
       type: 'subAgent' as const,
-      name: t(preset.nameKey),
+      name: preset.displayName,
       position,
       data: {
         description: formData.description,

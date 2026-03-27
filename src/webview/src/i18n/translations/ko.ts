@@ -987,21 +987,17 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.builtInTab': '내장',
   'subAgent.dialog.builtInDescription':
     'Claude Code의 내장 서브 에이전트를 선택합니다.\n다른 AI 에이전트에서는 유사한 동작을 재현하도록 내보내집니다.',
-  'subAgent.builtIn.badge': '내장',
   'subAgent.builtIn.controlledByPreset': '프리셋에서 제어',
-  'subAgent.builtIn.generalPurpose.name': '범용',
   'subAgent.builtIn.generalPurpose.description':
     '복잡한 조사, 코드 검색, 멀티스텝 작업 실행을 위한 범용 에이전트.',
   'subAgent.builtIn.generalPurpose.defaultAgentDefinition':
     '복잡한 조사, 코드 검색, 멀티 스텝 작업 실행에 대응하는 범용 에이전트. 모든 도구에 대한 접근 권한을 가짐.',
   'subAgent.builtIn.generalPurpose.defaultPrompt': '다음 작업을 조사하고 완료하세요:',
-  'subAgent.builtIn.explore.name': 'Explore',
   'subAgent.builtIn.explore.description':
     '코드베이스 탐색에 특화된 빠른 읽기 전용 에이전트. 파일 검색, 코드 검색, 질문 응답 가능.',
   'subAgent.builtIn.explore.defaultAgentDefinition':
     '코드베이스 탐색에 특화된 고속 에이전트. 파일 검색, 키워드 검색, 코드베이스 관련 질문 답변에 사용. 읽기 전용 — Write/Edit 도구 불가.',
   'subAgent.builtIn.explore.defaultPrompt': '코드베이스를 탐색하고 다음 질문에 답하세요:',
-  'subAgent.builtIn.plan.name': 'Plan',
   'subAgent.builtIn.plan.description':
     '구현 계획 설계 및 중요 파일 식별을 위한 소프트웨어 아키텍트 에이전트.',
   'subAgent.builtIn.plan.defaultAgentDefinition':

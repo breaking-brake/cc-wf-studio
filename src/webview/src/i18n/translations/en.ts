@@ -1000,22 +1000,18 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.dialog.builtInTab': 'Built-in',
   'subAgent.dialog.builtInDescription':
     'Built-in sub-agents optimized for Claude Code.\nFor other AI Agents, these presets are exported as regular sub-agents that emulate similar behavior.',
-  'subAgent.builtIn.badge': 'Built-in',
   'subAgent.builtIn.controlledByPreset': 'Controlled by preset',
-  'subAgent.builtIn.generalPurpose.name': 'General Purpose',
   'subAgent.builtIn.generalPurpose.description':
     'General-purpose agent for researching complex questions, searching code, and executing multi-step tasks.',
   'subAgent.builtIn.generalPurpose.defaultAgentDefinition':
     'General-purpose agent for researching complex questions, searching for code, and executing multi-step tasks. Has access to all tools.',
   'subAgent.builtIn.generalPurpose.defaultPrompt': 'Research and complete the following task:',
-  'subAgent.builtIn.explore.name': 'Explore',
   'subAgent.builtIn.explore.description':
     'Fast read-only agent for exploring codebases — find files, search code, and answer codebase questions.',
   'subAgent.builtIn.explore.defaultAgentDefinition':
     'Fast agent specialized for exploring codebases. Use for quick file searches, keyword searches, and answering questions about the codebase. Read-only — no Write/Edit tools.',
   'subAgent.builtIn.explore.defaultPrompt':
     'Explore the codebase and answer the following question:',
-  'subAgent.builtIn.plan.name': 'Plan',
   'subAgent.builtIn.plan.description':
     'Software architect agent for designing implementation plans and identifying critical files.',
   'subAgent.builtIn.plan.defaultAgentDefinition':

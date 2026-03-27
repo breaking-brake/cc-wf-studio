@@ -428,7 +428,7 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
                               : 'var(--vscode-foreground)',
                           }}
                         >
-                          {t(preset.nameKey)}
+                          {preset.displayName}
                         </span>
                         <span
                           style={{
@@ -440,7 +440,7 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
                             fontWeight: 500,
                           }}
                         >
-                          {t('subAgent.builtIn.badge')}
+                          Built-in
                         </span>
                       </div>
                       <div
