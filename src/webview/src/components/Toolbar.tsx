@@ -5,7 +5,7 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
-import { FileDown, Play, Save, Sparkles, Square, SquareSlash } from 'lucide-react';
+import { FileDown, MessageSquare, Play, Save, Sparkles, Square, SquareSlash } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
@@ -38,6 +38,7 @@ import {
   serializeWorkflow,
   validateWorkflow,
 } from '../services/workflow-service';
+import { useCommentaryStore } from '../stores/commentary-store';
 import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { EditableNameField } from './common/EditableNameField';
@@ -123,6 +124,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     isCursorEnabled,
     toggleCursorEnabled,
   } = useRefinementStore();
+  const { isEnabled: isCommentaryEnabled, toggleEnabled: toggleCommentary } = useCommentaryStore();
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
@@ -1575,6 +1577,36 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     argumentHint={slashCommandOptions.argumentHint ?? ''}
                     onArgumentHintChange={setSlashCommandArgumentHint}
                   />
+                  {/* Commentary AI Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      toggleCommentary();
+                      vscode.postMessage({
+                        type: 'TOGGLE_COMMENTARY',
+                        payload: { enabled: !isCommentaryEnabled },
+                      });
+                    }}
+                    style={{
+                      background: isCommentaryEnabled
+                        ? 'var(--vscode-button-background)'
+                        : 'transparent',
+                      color: isCommentaryEnabled
+                        ? 'var(--vscode-button-foreground)'
+                        : 'var(--vscode-descriptionForeground)',
+                      border: '1px solid var(--vscode-panel-border)',
+                      borderRadius: '3px',
+                      cursor: 'pointer',
+                      padding: '3px 6px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '11px',
+                    }}
+                    title={t('commentary.toggle')}
+                  >
+                    <MessageSquare size={12} />
+                  </button>
                 </div>
               </div>
 
@@ -2330,6 +2362,36 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 argumentHint={slashCommandOptions.argumentHint ?? ''}
                 onArgumentHintChange={setSlashCommandArgumentHint}
               />
+              {/* Commentary AI Toggle (compact) */}
+              <button
+                type="button"
+                onClick={() => {
+                  toggleCommentary();
+                  vscode.postMessage({
+                    type: 'TOGGLE_COMMENTARY',
+                    payload: { enabled: !isCommentaryEnabled },
+                  });
+                }}
+                style={{
+                  background: isCommentaryEnabled
+                    ? 'var(--vscode-button-background)'
+                    : 'transparent',
+                  color: isCommentaryEnabled
+                    ? 'var(--vscode-button-foreground)'
+                    : 'var(--vscode-descriptionForeground)',
+                  border: '1px solid var(--vscode-panel-border)',
+                  borderRadius: '3px',
+                  cursor: 'pointer',
+                  padding: '3px 6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '11px',
+                }}
+                title={t('commentary.toggle')}
+              >
+                <MessageSquare size={12} />
+              </button>
             </div>
           </div>
         )}

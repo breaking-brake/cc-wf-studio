@@ -14,6 +14,8 @@ export interface TerminalExecutionOptions {
   workflowName: string;
   /** Working directory for the terminal */
   workingDirectory: string;
+  /** Session ID for JSONL tracking (Commentary AI) */
+  sessionId?: string;
 }
 
 /**
@@ -24,6 +26,8 @@ export interface TerminalExecutionResult {
   terminalName: string;
   /** Reference to the VSCode terminal instance */
   terminal: vscode.Terminal;
+  /** Session ID used for JSONL tracking */
+  sessionId?: string;
 }
 
 /**
@@ -50,13 +54,17 @@ export function executeSlashCommandInTerminal(
   // Show the terminal and focus on it
   terminal.show(true);
 
+  // Build command with optional session-id for JSONL tracking
+  const sessionIdFlag = options.sessionId ? ` --session-id "${options.sessionId}"` : '';
+
   // Execute the Claude Code CLI with the slash command
   // Using double quotes to handle workflow names with spaces
-  terminal.sendText(`claude "/${options.workflowName}"`);
+  terminal.sendText(`claude "/${options.workflowName}"${sessionIdFlag}`);
 
   return {
     terminalName,
     terminal,
+    sessionId: options.sessionId,
   };
 }
 

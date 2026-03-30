@@ -196,6 +196,36 @@ export interface RunAsSlashCommandSuccessPayload {
   terminalName: string;
   /** Timestamp of run */
   timestamp: string; // ISO 8601
+  /** Session ID for JSONL tracking (Commentary AI) */
+  sessionId?: string;
+}
+
+// ============================================================================
+// Commentary AI Payloads (PoC)
+// ============================================================================
+
+/**
+ * Commentary update payload (Extension → Webview)
+ */
+export interface CommentaryUpdatePayload {
+  text: string;
+  timestamp: string;
+  eventType: 'assistant' | 'tool_use' | 'error' | 'summary';
+}
+
+/**
+ * Commentary session payload (Extension → Webview)
+ */
+export interface CommentarySessionPayload {
+  sessionId: string;
+  workflowName: string;
+}
+
+/**
+ * Commentary error payload (Extension → Webview)
+ */
+export interface CommentaryErrorPayload {
+  message: string;
 }
 
 // ============================================================================
@@ -1191,7 +1221,11 @@ export type ExtensionMessage =
   | Message<GetSkillVersionDetailsSuccessPayload, 'GET_SKILL_VERSION_DETAILS_SUCCESS'>
   | Message<GetSkillVersionDetailsFailedPayload, 'GET_SKILL_VERSION_DETAILS_FAILED'>
   | Message<{ success: boolean }, 'DELETE_MCP_BEARER_TOKEN_RESULT'>
-  | Message<{ exists: boolean }, 'CHECK_MCP_BEARER_TOKEN_RESULT'>;
+  | Message<{ exists: boolean }, 'CHECK_MCP_BEARER_TOKEN_RESULT'>
+  | Message<CommentaryUpdatePayload, 'COMMENTARY_UPDATE'>
+  | Message<CommentarySessionPayload, 'COMMENTARY_SESSION_STARTED'>
+  | Message<void, 'COMMENTARY_SESSION_ENDED'>
+  | Message<CommentaryErrorPayload, 'COMMENTARY_ERROR'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -2347,7 +2381,9 @@ export type WebviewMessage =
   | Message<GetSkillVersionDetailsPayload, 'GET_SKILL_VERSION_DETAILS'>
   | Message<void, 'GET_CHANGELOG'>
   | Message<void, 'MARK_CHANGELOG_READ'>
-  | Message<{ show: boolean }, 'SET_WHATS_NEW_BADGE'>;
+  | Message<{ show: boolean }, 'SET_WHATS_NEW_BADGE'>
+  | Message<{ enabled: boolean }, 'TOGGLE_COMMENTARY'>
+  | Message<void, 'STOP_COMMENTARY'>;
 
 // ============================================================================
 // Error Codes

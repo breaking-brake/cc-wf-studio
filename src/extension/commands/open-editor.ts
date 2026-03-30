@@ -5,6 +5,7 @@
  * Based on: /specs/001-cc-wf-studio/contracts/vscode-extension-api.md section 1.1
  */
 
+import * as crypto from 'node:crypto';
 import * as vscode from 'vscode';
 import type {
   AiEditingProvider,
@@ -25,6 +26,7 @@ import {
   startAntigravityTask,
 } from '../services/antigravity-extension-service';
 import { cancelGeneration } from '../services/claude-code-service';
+import { CommentarySessionManager } from '../services/commentary-session-manager';
 import { FileService } from '../services/file-service';
 import {
   getConfigTargetsForProvider,
@@ -105,6 +107,8 @@ let slackTokenManager: SlackTokenManager;
 let slackApiService: SlackApiService;
 let activeOAuthService: ReturnType<typeof createOAuthService> | null = null;
 let anthropicApiKeyManager: AnthropicApiKeyManager;
+let commentarySessionManager: CommentarySessionManager;
+let isCommentaryEnabled = false;
 
 /**
  * Import parameters for workflow import from Slack
@@ -163,6 +167,9 @@ export function registerOpenEditorCommand(
 
       // Initialize Anthropic API Key Manager
       anthropicApiKeyManager = new AnthropicApiKeyManager(context);
+
+      // Initialize Commentary Session Manager
+      commentarySessionManager = new CommentarySessionManager();
 
       const columnToShowIn = vscode.window.activeTextEditor
         ? vscode.window.activeTextEditor.viewColumn
@@ -426,11 +433,32 @@ export function registerOpenEditorCommand(
                     // Non-fatal: continue with run even if MCP auto-start fails
                   }
 
+                  // Generate session ID for JSONL tracking (Commentary AI)
+                  const sessionId = isCommentaryEnabled ? crypto.randomUUID() : undefined;
+
                   // Run the slash command in terminal
                   const result = executeSlashCommandInTerminal({
                     workflowName: message.payload.workflow.name,
                     workingDirectory: workspacePath,
+                    sessionId,
                   });
+
+                  // Start Commentary AI if enabled
+                  if (isCommentaryEnabled && sessionId) {
+                    commentarySessionManager
+                      .startCommentary(
+                        sessionId,
+                        message.payload.workflow.name,
+                        workspacePath,
+                        webview,
+                        result.terminal
+                      )
+                      .catch((err) => {
+                        log('WARN', 'Failed to start commentary', {
+                          error: err instanceof Error ? err.message : String(err),
+                        });
+                      });
+                  }
 
                   // Send success response
                   webview.postMessage({
@@ -440,6 +468,7 @@ export function registerOpenEditorCommand(
                       workflowName: message.payload.workflow.name,
                       terminalName: result.terminalName,
                       timestamp: new Date().toISOString(),
+                      sessionId,
                     },
                   });
                 } catch (error) {
@@ -1998,6 +2027,20 @@ export function registerOpenEditorCommand(
               break;
             }
 
+            case 'TOGGLE_COMMENTARY': {
+              isCommentaryEnabled = message.payload?.enabled ?? false;
+              log('INFO', 'Commentary AI toggled', { enabled: isCommentaryEnabled });
+              if (!isCommentaryEnabled) {
+                commentarySessionManager?.stopCommentary();
+              }
+              break;
+            }
+
+            case 'STOP_COMMENTARY': {
+              commentarySessionManager?.stopCommentary();
+              break;
+            }
+
             default:
               console.warn('Unknown message type:', message);
           }
@@ -2014,6 +2057,9 @@ export function registerOpenEditorCommand(
             activeOAuthService.cancelPolling();
             activeOAuthService = null;
           }
+          // Stop Commentary AI session
+          commentarySessionManager?.dispose();
+
           // Disconnect MCP server manager from webview
           const disposeManager = getMcpServerManager();
           if (disposeManager) {

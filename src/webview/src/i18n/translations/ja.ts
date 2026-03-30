@@ -1014,4 +1014,11 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Claude API Upload Dialog
   'claudeApi.description':
     'ワークフローを Agent Skills として Claude API にアップロードし、Messages API 経由で実行できます。\nMCP サーバー、コード実行、他のスキルと組み合わせることで、ドキュメント処理・データ分析・カスタマーサポートなど、専門的な AI エージェントを API として公開できます。',
+
+  // Commentary AI
+  'commentary.title': '実況',
+  'commentary.toggle': 'Commentary AI の ON/OFF',
+  'commentary.waiting': 'エージェントの活動を待機中...',
+  'commentary.inactive':
+    'Commentary を有効にしてワークフローを実行すると、リアルタイム実況が表示されます。',
 };
