@@ -152,6 +152,30 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [isCopilotChatExporting, setIsCopilotChatExporting] = useState(false);
   const [isCopilotChatRunning, setIsCopilotChatRunning] = useState(false);
 
+  // Sync commentary state to Extension Host on mount (restores localStorage state after reload)
+  const commentarySyncedRef = useRef(false);
+  useEffect(() => {
+    if (commentarySyncedRef.current) return;
+    commentarySyncedRef.current = true;
+    if (isCommentaryFeatureEnabled && isCommentaryEnabled) {
+      vscode.postMessage({
+        type: 'TOGGLE_COMMENTARY',
+        payload: {
+          enabled: true,
+          provider: commentaryProvider,
+          copilotModel: commentaryCopilotModel || undefined,
+          language: commentaryLanguage,
+        },
+      });
+    }
+  }, [
+    isCommentaryFeatureEnabled,
+    isCommentaryEnabled,
+    commentaryProvider,
+    commentaryCopilotModel,
+    commentaryLanguage,
+  ]);
+
   // Copilot CLI integration
   const [isCopilotCliExporting, setIsCopilotCliExporting] = useState(false);
   const [isCopilotCliRunning, setIsCopilotCliRunning] = useState(false);
