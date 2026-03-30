@@ -109,7 +109,7 @@ export const CommentaryPanel: React.FC<CommentaryPanelProps> = ({ onClose }) => 
               textTransform: 'uppercase',
             }}
           >
-            {t('commentary.title')}
+            Commentary
           </span>
           {isActive && (
             <span

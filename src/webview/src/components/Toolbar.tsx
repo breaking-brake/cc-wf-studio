@@ -47,6 +47,7 @@ import { StyledTooltipProvider } from './common/StyledTooltip';
 import { ClaudeApiUploadDialog } from './dialogs/ClaudeApiUploadDialog';
 import { ConfirmDialog } from './dialogs/ConfirmDialog';
 import { WhatsNewDialog } from './dialogs/WhatsNewDialog';
+import { CommentaryOptionsDropdown } from './toolbar/CommentaryOptionsDropdown';
 import { MoreActionsDropdown } from './toolbar/MoreActionsDropdown';
 import { SlashCommandOptionsDropdown } from './toolbar/SlashCommandOptionsDropdown';
 
@@ -151,23 +152,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [isCopilotChatExporting, setIsCopilotChatExporting] = useState(false);
   const [isCopilotChatRunning, setIsCopilotChatRunning] = useState(false);
 
-  // Fetch Copilot models for Commentary when provider is copilot
-  useEffect(() => {
-    if (
-      commentaryProvider === 'copilot' &&
-      commentaryAvailableCopilotModels.length === 0 &&
-      !isCommentaryFetchingModels &&
-      !commentaryCopilotModelsError
-    ) {
-      fetchCommentaryCopilotModels();
-    }
-  }, [
-    commentaryProvider,
-    commentaryAvailableCopilotModels.length,
-    isCommentaryFetchingModels,
-    commentaryCopilotModelsError,
-    fetchCommentaryCopilotModels,
-  ]);
   // Copilot CLI integration
   const [isCopilotCliExporting, setIsCopilotCliExporting] = useState(false);
   const [isCopilotCliRunning, setIsCopilotCliRunning] = useState(false);
@@ -1610,9 +1594,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     argumentHint={slashCommandOptions.argumentHint ?? ''}
                     onArgumentHintChange={setSlashCommandArgumentHint}
                   />
-                  {/* Commentary AI Toggle + Provider Select (visible when feature enabled in More menu) */}
+                  {/* Commentary AI Toggle + Options (visible when feature enabled in More menu) */}
                   {isCommentaryFeatureEnabled && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                       <button
                         type="button"
                         onClick={() => {
@@ -1648,84 +1632,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       >
                         <MessageSquare size={12} />
                       </button>
-                      <select
-                        value={commentaryProvider}
-                        onChange={(e) => {
-                          const provider = e.target.value as 'claude-code' | 'copilot';
-                          setCommentaryProvider(provider);
-                          if (isCommentaryEnabled) {
-                            vscode.postMessage({
-                              type: 'TOGGLE_COMMENTARY',
-                              payload: {
-                                enabled: true,
-                                provider,
-                                copilotModel: commentaryCopilotModel || undefined,
-                                language: commentaryLanguage,
-                              },
-                            });
-                          }
-                        }}
-                        style={{
-                          background: 'var(--vscode-dropdown-background)',
-                          color: 'var(--vscode-dropdown-foreground)',
-                          border: '1px solid var(--vscode-dropdown-border)',
-                          borderRadius: '3px',
-                          fontSize: '10px',
-                          padding: '2px 4px',
-                          cursor: 'pointer',
-                        }}
-                        title={t('commentary.providerSelect')}
-                      >
-                        <option value="claude-code">Claude</option>
-                        <option value="copilot">Copilot</option>
-                      </select>
-                      {commentaryProvider === 'copilot' && (
-                        <select
-                          value={commentaryCopilotModel}
-                          onChange={(e) => {
-                            setCommentaryCopilotModel(e.target.value);
-                          }}
-                          disabled={isCommentaryFetchingModels}
-                          style={{
-                            background: 'var(--vscode-dropdown-background)',
-                            color: 'var(--vscode-dropdown-foreground)',
-                            border: '1px solid var(--vscode-dropdown-border)',
-                            borderRadius: '3px',
-                            fontSize: '10px',
-                            padding: '2px 4px',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          {isCommentaryFetchingModels ? (
-                            <option value="">Loading...</option>
-                          ) : commentaryCopilotModelsError ? (
-                            <option value="">Error</option>
-                          ) : commentaryAvailableCopilotModels.length === 0 ? (
-                            <option value="">No models</option>
-                          ) : (
-                            commentaryAvailableCopilotModels.map((model) => (
-                              <option key={model.id} value={model.family}>
-                                {model.name}
-                              </option>
-                            ))
-                          )}
-                        </select>
-                      )}
-                      <input
-                        type="text"
-                        value={commentaryLanguage}
-                        onChange={(e) => setCommentaryLanguage(e.target.value)}
-                        placeholder="Language"
-                        style={{
-                          background: 'var(--vscode-input-background)',
-                          color: 'var(--vscode-input-foreground)',
-                          border: '1px solid var(--vscode-input-border)',
-                          borderRadius: '3px',
-                          fontSize: '10px',
-                          padding: '2px 4px',
-                          width: '60px',
-                        }}
-                        title="Commentary language"
+                      <CommentaryOptionsDropdown
+                        provider={commentaryProvider}
+                        onProviderChange={setCommentaryProvider}
+                        copilotModel={commentaryCopilotModel}
+                        onCopilotModelChange={setCommentaryCopilotModel}
+                        availableCopilotModels={commentaryAvailableCopilotModels}
+                        isFetchingModels={isCommentaryFetchingModels}
+                        modelsError={commentaryCopilotModelsError}
+                        onFetchModels={fetchCommentaryCopilotModels}
+                        language={commentaryLanguage}
+                        onLanguageChange={setCommentaryLanguage}
                       />
                     </div>
                   )}
@@ -2484,9 +2401,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 argumentHint={slashCommandOptions.argumentHint ?? ''}
                 onArgumentHintChange={setSlashCommandArgumentHint}
               />
-              {/* Commentary AI Toggle + Provider Select (compact, visible when feature enabled) */}
+              {/* Commentary AI Toggle + Options (compact, visible when feature enabled) */}
               {isCommentaryFeatureEnabled && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                   <button
                     type="button"
                     onClick={() => {
@@ -2522,84 +2439,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   >
                     <MessageSquare size={12} />
                   </button>
-                  <select
-                    value={commentaryProvider}
-                    onChange={(e) => {
-                      const provider = e.target.value as 'claude-code' | 'copilot';
-                      setCommentaryProvider(provider);
-                      if (isCommentaryEnabled) {
-                        vscode.postMessage({
-                          type: 'TOGGLE_COMMENTARY',
-                          payload: {
-                            enabled: true,
-                            provider,
-                            copilotModel: commentaryCopilotModel || undefined,
-                            language: commentaryLanguage,
-                          },
-                        });
-                      }
-                    }}
-                    style={{
-                      background: 'var(--vscode-dropdown-background)',
-                      color: 'var(--vscode-dropdown-foreground)',
-                      border: '1px solid var(--vscode-dropdown-border)',
-                      borderRadius: '3px',
-                      fontSize: '10px',
-                      padding: '2px 4px',
-                      cursor: 'pointer',
-                    }}
-                    title={t('commentary.providerSelect')}
-                  >
-                    <option value="claude-code">Claude</option>
-                    <option value="copilot">Copilot</option>
-                  </select>
-                  {commentaryProvider === 'copilot' && (
-                    <select
-                      value={commentaryCopilotModel}
-                      onChange={(e) => {
-                        setCommentaryCopilotModel(e.target.value);
-                      }}
-                      disabled={isCommentaryFetchingModels}
-                      style={{
-                        background: 'var(--vscode-dropdown-background)',
-                        color: 'var(--vscode-dropdown-foreground)',
-                        border: '1px solid var(--vscode-dropdown-border)',
-                        borderRadius: '3px',
-                        fontSize: '10px',
-                        padding: '2px 4px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {isCommentaryFetchingModels ? (
-                        <option value="">Loading...</option>
-                      ) : commentaryCopilotModelsError ? (
-                        <option value="">Error</option>
-                      ) : commentaryAvailableCopilotModels.length === 0 ? (
-                        <option value="">No models</option>
-                      ) : (
-                        commentaryAvailableCopilotModels.map((model) => (
-                          <option key={model.id} value={model.family}>
-                            {model.name}
-                          </option>
-                        ))
-                      )}
-                    </select>
-                  )}
-                  <input
-                    type="text"
-                    value={commentaryLanguage}
-                    onChange={(e) => setCommentaryLanguage(e.target.value)}
-                    placeholder="Lang"
-                    style={{
-                      background: 'var(--vscode-input-background)',
-                      color: 'var(--vscode-input-foreground)',
-                      border: '1px solid var(--vscode-input-border)',
-                      borderRadius: '3px',
-                      fontSize: '10px',
-                      padding: '2px 4px',
-                      width: '50px',
-                    }}
-                    title="Commentary language"
+                  <CommentaryOptionsDropdown
+                    provider={commentaryProvider}
+                    onProviderChange={setCommentaryProvider}
+                    copilotModel={commentaryCopilotModel}
+                    onCopilotModelChange={setCommentaryCopilotModel}
+                    availableCopilotModels={commentaryAvailableCopilotModels}
+                    isFetchingModels={isCommentaryFetchingModels}
+                    modelsError={commentaryCopilotModelsError}
+                    onFetchModels={fetchCommentaryCopilotModels}
+                    language={commentaryLanguage}
+                    onLanguageChange={setCommentaryLanguage}
                   />
                 </div>
               )}

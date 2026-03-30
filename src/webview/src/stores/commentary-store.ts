@@ -63,7 +63,7 @@ export const useCommentaryStore = create<CommentaryState & CommentaryActions>((s
   entries: [],
   selectedProvider:
     (localStorage.getItem(PROVIDER_STORAGE_KEY) as CommentaryProvider) || 'claude-code',
-  selectedCopilotModel: localStorage.getItem(COPILOT_MODEL_STORAGE_KEY) || '',
+  selectedCopilotModel: localStorage.getItem(COPILOT_MODEL_STORAGE_KEY) || 'gpt-4o-mini',
   language: localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'English',
   availableCopilotModels: [],
   isFetchingCopilotModels: false,

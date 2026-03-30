@@ -976,7 +976,6 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
     '將工作流程作為 Agent Skills 上傳到 Claude API，並透過 Messages API 執行。\n結合 MCP 伺服器、程式碼執行和其他技能，您可以將專業 AI 代理作為 API 發佈，用於文件處理、資料分析、客戶支援等場景。',
 
   // Commentary AI
-  'commentary.title': '解說',
   'commentary.toggle': '切換 Commentary AI',
   'commentary.waiting': '等待代理活動中...',
   'commentary.inactive': '啟用 Commentary 並執行工作流程，即可看到即時解說。',

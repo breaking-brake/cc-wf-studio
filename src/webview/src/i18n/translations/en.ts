@@ -1024,7 +1024,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Upload workflows as Agent Skills to Claude API and run them via the Messages API.\nCombined with MCP servers, code execution, and other skills, you can publish specialized AI agents as APIs for document processing, data analysis, customer support, and more.',
 
   // Commentary AI
-  'commentary.title': 'Commentary',
   'commentary.toggle': 'Toggle Commentary AI',
   'commentary.waiting': 'Waiting for agent activity...',
   'commentary.inactive': 'Run a workflow with Commentary enabled to see real-time commentary.',

@@ -926,7 +926,6 @@ export interface WebviewTranslationKeys {
   'claudeApi.description': string;
 
   // Commentary AI
-  'commentary.title': string;
   'commentary.toggle': string;
   'commentary.waiting': string;
   'commentary.inactive': string;
