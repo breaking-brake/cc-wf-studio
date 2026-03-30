@@ -448,6 +448,9 @@ export function registerOpenEditorCommand(
 
                   // Start Commentary AI if enabled
                   if (isCommentaryEnabled && sessionId) {
+                    const slashCommandPath = exportResult.exportedFiles?.find((f) =>
+                      f.includes('/commands/')
+                    );
                     commentarySessionManager
                       .startCommentary(
                         sessionId,
@@ -457,7 +460,8 @@ export function registerOpenEditorCommand(
                         result.terminal,
                         commentaryProvider,
                         commentaryCopilotModel,
-                        commentaryLanguage
+                        commentaryLanguage,
+                        slashCommandPath
                       )
                       .catch((err) => {
                         log('WARN', 'Failed to start commentary', {

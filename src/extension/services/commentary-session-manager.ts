@@ -5,6 +5,7 @@
  * Manages the lifecycle of commentary sessions.
  */
 
+import * as fs from 'node:fs';
 import * as vscode from 'vscode';
 import type {
   CommentaryErrorPayload,
@@ -36,7 +37,8 @@ export class CommentarySessionManager {
     terminal?: vscode.Terminal,
     provider?: CommentaryProvider,
     copilotModel?: CopilotModel,
-    language?: string
+    language?: string,
+    slashCommandPath?: string
   ): Promise<void> {
     // Stop any existing session
     this.stopCommentary();
@@ -87,9 +89,21 @@ export class CommentarySessionManager {
       workflowName,
     });
 
+    // Read slash command content if path is provided
+    let workflowContext: string | undefined;
+    if (slashCommandPath) {
+      try {
+        workflowContext = fs.readFileSync(slashCommandPath, 'utf-8');
+      } catch {
+        log('WARN', 'Failed to read slash command file for commentary context', {
+          path: slashCommandPath,
+        });
+      }
+    }
+
     // Start AI session first, then start watching
     try {
-      await this.aiService.startSession(workflowName);
+      await this.aiService.startSession(workflowName, workflowContext);
       this.watcher.start();
     } catch (error) {
       log('ERROR', 'Failed to start commentary', {

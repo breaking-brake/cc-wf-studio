@@ -66,13 +66,16 @@ export class CommentaryAiService {
   /**
    * Start a new commentary session with workflow context
    */
-  async startSession(workflowName: string): Promise<void> {
+  async startSession(workflowName: string, workflowContext?: string): Promise<void> {
     this.stopped = false;
     this.commentarySessionId = null;
     this.history = [];
 
     const systemPrompt = SYSTEM_PROMPT.replace('{LANGUAGE}', this.language);
-    const prompt = `${systemPrompt}\n\nWorkflow name: "${workflowName}"\nSay a single short sentence announcing that you are starting commentary for this workflow.`;
+    const contextSection = workflowContext
+      ? `\n\nWorkflow definition (slash command that the agent is executing):\n---\n${workflowContext}\n---`
+      : '';
+    const prompt = `${systemPrompt}\n\nWorkflow name: "${workflowName}"${contextSection}\nSay a single short sentence announcing that you are starting commentary for this workflow.`;
 
     try {
       const result = await this.callAi(prompt);
