@@ -12,7 +12,8 @@ import { getClaudeSpawnCommand } from './claude-cli-path';
 import type { CommentaryEvent } from './commentary-jsonl-watcher';
 
 const SYSTEM_PROMPT = `You are a workflow commentary AI. You observe real-time events from an AI agent executing a workflow and provide brief commentary. Rules:
-- Provide 1-2 sentence commentary in Japanese for each batch of events
+- Respond in the user's configured language
+- Provide 1-2 sentence commentary for each batch of events
 - Explain what the agent is currently doing and why
 - Be concise and informative
 - Output only the commentary text, no JSON wrapping
@@ -38,15 +39,16 @@ export class CommentaryAiService {
     this.stopped = false;
     this.commentarySessionId = null;
 
-    const prompt = `${SYSTEM_PROMPT}\n\nWorkflow name: "${workflowName}"\nRespond with only: "OK"`;
+    const prompt = `${SYSTEM_PROMPT}\n\nWorkflow name: "${workflowName}"\nSay a single short sentence announcing that you are starting commentary for this workflow.`;
 
     try {
       const result = await this.callClaude(prompt);
       if (result.sessionId) {
         this.commentarySessionId = result.sessionId;
       }
-      // Show a fixed startup message instead of AI's response
-      this.onCommentary(`ワークフロー「${workflowName}」の実況を開始します。`, 'assistant');
+      if (result.text) {
+        this.onCommentary(result.text, 'assistant');
+      }
       log('INFO', 'Commentary AI session started', {
         sessionId: this.commentarySessionId,
       });
