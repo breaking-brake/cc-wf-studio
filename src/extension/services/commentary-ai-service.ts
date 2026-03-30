@@ -45,7 +45,9 @@ export class CommentaryAiService {
   private pendingEvents: CommentaryEvent[] = [];
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
   private onCommentary: (text: string, eventType: CommentaryEvent['type']) => void;
+  private onProcessingChange: ((isProcessing: boolean) => void) | null = null;
   private stopped = false;
+  private isFlushing = false;
   private history: CommentaryHistoryEntry[] = [];
   private provider: CommentaryProvider;
   private copilotModel?: CopilotModel;
@@ -55,9 +57,11 @@ export class CommentaryAiService {
     onCommentary: (text: string, eventType: CommentaryEvent['type']) => void,
     provider: CommentaryProvider = 'claude-code',
     copilotModel?: CopilotModel,
-    language?: string
+    language?: string,
+    onProcessingChange?: (isProcessing: boolean) => void
   ) {
     this.onCommentary = onCommentary;
+    this.onProcessingChange = onProcessingChange ?? null;
     this.provider = provider;
     this.copilotModel = copilotModel;
     this.language = language || 'English';
@@ -150,44 +154,56 @@ export class CommentaryAiService {
   private async flushEvents(): Promise<void> {
     if (this.stopped || this.pendingEvents.length === 0) return;
 
-    const events = [...this.pendingEvents];
-    this.pendingEvents = [];
-
-    // Determine primary event type
-    const primaryType =
-      events.find((e) => e.type === 'error')?.type ??
-      events.find((e) => e.type === 'tool_use')?.type ??
-      'assistant';
-
-    // Build prompt from events
-    const eventSummary = events.map((e) => `[${e.type}] ${e.content}`).join('\n');
-
-    const prompt = `Agent activity update:\n${eventSummary}\n\nProvide brief commentary.`;
+    // Prevent concurrent AI calls — new events stay in pendingEvents
+    if (this.isFlushing) return;
+    this.isFlushing = true;
+    this.onProcessingChange?.(true);
 
     try {
-      const result = await this.callAi(prompt);
-      if (result.sessionId && !this.commentarySessionId) {
-        this.commentarySessionId = result.sessionId;
-      }
+      while (this.pendingEvents.length > 0 && !this.stopped) {
+        const events = [...this.pendingEvents];
+        this.pendingEvents = [];
 
-      // Record history
-      this.history.push({
-        role: 'user',
-        content: prompt,
-        timestamp: new Date().toISOString(),
-      });
-      if (result.text) {
-        this.history.push({
-          role: 'assistant',
-          content: result.text,
-          timestamp: new Date().toISOString(),
-        });
-        this.onCommentary(result.text, primaryType);
+        // Determine primary event type
+        const primaryType =
+          events.find((e) => e.type === 'error')?.type ??
+          events.find((e) => e.type === 'tool_use')?.type ??
+          'assistant';
+
+        // Build prompt from events
+        const eventSummary = events.map((e) => `[${e.type}] ${e.content}`).join('\n');
+
+        const prompt = `Agent activity update:\n${eventSummary}\n\nProvide brief commentary.`;
+
+        try {
+          const result = await this.callAi(prompt);
+          if (result.sessionId && !this.commentarySessionId) {
+            this.commentarySessionId = result.sessionId;
+          }
+
+          // Record history
+          this.history.push({
+            role: 'user',
+            content: prompt,
+            timestamp: new Date().toISOString(),
+          });
+          if (result.text) {
+            this.history.push({
+              role: 'assistant',
+              content: result.text,
+              timestamp: new Date().toISOString(),
+            });
+            this.onCommentary(result.text, primaryType);
+          }
+        } catch (error) {
+          log('ERROR', 'Commentary AI call failed', {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
       }
-    } catch (error) {
-      log('ERROR', 'Commentary AI call failed', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+    } finally {
+      this.isFlushing = false;
+      this.onProcessingChange?.(false);
     }
   }
 

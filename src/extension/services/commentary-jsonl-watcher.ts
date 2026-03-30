@@ -168,7 +168,7 @@ export class CommentaryJsonlWatcher {
       const message = entry.message as Record<string, unknown> | undefined;
       const content = message?.content;
       if (typeof content === 'string' && content.trim()) {
-        return { type: 'assistant', content: content.substring(0, 500), timestamp };
+        return { type: 'assistant', content: content.substring(0, 2000), timestamp };
       }
       // Content may be an array of content blocks
       if (Array.isArray(content)) {
@@ -180,7 +180,7 @@ export class CommentaryJsonlWatcher {
           .map((block: Record<string, unknown>) => block.text as string)
           .join('\n');
         if (textBlocks.trim()) {
-          return { type: 'assistant', content: textBlocks.substring(0, 500), timestamp };
+          return { type: 'assistant', content: textBlocks.substring(0, 2000), timestamp };
         }
         // Check for tool_use blocks
         const toolBlocks = content.filter(

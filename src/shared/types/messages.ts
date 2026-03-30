@@ -1237,6 +1237,7 @@ export type ExtensionMessage =
   | Message<{ success: boolean }, 'DELETE_MCP_BEARER_TOKEN_RESULT'>
   | Message<{ exists: boolean }, 'CHECK_MCP_BEARER_TOKEN_RESULT'>
   | Message<CommentaryUpdatePayload, 'COMMENTARY_UPDATE'>
+  | Message<{ isProcessing: boolean }, 'COMMENTARY_PROCESSING'>
   | Message<CommentarySessionPayload, 'COMMENTARY_SESSION_STARTED'>
   | Message<void, 'COMMENTARY_SESSION_ENDED'>
   | Message<CommentaryErrorPayload, 'COMMENTARY_ERROR'>;

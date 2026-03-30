@@ -42,12 +42,15 @@ interface CommentaryState {
   isFetchingCopilotModels: boolean;
   /** Error message if Copilot models fetch failed */
   copilotModelsError: string | null;
+  /** Whether commentary AI is currently generating a comment */
+  isProcessing: boolean;
 }
 
 interface CommentaryActions {
   toggleFeatureEnabled: () => void;
   toggleEnabled: () => void;
   setActive: (active: boolean) => void;
+  setProcessing: (processing: boolean) => void;
   addEntry: (entry: Omit<CommentaryEntry, 'id'>) => void;
   clearEntries: () => void;
   setProvider: (provider: CommentaryProvider) => void;
@@ -68,6 +71,7 @@ export const useCommentaryStore = create<CommentaryState & CommentaryActions>((s
   availableCopilotModels: [],
   isFetchingCopilotModels: false,
   copilotModelsError: null,
+  isProcessing: false,
 
   toggleFeatureEnabled: () =>
     set((state) => {
@@ -89,6 +93,7 @@ export const useCommentaryStore = create<CommentaryState & CommentaryActions>((s
     }),
 
   setActive: (active) => set({ isActive: active }),
+  setProcessing: (processing) => set({ isProcessing: processing }),
 
   addEntry: (entry) =>
     set((state) => ({

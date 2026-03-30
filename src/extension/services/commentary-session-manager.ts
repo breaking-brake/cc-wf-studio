@@ -63,7 +63,10 @@ export class CommentarySessionManager {
       },
       provider ?? 'claude-code',
       copilotModel,
-      language
+      language,
+      (isProcessing) => {
+        this.postMessage<{ isProcessing: boolean }>('COMMENTARY_PROCESSING', { isProcessing });
+      }
     );
 
     // Create JSONL watcher

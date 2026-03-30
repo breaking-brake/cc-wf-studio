@@ -6,7 +6,7 @@
 
 import { X } from 'lucide-react';
 import type React from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../i18n/i18n-context';
 import { useCommentaryStore } from '../stores/commentary-store';
 
@@ -16,16 +16,26 @@ interface CommentaryPanelProps {
 
 export const CommentaryPanel: React.FC<CommentaryPanelProps> = ({ onClose }) => {
   const { t } = useTranslation();
-  const { entries, isActive } = useCommentaryStore();
+  const { entries, isActive, isProcessing } = useCommentaryStore();
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom when new entries arrive
-  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on entries change
+  // Dot animation for processing indicator (1→2→3→1)
+  const [dotCount, setDotCount] = useState(1);
+  useEffect(() => {
+    if (!isProcessing) return;
+    const interval = setInterval(() => {
+      setDotCount((prev) => (prev % 3) + 1);
+    }, 500);
+    return () => clearInterval(interval);
+  }, [isProcessing]);
+
+  // Auto-scroll to bottom when new entries arrive or processing starts
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on entries/processing change
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [entries.length]);
+  }, [entries.length, isProcessing]);
 
   // Listen for commentary messages from extension
   useEffect(() => {
@@ -38,6 +48,8 @@ export const CommentaryPanel: React.FC<CommentaryPanelProps> = ({ onClose }) => 
           timestamp: message.payload.timestamp,
           eventType: message.payload.eventType,
         });
+      } else if (message.type === 'COMMENTARY_PROCESSING') {
+        useCommentaryStore.getState().setProcessing(message.payload.isProcessing);
       } else if (message.type === 'COMMENTARY_SESSION_STARTED') {
         useCommentaryStore.getState().setActive(true);
         useCommentaryStore.getState().clearEntries();
@@ -162,57 +174,75 @@ export const CommentaryPanel: React.FC<CommentaryPanelProps> = ({ onClose }) => 
             {isActive ? t('commentary.waiting') : t('commentary.inactive')}
           </div>
         ) : (
-          entries.map((entry) => (
-            <div
-              key={entry.id}
-              style={{
-                marginBottom: '8px',
-                padding: '6px 8px',
-                borderRadius: '4px',
-                backgroundColor: 'var(--vscode-editor-background)',
-                border: '1px solid var(--vscode-panel-border)',
-              }}
-            >
+          <>
+            {entries.map((entry) => (
               <div
+                key={entry.id}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  marginBottom: '4px',
+                  marginBottom: '8px',
+                  padding: '6px 8px',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--vscode-editor-background)',
+                  border: '1px solid var(--vscode-panel-border)',
                 }}
               >
-                <span
+                <div
                   style={{
-                    fontSize: '10px',
-                    color: 'var(--vscode-descriptionForeground)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    marginBottom: '4px',
                   }}
                 >
-                  {formatTime(entry.timestamp)}
-                </span>
-                <span
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      color: 'var(--vscode-descriptionForeground)',
+                    }}
+                  >
+                    {formatTime(entry.timestamp)}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      color: getEventTypeColor(entry.eventType),
+                      textTransform: 'uppercase',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {entry.eventType}
+                  </span>
+                </div>
+                <div
                   style={{
-                    fontSize: '10px',
-                    color: getEventTypeColor(entry.eventType),
-                    textTransform: 'uppercase',
-                    fontWeight: 600,
+                    fontSize: '12px',
+                    color: 'var(--vscode-foreground)',
+                    lineHeight: '1.4',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
                   }}
                 >
-                  {entry.eventType}
-                </span>
+                  {entry.text}
+                </div>
               </div>
+            ))}
+            {isProcessing && (
               <div
                 style={{
+                  marginBottom: '8px',
+                  padding: '6px 8px',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--vscode-editor-background)',
+                  border: '1px solid var(--vscode-panel-border)',
                   fontSize: '12px',
-                  color: 'var(--vscode-foreground)',
-                  lineHeight: '1.4',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
+                  color: 'var(--vscode-descriptionForeground)',
+                  fontStyle: 'italic',
                 }}
               >
-                {entry.text}
+                {'.'.repeat(dotCount)}
               </div>
-            </div>
-          ))
+            )}
+          </>
         )}
       </div>
 
