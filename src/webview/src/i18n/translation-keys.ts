@@ -930,4 +930,5 @@ export interface WebviewTranslationKeys {
   'commentary.toggle': string;
   'commentary.waiting': string;
   'commentary.inactive': string;
+  'commentary.providerSelect': string;
 }

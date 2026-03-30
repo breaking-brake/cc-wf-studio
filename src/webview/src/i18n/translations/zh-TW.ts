@@ -980,4 +980,5 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'commentary.toggle': '切換 Commentary AI',
   'commentary.waiting': '等待代理活動中...',
   'commentary.inactive': '啟用 Commentary 並執行工作流程，即可看到即時解說。',
+  'commentary.providerSelect': '選擇 Commentary AI 提供商',
 };

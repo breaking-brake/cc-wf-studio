@@ -1013,4 +1013,5 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'commentary.toggle': 'Commentary AI 전환',
   'commentary.waiting': '에이전트 활동 대기 중...',
   'commentary.inactive': 'Commentary를 활성화하고 워크플로우를 실행하면 실시간 해설이 표시됩니다.',
+  'commentary.providerSelect': 'Commentary AI 프로바이더 선택',
 };

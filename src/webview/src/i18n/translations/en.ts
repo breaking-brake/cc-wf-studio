@@ -1028,4 +1028,5 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'commentary.toggle': 'Toggle Commentary AI',
   'commentary.waiting': 'Waiting for agent activity...',
   'commentary.inactive': 'Run a workflow with Commentary enabled to see real-time commentary.',
+  'commentary.providerSelect': 'Select Commentary AI provider',
 };

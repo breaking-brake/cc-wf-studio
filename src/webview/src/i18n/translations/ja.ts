@@ -1021,4 +1021,5 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'commentary.waiting': 'エージェントの活動を待機中...',
   'commentary.inactive':
     'Commentary を有効にしてワークフローを実行すると、リアルタイム実況が表示されます。',
+  'commentary.providerSelect': 'Commentary AI プロバイダーを選択',
 };

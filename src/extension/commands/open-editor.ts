@@ -109,6 +109,9 @@ let activeOAuthService: ReturnType<typeof createOAuthService> | null = null;
 let anthropicApiKeyManager: AnthropicApiKeyManager;
 let commentarySessionManager: CommentarySessionManager;
 let isCommentaryEnabled = false;
+let commentaryProvider: import('../../shared/types/messages').CommentaryProvider = 'claude-code';
+let commentaryCopilotModel: import('../../shared/types/messages').CopilotModel | undefined;
+let commentaryLanguage = 'English';
 
 /**
  * Import parameters for workflow import from Slack
@@ -451,7 +454,10 @@ export function registerOpenEditorCommand(
                         message.payload.workflow.name,
                         workspacePath,
                         webview,
-                        result.terminal
+                        result.terminal,
+                        commentaryProvider,
+                        commentaryCopilotModel,
+                        commentaryLanguage
                       )
                       .catch((err) => {
                         log('WARN', 'Failed to start commentary', {
@@ -2029,7 +2035,15 @@ export function registerOpenEditorCommand(
 
             case 'TOGGLE_COMMENTARY': {
               isCommentaryEnabled = message.payload?.enabled ?? false;
-              log('INFO', 'Commentary AI toggled', { enabled: isCommentaryEnabled });
+              commentaryProvider = message.payload?.provider ?? 'claude-code';
+              commentaryCopilotModel = message.payload?.copilotModel;
+              commentaryLanguage = message.payload?.language ?? 'English';
+              log('INFO', 'Commentary AI toggled', {
+                enabled: isCommentaryEnabled,
+                provider: commentaryProvider,
+                copilotModel: commentaryCopilotModel,
+                language: commentaryLanguage,
+              });
               if (!isCommentaryEnabled) {
                 commentarySessionManager?.stopCommentary();
               }

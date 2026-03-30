@@ -8,8 +8,11 @@
 import * as vscode from 'vscode';
 import type {
   CommentaryErrorPayload,
+  CommentaryHistoryEntry,
+  CommentaryProvider,
   CommentarySessionPayload,
   CommentaryUpdatePayload,
+  CopilotModel,
 } from '../../shared/types/messages';
 import { log } from '../extension';
 import { CommentaryAiService } from './commentary-ai-service';
@@ -30,7 +33,10 @@ export class CommentarySessionManager {
     workflowName: string,
     workspacePath: string,
     webview: vscode.Webview,
-    terminal?: vscode.Terminal
+    terminal?: vscode.Terminal,
+    provider?: CommentaryProvider,
+    copilotModel?: CopilotModel,
+    language?: string
   ): Promise<void> {
     // Stop any existing session
     this.stopCommentary();
@@ -38,16 +44,25 @@ export class CommentarySessionManager {
     this.currentSessionId = sessionId;
     this.webview = webview;
 
-    log('INFO', 'Starting commentary session', { sessionId, workflowName });
-
-    // Create AI service
-    this.aiService = new CommentaryAiService((text, eventType) => {
-      this.postMessage<CommentaryUpdatePayload>('COMMENTARY_UPDATE', {
-        text,
-        timestamp: new Date().toISOString(),
-        eventType,
-      });
+    log('INFO', 'Starting commentary session', {
+      sessionId,
+      workflowName,
+      provider: provider ?? 'claude-code',
     });
+
+    // Create AI service with provider
+    this.aiService = new CommentaryAiService(
+      (text, eventType) => {
+        this.postMessage<CommentaryUpdatePayload>('COMMENTARY_UPDATE', {
+          text,
+          timestamp: new Date().toISOString(),
+          eventType,
+        });
+      },
+      provider ?? 'claude-code',
+      copilotModel,
+      language
+    );
 
     // Create JSONL watcher
     this.watcher = new CommentaryJsonlWatcher(sessionId, workspacePath, (events) => {
@@ -109,6 +124,13 @@ export class CommentarySessionManager {
       this.postMessage<void>('COMMENTARY_SESSION_ENDED', undefined);
       this.currentSessionId = null;
     }
+  }
+
+  /**
+   * Get the conversation history from the current AI service
+   */
+  getHistory(): CommentaryHistoryEntry[] {
+    return this.aiService?.getHistory() ?? [];
   }
 
   /**

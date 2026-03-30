@@ -416,6 +416,20 @@ export type AiCliProvider = 'claude-code' | 'copilot' | 'codex';
 export type CopilotModel = string;
 
 /**
+ * Commentary AI provider selection
+ */
+export type CommentaryProvider = 'claude-code' | 'copilot';
+
+/**
+ * Commentary AI conversation history entry
+ */
+export interface CommentaryHistoryEntry {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
+/**
  * Codex model selection (for OpenAI Codex CLI)
  * Common models include 'o3', 'o4-mini', etc.
  * The list is dynamic and can be configured in ~/.codex/config.toml
@@ -2382,7 +2396,15 @@ export type WebviewMessage =
   | Message<void, 'GET_CHANGELOG'>
   | Message<void, 'MARK_CHANGELOG_READ'>
   | Message<{ show: boolean }, 'SET_WHATS_NEW_BADGE'>
-  | Message<{ enabled: boolean }, 'TOGGLE_COMMENTARY'>
+  | Message<
+      {
+        enabled: boolean;
+        provider?: CommentaryProvider;
+        copilotModel?: CopilotModel;
+        language?: string;
+      },
+      'TOGGLE_COMMENTARY'
+    >
   | Message<void, 'STOP_COMMENTARY'>;
 
 // ============================================================================
