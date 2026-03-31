@@ -973,4 +973,10 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // Claude API Upload Dialog
   'claudeApi.description':
     '将工作流作为 Agent Skills 上传到 Claude API，并通过 Messages API 运行。\n结合 MCP 服务器、代码执行和其他技能，您可以将专业 AI 代理作为 API 发布，用于文档处理、数据分析、客户支持等场景。',
+
+  // Commentary AI
+  'commentary.toggle': '切换 Commentary AI',
+  'commentary.waiting': '等待代理活动中...',
+  'commentary.inactive': '启用 Commentary 并运行工作流，即可看到实时解说。',
+  'commentary.providerSelect': '选择 Commentary AI 提供商',
 };

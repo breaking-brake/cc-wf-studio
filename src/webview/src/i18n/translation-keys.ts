@@ -924,4 +924,10 @@ export interface WebviewTranslationKeys {
 
   // Claude API Upload Dialog
   'claudeApi.description': string;
+
+  // Commentary AI
+  'commentary.toggle': string;
+  'commentary.waiting': string;
+  'commentary.inactive': string;
+  'commentary.providerSelect': string;
 }
