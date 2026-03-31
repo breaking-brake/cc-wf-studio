@@ -9,6 +9,7 @@
  * - get_workflow_schema: Get the workflow JSON schema for generating valid workflows
  * - apply_workflow: Apply a workflow to the canvas (validates first)
  * - list_available_agents: List available .claude/agents/*.md agent files
+ * - update_nodes: Update specific nodes by ID without sending full workflow
  */
 
 import * as fs from 'node:fs/promises';
@@ -297,7 +298,160 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
       }
     }
   );
-  // Tool 5: highlight_group_node
+  // Tool 5: update_nodes
+  server.tool(
+    'update_nodes',
+    'Update specific nodes in the current workflow by ID. More efficient than apply_workflow for partial changes. Fetches the current workflow, merges the specified node changes, validates the result, and applies to the canvas. Only updates existing nodes — use apply_workflow to add or remove nodes.',
+    {
+      nodes: z
+        .array(
+          z.object({
+            id: z.string().describe('The ID of the node to update'),
+            name: z.string().optional().describe('New display name for the node'),
+            position: z
+              .object({
+                x: z.number(),
+                y: z.number(),
+              })
+              .optional()
+              .describe('New position for the node'),
+            data: z
+              .record(z.string(), z.unknown())
+              .describe(
+                'Data fields to shallow-merge into the node data. Set a field to null to remove it (e.g., {"commandFilePath": null} deletes commandFilePath).'
+              ),
+          })
+        )
+        .describe('Array of node updates. Each must include an id and a data object.'),
+      description: z
+        .string()
+        .optional()
+        .describe(
+          'A brief description of the changes being made. Shown to the user in the review dialog.'
+        ),
+    },
+    async ({ nodes: nodeUpdates, description }) => {
+      try {
+        // 1. Fetch current workflow
+        const result = await manager.requestCurrentWorkflow();
+        if (!result.workflow) {
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: JSON.stringify({
+                  success: false,
+                  error: 'No active workflow. Please open a workflow in CC Workflow Studio first.',
+                }),
+              },
+            ],
+            isError: true,
+          };
+        }
+
+        // 2. Validate that all node IDs exist
+        const currentNodeIds = new Set(result.workflow.nodes.map((n) => n.id));
+        const missingIds = nodeUpdates.map((u) => u.id).filter((id) => !currentNodeIds.has(id));
+        if (missingIds.length > 0) {
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: JSON.stringify({
+                  success: false,
+                  error: `Nodes not found: ${missingIds.join(', ')}. Use get_current_workflow to see available node IDs.`,
+                }),
+              },
+            ],
+            isError: true,
+          };
+        }
+
+        // 3. Deep clone and apply updates
+        const updatedWorkflow = JSON.parse(JSON.stringify(result.workflow)) as Workflow;
+
+        for (const update of nodeUpdates) {
+          const node = updatedWorkflow.nodes.find((n) => n.id === update.id);
+          if (!node) continue; // Already validated above
+
+          if (update.name !== undefined) {
+            node.name = update.name;
+          }
+          if (update.position !== undefined) {
+            node.position = update.position;
+          }
+          // Shallow merge, then remove null-valued fields (null = delete semantics)
+          const merged = { ...node.data, ...update.data };
+          for (const key of Object.keys(merged)) {
+            if ((merged as Record<string, unknown>)[key] === null) {
+              delete (merged as Record<string, unknown>)[key];
+            }
+          }
+          node.data = merged as WorkflowNode['data'];
+        }
+
+        // 4. Plan SubAgent files & validate
+        const plannedFiles = await planSubAgentFiles(updatedWorkflow);
+        const validation = validateAIGeneratedWorkflow(updatedWorkflow);
+        if (!validation.valid) {
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: JSON.stringify({
+                  success: false,
+                  error: 'Validation failed',
+                  validationErrors: validation.errors,
+                }),
+              },
+            ],
+            isError: true,
+          };
+        }
+
+        // 5. Apply to canvas
+        const applied = await manager.applyWorkflowToCanvas(
+          updatedWorkflow,
+          description,
+          plannedFiles
+        );
+
+        // 6. Create SubAgent files on disk after user acceptance
+        if (applied && plannedFiles.length > 0) {
+          await executeSubAgentFileCreation(plannedFiles);
+        }
+
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({
+                success: applied,
+                ...(plannedFiles.length > 0
+                  ? { autoCreatedFiles: plannedFiles.map((f) => f.filePath) }
+                  : {}),
+              }),
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({
+                success: false,
+                error: error instanceof Error ? error.message : String(error),
+              }),
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // Tool 6: highlight_group_node
   server.tool(
     'highlight_group_node',
     'Highlight a group node on the CC Workflow Studio canvas to indicate it is currently being executed. Call this before executing nodes within a group to visually track progress.',
