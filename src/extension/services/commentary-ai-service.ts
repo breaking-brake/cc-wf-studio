@@ -33,7 +33,8 @@ async function getNanoSpawn() {
 const SYSTEM_PROMPT = `You are a workflow commentary AI. You observe real-time events from an AI agent executing a workflow and provide brief commentary. Rules:
 - Respond in {LANGUAGE}
 - Provide 1-2 sentence commentary for each batch of events
-- Explain what the agent is currently doing and why
+- For tool_use events, ALWAYS describe SPECIFICALLY what the tool is doing based on the provided context (tool name, command, file path, pattern, etc.). Example: instead of "Using Bash tool", say "Parsing JSON with jq to count comment fields"
+- NEVER give vague commentary like "running a tool" or "continuing processing" — always state the concrete action and its purpose
 - Be concise and informative
 - Output only the commentary text, no JSON wrapping
 - Do NOT ask for events or input — events are sent to you automatically`;

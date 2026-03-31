@@ -187,10 +187,37 @@ export class CommentaryJsonlWatcher {
           (block: Record<string, unknown>) => block.type === 'tool_use'
         );
         if (toolBlocks.length > 0) {
-          const toolNames = toolBlocks
-            .map((block: Record<string, unknown>) => block.name as string)
-            .join(', ');
-          return { type: 'tool_use', content: `Using tools: ${toolNames}`, timestamp };
+          const toolDescriptions = toolBlocks
+            .map((block: Record<string, unknown>) => {
+              const name = block.name as string;
+              const input = block.input as Record<string, unknown> | undefined;
+              if (!input) return name;
+
+              switch (name) {
+                case 'Bash':
+                  return input.description
+                    ? `${name}: ${input.description}`
+                    : input.command
+                      ? `${name}: ${(input.command as string).substring(0, 200)}`
+                      : name;
+                case 'Read':
+                  return input.file_path ? `${name}: ${input.file_path}` : name;
+                case 'Glob':
+                case 'Grep':
+                  return input.pattern ? `${name}: ${input.pattern}` : name;
+                case 'Edit':
+                case 'Write':
+                  return input.file_path ? `${name}: ${input.file_path}` : name;
+                case 'Agent':
+                  return input.description
+                    ? `${name}(${input.subagent_type || 'general'}): ${input.description}`
+                    : name;
+                default:
+                  return name;
+              }
+            })
+            .join('\n');
+          return { type: 'tool_use', content: toolDescriptions, timestamp };
         }
       }
     }
