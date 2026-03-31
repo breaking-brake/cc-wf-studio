@@ -56,6 +56,7 @@ function resolveJsonlPath(sessionId: string, workspacePath: string): string {
 export class CommentaryJsonlWatcher {
   private interval: ReturnType<typeof setInterval> | null = null;
   private byteOffset = 0;
+  private trailingLine = '';
   private resolvedJsonlPath: string | null = null;
   private readonly sessionId: string;
   private readonly workspacePath: string;
@@ -122,13 +123,19 @@ export class CommentaryJsonlWatcher {
       // Read new bytes
       const fd = fs.openSync(jsonlPath, 'r');
       const buffer = Buffer.alloc(stat.size - this.byteOffset);
-      fs.readSync(fd, buffer, 0, buffer.length, this.byteOffset);
-      fs.closeSync(fd);
+      try {
+        fs.readSync(fd, buffer, 0, buffer.length, this.byteOffset);
+      } finally {
+        fs.closeSync(fd);
+      }
 
       this.byteOffset = stat.size;
 
-      // Parse new lines
-      const newLines = buffer.toString('utf-8').split('\n').filter(Boolean);
+      // Parse new lines, retaining trailing partial line for next poll
+      const chunk = this.trailingLine + buffer.toString('utf-8');
+      const lines = chunk.split('\n');
+      this.trailingLine = lines.pop() ?? '';
+      const newLines = lines.filter(Boolean);
       const events: CommentaryEvent[] = [];
 
       for (const line of newLines) {

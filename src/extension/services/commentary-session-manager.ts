@@ -86,12 +86,6 @@ export class CommentarySessionManager {
       });
     }
 
-    // Notify webview that session started
-    this.postMessage<CommentarySessionPayload>('COMMENTARY_SESSION_STARTED', {
-      sessionId,
-      workflowName,
-    });
-
     // Read slash command content if path is provided
     let workflowContext: string | undefined;
     if (slashCommandPath) {
@@ -108,7 +102,14 @@ export class CommentarySessionManager {
     try {
       await this.aiService.startSession(workflowName, workflowContext);
       this.watcher.start();
+
+      // Notify webview only after startup succeeds
+      this.postMessage<CommentarySessionPayload>('COMMENTARY_SESSION_STARTED', {
+        sessionId,
+        workflowName,
+      });
     } catch (error) {
+      this.currentSessionId = null;
       log('ERROR', 'Failed to start commentary', {
         error: error instanceof Error ? error.message : String(error),
       });

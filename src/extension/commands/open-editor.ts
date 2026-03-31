@@ -171,9 +171,6 @@ export function registerOpenEditorCommand(
       // Initialize Anthropic API Key Manager
       anthropicApiKeyManager = new AnthropicApiKeyManager(context);
 
-      // Initialize Commentary Session Manager
-      commentarySessionManager = new CommentarySessionManager();
-
       const columnToShowIn = vscode.window.activeTextEditor
         ? vscode.window.activeTextEditor.viewColumn
         : undefined;
@@ -196,6 +193,9 @@ export function registerOpenEditorCommand(
 
         return;
       }
+
+      // Initialize Commentary Session Manager
+      commentarySessionManager = new CommentarySessionManager();
 
       // Create new webview panel
       currentPanel = vscode.window.createWebviewPanel(
@@ -449,7 +449,7 @@ export function registerOpenEditorCommand(
                   // Start Commentary AI if enabled
                   if (isCommentaryEnabled && sessionId) {
                     const slashCommandPath = exportResult.exportedFiles?.find((f) =>
-                      f.includes('/commands/')
+                      f.replaceAll('\\', '/').includes('/commands/')
                     );
                     commentarySessionManager
                       .startCommentary(

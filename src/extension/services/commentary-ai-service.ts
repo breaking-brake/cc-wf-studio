@@ -84,6 +84,8 @@ export class CommentaryAiService {
 
     try {
       const result = await this.callAi(prompt);
+      if (this.stopped) return;
+
       if (result.sessionId) {
         this.commentarySessionId = result.sessionId;
       }
@@ -111,6 +113,7 @@ export class CommentaryAiService {
       log('ERROR', 'Failed to start commentary AI session', {
         error: error instanceof Error ? error.message : String(error),
       });
+      throw error;
     }
   }
 
@@ -178,6 +181,8 @@ export class CommentaryAiService {
 
         try {
           const result = await this.callAi(prompt);
+          if (this.stopped) continue;
+
           if (result.sessionId && !this.commentarySessionId) {
             this.commentarySessionId = result.sessionId;
           }

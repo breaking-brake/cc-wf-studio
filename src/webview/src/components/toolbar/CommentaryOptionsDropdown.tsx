@@ -70,8 +70,7 @@ export function CommentaryOptionsDropdown({
           open &&
           provider === 'copilot' &&
           availableCopilotModels.length === 0 &&
-          !isFetchingModels &&
-          !modelsError
+          !isFetchingModels
         ) {
           onFetchModels();
         }
@@ -80,6 +79,8 @@ export function CommentaryOptionsDropdown({
       <DropdownMenu.Trigger asChild>
         <button
           type="button"
+          aria-label="Commentary options"
+          title="Commentary options"
           style={{
             padding: '3px 4px',
             backgroundColor: 'transparent',
