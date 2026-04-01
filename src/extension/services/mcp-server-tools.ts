@@ -317,12 +317,15 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
               .describe('New position for the node'),
             data: z
               .record(z.string(), z.unknown())
+              .optional()
               .describe(
                 'Data fields to shallow-merge into the node data. Set a field to null to remove it (e.g., {"commandFilePath": null} deletes commandFilePath).'
               ),
           })
         )
-        .describe('Array of node updates. Each must include an id and a data object.'),
+        .describe(
+          'Array of node updates. Each must include an id and at least one of: name, position, or data.'
+        ),
       description: z
         .string()
         .optional()
@@ -381,7 +384,7 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
             node.position = update.position;
           }
           // Shallow merge, then remove null-valued fields (null = delete semantics)
-          const merged = { ...node.data, ...update.data };
+          const merged = { ...node.data, ...(update.data ?? {}) };
           for (const key of Object.keys(merged)) {
             if ((merged as Record<string, unknown>)[key] === null) {
               delete (merged as Record<string, unknown>)[key];
