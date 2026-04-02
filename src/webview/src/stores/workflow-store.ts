@@ -1330,8 +1330,9 @@ export const useWorkflowStore = create<WorkflowStore>()(
 // Only increments on content-meaningful changes (excludes selection, dimensions).
 
 let _canvasRevision = 0;
-let _prevNodesRef: Node[] = [];
-let _prevEdgesRef: Edge[] = [];
+const _initialState = useWorkflowStore.getState();
+let _prevNodesRef: Node[] = _initialState.nodes;
+let _prevEdgesRef: Edge[] = _initialState.edges;
 
 /**
  * Strip non-content fields for comparison (same logic as partialize for undo/redo).
@@ -1343,7 +1344,7 @@ function contentFingerprint(nodes: Node[], edges: Edge[]): string {
   return JSON.stringify({ n, e });
 }
 
-let _prevFingerprint = contentFingerprint([], []);
+let _prevFingerprint = contentFingerprint(_initialState.nodes, _initialState.edges);
 
 useWorkflowStore.subscribe((state) => {
   // Fast path: skip if references haven't changed
