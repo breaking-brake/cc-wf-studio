@@ -252,10 +252,31 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     [setSelectedNodeId]
   );
 
-  // Handle node drag stop (group containment logic)
+  // Save pre-drag snapshot for undo/redo (ref to avoid re-renders)
+  const preDragNodesRef = useRef<Node[] | null>(null);
+
+  // Pause undo/redo tracking during node drag to record only the final position
+  const handleNodeDragStart = useCallback(() => {
+    preDragNodesRef.current = useWorkflowStore.getState().nodes;
+    useWorkflowStore.temporal.getState().pause();
+  }, []);
+
+  // Handle node drag stop (group containment logic + record single undo entry)
   const handleNodeDragStop = useCallback(
     (_event: React.MouseEvent, node: Node) => {
       onNodeDragStop(node);
+      const preDragNodes = preDragNodesRef.current;
+      if (preDragNodes) {
+        const currentNodes = useWorkflowStore.getState().nodes;
+        // Temporarily revert to pre-drag state, then resume tracking and apply final state
+        // This makes zundo record a single undo entry: pre-drag → post-drag
+        useWorkflowStore.setState({ nodes: preDragNodes });
+        useWorkflowStore.temporal.getState().resume();
+        useWorkflowStore.setState({ nodes: currentNodes });
+        preDragNodesRef.current = null;
+      } else {
+        useWorkflowStore.temporal.getState().resume();
+      }
     },
     [onNodeDragStop]
   );
@@ -271,11 +292,24 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   // Track Ctrl/Cmd key state for temporary mode switching
   const [isModifierKeyPressed, setIsModifierKeyPressed] = useState(false);
 
-  // Keyboard event handlers for modifier key
+  // Keyboard event handlers for modifier key and undo/redo
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey || event.metaKey) {
         setIsModifierKeyPressed(true);
+      }
+
+      // Undo/Redo shortcuts
+      const mod = event.metaKey || event.ctrlKey;
+      if (mod && event.key === 'z' && !event.shiftKey) {
+        event.preventDefault();
+        const { undo, pastStates } = useWorkflowStore.temporal.getState();
+        if (pastStates.length > 0) undo();
+      }
+      if (mod && ((event.key === 'z' && event.shiftKey) || event.key === 'y')) {
+        event.preventDefault();
+        const { redo, futureStates } = useWorkflowStore.temporal.getState();
+        if (futureStates.length > 0) redo();
       }
     };
 
@@ -356,6 +390,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           onNodesChange={handleNodesChange}
           onEdgesChange={handleEdgesChange}
           onConnect={handleConnect}
+          onNodeDragStart={handleNodeDragStart}
           onNodeDragStop={handleNodeDragStop}
           onNodeClick={handleNodeClick}
           onEdgeClick={() => syncSelectedNodeId(null)}

@@ -50,6 +50,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     '現在グループノードがハイライトされています。ハイライトを無効化しますか？',
   'toolbar.highlight.confirmDisable.confirm': '無効化',
   'toolbar.highlight.confirmDisable.cancel': 'キャンセル',
+  'toolbar.undo': '元に戻す',
+  'toolbar.redo': 'やり直し',
   'toolbar.scrollMode.switchToClassic': 'Classicモードに切り替え（スクロール=ズーム）',
   'toolbar.scrollMode.switchToFreehand': 'Freehandモードに切り替え（スクロール=パン）',
 

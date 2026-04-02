@@ -21,6 +21,7 @@ import type {
 import { NodeType } from '@shared/types/workflow-definition';
 import type { Edge, Node, OnConnect, OnEdgesChange, OnNodesChange } from 'reactflow';
 import { addEdge, applyEdgeChanges, applyNodeChanges } from 'reactflow';
+import { temporal } from 'zundo';
 import { create } from 'zustand';
 
 // ============================================================================
@@ -296,912 +297,673 @@ export function createWorkflowFromCanvas(nodes: Node[], edges: Edge[]): Workflow
   };
 }
 
-export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
-  // Initial State - デフォルトでStartノードとEndノードを含む
-  nodes: [DEFAULT_START_NODE, DEFAULT_END_NODE],
-  edges: [],
-  selectedNodeId: null,
-  pendingDeleteNodeIds: [],
-  activeWorkflow: null,
-  interactionMode: 'pan', // Default: pan mode
-  scrollMode: (() => {
-    const saved = localStorage.getItem('cc-wf-studio.scrollMode');
-    return saved === 'freehand' ? 'freehand' : 'classic'; // Default: classic
-  })() as ScrollMode,
-  workflowName: 'my-workflow', // Default workflow name
-  workflowDescription: '', // Default workflow description
-  isPropertyOverlayOpen: true, // Property overlay is open by default
-  minimapDisplayMode: (() => {
-    const saved = localStorage.getItem('cc-wf-studio.minimapDisplayMode');
-    if (saved === 'hidden' || saved === 'auto' || saved === 'always') return saved;
-    return 'auto'; // Default: auto (show on scroll)
-  })() as 'hidden' | 'auto' | 'always',
-  isMinimapShown: false, // Controlled by scroll events (for 'auto' mode)
-  isDescriptionPanelVisible: (() => {
-    const saved = localStorage.getItem('cc-wf-studio.descriptionPanelVisible');
-    return saved !== null ? saved === 'true' : false; // Default: collapsed
-  })(),
-  isFocusMode: (() => {
-    const saved = localStorage.getItem('cc-wf-studio.focusMode');
-    return saved !== null ? saved === 'true' : false; // Default: off
-  })(),
-  slashCommandOptions: {
-    context: 'default',
-    model: 'default',
-    hooks: undefined,
-  },
-  lastAddedNodeId: null,
-  highlightedGroupNodeId: null,
-  isHighlightEnabled: true,
-  mcpServerRunning: false,
-  mcpServerPort: null,
+// Type for undo/redo tracked state (nodes and edges only)
+type TrackedState = {
+  nodes: Node[];
+  edges: Edge[];
+};
 
-  // Sub-Agent Flow Initial State (Feature: 089-subworkflow)
-  subAgentFlows: [],
-  activeSubAgentFlowId: null,
-  mainWorkflowSnapshot: null,
-
-  // React Flow Change Handlers (integrates with React Flow's onChange events)
-  onNodesChange: (changes) => {
-    // Separate remove events from other changes
-    const removeChanges = changes.filter((change) => change.type === 'remove');
-    const otherChanges = changes.filter((change) => change.type !== 'remove');
-
-    // Check if there are nodes to delete (excluding Start nodes)
-    if (removeChanges.length > 0) {
-      const nodeIdsToDelete = removeChanges
-        .map((change) => {
-          if (change.type === 'remove') {
-            const nodeToRemove = get().nodes.find((node) => node.id === change.id);
-            // Start nodeは削除不可
-            if (nodeToRemove?.type === 'start') {
-              console.warn('Cannot remove Start node: Start node is required for workflow');
-              return null;
-            }
-            return change.id;
-          }
-          return null;
-        })
-        .filter((id): id is string => id !== null);
-
-      // If there are nodes to delete, show confirmation dialog
-      if (nodeIdsToDelete.length > 0) {
-        set({ pendingDeleteNodeIds: nodeIdsToDelete });
-        // Don't apply remove changes yet - wait for confirmation
-      }
-    }
-
-    // Apply all non-remove changes immediately
-    if (otherChanges.length > 0) {
-      set({
-        nodes: applyNodeChanges(otherChanges, get().nodes),
-      });
-    }
-  },
-
-  onEdgesChange: (changes) => {
-    set({
-      edges: applyEdgeChanges(changes, get().edges),
-    });
-  },
-
-  onConnect: (connection) => {
-    const currentNodes = get().nodes.map((node) => ({ ...node, selected: false }));
-    const currentEdges = get().edges.map((e) => ({ ...e, selected: false }));
-    const newEdges = addEdge({ ...connection, selected: true }, currentEdges);
-    set({
-      nodes: currentNodes,
-      edges: newEdges,
-      selectedNodeId: null,
-    });
-  },
-
-  // Setters
-  setNodes: (nodes) => set({ nodes }),
-
-  setEdges: (edges) => set({ edges }),
-
-  setSelectedNodeId: (selectedNodeId) => {
-    // When a node is selected, auto-open the property overlay
-    if (selectedNodeId !== null) {
-      set({ selectedNodeId, isPropertyOverlayOpen: true });
-    } else {
-      set({ selectedNodeId });
-    }
-  },
-
-  syncSelectedNodeId: (selectedNodeId) => {
-    set({ selectedNodeId });
-  },
-
-  setInteractionMode: (interactionMode) => set({ interactionMode }),
-
-  toggleInteractionMode: () => {
-    const currentMode = get().interactionMode;
-    set({ interactionMode: currentMode === 'pan' ? 'selection' : 'pan' });
-  },
-
-  toggleScrollMode: () => {
-    const newMode = get().scrollMode === 'classic' ? 'freehand' : 'classic';
-    localStorage.setItem('cc-wf-studio.scrollMode', newMode);
-    set({ scrollMode: newMode });
-  },
-
-  setWorkflowName: (workflowName) => set({ workflowName }),
-
-  setWorkflowDescription: (workflowDescription) => set({ workflowDescription }),
-
-  openPropertyOverlay: () => set({ isPropertyOverlayOpen: true }),
-
-  closePropertyOverlay: () => set({ isPropertyOverlayOpen: false }),
-
-  setMinimapDisplayMode: (mode) => {
-    localStorage.setItem('cc-wf-studio.minimapDisplayMode', mode);
-    set({ minimapDisplayMode: mode, isMinimapShown: false });
-  },
-
-  setMinimapShown: (shown) => set({ isMinimapShown: shown }),
-
-  toggleDescriptionPanelVisibility: () => {
-    const newValue = !get().isDescriptionPanelVisible;
-    localStorage.setItem('cc-wf-studio.descriptionPanelVisible', newValue.toString());
-    set({ isDescriptionPanelVisible: newValue });
-  },
-
-  toggleFocusMode: () => {
-    const newValue = !get().isFocusMode;
-    localStorage.setItem('cc-wf-studio.focusMode', newValue.toString());
-    set({ isFocusMode: newValue });
-  },
-
-  setSlashCommandOptions: (options: SlashCommandOptions) => set({ slashCommandOptions: options }),
-
-  setSlashCommandContext: (context: SlashCommandContext) =>
-    set((state) => ({
-      slashCommandOptions: { ...state.slashCommandOptions, context },
-    })),
-
-  setSlashCommandModel: (model: SlashCommandModel) =>
-    set((state) => ({
-      slashCommandOptions: { ...state.slashCommandOptions, model },
-    })),
-
-  setSlashCommandAllowedTools: (allowedTools: string) =>
-    set((state) => ({
-      slashCommandOptions: { ...state.slashCommandOptions, allowedTools },
-    })),
-
-  setSlashCommandDisableModelInvocation: (disableModelInvocation: boolean) =>
-    set((state) => ({
-      slashCommandOptions: { ...state.slashCommandOptions, disableModelInvocation },
-    })),
-
-  setSlashCommandArgumentHint: (argumentHint: string) =>
-    set((state) => ({
-      slashCommandOptions: {
-        ...state.slashCommandOptions,
-        argumentHint: argumentHint || undefined,
-      },
-    })),
-
-  setHooks: (hooks: WorkflowHooks) =>
-    set((state) => ({
-      slashCommandOptions: { ...state.slashCommandOptions, hooks },
-    })),
-
-  addHookEntry: (hookType: HookType, matcher: string, command: string, once?: boolean) => {
-    const currentHooks = get().slashCommandOptions.hooks || {};
-    const existing = currentHooks[hookType] || [];
-    const newEntry: HookEntry = {
-      matcher: matcher || undefined,
-      hooks: [
-        {
-          type: 'command',
-          command,
-          once: once || undefined,
-        },
-      ],
-    };
-    set((state) => ({
-      slashCommandOptions: {
-        ...state.slashCommandOptions,
-        hooks: {
-          ...currentHooks,
-          [hookType]: [...existing, newEntry],
-        },
-      },
-    }));
-  },
-
-  removeHookEntry: (hookType: HookType, entryIndex: number) => {
-    const currentHooks = get().slashCommandOptions.hooks || {};
-    const existing = currentHooks[hookType] || [];
-    const updated = existing.filter((_, i) => i !== entryIndex);
-    if (updated.length === 0) {
-      const { [hookType]: _, ...rest } = currentHooks;
-      const newHooks = Object.keys(rest).length > 0 ? rest : undefined;
-      set((state) => ({
-        slashCommandOptions: { ...state.slashCommandOptions, hooks: newHooks },
-      }));
-    } else {
-      set((state) => ({
-        slashCommandOptions: {
-          ...state.slashCommandOptions,
-          hooks: { ...currentHooks, [hookType]: updated },
-        },
-      }));
-    }
-  },
-
-  updateHookEntry: (hookType: HookType, entryIndex: number, entry: Partial<HookEntry>) => {
-    const currentHooks = get().slashCommandOptions.hooks || {};
-    const existing = currentHooks[hookType] || [];
-    const updated = existing.map((h, i) => (i === entryIndex ? { ...h, ...entry } : h));
-    set((state) => ({
-      slashCommandOptions: {
-        ...state.slashCommandOptions,
-        hooks: { ...currentHooks, [hookType]: updated },
-      },
-    }));
-  },
-
-  // Group Node Actions
-  onNodeDragStop: (draggedNode: Node) => {
-    // Skip if the dragged node is a group node (no nesting)
-    if (draggedNode.type === 'group') return;
-
-    const currentNodes = get().nodes;
-
-    // Find all group nodes
-    const groupNodes = currentNodes.filter((n) => n.type === 'group');
-    if (groupNodes.length === 0) return;
-
-    // Calculate the absolute position of the dragged node
-    const draggedAbsX = draggedNode.parentId
-      ? (() => {
-          const parent = currentNodes.find((n) => n.id === draggedNode.parentId);
-          return parent ? draggedNode.position.x + parent.position.x : draggedNode.position.x;
-        })()
-      : draggedNode.position.x;
-    const draggedAbsY = draggedNode.parentId
-      ? (() => {
-          const parent = currentNodes.find((n) => n.id === draggedNode.parentId);
-          return parent ? draggedNode.position.y + parent.position.y : draggedNode.position.y;
-        })()
-      : draggedNode.position.y;
-
-    // Check if the dragged node is within any group node's bounds
-    let targetGroup: Node | null = null;
-    for (const group of groupNodes) {
-      const gw = group.style?.width ?? group.width ?? 400;
-      const gh = group.style?.height ?? group.height ?? 300;
-      const gx = group.position.x;
-      const gy = group.position.y;
-
-      if (
-        draggedAbsX >= gx &&
-        draggedAbsX <= gx + (gw as number) &&
-        draggedAbsY >= gy &&
-        draggedAbsY <= gy + (gh as number)
-      ) {
-        targetGroup = group;
-        break;
-      }
-    }
-
-    const currentParentId = draggedNode.parentId;
-
-    if (targetGroup && targetGroup.id !== currentParentId) {
-      // Moving into a new group: set parentId and convert to relative coordinates
-      const updatedNodes = currentNodes.map((n) => {
-        if (n.id === draggedNode.id) {
-          return {
-            ...n,
-            parentId: targetGroup.id,
-            position: {
-              x: draggedAbsX - targetGroup.position.x,
-              y: draggedAbsY - targetGroup.position.y,
-            },
-          };
-        }
-        return n;
-      });
-      // Sort so parents come before children
-      set({ nodes: sortNodesParentFirst(updatedNodes) });
-    } else if (!targetGroup && currentParentId) {
-      // Moving out of a group: remove parentId and convert to absolute coordinates
-      const updatedNodes = currentNodes.map((n) => {
-        if (n.id === draggedNode.id) {
-          return {
-            ...n,
-            parentId: undefined,
-            position: {
-              x: draggedAbsX,
-              y: draggedAbsY,
-            },
-          };
-        }
-        return n;
-      });
-      set({ nodes: sortNodesParentFirst(updatedNodes) });
-    }
-  },
-
-  // Custom Actions
-  updateNodeData: (nodeId: string, data: Partial<unknown>) => {
-    set({
-      nodes: get().nodes.map((node) =>
-        node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node
-      ),
-    });
-  },
-
-  addNode: (node: Node) => {
-    set({
-      nodes: [...get().nodes, node],
-      lastAddedNodeId: node.id,
-      selectedNodeId: node.id,
-      isPropertyOverlayOpen: true,
-    });
-  },
-
-  clearLastAddedNodeId: () => {
-    set({ lastAddedNodeId: null });
-  },
-
-  setHighlightedGroupNodeId: (id: string | null) => {
-    set({ highlightedGroupNodeId: id });
-  },
-
-  toggleHighlightEnabled: () => {
-    const current = get().isHighlightEnabled;
-    if (current) {
-      set({ isHighlightEnabled: false, highlightedGroupNodeId: null });
-    } else {
-      set({ isHighlightEnabled: true });
-    }
-  },
-
-  setMcpServerStatus: (running, port) => set({ mcpServerRunning: running, mcpServerPort: port }),
-
-  removeNode: (nodeId: string) => {
-    // Startノードの削除のみ防止
-    // Endノードは自由に削除可能（Export時にバリデーション）
-    const nodeToRemove = get().nodes.find((node) => node.id === nodeId);
-    if (nodeToRemove?.type === 'start') {
-      console.warn('Cannot remove Start node: Start node is required for workflow');
-      return;
-    }
-
-    // Clear selection if the deleted node is currently selected
-    const shouldClearSelection = get().selectedNodeId === nodeId;
-
-    // If removing a group node, release child nodes (convert to absolute coordinates)
-    const isGroupNode = nodeToRemove?.type === 'group';
-    let updatedNodes = get().nodes;
-    if (isGroupNode) {
-      const groupPos = nodeToRemove.position;
-      updatedNodes = updatedNodes.map((node) => {
-        if (node.parentId === nodeId) {
-          return {
-            ...node,
-            parentId: undefined,
-            position: {
-              x: node.position.x + groupPos.x,
-              y: node.position.y + groupPos.y,
-            },
-          };
-        }
-        return node;
-      });
-    }
-
-    set({
-      nodes: updatedNodes.filter((node) => node.id !== nodeId),
-      edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
-      ...(shouldClearSelection && { selectedNodeId: null }),
-    });
-  },
-
-  requestDeleteNode: (nodeId: string) => {
-    // ×ボタンからの削除要求
-    // Start nodeは削除不可
-    const nodeToRemove = get().nodes.find((node) => node.id === nodeId);
-    if (nodeToRemove?.type === 'start') {
-      console.warn('Cannot remove Start node: Start node is required for workflow');
-      return;
-    }
-
-    // 確認ダイアログを表示するために pendingDeleteNodeIds にセット
-    set({ pendingDeleteNodeIds: [nodeId] });
-  },
-
-  confirmDeleteNodes: () => {
-    const nodeIds = get().pendingDeleteNodeIds;
-    if (nodeIds.length === 0) return;
-
-    // Clear selection if the deleted node is currently selected
-    const currentSelectedNodeId = get().selectedNodeId;
-    const shouldClearSelection =
-      currentSelectedNodeId !== null && nodeIds.includes(currentSelectedNodeId);
-
-    // Release child nodes from group nodes being deleted
-    let updatedNodes = get().nodes;
-    for (const nodeId of nodeIds) {
-      const nodeToRemove = updatedNodes.find((n) => n.id === nodeId);
-      if (nodeToRemove?.type === 'group') {
-        const groupPos = nodeToRemove.position;
-        updatedNodes = updatedNodes.map((node) => {
-          if (node.parentId === nodeId) {
-            return {
-              ...node,
-              parentId: undefined,
-              position: {
-                x: node.position.x + groupPos.x,
-                y: node.position.y + groupPos.y,
-              },
-            };
-          }
-          return node;
-        });
-      }
-    }
-
-    // Delete all pending nodes
-    set({
-      nodes: updatedNodes.filter((node) => !nodeIds.includes(node.id)),
-      edges: get().edges.filter(
-        (edge) => !nodeIds.includes(edge.source) && !nodeIds.includes(edge.target)
-      ),
-      pendingDeleteNodeIds: [],
-      ...(shouldClearSelection && { selectedNodeId: null }),
-    });
-  },
-
-  cancelDeleteNodes: () => {
-    set({ pendingDeleteNodeIds: [] });
-  },
-
-  clearWorkflow: () => {
-    const { activeWorkflow } = get();
-
-    // StartノードとEndノードは保持し、他のノードとすべてのエッジをクリア
-    set({
+export const useWorkflowStore = create<WorkflowStore>()(
+  temporal(
+    (set, get) => ({
+      // Initial State - デフォルトでStartノードとEndノードを含む
       nodes: [DEFAULT_START_NODE, DEFAULT_END_NODE],
       edges: [],
       selectedNodeId: null,
-      highlightedGroupNodeId: null,
-      workflowDescription: '', // Reset description
+      pendingDeleteNodeIds: [],
+      activeWorkflow: null,
+      interactionMode: 'pan', // Default: pan mode
+      scrollMode: (() => {
+        const saved = localStorage.getItem('cc-wf-studio.scrollMode');
+        return saved === 'freehand' ? 'freehand' : 'classic'; // Default: classic
+      })() as ScrollMode,
+      workflowName: 'my-workflow', // Default workflow name
+      workflowDescription: '', // Default workflow description
+      isPropertyOverlayOpen: true, // Property overlay is open by default
+      minimapDisplayMode: (() => {
+        const saved = localStorage.getItem('cc-wf-studio.minimapDisplayMode');
+        if (saved === 'hidden' || saved === 'auto' || saved === 'always') return saved;
+        return 'auto'; // Default: auto (show on scroll)
+      })() as 'hidden' | 'auto' | 'always',
+      isMinimapShown: false, // Controlled by scroll events (for 'auto' mode)
+      isDescriptionPanelVisible: (() => {
+        const saved = localStorage.getItem('cc-wf-studio.descriptionPanelVisible');
+        return saved !== null ? saved === 'true' : false; // Default: collapsed
+      })(),
+      isFocusMode: (() => {
+        const saved = localStorage.getItem('cc-wf-studio.focusMode');
+        return saved !== null ? saved === 'true' : false; // Default: off
+      })(),
       slashCommandOptions: {
         context: 'default',
         model: 'default',
         hooks: undefined,
       },
-      // Sub-Agent Flow関連の状態をクリア
+      lastAddedNodeId: null,
+      highlightedGroupNodeId: null,
+      isHighlightEnabled: true,
+      mcpServerRunning: false,
+      mcpServerPort: null,
+
+      // Sub-Agent Flow Initial State (Feature: 089-subworkflow)
       subAgentFlows: [],
       activeSubAgentFlowId: null,
       mainWorkflowSnapshot: null,
-      // activeWorkflow の conversationHistory と subAgentFlows をクリア
-      activeWorkflow: activeWorkflow
-        ? {
-            ...activeWorkflow,
-            conversationHistory: undefined,
-            subAgentFlows: undefined,
+
+      // React Flow Change Handlers (integrates with React Flow's onChange events)
+      onNodesChange: (changes) => {
+        // Separate remove events from other changes
+        const removeChanges = changes.filter((change) => change.type === 'remove');
+        const otherChanges = changes.filter((change) => change.type !== 'remove');
+
+        // Check if there are nodes to delete (excluding Start nodes)
+        if (removeChanges.length > 0) {
+          const nodeIdsToDelete = removeChanges
+            .map((change) => {
+              if (change.type === 'remove') {
+                const nodeToRemove = get().nodes.find((node) => node.id === change.id);
+                // Start nodeは削除不可
+                if (nodeToRemove?.type === 'start') {
+                  console.warn('Cannot remove Start node: Start node is required for workflow');
+                  return null;
+                }
+                return change.id;
+              }
+              return null;
+            })
+            .filter((id): id is string => id !== null);
+
+          // If there are nodes to delete, show confirmation dialog
+          if (nodeIdsToDelete.length > 0) {
+            set({ pendingDeleteNodeIds: nodeIdsToDelete });
+            // Don't apply remove changes yet - wait for confirmation
           }
-        : null,
-    });
-  },
+        }
 
-  addGeneratedWorkflow: (workflow: Workflow) => {
-    // Convert workflow nodes to ReactFlow nodes
-    const newNodes: Node[] = sortNodesParentFirst(
-      workflow.nodes.map((node) => ({
-        id: node.id,
-        type: node.type,
-        position: {
-          x: node.position.x,
-          y: node.position.y,
-        },
-        // Normalize MCP node data for backwards compatibility
-        data: node.type === 'mcp' ? normalizeMcpNodeData(node.data as McpNodeData) : node.data,
-        ...(node.parentId && { parentId: node.parentId }),
-        ...(node.style && { style: node.style }),
-      }))
-    );
-
-    // Convert workflow connections to ReactFlow edges
-    const newEdges: Edge[] = workflow.connections.map((conn) => ({
-      id: conn.id,
-      source: conn.from,
-      target: conn.to,
-      sourceHandle: conn.fromPort,
-      targetHandle: conn.toPort,
-    }));
-
-    // Find the first non-start/end node to select
-    const firstSelectableNode = newNodes.find(
-      (node) => node.type !== 'start' && node.type !== 'end'
-    );
-
-    // Completely replace existing workflow with generated workflow
-    // Also include subAgentFlows from the generated workflow
-    set({
-      nodes: newNodes,
-      edges: newEdges,
-      selectedNodeId: firstSelectableNode?.id || null,
-      highlightedGroupNodeId: null,
-      activeWorkflow: workflow,
-      subAgentFlows: workflow.subAgentFlows || [],
-    });
-  },
-
-  updateWorkflow: (workflow: Workflow) => {
-    // Convert workflow nodes to ReactFlow nodes
-    const newNodes: Node[] = sortNodesParentFirst(
-      workflow.nodes.map((node) => ({
-        id: node.id,
-        type: node.type,
-        position: {
-          x: node.position.x,
-          y: node.position.y,
-        },
-        // Normalize MCP node data for backwards compatibility
-        data: node.type === 'mcp' ? normalizeMcpNodeData(node.data as McpNodeData) : node.data,
-        ...(node.parentId && { parentId: node.parentId }),
-        ...(node.style && { style: node.style }),
-      }))
-    );
-
-    // Convert workflow connections to ReactFlow edges
-    const newEdges: Edge[] = workflow.connections.map((conn) => ({
-      id: conn.id,
-      source: conn.from,
-      target: conn.to,
-      sourceHandle: conn.fromPort,
-      targetHandle: conn.toPort,
-    }));
-
-    // Update workflow while preserving selection
-    // Also include subAgentFlows from the refined workflow
-    set({
-      nodes: newNodes,
-      edges: newEdges,
-      highlightedGroupNodeId: null,
-      activeWorkflow: workflow,
-      subAgentFlows: workflow.subAgentFlows || [],
-    });
-  },
-
-  // Phase 3.12: Set active workflow and update canvas
-  setActiveWorkflow: (workflow: Workflow) => {
-    // Convert workflow nodes to ReactFlow nodes
-    const newNodes: Node[] = sortNodesParentFirst(
-      workflow.nodes.map((node) => ({
-        id: node.id,
-        type: node.type,
-        position: {
-          x: node.position.x,
-          y: node.position.y,
-        },
-        data: node.data,
-        ...(node.parentId && { parentId: node.parentId }),
-        ...(node.style && { style: node.style }),
-      }))
-    );
-
-    // Convert workflow connections to ReactFlow edges
-    const newEdges: Edge[] = workflow.connections.map((conn) => ({
-      id: conn.id,
-      source: conn.from,
-      target: conn.to,
-      sourceHandle: conn.fromPort,
-      targetHandle: conn.toPort,
-    }));
-
-    // Set active workflow and update canvas
-    // Also load subAgentFlows from the workflow if present
-    set({
-      nodes: newNodes,
-      edges: newEdges,
-      highlightedGroupNodeId: null,
-      activeWorkflow: workflow,
-      subAgentFlows: workflow.subAgentFlows || [],
-    });
-  },
-
-  updateActiveWorkflowMetadata: (updates: Partial<Workflow>) => {
-    const { activeWorkflow } = get();
-    if (!activeWorkflow) return;
-
-    // Update only activeWorkflow without changing canvas (nodes/edges)
-    // This is used when editing SubAgentFlow to update parent workflow metadata
-    // without overwriting the SubAgentFlow canvas
-    set({
-      activeWorkflow: {
-        ...activeWorkflow,
-        ...updates,
+        // Apply all non-remove changes immediately
+        if (otherChanges.length > 0) {
+          set({
+            nodes: applyNodeChanges(otherChanges, get().nodes),
+          });
+        }
       },
-      // Also sync subAgentFlows if it's being updated
-      ...(updates.subAgentFlows !== undefined && {
-        subAgentFlows: updates.subAgentFlows,
-      }),
-    });
-  },
 
-  ensureActiveWorkflow: () => {
-    const { activeWorkflow, nodes, edges, workflowName, subAgentFlows } = get();
-
-    // If activeWorkflow already exists, do nothing
-    if (activeWorkflow) return;
-
-    // Create activeWorkflow from current canvas state
-    const now = new Date();
-    const workflowNodes: WorkflowNode[] = nodes.map((node) => ({
-      id: node.id,
-      name: node.data?.label || node.id,
-      type: node.type as NodeType,
-      position: node.position,
-      data: node.data,
-      ...(node.parentId && { parentId: node.parentId }),
-      ...(node.style &&
-        (node.style.width || node.style.height) && {
-          style: {
-            ...(node.style.width && { width: node.style.width }),
-            ...(node.style.height && { height: node.style.height }),
-          },
-        }),
-    })) as WorkflowNode[];
-
-    const connections = edges.map((edge) => ({
-      id: edge.id,
-      from: edge.source,
-      to: edge.target,
-      fromPort: edge.sourceHandle || 'default',
-      toPort: edge.targetHandle || 'default',
-    }));
-
-    const newWorkflow: Workflow = {
-      id: `workflow-${now.getTime()}`,
-      name: workflowName,
-      version: '1.0.0',
-      schemaVersion: '1.2.0',
-      nodes: workflowNodes,
-      connections,
-      createdAt: now,
-      updatedAt: now,
-      subAgentFlows: subAgentFlows.length > 0 ? subAgentFlows : undefined,
-    };
-
-    set({ activeWorkflow: newWorkflow });
-  },
-
-  // ============================================================================
-  // Sub-Agent Flow Actions (Feature: 089-subworkflow)
-  // ============================================================================
-
-  addSubAgentFlow: (subAgentFlow: SubAgentFlow) => {
-    set({
-      subAgentFlows: [...get().subAgentFlows, subAgentFlow],
-    });
-  },
-
-  removeSubAgentFlow: (id: string) => {
-    // If currently editing this sub-agent flow, return to main workflow first
-    if (get().activeSubAgentFlowId === id) {
-      const snapshot = get().mainWorkflowSnapshot;
-      if (snapshot) {
+      onEdgesChange: (changes) => {
         set({
-          nodes: snapshot.nodes,
-          edges: snapshot.edges,
-          selectedNodeId: snapshot.selectedNodeId,
-          activeSubAgentFlowId: null,
-          mainWorkflowSnapshot: null,
+          edges: applyEdgeChanges(changes, get().edges),
         });
-      }
-    }
+      },
 
-    set({
-      subAgentFlows: get().subAgentFlows.filter((sf) => sf.id !== id),
-    });
-  },
-
-  updateSubAgentFlow: (id: string, updates: Partial<SubAgentFlow>) => {
-    set({
-      subAgentFlows: get().subAgentFlows.map((sf) => (sf.id === id ? { ...sf, ...updates } : sf)),
-    });
-  },
-
-  setActiveSubAgentFlowId: (id: string | null) => {
-    const currentActiveId = get().activeSubAgentFlowId;
-
-    // If switching from main to sub-agent flow
-    if (currentActiveId === null && id !== null) {
-      // Determine if this is a new Sub-Agent Flow (no existing reference node)
-      const isNewSubAgentFlow = !get().nodes.some(
-        (n) => n.type === 'subAgentFlow' && n.data?.subAgentFlowId === id
-      );
-
-      // Save current main workflow state
-      const snapshot: MainWorkflowSnapshot = {
-        nodes: get().nodes,
-        edges: get().edges,
-        selectedNodeId: get().selectedNodeId,
-        isNewSubAgentFlow,
-      };
-
-      // Find the sub-agent flow to edit
-      const subAgentFlow = get().subAgentFlows.find((sf) => sf.id === id);
-      if (!subAgentFlow) {
-        console.warn(`SubAgentFlow with id ${id} not found`);
-        return;
-      }
-
-      // Convert SubAgentFlow nodes to ReactFlow nodes
-      const subNodes: Node[] = subAgentFlow.nodes.map((node) => ({
-        id: node.id,
-        type: node.type,
-        position: { x: node.position.x, y: node.position.y },
-        data: node.data,
-      }));
-
-      // Convert SubAgentFlow connections to ReactFlow edges
-      const subEdges: Edge[] = subAgentFlow.connections.map((conn) => ({
-        id: conn.id,
-        source: conn.from,
-        target: conn.to,
-        sourceHandle: conn.fromPort,
-        targetHandle: conn.toPort,
-      }));
-
-      set({
-        mainWorkflowSnapshot: snapshot,
-        nodes: subNodes,
-        edges: subEdges,
-        selectedNodeId: null,
-        activeSubAgentFlowId: id,
-      });
-    }
-    // If switching from sub-agent flow back to main
-    else if (currentActiveId !== null && id === null) {
-      // Save current sub-agent flow state before switching
-      const currentSubAgentFlow = get().subAgentFlows.find((sf) => sf.id === currentActiveId);
-      if (currentSubAgentFlow) {
-        // Convert current canvas to SubAgentFlow format
-        const updatedNodes: WorkflowNode[] = get().nodes.map((node) => ({
-          id: node.id,
-          name: node.data?.label || node.id,
-          type: node.type as NodeType,
-          position: node.position,
-          data: node.data,
-        })) as WorkflowNode[];
-
-        const updatedConnections = get().edges.map((edge) => ({
-          id: edge.id,
-          from: edge.source,
-          to: edge.target,
-          fromPort: edge.sourceHandle || 'default',
-          toPort: edge.targetHandle || 'default',
-        }));
-
-        // Update the sub-agent flow with current canvas state
+      onConnect: (connection) => {
+        const currentNodes = get().nodes.map((node) => ({ ...node, selected: false }));
+        const currentEdges = get().edges.map((e) => ({ ...e, selected: false }));
+        const newEdges = addEdge({ ...connection, selected: true }, currentEdges);
         set({
-          subAgentFlows: get().subAgentFlows.map((sf) =>
-            sf.id === currentActiveId
-              ? { ...sf, nodes: updatedNodes, connections: updatedConnections }
-              : sf
+          nodes: currentNodes,
+          edges: newEdges,
+          selectedNodeId: null,
+        });
+      },
+
+      // Setters
+      setNodes: (nodes) => set({ nodes }),
+
+      setEdges: (edges) => set({ edges }),
+
+      setSelectedNodeId: (selectedNodeId) => {
+        // When a node is selected, auto-open the property overlay
+        if (selectedNodeId !== null) {
+          set({ selectedNodeId, isPropertyOverlayOpen: true });
+        } else {
+          set({ selectedNodeId });
+        }
+      },
+
+      syncSelectedNodeId: (selectedNodeId) => {
+        set({ selectedNodeId });
+      },
+
+      setInteractionMode: (interactionMode) => set({ interactionMode }),
+
+      toggleInteractionMode: () => {
+        const currentMode = get().interactionMode;
+        set({ interactionMode: currentMode === 'pan' ? 'selection' : 'pan' });
+      },
+
+      toggleScrollMode: () => {
+        const newMode = get().scrollMode === 'classic' ? 'freehand' : 'classic';
+        localStorage.setItem('cc-wf-studio.scrollMode', newMode);
+        set({ scrollMode: newMode });
+      },
+
+      setWorkflowName: (workflowName) => set({ workflowName }),
+
+      setWorkflowDescription: (workflowDescription) => set({ workflowDescription }),
+
+      openPropertyOverlay: () => set({ isPropertyOverlayOpen: true }),
+
+      closePropertyOverlay: () => set({ isPropertyOverlayOpen: false }),
+
+      setMinimapDisplayMode: (mode) => {
+        localStorage.setItem('cc-wf-studio.minimapDisplayMode', mode);
+        set({ minimapDisplayMode: mode, isMinimapShown: false });
+      },
+
+      setMinimapShown: (shown) => set({ isMinimapShown: shown }),
+
+      toggleDescriptionPanelVisibility: () => {
+        const newValue = !get().isDescriptionPanelVisible;
+        localStorage.setItem('cc-wf-studio.descriptionPanelVisible', newValue.toString());
+        set({ isDescriptionPanelVisible: newValue });
+      },
+
+      toggleFocusMode: () => {
+        const newValue = !get().isFocusMode;
+        localStorage.setItem('cc-wf-studio.focusMode', newValue.toString());
+        set({ isFocusMode: newValue });
+      },
+
+      setSlashCommandOptions: (options: SlashCommandOptions) =>
+        set({ slashCommandOptions: options }),
+
+      setSlashCommandContext: (context: SlashCommandContext) =>
+        set((state) => ({
+          slashCommandOptions: { ...state.slashCommandOptions, context },
+        })),
+
+      setSlashCommandModel: (model: SlashCommandModel) =>
+        set((state) => ({
+          slashCommandOptions: { ...state.slashCommandOptions, model },
+        })),
+
+      setSlashCommandAllowedTools: (allowedTools: string) =>
+        set((state) => ({
+          slashCommandOptions: { ...state.slashCommandOptions, allowedTools },
+        })),
+
+      setSlashCommandDisableModelInvocation: (disableModelInvocation: boolean) =>
+        set((state) => ({
+          slashCommandOptions: { ...state.slashCommandOptions, disableModelInvocation },
+        })),
+
+      setSlashCommandArgumentHint: (argumentHint: string) =>
+        set((state) => ({
+          slashCommandOptions: {
+            ...state.slashCommandOptions,
+            argumentHint: argumentHint || undefined,
+          },
+        })),
+
+      setHooks: (hooks: WorkflowHooks) =>
+        set((state) => ({
+          slashCommandOptions: { ...state.slashCommandOptions, hooks },
+        })),
+
+      addHookEntry: (hookType: HookType, matcher: string, command: string, once?: boolean) => {
+        const currentHooks = get().slashCommandOptions.hooks || {};
+        const existing = currentHooks[hookType] || [];
+        const newEntry: HookEntry = {
+          matcher: matcher || undefined,
+          hooks: [
+            {
+              type: 'command',
+              command,
+              once: once || undefined,
+            },
+          ],
+        };
+        set((state) => ({
+          slashCommandOptions: {
+            ...state.slashCommandOptions,
+            hooks: {
+              ...currentHooks,
+              [hookType]: [...existing, newEntry],
+            },
+          },
+        }));
+      },
+
+      removeHookEntry: (hookType: HookType, entryIndex: number) => {
+        const currentHooks = get().slashCommandOptions.hooks || {};
+        const existing = currentHooks[hookType] || [];
+        const updated = existing.filter((_, i) => i !== entryIndex);
+        if (updated.length === 0) {
+          const { [hookType]: _, ...rest } = currentHooks;
+          const newHooks = Object.keys(rest).length > 0 ? rest : undefined;
+          set((state) => ({
+            slashCommandOptions: { ...state.slashCommandOptions, hooks: newHooks },
+          }));
+        } else {
+          set((state) => ({
+            slashCommandOptions: {
+              ...state.slashCommandOptions,
+              hooks: { ...currentHooks, [hookType]: updated },
+            },
+          }));
+        }
+      },
+
+      updateHookEntry: (hookType: HookType, entryIndex: number, entry: Partial<HookEntry>) => {
+        const currentHooks = get().slashCommandOptions.hooks || {};
+        const existing = currentHooks[hookType] || [];
+        const updated = existing.map((h, i) => (i === entryIndex ? { ...h, ...entry } : h));
+        set((state) => ({
+          slashCommandOptions: {
+            ...state.slashCommandOptions,
+            hooks: { ...currentHooks, [hookType]: updated },
+          },
+        }));
+      },
+
+      // Group Node Actions
+      onNodeDragStop: (draggedNode: Node) => {
+        // Skip if the dragged node is a group node (no nesting)
+        if (draggedNode.type === 'group') return;
+
+        const currentNodes = get().nodes;
+
+        // Find all group nodes
+        const groupNodes = currentNodes.filter((n) => n.type === 'group');
+        if (groupNodes.length === 0) return;
+
+        // Calculate the absolute position of the dragged node
+        const draggedAbsX = draggedNode.parentId
+          ? (() => {
+              const parent = currentNodes.find((n) => n.id === draggedNode.parentId);
+              return parent ? draggedNode.position.x + parent.position.x : draggedNode.position.x;
+            })()
+          : draggedNode.position.x;
+        const draggedAbsY = draggedNode.parentId
+          ? (() => {
+              const parent = currentNodes.find((n) => n.id === draggedNode.parentId);
+              return parent ? draggedNode.position.y + parent.position.y : draggedNode.position.y;
+            })()
+          : draggedNode.position.y;
+
+        // Check if the dragged node is within any group node's bounds
+        let targetGroup: Node | null = null;
+        for (const group of groupNodes) {
+          const gw = group.style?.width ?? group.width ?? 400;
+          const gh = group.style?.height ?? group.height ?? 300;
+          const gx = group.position.x;
+          const gy = group.position.y;
+
+          if (
+            draggedAbsX >= gx &&
+            draggedAbsX <= gx + (gw as number) &&
+            draggedAbsY >= gy &&
+            draggedAbsY <= gy + (gh as number)
+          ) {
+            targetGroup = group;
+            break;
+          }
+        }
+
+        const currentParentId = draggedNode.parentId;
+
+        if (targetGroup && targetGroup.id !== currentParentId) {
+          // Moving into a new group: set parentId and convert to relative coordinates
+          const updatedNodes = currentNodes.map((n) => {
+            if (n.id === draggedNode.id) {
+              return {
+                ...n,
+                parentId: targetGroup.id,
+                position: {
+                  x: draggedAbsX - targetGroup.position.x,
+                  y: draggedAbsY - targetGroup.position.y,
+                },
+              };
+            }
+            return n;
+          });
+          // Sort so parents come before children
+          set({ nodes: sortNodesParentFirst(updatedNodes) });
+        } else if (!targetGroup && currentParentId) {
+          // Moving out of a group: remove parentId and convert to absolute coordinates
+          const updatedNodes = currentNodes.map((n) => {
+            if (n.id === draggedNode.id) {
+              return {
+                ...n,
+                parentId: undefined,
+                position: {
+                  x: draggedAbsX,
+                  y: draggedAbsY,
+                },
+              };
+            }
+            return n;
+          });
+          set({ nodes: sortNodesParentFirst(updatedNodes) });
+        }
+      },
+
+      // Custom Actions
+      updateNodeData: (nodeId: string, data: Partial<unknown>) => {
+        set({
+          nodes: get().nodes.map((node) =>
+            node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node
           ),
         });
-      }
+      },
 
-      // Restore main workflow state
-      const snapshot = get().mainWorkflowSnapshot;
-      if (snapshot) {
-        // Check if SubAgentFlowNode already exists for this sub-agent flow
-        const hasRef = snapshot.nodes.some(
-          (n) => n.type === 'subAgentFlow' && n.data?.subAgentFlowId === currentActiveId
-        );
+      addNode: (node: Node) => {
+        set({
+          nodes: [...get().nodes, node],
+          lastAddedNodeId: node.id,
+          selectedNodeId: node.id,
+          isPropertyOverlayOpen: true,
+        });
+      },
 
-        // Get the updated sub-agent flow (with latest name)
-        const subAgentFlow = get().subAgentFlows.find((sf) => sf.id === currentActiveId);
+      clearLastAddedNodeId: () => {
+        set({ lastAddedNodeId: null });
+      },
 
-        // Auto-add SubAgentFlowRefNode if it doesn't exist
-        if (!hasRef && subAgentFlow) {
-          // Calculate non-overlapping position
-          const calculatePosition = (
-            existingNodes: Node[],
-            defaultX: number,
-            defaultY: number
-          ): { x: number; y: number } => {
-            const OVERLAP_THRESHOLD = 50;
-            const OFFSET_X = 100;
-            const OFFSET_Y = 80;
-            const MAX_ATTEMPTS = 20;
+      setHighlightedGroupNodeId: (id: string | null) => {
+        set({ highlightedGroupNodeId: id });
+      },
 
-            let newX = defaultX;
-            let newY = defaultY;
-
-            for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-              const hasOverlap = existingNodes.some((node) => {
-                const dx = Math.abs(node.position.x - newX);
-                const dy = Math.abs(node.position.y - newY);
-                return dx < OVERLAP_THRESHOLD && dy < OVERLAP_THRESHOLD;
-              });
-
-              if (!hasOverlap) {
-                return { x: newX, y: newY };
-              }
-
-              newX += OFFSET_X;
-              newY += OFFSET_Y;
-            }
-
-            return { x: newX, y: newY };
-          };
-
-          const position = calculatePosition(snapshot.nodes, 350, 200);
-          const newRefNode: Node = {
-            id: `subagentflow-${Date.now()}`,
-            type: 'subAgentFlow',
-            position,
-            data: {
-              subAgentFlowId: currentActiveId,
-              label: subAgentFlow.name,
-              description: subAgentFlow.description || '',
-              outputPorts: 1,
-            },
-          };
-
-          set({
-            nodes: [...snapshot.nodes, newRefNode],
-            edges: snapshot.edges,
-            selectedNodeId: newRefNode.id,
-            activeSubAgentFlowId: null,
-            mainWorkflowSnapshot: null,
-          });
+      toggleHighlightEnabled: () => {
+        const current = get().isHighlightEnabled;
+        if (current) {
+          set({ isHighlightEnabled: false, highlightedGroupNodeId: null });
         } else {
-          // Update existing SubAgentFlowNode with latest name and description
-          const updatedNodes = snapshot.nodes.map((node) => {
-            if (
-              node.type === 'subAgentFlow' &&
-              node.data?.subAgentFlowId === currentActiveId &&
-              subAgentFlow
-            ) {
+          set({ isHighlightEnabled: true });
+        }
+      },
+
+      setMcpServerStatus: (running, port) =>
+        set({ mcpServerRunning: running, mcpServerPort: port }),
+
+      removeNode: (nodeId: string) => {
+        // Startノードの削除のみ防止
+        // Endノードは自由に削除可能（Export時にバリデーション）
+        const nodeToRemove = get().nodes.find((node) => node.id === nodeId);
+        if (nodeToRemove?.type === 'start') {
+          console.warn('Cannot remove Start node: Start node is required for workflow');
+          return;
+        }
+
+        // Clear selection if the deleted node is currently selected
+        const shouldClearSelection = get().selectedNodeId === nodeId;
+
+        // If removing a group node, release child nodes (convert to absolute coordinates)
+        const isGroupNode = nodeToRemove?.type === 'group';
+        let updatedNodes = get().nodes;
+        if (isGroupNode) {
+          const groupPos = nodeToRemove.position;
+          updatedNodes = updatedNodes.map((node) => {
+            if (node.parentId === nodeId) {
               return {
                 ...node,
-                data: {
-                  ...node.data,
-                  label: subAgentFlow.name,
-                  description: subAgentFlow.description || '',
+                parentId: undefined,
+                position: {
+                  x: node.position.x + groupPos.x,
+                  y: node.position.y + groupPos.y,
                 },
               };
             }
             return node;
           });
-
-          set({
-            nodes: updatedNodes,
-            edges: snapshot.edges,
-            selectedNodeId: snapshot.selectedNodeId,
-            activeSubAgentFlowId: null,
-            mainWorkflowSnapshot: null,
-          });
         }
-      }
-    }
-    // If switching between sub-agent flows
-    else if (currentActiveId !== null && id !== null && currentActiveId !== id) {
-      // First save current sub-agent flow
-      const currentSubAgentFlow = get().subAgentFlows.find((sf) => sf.id === currentActiveId);
-      if (currentSubAgentFlow) {
-        const updatedNodes: WorkflowNode[] = get().nodes.map((node) => ({
+
+        set({
+          nodes: updatedNodes.filter((node) => node.id !== nodeId),
+          edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+          ...(shouldClearSelection && { selectedNodeId: null }),
+        });
+      },
+
+      requestDeleteNode: (nodeId: string) => {
+        // ×ボタンからの削除要求
+        // Start nodeは削除不可
+        const nodeToRemove = get().nodes.find((node) => node.id === nodeId);
+        if (nodeToRemove?.type === 'start') {
+          console.warn('Cannot remove Start node: Start node is required for workflow');
+          return;
+        }
+
+        // 確認ダイアログを表示するために pendingDeleteNodeIds にセット
+        set({ pendingDeleteNodeIds: [nodeId] });
+      },
+
+      confirmDeleteNodes: () => {
+        const nodeIds = get().pendingDeleteNodeIds;
+        if (nodeIds.length === 0) return;
+
+        // Clear selection if the deleted node is currently selected
+        const currentSelectedNodeId = get().selectedNodeId;
+        const shouldClearSelection =
+          currentSelectedNodeId !== null && nodeIds.includes(currentSelectedNodeId);
+
+        // Release child nodes from group nodes being deleted
+        let updatedNodes = get().nodes;
+        for (const nodeId of nodeIds) {
+          const nodeToRemove = updatedNodes.find((n) => n.id === nodeId);
+          if (nodeToRemove?.type === 'group') {
+            const groupPos = nodeToRemove.position;
+            updatedNodes = updatedNodes.map((node) => {
+              if (node.parentId === nodeId) {
+                return {
+                  ...node,
+                  parentId: undefined,
+                  position: {
+                    x: node.position.x + groupPos.x,
+                    y: node.position.y + groupPos.y,
+                  },
+                };
+              }
+              return node;
+            });
+          }
+        }
+
+        // Delete all pending nodes
+        set({
+          nodes: updatedNodes.filter((node) => !nodeIds.includes(node.id)),
+          edges: get().edges.filter(
+            (edge) => !nodeIds.includes(edge.source) && !nodeIds.includes(edge.target)
+          ),
+          pendingDeleteNodeIds: [],
+          ...(shouldClearSelection && { selectedNodeId: null }),
+        });
+      },
+
+      cancelDeleteNodes: () => {
+        set({ pendingDeleteNodeIds: [] });
+      },
+
+      clearWorkflow: () => {
+        const { activeWorkflow } = get();
+
+        // StartノードとEndノードは保持し、他のノードとすべてのエッジをクリア
+        set({
+          nodes: [DEFAULT_START_NODE, DEFAULT_END_NODE],
+          edges: [],
+          selectedNodeId: null,
+          highlightedGroupNodeId: null,
+          workflowDescription: '', // Reset description
+          slashCommandOptions: {
+            context: 'default',
+            model: 'default',
+            hooks: undefined,
+          },
+          // Sub-Agent Flow関連の状態をクリア
+          subAgentFlows: [],
+          activeSubAgentFlowId: null,
+          mainWorkflowSnapshot: null,
+          // activeWorkflow の conversationHistory と subAgentFlows をクリア
+          activeWorkflow: activeWorkflow
+            ? {
+                ...activeWorkflow,
+                conversationHistory: undefined,
+                subAgentFlows: undefined,
+              }
+            : null,
+        });
+      },
+
+      addGeneratedWorkflow: (workflow: Workflow) => {
+        // Convert workflow nodes to ReactFlow nodes
+        const newNodes: Node[] = sortNodesParentFirst(
+          workflow.nodes.map((node) => ({
+            id: node.id,
+            type: node.type,
+            position: {
+              x: node.position.x,
+              y: node.position.y,
+            },
+            // Normalize MCP node data for backwards compatibility
+            data: node.type === 'mcp' ? normalizeMcpNodeData(node.data as McpNodeData) : node.data,
+            ...(node.parentId && { parentId: node.parentId }),
+            ...(node.style && { style: node.style }),
+          }))
+        );
+
+        // Convert workflow connections to ReactFlow edges
+        const newEdges: Edge[] = workflow.connections.map((conn) => ({
+          id: conn.id,
+          source: conn.from,
+          target: conn.to,
+          sourceHandle: conn.fromPort,
+          targetHandle: conn.toPort,
+        }));
+
+        // Find the first non-start/end node to select
+        const firstSelectableNode = newNodes.find(
+          (node) => node.type !== 'start' && node.type !== 'end'
+        );
+
+        // Completely replace existing workflow with generated workflow
+        // Also include subAgentFlows from the generated workflow
+        set({
+          nodes: newNodes,
+          edges: newEdges,
+          selectedNodeId: firstSelectableNode?.id || null,
+          highlightedGroupNodeId: null,
+          activeWorkflow: workflow,
+          subAgentFlows: workflow.subAgentFlows || [],
+        });
+      },
+
+      updateWorkflow: (workflow: Workflow) => {
+        // Convert workflow nodes to ReactFlow nodes
+        const newNodes: Node[] = sortNodesParentFirst(
+          workflow.nodes.map((node) => ({
+            id: node.id,
+            type: node.type,
+            position: {
+              x: node.position.x,
+              y: node.position.y,
+            },
+            // Normalize MCP node data for backwards compatibility
+            data: node.type === 'mcp' ? normalizeMcpNodeData(node.data as McpNodeData) : node.data,
+            ...(node.parentId && { parentId: node.parentId }),
+            ...(node.style && { style: node.style }),
+          }))
+        );
+
+        // Convert workflow connections to ReactFlow edges
+        const newEdges: Edge[] = workflow.connections.map((conn) => ({
+          id: conn.id,
+          source: conn.from,
+          target: conn.to,
+          sourceHandle: conn.fromPort,
+          targetHandle: conn.toPort,
+        }));
+
+        // Update workflow while preserving selection
+        // Also include subAgentFlows from the refined workflow
+        set({
+          nodes: newNodes,
+          edges: newEdges,
+          highlightedGroupNodeId: null,
+          activeWorkflow: workflow,
+          subAgentFlows: workflow.subAgentFlows || [],
+        });
+      },
+
+      // Phase 3.12: Set active workflow and update canvas
+      setActiveWorkflow: (workflow: Workflow) => {
+        // Convert workflow nodes to ReactFlow nodes
+        const newNodes: Node[] = sortNodesParentFirst(
+          workflow.nodes.map((node) => ({
+            id: node.id,
+            type: node.type,
+            position: {
+              x: node.position.x,
+              y: node.position.y,
+            },
+            data: node.data,
+            ...(node.parentId && { parentId: node.parentId }),
+            ...(node.style && { style: node.style }),
+          }))
+        );
+
+        // Convert workflow connections to ReactFlow edges
+        const newEdges: Edge[] = workflow.connections.map((conn) => ({
+          id: conn.id,
+          source: conn.from,
+          target: conn.to,
+          sourceHandle: conn.fromPort,
+          targetHandle: conn.toPort,
+        }));
+
+        // Set active workflow and update canvas
+        // Also load subAgentFlows from the workflow if present
+        set({
+          nodes: newNodes,
+          edges: newEdges,
+          highlightedGroupNodeId: null,
+          activeWorkflow: workflow,
+          subAgentFlows: workflow.subAgentFlows || [],
+        });
+      },
+
+      updateActiveWorkflowMetadata: (updates: Partial<Workflow>) => {
+        const { activeWorkflow } = get();
+        if (!activeWorkflow) return;
+
+        // Update only activeWorkflow without changing canvas (nodes/edges)
+        // This is used when editing SubAgentFlow to update parent workflow metadata
+        // without overwriting the SubAgentFlow canvas
+        set({
+          activeWorkflow: {
+            ...activeWorkflow,
+            ...updates,
+          },
+          // Also sync subAgentFlows if it's being updated
+          ...(updates.subAgentFlows !== undefined && {
+            subAgentFlows: updates.subAgentFlows,
+          }),
+        });
+      },
+
+      ensureActiveWorkflow: () => {
+        const { activeWorkflow, nodes, edges, workflowName, subAgentFlows } = get();
+
+        // If activeWorkflow already exists, do nothing
+        if (activeWorkflow) return;
+
+        // Create activeWorkflow from current canvas state
+        const now = new Date();
+        const workflowNodes: WorkflowNode[] = nodes.map((node) => ({
           id: node.id,
           name: node.data?.label || node.id,
           type: node.type as NodeType,
           position: node.position,
           data: node.data,
+          ...(node.parentId && { parentId: node.parentId }),
+          ...(node.style &&
+            (node.style.width || node.style.height) && {
+              style: {
+                ...(node.style.width && { width: node.style.width }),
+                ...(node.style.height && { height: node.style.height }),
+              },
+            }),
         })) as WorkflowNode[];
 
-        const updatedConnections = get().edges.map((edge) => ({
+        const connections = edges.map((edge) => ({
           id: edge.id,
           from: edge.source,
           to: edge.target,
@@ -1209,77 +971,342 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           toPort: edge.targetHandle || 'default',
         }));
 
+        const newWorkflow: Workflow = {
+          id: `workflow-${now.getTime()}`,
+          name: workflowName,
+          version: '1.0.0',
+          schemaVersion: '1.2.0',
+          nodes: workflowNodes,
+          connections,
+          createdAt: now,
+          updatedAt: now,
+          subAgentFlows: subAgentFlows.length > 0 ? subAgentFlows : undefined,
+        };
+
+        set({ activeWorkflow: newWorkflow });
+      },
+
+      // ============================================================================
+      // Sub-Agent Flow Actions (Feature: 089-subworkflow)
+      // ============================================================================
+
+      addSubAgentFlow: (subAgentFlow: SubAgentFlow) => {
+        set({
+          subAgentFlows: [...get().subAgentFlows, subAgentFlow],
+        });
+      },
+
+      removeSubAgentFlow: (id: string) => {
+        // If currently editing this sub-agent flow, return to main workflow first
+        if (get().activeSubAgentFlowId === id) {
+          const snapshot = get().mainWorkflowSnapshot;
+          if (snapshot) {
+            set({
+              nodes: snapshot.nodes,
+              edges: snapshot.edges,
+              selectedNodeId: snapshot.selectedNodeId,
+              activeSubAgentFlowId: null,
+              mainWorkflowSnapshot: null,
+            });
+          }
+        }
+
+        set({
+          subAgentFlows: get().subAgentFlows.filter((sf) => sf.id !== id),
+        });
+      },
+
+      updateSubAgentFlow: (id: string, updates: Partial<SubAgentFlow>) => {
         set({
           subAgentFlows: get().subAgentFlows.map((sf) =>
-            sf.id === currentActiveId
-              ? { ...sf, nodes: updatedNodes, connections: updatedConnections }
-              : sf
+            sf.id === id ? { ...sf, ...updates } : sf
           ),
         });
-      }
+      },
 
-      // Then load new sub-agent flow
-      const newSubAgentFlow = get().subAgentFlows.find((sf) => sf.id === id);
-      if (!newSubAgentFlow) {
-        console.warn(`SubAgentFlow with id ${id} not found`);
-        return;
-      }
+      setActiveSubAgentFlowId: (id: string | null) => {
+        const currentActiveId = get().activeSubAgentFlowId;
 
-      const subNodes: Node[] = newSubAgentFlow.nodes.map((node) => ({
-        id: node.id,
-        type: node.type,
-        position: { x: node.position.x, y: node.position.y },
-        data: node.data,
-      }));
+        // If switching from main to sub-agent flow
+        if (currentActiveId === null && id !== null) {
+          // Determine if this is a new Sub-Agent Flow (no existing reference node)
+          const isNewSubAgentFlow = !get().nodes.some(
+            (n) => n.type === 'subAgentFlow' && n.data?.subAgentFlowId === id
+          );
 
-      const subEdges: Edge[] = newSubAgentFlow.connections.map((conn) => ({
-        id: conn.id,
-        source: conn.from,
-        target: conn.to,
-        sourceHandle: conn.fromPort,
-        targetHandle: conn.toPort,
-      }));
+          // Save current main workflow state
+          const snapshot: MainWorkflowSnapshot = {
+            nodes: get().nodes,
+            edges: get().edges,
+            selectedNodeId: get().selectedNodeId,
+            isNewSubAgentFlow,
+          };
 
-      set({
-        nodes: subNodes,
-        edges: subEdges,
-        selectedNodeId: null,
-        activeSubAgentFlowId: id,
-      });
+          // Find the sub-agent flow to edit
+          const subAgentFlow = get().subAgentFlows.find((sf) => sf.id === id);
+          if (!subAgentFlow) {
+            console.warn(`SubAgentFlow with id ${id} not found`);
+            return;
+          }
+
+          // Convert SubAgentFlow nodes to ReactFlow nodes
+          const subNodes: Node[] = subAgentFlow.nodes.map((node) => ({
+            id: node.id,
+            type: node.type,
+            position: { x: node.position.x, y: node.position.y },
+            data: node.data,
+          }));
+
+          // Convert SubAgentFlow connections to ReactFlow edges
+          const subEdges: Edge[] = subAgentFlow.connections.map((conn) => ({
+            id: conn.id,
+            source: conn.from,
+            target: conn.to,
+            sourceHandle: conn.fromPort,
+            targetHandle: conn.toPort,
+          }));
+
+          set({
+            mainWorkflowSnapshot: snapshot,
+            nodes: subNodes,
+            edges: subEdges,
+            selectedNodeId: null,
+            activeSubAgentFlowId: id,
+          });
+        }
+        // If switching from sub-agent flow back to main
+        else if (currentActiveId !== null && id === null) {
+          // Save current sub-agent flow state before switching
+          const currentSubAgentFlow = get().subAgentFlows.find((sf) => sf.id === currentActiveId);
+          if (currentSubAgentFlow) {
+            // Convert current canvas to SubAgentFlow format
+            const updatedNodes: WorkflowNode[] = get().nodes.map((node) => ({
+              id: node.id,
+              name: node.data?.label || node.id,
+              type: node.type as NodeType,
+              position: node.position,
+              data: node.data,
+            })) as WorkflowNode[];
+
+            const updatedConnections = get().edges.map((edge) => ({
+              id: edge.id,
+              from: edge.source,
+              to: edge.target,
+              fromPort: edge.sourceHandle || 'default',
+              toPort: edge.targetHandle || 'default',
+            }));
+
+            // Update the sub-agent flow with current canvas state
+            set({
+              subAgentFlows: get().subAgentFlows.map((sf) =>
+                sf.id === currentActiveId
+                  ? { ...sf, nodes: updatedNodes, connections: updatedConnections }
+                  : sf
+              ),
+            });
+          }
+
+          // Restore main workflow state
+          const snapshot = get().mainWorkflowSnapshot;
+          if (snapshot) {
+            // Check if SubAgentFlowNode already exists for this sub-agent flow
+            const hasRef = snapshot.nodes.some(
+              (n) => n.type === 'subAgentFlow' && n.data?.subAgentFlowId === currentActiveId
+            );
+
+            // Get the updated sub-agent flow (with latest name)
+            const subAgentFlow = get().subAgentFlows.find((sf) => sf.id === currentActiveId);
+
+            // Auto-add SubAgentFlowRefNode if it doesn't exist
+            if (!hasRef && subAgentFlow) {
+              // Calculate non-overlapping position
+              const calculatePosition = (
+                existingNodes: Node[],
+                defaultX: number,
+                defaultY: number
+              ): { x: number; y: number } => {
+                const OVERLAP_THRESHOLD = 50;
+                const OFFSET_X = 100;
+                const OFFSET_Y = 80;
+                const MAX_ATTEMPTS = 20;
+
+                let newX = defaultX;
+                let newY = defaultY;
+
+                for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+                  const hasOverlap = existingNodes.some((node) => {
+                    const dx = Math.abs(node.position.x - newX);
+                    const dy = Math.abs(node.position.y - newY);
+                    return dx < OVERLAP_THRESHOLD && dy < OVERLAP_THRESHOLD;
+                  });
+
+                  if (!hasOverlap) {
+                    return { x: newX, y: newY };
+                  }
+
+                  newX += OFFSET_X;
+                  newY += OFFSET_Y;
+                }
+
+                return { x: newX, y: newY };
+              };
+
+              const position = calculatePosition(snapshot.nodes, 350, 200);
+              const newRefNode: Node = {
+                id: `subagentflow-${Date.now()}`,
+                type: 'subAgentFlow',
+                position,
+                data: {
+                  subAgentFlowId: currentActiveId,
+                  label: subAgentFlow.name,
+                  description: subAgentFlow.description || '',
+                  outputPorts: 1,
+                },
+              };
+
+              set({
+                nodes: [...snapshot.nodes, newRefNode],
+                edges: snapshot.edges,
+                selectedNodeId: newRefNode.id,
+                activeSubAgentFlowId: null,
+                mainWorkflowSnapshot: null,
+              });
+            } else {
+              // Update existing SubAgentFlowNode with latest name and description
+              const updatedNodes = snapshot.nodes.map((node) => {
+                if (
+                  node.type === 'subAgentFlow' &&
+                  node.data?.subAgentFlowId === currentActiveId &&
+                  subAgentFlow
+                ) {
+                  return {
+                    ...node,
+                    data: {
+                      ...node.data,
+                      label: subAgentFlow.name,
+                      description: subAgentFlow.description || '',
+                    },
+                  };
+                }
+                return node;
+              });
+
+              set({
+                nodes: updatedNodes,
+                edges: snapshot.edges,
+                selectedNodeId: snapshot.selectedNodeId,
+                activeSubAgentFlowId: null,
+                mainWorkflowSnapshot: null,
+              });
+            }
+          }
+        }
+        // If switching between sub-agent flows
+        else if (currentActiveId !== null && id !== null && currentActiveId !== id) {
+          // First save current sub-agent flow
+          const currentSubAgentFlow = get().subAgentFlows.find((sf) => sf.id === currentActiveId);
+          if (currentSubAgentFlow) {
+            const updatedNodes: WorkflowNode[] = get().nodes.map((node) => ({
+              id: node.id,
+              name: node.data?.label || node.id,
+              type: node.type as NodeType,
+              position: node.position,
+              data: node.data,
+            })) as WorkflowNode[];
+
+            const updatedConnections = get().edges.map((edge) => ({
+              id: edge.id,
+              from: edge.source,
+              to: edge.target,
+              fromPort: edge.sourceHandle || 'default',
+              toPort: edge.targetHandle || 'default',
+            }));
+
+            set({
+              subAgentFlows: get().subAgentFlows.map((sf) =>
+                sf.id === currentActiveId
+                  ? { ...sf, nodes: updatedNodes, connections: updatedConnections }
+                  : sf
+              ),
+            });
+          }
+
+          // Then load new sub-agent flow
+          const newSubAgentFlow = get().subAgentFlows.find((sf) => sf.id === id);
+          if (!newSubAgentFlow) {
+            console.warn(`SubAgentFlow with id ${id} not found`);
+            return;
+          }
+
+          const subNodes: Node[] = newSubAgentFlow.nodes.map((node) => ({
+            id: node.id,
+            type: node.type,
+            position: { x: node.position.x, y: node.position.y },
+            data: node.data,
+          }));
+
+          const subEdges: Edge[] = newSubAgentFlow.connections.map((conn) => ({
+            id: conn.id,
+            source: conn.from,
+            target: conn.to,
+            sourceHandle: conn.fromPort,
+            targetHandle: conn.toPort,
+          }));
+
+          set({
+            nodes: subNodes,
+            edges: subEdges,
+            selectedNodeId: null,
+            activeSubAgentFlowId: id,
+          });
+        }
+      },
+
+      setSubAgentFlows: (subAgentFlows: SubAgentFlow[]) => {
+        set({ subAgentFlows });
+      },
+
+      cancelSubAgentFlowEditing: () => {
+        const currentActiveId = get().activeSubAgentFlowId;
+        if (currentActiveId === null) {
+          return; // Not in sub-agent flow editing mode
+        }
+
+        // Restore main workflow from snapshot (without saving sub-agent flow changes)
+        const snapshot = get().mainWorkflowSnapshot;
+        if (snapshot) {
+          set({
+            nodes: snapshot.nodes,
+            edges: snapshot.edges,
+            selectedNodeId: snapshot.selectedNodeId,
+            activeSubAgentFlowId: null,
+            mainWorkflowSnapshot: null,
+          });
+
+          // Only remove the sub-agent flow if it was newly created (not editing existing)
+          // For existing sub-agent flows, cancel just discards canvas changes (name is managed locally in dialog)
+          if (snapshot.isNewSubAgentFlow) {
+            set({
+              subAgentFlows: get().subAgentFlows.filter((sf) => sf.id !== currentActiveId),
+            });
+          }
+        }
+      },
+    }),
+    {
+      // Only track nodes and edges for undo/redo
+      partialize: (state): TrackedState => ({
+        nodes: state.nodes.map((n) => ({ ...n, selected: false })),
+        edges: state.edges.map((e) => ({ ...e, selected: false })),
+      }),
+      // Prevent duplicate history entries for identical states
+      equality: (pastState, currentState) =>
+        JSON.stringify(pastState) === JSON.stringify(currentState),
+      // Limit history stack size
+      limit: 50,
     }
-  },
-
-  setSubAgentFlows: (subAgentFlows: SubAgentFlow[]) => {
-    set({ subAgentFlows });
-  },
-
-  cancelSubAgentFlowEditing: () => {
-    const currentActiveId = get().activeSubAgentFlowId;
-    if (currentActiveId === null) {
-      return; // Not in sub-agent flow editing mode
-    }
-
-    // Restore main workflow from snapshot (without saving sub-agent flow changes)
-    const snapshot = get().mainWorkflowSnapshot;
-    if (snapshot) {
-      set({
-        nodes: snapshot.nodes,
-        edges: snapshot.edges,
-        selectedNodeId: snapshot.selectedNodeId,
-        activeSubAgentFlowId: null,
-        mainWorkflowSnapshot: null,
-      });
-
-      // Only remove the sub-agent flow if it was newly created (not editing existing)
-      // For existing sub-agent flows, cancel just discards canvas changes (name is managed locally in dialog)
-      if (snapshot.isNewSubAgentFlow) {
-        set({
-          subAgentFlows: get().subAgentFlows.filter((sf) => sf.id !== currentActiveId),
-        });
-      }
-    }
-  },
-}));
+  )
+);
 
 /**
  * Check if the current canvas has unsaved changes compared to activeWorkflow
