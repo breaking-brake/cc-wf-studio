@@ -47,7 +47,7 @@ import { vscode } from './main';
 import { deserializeWorkflow, serializeWorkflow } from './services/workflow-service';
 import { useCommentaryStore } from './stores/commentary-store';
 import { useRefinementStore } from './stores/refinement-store';
-import { useWorkflowStore } from './stores/workflow-store';
+import { getCanvasRevision, useWorkflowStore } from './stores/workflow-store';
 import type { RefinementChatState } from './types/refinement-chat-state';
 import { computeWorkflowDiff, type WorkflowDiffSummary } from './utils/workflow-diff';
 
@@ -211,6 +211,7 @@ const App: React.FC = () => {
     diffSummary: WorkflowDiffSummary;
     description?: string;
     plannedFiles?: PlannedSubAgentFile[];
+    hasRevisionConflict?: boolean;
   } | null>(null);
   const pendingMcpApplyRef = useRef(pendingMcpApply);
   pendingMcpApplyRef.current = pendingMcpApply;
@@ -400,6 +401,7 @@ const App: React.FC = () => {
           payload: {
             correlationId: payload.correlationId,
             workflow: currentWorkflow,
+            revision: getCanvasRevision(),
           },
         });
       } else if (message.type === 'MCP_SERVER_STATUS') {
@@ -433,6 +435,12 @@ const App: React.FC = () => {
           return;
         }
 
+        // Revision conflict detection (optimistic concurrency control)
+        const hasRevisionConflict =
+          payload.expectedRevision !== undefined &&
+          payload.expectedRevision >= 0 &&
+          payload.expectedRevision !== getCanvasRevision();
+
         if (payload.requireConfirmation) {
           // Auto-reject any existing pending request
           if (pendingMcpApplyRef.current) {
@@ -459,9 +467,23 @@ const App: React.FC = () => {
             diffSummary,
             description: payload.description,
             plannedFiles: payload.plannedFiles,
+            hasRevisionConflict,
           });
         } else {
-          // Direct apply without confirmation
+          // Direct apply without confirmation — reject on revision conflict
+          if (hasRevisionConflict) {
+            vscode.postMessage({
+              type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
+              payload: {
+                correlationId: payload.correlationId,
+                success: false,
+                error: `Canvas was modified since workflow was fetched (expected revision ${payload.expectedRevision}, current ${getCanvasRevision()}). Please re-fetch the workflow with get_current_workflow and try again.`,
+                currentRevision: getCanvasRevision(),
+              },
+            });
+            return;
+          }
+
           try {
             const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(
               payload.workflow
@@ -670,6 +692,7 @@ const App: React.FC = () => {
         diffSummary={pendingMcpApply?.diffSummary ?? null}
         description={pendingMcpApply?.description}
         plannedFiles={pendingMcpApply?.plannedFiles}
+        hasRevisionConflict={pendingMcpApply?.hasRevisionConflict}
         onAccept={handleAcceptMcpApply}
         onReject={handleRejectMcpApply}
       />

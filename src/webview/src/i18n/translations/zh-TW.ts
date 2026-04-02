@@ -414,6 +414,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'dialog.diffPreview.filesToCreate': '將建立的檔案',
   'dialog.diffPreview.accept': '接受',
   'dialog.diffPreview.reject': '拒絕',
+  'dialog.diffPreview.revisionConflict':
+    '警告：AI取得工作流程後畫布已被修改。請仔細檢查變更內容後再接受。',
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '重設工作流程',

@@ -11,6 +11,7 @@ interface DiffPreviewDialogProps {
   diffSummary: WorkflowDiffSummary | null;
   description?: string;
   plannedFiles?: PlannedSubAgentFile[];
+  hasRevisionConflict?: boolean;
   onAccept: () => void;
   onReject: () => void;
 }
@@ -20,6 +21,7 @@ export const DiffPreviewDialog: React.FC<DiffPreviewDialogProps> = ({
   diffSummary,
   description,
   plannedFiles,
+  hasRevisionConflict,
   onAccept,
   onReject,
 }) => {
@@ -77,6 +79,25 @@ export const DiffPreviewDialog: React.FC<DiffPreviewDialogProps> = ({
                 ? t('dialog.diffPreview.newWorkflow')
                 : t('dialog.diffPreview.description')}
             </Dialog.Description>
+
+            {/* Revision conflict warning */}
+            {hasRevisionConflict && (
+              <div
+                style={{
+                  marginBottom: '12px',
+                  padding: '8px 12px',
+                  borderLeft: '3px solid var(--vscode-editorWarning-foreground, #cca700)',
+                  backgroundColor:
+                    'var(--vscode-inputValidation-warningBackground, rgba(204, 167, 0, 0.1))',
+                  borderRadius: '0 2px 2px 0',
+                  fontSize: '13px',
+                  lineHeight: '1.5',
+                  color: 'var(--vscode-editorWarning-foreground, #cca700)',
+                }}
+              >
+                {t('dialog.diffPreview.revisionConflict')}
+              </div>
+            )}
 
             {/* Agent description */}
             {description && (

@@ -431,6 +431,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'dialog.diffPreview.filesToCreate': '作成されるファイル',
   'dialog.diffPreview.accept': '適用',
   'dialog.diffPreview.reject': '却下',
+  'dialog.diffPreview.revisionConflict':
+    '警告: AIがワークフローを取得した後にキャンバスが変更されています。変更内容を慎重に確認してください。',
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': 'ワークフローをリセット',

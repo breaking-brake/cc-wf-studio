@@ -47,7 +47,7 @@ export class McpServerManager {
 
   private pendingWorkflowRequests = new Map<
     string,
-    PendingRequest<{ workflow: Workflow | null; isStale: boolean }>
+    PendingRequest<{ workflow: Workflow | null; isStale: boolean; revision: number }>
   >();
   private pendingApplyRequests = new Map<string, PendingRequest<boolean>>();
 
@@ -244,44 +244,51 @@ export class McpServerManager {
   }
 
   // Called by MCP tools to get current workflow
-  async requestCurrentWorkflow(): Promise<{ workflow: Workflow | null; isStale: boolean }> {
+  async requestCurrentWorkflow(): Promise<{
+    workflow: Workflow | null;
+    isStale: boolean;
+    revision: number;
+  }> {
     // If webview is available, request fresh data
     if (this.webview) {
       const correlationId = `mcp-get-${Date.now()}-${Math.random()}`;
 
-      return new Promise<{ workflow: Workflow | null; isStale: boolean }>((resolve, reject) => {
-        const timer = setTimeout(() => {
-          this.pendingWorkflowRequests.delete(correlationId);
-          // Fallback to cache on timeout
-          if (this.lastKnownWorkflow) {
-            resolve({ workflow: this.lastKnownWorkflow, isStale: true });
-          } else {
-            reject(new Error('Timeout waiting for workflow from Webview'));
-          }
-        }, REQUEST_TIMEOUT_MS);
+      return new Promise<{ workflow: Workflow | null; isStale: boolean; revision: number }>(
+        (resolve, reject) => {
+          const timer = setTimeout(() => {
+            this.pendingWorkflowRequests.delete(correlationId);
+            // Fallback to cache on timeout
+            if (this.lastKnownWorkflow) {
+              resolve({ workflow: this.lastKnownWorkflow, isStale: true, revision: -1 });
+            } else {
+              reject(new Error('Timeout waiting for workflow from Webview'));
+            }
+          }, REQUEST_TIMEOUT_MS);
 
-        this.pendingWorkflowRequests.set(correlationId, { resolve, reject, timer });
+          this.pendingWorkflowRequests.set(correlationId, { resolve, reject, timer });
 
-        this.webview?.postMessage({
-          type: 'GET_CURRENT_WORKFLOW_REQUEST',
-          payload: { correlationId },
-        });
-      });
+          this.webview?.postMessage({
+            type: 'GET_CURRENT_WORKFLOW_REQUEST',
+            payload: { correlationId },
+          });
+        }
+      );
     }
 
     // Webview is closed, return cached workflow
     if (this.lastKnownWorkflow) {
-      return { workflow: this.lastKnownWorkflow, isStale: true };
+      return { workflow: this.lastKnownWorkflow, isStale: true, revision: -1 };
     }
 
-    return { workflow: null, isStale: false };
+    return { workflow: null, isStale: false, revision: -1 };
   }
 
   // Called by MCP tools to apply workflow to canvas
   async applyWorkflowToCanvas(
     workflow: Workflow,
     description?: string,
-    plannedFiles?: PlannedSubAgentFile[]
+    plannedFiles?: PlannedSubAgentFile[],
+    expectedRevision?: number
   ): Promise<boolean> {
     if (!this.webview) {
       throw new Error('Webview is not open. Please open CC Workflow Studio first.');
@@ -307,6 +314,7 @@ export class McpServerManager {
           requireConfirmation,
           description,
           ...(plannedFiles && plannedFiles.length > 0 ? { plannedFiles } : {}),
+          ...(expectedRevision !== undefined ? { expectedRevision } : {}),
         },
       });
     });
@@ -332,7 +340,11 @@ export class McpServerManager {
         this.lastKnownWorkflow = payload.workflow;
       }
 
-      pending.resolve({ workflow: payload.workflow, isStale: false });
+      pending.resolve({
+        workflow: payload.workflow,
+        isStale: false,
+        revision: payload.revision,
+      });
     }
   }
 

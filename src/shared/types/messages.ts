@@ -2208,6 +2208,8 @@ export interface GetCurrentWorkflowResponsePayload {
   correlationId: string;
   /** Current workflow (null if no active workflow) */
   workflow: Workflow | null;
+  /** Canvas revision number for optimistic concurrency control */
+  revision: number;
 }
 
 /**
@@ -2234,6 +2236,8 @@ export interface ApplyWorkflowFromMcpPayload {
   description?: string;
   /** Files planned to be created for sub-agent nodes (shown in diff preview) */
   plannedFiles?: PlannedSubAgentFile[];
+  /** Expected canvas revision (from get_current_workflow). Omit to skip conflict check. */
+  expectedRevision?: number;
 }
 
 /**
@@ -2246,6 +2250,8 @@ export interface ApplyWorkflowFromMcpResponsePayload {
   success: boolean;
   /** Error message if failed */
   error?: string;
+  /** Current canvas revision (returned on conflict for retry) */
+  currentRevision?: number;
 }
 
 // ============================================================================

@@ -56,6 +56,7 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
               text: JSON.stringify({
                 success: true,
                 isStale: result.isStale,
+                revision: result.revision,
                 workflow: result.workflow,
               }),
             },
@@ -156,8 +157,14 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
         .describe(
           'A brief description of the changes being made (e.g., "Added error handling step after API call"). Shown to the user in the review dialog.'
         ),
+      revision: z
+        .number()
+        .optional()
+        .describe(
+          'Canvas revision from get_current_workflow for conflict detection. If provided and the canvas has been modified since, the apply will be rejected or a warning shown.'
+        ),
     },
-    async ({ workflow: workflowJson, description }) => {
+    async ({ workflow: workflowJson, description, revision }) => {
       try {
         // Parse JSON
         let parsedWorkflow: unknown;
@@ -204,7 +211,8 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
         const applied = await manager.applyWorkflowToCanvas(
           parsedWorkflow as Workflow,
           description,
-          plannedFiles
+          plannedFiles,
+          revision
         );
 
         // Only create files on disk after successful canvas apply (user accepted)
@@ -332,8 +340,14 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
         .describe(
           'A brief description of the changes being made. Shown to the user in the review dialog.'
         ),
+      revision: z
+        .number()
+        .optional()
+        .describe(
+          'Canvas revision from get_current_workflow for conflict detection. If omitted, the revision from the internal fetch is used.'
+        ),
     },
-    async ({ nodes: nodeUpdates, description }) => {
+    async ({ nodes: nodeUpdates, description, revision }) => {
       try {
         // 1. Fetch current workflow
         const result = await manager.requestCurrentWorkflow();
@@ -412,11 +426,12 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
           };
         }
 
-        // 5. Apply to canvas
+        // 5. Apply to canvas (use caller-provided revision, or fall back to internally fetched one)
         const applied = await manager.applyWorkflowToCanvas(
           updatedWorkflow,
           description,
-          plannedFiles
+          plannedFiles,
+          revision ?? result.revision
         );
 
         // 6. Create SubAgent files on disk after user acceptance
