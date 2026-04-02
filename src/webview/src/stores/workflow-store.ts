@@ -1295,9 +1295,10 @@ export const useWorkflowStore = create<WorkflowStore>()(
     }),
     {
       // Only track nodes and edges for undo/redo
+      // Exclude selected, width, height, measured (dimension changes from React Flow rendering)
       partialize: (state): TrackedState => ({
-        nodes: state.nodes.map((n) => ({ ...n, selected: false })),
-        edges: state.edges.map((e) => ({ ...e, selected: false })),
+        nodes: state.nodes.map(({ selected, width, height, ...rest }) => rest as Node),
+        edges: state.edges.map(({ selected, ...rest }) => rest as Edge),
       }),
       // Prevent duplicate history entries for identical states
       equality: (pastState, currentState) =>
