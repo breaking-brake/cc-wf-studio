@@ -49,6 +49,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.highlight.confirmDisable.message': '目前有群組節點正在高亮顯示。確定要停用高亮嗎？',
   'toolbar.highlight.confirmDisable.confirm': '停用',
   'toolbar.highlight.confirmDisable.cancel': '取消',
+  'toolbar.undo': '復原',
+  'toolbar.redo': '重做',
   'toolbar.scrollMode.switchToClassic': '切換到Classic模式（滾動=縮放）',
   'toolbar.scrollMode.switchToFreehand': '切換到Freehand模式（滾動=平移）',
 

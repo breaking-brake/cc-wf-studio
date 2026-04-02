@@ -63,8 +63,7 @@ const App: React.FC = () => {
     workflowName,
     workflowDescription,
     subAgentFlows,
-    setNodes,
-    setEdges,
+    setCanvas,
     setWorkflowName,
     setActiveWorkflow,
     updateActiveWorkflowMetadata,
@@ -250,8 +249,7 @@ const App: React.FC = () => {
     if (!pending) return;
     try {
       const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(pending.workflow);
-      setNodes(loadedNodes);
-      setEdges(loadedEdges);
+      setCanvas(loadedNodes, loadedEdges);
       setWorkflowName(pending.workflow.name);
       setActiveWorkflow(pending.workflow);
       vscode.postMessage({
@@ -269,7 +267,7 @@ const App: React.FC = () => {
       });
     }
     setPendingMcpApply(null);
-  }, [setNodes, setEdges, setWorkflowName, setActiveWorkflow]);
+  }, [setCanvas, setWorkflowName, setActiveWorkflow]);
 
   const handleMcpRefreshRun = useCallback(() => {
     setShowMcpRefreshDialog(false);
@@ -347,8 +345,7 @@ const App: React.FC = () => {
         const workflow = message.payload?.workflow as Workflow;
         if (workflow) {
           const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(workflow);
-          setNodes(loadedNodes);
-          setEdges(loadedEdges);
+          setCanvas(loadedNodes, loadedEdges);
           setWorkflowName(workflow.name);
           // Set as active workflow to preserve conversation history
           setActiveWorkflow(workflow);
@@ -469,8 +466,7 @@ const App: React.FC = () => {
             const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(
               payload.workflow
             );
-            setNodes(loadedNodes);
-            setEdges(loadedEdges);
+            setCanvas(loadedNodes, loadedEdges);
             setWorkflowName(payload.workflow.name);
             setActiveWorkflow(payload.workflow);
             vscode.postMessage({
@@ -500,8 +496,7 @@ const App: React.FC = () => {
       window.removeEventListener('message', messageHandler);
     };
   }, [
-    setNodes,
-    setEdges,
+    setCanvas,
     setWorkflowName,
     setActiveWorkflow,
     activeWorkflow,

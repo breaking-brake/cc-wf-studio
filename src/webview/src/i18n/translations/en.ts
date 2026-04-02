@@ -50,6 +50,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'A group node is currently highlighted. Are you sure you want to disable the highlight?',
   'toolbar.highlight.confirmDisable.confirm': 'Disable',
   'toolbar.highlight.confirmDisable.cancel': 'Cancel',
+  'toolbar.undo': 'Undo',
+  'toolbar.redo': 'Redo',
   'toolbar.scrollMode.switchToClassic': 'Switch to Classic mode (scroll = zoom)',
   'toolbar.scrollMode.switchToFreehand': 'Switch to Freehand mode (scroll = pan)',
 

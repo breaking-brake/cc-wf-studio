@@ -47,6 +47,8 @@ export interface WebviewTranslationKeys {
   'toolbar.highlight.confirmDisable.message': string;
   'toolbar.highlight.confirmDisable.confirm': string;
   'toolbar.highlight.confirmDisable.cancel': string;
+  'toolbar.undo': string;
+  'toolbar.redo': string;
   'toolbar.scrollMode.switchToClassic': string;
   'toolbar.scrollMode.switchToFreehand': string;
 

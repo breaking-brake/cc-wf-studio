@@ -50,6 +50,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     '현재 그룹 노드가 하이라이트되어 있습니다. 하이라이트를 비활성화하시겠습니까?',
   'toolbar.highlight.confirmDisable.confirm': '비활성화',
   'toolbar.highlight.confirmDisable.cancel': '취소',
+  'toolbar.undo': '실행 취소',
+  'toolbar.redo': '다시 실행',
   'toolbar.scrollMode.switchToClassic': 'Classic 모드로 전환 (스크롤 = 줌)',
   'toolbar.scrollMode.switchToFreehand': 'Freehand 모드로 전환 (스크롤 = 팬)',
 

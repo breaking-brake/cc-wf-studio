@@ -77,8 +77,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const {
     nodes,
     edges,
-    setNodes,
-    setEdges,
+    setCanvas,
     activeWorkflow,
     setActiveWorkflow,
     workflowName,
@@ -304,8 +303,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         const workflow: Workflow = message.payload?.workflow;
         if (workflow) {
           const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(workflow);
-          setNodes(loadedNodes);
-          setEdges(loadedEdges);
+          setCanvas(loadedNodes, loadedEdges);
           setWorkflowName(workflow.name);
           // Load description from workflow (default to empty string if not present)
           setWorkflowDescription(workflow.description || '');
@@ -346,8 +344,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
   }, [
-    setNodes,
-    setEdges,
+    setCanvas,
     setActiveWorkflow,
     setWorkflowName,
     setWorkflowDescription,
