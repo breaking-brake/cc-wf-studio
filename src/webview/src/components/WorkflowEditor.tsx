@@ -299,17 +299,27 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         setIsModifierKeyPressed(true);
       }
 
-      // Undo/Redo shortcuts
+      // Undo/Redo shortcuts — skip when focus is in editable elements
       const mod = event.metaKey || event.ctrlKey;
-      if (mod && event.key === 'z' && !event.shiftKey) {
-        event.preventDefault();
-        const { undo, pastStates } = useWorkflowStore.temporal.getState();
-        if (pastStates.length > 0) undo();
-      }
-      if (mod && ((event.key === 'z' && event.shiftKey) || event.key === 'y')) {
-        event.preventDefault();
-        const { redo, futureStates } = useWorkflowStore.temporal.getState();
-        if (futureStates.length > 0) redo();
+      if (mod) {
+        const target = event.target as HTMLElement | null;
+        if (
+          target &&
+          (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+        ) {
+          return;
+        }
+        const key = event.key.toLowerCase();
+        if (key === 'z' && !event.shiftKey) {
+          event.preventDefault();
+          const { undo, pastStates } = useWorkflowStore.temporal.getState();
+          if (pastStates.length > 0) undo();
+        }
+        if ((key === 'z' && event.shiftKey) || key === 'y') {
+          event.preventDefault();
+          const { redo, futureStates } = useWorkflowStore.temporal.getState();
+          if (futureStates.length > 0) redo();
+        }
       }
     };
 

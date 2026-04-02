@@ -805,6 +805,8 @@ export const useWorkflowStore = create<WorkflowStore>()(
               }
             : null,
         });
+        // Clear undo/redo history to prevent cross-workflow undo
+        useWorkflowStore.temporal.getState().clear();
       },
 
       addGeneratedWorkflow: (workflow: Workflow) => {
@@ -848,6 +850,8 @@ export const useWorkflowStore = create<WorkflowStore>()(
           activeWorkflow: workflow,
           subAgentFlows: workflow.subAgentFlows || [],
         });
+        // Clear undo/redo history to prevent cross-workflow undo
+        useWorkflowStore.temporal.getState().clear();
       },
 
       updateWorkflow: (workflow: Workflow) => {
@@ -922,6 +926,8 @@ export const useWorkflowStore = create<WorkflowStore>()(
           activeWorkflow: workflow,
           subAgentFlows: workflow.subAgentFlows || [],
         });
+        // Clear undo/redo history to prevent cross-workflow undo
+        useWorkflowStore.temporal.getState().clear();
       },
 
       updateActiveWorkflowMetadata: (updates: Partial<Workflow>) => {
@@ -1264,6 +1270,8 @@ export const useWorkflowStore = create<WorkflowStore>()(
             activeSubAgentFlowId: id,
           });
         }
+        // Clear undo/redo history to prevent cross-canvas undo
+        useWorkflowStore.temporal.getState().clear();
       },
 
       setSubAgentFlows: (subAgentFlows: SubAgentFlow[]) => {
@@ -1294,6 +1302,8 @@ export const useWorkflowStore = create<WorkflowStore>()(
               subAgentFlows: get().subAgentFlows.filter((sf) => sf.id !== currentActiveId),
             });
           }
+          // Clear undo/redo history to prevent cross-canvas undo
+          useWorkflowStore.temporal.getState().clear();
         }
       },
     }),
