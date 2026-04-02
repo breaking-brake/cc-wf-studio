@@ -106,7 +106,7 @@ export function RefinementChatPanel({
     selectedProvider,
   } = useRefinementStore();
 
-  const { activeWorkflow, updateWorkflow, subAgentFlows, updateSubAgentFlow, setNodes, setEdges } =
+  const { activeWorkflow, updateWorkflow, subAgentFlows, updateSubAgentFlow, setCanvas } =
     useWorkflowStore();
 
   const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
@@ -208,8 +208,7 @@ export function RefinementChatPanel({
             targetHandle: conn.toPort,
           }));
 
-          setNodes(newNodes);
-          setEdges(newEdges);
+          setCanvas(newNodes, newEdges);
 
           // Update loading message
           updateMessageContent(aiMessageId, aiMessage.content);
@@ -414,8 +413,7 @@ export function RefinementChatPanel({
             targetHandle: conn.toPort,
           }));
 
-          setNodes(newNodes);
-          setEdges(newEdges);
+          setCanvas(newNodes, newEdges);
 
           updateMessageContent(aiMessageId, aiMessage.content);
           updateMessageLoadingState(aiMessageId, false);

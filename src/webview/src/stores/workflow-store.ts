@@ -94,6 +94,8 @@ interface WorkflowStore {
   // Setters
   setNodes: (nodes: Node[]) => void;
   setEdges: (edges: Edge[]) => void;
+  /** Set nodes and edges in a single state update (single undo/redo entry) */
+  setCanvas: (nodes: Node[], edges: Edge[]) => void;
   setSelectedNodeId: (id: string | null) => void;
   /** Update selectedNodeId without opening property overlay (for React Flow selection sync) */
   syncSelectedNodeId: (id: string | null) => void;
@@ -409,6 +411,8 @@ export const useWorkflowStore = create<WorkflowStore>()(
       setNodes: (nodes) => set({ nodes }),
 
       setEdges: (edges) => set({ edges }),
+
+      setCanvas: (nodes, edges) => set({ nodes, edges }),
 
       setSelectedNodeId: (selectedNodeId) => {
         // When a node is selected, auto-open the property overlay
