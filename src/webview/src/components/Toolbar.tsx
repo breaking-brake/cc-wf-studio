@@ -5,7 +5,7 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
-import { FileDown, Play, Save, Sparkles, Square, SquareSlash } from 'lucide-react';
+import { FileDown, MessageSquare, Play, Save, Sparkles, Square, SquareSlash } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
@@ -38,6 +38,7 @@ import {
   serializeWorkflow,
   validateWorkflow,
 } from '../services/workflow-service';
+import { useCommentaryStore } from '../stores/commentary-store';
 import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { EditableNameField } from './common/EditableNameField';
@@ -46,6 +47,7 @@ import { StyledTooltipProvider } from './common/StyledTooltip';
 import { ClaudeApiUploadDialog } from './dialogs/ClaudeApiUploadDialog';
 import { ConfirmDialog } from './dialogs/ConfirmDialog';
 import { WhatsNewDialog } from './dialogs/WhatsNewDialog';
+import { CommentaryOptionsDropdown } from './toolbar/CommentaryOptionsDropdown';
 import { MoreActionsDropdown } from './toolbar/MoreActionsDropdown';
 import { SlashCommandOptionsDropdown } from './toolbar/SlashCommandOptionsDropdown';
 
@@ -75,8 +77,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const {
     nodes,
     edges,
-    setNodes,
-    setEdges,
+    setCanvas,
     activeWorkflow,
     setActiveWorkflow,
     workflowName,
@@ -123,6 +124,22 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     isCursorEnabled,
     toggleCursorEnabled,
   } = useRefinementStore();
+  const {
+    isFeatureEnabled: isCommentaryFeatureEnabled,
+    toggleFeatureEnabled: toggleCommentaryFeature,
+    isEnabled: isCommentaryEnabled,
+    toggleEnabled: toggleCommentary,
+    selectedProvider: commentaryProvider,
+    setProvider: setCommentaryProvider,
+    selectedCopilotModel: commentaryCopilotModel,
+    setCopilotModel: setCommentaryCopilotModel,
+    availableCopilotModels: commentaryAvailableCopilotModels,
+    isFetchingCopilotModels: isCommentaryFetchingModels,
+    copilotModelsError: commentaryCopilotModelsError,
+    fetchCopilotModels: fetchCommentaryCopilotModels,
+    language: commentaryLanguage,
+    setLanguage: setCommentaryLanguage,
+  } = useCommentaryStore();
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
@@ -133,6 +150,31 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   // Copilot Chat integration
   const [isCopilotChatExporting, setIsCopilotChatExporting] = useState(false);
   const [isCopilotChatRunning, setIsCopilotChatRunning] = useState(false);
+
+  // Sync commentary state to Extension Host on mount (restores localStorage state after reload)
+  const commentarySyncedRef = useRef(false);
+  useEffect(() => {
+    if (commentarySyncedRef.current) return;
+    commentarySyncedRef.current = true;
+    if (isCommentaryFeatureEnabled && isCommentaryEnabled) {
+      vscode.postMessage({
+        type: 'TOGGLE_COMMENTARY',
+        payload: {
+          enabled: true,
+          provider: commentaryProvider,
+          copilotModel: commentaryCopilotModel || undefined,
+          language: commentaryLanguage,
+        },
+      });
+    }
+  }, [
+    isCommentaryFeatureEnabled,
+    isCommentaryEnabled,
+    commentaryProvider,
+    commentaryCopilotModel,
+    commentaryLanguage,
+  ]);
+
   // Copilot CLI integration
   const [isCopilotCliExporting, setIsCopilotCliExporting] = useState(false);
   const [isCopilotCliRunning, setIsCopilotCliRunning] = useState(false);
@@ -261,8 +303,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         const workflow: Workflow = message.payload?.workflow;
         if (workflow) {
           const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(workflow);
-          setNodes(loadedNodes);
-          setEdges(loadedEdges);
+          setCanvas(loadedNodes, loadedEdges);
           setWorkflowName(workflow.name);
           // Load description from workflow (default to empty string if not present)
           setWorkflowDescription(workflow.description || '');
@@ -303,8 +344,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
   }, [
-    setNodes,
-    setEdges,
+    setCanvas,
     setActiveWorkflow,
     setWorkflowName,
     setWorkflowDescription,
@@ -1575,6 +1615,58 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     argumentHint={slashCommandOptions.argumentHint ?? ''}
                     onArgumentHintChange={setSlashCommandArgumentHint}
                   />
+                  {/* Commentary AI Toggle + Options (visible when feature enabled in More menu) */}
+                  {isCommentaryFeatureEnabled && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          toggleCommentary();
+                          const newEnabled = !isCommentaryEnabled;
+                          vscode.postMessage({
+                            type: 'TOGGLE_COMMENTARY',
+                            payload: {
+                              enabled: newEnabled,
+                              provider: commentaryProvider,
+                              copilotModel: commentaryCopilotModel || undefined,
+                              language: commentaryLanguage,
+                            },
+                          });
+                        }}
+                        style={{
+                          background: isCommentaryEnabled
+                            ? 'var(--vscode-button-background)'
+                            : 'transparent',
+                          color: isCommentaryEnabled
+                            ? 'var(--vscode-button-foreground)'
+                            : 'var(--vscode-descriptionForeground)',
+                          border: '1px solid var(--vscode-panel-border)',
+                          borderRadius: '3px',
+                          cursor: 'pointer',
+                          padding: '3px 6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontSize: '11px',
+                        }}
+                        title={t('commentary.toggle')}
+                      >
+                        <MessageSquare size={12} />
+                      </button>
+                      <CommentaryOptionsDropdown
+                        provider={commentaryProvider}
+                        onProviderChange={setCommentaryProvider}
+                        copilotModel={commentaryCopilotModel}
+                        onCopilotModelChange={setCommentaryCopilotModel}
+                        availableCopilotModels={commentaryAvailableCopilotModels}
+                        isFetchingModels={isCommentaryFetchingModels}
+                        modelsError={commentaryCopilotModelsError}
+                        onFetchModels={fetchCommentaryCopilotModels}
+                        language={commentaryLanguage}
+                        onLanguageChange={setCommentaryLanguage}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -2330,6 +2422,58 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 argumentHint={slashCommandOptions.argumentHint ?? ''}
                 onArgumentHintChange={setSlashCommandArgumentHint}
               />
+              {/* Commentary AI Toggle + Options (compact, visible when feature enabled) */}
+              {isCommentaryFeatureEnabled && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      toggleCommentary();
+                      const newEnabled = !isCommentaryEnabled;
+                      vscode.postMessage({
+                        type: 'TOGGLE_COMMENTARY',
+                        payload: {
+                          enabled: newEnabled,
+                          provider: commentaryProvider,
+                          copilotModel: commentaryCopilotModel || undefined,
+                          language: commentaryLanguage,
+                        },
+                      });
+                    }}
+                    style={{
+                      background: isCommentaryEnabled
+                        ? 'var(--vscode-button-background)'
+                        : 'transparent',
+                      color: isCommentaryEnabled
+                        ? 'var(--vscode-button-foreground)'
+                        : 'var(--vscode-descriptionForeground)',
+                      border: '1px solid var(--vscode-panel-border)',
+                      borderRadius: '3px',
+                      cursor: 'pointer',
+                      padding: '3px 6px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '11px',
+                    }}
+                    title={t('commentary.toggle')}
+                  >
+                    <MessageSquare size={12} />
+                  </button>
+                  <CommentaryOptionsDropdown
+                    provider={commentaryProvider}
+                    onProviderChange={setCommentaryProvider}
+                    copilotModel={commentaryCopilotModel}
+                    onCopilotModelChange={setCommentaryCopilotModel}
+                    availableCopilotModels={commentaryAvailableCopilotModels}
+                    isFetchingModels={isCommentaryFetchingModels}
+                    modelsError={commentaryCopilotModelsError}
+                    onFetchModels={fetchCommentaryCopilotModels}
+                    language={commentaryLanguage}
+                    onLanguageChange={setCommentaryLanguage}
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -2415,6 +2559,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onToggleAntigravityBeta={toggleAntigravityEnabled}
               isCursorEnabled={isCursorEnabled}
               onToggleCursorBeta={toggleCursorEnabled}
+              isCommentaryEnabled={isCommentaryFeatureEnabled}
+              onToggleCommentary={toggleCommentaryFeature}
               onOpenWhatsNew={() => setIsWhatsNewDialogOpen(true)}
               unreadReleaseCount={unreadReleaseCount}
               open={moreActionsOpen}

@@ -49,6 +49,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.highlight.confirmDisable.message': '目前有群組節點正在高亮顯示。確定要停用高亮嗎？',
   'toolbar.highlight.confirmDisable.confirm': '停用',
   'toolbar.highlight.confirmDisable.cancel': '取消',
+  'toolbar.undo': '復原',
+  'toolbar.redo': '重做',
   'toolbar.scrollMode.switchToClassic': '切換到Classic模式（滾動=縮放）',
   'toolbar.scrollMode.switchToFreehand': '切換到Freehand模式（滾動=平移）',
 
@@ -974,4 +976,10 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   // Claude API Upload Dialog
   'claudeApi.description':
     '將工作流程作為 Agent Skills 上傳到 Claude API，並透過 Messages API 執行。\n結合 MCP 伺服器、程式碼執行和其他技能，您可以將專業 AI 代理作為 API 發佈，用於文件處理、資料分析、客戶支援等場景。',
+
+  // Commentary AI
+  'commentary.toggle': '切換 Commentary AI',
+  'commentary.waiting': '等待代理活動中...',
+  'commentary.inactive': '啟用 Commentary 並執行工作流程，即可看到即時解說。',
+  'commentary.providerSelect': '選擇 Commentary AI 提供商',
 };

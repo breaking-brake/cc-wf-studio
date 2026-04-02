@@ -11,6 +11,7 @@ import { HighlightToggle } from './HighlightToggle';
 import { InteractionModeToggle } from './InteractionModeToggle';
 import { MinimapToggle } from './MinimapToggle';
 import { ScrollModeToggle } from './ScrollModeToggle';
+import { UndoRedoControls } from './UndoRedoControls';
 
 interface CanvasToolbarProps {
   isEdgeAnimationEnabled: boolean;
@@ -23,6 +24,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
 }) => {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <UndoRedoControls />
       <ScrollModeToggle />
       <InteractionModeToggle />
       <EdgeAnimationToggle isEnabled={isEdgeAnimationEnabled} onToggle={onToggleEdgeAnimation} />

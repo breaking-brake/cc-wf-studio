@@ -50,6 +50,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'A group node is currently highlighted. Are you sure you want to disable the highlight?',
   'toolbar.highlight.confirmDisable.confirm': 'Disable',
   'toolbar.highlight.confirmDisable.cancel': 'Cancel',
+  'toolbar.undo': 'Undo',
+  'toolbar.redo': 'Redo',
   'toolbar.scrollMode.switchToClassic': 'Switch to Classic mode (scroll = zoom)',
   'toolbar.scrollMode.switchToFreehand': 'Switch to Freehand mode (scroll = pan)',
 
@@ -1022,4 +1024,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Claude API Upload Dialog
   'claudeApi.description':
     'Upload workflows as Agent Skills to Claude API and run them via the Messages API.\nCombined with MCP servers, code execution, and other skills, you can publish specialized AI agents as APIs for document processing, data analysis, customer support, and more.',
+
+  // Commentary AI
+  'commentary.toggle': 'Toggle Commentary AI',
+  'commentary.waiting': 'Waiting for agent activity...',
+  'commentary.inactive': 'Run a workflow with Commentary enabled to see real-time commentary.',
+  'commentary.providerSelect': 'Select Commentary AI provider',
 };

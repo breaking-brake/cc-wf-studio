@@ -21,6 +21,7 @@ import type {
 } from '@shared/types/messages';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { CommentaryPanel } from './components/CommentaryPanel';
 import { ProcessingOverlay } from './components/common/ProcessingOverlay';
 import { SimpleOverlay } from './components/common/SimpleOverlay';
 import { Spinner } from './components/common/Spinner';
@@ -44,6 +45,7 @@ import { useIsCompactMode } from './hooks/useWindowWidth';
 import { useTranslation } from './i18n/i18n-context';
 import { vscode } from './main';
 import { deserializeWorkflow, serializeWorkflow } from './services/workflow-service';
+import { useCommentaryStore } from './stores/commentary-store';
 import { useRefinementStore } from './stores/refinement-store';
 import { useWorkflowStore } from './stores/workflow-store';
 import type { RefinementChatState } from './types/refinement-chat-state';
@@ -61,8 +63,7 @@ const App: React.FC = () => {
     workflowName,
     workflowDescription,
     subAgentFlows,
-    setNodes,
-    setEdges,
+    setCanvas,
     setWorkflowName,
     setActiveWorkflow,
     updateActiveWorkflowMetadata,
@@ -71,6 +72,18 @@ const App: React.FC = () => {
     activeSubAgentFlowId,
     setActiveSubAgentFlowId,
   } = useWorkflowStore();
+  // Commentary AI store
+  const { isEnabled: isCommentaryEnabled } = useCommentaryStore();
+  const handleCloseCommentaryPanel = useCallback(() => {
+    useCommentaryStore.getState().toggleEnabled();
+    // Notify extension
+    // biome-ignore lint/suspicious/noExplicitAny: vscode postMessage typing
+    (window as any).vscodeApi?.postMessage?.({
+      type: 'TOGGLE_COMMENTARY',
+      payload: { enabled: false },
+    });
+  }, []);
+
   // Get all refinement store state and actions for main workflow chat
   const refinementStore = useRefinementStore();
   const { isOpen: isRefinementPanelOpen, isProcessing } = refinementStore;
@@ -236,8 +249,7 @@ const App: React.FC = () => {
     if (!pending) return;
     try {
       const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(pending.workflow);
-      setNodes(loadedNodes);
-      setEdges(loadedEdges);
+      setCanvas(loadedNodes, loadedEdges);
       setWorkflowName(pending.workflow.name);
       setActiveWorkflow(pending.workflow);
       vscode.postMessage({
@@ -255,7 +267,7 @@ const App: React.FC = () => {
       });
     }
     setPendingMcpApply(null);
-  }, [setNodes, setEdges, setWorkflowName, setActiveWorkflow]);
+  }, [setCanvas, setWorkflowName, setActiveWorkflow]);
 
   const handleMcpRefreshRun = useCallback(() => {
     setShowMcpRefreshDialog(false);
@@ -333,8 +345,7 @@ const App: React.FC = () => {
         const workflow = message.payload?.workflow as Workflow;
         if (workflow) {
           const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(workflow);
-          setNodes(loadedNodes);
-          setEdges(loadedEdges);
+          setCanvas(loadedNodes, loadedEdges);
           setWorkflowName(workflow.name);
           // Set as active workflow to preserve conversation history
           setActiveWorkflow(workflow);
@@ -455,8 +466,7 @@ const App: React.FC = () => {
             const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(
               payload.workflow
             );
-            setNodes(loadedNodes);
-            setEdges(loadedEdges);
+            setCanvas(loadedNodes, loadedEdges);
             setWorkflowName(payload.workflow.name);
             setActiveWorkflow(payload.workflow);
             vscode.postMessage({
@@ -486,8 +496,7 @@ const App: React.FC = () => {
       window.removeEventListener('message', messageHandler);
     };
   }, [
-    setNodes,
-    setEdges,
+    setCanvas,
     setWorkflowName,
     setActiveWorkflow,
     activeWorkflow,
@@ -619,6 +628,13 @@ const App: React.FC = () => {
         <Collapsible.Root open={isRefinementPanelOpen}>
           <Collapsible.Content className="refinement-panel-collapsible">
             <RefinementChatPanel chatState={mainChatState} onClose={handleCloseRefinementPanel} />
+          </Collapsible.Content>
+        </Collapsible.Root>
+
+        {/* Commentary AI Panel */}
+        <Collapsible.Root open={isCommentaryEnabled}>
+          <Collapsible.Content className="refinement-panel-collapsible">
+            <CommentaryPanel onClose={handleCloseCommentaryPanel} />
           </Collapsible.Content>
         </Collapsible.Root>
       </div>

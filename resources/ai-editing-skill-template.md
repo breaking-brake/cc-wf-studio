@@ -1,13 +1,16 @@
 ---
 name: cc-workflow-ai-editor
-description: AI workflow editor for CC Workflow Studio. Create and edit visual AI agent workflows through interactive conversation using MCP tools (get_workflow_schema, get_current_workflow, apply_workflow). Use when the user wants to create a new workflow, modify an existing workflow, or edit the workflow canvas in CC Workflow Studio via the built-in MCP server.
+description: AI workflow editor for CC Workflow Studio. Create and edit visual AI agent workflows through interactive conversation using MCP tools (get_workflow_schema, get_current_workflow, apply_workflow, update_nodes). Use when the user wants to create a new workflow, modify an existing workflow, or edit the workflow canvas in CC Workflow Studio via the built-in MCP server.
 ---
 
 1. Call `get_workflow_schema` via `cc-workflow-studio` MCP server
 2. Call `get_current_workflow` via `cc-workflow-studio` MCP server
 3. Ask the user what to create or modify
 4. Generate workflow JSON: use built-in sub-agents (builtInType: explore/plan/general-purpose) by default. Only call `list_available_agents` when the user explicitly asks to use an existing custom sub-agent.
-5. Call `apply_workflow` via `cc-workflow-studio` MCP server, fix errors if any
+5. Apply changes via `cc-workflow-studio` MCP server:
+   - **New workflow or structural changes** (add/remove nodes/connections): use `apply_workflow`
+   - **Partial updates to existing nodes** (change name, position, or data): use `update_nodes` (more token-efficient)
+   - Fix errors if any
 6. Ask for feedback, repeat from step 4
 
 ## Group Node

@@ -50,6 +50,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     '현재 그룹 노드가 하이라이트되어 있습니다. 하이라이트를 비활성화하시겠습니까?',
   'toolbar.highlight.confirmDisable.confirm': '비활성화',
   'toolbar.highlight.confirmDisable.cancel': '취소',
+  'toolbar.undo': '실행 취소',
+  'toolbar.redo': '다시 실행',
   'toolbar.scrollMode.switchToClassic': 'Classic 모드로 전환 (스크롤 = 줌)',
   'toolbar.scrollMode.switchToFreehand': 'Freehand 모드로 전환 (스크롤 = 팬)',
 
@@ -1007,4 +1009,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Claude API Upload Dialog
   'claudeApi.description':
     '워크플로우를 Agent Skills로 Claude API에 업로드하고 Messages API를 통해 실행할 수 있습니다.\nMCP 서버, 코드 실행, 기타 스킬과 결합하여 문서 처리, 데이터 분석, 고객 지원 등 전문 AI 에이전트를 API로 공개할 수 있습니다.',
+
+  // Commentary AI
+  'commentary.toggle': 'Commentary AI 전환',
+  'commentary.waiting': '에이전트 활동 대기 중...',
+  'commentary.inactive': 'Commentary를 활성화하고 워크플로우를 실행하면 실시간 해설이 표시됩니다.',
+  'commentary.providerSelect': 'Commentary AI 프로바이더 선택',
 };

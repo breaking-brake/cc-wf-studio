@@ -16,6 +16,7 @@ import {
   Focus,
   HelpCircle,
   Info,
+  MessageSquare,
   MoreHorizontal,
   Share2,
   Terminal,
@@ -23,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useIsCompactMode } from '../../hooks/useWindowWidth';
 import { useTranslation } from '../../i18n/i18n-context';
+import { BetaBadge } from '../common/BetaBadge';
 
 // Fixed font sizes for dropdown menu (not responsive)
 const FONT_SIZES = {
@@ -50,6 +52,8 @@ interface MoreActionsDropdownProps {
   onToggleAntigravityBeta: () => void;
   isCursorEnabled: boolean;
   onToggleCursorBeta: () => void;
+  isCommentaryEnabled: boolean;
+  onToggleCommentary: () => void;
   onOpenWhatsNew: () => void;
   unreadReleaseCount: number;
   open?: boolean;
@@ -77,6 +81,8 @@ export function MoreActionsDropdown({
   onToggleAntigravityBeta,
   isCursorEnabled,
   onToggleCursorBeta,
+  isCommentaryEnabled,
+  onToggleCommentary,
   onOpenWhatsNew,
   unreadReleaseCount,
   open,
@@ -225,6 +231,30 @@ export function MoreActionsDropdown({
             <Focus size={14} />
             <span style={{ flex: 1 }}>{t('toolbar.focusMode')}</span>
             {isFocusMode && <Check size={14} />}
+          </DropdownMenu.Item>
+
+          {/* Commentary AI Toggle */}
+          <DropdownMenu.Item
+            onSelect={(event) => {
+              event.preventDefault();
+              onToggleCommentary();
+            }}
+            style={{
+              padding: '8px 12px',
+              fontSize: `${FONT_SIZES.small}px`,
+              color: 'var(--vscode-foreground)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              outline: 'none',
+              borderRadius: '2px',
+            }}
+          >
+            <MessageSquare size={14} />
+            <span style={{ flex: 1 }}>Commentary AI</span>
+            <BetaBadge />
+            {isCommentaryEnabled && <Check size={14} />}
           </DropdownMenu.Item>
 
           {/* AI Agents Sub-menu */}

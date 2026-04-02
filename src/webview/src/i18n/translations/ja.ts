@@ -50,6 +50,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     '現在グループノードがハイライトされています。ハイライトを無効化しますか？',
   'toolbar.highlight.confirmDisable.confirm': '無効化',
   'toolbar.highlight.confirmDisable.cancel': 'キャンセル',
+  'toolbar.undo': '元に戻す',
+  'toolbar.redo': 'やり直し',
   'toolbar.scrollMode.switchToClassic': 'Classicモードに切り替え（スクロール=ズーム）',
   'toolbar.scrollMode.switchToFreehand': 'Freehandモードに切り替え（スクロール=パン）',
 
@@ -1014,4 +1016,11 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Claude API Upload Dialog
   'claudeApi.description':
     'ワークフローを Agent Skills として Claude API にアップロードし、Messages API 経由で実行できます。\nMCP サーバー、コード実行、他のスキルと組み合わせることで、ドキュメント処理・データ分析・カスタマーサポートなど、専門的な AI エージェントを API として公開できます。',
+
+  // Commentary AI
+  'commentary.toggle': 'Commentary AI の ON/OFF',
+  'commentary.waiting': 'エージェントの活動を待機中...',
+  'commentary.inactive':
+    'Commentary を有効にしてワークフローを実行すると、リアルタイム実況が表示されます。',
+  'commentary.providerSelect': 'Commentary AI プロバイダーを選択',
 };

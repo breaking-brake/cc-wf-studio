@@ -5,6 +5,7 @@ on:
     branches: [main, production]
   pull_request:
     branches: [main, production]
+  workflow_dispatch:
   schedule:
     # 毎週月曜日 9:00 JST (00:00 UTC) に実行
     - cron: '0 0 * * 1'
