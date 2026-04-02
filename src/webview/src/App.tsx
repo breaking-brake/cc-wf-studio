@@ -300,6 +300,22 @@ const App: React.FC = () => {
     setPendingMcpApply(null);
   }, []);
 
+  const handleRetryMcpApply = useCallback(() => {
+    const pending = pendingMcpApplyRef.current;
+    if (!pending) return;
+    vscode.postMessage({
+      type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
+      payload: {
+        correlationId: pending.correlationId,
+        success: false,
+        error:
+          'Canvas was modified during AI processing. Please call get_current_workflow to fetch the latest state and re-apply your changes.',
+        currentRevision: getCanvasRevision(),
+      },
+    });
+    setPendingMcpApply(null);
+  }, []);
+
   // Listen for messages from Extension
   useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
@@ -695,6 +711,7 @@ const App: React.FC = () => {
         hasRevisionConflict={pendingMcpApply?.hasRevisionConflict}
         onAccept={handleAcceptMcpApply}
         onReject={handleRejectMcpApply}
+        onRetry={handleRetryMcpApply}
       />
 
       {/* Slack Share Dialog */}

@@ -396,6 +396,8 @@ export interface WebviewTranslationKeys {
   'dialog.diffPreview.accept': string;
   'dialog.diffPreview.reject': string;
   'dialog.diffPreview.revisionConflict': string;
+  'dialog.diffPreview.applyAnyway': string;
+  'dialog.diffPreview.retryWithLatest': string;
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': string;

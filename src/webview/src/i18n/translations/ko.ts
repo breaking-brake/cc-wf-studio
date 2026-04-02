@@ -432,6 +432,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'dialog.diffPreview.reject': '거부',
   'dialog.diffPreview.revisionConflict':
     '경고: AI가 워크플로우를 가져온 후 캔버스가 수정되었습니다. 변경 사항을 신중하게 검토한 후 수락하세요.',
+  'dialog.diffPreview.applyAnyway': '변경 사항 적용',
+  'dialog.diffPreview.retryWithLatest': '최신으로 재시도',
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '워크플로우 초기화',

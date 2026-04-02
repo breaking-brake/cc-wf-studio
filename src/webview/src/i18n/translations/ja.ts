@@ -433,6 +433,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'dialog.diffPreview.reject': '却下',
   'dialog.diffPreview.revisionConflict':
     '警告: AIがワークフローを取得した後にキャンバスが変更されています。変更内容を慎重に確認してください。',
+  'dialog.diffPreview.applyAnyway': '変更を適用',
+  'dialog.diffPreview.retryWithLatest': '最新で再試行',
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': 'ワークフローをリセット',

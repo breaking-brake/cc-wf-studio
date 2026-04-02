@@ -416,6 +416,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'dialog.diffPreview.reject': '拒絕',
   'dialog.diffPreview.revisionConflict':
     '警告：AI取得工作流程後畫布已被修改。請仔細檢查變更內容後再接受。',
+  'dialog.diffPreview.applyAnyway': '仍然套用',
+  'dialog.diffPreview.retryWithLatest': '使用最新重試',
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '重設工作流程',
