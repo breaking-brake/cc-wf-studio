@@ -17,7 +17,7 @@ import * as path from 'node:path';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import type { PlannedSubAgentFile } from '../../shared/types/messages';
-import type { Workflow, WorkflowNode } from '../../shared/types/workflow-definition';
+import { NodeType, type Workflow, type WorkflowNode } from '../../shared/types/workflow-definition';
 import { getProjectCommandsDir } from '../utils/path-utils';
 import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
 import { scanAllCommands } from './command-service';
@@ -329,10 +329,28 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
               .describe(
                 'Data fields to shallow-merge into the node data. Set a field to null to remove it (e.g., {"commandFilePath": null} deletes commandFilePath).'
               ),
+            type: z
+              .nativeEnum(NodeType)
+              .optional()
+              .describe(
+                'New node type. When type is changed, data must also be provided and will fully replace (not merge) the existing data.'
+              ),
+            parentId: z
+              .string()
+              .nullable()
+              .optional()
+              .describe('Parent group node ID. Set to null to remove from group.'),
+            style: z
+              .object({
+                width: z.number().optional(),
+                height: z.number().optional(),
+              })
+              .optional()
+              .describe('Node dimensions (mainly for group nodes).'),
           })
         )
         .describe(
-          'Array of node updates. Each must include an id and at least one of: name, position, or data.'
+          'Array of node updates. Each must include an id and at least one of: name, position, data, type, parentId, or style.'
         ),
       description: z
         .string()
@@ -391,20 +409,63 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
           const node = updatedWorkflow.nodes.find((n) => n.id === update.id);
           if (!node) continue; // Already validated above
 
+          const typeChanged = update.type !== undefined && update.type !== node.type;
+
+          // type変更時にdata未提供はエラー
+          if (typeChanged && update.data === undefined) {
+            return {
+              content: [
+                {
+                  type: 'text' as const,
+                  text: JSON.stringify({
+                    success: false,
+                    error: `When changing node type, data must also be provided to match the new type schema. Node ID: ${update.id}`,
+                  }),
+                },
+              ],
+            };
+          }
+
+          // type更新
+          if (update.type !== undefined) {
+            (node as any).type = update.type;
+          }
+
           if (update.name !== undefined) {
             node.name = update.name;
           }
           if (update.position !== undefined) {
             node.position = update.position;
           }
-          // Shallow merge, then remove null-valued fields (null = delete semantics)
-          const merged = { ...node.data, ...(update.data ?? {}) };
-          for (const key of Object.keys(merged)) {
-            if ((merged as Record<string, unknown>)[key] === null) {
-              delete (merged as Record<string, unknown>)[key];
+
+          // data: type変更時は完全置換、それ以外はシャローマージ
+          if (typeChanged && update.data !== undefined) {
+            // 完全置換
+            node.data = update.data as WorkflowNode['data'];
+          } else {
+            // Shallow merge, then remove null-valued fields (null = delete semantics)
+            const merged = { ...node.data, ...(update.data ?? {}) };
+            for (const key of Object.keys(merged)) {
+              if ((merged as Record<string, unknown>)[key] === null) {
+                delete (merged as Record<string, unknown>)[key];
+              }
+            }
+            node.data = merged as WorkflowNode['data'];
+          }
+
+          // parentId (null = 解除、undefined = 変更なし)
+          if ('parentId' in update) {
+            if (update.parentId === null || update.parentId === undefined) {
+              delete (node as any).parentId;
+            } else {
+              (node as any).parentId = update.parentId;
             }
           }
-          node.data = merged as WorkflowNode['data'];
+
+          // style
+          if (update.style !== undefined) {
+            (node as any).style = update.style;
+          }
         }
 
         // 4. Plan SubAgent files & validate
