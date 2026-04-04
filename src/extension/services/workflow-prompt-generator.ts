@@ -698,6 +698,23 @@ export function generateExecutionInstructions(
       sections.push(node.data.prompt || '');
       sections.push('```');
       sections.push('');
+      if (node.data.builtInType) {
+        sections.push('**Parallel Execution**: enabled');
+        sections.push('');
+        sections.push(
+          'When executing this node, assess whether the task involves multiple independent areas or concerns.'
+        );
+        sections.push(
+          'If so, launch multiple agents of the same subagent_type in parallel — one per independent area.'
+        );
+        sections.push('');
+        sections.push('Guidelines:');
+        sections.push('- Single area of concern → execute with 1 agent');
+        sections.push('- Multiple independent areas → spawn 1 agent per area, execute in parallel');
+        sections.push('- Wait for all agents to complete before proceeding to the next node');
+        sections.push('- Consolidate all agent results before passing to the next node');
+        sections.push('');
+      }
     }
   }
 
