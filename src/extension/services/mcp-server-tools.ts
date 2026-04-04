@@ -17,7 +17,12 @@ import * as path from 'node:path';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import type { PlannedSubAgentFile } from '../../shared/types/messages';
-import { NodeType, type Workflow, type WorkflowNode } from '../../shared/types/workflow-definition';
+import {
+  type BaseNode,
+  NodeType,
+  type Workflow,
+  type WorkflowNode,
+} from '../../shared/types/workflow-definition';
 import { getProjectCommandsDir } from '../utils/path-utils';
 import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
 import { scanAllCommands } from './command-service';
@@ -428,7 +433,7 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
 
           // type更新
           if (update.type !== undefined) {
-            (node as any).type = update.type;
+            (node as BaseNode).type = update.type;
           }
 
           if (update.name !== undefined) {
@@ -456,15 +461,15 @@ export function registerMcpTools(server: McpServer, manager: McpServerManager): 
           // parentId (null = 解除、undefined = 変更なし)
           if ('parentId' in update) {
             if (update.parentId === null || update.parentId === undefined) {
-              delete (node as any).parentId;
+              delete node.parentId;
             } else {
-              (node as any).parentId = update.parentId;
+              node.parentId = update.parentId;
             }
           }
 
           // style
           if (update.style !== undefined) {
-            (node as any).style = update.style;
+            node.style = update.style;
           }
         }
 
