@@ -252,7 +252,7 @@ const App: React.FC = () => {
       const { nodes: loadedNodes, edges: loadedEdges } = deserializeWorkflow(pending.workflow);
       setCanvas(loadedNodes, loadedEdges);
       setWorkflowName(pending.workflow.name);
-      setActiveWorkflow(pending.workflow);
+      setActiveWorkflow(pending.workflow, { clearHistory: false });
       vscode.postMessage({
         type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
         payload: { correlationId: pending.correlationId, success: true },
@@ -365,7 +365,7 @@ const App: React.FC = () => {
           setCanvas(loadedNodes, loadedEdges);
           setWorkflowName(workflow.name);
           // Set as active workflow to preserve conversation history
-          setActiveWorkflow(workflow);
+          setActiveWorkflow(workflow, { clearHistory: false });
 
           // TODO: Select imported workflow in dropdown after fixing selection logic
         }
@@ -506,7 +506,7 @@ const App: React.FC = () => {
             );
             setCanvas(loadedNodes, loadedEdges);
             setWorkflowName(payload.workflow.name);
-            setActiveWorkflow(payload.workflow);
+            setActiveWorkflow(payload.workflow, { clearHistory: false });
             vscode.postMessage({
               type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
               payload: {
