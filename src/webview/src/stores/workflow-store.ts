@@ -142,7 +142,7 @@ interface WorkflowStore {
   clearWorkflow: () => void;
   addGeneratedWorkflow: (workflow: Workflow) => void;
   updateWorkflow: (workflow: Workflow) => void;
-  setActiveWorkflow: (workflow: Workflow) => void; // Phase 3.12
+  setActiveWorkflow: (workflow: Workflow, options?: { clearHistory?: boolean }) => void; // Phase 3.12
   updateActiveWorkflowMetadata: (updates: Partial<Workflow>) => void; // Update activeWorkflow without changing canvas
   ensureActiveWorkflow: () => void; // Ensure activeWorkflow exists (create from canvas if null)
 
@@ -892,7 +892,7 @@ export const useWorkflowStore = create<WorkflowStore>()(
       },
 
       // Phase 3.12: Set active workflow and update canvas
-      setActiveWorkflow: (workflow: Workflow) => {
+      setActiveWorkflow: (workflow: Workflow, options?: { clearHistory?: boolean }) => {
         // Convert workflow nodes to ReactFlow nodes
         const newNodes: Node[] = sortNodesParentFirst(
           workflow.nodes.map((node) => ({
@@ -927,7 +927,10 @@ export const useWorkflowStore = create<WorkflowStore>()(
           subAgentFlows: workflow.subAgentFlows || [],
         });
         // Clear undo/redo history to prevent cross-workflow undo
-        useWorkflowStore.temporal.getState().clear();
+        // Skip clearing when explicitly requested (e.g., MCP apply on same workflow)
+        if (options?.clearHistory !== false) {
+          useWorkflowStore.temporal.getState().clear();
+        }
       },
 
       updateActiveWorkflowMetadata: (updates: Partial<Workflow>) => {
