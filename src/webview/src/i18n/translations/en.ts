@@ -1034,4 +1034,14 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'commentary.waiting': 'Waiting for agent activity...',
   'commentary.inactive': 'Run a workflow with Commentary enabled to see real-time commentary.',
   'commentary.providerSelect': 'Select Commentary AI provider',
+
+  // Sample Workflows
+  'toolbar.sampleWorkflows': 'Sample Workflows',
+  'sample.dialog.title': 'Sample Workflows',
+  'sample.dialog.description': 'Load a sample workflow to explore what you can build.',
+  'sample.dialog.nodeCount': '{{count}} nodes',
+  'sample.dialog.loadButton': 'Load',
+  'sample.githubIssuePlanning.name': 'GitHub Issue Planning',
+  'sample.githubIssuePlanning.description':
+    'A planning workflow for GitHub issues: fetch issue, analyze current code, verify fixes, and retrospective.',
 };

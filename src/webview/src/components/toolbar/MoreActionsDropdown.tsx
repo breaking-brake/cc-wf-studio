@@ -9,6 +9,7 @@
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import {
+  BookOpen,
   Bot,
   Check,
   ChevronLeft,
@@ -55,6 +56,7 @@ interface MoreActionsDropdownProps {
   isCommentaryEnabled: boolean;
   onToggleCommentary: () => void;
   onOpenWhatsNew: () => void;
+  onOpenSampleWorkflows: () => void;
   unreadReleaseCount: number;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -84,6 +86,7 @@ export function MoreActionsDropdown({
   isCommentaryEnabled,
   onToggleCommentary,
   onOpenWhatsNew,
+  onOpenSampleWorkflows,
   unreadReleaseCount,
   open,
   onOpenChange,
@@ -518,6 +521,25 @@ export function MoreActionsDropdown({
           >
             <HelpCircle size={14} />
             <span>{t('toolbar.help')}</span>
+          </DropdownMenu.Item>
+
+          {/* Sample Workflows */}
+          <DropdownMenu.Item
+            onSelect={onOpenSampleWorkflows}
+            style={{
+              padding: '8px 12px',
+              fontSize: `${FONT_SIZES.small}px`,
+              color: 'var(--vscode-foreground)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              outline: 'none',
+              borderRadius: '2px',
+            }}
+          >
+            <BookOpen size={14} />
+            <span>{t('toolbar.sampleWorkflows')}</span>
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>

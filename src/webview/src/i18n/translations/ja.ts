@@ -1027,4 +1027,15 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'commentary.inactive':
     'Commentary を有効にしてワークフローを実行すると、リアルタイム実況が表示されます。',
   'commentary.providerSelect': 'Commentary AI プロバイダーを選択',
+
+  // Sample Workflows
+  'toolbar.sampleWorkflows': 'サンプルワークフロー',
+  'sample.dialog.title': 'サンプルワークフロー',
+  'sample.dialog.description':
+    'サンプルワークフローを読み込んで、どんなものが作れるか体験しましょう。',
+  'sample.dialog.nodeCount': '{{count}} ノード',
+  'sample.dialog.loadButton': '読み込む',
+  'sample.githubIssuePlanning.name': 'GitHub Issue プランニング',
+  'sample.githubIssuePlanning.description':
+    'GitHub Issueに対するプランニングワークフロー：Issue取得、現状コード分析、修正の検証確認、振り返り。',
 };

@@ -1,0 +1,702 @@
+{
+  "meta": {
+    "id": "github-issue-planning-sample",
+    "nameKey": "sample.githubIssuePlanning.name",
+    "descriptionKey": "sample.githubIssuePlanning.description",
+    "difficulty": "advanced",
+    "tags": [
+      "planning",
+      "github"
+    ],
+    "nodeCount": 28
+  },
+  "workflow": {
+    "id": "sample-github-issue-planning",
+    "name": "github-issue-planning-en",
+    "version": "1.0.0",
+    "nodes": [
+      {
+        "id": "group-1",
+        "type": "group",
+        "name": "group-1",
+        "position": {
+          "x": 270,
+          "y": 165
+        },
+        "data": {
+          "label": "1. Fetch Issue"
+        },
+        "style": {
+          "width": 372,
+          "height": 380
+        }
+      },
+      {
+        "id": "group-2",
+        "type": "group",
+        "name": "group-2",
+        "position": {
+          "x": 675,
+          "y": 165
+        },
+        "data": {
+          "label": "2. Confirm Understanding"
+        },
+        "style": {
+          "width": 575,
+          "height": 405
+        }
+      },
+      {
+        "id": "group-3",
+        "type": "group",
+        "name": "group-3",
+        "position": {
+          "x": 1290,
+          "y": 165
+        },
+        "data": {
+          "label": "3. Reproduce"
+        },
+        "style": {
+          "width": 375,
+          "height": 550
+        }
+      },
+      {
+        "id": "group-5",
+        "type": "group",
+        "name": "group-5",
+        "position": {
+          "x": 1700,
+          "y": 165
+        },
+        "data": {
+          "label": "4. Analysis & Effort Estimation"
+        },
+        "style": {
+          "width": 380,
+          "height": 630
+        }
+      },
+      {
+        "id": "group-6-merged",
+        "type": "group",
+        "name": "group-6-merged",
+        "position": {
+          "x": 2100,
+          "y": 165
+        },
+        "data": {
+          "label": "5. Code Fix & Verification"
+        },
+        "style": {
+          "width": 770,
+          "height": 665
+        }
+      },
+      {
+        "id": "group-7",
+        "type": "group",
+        "name": "group-7",
+        "position": {
+          "x": 2925,
+          "y": 165
+        },
+        "data": {
+          "label": "6. Retrospective & Knowledge Persistence"
+        },
+        "style": {
+          "width": 480,
+          "height": 580
+        }
+      },
+      {
+        "id": "start-1",
+        "type": "start",
+        "name": "start-1",
+        "position": {
+          "x": 105,
+          "y": 345
+        },
+        "data": {
+          "label": "Start"
+        }
+      },
+      {
+        "id": "prompt-ticket",
+        "type": "prompt",
+        "name": "prompt-ticket",
+        "position": {
+          "x": 30,
+          "y": 75
+        },
+        "data": {
+          "label": "Enter Issue URL",
+          "prompt": "Please enter the GitHub Issue URL or number.\n\nExample: https://github.com/owner/repo/issues/123\nOr: #123\n\nThe current workspace repository will be used.",
+          "variables": {
+            "issueUrl": ""
+          }
+        },
+        "parentId": "group-1"
+      },
+      {
+        "id": "prompt-gh-fetch",
+        "type": "prompt",
+        "name": "prompt-gh-fetch",
+        "position": {
+          "x": 30,
+          "y": 210
+        },
+        "data": {
+          "label": "Fetch GitHub Issue",
+          "prompt": "Fetch the issue details from the GitHub Issue URL or number entered by the user using the `gh issue view` command.\n\n**Steps:**\n1. Extract the issue number from the input\n2. Run `gh issue view <number> --json title,body,labels,assignees,state,comments`\n3. Organize the fetched content and pass it to the next step\n\nIf the fetch fails, inform the user of the error."
+        },
+        "parentId": "group-1"
+      },
+      {
+        "id": "prompt-understanding",
+        "type": "prompt",
+        "name": "prompt-understanding",
+        "position": {
+          "x": 30,
+          "y": 60
+        },
+        "data": {
+          "label": "Present AI Understanding",
+          "prompt": "Based on the GitHub Issue content, here is my understanding:\n\n**Current Problem / Symptoms**\n- [List the problems or symptoms described in the issue]\n\n**User's Request**\n- [List the requested changes]\n\n**Expected Outcome**\n- [List the expected results]\n\nIs this understanding correct?\nIf there are any misunderstandings, please select \"Needs Correction\" in the next question."
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "ask-understanding",
+        "type": "askUserQuestion",
+        "name": "ask-understanding",
+        "position": {
+          "x": 30,
+          "y": 210
+        },
+        "data": {
+          "questionText": "Is this understanding correct?",
+          "options": [
+            {
+              "label": "Correct, proceed",
+              "description": "The AI's understanding is correct. Start planning.",
+              "id": "opt-en-understanding-yes"
+            },
+            {
+              "label": "Needs correction",
+              "description": "There are misunderstandings that need to be corrected.",
+              "id": "opt-en-understanding-no"
+            }
+          ],
+          "multiSelect": false,
+          "useAiSuggestions": false,
+          "outputPorts": 2
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "prompt-clarify",
+        "type": "prompt",
+        "name": "prompt-clarify",
+        "position": {
+          "x": 255,
+          "y": 270
+        },
+        "data": {
+          "label": "Apply Corrections",
+          "prompt": "Thank you. Please tell me what needs to be corrected.\n\nWe'll align our understanding through dialogue.\nOnce aligned, we'll proceed to planning."
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "ask-reproduce",
+        "type": "askUserQuestion",
+        "name": "ask-reproduce",
+        "position": {
+          "x": 30,
+          "y": 60
+        },
+        "data": {
+          "questionText": "Would you like to reproduce the issue?",
+          "options": [
+            {
+              "label": "Yes, reproduce",
+              "description": "I want to confirm the issue can be reproduced.",
+              "id": "opt-en-reproduce-yes"
+            },
+            {
+              "label": "Skip",
+              "description": "Skip reproduction and move to the next step.",
+              "id": "opt-en-reproduce-skip"
+            }
+          ],
+          "multiSelect": false,
+          "useAiSuggestions": false,
+          "outputPorts": 2
+        },
+        "parentId": "group-3"
+      },
+      {
+        "id": "prompt-reproduce",
+        "type": "prompt",
+        "name": "prompt-reproduce",
+        "position": {
+          "x": 30,
+          "y": 225
+        },
+        "data": {
+          "label": "Reproduction Steps",
+          "prompt": "I've extracted the reproduction steps from the issue:\n\n**Reproduction Steps**\n1. [Specific operation steps]\n2. [Next operation]\n3. ...\n\n**How to Verify**\n- [Where to check for the problem]\n- [Difference between expected and actual results]\n\nPlease verify whether the issue can be reproduced using these steps."
+        },
+        "parentId": "group-3"
+      },
+      {
+        "id": "ask-reproduce-result",
+        "type": "askUserQuestion",
+        "name": "ask-reproduce-result",
+        "position": {
+          "x": 75,
+          "y": 390
+        },
+        "data": {
+          "questionText": "Reproduction result?",
+          "options": [
+            {
+              "label": "Reproduced",
+              "description": "The issue was successfully reproduced.",
+              "id": "opt-en-reproduced-yes"
+            },
+            {
+              "label": "Not reproduced",
+              "description": "The issue could not be reproduced.",
+              "id": "opt-en-reproduced-no"
+            }
+          ],
+          "multiSelect": false,
+          "useAiSuggestions": false,
+          "outputPorts": 2
+        },
+        "parentId": "group-3"
+      },
+      {
+        "id": "prompt-analysis-start",
+        "type": "prompt",
+        "name": "prompt-analysis-start",
+        "position": {
+          "x": 30,
+          "y": 60
+        },
+        "data": {
+          "label": "Start Analysis",
+          "prompt": "Analyzing the GitHub Issue content.\n\n**Tasks:**\n1. Understand the problem from the issue description\n2. Identify related code files\n3. Investigate the problem areas in detail (record file paths and line numbers)\n4. Formulate a fix strategy\n\nPlease begin the analysis."
+        },
+        "parentId": "group-5"
+      },
+      {
+        "id": "agent-file-investigation",
+        "type": "subAgent",
+        "name": "agent-file-investigation",
+        "position": {
+          "x": 30,
+          "y": 195
+        },
+        "data": {
+          "description": "Investigate codebase",
+          "agentDefinition": "Fast agent specialized for exploring codebases. Use this when you need to quickly find files by patterns, search code for keywords, or answer questions about the codebase.",
+          "prompt": "Investigate files related to the issue:\n\n**Tasks:**\n1. Use Read/Grep/Glob tools to identify related files\n2. Review code at problem areas (include file paths and line numbers)\n3. Investigate the scope of impact\n4. Check dependencies and related components\n\n**Important:** Report findings with specific file paths, line numbers, and code snippets.",
+          "builtInType": "explore",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-5"
+      },
+      {
+        "id": "agent-solution-design",
+        "type": "subAgent",
+        "name": "agent-solution-design",
+        "position": {
+          "x": 30,
+          "y": 330
+        },
+        "data": {
+          "description": "Design fix strategy",
+          "agentDefinition": "Software architect agent for designing implementation plans. Use this when you need to plan the implementation strategy for a task. Returns step-by-step plans, identifies critical files, and considers architectural trade-offs.",
+          "prompt": "Based on the investigation, design a fix strategy:\n\n**Tasks:**\n1. Identify the locations to fix (files, functions, line numbers)\n2. Describe the fix details\n3. Define implementation steps\n4. Evaluate impact scope and risks\n5. Consider architectural trade-offs\n\n**Output Format:**\n- Fix Target: File paths and affected areas\n- Fix Content: Specific changes\n- Implementation Steps: Step-by-step plan\n- Impact Scope: Affected components and files\n- Risk Assessment: Anticipated risks and mitigations\n\nPlease organize and present the analysis clearly.",
+          "builtInType": "plan",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-5"
+      },
+      {
+        "id": "prompt-estimate",
+        "type": "prompt",
+        "name": "prompt-estimate",
+        "position": {
+          "x": 30,
+          "y": 480
+        },
+        "data": {
+          "label": "Effort Estimation",
+          "prompt": "Based on the analysis and investigated files, evaluate the code change effort:\n\n**Evaluation Items:**\n1. Number of files to modify\n2. Estimated lines changed (additions/modifications/deletions)\n3. Complexity (simple/moderate/complex)\n4. Time estimate (in minutes)\n5. Risk assessment (impact scope and side effects)\n\n**Output Format:**\n- Change Size: Small/Medium/Large\n- Files: X files\n- Lines: ~Y lines\n- Complexity: Simple/Moderate/Complex\n- Time Estimate: ~Z minutes\n- Risk: Low/Medium/High\n- Rationale: (detailed explanation)\n\nPresent this evaluation clearly to the user."
+        },
+        "parentId": "group-5"
+      },
+      {
+        "id": "ask-modify",
+        "type": "askUserQuestion",
+        "name": "ask-modify",
+        "position": {
+          "x": 40,
+          "y": 60
+        },
+        "data": {
+          "questionText": "Would you like to try the fix during planning? (for verification)",
+          "options": [
+            {
+              "label": "Try the fix",
+              "description": "Actually implement the fix and verify it during planning."
+            },
+            {
+              "label": "Skip the fix",
+              "description": "End with planning only, without making changes."
+            }
+          ],
+          "multiSelect": false,
+          "useAiSuggestions": false,
+          "outputPorts": 2
+        },
+        "parentId": "group-6-merged"
+      },
+      {
+        "id": "agent-2",
+        "type": "subAgent",
+        "name": "agent-2",
+        "position": {
+          "x": 60,
+          "y": 315
+        },
+        "data": {
+          "description": "Implement code fix",
+          "agentDefinition": "General-purpose agent for researching complex questions, searching for code, and executing multi-step tasks. Use this for code modifications, file creation/editing, and shell execution.",
+          "prompt": "Based on the analysis and fix strategy, try implementing the fix as a verification during planning:\n\n**Tasks:**\n1. Implement the proposed changes\n2. Clearly explain the modified areas\n3. Confirm the impact scope\n\nOnce complete, prompt the user to verify.",
+          "builtInType": "general-purpose",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-6-merged"
+      },
+      {
+        "id": "prompt-1",
+        "type": "prompt",
+        "name": "prompt-1",
+        "position": {
+          "x": 420,
+          "y": 90
+        },
+        "data": {
+          "label": "Verify Results",
+          "prompt": "Please verify the changes in your local environment:\n\n1. Start the dev server (if needed)\n2. Check the modified areas\n3. Verify the issue is resolved\n\nProceed to the next step when verification is complete."
+        },
+        "parentId": "group-6-merged"
+      },
+      {
+        "id": "ask-1",
+        "type": "askUserQuestion",
+        "name": "ask-1",
+        "position": {
+          "x": 435,
+          "y": 270
+        },
+        "data": {
+          "questionText": "How did the verification go?",
+          "options": [
+            {
+              "label": "Verification complete",
+              "description": "The fix works correctly and the issue is resolved.",
+              "id": "opt-en-verify-done"
+            },
+            {
+              "label": "Additional fix needed",
+              "description": "There are still issues that need additional changes.",
+              "id": "opt-en-verify-more"
+            }
+          ],
+          "multiSelect": false,
+          "useAiSuggestions": false,
+          "outputPorts": 2
+        },
+        "parentId": "group-6-merged"
+      },
+      {
+        "id": "agent-3",
+        "type": "subAgent",
+        "name": "agent-3",
+        "position": {
+          "x": 440,
+          "y": 480
+        },
+        "data": {
+          "description": "Apply additional fixes",
+          "agentDefinition": "General-purpose agent for researching complex questions, searching for code, and executing multi-step tasks. Use this for code modifications, file creation/editing, and shell execution.",
+          "prompt": "Apply additional fixes based on user feedback:\n\n**Tasks:**\n1. Review the reported issues\n2. Implement the necessary fixes\n3. Prompt for re-verification\n\nRespond flexibly to the user's instructions.",
+          "builtInType": "general-purpose",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-6-merged"
+      },
+      {
+        "id": "agent-retrospective",
+        "type": "subAgent",
+        "name": "agent-retrospective",
+        "position": {
+          "x": 40,
+          "y": 60
+        },
+        "data": {
+          "description": "Retrospective analysis and proposals",
+          "agentDefinition": "Software architect agent for designing implementation plans. Use this when you need to plan the implementation strategy for a task. Returns step-by-step plans, identifies critical files, and considers architectural trade-offs.",
+          "prompt": "Review the entire issue resolution process and propose knowledge items to persist, presented as a numbered list.\n\n**Analysis Perspectives:**\n1. Root cause and nature of the problem\n2. Validity of the solution approach\n3. Reusable patterns and insights\n4. Process improvements\n\n**Proposal Format (numbered list):**\nInclude the target destination and specific content for each proposal.\n\nExample:\n1. [Workflow] Add a step for XX in the reproduction phase\n   -> Content: ...\n2. [Skill (project)] Create a skill for the XX investigation pattern\n   -> Skill name: xxx, Content: ...\n3. [MEMORY.md (project)] Record the decision criteria for XX\n   -> Content: ...\n4. [CLAUDE.md (project)] Add a rule for XX\n   -> Content: ...\n\nDestination options:\n- **Workflow**: Improve this workflow's flow and prompts\n- **Skill**: Create reusable pattern as a skill (user/project/local)\n- **MEMORY.md**: Record insights and decision criteria (user/project/local)\n- **CLAUDE.md**: Add development rules and conventions (user: ~/.claude/CLAUDE.md / project: repo root)\n\nOmit destinations where no proposal is needed.\nInclude the scope in each proposal.",
+          "builtInType": "plan",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-7"
+      },
+      {
+        "id": "prompt-select",
+        "type": "prompt",
+        "name": "prompt-select",
+        "position": {
+          "x": 40,
+          "y": 240
+        },
+        "data": {
+          "label": "Select Proposals",
+          "prompt": "Please review the AI's retrospective proposals above.\n\nTell me which proposals to adopt by number.\n(e.g., \"Adopt 1 and 3\", \"All\", \"Everything except 2\", \"None\")\n\nFeel free to add corrections or additional notes."
+        },
+        "parentId": "group-7"
+      },
+      {
+        "id": "agent-reflect",
+        "type": "subAgent",
+        "name": "agent-reflect",
+        "position": {
+          "x": 40,
+          "y": 410
+        },
+        "data": {
+          "description": "Persist knowledge to destinations",
+          "agentDefinition": "General-purpose agent for researching complex questions, searching for code, and executing multi-step tasks. Use this for code modifications, file creation/editing, and shell execution.",
+          "prompt": "Persist the adopted proposals to their specified destinations.\n\n**Steps per destination:**\n\n1. **Workflow**: Organize improvements and update via MCP tools\n2. **Skill**: Create or update skill MD files in `.claude/skills/`\n3. **MEMORY.md**: Append insights to the appropriate scope's MEMORY.md\n4. **CLAUDE.md**: Append rules/conventions to the appropriate scope's CLAUDE.md\n\n**Important:**\n- Present the specific content to the user for final confirmation before writing\n- Incorporate any corrections or additions from the user\n- Do not write without explicit approval",
+          "builtInType": "general-purpose",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-7"
+      },
+      {
+        "id": "end-1",
+        "type": "end",
+        "name": "end-1",
+        "position": {
+          "x": 3460,
+          "y": 330
+        },
+        "data": {
+          "label": "End"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c1",
+        "from": "start-1",
+        "to": "prompt-ticket",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c2",
+        "from": "prompt-ticket",
+        "to": "prompt-gh-fetch",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c3",
+        "from": "prompt-gh-fetch",
+        "to": "prompt-understanding",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c3-1",
+        "from": "prompt-understanding",
+        "to": "ask-understanding",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c3-5",
+        "from": "ask-understanding",
+        "to": "ask-reproduce",
+        "fromPort": "branch-0",
+        "toPort": "input"
+      },
+      {
+        "id": "c3-3",
+        "from": "ask-understanding",
+        "to": "prompt-clarify",
+        "fromPort": "branch-1",
+        "toPort": "input"
+      },
+      {
+        "id": "c3-6",
+        "from": "prompt-clarify",
+        "to": "ask-reproduce",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c3-7",
+        "from": "ask-reproduce",
+        "to": "prompt-reproduce",
+        "fromPort": "branch-0",
+        "toPort": "input"
+      },
+      {
+        "id": "c3-8",
+        "from": "ask-reproduce",
+        "to": "prompt-analysis-start",
+        "fromPort": "branch-1",
+        "toPort": "input"
+      },
+      {
+        "id": "c3-9",
+        "from": "prompt-reproduce",
+        "to": "ask-reproduce-result",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c3-10",
+        "from": "ask-reproduce-result",
+        "to": "prompt-analysis-start",
+        "fromPort": "branch-0",
+        "toPort": "input"
+      },
+      {
+        "id": "c3-11",
+        "from": "ask-reproduce-result",
+        "to": "ask-reproduce",
+        "fromPort": "branch-1",
+        "toPort": "input"
+      },
+      {
+        "id": "c5",
+        "from": "prompt-analysis-start",
+        "to": "agent-file-investigation",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c6",
+        "from": "agent-file-investigation",
+        "to": "agent-solution-design",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c7",
+        "from": "agent-solution-design",
+        "to": "prompt-estimate",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c8",
+        "from": "prompt-estimate",
+        "to": "ask-modify",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c9",
+        "from": "ask-modify",
+        "to": "agent-2",
+        "fromPort": "branch-0",
+        "toPort": "input"
+      },
+      {
+        "id": "c10",
+        "from": "ask-modify",
+        "to": "agent-retrospective",
+        "fromPort": "branch-1",
+        "toPort": "input"
+      },
+      {
+        "id": "c11",
+        "from": "agent-2",
+        "to": "prompt-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c12",
+        "from": "prompt-1",
+        "to": "ask-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c13",
+        "from": "ask-1",
+        "to": "agent-retrospective",
+        "fromPort": "branch-0",
+        "toPort": "input"
+      },
+      {
+        "id": "c14",
+        "from": "ask-1",
+        "to": "agent-3",
+        "fromPort": "branch-1",
+        "toPort": "input"
+      },
+      {
+        "id": "c15",
+        "from": "agent-3",
+        "to": "prompt-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c16",
+        "from": "agent-retrospective",
+        "to": "prompt-select",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c17",
+        "from": "prompt-select",
+        "to": "agent-reflect",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c18",
+        "from": "agent-reflect",
+        "to": "end-1",
+        "fromPort": "output",
+        "toPort": "input"
+      }
+    ],
+    "createdAt": "2026-04-06T00:00:00.000Z",
+    "updatedAt": "2026-04-06T00:00:00.000Z",
+    "subAgentFlows": []
+  }
+}

@@ -55,6 +55,7 @@ interface ToolbarProps {
   onError: (error: { code: string; message: string; details?: unknown }) => void;
   onStartTour: () => void;
   onShareToSlack: () => void;
+  onOpenSampleWorkflows?: () => void;
   moreActionsOpen?: boolean;
   onMoreActionsOpenChange?: (open: boolean) => void;
   initialUnreadReleaseCount?: number;
@@ -66,6 +67,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onError,
   onStartTour,
   onShareToSlack,
+  onOpenSampleWorkflows,
   moreActionsOpen,
   onMoreActionsOpenChange,
   initialUnreadReleaseCount = 0,
@@ -2562,6 +2564,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               isCommentaryEnabled={isCommentaryFeatureEnabled}
               onToggleCommentary={toggleCommentaryFeature}
               onOpenWhatsNew={() => setIsWhatsNewDialogOpen(true)}
+              onOpenSampleWorkflows={onOpenSampleWorkflows ?? (() => undefined)}
               unreadReleaseCount={unreadReleaseCount}
               open={moreActionsOpen}
               onOpenChange={onMoreActionsOpenChange}

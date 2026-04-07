@@ -1092,6 +1092,22 @@ export interface GetSkillVersionDetailsFailedPayload {
 }
 
 // ============================================================================
+// Sample Workflow Payloads
+// ============================================================================
+
+export interface SampleWorkflowListPayload {
+  samples: import('./sample-workflow').SampleWorkflowMeta[];
+}
+
+export interface LoadSampleWorkflowRequestPayload {
+  sampleId: string;
+}
+
+export interface SampleWorkflowLoadedPayload {
+  workflow: Workflow;
+}
+
+// ============================================================================
 // Extension → Webview Messages
 // ============================================================================
 
@@ -1240,7 +1256,9 @@ export type ExtensionMessage =
   | Message<{ isProcessing: boolean }, 'COMMENTARY_PROCESSING'>
   | Message<CommentarySessionPayload, 'COMMENTARY_SESSION_STARTED'>
   | Message<void, 'COMMENTARY_SESSION_ENDED'>
-  | Message<CommentaryErrorPayload, 'COMMENTARY_ERROR'>;
+  | Message<CommentaryErrorPayload, 'COMMENTARY_ERROR'>
+  | Message<SampleWorkflowListPayload, 'SAMPLE_WORKFLOW_LIST'>
+  | Message<SampleWorkflowLoadedPayload, 'SAMPLE_WORKFLOW_LOADED'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -2412,7 +2430,9 @@ export type WebviewMessage =
       },
       'TOGGLE_COMMENTARY'
     >
-  | Message<void, 'STOP_COMMENTARY'>;
+  | Message<void, 'STOP_COMMENTARY'>
+  | Message<void, 'LIST_SAMPLE_WORKFLOWS'>
+  | Message<LoadSampleWorkflowRequestPayload, 'LOAD_SAMPLE_WORKFLOW'>;
 
 // ============================================================================
 // Error Codes

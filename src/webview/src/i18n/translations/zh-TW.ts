@@ -986,4 +986,14 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'commentary.waiting': '等待代理活動中...',
   'commentary.inactive': '啟用 Commentary 並執行工作流程，即可看到即時解說。',
   'commentary.providerSelect': '選擇 Commentary AI 提供商',
+
+  // Sample Workflows
+  'toolbar.sampleWorkflows': '範例工作流程',
+  'sample.dialog.title': '範例工作流程',
+  'sample.dialog.description': '載入範例工作流程，了解您可以建構什麼。',
+  'sample.dialog.nodeCount': '{{count}} 個節點',
+  'sample.dialog.loadButton': '載入',
+  'sample.githubIssuePlanning.name': 'GitHub Issue 規劃',
+  'sample.githubIssuePlanning.description':
+    'GitHub Issue 規劃工作流程：取得 Issue、分析現有程式碼、驗證修復、回顧總結。',
 };

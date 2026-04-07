@@ -935,4 +935,13 @@ export interface WebviewTranslationKeys {
   'commentary.waiting': string;
   'commentary.inactive': string;
   'commentary.providerSelect': string;
+
+  // Sample Workflows
+  'toolbar.sampleWorkflows': string;
+  'sample.dialog.title': string;
+  'sample.dialog.description': string;
+  'sample.dialog.nodeCount': string;
+  'sample.dialog.loadButton': string;
+  'sample.githubIssuePlanning.name': string;
+  'sample.githubIssuePlanning.description': string;
 }

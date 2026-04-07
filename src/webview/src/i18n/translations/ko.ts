@@ -1019,4 +1019,14 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'commentary.waiting': '에이전트 활동 대기 중...',
   'commentary.inactive': 'Commentary를 활성화하고 워크플로우를 실행하면 실시간 해설이 표시됩니다.',
   'commentary.providerSelect': 'Commentary AI 프로바이더 선택',
+
+  // Sample Workflows
+  'toolbar.sampleWorkflows': '샘플 워크플로우',
+  'sample.dialog.title': '샘플 워크플로우',
+  'sample.dialog.description': '샘플 워크플로우를 불러와 어떤 것을 만들 수 있는지 체험해 보세요.',
+  'sample.dialog.nodeCount': '{{count}}개 노드',
+  'sample.dialog.loadButton': '불러오기',
+  'sample.githubIssuePlanning.name': 'GitHub Issue 플래닝',
+  'sample.githubIssuePlanning.description':
+    'GitHub Issue 플래닝 워크플로우: Issue 조회, 현재 코드 분석, 수정 검증 확인, 회고.',
 };

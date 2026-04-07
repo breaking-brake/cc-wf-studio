@@ -985,4 +985,14 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'commentary.waiting': '等待代理活动中...',
   'commentary.inactive': '启用 Commentary 并运行工作流，即可看到实时解说。',
   'commentary.providerSelect': '选择 Commentary AI 提供商',
+
+  // Sample Workflows
+  'toolbar.sampleWorkflows': '示例工作流',
+  'sample.dialog.title': '示例工作流',
+  'sample.dialog.description': '加载示例工作流，了解您可以构建什么。',
+  'sample.dialog.nodeCount': '{{count}} 个节点',
+  'sample.dialog.loadButton': '加载',
+  'sample.githubIssuePlanning.name': 'GitHub Issue 规划',
+  'sample.githubIssuePlanning.description':
+    'GitHub Issue 规划工作流：获取 Issue、分析现有代码、验证修复、回顾总结。',
 };
