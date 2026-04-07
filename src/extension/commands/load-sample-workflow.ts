@@ -5,7 +5,7 @@
  * from the resources/samples/ directory bundled with the extension.
  */
 
-import * as fs from 'node:fs';
+import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import type * as vscode from 'vscode';
 import type {
@@ -31,7 +31,7 @@ export async function listSampleWorkflows(
 
     let files: string[] = [];
     try {
-      files = fs.readdirSync(samplesDir);
+      files = await fs.readdir(samplesDir);
     } catch (error) {
       console.log('No samples directory or empty:', error);
       files = [];
@@ -45,7 +45,7 @@ export async function listSampleWorkflows(
 
       try {
         const filePath = path.join(samplesDir, filename);
-        const content = fs.readFileSync(filePath, 'utf-8');
+        const content = await fs.readFile(filePath, 'utf-8');
         const parsed: SampleWorkflowFile = JSON.parse(content);
 
         if (parsed.meta) {
@@ -92,9 +92,26 @@ export async function loadSampleWorkflow(
   requestId?: string
 ): Promise<void> {
   try {
-    const filePath = path.join(extensionPath, 'resources', 'samples', `${sampleId}.json`);
+    const baseDir = path.resolve(extensionPath, 'resources', 'samples');
+    const filePath = path.resolve(baseDir, `${sampleId}.json`);
 
-    if (!fs.existsSync(filePath)) {
+    // Prevent path traversal
+    if (!filePath.startsWith(baseDir + path.sep)) {
+      webview.postMessage({
+        type: 'ERROR',
+        requestId,
+        payload: {
+          code: 'LOAD_FAILED',
+          message: `Invalid sample workflow ID: "${sampleId}"`,
+        },
+      });
+      return;
+    }
+
+    let content: string;
+    try {
+      content = await fs.readFile(filePath, 'utf-8');
+    } catch {
       webview.postMessage({
         type: 'ERROR',
         requestId,
@@ -106,7 +123,6 @@ export async function loadSampleWorkflow(
       return;
     }
 
-    const content = fs.readFileSync(filePath, 'utf-8');
     const parsed: SampleWorkflowFile = JSON.parse(content);
 
     const payload: SampleWorkflowLoadedPayload = { workflow: parsed.workflow };

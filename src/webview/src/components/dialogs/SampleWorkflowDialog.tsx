@@ -29,18 +29,21 @@ export const SampleWorkflowDialog: React.FC<SampleWorkflowDialogProps> = ({
 }) => {
   const { t } = useTranslation();
   const [samples, setSamples] = useState<SampleWorkflowMeta[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!isOpen) {
       return;
     }
 
+    setIsLoading(true);
+
     // Listen for sample workflow list response
     const handler = (event: MessageEvent) => {
       const message = event.data;
       if (message.type === 'SAMPLE_WORKFLOW_LIST') {
-        const payload = message.payload as { samples: SampleWorkflowMeta[] };
-        setSamples(payload.samples ?? []);
+        setSamples(message.payload?.samples ?? []);
+        setIsLoading(false);
       }
     };
 
@@ -58,6 +61,7 @@ export const SampleWorkflowDialog: React.FC<SampleWorkflowDialogProps> = ({
   useEffect(() => {
     if (!isOpen) {
       setSamples([]);
+      setIsLoading(true);
     }
   }, [isOpen]);
 
@@ -128,7 +132,7 @@ export const SampleWorkflowDialog: React.FC<SampleWorkflowDialogProps> = ({
                 gap: '12px',
               }}
             >
-              {samples.length === 0 ? (
+              {isLoading ? (
                 <div
                   style={{
                     padding: '32px',
@@ -138,6 +142,17 @@ export const SampleWorkflowDialog: React.FC<SampleWorkflowDialogProps> = ({
                   }}
                 >
                   Loading...
+                </div>
+              ) : samples.length === 0 ? (
+                <div
+                  style={{
+                    padding: '32px',
+                    textAlign: 'center',
+                    color: 'var(--vscode-descriptionForeground)',
+                    fontSize: '13px',
+                  }}
+                >
+                  No samples available.
                 </div>
               ) : (
                 samples.map((sample) => {

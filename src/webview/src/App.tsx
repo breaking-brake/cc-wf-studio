@@ -424,6 +424,12 @@ const App: React.FC = () => {
           pendingTourAfterSampleLoadRef.current = false;
           handleStartTour();
         }
+      } else if (message.type === 'ERROR') {
+        // If sample load failed during first-time user flow, still start the tour
+        if (pendingTourAfterSampleLoadRef.current) {
+          pendingTourAfterSampleLoadRef.current = false;
+          handleStartTour();
+        }
       } else if (message.type === 'PREPARE_WORKFLOW_LOAD') {
         // Show loading overlay while loading new workflow from preview
         setIsLoadingWorkflowFromPreview(true);

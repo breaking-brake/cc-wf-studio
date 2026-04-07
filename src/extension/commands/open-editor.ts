@@ -951,6 +951,15 @@ export function registerOpenEditorCommand(
                   message.payload.sampleId,
                   message.requestId
                 );
+              } else {
+                webview.postMessage({
+                  type: 'ERROR',
+                  requestId: message.requestId,
+                  payload: {
+                    code: 'VALIDATION_ERROR',
+                    message: 'Sample workflow ID is required',
+                  },
+                });
               }
               break;
 
