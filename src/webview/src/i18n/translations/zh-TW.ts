@@ -343,43 +343,18 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'default.conditionSuffix': ' 時',
 
   // Tour
-  'tour.welcome':
-    '歡迎使用CC Workflow Studio！\n\n本導覽將介紹主要功能的位置和作用。在建立第一個工作流程之前，讓我們先熟悉基礎知識。',
+  'tour.welcome': '歡迎使用CC Workflow Studio！\n\n使用範例工作流程來介紹基本操作方法。',
+  'tour.canvas':
+    '這是工作流程畫布。節點連接形成處理管線。\n\n拖曳節點移動位置，拖曳手柄(⚪)連接節點。',
+  'tour.propertyPanel': '點擊節點會顯示屬性面板。\n\n在這裡可以設定節點名稱、提示、模型選擇等。',
   'tour.nodePalette':
-    '節點面板包含可在工作流程中使用的各種節點。\n\n點擊Prompt、Sub-Agent、AskUserQuestion、If/Else、Switch等節點將其新增到畫布。',
-  'tour.addPrompt':
-    '這個「Prompt」按鈕可以將Prompt節點新增到畫布。\n\nPrompt節點是支援變數的範本，是工作流程的基本建置區塊。',
-  'tour.addSubAgent':
-    '「Sub-Agent」節點是執行特定任務的專業代理。\n\n配置提示和工具限制，建立具有單一職責的代理。',
-  'tour.addSubAgentFlow':
-    '「Sub-Agent Flow」可以視覺化定義複雜的Sub-Agent處理流程。\n\n如果您想並行執行MCP或Skill，可以將各處理包含在Sub-Agent Flow中，然後建立並行執行這些Sub-Agent Flow的工作流程來實現。',
-  'tour.addSkill':
-    '「Skill」節點呼叫Claude Code技能。\n\n可以選擇並執行個人用（~/.claude/skills/）或專案用（.claude/skills/）的技能。',
-  'tour.addMcp': '「MCP Tool」節點執行MCP伺服器工具。\n\n可用於外部服務整合或自訂工具呼叫。',
-  'tour.addAskUserQuestion':
-    '「AskUserQuestion」節點用於根據使用者選擇分支工作流程。\n\n可以使用此按鈕將其新增到畫布。',
-  'tour.addEnd':
-    '「End」節點表示工作流程的結束點。\n\n可以放置多個End節點，根據不同結果設定不同的結束點。',
-  'tour.addIfElse':
-    '「If/Else」節點根據條件將工作流程分成兩個方向。\n\n設定真（True）或假（False）條件來控制處理流程。',
-  'tour.addSwitch':
-    '「Switch」節點根據多個條件將工作流程分成多個方向。\n\n設定多個案例和預設案例來實現複雜的分支邏輯。',
-  'tour.canvas': '這是畫布。拖曳節點調整位置，拖曳手柄連接節點。\n\n已經放置了開始和結束節點。',
-  'tour.propertyPanel': '屬性面板可以設定所選節點。\n\n您可以編輯節點名稱、提示、模型選擇等。',
-  'tour.connectNodes':
-    '連接節點以建立工作流程。\n\n從節點右側的輸出手柄(⚪)拖曳到另一個節點左側的輸入手柄。',
-  'tour.workflowName': '在這裡可以為工作流程命名。\n\n可以使用字母、數字、連字號和底線。',
-  'tour.saveWorkflow':
-    '點擊「儲存」按鈕將工作流程以JSON格式儲存到`.vscode/workflows/`目錄。\n\n稍後可以載入並繼續編輯。',
-  'tour.loadWorkflow': '要載入已儲存的工作流程，請從下拉選單中選擇工作流程並點擊「載入」按鈕。',
-  'tour.exportWorkflow':
-    '點擊「Convert」按鈕可將工作流程轉換為Slash Command格式。\n\n轉換後的檔案儲存在.claude/commands/目錄中。',
-  'tour.runSlashCommand':
-    '點擊「Run」按鈕可將工作流程轉換為Slash Command並立即在Claude Code中執行。\n\n一鍵完成轉換和執行。',
+    '從節點面板新增節點到工作流程。\n\nPrompt、Sub-Agent、Skill、MCP Tool、If/Else、Switch等多種節點可供使用。',
+  'tour.toolbarActions':
+    '從工具列儲存、載入、轉換和執行工作流程。\n\n「Run」按鈕可直接在Claude Code中執行工作流程。',
   'tour.refineWithAI':
-    '使用「AI編輯」按鈕透過與AI對話建立或改善工作流程。\n\n可以從空白畫布開始或以對話方式編輯現有工作流程。',
-  'tour.moreActions':
-    '「更多」選單提供以下功能：<br><br>• Claude API - 將工作流程上傳到Claude API<br>• 分享到Slack - 與團隊分享工作流程<br>• 重置 - 清空畫布<br>• 專注模式 - 切換無干擾編輯模式<br>• AI代理 - 在其他AI代理中開啟工作流程<br>• 最新消息 - 檢視最新更新<br>• 說明 - 再次檢視此導覽<br><br>享受建立工作流程的樂趣！',
+    '使用「AI編輯」按鈕請求AI生成或改善工作流程。\n\n可以從空白畫布開始或以對話方式編輯現有工作流程。',
+  'tour.finish':
+    '導覽結束！\n\n試著編輯此範例，或重置後從頭開始。\n可以隨時從「更多」選單的「說明」重新查看導覽。',
 
   // Tour buttons
   'tour.button.back': '返回',
@@ -387,6 +362,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': '完成',
   'tour.button.next': '下一步',
   'tour.button.skip': '略過',
+  'tour.button.minimize': '最小化',
+  'tour.button.resume': '繼續導覽',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '刪除節點',

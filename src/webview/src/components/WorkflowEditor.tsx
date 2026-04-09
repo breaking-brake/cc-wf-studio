@@ -29,6 +29,7 @@ import { useWorkflowStore } from '../stores/workflow-store';
 import { CanvasToolbar } from './CanvasToolbar';
 import { FeatureAnnouncementBanner } from './common/FeatureAnnouncementBanner';
 import { DescriptionPanel } from './DescriptionPanel';
+import { EmptyState } from './EmptyState';
 // Custom edge with delete button
 import { DeletableEdge } from './edges/DeletableEdge';
 import { MinimapContainer } from './MinimapContainer';
@@ -91,6 +92,10 @@ const edgeTypes: EdgeTypes = {
 interface WorkflowEditorProps {
   isNodePaletteCollapsed?: boolean;
   onExpandNodePalette?: () => void;
+  showEmptyState?: boolean;
+  onOpenSample?: () => void;
+  onDismissEmptyState?: () => void;
+  onLoadWorkflow?: () => void;
 }
 
 /**
@@ -99,6 +104,10 @@ interface WorkflowEditorProps {
 export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   isNodePaletteCollapsed = false,
   onExpandNodePalette,
+  showEmptyState = false,
+  onOpenSample,
+  onDismissEmptyState,
+  onLoadWorkflow,
 }) => {
   const { t } = useTranslation();
   const isCompact = useIsCompactMode();
@@ -523,6 +532,14 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
             </Panel>
           )}
         </ReactFlow>
+        {onOpenSample && onDismissEmptyState && onLoadWorkflow && (
+          <EmptyState
+            isOpen={showEmptyState}
+            onOpenSample={onOpenSample}
+            onStartFromScratch={onDismissEmptyState}
+            onLoadWorkflow={onLoadWorkflow}
+          />
+        )}
       </div>
     </div>
   );

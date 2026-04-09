@@ -1360,6 +1360,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   return (
     <StyledTooltipProvider>
       <div
+        data-tour="toolbar-actions"
         style={{
           position: 'relative',
           display: 'flex',

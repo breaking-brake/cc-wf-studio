@@ -355,47 +355,19 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Tour
   'tour.welcome':
-    "Welcome to CC Workflow Studio!\n\nThis tour will introduce the key features and show you where everything is. Let's get familiar with the basics before creating your first workflow.",
-  'tour.nodePalette':
-    'The Node Palette contains various nodes you can use in your workflow.\n\nClick on Prompt, Sub-Agent, AskUserQuestion, If/Else, Switch, and other nodes to add them to the canvas.',
-  'tour.addPrompt':
-    'This "Prompt" button lets you add Prompt nodes to the canvas.\n\nA Prompt node is a template that supports variables and is the basic building block of workflows.',
-  'tour.addSubAgent':
-    'The "Sub-Agent" node is a specialized agent that executes specific tasks.\n\nConfigure prompts and tool restrictions to create agents with single responsibilities.',
-  'tour.addSubAgentFlow':
-    '"Sub-Agent Flow" allows you to visually define complex Sub-Agent processing flows.\n\nTo run MCP or Skills in parallel, wrap each process in a Sub-Agent Flow and create a flow that executes those Sub-Agent Flows in parallel.',
-  'tour.addSkill':
-    'The "Skill" node calls Claude Code skills.\n\nSelect and execute skills from personal (~/.claude/skills/) or project (.claude/skills/) directories.',
-  'tour.addMcp':
-    'The "MCP Tool" node executes MCP server tools.\n\nUse it for external service integration or custom tool invocation.',
-  'tour.addAskUserQuestion':
-    'The "AskUserQuestion" node lets you branch the workflow based on user selection.\n\nYou can add it to the canvas using this button.',
-  'tour.addEnd':
-    'The "End" node marks the endpoint of a workflow.\n\nYou can place multiple End nodes to set different endpoints based on outcomes.',
-  'tour.addIfElse':
-    'The "If/Else" node branches the workflow in two directions based on a condition.\n\nSet True or False conditions to control the flow of processing.',
-  'tour.addSwitch':
-    'The "Switch" node branches the workflow in multiple directions based on multiple conditions.\n\nSet multiple cases and a default case to implement complex branching logic.',
+    'Welcome to CC Workflow Studio!\n\nLet us walk you through the basics using a sample workflow.',
   'tour.canvas':
-    'This is the canvas. Drag nodes to adjust their position and drag handles to connect nodes.\n\nStart and End nodes are already placed.',
+    'This is the workflow canvas. Nodes are connected to form a processing pipeline.\n\nDrag nodes to move them, and drag handles (⚪) to connect nodes together.',
   'tour.propertyPanel':
-    'The Property Panel lets you configure the selected node.\n\nYou can edit node name, prompt, model selection, and more.',
-  'tour.connectNodes':
-    'Connect nodes to create your workflow.\n\nDrag from the output handle (⚪) on the right of a node to the input handle on the left of another node.',
-  'tour.workflowName':
-    'This is where you name your workflow.\n\nYou can use letters, numbers, hyphens, and underscores.',
-  'tour.saveWorkflow':
-    'Click the "Save" button to save your workflow as JSON in the `.vscode/workflows/` directory.\n\nYou can load and continue editing later.',
-  'tour.loadWorkflow':
-    'To load a saved workflow, select it from the dropdown menu and click the "Load" button.',
-  'tour.exportWorkflow':
-    'Click the "Convert" button to convert your workflow to a Slash Command format.\n\nThe converted files are saved to the .claude/commands/ directory.',
-  'tour.runSlashCommand':
-    'Click the "Run" button to convert your workflow to a Slash Command and immediately execute it in Claude Code.\n\nThis combines conversion and execution in a single action.',
+    'Click a node to open the Property Panel.\n\nHere you can configure node name, prompt, model selection, and more.',
+  'tour.nodePalette':
+    'Add nodes to your workflow from the Node Palette.\n\nPrompt, Sub-Agent, Skill, MCP Tool, If/Else, Switch, and more are available.',
+  'tour.toolbarActions':
+    'Save, load, convert, and run workflows from the toolbar.\n\nThe "Run" button lets you execute your workflow directly in Claude Code.',
   'tour.refineWithAI':
-    'Use the "Edit with AI" button to create or improve workflows through an interactive chat with AI.\n\nYou can start from an empty canvas or edit existing workflows conversationally.',
-  'tour.moreActions':
-    'The "More" menu provides additional actions:<br><br>• Claude API - Upload workflows to Claude API<br>• Share to Slack - Share workflows with your team<br>• Reset Workflow - Clear the canvas<br>• Focus Mode - Toggle distraction-free editing<br>• AI Agents - Open workflows in other AI agents<br>• What\'s New - View latest updates<br>• Help - View this tour again<br><br>Enjoy creating workflows!',
+    'Use "Edit with AI" to generate or improve workflows through an interactive chat.\n\nYou can start from an empty canvas or refine existing workflows conversationally.',
+  'tour.finish':
+    "That's the end of the tour!\n\nTry editing this sample, or reset to start from scratch.\nYou can revisit this tour anytime from the Help option in the More menu.",
 
   // Tour buttons
   'tour.button.back': 'Back',
@@ -403,6 +375,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': 'Finish',
   'tour.button.next': 'Next',
   'tour.button.skip': 'Skip',
+  'tour.button.minimize': 'Minimize',
+  'tour.button.resume': 'Resume Tour',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'Delete Node',

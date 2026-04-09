@@ -354,47 +354,19 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Tour
   'tour.welcome':
-    'CC Workflow Studioへようこそ！\n\nこのツアーでは、各機能の場所と役割をご紹介します。基本的な使い方を理解して、ワークフロー作成を始めましょう。',
-  'tour.nodePalette':
-    'ノードパレットには、ワークフローで使用できる様々なノードが用意されています。\n\nPrompt、Sub-Agent、AskUserQuestion、If/Else、Switchなどのノードをクリックしてキャンバスに追加できます。',
-  'tour.addPrompt':
-    'この「Prompt」ボタンから、Promptノードをキャンバスに追加できます。\n\nPromptノードは変数を使用できるテンプレートで、ワークフローの基本的な構成要素です。',
-  'tour.addSubAgent':
-    '「Sub-Agent」ノードは、特定のタスクを実行する専門のエージェントです。\n\nプロンプトとツール制限を設定して、単一の責務を持つエージェントを作成できます。',
-  'tour.addSubAgentFlow':
-    '「Sub-Agent Flow」は、複雑なSub-Agentの処理フローを視覚的に定義できます。\n\nMCPやSkillを並列実行したい場合は、各処理をSub-Agent Flowに内包し、それらのSub-Agent Flowを並列実行するフローを作成することで実現できます。',
-  'tour.addSkill':
-    '「Skill」ノードは、Claude Codeのスキルを呼び出します。\n\n個人用（~/.claude/skills/）またはプロジェクト用（.claude/skills/）のスキルを選択して実行できます。',
-  'tour.addMcp':
-    '「MCP Tool」ノードは、MCPサーバーのツールを実行します。\n\n外部サービスとの連携やカスタムツールの呼び出しに使用できます。',
-  'tour.addAskUserQuestion':
-    '「AskUserQuestion」ノードは、ユーザーの選択に応じてワークフローを分岐させるために使用します。\n\nこのボタンからキャンバスに追加できます。',
-  'tour.addEnd':
-    '「End」ノードは、ワークフローの終了点を示します。\n\n複数のEndノードを配置して、異なる結果に応じた終了点を設定できます。',
-  'tour.addIfElse':
-    '「If/Else」ノードは、条件に基づいてワークフローを2方向に分岐させます。\n\n真（True）または偽（False）の条件を設定して、処理の流れを制御できます。',
-  'tour.addSwitch':
-    '「Switch」ノードは、複数の条件に基づいてワークフローを多方向に分岐させます。\n\n複数のケースとデフォルトケースを設定して、複雑な分岐ロジックを実現できます。',
+    'CC Workflow Studioへようこそ！\n\nサンプルワークフローを使って、基本的な操作方法をご紹介します。',
   'tour.canvas':
-    'ここがキャンバスです。ノードをドラッグして配置を調整し、ハンドルをドラッグしてノード間を接続できます。\n\n既にStartノードとEndノードが配置されています。',
+    'これがワークフローのキャンバスです。ノードが接続されて処理フローを構成しています。\n\nノードをドラッグして移動、ハンドル(⚪)をドラッグしてノード間を接続できます。',
   'tour.propertyPanel':
-    'プロパティパネルでは、選択したノードの詳細設定を行います。\n\nノード名、プロンプト、モデル選択などを編集できます。',
-  'tour.connectNodes':
-    'ノードを接続してワークフローを作りましょう。\n\nノードの右側の出力ハンドル(⚪)を別のノードの左側の入力ハンドルにドラッグして接続します。',
-  'tour.workflowName':
-    'ここでワークフローに名前を付けることができます。\n\n英数字、ハイフン、アンダースコアが使用できます。',
-  'tour.saveWorkflow':
-    '「保存」ボタンをクリックすると、ワークフローが`.vscode/workflows/`ディレクトリにJSON形式で保存されます。\n\n後で読み込んで編集を続けることができます。',
-  'tour.loadWorkflow':
-    '保存したワークフローを読み込むには、ドロップダウンメニューからワークフローを選択し、「読み込み」ボタンをクリックします。',
-  'tour.exportWorkflow':
-    '「Convert」ボタンをクリックすると、ワークフローをSlash Command形式に変換できます。\n\n変換されたファイルは .claude/commands/ ディレクトリに保存されます。',
-  'tour.runSlashCommand':
-    '「Run」ボタンをクリックすると、ワークフローをSlash Commandに変換し、即座にClaude Codeで実行できます。\n\n変換と実行を一度に行えます。',
+    'ノードをクリックすると、プロパティパネルが表示されます。\n\nここでノード名、プロンプト、モデル選択などの詳細設定を行います。',
+  'tour.nodePalette':
+    'ノードパレットから、ワークフローにノードを追加できます。\n\nPrompt、Sub-Agent、Skill、MCP Tool、If/Else、Switchなど様々なノードが用意されています。',
+  'tour.toolbarActions':
+    'ツールバーからワークフローの保存・読み込み・変換・実行ができます。\n\n「Run」ボタンで、ワークフローをそのままClaude Codeで実行できます。',
   'tour.refineWithAI':
-    '「AI編集」ボタンで、AIとチャットしながらワークフローを生成・改善できます。\n\n空のキャンバスから新規作成も、既存のワークフローの修正も対話的に行えます。',
-  'tour.moreActions':
-    '「その他」メニューから追加の操作が利用できます：<br><br>• Claude API - ワークフローをClaude APIにアップロード<br>• Slackに共有 - チームとワークフローを共有<br>• リセット - キャンバスをクリア<br>• 集中モード - 集中編集モードの切り替え<br>• AIエージェント - 他のAIエージェントでワークフローを開く<br>• 最新情報 - 最新のアップデートを確認<br>• ヘルプ - このツアーを再表示<br><br>それでは、ワークフロー作成を楽しんでください！',
+    '「AI編集」ボタンで、AIにワークフローの生成や改善を依頼できます。\n\n空のキャンバスからの新規作成も、既存ワークフローの修正も対話的に行えます。',
+  'tour.finish':
+    'ツアーは以上です！\n\nこのサンプルを編集して試してみるか、リセットして新しく作成してみてください。\nツアーは「その他」メニューの「ヘルプ」からいつでも再表示できます。',
 
   // Tour buttons
   'tour.button.back': '戻る',
@@ -402,6 +374,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': '完了',
   'tour.button.next': '次へ',
   'tour.button.skip': 'スキップ',
+  'tour.button.minimize': '最小化',
+  'tour.button.resume': 'ツアーを再開',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'ノードを削除',

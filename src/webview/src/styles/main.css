@@ -193,6 +193,11 @@ button {
   z-index: 10000;
 }
 
+/* Shift minimap up when tour floating button is visible */
+body.tour-floating-visible .react-flow__panel.bottom.right {
+  bottom: 24px !important;
+}
+
 /* ============================================================================
    Highlight Toggle Button Pulse Animation
    Synced with GroupNode's highlightPulse to visually connect the two

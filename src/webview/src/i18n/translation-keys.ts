@@ -341,26 +341,12 @@ export interface WebviewTranslationKeys {
 
   // Tour
   'tour.welcome': string;
-  'tour.nodePalette': string;
-  'tour.addPrompt': string;
-  'tour.addSubAgent': string;
-  'tour.addSubAgentFlow': string;
-  'tour.addSkill': string;
-  'tour.addMcp': string;
-  'tour.addAskUserQuestion': string;
-  'tour.addEnd': string;
-  'tour.addIfElse': string;
-  'tour.addSwitch': string;
   'tour.canvas': string;
   'tour.propertyPanel': string;
-  'tour.connectNodes': string;
-  'tour.workflowName': string;
-  'tour.saveWorkflow': string;
-  'tour.loadWorkflow': string;
-  'tour.exportWorkflow': string;
-  'tour.runSlashCommand': string;
+  'tour.nodePalette': string;
+  'tour.toolbarActions': string;
   'tour.refineWithAI': string;
-  'tour.moreActions': string;
+  'tour.finish': string;
 
   // Tour buttons
   'tour.button.back': string;
@@ -368,6 +354,8 @@ export interface WebviewTranslationKeys {
   'tour.button.finish': string;
   'tour.button.next': string;
   'tour.button.skip': string;
+  'tour.button.minimize': string;
+  'tour.button.resume': string;
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': string;

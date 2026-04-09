@@ -209,6 +209,7 @@ const App: React.FC = () => {
   const [showWhatsNewBadge, setShowWhatsNewBadge] = useState(true);
   const [showMcpRefreshDialog, setShowMcpRefreshDialog] = useState(false);
   const [mcpRefreshSkillName, setMcpRefreshSkillName] = useState<string>('cc-workflow-ai-editor');
+  const [emptyStateDismissed, setEmptyStateDismissed] = useState(false);
 
   // Pending MCP apply state for diff preview
   const [pendingMcpApply, setPendingMcpApply] = useState<{
@@ -229,6 +230,28 @@ const App: React.FC = () => {
     expand: expandNodePalette,
   } = useCollapsiblePanel();
   const isCompact = useIsCompactMode();
+
+  // Reset emptyStateDismissed when a workflow is loaded (so empty state reappears after reset)
+  const prevActiveWorkflowRef = useRef(activeWorkflow);
+  useEffect(() => {
+    if (prevActiveWorkflowRef.current !== null && activeWorkflow === null) {
+      setEmptyStateDismissed(false);
+    }
+    prevActiveWorkflowRef.current = activeWorkflow;
+  }, [activeWorkflow]);
+
+  // Empty state: show when canvas has only default Start/End nodes, no edges, no active workflow
+  const isCanvasEmpty =
+    nodes.length === 2 &&
+    edges.length === 0 &&
+    activeWorkflow === null &&
+    nodes.some((n) => n.id === 'start-node-default') &&
+    nodes.some((n) => n.id === 'end_node_default');
+  const showEmptyState = isCanvasEmpty && !emptyStateDismissed && !runTour;
+
+  const handleLoadWorkflowFromEmptyState = useCallback(() => {
+    vscode.postMessage({ type: 'OPEN_FILE_PICKER' });
+  }, []);
 
   const handleError = (errorData: ErrorPayload) => {
     setError(errorData);
@@ -685,6 +708,10 @@ const App: React.FC = () => {
           <WorkflowEditor
             isNodePaletteCollapsed={isNodePaletteCollapsed}
             onExpandNodePalette={expandNodePalette}
+            showEmptyState={showEmptyState}
+            onOpenSample={() => setIsSampleDialogOpen(true)}
+            onDismissEmptyState={() => setEmptyStateDismissed(true)}
+            onLoadWorkflow={handleLoadWorkflowFromEmptyState}
           />
           {/* Processing overlay for canvas area only (with message centered in canvas) */}
           <ProcessingOverlay isVisible={isProcessing} message={t('refinement.processingOverlay')} />

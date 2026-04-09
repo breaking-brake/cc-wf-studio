@@ -343,43 +343,18 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'default.conditionSuffix': ' 时',
 
   // Tour
-  'tour.welcome':
-    '欢迎使用CC Workflow Studio！\n\n本导览将介绍主要功能的位置和作用。在创建第一个工作流之前，让我们先熟悉基础知识。',
+  'tour.welcome': '欢迎使用CC Workflow Studio！\n\n使用示例工作流来介绍基本操作方法。',
+  'tour.canvas':
+    '这是工作流画布。节点连接形成处理流水线。\n\n拖动节点移动位置，拖动手柄(⚪)连接节点。',
+  'tour.propertyPanel': '点击节点会显示属性面板。\n\n在这里可以设置节点名称、提示、模型选择等。',
   'tour.nodePalette':
-    '节点面板包含可在工作流中使用的各种节点。\n\n点击Prompt、Sub-Agent、AskUserQuestion、If/Else、Switch等节点将其添加到画布。',
-  'tour.addPrompt':
-    '这个"Prompt"按钮可以将Prompt节点添加到画布。\n\nPrompt节点是支持变量的模板，是工作流的基本构建块。',
-  'tour.addSubAgent':
-    '"Sub-Agent"节点是执行特定任务的专业代理。\n\n配置提示和工具限制，创建具有单一职责的代理。',
-  'tour.addSubAgentFlow':
-    '「Sub-Agent Flow」可以可视化定义复杂的Sub-Agent处理流程。\n\n如果您想并行执行MCP或Skill，可以将各处理包含在Sub-Agent Flow中，然后创建并行执行这些Sub-Agent Flow的工作流来实现。',
-  'tour.addSkill':
-    '"Skill"节点调用Claude Code技能。\n\n可以选择并执行个人用（~/.claude/skills/）或项目用（.claude/skills/）的技能。',
-  'tour.addMcp': '"MCP Tool"节点执行MCP服务器工具。\n\n可用于外部服务集成或自定义工具调用。',
-  'tour.addAskUserQuestion':
-    '"AskUserQuestion"节点用于根据用户选择分支工作流。\n\n可以使用此按钮将其添加到画布。',
-  'tour.addEnd':
-    '"End"节点表示工作流的结束点。\n\n可以放置多个End节点，根据不同结果设置不同的结束点。',
-  'tour.addIfElse':
-    '"If/Else"节点根据条件将工作流分成两个方向。\n\n设置真（True）或假（False）条件来控制处理流程。',
-  'tour.addSwitch':
-    '"Switch"节点根据多个条件将工作流分成多个方向。\n\n设置多个案例和默认案例来实现复杂的分支逻辑。',
-  'tour.canvas': '这是画布。拖动节点调整位置，拖动手柄连接节点。\n\n已经放置了开始和结束节点。',
-  'tour.propertyPanel': '属性面板可以配置所选节点。\n\n您可以编辑节点名称、提示、模型选择等。',
-  'tour.connectNodes':
-    '连接节点以创建工作流。\n\n从节点右侧的输出手柄(⚪)拖动到另一个节点左侧的输入手柄。',
-  'tour.workflowName': '在这里可以为工作流命名。\n\n可以使用字母、数字、连字符和下划线。',
-  'tour.saveWorkflow':
-    '点击"保存"按钮将工作流以JSON格式保存到`.vscode/workflows/`目录。\n\n稍后可以加载并继续编辑。',
-  'tour.loadWorkflow': '要加载已保存的工作流，请从下拉菜单中选择工作流并点击"加载"按钮。',
-  'tour.exportWorkflow':
-    '点击"Convert"按钮可将工作流转换为Slash Command格式。\n\n转换后的文件保存在.claude/commands/目录中。',
-  'tour.runSlashCommand':
-    '点击"Run"按钮可将工作流转换为Slash Command并立即在Claude Code中执行。\n\n一键完成转换和执行。',
+    '从节点面板添加节点到工作流。\n\nPrompt、Sub-Agent、Skill、MCP Tool、If/Else、Switch等多种节点可供使用。',
+  'tour.toolbarActions':
+    '从工具栏保存、加载、转换和运行工作流。\n\n"Run"按钮可直接在Claude Code中执行工作流。',
   'tour.refineWithAI':
-    '使用"AI编辑"按钮通过与AI对话创建或改进工作流。\n\n可以从空画布开始或以对话方式编辑现有工作流。',
-  'tour.moreActions':
-    '"更多"菜单提供以下功能：<br><br>• Claude API - 将工作流上传到Claude API<br>• 分享到Slack - 与团队分享工作流<br>• 重置 - 清空画布<br>• 专注模式 - 切换无干扰编辑模式<br>• AI代理 - 在其他AI代理中打开工作流<br>• 最新动态 - 查看最新更新<br>• 帮助 - 再次查看此导览<br><br>享受创建工作流的乐趣！',
+    '使用"AI编辑"按钮请求AI生成或改进工作流。\n\n可以从空画布开始或以对话方式编辑现有工作流。',
+  'tour.finish':
+    '导览结束！\n\n试着编辑此示例，或重置后从头开始。\n可以随时从"更多"菜单的"帮助"重新查看导览。',
 
   // Tour buttons
   'tour.button.back': '返回',
@@ -387,6 +362,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': '完成',
   'tour.button.next': '下一步',
   'tour.button.skip': '跳过',
+  'tour.button.minimize': '最小化',
+  'tour.button.resume': '继续导览',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '删除节点',

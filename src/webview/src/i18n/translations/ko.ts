@@ -354,47 +354,19 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Tour
   'tour.welcome':
-    'CC Workflow Studio에 오신 것을 환영합니다!\n\n이 투어에서는 주요 기능의 위치와 역할을 소개합니다. 첫 워크플로우를 만들기 전에 기본 사항을 익혀보세요.',
-  'tour.nodePalette':
-    '노드 팔레트에는 워크플로우에서 사용할 수 있는 다양한 노드가 있습니다.\n\nPrompt, Sub-Agent, AskUserQuestion, If/Else, Switch 등의 노드를 클릭하여 캔버스에 추가할 수 있습니다.',
-  'tour.addPrompt':
-    '이 "Prompt" 버튼으로 캔버스에 Prompt 노드를 추가할 수 있습니다.\n\nPrompt 노드는 변수를 지원하는 템플릿으로 워크플로우의 기본 구성 요소입니다.',
-  'tour.addSubAgent':
-    '"Sub-Agent" 노드는 특정 작업을 실행하는 전문 에이전트입니다.\n\n프롬프트와 도구 제한을 설정하여 단일 책임을 가진 에이전트를 만들 수 있습니다.',
-  'tour.addSubAgentFlow':
-    '"Sub-Agent Flow"는 복잡한 Sub-Agent 처리 흐름을 시각적으로 정의할 수 있습니다.\n\nMCP나 Skill을 병렬로 실행하려면 각 처리를 Sub-Agent Flow에 포함하고 해당 Sub-Agent Flow들을 병렬로 실행하는 흐름을 만들면 됩니다.',
-  'tour.addSkill':
-    '"Skill" 노드는 Claude Code 스킬을 호출합니다.\n\n개인용(~/.claude/skills/) 또는 프로젝트용(.claude/skills/) 스킬을 선택하여 실행할 수 있습니다.',
-  'tour.addMcp':
-    '"MCP Tool" 노드는 MCP 서버 도구를 실행합니다.\n\n외부 서비스 연동이나 커스텀 도구 호출에 사용할 수 있습니다.',
-  'tour.addAskUserQuestion':
-    '"AskUserQuestion" 노드는 사용자 선택에 따라 워크플로우를 분기하는 데 사용됩니다.\n\n이 버튼으로 캔버스에 추가할 수 있습니다.',
-  'tour.addEnd':
-    '"End" 노드는 워크플로우의 종료 지점을 나타냅니다.\n\n여러 End 노드를 배치하여 결과에 따른 다른 종료 지점을 설정할 수 있습니다.',
-  'tour.addIfElse':
-    '"If/Else" 노드는 조건에 따라 워크플로우를 두 방향으로 분기합니다.\n\n참(True) 또는 거짓(False) 조건을 설정하여 처리 흐름을 제어할 수 있습니다.',
-  'tour.addSwitch':
-    '"Switch" 노드는 여러 조건에 따라 워크플로우를 다방향으로 분기합니다.\n\n여러 케이스와 기본 케이스를 설정하여 복잡한 분기 로직을 구현할 수 있습니다.',
+    'CC Workflow Studio에 오신 것을 환영합니다!\n\n샘플 워크플로우를 사용하여 기본 조작 방법을 소개합니다.',
   'tour.canvas':
-    '여기가 캔버스입니다. 노드를 드래그하여 위치를 조정하고 핸들을 드래그하여 노드를 연결할 수 있습니다.\n\n시작 및 종료 노드가 이미 배치되어 있습니다.',
+    '워크플로우 캔버스입니다. 노드가 연결되어 처리 파이프라인을 구성합니다.\n\n노드를 드래그하여 이동하고 핸들(⚪)을 드래그하여 노드를 연결할 수 있습니다.',
   'tour.propertyPanel':
-    '속성 패널에서 선택한 노드를 구성할 수 있습니다.\n\n노드 이름, 프롬프트, 모델 선택 등을 편집할 수 있습니다.',
-  'tour.connectNodes':
-    '노드를 연결하여 워크플로우를 만드세요.\n\n노드 오른쪽의 출력 핸들(⚪)에서 다른 노드 왼쪽의 입력 핸들로 드래그하세요.',
-  'tour.workflowName':
-    '여기에서 워크플로우에 이름을 지정할 수 있습니다.\n\n문자, 숫자, 하이픈 및 밑줄을 사용할 수 있습니다.',
-  'tour.saveWorkflow':
-    '"저장" 버튼을 클릭하면 워크플로우가 `.vscode/workflows/` 디렉터리에 JSON으로 저장됩니다.\n\n나중에 로드하여 계속 편집할 수 있습니다.',
-  'tour.loadWorkflow':
-    '저장된 워크플로우를 로드하려면 드롭다운 메뉴에서 워크플로우를 선택하고 "불러오기" 버튼을 클릭하세요.',
-  'tour.exportWorkflow':
-    '"Convert" 버튼을 클릭하면 워크플로우를 Slash Command 형식으로 변환합니다.\n\n변환된 파일은 .claude/commands/ 디렉토리에 저장됩니다.',
-  'tour.runSlashCommand':
-    '"Run" 버튼을 클릭하면 워크플로우를 Slash Command로 변환하고 즉시 Claude Code에서 실행합니다.\n\n변환과 실행을 한 번에 수행합니다.',
+    '노드를 클릭하면 속성 패널이 표시됩니다.\n\n여기에서 노드 이름, 프롬프트, 모델 선택 등을 설정할 수 있습니다.',
+  'tour.nodePalette':
+    '노드 팔레트에서 워크플로우에 노드를 추가할 수 있습니다.\n\nPrompt, Sub-Agent, Skill, MCP Tool, If/Else, Switch 등 다양한 노드가 있습니다.',
+  'tour.toolbarActions':
+    '툴바에서 워크플로우의 저장, 로드, 변환, 실행이 가능합니다.\n\n"Run" 버튼으로 워크플로우를 바로 Claude Code에서 실행할 수 있습니다.',
   'tour.refineWithAI':
-    '"AI로 편집" 버튼을 사용하여 AI와 대화하며 워크플로우를 생성하거나 개선할 수 있습니다.\n\n빈 캔버스에서 시작하거나 기존 워크플로우를 대화형으로 수정할 수 있습니다.',
-  'tour.moreActions':
-    '"더보기" 메뉴에서 추가 작업을 사용할 수 있습니다:<br><br>• Claude API - 워크플로우를 Claude API에 업로드<br>• Slack에 공유 - 팀과 워크플로우 공유<br>• 초기화 - 캔버스 지우기<br>• 집중 모드 - 집중 편집 모드 전환<br>• AI 에이전트 - 다른 AI 에이전트에서 워크플로우 열기<br>• 새소식 - 최신 업데이트 확인<br>• 도움말 - 이 투어 다시 보기<br><br>워크플로우 생성을 즐기세요!',
+    '"AI로 편집" 버튼으로 AI에게 워크플로우 생성이나 개선을 요청할 수 있습니다.\n\n빈 캔버스에서 새로 시작하거나 기존 워크플로우를 대화형으로 수정할 수 있습니다.',
+  'tour.finish':
+    '투어가 끝났습니다!\n\n이 샘플을 편집하거나 초기화하여 새로 시작해 보세요.\n투어는 "더보기" 메뉴의 "도움말"에서 언제든 다시 볼 수 있습니다.',
 
   // Tour buttons
   'tour.button.back': '뒤로',
@@ -402,6 +374,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.finish': '완료',
   'tour.button.next': '다음',
   'tour.button.skip': '건너뛰기',
+  'tour.button.minimize': '최소화',
+  'tour.button.resume': '투어 재개',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '노드 삭제',

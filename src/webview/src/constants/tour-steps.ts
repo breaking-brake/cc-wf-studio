@@ -2,17 +2,17 @@
  * Claude Code Workflow Studio - Tour Steps Definition
  *
  * Defines interactive tour steps for first-time users using Driver.js
+ * Redesigned to 7 focused steps using sample workflow as teaching context
  */
 
 import type { Config as DriverConfig, DriveStep } from 'driver.js';
 
 // Tour step indices (0-based)
-export const CANVAS_STEP_INDEX = 11;
-export const PROPERTY_PANEL_STEP_INDEX = 12;
+export const PROPERTY_PANEL_STEP_INDEX = 2;
 
 /**
  * Tour steps configuration
- * Each step guides users through creating their first workflow
+ * Each step guides users through the workflow editor using a sample workflow
  *
  * @param t - Translation function
  * @param callbacks - Optional callbacks for step-specific actions
@@ -20,12 +20,13 @@ export const PROPERTY_PANEL_STEP_INDEX = 12;
 export const getTourSteps = (
   t: (key: string) => string,
   callbacks?: {
-    onSelectStartNode?: () => void;
+    onSelectSampleNode?: () => void;
     onDeselectNode?: () => void;
     moveNext?: () => void;
     movePrevious?: () => void;
   }
 ): DriveStep[] => [
+  // Step 1: Welcome
   {
     popover: {
       title: '',
@@ -34,6 +35,42 @@ export const getTourSteps = (
       align: 'center',
     },
   },
+  // Step 2: Canvas with sample workflow
+  {
+    element: '.react-flow',
+    popover: {
+      title: '',
+      description: t('tour.canvas'),
+      side: 'over',
+      align: 'center',
+      // Select a node before moving to property panel step
+      onNextClick: () => {
+        callbacks?.onSelectSampleNode?.();
+        setTimeout(() => {
+          callbacks?.moveNext?.();
+        }, 50);
+      },
+    },
+  },
+  // Step 3: Property Panel (select a node to show it)
+  {
+    element: '.property-panel',
+    popover: {
+      title: '',
+      description: t('tour.propertyPanel'),
+      side: 'left',
+      align: 'start',
+      onPrevClick: () => {
+        callbacks?.onDeselectNode?.();
+        callbacks?.movePrevious?.();
+      },
+      onNextClick: () => {
+        callbacks?.onDeselectNode?.();
+        callbacks?.moveNext?.();
+      },
+    },
+  },
+  // Step 4: Node Palette (all nodes at once)
   {
     element: '.node-palette',
     popover: {
@@ -43,175 +80,17 @@ export const getTourSteps = (
       align: 'start',
     },
   },
+  // Step 5: Toolbar (Save/Load/Export/Run grouped)
   {
-    element: '[data-tour="add-prompt-button"]',
+    element: '[data-tour="toolbar-actions"]',
     popover: {
       title: '',
-      description: t('tour.addPrompt'),
-      side: 'right',
-      align: 'start',
-    },
-  },
-  {
-    element: '[data-tour="add-subagent-button"]',
-    popover: {
-      title: '',
-      description: t('tour.addSubAgent'),
-      side: 'right',
-      align: 'start',
-    },
-  },
-  {
-    element: '[data-tour="add-subagentflow-button"]',
-    popover: {
-      title: '',
-      description: t('tour.addSubAgentFlow'),
-      side: 'right',
-      align: 'start',
-    },
-  },
-  {
-    element: '[data-tour="add-skill-button"]',
-    popover: {
-      title: '',
-      description: t('tour.addSkill'),
-      side: 'right',
-      align: 'start',
-    },
-  },
-  {
-    element: '[data-tour="add-mcp-button"]',
-    popover: {
-      title: '',
-      description: t('tour.addMcp'),
-      side: 'right',
-      align: 'start',
-    },
-  },
-  {
-    element: '[data-tour="add-ifelse-button"]',
-    popover: {
-      title: '',
-      description: t('tour.addIfElse'),
-      side: 'right',
-      align: 'start',
-    },
-  },
-  {
-    element: '[data-tour="add-switch-button"]',
-    popover: {
-      title: '',
-      description: t('tour.addSwitch'),
-      side: 'right',
-      align: 'start',
-    },
-  },
-  {
-    element: '[data-tour="add-askuserquestion-button"]',
-    popover: {
-      title: '',
-      description: t('tour.addAskUserQuestion'),
-      side: 'right',
-      align: 'start',
-    },
-  },
-  {
-    element: '[data-tour="add-end-button"]',
-    popover: {
-      title: '',
-      description: t('tour.addEnd'),
-      side: 'right',
-      align: 'start',
-    },
-  },
-  {
-    popover: {
-      title: '',
-      description: t('tour.canvas'),
-      side: 'over',
-      align: 'center',
-      // Select Start node before moving to property panel step
-      onNextClick: () => {
-        callbacks?.onSelectStartNode?.();
-        // Small delay to allow React to render the property panel
-        setTimeout(() => {
-          callbacks?.moveNext?.();
-        }, 50);
-      },
-    },
-  },
-  {
-    element: '.property-panel',
-    popover: {
-      title: '',
-      description: t('tour.propertyPanel'),
-      side: 'left',
-      align: 'start',
-      // Deselect node when leaving property panel step (going back)
-      onPrevClick: () => {
-        callbacks?.onDeselectNode?.();
-        callbacks?.movePrevious?.();
-      },
-      // Deselect node when leaving property panel step (going forward)
-      onNextClick: () => {
-        callbacks?.onDeselectNode?.();
-        callbacks?.moveNext?.();
-      },
-    },
-  },
-  {
-    popover: {
-      title: '',
-      description: t('tour.connectNodes'),
-      side: 'over',
-      align: 'center',
-    },
-  },
-  {
-    element: '[data-tour="workflow-name-input"]',
-    popover: {
-      title: '',
-      description: t('tour.workflowName'),
+      description: t('tour.toolbarActions'),
       side: 'bottom',
       align: 'start',
     },
   },
-  {
-    element: '[data-tour="save-button"]',
-    popover: {
-      title: '',
-      description: t('tour.saveWorkflow'),
-      side: 'bottom',
-      align: 'start',
-    },
-  },
-  {
-    element: '[data-tour="load-button"]',
-    popover: {
-      title: '',
-      description: t('tour.loadWorkflow'),
-      side: 'bottom',
-      align: 'start',
-    },
-  },
-  {
-    element: '[data-tour="export-button"]',
-    popover: {
-      title: '',
-      description: t('tour.exportWorkflow'),
-      side: 'bottom',
-      align: 'start',
-    },
-  },
-  {
-    element: '[data-tour="run-button"]',
-    popover: {
-      title: '',
-      description: t('tour.runSlashCommand'),
-      side: 'bottom',
-      align: 'start',
-    },
-  },
+  // Step 6: AI Refine button
   {
     element: '[data-tour="ai-refine-button"]',
     popover: {
@@ -221,13 +100,13 @@ export const getTourSteps = (
       align: 'start',
     },
   },
+  // Step 7: Finish
   {
-    element: '[data-tour="more-actions-button"]',
     popover: {
       title: '',
-      description: t('tour.moreActions'),
-      side: 'bottom',
-      align: 'start',
+      description: t('tour.finish'),
+      side: 'over',
+      align: 'center',
     },
   },
 ];
@@ -240,11 +119,11 @@ export const getDriverConfig = (t: (key: string) => string): DriverConfig => ({
   animate: false,
   showProgress: true,
   progressText: 'Step {{current}}/{{total}}',
-  showButtons: ['next', 'previous', 'close'],
+  showButtons: ['next', 'previous'],
   nextBtnText: t('tour.button.next'),
   prevBtnText: t('tour.button.back'),
   doneBtnText: t('tour.button.finish'),
-  allowClose: true,
+  allowClose: false,
   allowKeyboardControl: true,
   smoothScroll: false,
   overlayColor: 'rgba(0, 0, 0, 0.5)',
