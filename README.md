@@ -16,9 +16,21 @@
   <img src="./resources/hero.png" alt="CC Workflow Studio" width="800">
 </p>
 
+**You think visually. AI thinks in `.md`. CC Workflow Studio speaks both.**
+
+Design workflows on a canvas. Export as Markdown your AI agent already understands. No more prompt-guessing.
+
 <p align="center">
-  <strong>Visual Workflow Editor for AI Agents</strong>
+  <a href="https://speakerdeck.com/seiyakobayashi/cc-workflow-studio">
+    <img src="./resources/deck-preview.png" alt="Learn more: Why CC Workflow Studio?" width="600">
+  </a>
+  <br>
+  <em>Why CC Workflow Studio? - Speaker Deck Link</em>
 </p>
+
+---
+
+## Supported Agents
 
 | Agent | Export Format | Requires |
 |-------|--------------|----------|

@@ -58,6 +58,7 @@ resources/icon-file-down.png
 resources/icon-export.png
 resources/icon-play.png
 resources/icon-sparkles.png
+resources/deck-preview.png
 
 # Build config
 biome.json
