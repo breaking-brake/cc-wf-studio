@@ -4,10 +4,7 @@
     "nameKey": "sample.githubIssuePlanning.name",
     "descriptionKey": "sample.githubIssuePlanning.description",
     "difficulty": "advanced",
-    "tags": [
-      "planning",
-      "github"
-    ],
+    "tags": ["planning", "github"],
     "nodeCount": 28
   },
   "workflow": {
