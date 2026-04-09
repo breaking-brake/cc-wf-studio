@@ -2,7 +2,15 @@
   "mcpServers": {
     "atlassian": {
       "command": "npx",
-      "args": ["-y", "mcp-remote", "https://mcp.atlassian.com/v1/sse"]
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.atlassian.com/v1/sse"
+      ]
+    },
+    "cc-workflow-studio": {
+      "type": "http",
+      "url": "http://127.0.0.1:6289/mcp"
     }
   }
 }

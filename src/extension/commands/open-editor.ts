@@ -31,7 +31,6 @@ import { FileService } from '../services/file-service';
 import {
   checkPortMismatch,
   getConfigTargetsForProvider,
-  removeAllAgentConfigs,
   writeAllAgentConfigs,
 } from '../services/mcp-server-config-writer';
 import { SlackApiService } from '../services/slack-api-service';
@@ -1696,12 +1695,6 @@ export function registerOpenEditorCommand(
 
               try {
                 await stopManager.stop();
-
-                // Remove configs (best-effort)
-                const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-                if (workspacePath) {
-                  await removeAllAgentConfigs(workspacePath);
-                }
 
                 webview.postMessage({
                   type: 'MCP_SERVER_STATUS',

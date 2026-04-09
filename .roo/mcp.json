@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "cc-workflow-studio": {
+      "type": "streamable-http",
+      "url": "http://127.0.0.1:6289/mcp"
+    }
+  }
+}

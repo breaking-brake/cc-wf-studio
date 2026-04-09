@@ -8,7 +8,6 @@ import * as vscode from 'vscode';
 import { registerOpenEditorCommand } from './commands/open-editor';
 import { handleConnectSlackManual } from './commands/slack-connect-manual';
 import { WorkflowPreviewEditorProvider } from './editors/workflow-preview-editor-provider';
-import { removeAllAgentConfigs } from './services/mcp-server-config-writer';
 import { McpServerManager } from './services/mcp-server-service';
 import { SlackApiService } from './services/slack-api-service';
 import { SlackTokenManager } from './utils/slack-token-manager';
@@ -199,14 +198,10 @@ export function activate(context: vscode.ExtensionContext): void {
  * Called when the extension is deactivated
  */
 export async function deactivate(): Promise<void> {
-  // Stop MCP server and clean up configs if running
+  // Stop MCP server if running (configs are kept for fixed-port reuse)
   if (mcpServerManager?.isRunning()) {
     try {
       await mcpServerManager.stop();
-      const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-      if (workspacePath) {
-        await removeAllAgentConfigs(workspacePath);
-      }
     } catch (error) {
       log('ERROR', 'Failed to stop MCP server during deactivation', {
         error: error instanceof Error ? error.message : String(error),
