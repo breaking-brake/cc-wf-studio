@@ -85,6 +85,13 @@
           "minimum": 10,
           "maximum": 500,
           "description": "Maximum number of nodes allowed in a workflow."
+        },
+        "cc-wf-studio.mcp.port": {
+          "type": "number",
+          "default": 6282,
+          "minimum": 1024,
+          "maximum": 65535,
+          "description": "Port number for the built-in MCP server. Change only if the default port (6282) is already in use."
         }
       }
     }

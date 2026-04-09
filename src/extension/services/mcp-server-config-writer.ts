@@ -111,6 +111,17 @@ export async function writeAgentConfig(
   workspacePath: string
 ): Promise<void> {
   try {
+    // Skip write if config already has the correct port
+    const configPort = await readConfiguredPort(target, workspacePath);
+    const newPort = extractPortFromUrl(serverUrl);
+    if (configPort !== null && configPort === newPort) {
+      log(
+        'INFO',
+        `MCP Config Writer: Config for ${target} already has port ${configPort}, skipping write`
+      );
+      return;
+    }
+
     if (target === 'codex') {
       const config = await readCodexConfig();
       if (!config.mcp_servers) {
@@ -182,6 +193,56 @@ export async function writeAgentConfig(
     });
     throw error;
   }
+}
+
+/**
+ * Extract port number from a URL string
+ */
+function extractPortFromUrl(url: string): number | null {
+  try {
+    const parsed = new URL(url);
+    return parsed.port ? Number.parseInt(parsed.port, 10) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Read the configured port for a specific target from its config file
+ */
+export async function readConfiguredPort(
+  target: McpConfigTarget,
+  workspacePath: string
+): Promise<number | null> {
+  try {
+    if (target === 'codex') {
+      const config = await readCodexConfig();
+      const url = config.mcp_servers?.[SERVER_ENTRY_NAME]?.url;
+      return url ? extractPortFromUrl(url) : null;
+    }
+    const filePath = getConfigPath(target, workspacePath);
+    const config = await readJsonConfig(filePath);
+    const entry = config.servers?.[SERVER_ENTRY_NAME] || config.mcpServers?.[SERVER_ENTRY_NAME];
+    const url = entry?.url || (entry as Record<string, unknown>)?.serverUrl;
+    return typeof url === 'string' ? extractPortFromUrl(url) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Check if the running server port matches the port in a config file
+ */
+export async function checkPortMismatch(
+  target: McpConfigTarget,
+  runningPort: number,
+  workspacePath: string
+): Promise<{ mismatch: boolean; configPort: number | null }> {
+  const configPort = await readConfiguredPort(target, workspacePath);
+  if (configPort === null) {
+    return { mismatch: false, configPort: null };
+  }
+  return { mismatch: configPort !== runningPort, configPort };
 }
 
 /**

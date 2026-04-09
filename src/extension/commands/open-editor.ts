@@ -29,6 +29,7 @@ import { cancelGeneration } from '../services/claude-code-service';
 import { CommentarySessionManager } from '../services/commentary-session-manager';
 import { FileService } from '../services/file-service';
 import {
+  checkPortMismatch,
   getConfigTargetsForProvider,
   removeAllAgentConfigs,
   writeAllAgentConfigs,
@@ -240,6 +241,11 @@ export function registerOpenEditorCommand(
           }
           const webview = currentPanel.webview;
 
+          // Helper: get configured MCP port from VSCode settings
+          function getConfiguredMcpPort(): number {
+            return vscode.workspace.getConfiguration('cc-wf-studio').get<number>('mcp.port', 6282);
+          }
+
           // Helper: ensure MCP server is running and config written for Run operations
           async function ensureMcpServerForRun(
             provider: AiEditingProvider,
@@ -253,7 +259,7 @@ export function registerOpenEditorCommand(
             const previousPort = mcpManager.getPort();
             let serverPort = previousPort;
             if (!mcpManager.isRunning()) {
-              serverPort = await mcpManager.start(context.extensionPath);
+              serverPort = await mcpManager.start(context.extensionPath, getConfiguredMcpPort());
             }
             const serverUrl = `http://127.0.0.1:${serverPort}/mcp`;
 
@@ -272,6 +278,31 @@ export function registerOpenEditorCommand(
                 const written = await writeAllAgentConfigs(newTargets, serverUrl, workspacePath);
                 mcpManager.addWrittenConfigs(written);
                 configWritten = written.length > 0;
+              }
+
+              // Check for port mismatch in config files
+              if (serverPort !== null) {
+                const primaryTarget = requiredTargets[0];
+                const { mismatch, configPort } = await checkPortMismatch(
+                  primaryTarget,
+                  serverPort,
+                  workspacePath
+                );
+                if (mismatch) {
+                  vscode.window.showWarningMessage(
+                    `MCP port mismatch: server is running on port ${serverPort}, but ${primaryTarget} config has port ${configPort}. Rewriting config.`
+                  );
+                  for (const t of requiredTargets) {
+                    mcpManager.getWrittenConfigs().delete(t);
+                  }
+                  const rewritten = await writeAllAgentConfigs(
+                    requiredTargets,
+                    serverUrl,
+                    workspacePath
+                  );
+                  mcpManager.addWrittenConfigs(rewritten);
+                  configWritten = true;
+                }
               }
             }
 
@@ -1600,7 +1631,10 @@ export function registerOpenEditorCommand(
                   'copilot',
                 ];
 
-                const port = await startManager.start(context.extensionPath);
+                const port = await startManager.start(
+                  context.extensionPath,
+                  getConfiguredMcpPort()
+                );
                 const serverUrl = `http://127.0.0.1:${port}/mcp`;
 
                 // Write config to selected targets
@@ -1627,9 +1661,9 @@ export function registerOpenEditorCommand(
 
                 log('INFO', 'MCP Server started via UI', { port, configsWritten });
               } catch (error) {
-                log('ERROR', 'Failed to start MCP server', {
-                  error: error instanceof Error ? error.message : String(error),
-                });
+                const errMsg = error instanceof Error ? error.message : String(error);
+                log('ERROR', 'Failed to start MCP server', { error: errMsg });
+                vscode.window.showErrorMessage(errMsg);
                 webview.postMessage({
                   type: 'MCP_SERVER_STATUS',
                   requestId: message.requestId,
@@ -1782,7 +1816,10 @@ export function registerOpenEditorCommand(
                 // 1. Start server if not running
                 let serverPort = launchManager.getPort();
                 if (!launchManager.isRunning()) {
-                  serverPort = await launchManager.start(context.extensionPath);
+                  serverPort = await launchManager.start(
+                    context.extensionPath,
+                    getConfiguredMcpPort()
+                  );
                 }
                 const serverUrl = `http://127.0.0.1:${serverPort}/mcp`;
 
@@ -1796,6 +1833,30 @@ export function registerOpenEditorCommand(
                 if (newTargets.length > 0) {
                   const written = await writeAllAgentConfigs(newTargets, serverUrl, workspacePath);
                   launchManager.addWrittenConfigs(written);
+                }
+
+                // Check for port mismatch in config files
+                if (serverPort !== null) {
+                  const primaryTarget = requiredTargets[0];
+                  const { mismatch, configPort } = await checkPortMismatch(
+                    primaryTarget,
+                    serverPort,
+                    workspacePath
+                  );
+                  if (mismatch) {
+                    vscode.window.showWarningMessage(
+                      `MCP port mismatch: server is running on port ${serverPort}, but ${primaryTarget} config has port ${configPort}. Rewriting config.`
+                    );
+                    for (const t of requiredTargets) {
+                      launchManager.getWrittenConfigs().delete(t);
+                    }
+                    const rewritten = await writeAllAgentConfigs(
+                      requiredTargets,
+                      serverUrl,
+                      workspacePath
+                    );
+                    launchManager.addWrittenConfigs(rewritten);
+                  }
                 }
 
                 // 3. Send MCP_SERVER_STATUS update

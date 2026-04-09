@@ -5,7 +5,7 @@
  * can connect to for workflow CRUD operations.
  *
  * Architecture:
- * - HTTP server on 127.0.0.1 (localhost only) with dynamic port
+ * - HTTP server on 127.0.0.1 (localhost only) with configurable fixed port (default: 6282)
  * - StreamableHTTPServerTransport in stateless mode (no session management)
  * - Webview communication via postMessage for workflow data
  * - lastKnownWorkflow cache for when Webview is closed
@@ -51,7 +51,7 @@ export class McpServerManager {
   >();
   private pendingApplyRequests = new Map<string, PendingRequest<boolean>>();
 
-  async start(extensionPath: string): Promise<number> {
+  async start(extensionPath: string, port?: number): Promise<number> {
     if (this.httpServer) {
       throw new Error('MCP server is already running');
     }
@@ -145,10 +145,11 @@ export class McpServerManager {
       }
     });
 
-    // Start listening on dynamic port, localhost only
+    // Start listening on configured port (default: 6282), localhost only
+    const listenPort = port ?? 0;
     const httpServer = this.httpServer;
     return new Promise<number>((resolve, reject) => {
-      httpServer.listen(0, '127.0.0.1', () => {
+      httpServer.listen(listenPort, '127.0.0.1', () => {
         const address = httpServer.address();
         if (address && typeof address !== 'string') {
           this.port = address.port;
@@ -159,11 +160,17 @@ export class McpServerManager {
         }
       });
 
-      httpServer.on('error', (error) => {
-        log('ERROR', 'MCP Server: HTTP server error', {
-          error: error.message,
-        });
-        reject(error);
+      httpServer.on('error', (error: NodeJS.ErrnoException) => {
+        if (error.code === 'EADDRINUSE') {
+          const msg = `Port ${listenPort} is already in use. Change the port in Settings (cc-wf-studio.mcp.port) or close the application using port ${listenPort}.`;
+          log('ERROR', 'MCP Server: Port in use', { port: listenPort });
+          reject(new Error(msg));
+        } else {
+          log('ERROR', 'MCP Server: HTTP server error', {
+            error: error.message,
+          });
+          reject(error);
+        }
       });
     });
   }
