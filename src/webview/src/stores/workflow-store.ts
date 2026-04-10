@@ -823,6 +823,8 @@ export const useWorkflowStore = create<WorkflowStore>()(
             data: node.type === 'mcp' ? normalizeMcpNodeData(node.data as McpNodeData) : node.data,
             ...(node.parentId && { parentId: node.parentId }),
             ...(node.style && { style: node.style }),
+            // Keep group below edge SVG layer so edges inside groups remain clickable (selected: -1001+1000=-1 < edge:0)
+            ...(node.type === 'group' && { zIndex: -1001 }),
           }))
         );
 
@@ -868,6 +870,8 @@ export const useWorkflowStore = create<WorkflowStore>()(
             data: node.type === 'mcp' ? normalizeMcpNodeData(node.data as McpNodeData) : node.data,
             ...(node.parentId && { parentId: node.parentId }),
             ...(node.style && { style: node.style }),
+            // Keep group below edge SVG layer so edges inside groups remain clickable (selected: -1001+1000=-1 < edge:0)
+            ...(node.type === 'group' && { zIndex: -1001 }),
           }))
         );
 
@@ -905,6 +909,8 @@ export const useWorkflowStore = create<WorkflowStore>()(
             data: node.data,
             ...(node.parentId && { parentId: node.parentId }),
             ...(node.style && { style: node.style }),
+            // Keep group below edge SVG layer so edges inside groups remain clickable (selected: -1001+1000=-1 < edge:0)
+            ...(node.type === 'group' && { zIndex: -1001 }),
           }))
         );
 

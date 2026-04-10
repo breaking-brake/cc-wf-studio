@@ -117,6 +117,9 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
       id: `group-${Date.now()}`,
       type: 'group' as const,
       position,
+      // Place group below edge SVG layer (z-index: 0) so edges inside groups remain clickable.
+      // React Flow adds +1000 to selected nodes, so -1001 keeps selected groups at -1 (still below edges).
+      zIndex: -1001,
       data: {
         label: 'Group',
       },
