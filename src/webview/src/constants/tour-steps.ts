@@ -46,9 +46,14 @@ export const getTourSteps = (
       // Select a node before moving to property panel step
       onNextClick: () => {
         callbacks?.onSelectSampleNode?.();
-        setTimeout(() => {
-          callbacks?.moveNext?.();
-        }, 50);
+        const waitForPropertyPanel = () => {
+          if (document.querySelector('.property-panel')) {
+            callbacks?.moveNext?.();
+            return;
+          }
+          requestAnimationFrame(waitForPropertyPanel);
+        };
+        waitForPropertyPanel();
       },
     },
   },

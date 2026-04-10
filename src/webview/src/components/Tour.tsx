@@ -100,9 +100,6 @@ export const Tour: React.FC<TourProps> = ({ run, onFinish }) => {
   // Minimize the tour: save step, destroy Driver.js, show floating button
   const doMinimize = useCallback(() => {
     removeClickOutsideListener();
-    if (stepIndexRef.current === PROPERTY_PANEL_STEP_INDEX) {
-      setSelectedNodeIdRef.current(null);
-    }
     if (driverRef.current) {
       driverRef.current.destroy();
       driverRef.current = null;
