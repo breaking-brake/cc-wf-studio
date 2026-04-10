@@ -169,7 +169,8 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
     const hasHighlight = highlightedGroupNodeId != null;
     const hasSelection = isEdgeAnimationEnabled && selectedNodeId != null;
-    if (!hasHighlight && !hasSelection) return edges;
+    const hasSelectedEdge = isEdgeAnimationEnabled && edges.some((e) => e.selected);
+    if (!hasHighlight && !hasSelection && !hasSelectedEdge) return edges;
 
     return edges.map((edge) => {
       const isHighlightAnimated =
@@ -180,12 +181,12 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
             (highlightChildIds.has(edge.source) || highlightChildIds.has(edge.target))));
 
       const isSelectionAnimated =
-        hasSelection &&
-        (edge.selected ||
-          edge.source === selectedNodeId ||
-          edge.target === selectedNodeId ||
-          (selectionChildIds != null &&
-            (selectionChildIds.has(edge.source) || selectionChildIds.has(edge.target))));
+        (isEdgeAnimationEnabled && edge.selected) ||
+        (hasSelection &&
+          (edge.source === selectedNodeId ||
+            edge.target === selectedNodeId ||
+            (selectionChildIds != null &&
+              (selectionChildIds.has(edge.source) || selectionChildIds.has(edge.target)))));
 
       return { ...edge, animated: isHighlightAnimated || isSelectionAnimated };
     });
