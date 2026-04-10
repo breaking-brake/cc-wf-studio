@@ -353,10 +353,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'default.conditionSuffix': 'の場合',
 
   // Tour
-  'tour.welcome':
-    'CC Workflow Studioへようこそ！\n\nサンプルワークフローを使って、基本的な操作方法をご紹介します。',
+  'tour.welcome': 'CC Workflow Studioへようこそ！\n\n基本的な操作方法をご紹介します。',
   'tour.canvas':
-    'これがワークフローのキャンバスです。ノードが接続されて処理フローを構成しています。\n\nノードをドラッグして移動、ハンドル(⚪)をドラッグしてノード間を接続できます。',
+    'これがワークフローのキャンバスです。ノードを配置し、接続して処理フローを作成します。\n\nノードをドラッグして移動、ハンドル(⚪)をドラッグしてノード間を接続できます。',
   'tour.propertyPanel':
     'ノードをクリックすると、プロパティパネルが表示されます。\n\nここでノード名、プロンプト、モデル選択などの詳細設定を行います。',
   'tour.nodePalette':
@@ -366,7 +365,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'tour.refineWithAI':
     '「AI編集」ボタンで、AIにワークフローの生成や改善を依頼できます。\n\n空のキャンバスからの新規作成も、既存ワークフローの修正も対話的に行えます。',
   'tour.finish':
-    'ツアーは以上です！\n\nこのサンプルを編集して試してみるか、リセットして新しく作成してみてください。\nツアーは「その他」メニューの「ヘルプ」からいつでも再表示できます。',
+    'ツアーは以上です！\n\nワークフローを自由に編集してみてください。\nツアーは「その他」メニューの「ヘルプ」からいつでも再表示できます。',
 
   // Tour buttons
   'tour.button.back': '戻る',

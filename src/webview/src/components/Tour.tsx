@@ -83,6 +83,7 @@ export const Tour: React.FC<TourProps> = ({ run, onFinish }) => {
       onDeselectNode: () => setSelectedNodeIdRef.current(null),
       moveNext: () => driverInstance.moveNext(),
       movePrevious: () => driverInstance.movePrevious(),
+      skipToStep: (index: number) => driverInstance.drive(index),
     }),
     []
   );

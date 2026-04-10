@@ -343,9 +343,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'default.conditionSuffix': ' 时',
 
   // Tour
-  'tour.welcome': '欢迎使用CC Workflow Studio！\n\n使用示例工作流来介绍基本操作方法。',
+  'tour.welcome': '欢迎使用CC Workflow Studio！\n\n为您介绍基本操作方法。',
   'tour.canvas':
-    '这是工作流画布。节点连接形成处理流水线。\n\n拖动节点移动位置，拖动手柄(⚪)连接节点。',
+    '这是工作流画布。放置节点并连接它们来构建处理流水线。\n\n拖动节点移动位置，拖动手柄(⚪)连接节点。',
   'tour.propertyPanel': '点击节点会显示属性面板。\n\n在这里可以设置节点名称、提示、模型选择等。',
   'tour.nodePalette':
     '从节点面板添加节点到工作流。\n\nPrompt、Sub-Agent、Skill、MCP Tool、If/Else、Switch等多种节点可供使用。',
@@ -353,8 +353,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
     '从工具栏保存、加载、转换和运行工作流。\n\n"Run"按钮可直接在Claude Code中执行工作流。',
   'tour.refineWithAI':
     '使用"AI编辑"按钮请求AI生成或改进工作流。\n\n可以从空画布开始或以对话方式编辑现有工作流。',
-  'tour.finish':
-    '导览结束！\n\n试着编辑此示例，或重置后从头开始。\n可以随时从"更多"菜单的"帮助"重新查看导览。',
+  'tour.finish': '导览结束！\n\n请自由编辑您的工作流。\n可以随时从"更多"菜单的"帮助"重新查看导览。',
 
   // Tour buttons
   'tour.button.back': '返回',

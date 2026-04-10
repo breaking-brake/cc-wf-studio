@@ -353,10 +353,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'default.conditionSuffix': '이 충족될 때',
 
   // Tour
-  'tour.welcome':
-    'CC Workflow Studio에 오신 것을 환영합니다!\n\n샘플 워크플로우를 사용하여 기본 조작 방법을 소개합니다.',
+  'tour.welcome': 'CC Workflow Studio에 오신 것을 환영합니다!\n\n기본 조작 방법을 소개합니다.',
   'tour.canvas':
-    '워크플로우 캔버스입니다. 노드가 연결되어 처리 파이프라인을 구성합니다.\n\n노드를 드래그하여 이동하고 핸들(⚪)을 드래그하여 노드를 연결할 수 있습니다.',
+    '워크플로우 캔버스입니다. 노드를 배치하고 연결하여 처리 파이프라인을 만듭니다.\n\n노드를 드래그하여 이동하고 핸들(⚪)을 드래그하여 노드를 연결할 수 있습니다.',
   'tour.propertyPanel':
     '노드를 클릭하면 속성 패널이 표시됩니다.\n\n여기에서 노드 이름, 프롬프트, 모델 선택 등을 설정할 수 있습니다.',
   'tour.nodePalette':
@@ -366,7 +365,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'tour.refineWithAI':
     '"AI로 편집" 버튼으로 AI에게 워크플로우 생성이나 개선을 요청할 수 있습니다.\n\n빈 캔버스에서 새로 시작하거나 기존 워크플로우를 대화형으로 수정할 수 있습니다.',
   'tour.finish':
-    '투어가 끝났습니다!\n\n이 샘플을 편집하거나 초기화하여 새로 시작해 보세요.\n투어는 "더보기" 메뉴의 "도움말"에서 언제든 다시 볼 수 있습니다.',
+    '투어가 끝났습니다!\n\n워크플로우를 자유롭게 편집해 보세요.\n투어는 "더보기" 메뉴의 "도움말"에서 언제든 다시 볼 수 있습니다.',
 
   // Tour buttons
   'tour.button.back': '뒤로',

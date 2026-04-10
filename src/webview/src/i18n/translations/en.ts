@@ -354,10 +354,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'default.conditionSuffix': ' is met',
 
   // Tour
-  'tour.welcome':
-    'Welcome to CC Workflow Studio!\n\nLet us walk you through the basics using a sample workflow.',
+  'tour.welcome': 'Welcome to CC Workflow Studio!\n\nLet us walk you through the basics.',
   'tour.canvas':
-    'This is the workflow canvas. Nodes are connected to form a processing pipeline.\n\nDrag nodes to move them, and drag handles (⚪) to connect nodes together.',
+    'This is the workflow canvas. Place nodes and connect them to build a processing pipeline.\n\nDrag nodes to move them, and drag handles (⚪) to connect nodes together.',
   'tour.propertyPanel':
     'Click a node to open the Property Panel.\n\nHere you can configure node name, prompt, model selection, and more.',
   'tour.nodePalette':
@@ -367,7 +366,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'tour.refineWithAI':
     'Use "Edit with AI" to generate or improve workflows through an interactive chat.\n\nYou can start from an empty canvas or refine existing workflows conversationally.',
   'tour.finish':
-    "That's the end of the tour!\n\nTry editing this sample, or reset to start from scratch.\nYou can revisit this tour anytime from the Help option in the More menu.",
+    "That's the end of the tour!\n\nFeel free to start building your workflow.\nYou can revisit this tour anytime from the Help option in the More menu.",
 
   // Tour buttons
   'tour.button.back': 'Back',

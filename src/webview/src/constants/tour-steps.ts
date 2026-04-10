@@ -24,6 +24,7 @@ export const getTourSteps = (
     onDeselectNode?: () => void;
     moveNext?: () => void;
     movePrevious?: () => void;
+    skipToStep?: (index: number) => void;
   }
 ): DriveStep[] => [
   // Step 1: Welcome
@@ -46,9 +47,15 @@ export const getTourSteps = (
       // Select a node before moving to property panel step
       onNextClick: () => {
         callbacks?.onSelectSampleNode?.();
+        const start = Date.now();
         const waitForPropertyPanel = () => {
           if (document.querySelector('.property-panel')) {
             callbacks?.moveNext?.();
+            return;
+          }
+          // Timeout: skip property panel step if it doesn't appear (e.g. empty canvas)
+          if (Date.now() - start > 500) {
+            callbacks?.skipToStep?.(PROPERTY_PANEL_STEP_INDEX + 1);
             return;
           }
           requestAnimationFrame(waitForPropertyPanel);

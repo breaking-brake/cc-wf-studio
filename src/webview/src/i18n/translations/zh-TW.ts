@@ -343,9 +343,9 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'default.conditionSuffix': ' 時',
 
   // Tour
-  'tour.welcome': '歡迎使用CC Workflow Studio！\n\n使用範例工作流程來介紹基本操作方法。',
+  'tour.welcome': '歡迎使用CC Workflow Studio！\n\n為您介紹基本操作方法。',
   'tour.canvas':
-    '這是工作流程畫布。節點連接形成處理管線。\n\n拖曳節點移動位置，拖曳手柄(⚪)連接節點。',
+    '這是工作流程畫布。放置節點並連接它們來建立處理管線。\n\n拖曳節點移動位置，拖曳手柄(⚪)連接節點。',
   'tour.propertyPanel': '點擊節點會顯示屬性面板。\n\n在這裡可以設定節點名稱、提示、模型選擇等。',
   'tour.nodePalette':
     '從節點面板新增節點到工作流程。\n\nPrompt、Sub-Agent、Skill、MCP Tool、If/Else、Switch等多種節點可供使用。',
@@ -354,7 +354,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'tour.refineWithAI':
     '使用「AI編輯」按鈕請求AI生成或改善工作流程。\n\n可以從空白畫布開始或以對話方式編輯現有工作流程。',
   'tour.finish':
-    '導覽結束！\n\n試著編輯此範例，或重置後從頭開始。\n可以隨時從「更多」選單的「說明」重新查看導覽。',
+    '導覽結束！\n\n請自由編輯您的工作流程。\n可以隨時從「更多」選單的「說明」重新查看導覽。',
 
   // Tour buttons
   'tour.button.back': '返回',
