@@ -193,8 +193,10 @@ button {
   z-index: 10000;
 }
 
-/* Shift minimap up when tour floating button is visible */
+/* Shift minimap up when tour floating button is visible.
+   !important is required to override React Flow's inline styles on .react-flow__panel */
 body.tour-floating-visible .react-flow__panel.bottom.right {
+  /* biome-ignore lint/complexity/noImportantStyles: React Flow applies inline styles that can only be overridden with !important */
   bottom: 24px !important;
 }
 
