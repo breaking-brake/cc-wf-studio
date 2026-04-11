@@ -80,7 +80,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Toolbar slash command options dropdown
   'toolbar.slashCommandOptions.frontmatterReferenceUrl':
-    'https://code.claude.com/docs/ko/slash-commands#프론트매터',
+    'https://code.claude.com/docs/ko/skills#frontmatter-참조',
 
   // Toolbar hooks configuration dropdown
   'hooks.title': 'Hooks',
