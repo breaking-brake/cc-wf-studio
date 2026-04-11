@@ -13,6 +13,7 @@ import type {
   GetCurrentWorkflowResponsePayload,
   LaunchAiAgentPayload,
   McpConfigTarget,
+  RecentWorkflowItem,
   RunAiEditingSkillPayload,
   SetReviewBeforeApplyPayload,
   StartMcpServerPayload,
@@ -125,6 +126,48 @@ export interface ImportParameters {
   workflowId: string;
   /** Workspace name for display in error dialogs (decoded from Base64) */
   workspaceName?: string;
+}
+
+const MAX_RECENT_WORKFLOWS = 10;
+
+async function addRecentWorkflow(
+  context: vscode.ExtensionContext,
+  workflowId: string
+): Promise<void> {
+  const recent = context.globalState.get<string[]>('recentWorkflows', []);
+  const updated = [workflowId, ...recent.filter((id) => id !== workflowId)].slice(
+    0,
+    MAX_RECENT_WORKFLOWS
+  );
+  await context.globalState.update('recentWorkflows', updated);
+}
+
+async function loadRecentWorkflows(
+  context: vscode.ExtensionContext,
+  fileService: FileService
+): Promise<RecentWorkflowItem[]> {
+  const recentIds = context.globalState.get<string[]>('recentWorkflows', []);
+  const items: RecentWorkflowItem[] = [];
+  const validIds: string[] = [];
+
+  for (const id of recentIds) {
+    try {
+      const filePath = fileService.getWorkflowFilePath(id);
+      const content = await fileService.readFile(filePath);
+      const workflow = JSON.parse(content);
+      items.push({ id, name: workflow.name || id });
+      validIds.push(id);
+    } catch {
+      // File no longer exists - skip
+    }
+  }
+
+  // Clean up stale entries
+  if (validIds.length !== recentIds.length) {
+    await context.globalState.update('recentWorkflows', validIds);
+  }
+
+  return items;
 }
 
 /**
@@ -351,6 +394,7 @@ export function registerOpenEditorCommand(
               const extensionPkg = require(
                 vscode.Uri.joinPath(vscode.Uri.file(context.extensionPath), 'package.json').fsPath
               );
+              const recentWorkflows = await loadRecentWorkflows(context, fileService);
               webview.postMessage({
                 type: 'INITIAL_STATE',
                 payload: {
@@ -358,6 +402,7 @@ export function registerOpenEditorCommand(
                   unreadReleaseCount: showWhatsNewBadge ? unreadReleaseCount : 0,
                   showWhatsNewBadge,
                   extensionVersion: extensionPkg.version ?? '',
+                  recentWorkflows,
                 },
               });
 
@@ -386,6 +431,8 @@ export function registerOpenEditorCommand(
                   message.payload.workflow,
                   message.requestId
                 );
+                // Record in recent workflows
+                await addRecentWorkflow(context, message.payload.workflow.name);
                 // Update MCP server workflow cache
                 const saveManager = getMcpServerManager();
                 if (saveManager) {
@@ -961,6 +1008,8 @@ export function registerOpenEditorCommand(
                   message.payload.workflowId,
                   message.requestId
                 );
+                // Record in recent workflows
+                await addRecentWorkflow(context, message.payload.workflowId);
               } else {
                 webview.postMessage({
                   type: 'ERROR',
@@ -1056,6 +1105,11 @@ export function registerOpenEditorCommand(
                   requestId: message.requestId,
                   payload: { workflow },
                 });
+
+                // Record in recent workflows
+                if (workflow.name) {
+                  await addRecentWorkflow(context, workflow.name);
+                }
 
                 console.log(`Workflow loaded from file picker: ${filePath}`);
               } catch (error) {

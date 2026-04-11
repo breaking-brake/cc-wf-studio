@@ -52,11 +52,17 @@ export interface WorkflowListPayload {
   }>;
 }
 
+export interface RecentWorkflowItem {
+  id: string;
+  name: string;
+}
+
 export interface InitialStatePayload {
   isFirstTimeUser: boolean;
   unreadReleaseCount: number;
   showWhatsNewBadge: boolean;
   extensionVersion: string;
+  recentWorkflows?: RecentWorkflowItem[];
 }
 
 // ============================================================================

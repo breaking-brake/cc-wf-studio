@@ -207,6 +207,7 @@ const App: React.FC = () => {
   const pendingTourAfterSampleLoadRef = useRef(false);
   const [unreadReleaseCount, setUnreadReleaseCount] = useState(0);
   const [extensionVersion, setExtensionVersion] = useState('');
+  const [recentWorkflows, setRecentWorkflows] = useState<Array<{ id: string; name: string }>>([]);
   const [showWhatsNewBadge, setShowWhatsNewBadge] = useState(true);
   const [showMcpRefreshDialog, setShowMcpRefreshDialog] = useState(false);
   const [mcpRefreshSkillName, setMcpRefreshSkillName] = useState<string>('cc-workflow-ai-editor');
@@ -383,6 +384,7 @@ const App: React.FC = () => {
         setUnreadReleaseCount(payload.unreadReleaseCount ?? 0);
         setShowWhatsNewBadge(payload.showWhatsNewBadge ?? true);
         setExtensionVersion(payload.extensionVersion ?? '');
+        setRecentWorkflows(payload.recentWorkflows ?? []);
       } else if (message.type === 'IMPORT_WORKFLOW_FROM_SLACK') {
         // Handle import workflow request from Extension Host
         // Simply forward the message back to Extension Host to trigger the import process
@@ -715,6 +717,13 @@ const App: React.FC = () => {
             onDismissEmptyState={() => setEmptyStateDismissed(true)}
             onLoadWorkflow={handleLoadWorkflowFromEmptyState}
             extensionVersion={extensionVersion}
+            recentWorkflows={recentWorkflows}
+            onLoadRecent={(id) => {
+              vscode.postMessage({
+                type: 'LOAD_WORKFLOW',
+                payload: { workflowId: id },
+              });
+            }}
           />
           {/* Processing overlay for canvas area only (with message centered in canvas) */}
           <ProcessingOverlay isVisible={isProcessing} message={t('refinement.processingOverlay')} />
