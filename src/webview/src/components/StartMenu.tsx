@@ -18,6 +18,7 @@ interface StartMenuProps {
   extensionVersion?: string;
   recentWorkflows?: Array<{ id: string; name: string }>;
   onLoadRecent?: (id: string) => void;
+  onVersionClick?: () => void;
 }
 
 const buttonStyle: React.CSSProperties = {
@@ -44,6 +45,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
   extensionVersion,
   recentWorkflows,
   onLoadRecent,
+  onVersionClick,
 }) => {
   const hasRecent = recentWorkflows && recentWorkflows.length > 0;
 
@@ -73,6 +75,12 @@ export const StartMenu: React.FC<StartMenuProps> = ({
               flexDirection: 'column',
               boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
               outline: 'none',
+            }}
+            // Prevent auto-focus on the first button (New) to avoid unwanted highlight on open.
+            // Focus the dialog content itself so Tab key navigation still works.
+            onOpenAutoFocus={(e) => {
+              e.preventDefault();
+              (e.currentTarget as HTMLElement).focus();
             }}
             onEscapeKeyDown={onStartFromScratch}
           >
@@ -231,10 +239,27 @@ export const StartMenu: React.FC<StartMenuProps> = ({
               </button>
               {extensionVersion && (
                 <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={onVersionClick}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      onVersionClick?.();
+                    }
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = '0.7';
+                  }}
                   style={{
                     fontSize: '11px',
                     color: 'var(--vscode-descriptionForeground)',
                     padding: '4px',
+                    cursor: 'pointer',
+                    opacity: 0.7,
+                    transition: 'opacity 0.15s',
                   }}
                 >
                   v{extensionVersion}

@@ -34,6 +34,7 @@ import { SlackConnectionRequiredDialog } from './components/dialogs/SlackConnect
 import { SlackManualTokenDialog } from './components/dialogs/SlackManualTokenDialog';
 import { SlackShareDialog } from './components/dialogs/SlackShareDialog';
 import { SubAgentFlowDialog } from './components/dialogs/SubAgentFlowDialog';
+import { WhatsNewDialog } from './components/dialogs/WhatsNewDialog';
 import { ErrorNotification } from './components/ErrorNotification';
 import { NodePalette } from './components/NodePalette';
 import { PropertyOverlay } from './components/PropertyOverlay';
@@ -209,6 +210,7 @@ const App: React.FC = () => {
   const [extensionVersion, setExtensionVersion] = useState('');
   const [recentWorkflows, setRecentWorkflows] = useState<Array<{ id: string; name: string }>>([]);
   const [showWhatsNewBadge, setShowWhatsNewBadge] = useState(true);
+  const [isWhatsNewFromStartMenu, setIsWhatsNewFromStartMenu] = useState(false);
   const [showMcpRefreshDialog, setShowMcpRefreshDialog] = useState(false);
   const [mcpRefreshSkillName, setMcpRefreshSkillName] = useState<string>('cc-workflow-ai-editor');
   const [emptyStateDismissed, setEmptyStateDismissed] = useState(false);
@@ -724,6 +726,7 @@ const App: React.FC = () => {
                 payload: { workflowId: id },
               });
             }}
+            onVersionClick={() => setIsWhatsNewFromStartMenu(true)}
           />
           {/* Processing overlay for canvas area only (with message centered in canvas) */}
           <ProcessingOverlay isVisible={isProcessing} message={t('refinement.processingOverlay')} />
@@ -778,6 +781,14 @@ const App: React.FC = () => {
         isOpen={isSampleDialogOpen}
         onClose={() => setIsSampleDialogOpen(false)}
         onLoadSample={handleLoadSample}
+      />
+
+      {/* What's New Dialog triggered from StartMenu version click */}
+      <WhatsNewDialog
+        isOpen={isWhatsNewFromStartMenu}
+        onClose={() => setIsWhatsNewFromStartMenu(false)}
+        showBadge={showWhatsNewBadge}
+        onShowBadgeChange={setShowWhatsNewBadge}
       />
 
       {/* Unsaved changes confirmation before loading sample */}
