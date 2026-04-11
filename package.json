@@ -97,8 +97,7 @@
     }
   },
   "activationEvents": [
-    "onUri",
-    "onCustomEditor:cc-wf-studio.workflowPreview"
+    "onUri"
   ],
   "scripts": {
     "vscode:prepublish": "npm run build",
