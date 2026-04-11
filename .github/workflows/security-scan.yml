@@ -65,15 +65,24 @@ jobs:
           command: test
           args: --severity-threshold=high --file=src/webview/package.json --project-name=cc-wf-studio-webview
 
-      # SARIF形式でのスキャン（GitHub Code Scanning用）
-      - name: Run Snyk to generate SARIF file
+      # SARIF形式でのスキャン（GitHub Code Scanning用 - プロジェクトごとに分割）
+      - name: Generate SARIF for root project
         uses: snyk/actions/node@v1.0.0
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --all-projects --severity-threshold=low --sarif-file-output=snyk.sarif
+          args: --severity-threshold=low --file=package.json --sarif-file-output=snyk-root.sarif
+
+      - name: Generate SARIF for webview project
+        uses: snyk/actions/node@v1.0.0
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: --severity-threshold=low --file=src/webview/package.json --sarif-file-output=snyk-webview.sarif
 
       # すべてのプロジェクトのモニタリング（継続的な監視）
       - name: Monitor all projects with Snyk
@@ -84,10 +93,17 @@ jobs:
           command: monitor
           args: --all-projects
 
-      # GitHub Code Scanningへのアップロード
-      - name: Upload Snyk results to GitHub Code Scanning
+      # GitHub Code Scanningへのアップロード（プロジェクトごとに分割）
+      - name: Upload root project results to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
-          sarif_file: snyk.sarif
-          category: snyk-open-source
+          sarif_file: snyk-root.sarif
+          category: snyk-root
+
+      - name: Upload webview project results to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: snyk-webview.sarif
+          category: snyk-webview
