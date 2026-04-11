@@ -2,13 +2,18 @@ name: Security Scan
 
 on:
   push:
-    branches: [main, production]
+    branches: [main]
   pull_request:
-    branches: [main, production]
-  workflow_dispatch:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'src/webview/package.json'
+      - 'src/webview/package-lock.json'
   schedule:
-    # 毎週月曜日 9:00 JST (00:00 UTC) に実行
-    - cron: '0 0 * * 1'
+    # 毎週月曜日 12:00 JST (03:00 UTC) に実行
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
 
 permissions:
   contents: read

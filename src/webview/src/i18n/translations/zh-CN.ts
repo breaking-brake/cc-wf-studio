@@ -77,7 +77,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
 
   // Toolbar slash command options dropdown
   'toolbar.slashCommandOptions.frontmatterReferenceUrl':
-    'https://code.claude.com/docs/zh-CN/slash-commands#前置事项',
+    'https://code.claude.com/docs/zh-CN/skills#frontmatter-参考',
 
   // Toolbar hooks configuration dropdown
   'hooks.title': 'Hooks',

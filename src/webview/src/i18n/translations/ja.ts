@@ -81,7 +81,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Toolbar slash command options dropdown
   'toolbar.slashCommandOptions.frontmatterReferenceUrl':
-    'https://code.claude.com/docs/ja/slash-commands#フロントマター',
+    'https://code.claude.com/docs/ja/skills#フロントマターリファレンス',
 
   // Toolbar hooks configuration dropdown
   'hooks.title': 'Hooks',
