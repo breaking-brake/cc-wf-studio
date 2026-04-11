@@ -1,5 +1,5 @@
 /**
- * Empty State Component
+ * Start Menu Component
  *
  * Displayed on the canvas when no workflow is loaded (only Start/End nodes).
  * Provides quick actions to get started.
@@ -10,7 +10,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { FileDown, FolderOpen, Plus } from 'lucide-react';
 import type React from 'react';
 
-interface EmptyStateProps {
+interface StartMenuProps {
   isOpen: boolean;
   onOpenSample: () => void;
   onStartFromScratch: () => void;
@@ -33,7 +33,7 @@ const buttonStyle: React.CSSProperties = {
   transition: 'background-color 0.15s',
 };
 
-export const EmptyState: React.FC<EmptyStateProps> = ({
+export const StartMenu: React.FC<StartMenuProps> = ({
   isOpen,
   onOpenSample,
   onStartFromScratch,

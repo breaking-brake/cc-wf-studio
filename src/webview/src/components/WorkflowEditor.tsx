@@ -29,7 +29,6 @@ import { useWorkflowStore } from '../stores/workflow-store';
 import { CanvasToolbar } from './CanvasToolbar';
 import { FeatureAnnouncementBanner } from './common/FeatureAnnouncementBanner';
 import { DescriptionPanel } from './DescriptionPanel';
-import { EmptyState } from './EmptyState';
 // Custom edge with delete button
 import { DeletableEdge } from './edges/DeletableEdge';
 import { MinimapContainer } from './MinimapContainer';
@@ -47,6 +46,7 @@ import { StartNode } from './nodes/StartNode';
 import { SubAgentFlowNodeComponent } from './nodes/SubAgentFlowNode';
 import { SubAgentNodeComponent } from './nodes/SubAgentNode';
 import { SwitchNodeComponent } from './nodes/SwitchNode';
+import { StartMenu } from './StartMenu';
 
 /**
  * Node types registration (memoized outside component for performance)
@@ -534,7 +534,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           )}
         </ReactFlow>
         {onOpenSample && onDismissEmptyState && onLoadWorkflow && (
-          <EmptyState
+          <StartMenu
             isOpen={showEmptyState}
             onOpenSample={onOpenSample}
             onStartFromScratch={onDismissEmptyState}
