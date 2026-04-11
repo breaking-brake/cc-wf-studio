@@ -348,12 +348,16 @@ export function registerOpenEditorCommand(
               // Webview is fully initialized and ready to receive messages
               // This is more reliable than setTimeout (fixes Issue #396)
               const showWhatsNewBadge = context.globalState.get<boolean>('showWhatsNewBadge', true);
+              const extensionPkg = require(
+                vscode.Uri.joinPath(vscode.Uri.file(context.extensionPath), 'package.json').fsPath
+              );
               webview.postMessage({
                 type: 'INITIAL_STATE',
                 payload: {
                   isFirstTimeUser,
                   unreadReleaseCount: showWhatsNewBadge ? unreadReleaseCount : 0,
                   showWhatsNewBadge,
+                  extensionVersion: extensionPkg.version ?? '',
                 },
               });
 

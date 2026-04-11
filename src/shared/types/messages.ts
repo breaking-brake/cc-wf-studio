@@ -56,6 +56,7 @@ export interface InitialStatePayload {
   isFirstTimeUser: boolean;
   unreadReleaseCount: number;
   showWhatsNewBadge: boolean;
+  extensionVersion: string;
 }
 
 // ============================================================================

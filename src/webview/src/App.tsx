@@ -206,6 +206,7 @@ const App: React.FC = () => {
   const [showUnsavedConfirmForSample, setShowUnsavedConfirmForSample] = useState(false);
   const pendingTourAfterSampleLoadRef = useRef(false);
   const [unreadReleaseCount, setUnreadReleaseCount] = useState(0);
+  const [extensionVersion, setExtensionVersion] = useState('');
   const [showWhatsNewBadge, setShowWhatsNewBadge] = useState(true);
   const [showMcpRefreshDialog, setShowMcpRefreshDialog] = useState(false);
   const [mcpRefreshSkillName, setMcpRefreshSkillName] = useState<string>('cc-workflow-ai-editor');
@@ -381,6 +382,7 @@ const App: React.FC = () => {
         }
         setUnreadReleaseCount(payload.unreadReleaseCount ?? 0);
         setShowWhatsNewBadge(payload.showWhatsNewBadge ?? true);
+        setExtensionVersion(payload.extensionVersion ?? '');
       } else if (message.type === 'IMPORT_WORKFLOW_FROM_SLACK') {
         // Handle import workflow request from Extension Host
         // Simply forward the message back to Extension Host to trigger the import process
@@ -712,6 +714,7 @@ const App: React.FC = () => {
             onOpenSample={() => setIsSampleDialogOpen(true)}
             onDismissEmptyState={() => setEmptyStateDismissed(true)}
             onLoadWorkflow={handleLoadWorkflowFromEmptyState}
+            extensionVersion={extensionVersion}
           />
           {/* Processing overlay for canvas area only (with message centered in canvas) */}
           <ProcessingOverlay isVisible={isProcessing} message={t('refinement.processingOverlay')} />

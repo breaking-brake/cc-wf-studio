@@ -15,6 +15,7 @@ interface StartMenuProps {
   onOpenSample: () => void;
   onStartFromScratch: () => void;
   onLoadWorkflow: () => void;
+  extensionVersion?: string;
 }
 
 const buttonStyle: React.CSSProperties = {
@@ -38,6 +39,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
   onOpenSample,
   onStartFromScratch,
   onLoadWorkflow,
+  extensionVersion,
 }) => {
   return (
     <Dialog.Root open={isOpen}>
@@ -112,7 +114,14 @@ export const StartMenu: React.FC<StartMenuProps> = ({
               </button>
             </div>
 
-            <div style={{ marginTop: '12px', textAlign: 'center' }}>
+            <div
+              style={{
+                marginTop: '12px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <button
                 type="button"
                 onClick={onOpenSample}
@@ -138,6 +147,17 @@ export const StartMenu: React.FC<StartMenuProps> = ({
                 <FolderOpen size={12} />
                 Sample Workflow
               </button>
+              {extensionVersion && (
+                <span
+                  style={{
+                    fontSize: '11px',
+                    color: 'var(--vscode-descriptionForeground)',
+                    padding: '4px',
+                  }}
+                >
+                  v{extensionVersion}
+                </span>
+              )}
             </div>
           </Dialog.Content>
         </Dialog.Overlay>
