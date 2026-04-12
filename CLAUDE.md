@@ -2,6 +2,11 @@
 
 Auto-generated from all feature plans. Last updated: 2025-11-01
 
+## Language
+
+- GitHub Issues and Pull Requests (titles, bodies, and comments) MUST be written in English.
+- This applies regardless of the conversation language used with Claude.
+
 ## Active Technologies
 - ローカルファイルシステム (`.vscode/workflows/*.json`, `.claude/skills/*.md`, `.claude/commands/*.md`) (001-cc-wf-studio)
 - TypeScript 5.3 (VSCode Extension Host), React 18.2 (Webview UI) (001-node-types-extension)
