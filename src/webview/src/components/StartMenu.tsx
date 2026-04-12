@@ -244,6 +244,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
                   onClick={onVersionClick}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
                       onVersionClick?.();
                     }
                   }}

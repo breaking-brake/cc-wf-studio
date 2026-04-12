@@ -6,6 +6,7 @@
  */
 
 import * as crypto from 'node:crypto';
+import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type {
   AiEditingProvider,
@@ -1106,10 +1107,10 @@ export function registerOpenEditorCommand(
                   payload: { workflow },
                 });
 
-                // Record in recent workflows
-                if (workflow.name) {
-                  await addRecentWorkflow(context, workflow.name);
-                }
+                // Record in recent workflows (use filename as canonical ID
+                // to match getWorkflowFilePath resolution)
+                const workflowId = path.basename(filePath, '.json');
+                await addRecentWorkflow(context, workflowId);
 
                 console.log(`Workflow loaded from file picker: ${filePath}`);
               } catch (error) {
