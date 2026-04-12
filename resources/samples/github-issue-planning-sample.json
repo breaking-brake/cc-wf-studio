@@ -5,10 +5,10 @@
     "descriptionKey": "sample.githubIssuePlanning.description",
     "difficulty": "advanced",
     "tags": ["planning", "github"],
-    "nodeCount": 28
+    "nodeCount": 29
   },
   "workflow": {
-    "id": "sample-github-issue-planning",
+    "id": "workflow-1776004712945",
     "name": "github-issue-planning-en",
     "version": "1.0.0",
     "nodes": [
@@ -49,15 +49,15 @@
         "type": "group",
         "name": "group-3",
         "position": {
-          "x": 1290,
+          "x": 1275,
           "y": 165
         },
         "data": {
           "label": "3. Reproduce"
         },
         "style": {
-          "width": 375,
-          "height": 550
+          "width": 405,
+          "height": 680
         }
       },
       {
@@ -81,7 +81,7 @@
         "type": "group",
         "name": "group-6-merged",
         "position": {
-          "x": 2100,
+          "x": 2115,
           "y": 165
         },
         "data": {
@@ -254,8 +254,8 @@
         "type": "askUserQuestion",
         "name": "ask-reproduce-result",
         "position": {
-          "x": 75,
-          "y": 390
+          "x": 120,
+          "y": 375
         },
         "data": {
           "questionText": "Reproduction result?",
@@ -266,14 +266,33 @@
               "id": "opt-en-reproduced-yes"
             },
             {
-              "label": "Not reproduced",
-              "description": "The issue could not be reproduced.",
-              "id": "opt-en-reproduced-no"
+              "label": "Unable-proceed",
+              "description": "Cannot reproduce, but proceed with analysis using the issue description.",
+              "id": "opt-en-reproduced-proceed"
+            },
+            {
+              "label": "Need-more-info",
+              "description": "Cannot reproduce and need more information from the issue reporter.",
+              "id": "opt-en-reproduced-more-info"
             }
           ],
           "multiSelect": false,
           "useAiSuggestions": false,
-          "outputPorts": 2
+          "outputPorts": 3
+        },
+        "parentId": "group-3"
+      },
+      {
+        "id": "prompt-need-more-info",
+        "type": "prompt",
+        "name": "prompt-need-more-info",
+        "position": {
+          "x": 75,
+          "y": 555
+        },
+        "data": {
+          "label": "Request More Info",
+          "prompt": "The issue cannot be reproduced with the current information.\n\nPlease add a comment to the GitHub issue asking the reporter for:\n- Exact environment (OS, browser, version)\n- Detailed reproduction steps\n- Screenshots or logs if applicable\n- Any workaround they have tried\n\nSuggested command:\n`gh issue comment <number> --body \"...\"`\n\nThe workflow will end here. Re-run the workflow once additional info is received."
         },
         "parentId": "group-3"
       },
@@ -302,7 +321,7 @@
         "data": {
           "description": "Investigate codebase",
           "agentDefinition": "Fast agent specialized for exploring codebases. Use this when you need to quickly find files by patterns, search code for keywords, or answer questions about the codebase.",
-          "prompt": "Investigate files related to the issue:\n\n**Tasks:**\n1. Use Read/Grep/Glob tools to identify related files\n2. Review code at problem areas (include file paths and line numbers)\n3. Investigate the scope of impact\n4. Check dependencies and related components\n\n**Important:** Report findings with specific file paths, line numbers, and code snippets.",
+          "prompt": "Investigate files related to the issue.\n\n## Tasks\n1. Extract keywords from the issue description\n2. Use Read/Grep/Glob tools to identify related files\n3. Review code at problem areas\n4. Analyze scope of impact and dependencies\n\n## Required Output Format\n\n**Related Files**\n- `path/to/file.ts` (lines X-Y) — one-line role description\n\n**Problem Areas**\n- File: `path/to/file.ts`\n  Line: N\n  Code snippet:\n  ```\n  (3-5 relevant lines)\n  ```\n  Issue: (1-2 sentence explanation of what's wrong)\n\n**Impact Analysis**\n- Dependencies: files that depend on the problem areas\n- Usage sites: where the problem code is called from\n\nDo not omit any section. If a section has no findings, explicitly write \"None\".",
           "builtInType": "explore",
           "agentType": "claudeCode",
           "outputPorts": 1
@@ -320,7 +339,7 @@
         "data": {
           "description": "Design fix strategy",
           "agentDefinition": "Software architect agent for designing implementation plans. Use this when you need to plan the implementation strategy for a task. Returns step-by-step plans, identifies critical files, and considers architectural trade-offs.",
-          "prompt": "Based on the investigation, design a fix strategy:\n\n**Tasks:**\n1. Identify the locations to fix (files, functions, line numbers)\n2. Describe the fix details\n3. Define implementation steps\n4. Evaluate impact scope and risks\n5. Consider architectural trade-offs\n\n**Output Format:**\n- Fix Target: File paths and affected areas\n- Fix Content: Specific changes\n- Implementation Steps: Step-by-step plan\n- Impact Scope: Affected components and files\n- Risk Assessment: Anticipated risks and mitigations\n\nPlease organize and present the analysis clearly.",
+          "prompt": "Based on the investigation, design a fix strategy.\n\n## Tasks\n1. Identify fix locations (files, functions, line numbers)\n2. Describe the fix in detail\n3. Define implementation steps\n4. Evaluate impact and risks\n5. Consider architectural trade-offs\n\n## Required Output Format\n\n**Fix Targets**\n- File: `path/to/file.ts`\n  Function/area: functionName (lines X-Y)\n  Change type: add | modify | delete\n\n**Fix Details**\n- (bullet list of what will change and why)\n\n**Implementation Steps**\n1. Step one (concrete action)\n2. Step two\n3. ...\n\n**Impact Scope**\n- Affected components: (list)\n- Affected tests: (list or \"None\")\n\n**Risk Assessment**\n- Risk 1: description → mitigation\n- Risk 2: ...\n\nDo not omit any section.",
           "builtInType": "plan",
           "agentType": "claudeCode",
           "outputPorts": 1
@@ -378,7 +397,7 @@
         "data": {
           "description": "Implement code fix",
           "agentDefinition": "General-purpose agent for researching complex questions, searching for code, and executing multi-step tasks. Use this for code modifications, file creation/editing, and shell execution.",
-          "prompt": "Based on the analysis and fix strategy, try implementing the fix as a verification during planning:\n\n**Tasks:**\n1. Implement the proposed changes\n2. Clearly explain the modified areas\n3. Confirm the impact scope\n\nOnce complete, prompt the user to verify.",
+          "prompt": "Based on the analysis and fix strategy, implement the proposed fix.\n\n## Tasks\n1. Apply the changes described in the fix strategy\n2. Run the project's formatter/linter if available\n3. Summarize what was changed\n\n## Required Output Format\n\n**Files Changed**\n- `path/to/file.ts` — what changed (1 line per file)\n\n**Diff Summary**\n- Added: N lines\n- Modified: N lines\n- Deleted: N lines\n\n**Follow-up Checks**\n- [ ] Formatter passed\n- [ ] Linter passed / warnings noted\n- [ ] Type check passed (if applicable)\n\nPrompt the user to proceed to verification.",
           "builtInType": "general-purpose",
           "agentType": "claudeCode",
           "outputPorts": 1
@@ -395,7 +414,7 @@
         },
         "data": {
           "label": "Verify Results",
-          "prompt": "Please verify the changes in your local environment:\n\n1. Start the dev server (if needed)\n2. Check the modified areas\n3. Verify the issue is resolved\n\nProceed to the next step when verification is complete."
+          "prompt": "Verify the fix by following the steps below.\n\n## Step 1: Review the changes\nRun `git diff` to review all modified files and diffs.\n\n## Step 2: Run project verification commands\nExecute the project's own commands (do not assume specific commands):\n- Start the development server (if the project has one)\n- Run the test suite\n- Run the formatter/linter\n\n## Step 3: Verification checklist\n- [ ] The target feature works as expected\n- [ ] No regression in related features\n- [ ] No errors or warnings in console/logs\n- [ ] The original reproduction steps no longer trigger the issue\n\n## Step 4: Proceed\nOnce all checks pass, proceed to the next step.\nIf any check fails, choose \"Additional fix needed\" in the next question."
         },
         "parentId": "group-6-merged"
       },
@@ -438,7 +457,7 @@
         "data": {
           "description": "Apply additional fixes",
           "agentDefinition": "General-purpose agent for researching complex questions, searching for code, and executing multi-step tasks. Use this for code modifications, file creation/editing, and shell execution.",
-          "prompt": "Apply additional fixes based on user feedback:\n\n**Tasks:**\n1. Review the reported issues\n2. Implement the necessary fixes\n3. Prompt for re-verification\n\nRespond flexibly to the user's instructions.",
+          "prompt": "Apply additional fixes based on user feedback from verification.\n\n## Tasks\n1. Read the reported issues carefully\n2. Implement targeted fixes\n3. Re-run formatter/linter\n4. Prompt for re-verification\n\n## Required Output Format\n\n**User Feedback Received**\n- (summary of the issue reported by user)\n\n**Files Changed (this iteration)**\n- `path/to/file.ts` — what changed\n\n**Follow-up Checks**\n- [ ] Formatter passed\n- [ ] Linter passed\n- [ ] Type check passed (if applicable)\n\nPrompt the user to re-verify.",
           "builtInType": "general-purpose",
           "agentType": "claudeCode",
           "outputPorts": 1
@@ -456,7 +475,7 @@
         "data": {
           "description": "Retrospective analysis and proposals",
           "agentDefinition": "Software architect agent for designing implementation plans. Use this when you need to plan the implementation strategy for a task. Returns step-by-step plans, identifies critical files, and considers architectural trade-offs.",
-          "prompt": "Review the entire issue resolution process and propose knowledge items to persist, presented as a numbered list.\n\n**Analysis Perspectives:**\n1. Root cause and nature of the problem\n2. Validity of the solution approach\n3. Reusable patterns and insights\n4. Process improvements\n\n**Proposal Format (numbered list):**\nInclude the target destination and specific content for each proposal.\n\nExample:\n1. [Workflow] Add a step for XX in the reproduction phase\n   -> Content: ...\n2. [Skill (project)] Create a skill for the XX investigation pattern\n   -> Skill name: xxx, Content: ...\n3. [MEMORY.md (project)] Record the decision criteria for XX\n   -> Content: ...\n4. [CLAUDE.md (project)] Add a rule for XX\n   -> Content: ...\n\nDestination options:\n- **Workflow**: Improve this workflow's flow and prompts\n- **Skill**: Create reusable pattern as a skill (user/project/local)\n- **MEMORY.md**: Record insights and decision criteria (user/project/local)\n- **CLAUDE.md**: Add development rules and conventions (user: ~/.claude/CLAUDE.md / project: repo root)\n\nOmit destinations where no proposal is needed.\nInclude the scope in each proposal.",
+          "prompt": "Review the entire issue resolution process and propose knowledge items to persist, as a numbered list.\n\n## Analysis Perspectives\n1. Root cause and nature of the problem\n2. Validity of the solution approach\n3. Reusable patterns and insights\n4. Process improvements\n\n## Required Proposal Format\n\nEach proposal must include:\n- **Target**: [Workflow | Skill | MEMORY.md | CLAUDE.md]\n- **Scope**: [user | project | local] (for Skill/MEMORY/CLAUDE only)\n- **Rationale**: why this should be persisted (1-2 sentences)\n- **Content**: the actual text or change to apply\n\nExample:\n1. **Target**: Skill (project)\n   **Rationale**: The XX investigation pattern appeared repeatedly.\n   **Content**:\n   - Skill name: `xx-investigation`\n   - Description: ...\n   - Body: ...\n\n2. **Target**: MEMORY.md (project)\n   **Rationale**: Decision criteria for XX should survive future sessions.\n   **Content**:\n   - ...\n\n## Destination Options\n- **Workflow**: improve this workflow's flow/prompts\n- **Skill**: create reusable pattern as a skill\n- **MEMORY.md**: record insights and decision criteria\n- **CLAUDE.md**: add development rules and conventions\n\nOmit destinations where no proposal is needed.",
           "builtInType": "plan",
           "agentType": "claudeCode",
           "outputPorts": 1
@@ -589,8 +608,22 @@
       {
         "id": "c3-11",
         "from": "ask-reproduce-result",
-        "to": "ask-reproduce",
+        "to": "prompt-analysis-start",
         "fromPort": "branch-1",
+        "toPort": "input"
+      },
+      {
+        "id": "c3-12",
+        "from": "ask-reproduce-result",
+        "to": "prompt-need-more-info",
+        "fromPort": "branch-2",
+        "toPort": "input"
+      },
+      {
+        "id": "c3-13",
+        "from": "prompt-need-more-info",
+        "to": "end-1",
+        "fromPort": "output",
         "toPort": "input"
       },
       {
@@ -692,8 +725,8 @@
         "toPort": "input"
       }
     ],
-    "createdAt": "2026-04-06T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:00:00.000Z",
+    "createdAt": "2026-04-12T14:38:32.945Z",
+    "updatedAt": "2026-04-12T14:38:32.945Z",
     "subAgentFlows": []
   }
 }
