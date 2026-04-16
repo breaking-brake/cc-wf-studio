@@ -27,7 +27,7 @@
     "react-dom": "^19.2.3",
     "reactflow": "^11.10.0",
     "zundo": "^2.3.0",
-    "zustand": "^5.0.10"
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@types/react": "^19.2.7",
