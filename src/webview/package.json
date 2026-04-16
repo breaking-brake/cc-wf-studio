@@ -23,14 +23,14 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "driver.js": "^1.4.0",
     "lucide-react": "^0.562.0",
-    "react": "^19.2.3",
+    "react": "^19.2.5",
     "react-dom": "^19.2.3",
     "reactflow": "^11.10.0",
     "zundo": "^2.3.0",
     "zustand": "^5.0.10"
   },
   "devDependencies": {
-    "@types/react": "^19.2.7",
+    "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
     "@vitest/ui": "^4.1.2",
