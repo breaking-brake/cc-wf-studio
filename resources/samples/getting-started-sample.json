@@ -1,0 +1,115 @@
+{
+  "meta": {
+    "id": "getting-started-sample",
+    "nameKey": "sample.gettingStarted.name",
+    "descriptionKey": "sample.gettingStarted.description",
+    "difficulty": "beginner",
+    "tags": ["getting-started", "basic"],
+    "nodeCount": 7
+  },
+  "workflow": {
+    "id": "workflow-getting-started",
+    "name": "getting-started-en",
+    "version": "1.0.0",
+    "nodes": [
+      {
+        "id": "start-1",
+        "type": "start",
+        "name": "start-1",
+        "position": { "x": 100, "y": 200 },
+        "data": { "label": "Start" }
+      },
+      {
+        "id": "prompt-greeting",
+        "type": "prompt",
+        "name": "prompt-greeting",
+        "position": { "x": 300, "y": 200 },
+        "data": {
+          "label": "Ask for Name",
+          "prompt": "Please enter your name:",
+          "variables": { "userName": "" }
+        }
+      },
+      {
+        "id": "prompt-task",
+        "type": "prompt",
+        "name": "prompt-task",
+        "position": { "x": 500, "y": 200 },
+        "data": {
+          "label": "What to do",
+          "prompt": "What task would you like help with?",
+          "variables": { "task": "" }
+        }
+      },
+      {
+        "id": "prompt-summary",
+        "type": "prompt",
+        "name": "prompt-summary",
+        "position": { "x": 700, "y": 200 },
+        "data": {
+          "label": "Summarize",
+          "prompt": "Thank you, {{userName}}! I'll help you with: {{task}}\n\nIs this correct?",
+          "variables": {}
+        }
+      },
+      {
+        "id": "ask-confirm",
+        "type": "askUserQuestion",
+        "name": "ask-confirm",
+        "position": { "x": 900, "y": 200 },
+        "data": {
+          "questionText": "Is this correct?",
+          "options": [
+            { "label": "Yes, proceed", "description": "The summary is correct, proceed with the task.", "id": "opt-yes" },
+            { "label": "No, start over", "description": "Start the workflow again.", "id": "opt-no" }
+          ],
+          "multiSelect": false,
+          "useAiSuggestions": false,
+          "outputPorts": 2
+        }
+      },
+      {
+        "id": "prompt-process",
+        "type": "prompt",
+        "name": "prompt-process",
+        "position": { "x": 1100, "y": 150 },
+        "data": {
+          "label": "Process Task",
+          "prompt": "Now processing the task: {{task}}\n\nPlease proceed with the actual work.",
+          "variables": {}
+        }
+      },
+      {
+        "id": "prompt-restart",
+        "type": "prompt",
+        "name": "prompt-restart",
+        "position": { "x": 1100, "y": 300 },
+        "data": {
+          "label": "Restart",
+          "prompt": "Starting over. Please enter your name again.",
+          "variables": {}
+        }
+      },
+      {
+        "id": "end-1",
+        "type": "end",
+        "name": "end-1",
+        "position": { "x": 1300, "y": 200 },
+        "data": { "label": "Done" }
+      }
+    ],
+    "connections": [
+      { "id": "c1", "from": "start-1", "to": "prompt-greeting", "fromPort": "output", "toPort": "input" },
+      { "id": "c2", "from": "prompt-greeting", "to": "prompt-task", "fromPort": "output", "toPort": "input" },
+      { "id": "c3", "from": "prompt-task", "to": "prompt-summary", "fromPort": "output", "toPort": "input" },
+      { "id": "c4", "from": "prompt-summary", "to": "ask-confirm", "fromPort": "output", "toPort": "input" },
+      { "id": "c5", "from": "ask-confirm", "to": "prompt-process", "fromPort": "branch-0", "toPort": "input" },
+      { "id": "c6", "from": "ask-confirm", "to": "prompt-restart", "fromPort": "branch-1", "toPort": "input" },
+      { "id": "c7", "from": "prompt-process", "to": "end-1", "fromPort": "output", "toPort": "input" },
+      { "id": "c8", "from": "prompt-restart", "to": "prompt-greeting", "fromPort": "output", "toPort": "input" }
+    ],
+    "createdAt": "2026-04-16T00:00:00.000Z",
+    "updatedAt": "2026-04-16T00:00:00.000Z",
+    "subAgentFlows": []
+  }
+}

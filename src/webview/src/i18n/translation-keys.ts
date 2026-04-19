@@ -930,6 +930,10 @@ export interface WebviewTranslationKeys {
   'sample.dialog.description': string;
   'sample.dialog.nodeCount': string;
   'sample.dialog.loadButton': string;
+  'sample.gettingStarted.name': string;
+  'sample.gettingStarted.description': string;
+  'sample.codeReview.name': string;
+  'sample.codeReview.description': string;
   'sample.githubIssuePlanning.name': string;
   'sample.githubIssuePlanning.description': string;
 }

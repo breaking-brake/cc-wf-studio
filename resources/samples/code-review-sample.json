@@ -1,0 +1,153 @@
+{
+  "meta": {
+    "id": "code-review-sample",
+    "nameKey": "sample.codeReview.name",
+    "descriptionKey": "sample.codeReview.description",
+    "difficulty": "intermediate",
+    "tags": ["code-review", "automation"],
+    "nodeCount": 15
+  },
+  "workflow": {
+    "id": "workflow-code-review",
+    "name": "code-review-en",
+    "version": "1.0.0",
+    "nodes": [
+      {
+        "id": "start-1",
+        "type": "start",
+        "name": "start-1",
+        "position": { "x": 100, "y": 200 },
+        "data": { "label": "Start" }
+      },
+      {
+        "id": "prompt-pr-url",
+        "type": "prompt",
+        "name": "prompt-pr-url",
+        "position": { "x": 300, "y": 200 },
+        "data": {
+          "label": "Enter PR URL",
+          "prompt": "Please enter the GitHub Pull Request URL:\n\nExample: https://github.com/owner/repo/pull/123",
+          "variables": { "prUrl": "" }
+        }
+      },
+      {
+        "id": "prompt-fetch-pr",
+        "type": "prompt",
+        "name": "prompt-fetch-pr",
+        "position": { "x": 500, "y": 200 },
+        "data": {
+          "label": "Fetch PR Details",
+          "prompt": "Fetch the PR details using:\n`gh pr view <PR_NUMBER> --json title,body,files,changedFiles,additions,deletions,reviewRequests`\n\nReport the findings.",
+          "variables": {}
+        }
+      },
+      {
+        "id": "prompt-changes",
+        "type": "prompt",
+        "name": "prompt-changes",
+        "position": { "x": 700, "y": 200 },
+        "data": {
+          "label": "Review Changes",
+          "prompt": "Review the following files that were changed in this PR:\n\n[List files from previous step]\n\nAnalyze:\n1. Are there any obvious bugs?\n2. Are there security concerns?\n3. Is the code following project conventions?",
+          "variables": {}
+        }
+      },
+      {
+        "id": "prompt-tests",
+        "type": "prompt",
+        "name": "prompt-tests",
+        "position": { "x": 900, "y": 200 },
+        "data": {
+          "label": "Check Tests",
+          "prompt": "Check if the PR includes adequate tests:\n\n1. Are there new tests for new functionality?\n2. Do existing tests still pass?\n3. Are there edge cases covered?",
+          "variables": {}
+        }
+      },
+      {
+        "id": "prompt-summary",
+        "type": "prompt",
+        "name": "prompt-summary",
+        "position": { "x": 1100, "y": 200 },
+        "data": {
+          "label": "Review Summary",
+          "prompt": "Compile your findings into a review summary:\n\n**Overall**: [Approve / Request Changes / Comment]\n\n**Strengths**:\n- ...\n\n**Concerns**:\n- ...\n\n**Suggestions**:\n- ...",
+          "variables": {}
+        }
+      },
+      {
+        "id": "ask-submit",
+        "type": "askUserQuestion",
+        "name": "ask-submit",
+        "position": { "x": 1300, "y": 200 },
+        "data": {
+          "questionText": "Submit this review to GitHub?",
+          "options": [
+            { "label": "Yes, submit review", "description": "Post the review to the PR.", "id": "opt-submit" },
+            { "label": "Edit first", "description": "Modify the review before submitting.", "id": "opt-edit" },
+            { "label": "Cancel", "description": "Don't submit the review.", "id": "opt-cancel" }
+          ],
+          "multiSelect": false,
+          "useAiSuggestions": false,
+          "outputPorts": 3
+        }
+      },
+      {
+        "id": "prompt-submit-review",
+        "type": "prompt",
+        "name": "prompt-submit-review",
+        "position": { "x": 1500, "y": 100 },
+        "data": {
+          "label": "Submit Review",
+          "prompt": "Submit the review to GitHub using:\n`gh pr review <PR_NUMBER> --body \"...\" --approve` (or --request-changes)\n\nConfirm when done.",
+          "variables": {}
+        }
+      },
+      {
+        "id": "prompt-edit-review",
+        "type": "prompt",
+        "name": "prompt-edit-review",
+        "position": { "x": 1500, "y": 200 },
+        "data": {
+          "label": "Edit Review",
+          "prompt": "Please edit your review summary.\n\nWhat would you like to change?",
+          "variables": { "editedReview": "" }
+        }
+      },
+      {
+        "id": "prompt-cancelled",
+        "type": "prompt",
+        "name": "prompt-cancelled",
+        "position": { "x": 1500, "y": 300 },
+        "data": {
+          "label": "Cancelled",
+          "prompt": "Review cancelled. You can run this workflow again later.",
+          "variables": {}
+        }
+      },
+      {
+        "id": "end-1",
+        "type": "end",
+        "name": "end-1",
+        "position": { "x": 1700, "y": 200 },
+        "data": { "label": "Done" }
+      }
+    ],
+    "connections": [
+      { "id": "c1", "from": "start-1", "to": "prompt-pr-url", "fromPort": "output", "toPort": "input" },
+      { "id": "c2", "from": "prompt-pr-url", "to": "prompt-fetch-pr", "fromPort": "output", "toPort": "input" },
+      { "id": "c3", "from": "prompt-fetch-pr", "to": "prompt-changes", "fromPort": "output", "toPort": "input" },
+      { "id": "c4", "from": "prompt-changes", "to": "prompt-tests", "fromPort": "output", "toPort": "input" },
+      { "id": "c5", "from": "prompt-tests", "to": "prompt-summary", "fromPort": "output", "toPort": "input" },
+      { "id": "c6", "from": "prompt-summary", "to": "ask-submit", "fromPort": "output", "toPort": "input" },
+      { "id": "c7", "from": "ask-submit", "to": "prompt-submit-review", "fromPort": "branch-0", "toPort": "input" },
+      { "id": "c8", "from": "ask-submit", "to": "prompt-edit-review", "fromPort": "branch-1", "toPort": "input" },
+      { "id": "c9", "from": "ask-submit", "to": "prompt-cancelled", "fromPort": "branch-2", "toPort": "input" },
+      { "id": "c10", "from": "prompt-submit-review", "to": "end-1", "fromPort": "output", "toPort": "input" },
+      { "id": "c11", "from": "prompt-edit-review", "to": "prompt-summary", "fromPort": "output", "toPort": "input" },
+      { "id": "c12", "from": "prompt-cancelled", "to": "end-1", "fromPort": "output", "toPort": "input" }
+    ],
+    "createdAt": "2026-04-16T00:00:00.000Z",
+    "updatedAt": "2026-04-16T00:00:00.000Z",
+    "subAgentFlows": []
+  }
+}
