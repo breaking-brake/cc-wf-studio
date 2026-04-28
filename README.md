@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/breaking-brake-cc-wf-studio-badge.png)](https://mseep.ai/app/breaking-brake-cc-wf-studio)
+
 <p align="center">
   <img src="./resources/icon-large.png" alt="CC Workflow Studio Icon" width="128">
 </p>
