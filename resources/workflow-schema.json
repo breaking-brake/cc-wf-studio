@@ -36,7 +36,7 @@
       "outputPorts": 0
     },
     "prompt": {
-      "description": "Display a message/instructions to user",
+      "description": "A step executed by the main orchestrating agent.",
       "fields": {
         "label": { "type": "string", "required": false },
         "prompt": { "type": "string", "required": true, "maxLength": 10000 },
@@ -46,7 +46,7 @@
       "outputPorts": 1
     },
     "subAgent": {
-      "description": "AI sub-agent with separate agent definition and task prompt",
+      "description": "A step executed by an isolated sub-agent.",
       "fields": {
         "description": { "type": "string", "required": true, "maxLength": 200 },
         "agentDefinition": { "type": "string", "required": true, "maxLength": 10000 },
