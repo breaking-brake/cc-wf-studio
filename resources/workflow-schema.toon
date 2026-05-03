@@ -523,7 +523,7 @@ connections:
   description: "Comprehensive specification for workflow connections. Defines connection object structure, port naming conventions, and completeness rules for AI-generated workflows."
   overview:
     description: High-level connection constraints that apply to all workflows
-    forbidden[4]: Start node cannot have input connections,End node cannot have output connections,No cycles allowed,No self-connections
+    forbidden[2]: Start node cannot have input connections,End node cannot have output connections
     required[5]: At least one connection per output port,Exactly one Start node per workflow,At least one End node per workflow,All non-Start nodes must have input connection,All non-End nodes must have output connection
   format:
     description: Connection object structure in connections array
@@ -654,19 +654,18 @@ connections:
           validation: "For each connection: verify 'from' node exists, verify 'to' node exists"
     exportValidationRules:
       description: Mandatory validation rules checked when exporting or executing a workflow. These rules apply to both manually-edited and AI-generated workflows. Workflows must pass these validations before execution.
-      rules[9]{id,rule,failureMessage}:
+      rules[8]{id,rule,failureMessage}:
         EXACTLY_ONE_START,Workflow MUST have exactly one Start node,Workflow must have exactly one Start node
         AT_LEAST_ONE_END,Workflow MUST have at least one End node,Workflow must have at least one End node
         START_OUTPUT_CONNECTED,Start node's 'output' port MUST be connected,Start node output must be connected to downstream node
         END_INPUT_CONNECTED,At least one End node's 'input' port MUST be connected,At least one End node must have incoming connection
         ALL_NODES_REACHABLE,All nodes MUST be reachable from Start node,Unreachable nodes found - ensure all nodes form a connected path from Start
         ALL_PATHS_LEAD_TO_END,All execution paths MUST lead to at least one End node,Dead-end paths found - ensure all branches converge to an End node
-        NO_CYCLES,Workflow MUST NOT contain cycles,Circular reference detected - workflows must be acyclic (DAG)
         NODE_ID_REFERENCES_VALID,All node IDs in connections must reference existing nodes,Connection references non-existent node
         CONDITIONAL_BRANCHES_CONNECTED,"All conditional node branches (IfElse, Switch, AskUserQuestion single-select) MUST have outgoing connections",Conditional node has disconnected branch
     postGenerationChecklist:
       description: Quick checklist for verifying AI-generated workflows before returning to user
-      items[10]: ✓ Exactly 1 Start node with output connected,✓ At least 1 End node with input(s) connected,✓ All non-Start nodes have input connected,✓ All non-End nodes have output(s) connected,"✓ IfElse nodes: both branches connected","✓ Switch nodes: all branches connected","✓ AskUserQuestion nodes (single-select): all options connected",✓ No dangling nodes,✓ No circular references,✓ All node IDs in connections exist in nodes array
+      items[9]: ✓ Exactly 1 Start node with output connected,✓ At least 1 End node with input(s) connected,✓ All non-Start nodes have input connected,✓ All non-End nodes have output(s) connected,"✓ IfElse nodes: both branches connected","✓ Switch nodes: all branches connected","✓ AskUserQuestion nodes (single-select): all options connected",✓ No dangling nodes,✓ All node IDs in connections exist in nodes array
 validationRules:
   workflow:
     maxNodes: 100

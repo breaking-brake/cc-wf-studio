@@ -607,9 +607,7 @@
       "description": "High-level connection constraints that apply to all workflows",
       "forbidden": [
         "Start node cannot have input connections",
-        "End node cannot have output connections",
-        "No cycles allowed",
-        "No self-connections"
+        "End node cannot have output connections"
       ],
       "required": [
         "At least one connection per output port",
@@ -823,11 +821,6 @@
             "failureMessage": "Dead-end paths found - ensure all branches converge to an End node"
           },
           {
-            "id": "NO_CYCLES",
-            "rule": "Workflow MUST NOT contain cycles",
-            "failureMessage": "Circular reference detected - workflows must be acyclic (DAG)"
-          },
-          {
             "id": "NODE_ID_REFERENCES_VALID",
             "rule": "All node IDs in connections must reference existing nodes",
             "failureMessage": "Connection references non-existent node"
@@ -850,7 +843,6 @@
           "✓ Switch nodes: all branches connected",
           "✓ AskUserQuestion nodes (single-select): all options connected",
           "✓ No dangling nodes",
-          "✓ No circular references",
           "✓ All node IDs in connections exist in nodes array"
         ]
       }
