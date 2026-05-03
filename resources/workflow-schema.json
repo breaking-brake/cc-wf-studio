@@ -607,7 +607,8 @@
       "description": "High-level connection constraints that apply to all workflows",
       "forbidden": [
         "Start node cannot have input connections",
-        "End node cannot have output connections"
+        "End node cannot have output connections",
+        "No self-connections"
       ],
       "required": [
         "At least one connection per output port",

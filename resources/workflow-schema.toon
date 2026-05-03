@@ -523,7 +523,7 @@ connections:
   description: "Comprehensive specification for workflow connections. Defines connection object structure, port naming conventions, and completeness rules for AI-generated workflows."
   overview:
     description: High-level connection constraints that apply to all workflows
-    forbidden[2]: Start node cannot have input connections,End node cannot have output connections
+    forbidden[3]: Start node cannot have input connections,End node cannot have output connections,No self-connections
     required[5]: At least one connection per output port,Exactly one Start node per workflow,At least one End node per workflow,All non-Start nodes must have input connection,All non-End nodes must have output connection
   format:
     description: Connection object structure in connections array
