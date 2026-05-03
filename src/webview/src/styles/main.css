@@ -260,3 +260,42 @@ body.tour-floating-visible .react-flow__panel.bottom.right {
       0 0 4px rgba(79, 195, 247, 0.3);
   }
 }
+
+/* Overview Mode */
+.overview-mermaid-container svg {
+  display: block;
+  margin: 0 auto;
+}
+
+.overview-instructions-panel ul,
+.overview-instructions-panel ol {
+  padding-left: 24px;
+  margin: 8px 0;
+}
+
+.overview-instructions-panel p {
+  margin: 6px 0;
+}
+
+.overview-instructions-panel hr {
+  border: none;
+  border-top: 1px solid var(--vscode-panel-border);
+  margin: 16px 0;
+}
+
+.overview-section-heading {
+  outline-offset: 4px;
+  border-radius: 3px;
+  transition:
+    outline 1.2s ease,
+    background-color 1.2s ease;
+}
+
+.overview-section-heading[data-highlight="true"] {
+  outline: 2px solid var(--vscode-focusBorder);
+  background-color: color-mix(in srgb, var(--vscode-focusBorder) 12%, transparent);
+}
+
+.overview-section-heading:focus-visible {
+  outline: 2px solid var(--vscode-focusBorder);
+}

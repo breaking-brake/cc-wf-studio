@@ -6,6 +6,11 @@
  */
 
 import * as path from 'node:path';
+import {
+  generateExecutionInstructions,
+  generateMermaidFlowchart,
+  sanitizeNodeId,
+} from '../../shared/services/workflow-prompt-generator';
 import type {
   SubAgentFlow,
   SubAgentFlowNode,
@@ -13,11 +18,6 @@ import type {
   Workflow,
 } from '../../shared/types/workflow-definition';
 import type { FileService } from './file-service';
-import {
-  generateExecutionInstructions,
-  generateMermaidFlowchart,
-  sanitizeNodeId,
-} from './workflow-prompt-generator';
 
 /**
  * Check if any export files already exist

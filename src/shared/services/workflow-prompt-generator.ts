@@ -19,7 +19,7 @@ import type {
   SwitchNode,
   Workflow,
   WorkflowNode,
-} from '../../shared/types/workflow-definition';
+} from '../types/workflow-definition';
 
 /**
  * Common interface for Mermaid generation

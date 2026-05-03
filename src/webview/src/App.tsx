@@ -15,8 +15,8 @@ import type {
   ImportWorkflowFromSlackPayload,
   InitialStatePayload,
   McpServerStatusPayload,
+  OverviewModeInitPayload,
   PlannedSubAgentFile,
-  PreviewModeInitPayload,
   Workflow,
 } from '@shared/types/messages';
 import type React from 'react';
@@ -37,8 +37,8 @@ import { SubAgentFlowDialog } from './components/dialogs/SubAgentFlowDialog';
 import { WhatsNewDialog } from './components/dialogs/WhatsNewDialog';
 import { ErrorNotification } from './components/ErrorNotification';
 import { NodePalette } from './components/NodePalette';
+import { OverviewMode } from './components/overview/OverviewMode';
 import { PropertyOverlay } from './components/PropertyOverlay';
-import { PreviewCanvas } from './components/preview/PreviewCanvas';
 import { Toolbar } from './components/Toolbar';
 import { Tour } from './components/Tour';
 import { WorkflowEditor } from './components/WorkflowEditor';
@@ -181,13 +181,13 @@ const App: React.FC = () => {
     updateActiveWorkflowMetadata,
   ]);
 
-  // App mode: null = loading, 'edit' = full editor, 'preview' = read-only preview
+  // App mode: null = loading, 'edit' = full editor, 'overview' = read-only overview
   // Start with null to prevent flashing the wrong UI
-  const [mode, setMode] = useState<'edit' | 'preview' | null>(null);
-  // Preview mode state
-  const [previewWorkflow, setPreviewWorkflow] = useState<Workflow | null>(null);
-  const [previewIsHistoricalVersion, setPreviewIsHistoricalVersion] = useState<boolean>(false);
-  const [previewHasGitChanges, setPreviewHasGitChanges] = useState<boolean>(false);
+  const [mode, setMode] = useState<'edit' | 'overview' | null>(null);
+  // Overview mode state
+  const [overviewWorkflow, setOverviewWorkflow] = useState<Workflow | null>(null);
+  const [overviewIsHistoricalVersion, setOverviewIsHistoricalVersion] = useState<boolean>(false);
+  const [overviewHasGitChanges, setOverviewHasGitChanges] = useState<boolean>(false);
 
   const [error, setError] = useState<ErrorPayload | null>(null);
   const [runTour, setRunTour] = useState(false);
@@ -364,13 +364,13 @@ const App: React.FC = () => {
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.type === 'PREVIEW_MODE_INIT') {
-        // Switch to preview mode with workflow data
-        const payload = message.payload as PreviewModeInitPayload;
-        setPreviewWorkflow(payload.workflow);
-        setPreviewIsHistoricalVersion(payload.isHistoricalVersion ?? false);
-        setPreviewHasGitChanges(payload.hasGitChanges ?? false);
-        setMode('preview');
+      if (message.type === 'OVERVIEW_MODE_INIT') {
+        // Switch to overview mode with workflow data
+        const payload = message.payload as OverviewModeInitPayload;
+        setOverviewWorkflow(payload.workflow);
+        setOverviewIsHistoricalVersion(payload.isHistoricalVersion ?? false);
+        setOverviewHasGitChanges(payload.hasGitChanges ?? false);
+        setMode('overview');
       } else if (message.type === 'INITIAL_STATE') {
         // Switch to edit mode
         setMode('edit');
@@ -508,14 +508,15 @@ const App: React.FC = () => {
         // MCP Server applying workflow to canvas
         const payload = message.payload as ApplyWorkflowFromMcpPayload;
 
-        // Reject if in preview mode
-        if (mode === 'preview') {
+        // Reject if in overview mode
+        if (mode === 'overview') {
           vscode.postMessage({
             type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
             payload: {
               correlationId: payload.correlationId,
               success: false,
-              error: 'Cannot apply workflow while in preview mode. Please open the editor first.',
+              error:
+                'Cannot apply workflow while in overview mode. Please switch to edit mode first.',
             },
           });
           return;
@@ -619,7 +620,7 @@ const App: React.FC = () => {
   ]);
 
   // Render loading state (waiting for mode to be determined)
-  // Shows spinner while waiting for INITIAL_STATE or PREVIEW_MODE_INIT from Extension Host
+  // Shows spinner while waiting for INITIAL_STATE or OVERVIEW_MODE_INIT from Extension Host
   if (mode === null) {
     return (
       <div
@@ -637,11 +638,11 @@ const App: React.FC = () => {
     );
   }
 
-  // Render preview mode
-  if (mode === 'preview') {
+  // Render overview mode
+  if (mode === 'overview') {
     return (
       <div
-        className="app preview-mode"
+        className="app overview-mode"
         style={{
           width: '100vw',
           height: '100vh',
@@ -650,10 +651,17 @@ const App: React.FC = () => {
           overflow: 'hidden',
         }}
       >
-        <PreviewCanvas
-          initialWorkflow={previewWorkflow}
-          initialIsHistoricalVersion={previewIsHistoricalVersion}
-          initialHasGitChanges={previewHasGitChanges}
+        <OverviewMode
+          workflow={overviewWorkflow}
+          isHistoricalVersion={overviewIsHistoricalVersion}
+          hasGitChanges={overviewHasGitChanges}
+          onSwitchToEdit={
+            overviewIsHistoricalVersion
+              ? undefined
+              : () => {
+                  setMode('edit');
+                }
+          }
         />
       </div>
     );
@@ -682,6 +690,23 @@ const App: React.FC = () => {
         initialUnreadReleaseCount={unreadReleaseCount}
         showWhatsNewBadge={showWhatsNewBadge}
         onShowWhatsNewBadgeChange={setShowWhatsNewBadge}
+        onSwitchToOverview={() => {
+          const live = serializeWorkflow(
+            nodes,
+            edges,
+            workflowName || 'Untitled',
+            workflowDescription || undefined,
+            activeWorkflow?.conversationHistory,
+            subAgentFlows
+          );
+          if (activeWorkflow?.id) {
+            live.id = activeWorkflow.id;
+          }
+          setOverviewWorkflow(live);
+          setOverviewIsHistoricalVersion(false);
+          setOverviewHasGitChanges(false);
+          setMode('overview');
+        }}
       />
 
       {/* Main Content: 3-column layout */}

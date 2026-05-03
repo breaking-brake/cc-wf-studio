@@ -23,9 +23,12 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "driver.js": "^1.4.0",
     "lucide-react": "^0.562.0",
+    "mermaid": "^11.14.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "react-markdown": "^10.1.0",
     "reactflow": "^11.10.0",
+    "remark-gfm": "^4.0.1",
     "zundo": "^2.3.0",
     "zustand": "^5.0.10"
   },

@@ -15,13 +15,16 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'loading.importWorkflow': '正在匯入工作流程...',
   'loading.openWorkflow': '正在開啟工作流程...',
 
-  // Preview mode
-  'preview.label': '預覽',
-  'preview.loading': '正在載入工作流程...',
-  'preview.parseError': '工作流程解析失敗',
-  'preview.openInEditor': '編輯',
-  'preview.versionBefore': '修改前',
-  'preview.versionAfter': '修改後',
+  // Overview mode
+  'overview.label': '俯瞰',
+  'overview.loading': '正在載入工作流程...',
+  'overview.parseError': '工作流程解析失敗',
+  'overview.openInEditor': '在編輯器中開啟',
+  'overview.versionBefore': '修改前',
+  'overview.versionAfter': '修改後',
+  'overview.emptyState.title': '沒有可顯示的指示',
+  'overview.emptyState.description':
+    '此工作流程尚無指示節點。切換至編輯模式並加入 Sub-Agent、Prompt、Skill 等節點即可在此俯瞰。',
 
   // Toolbar
   'toolbar.workflowNamePlaceholder': '工作流名稱',
@@ -35,6 +38,10 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.load': '載入',
   'toolbar.loading': '載入中...',
   'toolbar.refreshList': '重新整理工作流清單',
+
+  // Toolbar view mode
+  'toolbar.viewMode.switchToOverview': '切換至俯瞰模式',
+  'toolbar.viewMode.switchToEdit': '切換至編輯模式',
 
   // Toolbar interaction mode
   'toolbar.interactionMode.panButton': '手掌',

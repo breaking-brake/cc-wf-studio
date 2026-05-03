@@ -6,13 +6,13 @@
  */
 
 import * as path from 'node:path';
-import type { Workflow } from '../../shared/types/workflow-definition';
-import { nodeNameToFileName } from './export-service';
-import type { FileService } from './file-service';
 import {
   generateExecutionInstructions,
   generateMermaidFlowchart,
-} from './workflow-prompt-generator';
+} from '../../shared/services/workflow-prompt-generator';
+import type { Workflow } from '../../shared/types/workflow-definition';
+import { nodeNameToFileName } from './export-service';
+import type { FileService } from './file-service';
 
 /**
  * Antigravity skill export result

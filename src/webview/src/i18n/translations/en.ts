@@ -15,13 +15,16 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'loading.importWorkflow': 'Importing workflow...',
   'loading.openWorkflow': 'Opening workflow...',
 
-  // Preview mode
-  'preview.label': 'Preview',
-  'preview.loading': 'Loading workflow...',
-  'preview.parseError': 'Failed to parse workflow',
-  'preview.openInEditor': 'Edit',
-  'preview.versionBefore': 'Before',
-  'preview.versionAfter': 'After',
+  // Overview mode
+  'overview.label': 'Overview',
+  'overview.loading': 'Loading workflow...',
+  'overview.parseError': 'Failed to parse workflow',
+  'overview.openInEditor': 'Open in Editor',
+  'overview.versionBefore': 'Before',
+  'overview.versionAfter': 'After',
+  'overview.emptyState.title': 'No instructions to display',
+  'overview.emptyState.description':
+    'This workflow has no instructional nodes yet. Switch to Edit mode and add nodes such as Sub-Agent, Prompt, or Skill to populate the overview.',
 
   // Toolbar
   'toolbar.workflowNamePlaceholder': 'Workflow name',
@@ -35,6 +38,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.load': 'Load',
   'toolbar.loading': 'Loading...',
   'toolbar.refreshList': 'Refresh workflow list',
+
+  // Toolbar view mode
+  'toolbar.viewMode.switchToOverview': 'Switch to Overview',
+  'toolbar.viewMode.switchToEdit': 'Switch to Edit',
 
   // Toolbar interaction mode
   'toolbar.interactionMode.panButton': 'Hand',

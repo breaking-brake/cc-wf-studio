@@ -98,12 +98,12 @@ export class WorkflowPreviewEditorProvider implements vscode.CustomTextEditorPro
 
       if (error) {
         webviewPanel.webview.postMessage({
-          type: 'PREVIEW_PARSE_ERROR',
+          type: 'OVERVIEW_PARSE_ERROR',
           payload: { error },
         });
       } else if (workflow) {
         webviewPanel.webview.postMessage({
-          type: 'PREVIEW_MODE_INIT',
+          type: 'OVERVIEW_MODE_INIT',
           payload: { workflow, isHistoricalVersion, hasGitChanges: fileHasGitChanges },
         });
       }
@@ -119,12 +119,12 @@ export class WorkflowPreviewEditorProvider implements vscode.CustomTextEditorPro
 
         if (error) {
           webviewPanel.webview.postMessage({
-            type: 'PREVIEW_PARSE_ERROR',
+            type: 'OVERVIEW_PARSE_ERROR',
             payload: { error },
           });
         } else if (workflow) {
           webviewPanel.webview.postMessage({
-            type: 'PREVIEW_UPDATE',
+            type: 'OVERVIEW_UPDATE',
             payload: { workflow },
           });
         }

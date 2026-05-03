@@ -98,11 +98,11 @@ export interface GetChangelogResultPayload {
 // ============================================================================
 
 /**
- * Preview mode initialization payload
- * Sent when opening a workflow file in preview mode
+ * Overview mode initialization payload
+ * Sent when opening a workflow file in overview mode
  */
-export interface PreviewModeInitPayload {
-  /** Workflow to display in preview */
+export interface OverviewModeInitPayload {
+  /** Workflow to display in overview */
   workflow: Workflow;
   /** Whether this is a historical version (git diff "before" side) */
   isHistoricalVersion?: boolean;
@@ -111,19 +111,19 @@ export interface PreviewModeInitPayload {
 }
 
 /**
- * Preview update payload
+ * Overview update payload
  * Sent when the source JSON file is modified
  */
-export interface PreviewUpdatePayload {
+export interface OverviewUpdatePayload {
   /** Updated workflow to display */
   workflow: Workflow;
 }
 
 /**
- * Preview parse error payload
+ * Overview parse error payload
  * Sent when the source JSON cannot be parsed
  */
-export interface PreviewParseErrorPayload {
+export interface OverviewParseErrorPayload {
   /** Error message describing the parse failure */
   error: string;
 }
@@ -1125,9 +1125,9 @@ export type ExtensionMessage =
   | Message<ErrorPayload, 'ERROR'>
   | Message<WorkflowListPayload, 'WORKFLOW_LIST_LOADED'>
   | Message<InitialStatePayload, 'INITIAL_STATE'>
-  | Message<PreviewModeInitPayload, 'PREVIEW_MODE_INIT'>
-  | Message<PreviewUpdatePayload, 'PREVIEW_UPDATE'>
-  | Message<PreviewParseErrorPayload, 'PREVIEW_PARSE_ERROR'>
+  | Message<OverviewModeInitPayload, 'OVERVIEW_MODE_INIT'>
+  | Message<OverviewUpdatePayload, 'OVERVIEW_UPDATE'>
+  | Message<OverviewParseErrorPayload, 'OVERVIEW_PARSE_ERROR'>
   | Message<void, 'SAVE_CANCELLED'>
   | Message<void, 'EXPORT_CANCELLED'>
   | Message<CommandListLoadedPayload, 'COMMAND_LIST_LOADED'>

@@ -15,13 +15,16 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'loading.importWorkflow': '워크플로 가져오는 중...',
   'loading.openWorkflow': '워크플로 여는 중...',
 
-  // Preview mode
-  'preview.label': '미리보기',
-  'preview.loading': '워크플로 로딩 중...',
-  'preview.parseError': '워크플로 파싱에 실패했습니다',
-  'preview.openInEditor': '편집',
-  'preview.versionBefore': '수정 전',
-  'preview.versionAfter': '수정 후',
+  // Overview mode
+  'overview.label': '오버뷰',
+  'overview.loading': '워크플로 로딩 중...',
+  'overview.parseError': '워크플로 파싱에 실패했습니다',
+  'overview.openInEditor': '에디터에서 열기',
+  'overview.versionBefore': '수정 전',
+  'overview.versionAfter': '수정 후',
+  'overview.emptyState.title': '표시할 지시가 없습니다',
+  'overview.emptyState.description':
+    '이 워크플로에는 아직 지시 노드가 없습니다. 편집 모드로 전환하여 Sub-Agent / Prompt / Skill 등의 노드를 추가하면 오버뷰에 표시됩니다.',
 
   // Toolbar
   'toolbar.workflowNamePlaceholder': '워크플로 이름',
@@ -35,6 +38,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.load': '불러오기',
   'toolbar.loading': '불러오는 중...',
   'toolbar.refreshList': '워크플로 목록 새로고침',
+
+  // Toolbar view mode
+  'toolbar.viewMode.switchToOverview': '오버뷰 모드로 전환',
+  'toolbar.viewMode.switchToEdit': '편집 모드로 전환',
 
   // Toolbar interaction mode
   'toolbar.interactionMode.panButton': '손바닥',

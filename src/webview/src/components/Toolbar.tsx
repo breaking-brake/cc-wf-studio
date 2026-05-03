@@ -5,7 +5,16 @@
  */
 
 import type { Workflow } from '@shared/types/messages';
-import { FileDown, MessageSquare, Play, Save, Sparkles, Square, SquareSlash } from 'lucide-react';
+import {
+  BookOpen,
+  FileDown,
+  MessageSquare,
+  Play,
+  Save,
+  Sparkles,
+  Square,
+  SquareSlash,
+} from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
@@ -61,6 +70,8 @@ interface ToolbarProps {
   initialUnreadReleaseCount?: number;
   showWhatsNewBadge?: boolean;
   onShowWhatsNewBadgeChange?: (show: boolean) => void;
+  /** Switch the app to Overview mode (read-only document view). */
+  onSwitchToOverview?: () => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -73,6 +84,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   initialUnreadReleaseCount = 0,
   showWhatsNewBadge = true,
   onShowWhatsNewBadgeChange,
+  onSwitchToOverview,
 }) => {
   const { t, locale } = useTranslation();
   const isCompact = useIsCompactMode();
@@ -1474,6 +1486,32 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 t('toolbar.load')
               )}
             </button>
+
+            {/* Overview Mode Toggle */}
+            {onSwitchToOverview && (
+              <button
+                type="button"
+                onClick={onSwitchToOverview}
+                title={t('toolbar.viewMode.switchToOverview')}
+                aria-label={t('toolbar.viewMode.switchToOverview')}
+                style={{
+                  padding: isCompact ? '4px 8px' : '4px 12px',
+                  backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                  color: 'var(--vscode-button-secondaryForeground)',
+                  border: 'none',
+                  borderRadius: '2px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <BookOpen size={16} />
+                {!isCompact && t('overview.label')}
+              </button>
+            )}
           </div>
         </div>
 
