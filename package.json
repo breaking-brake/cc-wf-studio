@@ -112,6 +112,7 @@
     "compile": "tsc -p ./",
     "watch": "vite build --config vite.extension.config.ts --watch",
     "watch:webview": "cd src/webview && npm run dev",
+    "debug": "npm run build && code --extensionDevelopmentPath=. --new-window",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "check": "biome check --write .",
