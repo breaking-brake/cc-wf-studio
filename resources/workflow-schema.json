@@ -36,7 +36,7 @@
       "outputPorts": 0
     },
     "prompt": {
-      "description": "Display a message/instructions to user",
+      "description": "A step executed by the main orchestrator (your current session, where you can talk to the user).",
       "fields": {
         "label": { "type": "string", "required": false },
         "prompt": { "type": "string", "required": true, "maxLength": 10000 },
@@ -46,7 +46,7 @@
       "outputPorts": 1
     },
     "subAgent": {
-      "description": "AI sub-agent with separate agent definition and task prompt",
+      "description": "An isolated sub-agent invocation (e.g., Claude Code's Task tool).",
       "fields": {
         "description": { "type": "string", "required": true, "maxLength": 200 },
         "agentDefinition": { "type": "string", "required": true, "maxLength": 10000 },
@@ -608,7 +608,6 @@
       "forbidden": [
         "Start node cannot have input connections",
         "End node cannot have output connections",
-        "No cycles allowed",
         "No self-connections"
       ],
       "required": [
@@ -823,11 +822,6 @@
             "failureMessage": "Dead-end paths found - ensure all branches converge to an End node"
           },
           {
-            "id": "NO_CYCLES",
-            "rule": "Workflow MUST NOT contain cycles",
-            "failureMessage": "Circular reference detected - workflows must be acyclic (DAG)"
-          },
-          {
             "id": "NODE_ID_REFERENCES_VALID",
             "rule": "All node IDs in connections must reference existing nodes",
             "failureMessage": "Connection references non-existent node"
@@ -850,7 +844,6 @@
           "✓ Switch nodes: all branches connected",
           "✓ AskUserQuestion nodes (single-select): all options connected",
           "✓ No dangling nodes",
-          "✓ No circular references",
           "✓ All node IDs in connections exist in nodes array"
         ]
       }
