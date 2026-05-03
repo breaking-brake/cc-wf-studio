@@ -299,3 +299,21 @@ body.tour-floating-visible .react-flow__panel.bottom.right {
 .overview-section-heading:focus-visible {
   outline: 2px solid var(--vscode-focusBorder);
 }
+
+/* Active node highlight on the Mermaid diagram (driven by right-pane scroll).
+ * !important is required because mermaid sets stroke / stroke-width via
+ * inline `style="..."` on the shape elements, which would otherwise win. */
+.overview-mermaid-stage g.node.overview-active > rect,
+.overview-mermaid-stage g.node.overview-active > polygon,
+.overview-mermaid-stage g.node.overview-active > circle,
+.overview-mermaid-stage g.node.overview-active > path {
+  /* biome-ignore lint/complexity/noImportantStyles: override mermaid inline styles */
+  stroke: var(--vscode-focusBorder) !important;
+  /* biome-ignore lint/complexity/noImportantStyles: override mermaid inline styles */
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 6px var(--vscode-focusBorder));
+}
+
+.overview-mermaid-stage g.node.overview-active {
+  transition: filter 0.15s ease;
+}

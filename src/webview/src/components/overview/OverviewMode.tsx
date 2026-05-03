@@ -59,6 +59,9 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
   const splitContainerRef = useRef<HTMLDivElement>(null);
   const isResizingRef = useRef(false);
   const instructionsRef = useRef<InstructionsPanelHandle>(null);
+  // Sanitized id of the section currently nearest the top of the right pane.
+  // Drives the "you are reading this" highlight on the Mermaid flow.
+  const [activeSanitizedNodeId, setActiveSanitizedNodeId] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -147,11 +150,16 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
           style={{
             flexBasis: `${ratio * 100}%`,
             minWidth: 0,
-            overflow: 'auto',
+            overflow: 'hidden',
+            display: 'flex',
             backgroundColor: 'var(--vscode-editor-background)',
           }}
         >
-          <MermaidDiagram workflow={workflow} onNodeClick={handleNodeClick} />
+          <MermaidDiagram
+            workflow={workflow}
+            onNodeClick={handleNodeClick}
+            activeSanitizedNodeId={activeSanitizedNodeId}
+          />
         </div>
         <div
           role="slider"
@@ -181,7 +189,11 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
           }}
         >
           {hasContent ? (
-            <InstructionsPanel ref={instructionsRef} workflow={workflow} />
+            <InstructionsPanel
+              ref={instructionsRef}
+              workflow={workflow}
+              onActiveSectionChange={setActiveSanitizedNodeId}
+            />
           ) : (
             <OverviewEmptyState />
           )}

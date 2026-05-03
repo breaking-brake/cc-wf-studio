@@ -28,6 +28,15 @@ import type {
 export interface MermaidSource {
   nodes: WorkflowNode[];
   connections: { from: string; to: string; fromPort?: string }[];
+  /**
+   * Label rendering mode.
+   * - 'detailed' (default): include extra context (e.g. truncated prompt body,
+   *   question text) so downstream AI agents can read the diagram standalone.
+   * - 'concise': show only the node type and the node title (data.label or
+   *   node.name). Used by the Overview canvas where space is limited and the
+   *   detail panel already shows the prompt body.
+   */
+  labelMode?: 'detailed' | 'concise';
 }
 
 /**
@@ -83,7 +92,17 @@ export function escapeLabel(label: string): string {
  * Generate Mermaid flowchart from workflow or subworkflow
  */
 export function generateMermaidFlowchart(source: MermaidSource): string {
-  const { nodes, connections } = source;
+  const { nodes, connections, labelMode = 'detailed' } = source;
+  const concise = labelMode === 'concise';
+  /** Resolve the user-visible title for a node (data.label > node.name > fallback). */
+  const titleOf = (node: WorkflowNode, fallback: string): string => {
+    const data = (node as { data?: { label?: string } }).data;
+    const label = data?.label?.trim();
+    if (label) return label;
+    const name = node.name?.trim();
+    if (name) return name;
+    return fallback;
+  };
   const lines: string[] = [];
 
   lines.push('```mermaid');
@@ -119,18 +138,42 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
     }
     if (nodeType === 'askUserQuestion') {
       const askNode = node as AskUserQuestionNode;
+      if (concise) {
+        const title = titleOf(askNode, 'Question');
+        return `${indent}${nodeId}{${escapeLabel('AskUserQuestion')}:<br/>${escapeLabel(title)}}`;
+      }
       const questionText = askNode.data.questionText || 'Question';
       return `${indent}${nodeId}{${escapeLabel('AskUserQuestion')}:<br/>${escapeLabel(questionText)}}`;
     }
     if (nodeType === 'branch') {
       const branchNode = node as BranchNode;
       const branchType = branchNode.data.branchType === 'conditional' ? 'Branch' : 'Switch';
+      if (concise) {
+        const title = titleOf(branchNode, branchType);
+        return `${indent}${nodeId}{${escapeLabel(branchType)}:<br/>${escapeLabel(title)}}`;
+      }
       return `${indent}${nodeId}{${escapeLabel(branchType)}:<br/>Conditional Branch}`;
     }
-    if (nodeType === 'ifElse') return `${indent}${nodeId}{If/Else:<br/>Conditional Branch}`;
-    if (nodeType === 'switch') return `${indent}${nodeId}{Switch:<br/>Conditional Branch}`;
+    if (nodeType === 'ifElse') {
+      if (concise) {
+        const title = titleOf(node, 'If/Else');
+        return `${indent}${nodeId}{If/Else:<br/>${escapeLabel(title)}}`;
+      }
+      return `${indent}${nodeId}{If/Else:<br/>Conditional Branch}`;
+    }
+    if (nodeType === 'switch') {
+      if (concise) {
+        const title = titleOf(node, 'Switch');
+        return `${indent}${nodeId}{Switch:<br/>${escapeLabel(title)}}`;
+      }
+      return `${indent}${nodeId}{Switch:<br/>Conditional Branch}`;
+    }
     if (nodeType === 'prompt') {
       const promptNode = node as PromptNode;
+      if (concise) {
+        const title = titleOf(promptNode, 'Prompt');
+        return `${indent}${nodeId}[${escapeLabel(`Prompt: ${title}`)}]`;
+      }
       const promptText = promptNode.data.prompt?.split('\n')[0] || 'Prompt';
       const label = promptText.length > 30 ? `${promptText.substring(0, 27)}...` : promptText;
       return `${indent}${nodeId}[${escapeLabel(label)}]`;
@@ -143,6 +186,10 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
     if (nodeType === 'mcp') {
       const mcpNode = node as McpNode;
       const mcpData = mcpNode.data;
+      if (concise) {
+        const title = titleOf(mcpNode, mcpData?.toolName || mcpData?.serverId || 'MCP');
+        return `${indent}${nodeId}[[${escapeLabel(`MCP: ${title}`)}]]`;
+      }
       let mcpLabel = 'MCP Tool';
       if (mcpData) {
         if (mcpData.toolName) {
