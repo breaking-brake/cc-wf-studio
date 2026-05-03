@@ -23,7 +23,7 @@ nodeTypes:
     inputPorts: unlimited
     outputPorts: 0
   prompt:
-    description: A step executed by the main orchestrating agent.
+    description: "A step executed by the main orchestrator (your current session, where you can talk to the user)."
     fields:
       label:
         type: string
@@ -38,7 +38,7 @@ nodeTypes:
     inputPorts: 1
     outputPorts: 1
   subAgent:
-    description: A step executed by an isolated sub-agent.
+    description: "An isolated sub-agent invocation (e.g., Claude Code's Task tool)."
     fields:
       description:
         type: string
