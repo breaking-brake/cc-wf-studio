@@ -317,7 +317,7 @@ export function SlackManualTokenDialog({
                   <li>
                     <button
                       type="button"
-                      onClick={() => openExternalUrl('https://cc-wf-studio.com/terms')}
+                      onClick={() => openExternalUrl('https://api.cc-wf-studio.com/terms')}
                       style={{
                         fontSize: '12px',
                         color: 'var(--vscode-textLink-foreground)',
@@ -339,7 +339,7 @@ export function SlackManualTokenDialog({
                   <li>
                     <button
                       type="button"
-                      onClick={() => openExternalUrl('https://cc-wf-studio.com/privacy')}
+                      onClick={() => openExternalUrl('https://api.cc-wf-studio.com/privacy')}
                       style={{
                         fontSize: '12px',
                         color: 'var(--vscode-textLink-foreground)',
@@ -620,7 +620,7 @@ export function SlackManualTokenDialog({
                   <li>
                     <button
                       type="button"
-                      onClick={() => openExternalUrl('https://cc-wf-studio.com/terms')}
+                      onClick={() => openExternalUrl('https://api.cc-wf-studio.com/terms')}
                       style={{
                         fontSize: '12px',
                         color: 'var(--vscode-textLink-foreground)',
@@ -642,7 +642,7 @@ export function SlackManualTokenDialog({
                   <li>
                     <button
                       type="button"
-                      onClick={() => openExternalUrl('https://cc-wf-studio.com/privacy')}
+                      onClick={() => openExternalUrl('https://api.cc-wf-studio.com/privacy')}
                       style={{
                         fontSize: '12px',
                         color: 'var(--vscode-textLink-foreground)',

@@ -22,7 +22,7 @@ import { log } from '../extension';
  */
 const OAUTH_CONFIG = {
   /** OAuth server base URL */
-  serverUrl: 'https://cc-wf-studio.com',
+  serverUrl: 'https://api.cc-wf-studio.com',
   /** Slack OAuth Client ID (public) */
   slackClientId: '9964370319943.10022663519665',
   /** Bot Token scopes (empty - all operations use User Token) */
