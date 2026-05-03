@@ -1,3 +1,9 @@
+## [3.33.1](https://github.com/breaking-brake/cc-wf-studio/compare/v3.33.0...v3.33.1) (2026-05-03)
+
+### Improvements
+
+* align AI workflow generation by removing schema biases ([#751](https://github.com/breaking-brake/cc-wf-studio/issues/751)) ([2839c84](https://github.com/breaking-brake/cc-wf-studio/commit/2839c8412a271451f1c1c7c36c06f0c0ffe68696))
+
 ## [3.33.0](https://github.com/breaking-brake/cc-wf-studio/compare/v3.32.2...v3.33.0) (2026-04-12)
 
 ### Features
