@@ -99,9 +99,29 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ workflow, onNode
 
     const render = async () => {
       try {
-        const mermaidModule = await import('mermaid');
+        const mermaidModule = (await import('mermaid')) as unknown;
         if (cancelled) return;
-        const mermaid = mermaidModule.default;
+        if (!mermaidModule || typeof mermaidModule !== 'object') {
+          throw new Error(
+            `mermaid dynamic import resolved with ${
+              mermaidModule === undefined ? 'undefined' : String(mermaidModule)
+            } — likely a CSP or chunk-load failure. Check DevTools network/console.`
+          );
+        }
+        // Some bundling configurations expose the API as `.default`, others
+        // hand back the API object directly. Fall back gracefully.
+        type MermaidLike = {
+          initialize: (config: unknown) => void;
+          render: (id: string, source: string) => Promise<{ svg: string }>;
+        };
+        const candidate = mermaidModule as { default?: MermaidLike } & Partial<MermaidLike>;
+        const mermaid: MermaidLike | undefined =
+          candidate.default ??
+          (typeof candidate.initialize === 'function' ? (candidate as MermaidLike) : undefined);
+        if (!mermaid || typeof mermaid.initialize !== 'function') {
+          const keys = Object.keys(mermaidModule as Record<string, unknown>).join(', ');
+          throw new Error(`mermaid module loaded but exports are unrecognised — got keys: ${keys}`);
+        }
 
         const theme = detectVscodeTheme();
         mermaid.initialize({
