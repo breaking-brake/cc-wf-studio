@@ -59,7 +59,7 @@ export function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.
     <script nonce="${nonce}">
       window.initialLocale = "${locale}";
     </script>
-    <script nonce="${nonce}" src="${scriptUri}"></script>
+    <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`;
 }
