@@ -1014,6 +1014,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'sample.dialog.description': 'Load a sample workflow to explore what you can build.',
   'sample.dialog.nodeCount': '{{count}} nodes',
   'sample.dialog.loadButton': 'Load',
+  'sample.gettingStarted.name': 'Getting Started',
+  'sample.gettingStarted.description': 'A simple workflow demonstrating basic prompt nodes and branching logic.',
+  'sample.codeReview.name': 'Code Review',
+  'sample.codeReview.description': 'An automated code review workflow for GitHub PRs with submission options.',
   'sample.githubIssuePlanning.name': 'GitHub Issue Planning',
   'sample.githubIssuePlanning.description':
     'A planning workflow for GitHub issues: fetch issue, analyze current code, verify fixes, and retrospective.',
