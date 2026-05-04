@@ -15,8 +15,10 @@ import type {
   ImportWorkflowFromSlackPayload,
   InitialStatePayload,
   McpServerStatusPayload,
+  OverviewModeInitPayload,
+  OverviewParseErrorPayload,
+  OverviewUpdatePayload,
   PlannedSubAgentFile,
-  PreviewModeInitPayload,
   Workflow,
 } from '@shared/types/messages';
 import type React from 'react';
@@ -37,8 +39,8 @@ import { SubAgentFlowDialog } from './components/dialogs/SubAgentFlowDialog';
 import { WhatsNewDialog } from './components/dialogs/WhatsNewDialog';
 import { ErrorNotification } from './components/ErrorNotification';
 import { NodePalette } from './components/NodePalette';
+import { OverviewMode } from './components/overview/OverviewMode';
 import { PropertyOverlay } from './components/PropertyOverlay';
-import { PreviewCanvas } from './components/preview/PreviewCanvas';
 import { Toolbar } from './components/Toolbar';
 import { Tour } from './components/Tour';
 import { WorkflowEditor } from './components/WorkflowEditor';
@@ -181,13 +183,28 @@ const App: React.FC = () => {
     updateActiveWorkflowMetadata,
   ]);
 
-  // App mode: null = loading, 'edit' = full editor, 'preview' = read-only preview
+  // App mode: null = loading, 'edit' = full editor, 'overview' = read-only overview
   // Start with null to prevent flashing the wrong UI
-  const [mode, setMode] = useState<'edit' | 'preview' | null>(null);
-  // Preview mode state
-  const [previewWorkflow, setPreviewWorkflow] = useState<Workflow | null>(null);
-  const [previewIsHistoricalVersion, setPreviewIsHistoricalVersion] = useState<boolean>(false);
-  const [previewHasGitChanges, setPreviewHasGitChanges] = useState<boolean>(false);
+  const [mode, setMode] = useState<'edit' | 'overview' | null>(null);
+  // Overview mode state
+  const [overviewWorkflow, setOverviewWorkflow] = useState<Workflow | null>(null);
+  // One-shot focus request when entering Overview from PropertyOverlay's
+  // "Show in Overview" button. Uses an incrementing key so the same node
+  // requested twice still fires.
+  const [overviewFocusRequest, setOverviewFocusRequest] = useState<{
+    nodeId: string;
+    key: number;
+  } | null>(null);
+  const [overviewIsHistoricalVersion, setOverviewIsHistoricalVersion] = useState<boolean>(false);
+  // True when View was opened via the workflow-preview-editor-provider (i.e.
+  // the user opened a `.vscode/workflows/*.json` from git history / diff /
+  // file explorer). In that case there is no live canvas to go back to,
+  // so navigation buttons (Back-to-canvas, per-section Edit) are hidden.
+  const [overviewIsExternal, setOverviewIsExternal] = useState<boolean>(false);
+  // JSON parse failure surfaced from the workflow-preview-editor-provider so
+  // the user knows why the View pane is empty.
+  const [overviewParseError, setOverviewParseError] = useState<string | null>(null);
+  const [overviewHasGitChanges, setOverviewHasGitChanges] = useState<boolean>(false);
 
   const [error, setError] = useState<ErrorPayload | null>(null);
   const [runTour, setRunTour] = useState(false);
@@ -364,13 +381,27 @@ const App: React.FC = () => {
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.type === 'PREVIEW_MODE_INIT') {
-        // Switch to preview mode with workflow data
-        const payload = message.payload as PreviewModeInitPayload;
-        setPreviewWorkflow(payload.workflow);
-        setPreviewIsHistoricalVersion(payload.isHistoricalVersion ?? false);
-        setPreviewHasGitChanges(payload.hasGitChanges ?? false);
-        setMode('preview');
+      if (message.type === 'OVERVIEW_MODE_INIT') {
+        // Switch to overview mode with workflow data
+        const payload = message.payload as OverviewModeInitPayload;
+        setOverviewWorkflow(payload.workflow);
+        setOverviewIsHistoricalVersion(payload.isHistoricalVersion ?? false);
+        setOverviewHasGitChanges(payload.hasGitChanges ?? false);
+        setOverviewIsExternal(true);
+        setOverviewParseError(null);
+        // Clear any stale focus request from a previous PropertyOverlay
+        // "Show in View" so the new external workflow does not auto-scroll
+        // to an unrelated node.
+        setOverviewFocusRequest(null);
+        setMode('overview');
+      } else if (message.type === 'OVERVIEW_UPDATE') {
+        // The source JSON file changed; refresh the displayed workflow.
+        const payload = message.payload as OverviewUpdatePayload;
+        setOverviewWorkflow(payload.workflow);
+        setOverviewParseError(null);
+      } else if (message.type === 'OVERVIEW_PARSE_ERROR') {
+        const payload = message.payload as OverviewParseErrorPayload;
+        setOverviewParseError(payload.error);
       } else if (message.type === 'INITIAL_STATE') {
         // Switch to edit mode
         setMode('edit');
@@ -508,14 +539,15 @@ const App: React.FC = () => {
         // MCP Server applying workflow to canvas
         const payload = message.payload as ApplyWorkflowFromMcpPayload;
 
-        // Reject if in preview mode
-        if (mode === 'preview') {
+        // Reject if in overview mode
+        if (mode === 'overview') {
           vscode.postMessage({
             type: 'APPLY_WORKFLOW_FROM_MCP_RESPONSE',
             payload: {
               correlationId: payload.correlationId,
               success: false,
-              error: 'Cannot apply workflow while in preview mode. Please open the editor first.',
+              error:
+                'Cannot apply workflow while in overview mode. Please switch to edit mode first.',
             },
           });
           return;
@@ -619,7 +651,7 @@ const App: React.FC = () => {
   ]);
 
   // Render loading state (waiting for mode to be determined)
-  // Shows spinner while waiting for INITIAL_STATE or PREVIEW_MODE_INIT from Extension Host
+  // Shows spinner while waiting for INITIAL_STATE or OVERVIEW_MODE_INIT from Extension Host
   if (mode === null) {
     return (
       <div
@@ -637,11 +669,11 @@ const App: React.FC = () => {
     );
   }
 
-  // Render preview mode
-  if (mode === 'preview') {
+  // Render overview mode
+  if (mode === 'overview') {
     return (
       <div
-        className="app preview-mode"
+        className="app overview-mode"
         style={{
           width: '100vw',
           height: '100vh',
@@ -650,10 +682,31 @@ const App: React.FC = () => {
           overflow: 'hidden',
         }}
       >
-        <PreviewCanvas
-          initialWorkflow={previewWorkflow}
-          initialIsHistoricalVersion={previewIsHistoricalVersion}
-          initialHasGitChanges={previewHasGitChanges}
+        <OverviewMode
+          workflow={overviewWorkflow}
+          isHistoricalVersion={overviewIsHistoricalVersion}
+          hasGitChanges={overviewHasGitChanges}
+          onSwitchToEdit={
+            overviewIsExternal
+              ? undefined
+              : () => {
+                  setMode('edit');
+                }
+          }
+          onEditNode={
+            overviewIsExternal
+              ? undefined
+              : (nodeId) => {
+                  // Switch back to Edit mode, select the node (auto-opens
+                  // the property overlay) and ask the canvas to pan to it.
+                  setMode('edit');
+                  const store = useWorkflowStore.getState();
+                  store.setSelectedNodeId(nodeId);
+                  store.requestFocusNode(nodeId);
+                }
+          }
+          focusRequest={overviewFocusRequest}
+          parseError={overviewParseError}
         />
       </div>
     );
@@ -682,6 +735,27 @@ const App: React.FC = () => {
         initialUnreadReleaseCount={unreadReleaseCount}
         showWhatsNewBadge={showWhatsNewBadge}
         onShowWhatsNewBadgeChange={setShowWhatsNewBadge}
+        onSwitchToOverview={() => {
+          const live = serializeWorkflow(
+            nodes,
+            edges,
+            workflowName || 'Untitled',
+            workflowDescription || undefined,
+            activeWorkflow?.conversationHistory,
+            subAgentFlows
+          );
+          if (activeWorkflow?.id) {
+            live.id = activeWorkflow.id;
+          }
+          setOverviewWorkflow(live);
+          setOverviewIsHistoricalVersion(false);
+          setOverviewHasGitChanges(false);
+          setOverviewIsExternal(false);
+          // Plain Toolbar entry — no per-node focus, drop any prior request.
+          setOverviewFocusRequest(null);
+          setOverviewParseError(null);
+          setMode('overview');
+        }}
       />
 
       {/* Main Content: 3-column layout */}
@@ -742,7 +816,30 @@ const App: React.FC = () => {
                 zIndex: 10,
               }}
             >
-              <PropertyOverlay />
+              <PropertyOverlay
+                onShowInOverview={(nodeId) => {
+                  // Snapshot the live canvas, switch to Overview mode and
+                  // ask InstructionsPanel to scroll to the matching section
+                  // (which in turn drives the Mermaid follow-mode pan).
+                  const live = serializeWorkflow(
+                    nodes,
+                    edges,
+                    workflowName || 'Untitled',
+                    workflowDescription || undefined,
+                    activeWorkflow?.conversationHistory,
+                    subAgentFlows
+                  );
+                  if (activeWorkflow?.id) {
+                    live.id = activeWorkflow.id;
+                  }
+                  setOverviewWorkflow(live);
+                  setOverviewIsHistoricalVersion(false);
+                  setOverviewHasGitChanges(false);
+                  setOverviewIsExternal(false);
+                  setOverviewFocusRequest({ nodeId, key: Date.now() });
+                  setMode('overview');
+                }}
+              />
             </div>
           )}
         </div>
@@ -829,6 +926,7 @@ const App: React.FC = () => {
       {/* Diff Preview Dialog for MCP apply_workflow */}
       <DiffPreviewDialog
         isOpen={pendingMcpApply !== null}
+        workflow={pendingMcpApply?.workflow ?? null}
         diffSummary={pendingMcpApply?.diffSummary ?? null}
         description={pendingMcpApply?.description}
         plannedFiles={pendingMcpApply?.plannedFiles}

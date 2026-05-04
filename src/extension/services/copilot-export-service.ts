@@ -6,14 +6,14 @@
  */
 
 import * as path from 'node:path';
+import {
+  generateExecutionInstructions,
+  generateMermaidFlowchart,
+} from '../../shared/services/workflow-prompt-generator';
 import type { Workflow } from '../../shared/types/workflow-definition';
 import { escapeYamlString, nodeNameToFileName } from './export-service';
 import type { FileService } from './file-service';
 import { getMcpServerConfig } from './mcp-config-reader';
-import {
-  generateExecutionInstructions,
-  generateMermaidFlowchart,
-} from './workflow-prompt-generator';
 
 /**
  * Copilot agent mode options

@@ -13,13 +13,15 @@ export interface WebviewTranslationKeys {
   'loading.importWorkflow': string;
   'loading.openWorkflow': string;
 
-  // Preview mode
-  'preview.label': string;
-  'preview.loading': string;
-  'preview.parseError': string;
-  'preview.openInEditor': string;
-  'preview.versionBefore': string;
-  'preview.versionAfter': string;
+  // Overview mode
+  'overview.label': string;
+  'overview.loading': string;
+  'overview.parseError': string;
+  'overview.openInEditor': string;
+  'overview.versionBefore': string;
+  'overview.versionAfter': string;
+  'overview.emptyState.title': string;
+  'overview.emptyState.description': string;
 
   // Toolbar
   'toolbar.workflowNamePlaceholder': string;
@@ -33,6 +35,10 @@ export interface WebviewTranslationKeys {
   'toolbar.load': string;
   'toolbar.loading': string;
   'toolbar.refreshList': string;
+
+  // Toolbar view mode (Edit / Overview)
+  'toolbar.viewMode.switchToOverview': string;
+  'toolbar.viewMode.switchToEdit': string;
 
   // Toolbar interaction mode
   'toolbar.interactionMode.panButton': string;
@@ -230,6 +236,7 @@ export interface WebviewTranslationKeys {
 
   // Property Panel
   'property.title': string;
+  'property.showInOverview': string;
 
   // Common property labels
   'property.nodeName': string;
@@ -386,6 +393,8 @@ export interface WebviewTranslationKeys {
   'dialog.diffPreview.revisionConflict': string;
   'dialog.diffPreview.applyAnyway': string;
   'dialog.diffPreview.retryWithLatest': string;
+  'dialog.diffPreview.previewOverview': string;
+  'dialog.diffPreview.closeOverview': string;
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': string;

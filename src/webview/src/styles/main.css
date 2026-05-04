@@ -260,3 +260,121 @@ body.tour-floating-visible .react-flow__panel.bottom.right {
       0 0 4px rgba(79, 195, 247, 0.3);
   }
 }
+
+/* Overview Mode */
+.overview-mermaid-container svg {
+  display: block;
+  margin: 0 auto;
+}
+
+.overview-instructions-panel ul,
+.overview-instructions-panel ol {
+  padding-left: 24px;
+  margin: 8px 0;
+}
+
+.overview-instructions-panel p {
+  margin: 6px 0;
+}
+
+.overview-instructions-panel hr {
+  border: none;
+  border-top: 1px solid var(--vscode-panel-border);
+  margin: 16px 0;
+}
+
+.overview-section-heading {
+  outline-offset: 4px;
+  border-radius: 3px;
+  transition:
+    outline 1.2s ease,
+    background-color 1.2s ease;
+}
+
+.overview-section-heading[data-highlight="true"] {
+  outline: 2px solid var(--vscode-focusBorder);
+  background-color: color-mix(in srgb, var(--vscode-focusBorder) 12%, transparent);
+}
+
+.overview-section-heading:focus-visible {
+  outline: 2px solid var(--vscode-focusBorder);
+}
+
+/* Each node section is wrapped in `.overview-section-block` so we can box the
+ * whole section (heading + content) and apply a glow when it matches the
+ * active Mermaid node. */
+.overview-section-block {
+  position: relative;
+  padding: 0 12px;
+  margin: 0 -12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    background-color 200ms ease;
+}
+
+.overview-section-block[data-active-section="true"] {
+  border-color: var(--vscode-focusBorder);
+  background-color: color-mix(in srgb, var(--vscode-focusBorder) 6%, transparent);
+  box-shadow: 0 0 0 1px var(--vscode-focusBorder);
+  animation: overview-active-glow 1.6s ease-in-out infinite;
+}
+
+@keyframes overview-active-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px var(--vscode-focusBorder),
+      0 0 6px color-mix(in srgb, var(--vscode-focusBorder) 35%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px var(--vscode-focusBorder),
+      0 0 14px color-mix(in srgb, var(--vscode-focusBorder) 60%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overview-section-block[data-active-section="true"] {
+    animation: none;
+  }
+}
+
+/* While dragging the Mermaid viewport, swap the open-hand cursor for the
+ * closed-fist "grabbing" cursor. Applied to the viewport itself and any
+ * descendant so the cursor stays consistent across SVG/foreignObject.
+ * !important is needed to beat the inline `cursor: pointer` we set on
+ * individual `g.node` elements during render. */
+.overview-mermaid-viewport[data-dragging="true"],
+.overview-mermaid-viewport[data-dragging="true"] * {
+  /* biome-ignore lint/complexity/noImportantStyles: override inline g.node cursor */
+  cursor: grabbing !important;
+}
+
+/* Smoothly tween the stage transform when follow-mode pans to the active
+ * node. User-driven drag/wheel never sets this attribute, so panning by hand
+ * stays instantaneous. */
+.overview-mermaid-stage[data-follow-animating="true"] {
+  transition: transform 320ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Active node highlight on the Mermaid diagram (driven by right-pane scroll).
+ * !important is required because mermaid sets stroke / stroke-width via
+ * inline `style="..."` on the shape elements, which would otherwise win. */
+.overview-mermaid-stage g.node.overview-active > rect,
+.overview-mermaid-stage g.node.overview-active > polygon,
+.overview-mermaid-stage g.node.overview-active > circle,
+.overview-mermaid-stage g.node.overview-active > ellipse,
+.overview-mermaid-stage g.node.overview-active > path {
+  /* biome-ignore lint/complexity/noImportantStyles: override mermaid inline styles */
+  stroke: var(--vscode-focusBorder) !important;
+  /* biome-ignore lint/complexity/noImportantStyles: override mermaid inline styles */
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 6px var(--vscode-focusBorder));
+}
+
+.overview-mermaid-stage g.node.overview-active {
+  transition: filter 0.15s ease;
+}

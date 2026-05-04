@@ -15,13 +15,16 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'loading.importWorkflow': 'Importing workflow...',
   'loading.openWorkflow': 'Opening workflow...',
 
-  // Preview mode
-  'preview.label': 'Preview',
-  'preview.loading': 'Loading workflow...',
-  'preview.parseError': 'Failed to parse workflow',
-  'preview.openInEditor': 'Edit',
-  'preview.versionBefore': 'Before',
-  'preview.versionAfter': 'After',
+  // Overview mode
+  'overview.label': 'View',
+  'overview.loading': 'Loading workflow...',
+  'overview.parseError': 'Failed to parse workflow',
+  'overview.openInEditor': 'Open in Editor',
+  'overview.versionBefore': 'Before',
+  'overview.versionAfter': 'After',
+  'overview.emptyState.title': 'No instructions to display',
+  'overview.emptyState.description':
+    'This workflow has no instructional nodes yet. Switch to Edit mode and add nodes such as Sub-Agent, Prompt, or Skill to populate the overview.',
 
   // Toolbar
   'toolbar.workflowNamePlaceholder': 'Workflow name',
@@ -35,6 +38,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.load': 'Load',
   'toolbar.loading': 'Loading...',
   'toolbar.refreshList': 'Refresh workflow list',
+
+  // Toolbar view mode
+  'toolbar.viewMode.switchToOverview': 'Switch to View',
+  'toolbar.viewMode.switchToEdit': 'Back to canvas',
 
   // Toolbar interaction mode
   'toolbar.interactionMode.panButton': 'Hand',
@@ -239,6 +246,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Property Panel
   'property.title': 'Properties',
+  'property.showInOverview': 'Show in View',
 
   // Common property labels
   'property.nodeName': 'Node Name',
@@ -409,6 +417,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Warning: The canvas was modified after the AI fetched the workflow. Review the changes carefully before accepting.',
   'dialog.diffPreview.applyAnyway': 'Apply Anyway',
   'dialog.diffPreview.retryWithLatest': 'Retry with Latest',
+  'dialog.diffPreview.previewOverview': 'Preview',
+  'dialog.diffPreview.closeOverview': 'Close Preview',
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': 'Reset Workflow',

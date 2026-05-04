@@ -15,13 +15,16 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'loading.importWorkflow': '正在导入工作流...',
   'loading.openWorkflow': '正在打开工作流...',
 
-  // Preview mode
-  'preview.label': '预览',
-  'preview.loading': '正在加载工作流...',
-  'preview.parseError': '工作流解析失败',
-  'preview.openInEditor': '编辑',
-  'preview.versionBefore': '修改前',
-  'preview.versionAfter': '修改后',
+  // Overview mode
+  'overview.label': 'View',
+  'overview.loading': '正在加载工作流...',
+  'overview.parseError': '工作流解析失败',
+  'overview.openInEditor': '在编辑器中打开',
+  'overview.versionBefore': '修改前',
+  'overview.versionAfter': '修改后',
+  'overview.emptyState.title': '暂无可显示的指令',
+  'overview.emptyState.description':
+    '此工作流尚无指令节点。切换到编辑模式并添加 Sub-Agent、Prompt、Skill 等节点即可在此处概览。',
 
   // Toolbar
   'toolbar.workflowNamePlaceholder': '工作流名称',
@@ -35,6 +38,10 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.load': '加载',
   'toolbar.loading': '加载中...',
   'toolbar.refreshList': '刷新工作流列表',
+
+  // Toolbar view mode
+  'toolbar.viewMode.switchToOverview': '切换到 View 模式',
+  'toolbar.viewMode.switchToEdit': '返回画布',
 
   // Toolbar interaction mode
   'toolbar.interactionMode.panButton': '手掌',
@@ -231,6 +238,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
 
   // Property Panel
   'property.title': '属性',
+  'property.showInOverview': '在 View 模式中查看',
 
   // Common property labels
   'property.nodeName': '节点名称',
@@ -394,6 +402,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
     '警告：AI获取工作流后画布已被修改。请仔细检查变更内容后再接受。',
   'dialog.diffPreview.applyAnyway': '仍然应用',
   'dialog.diffPreview.retryWithLatest': '使用最新重试',
+  'dialog.diffPreview.previewOverview': '预览',
+  'dialog.diffPreview.closeOverview': '关闭预览',
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '重置工作流',

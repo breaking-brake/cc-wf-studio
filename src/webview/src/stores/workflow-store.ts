@@ -72,6 +72,9 @@ interface WorkflowStore {
   /** Slash Command export options (context, model, hooks) */
   slashCommandOptions: SlashCommandOptions;
   lastAddedNodeId: string | null;
+  /** When set, the Edit-mode canvas should pan to centre this node and clear the
+   *  request. Used by the Overview mode "Edit on canvas" links. */
+  requestedFocusNodeId: string | null;
 
   // Group Node Highlight State (for MCP execution tracking)
   highlightedGroupNodeId: string | null;
@@ -135,6 +138,10 @@ interface WorkflowStore {
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
   addNode: (node: Node) => void;
   clearLastAddedNodeId: () => void;
+  /** Request the canvas to pan to a specific node (e.g. when jumping in from
+   *  Overview mode). The canvas-side hook clears it after centring. */
+  requestFocusNode: (nodeId: string) => void;
+  clearRequestedFocusNodeId: () => void;
   removeNode: (nodeId: string) => void;
   requestDeleteNode: (nodeId: string) => void;
   confirmDeleteNodes: () => void;
@@ -342,6 +349,7 @@ export const useWorkflowStore = create<WorkflowStore>()(
         hooks: undefined,
       },
       lastAddedNodeId: null,
+      requestedFocusNodeId: null,
       highlightedGroupNodeId: null,
       isHighlightEnabled: true,
       mcpServerRunning: false,
@@ -661,6 +669,14 @@ export const useWorkflowStore = create<WorkflowStore>()(
 
       clearLastAddedNodeId: () => {
         set({ lastAddedNodeId: null });
+      },
+
+      requestFocusNode: (nodeId: string) => {
+        set({ requestedFocusNodeId: nodeId });
+      },
+
+      clearRequestedFocusNodeId: () => {
+        set({ requestedFocusNodeId: null });
       },
 
       setHighlightedGroupNodeId: (id: string | null) => {

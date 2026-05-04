@@ -35,6 +35,26 @@ declare global {
   }
 }
 
+// Vite's `__vitePreload` helper preloads CSS deps for code-split chunks. In the
+// VSCode webview environment those root-relative `assets/main.css` URLs cannot
+// be fetched (the asset lives under the `vscode-webview://` scheme). The CSS
+// preload is purely an optimisation — the dynamic import itself works fine —
+// so we silence *only* CSS preload failures. Letting other preload errors
+// propagate is important: otherwise the parent dynamic import resolves with
+// `undefined` and surfaces as a confusing "Cannot read properties of undefined"
+// downstream.
+// See https://vite.dev/guide/build.html#load-error-handling
+window.addEventListener('vite:preloadError', (event) => {
+  const e = event as Event & { payload?: unknown };
+  const message = e.payload instanceof Error ? e.payload.message : String(e.payload ?? '');
+  if (message.includes('Unable to preload CSS')) {
+    event.preventDefault();
+  } else {
+    // Surface real errors in the console so we can see what actually broke.
+    console.error('[vite:preloadError]', e.payload);
+  }
+});
+
 // Acquire VSCode API (only available in VSCode Webview context)
 export const vscode = window.acquireVsCodeApi?.() ?? {
   postMessage: (message: unknown) => {

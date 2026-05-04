@@ -30,6 +30,11 @@ export default defineConfig({
     // Target modern browsers (VSCode uses Electron)
     target: 'esnext',
     minify: 'esbuild',
+    // Polyfill not needed (VSCode Electron supports modules natively).
+    // Per-chunk CSS preload deps still get baked into split chunks; we
+    // suppress the resulting preload errors at runtime via a
+    // `vite:preloadError` listener in main.tsx.
+    modulePreload: { polyfill: false },
     // Increase chunk size warning limit to 1000 kB (VSCode extension context)
     chunkSizeWarningLimit: 1000,
   },
