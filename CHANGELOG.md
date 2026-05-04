@@ -1,3 +1,13 @@
+## [3.34.0](https://github.com/breaking-brake/cc-wf-studio/compare/v3.33.1...v3.34.0) (2026-05-04)
+
+### Features
+
+* workflow Overview (View) mode with bidirectional canvas sync ([#755](https://github.com/breaking-brake/cc-wf-studio/issues/755)) ([fdd0617](https://github.com/breaking-brake/cc-wf-studio/commit/fdd06174284932b563233ba8f07c4eab8d8aebb2))
+
+### Improvements
+
+* add Preview button to AI apply confirmation dialog ([#756](https://github.com/breaking-brake/cc-wf-studio/issues/756)) ([c73f88a](https://github.com/breaking-brake/cc-wf-studio/commit/c73f88a27bc7c8cffe1e46f5fee4839f0a51ee27))
+
 ## [3.33.1](https://github.com/breaking-brake/cc-wf-studio/compare/v3.33.0...v3.33.1) (2026-05-03)
 
 ### Improvements
