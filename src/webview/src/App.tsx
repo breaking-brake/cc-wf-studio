@@ -186,6 +186,13 @@ const App: React.FC = () => {
   const [mode, setMode] = useState<'edit' | 'overview' | null>(null);
   // Overview mode state
   const [overviewWorkflow, setOverviewWorkflow] = useState<Workflow | null>(null);
+  // One-shot focus request when entering Overview from PropertyOverlay's
+  // "Show in Overview" button. Uses an incrementing key so the same node
+  // requested twice still fires.
+  const [overviewFocusRequest, setOverviewFocusRequest] = useState<{
+    nodeId: string;
+    key: number;
+  } | null>(null);
   const [overviewIsHistoricalVersion, setOverviewIsHistoricalVersion] = useState<boolean>(false);
   const [overviewHasGitChanges, setOverviewHasGitChanges] = useState<boolean>(false);
 
@@ -674,6 +681,7 @@ const App: React.FC = () => {
                   store.requestFocusNode(nodeId);
                 }
           }
+          focusRequest={overviewFocusRequest}
         />
       </div>
     );
@@ -779,7 +787,29 @@ const App: React.FC = () => {
                 zIndex: 10,
               }}
             >
-              <PropertyOverlay />
+              <PropertyOverlay
+                onShowInOverview={(nodeId) => {
+                  // Snapshot the live canvas, switch to Overview mode and
+                  // ask InstructionsPanel to scroll to the matching section
+                  // (which in turn drives the Mermaid follow-mode pan).
+                  const live = serializeWorkflow(
+                    nodes,
+                    edges,
+                    workflowName || 'Untitled',
+                    workflowDescription || undefined,
+                    activeWorkflow?.conversationHistory,
+                    subAgentFlows
+                  );
+                  if (activeWorkflow?.id) {
+                    live.id = activeWorkflow.id;
+                  }
+                  setOverviewWorkflow(live);
+                  setOverviewIsHistoricalVersion(false);
+                  setOverviewHasGitChanges(false);
+                  setOverviewFocusRequest({ nodeId, key: Date.now() });
+                  setMode('overview');
+                }}
+              />
             </div>
           )}
         </div>

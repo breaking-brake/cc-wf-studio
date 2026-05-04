@@ -236,6 +236,7 @@ export interface WebviewTranslationKeys {
 
   // Property Panel
   'property.title': string;
+  'property.showInOverview': string;
 
   // Common property labels
   'property.nodeName': string;

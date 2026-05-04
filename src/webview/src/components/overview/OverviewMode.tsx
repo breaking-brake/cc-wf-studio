@@ -27,6 +27,14 @@ interface OverviewModeProps {
    * the original (un-sanitized) node id.
    */
   onEditNode?: (nodeId: string) => void;
+  /**
+   * Optional one-shot focus request: when this prop changes (different
+   * object identity), Overview scrolls the right pane to the matching
+   * section, which in turn drives the Mermaid follow-mode pan. Use a
+   * fresh object on every request so repeated requests for the same node
+   * still fire.
+   */
+  focusRequest?: { nodeId: string; key: number } | null;
 }
 
 const RATIO_STORAGE_KEY = 'cc-wf-studio.overviewMermaidPanelRatio';
@@ -59,6 +67,7 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
   hasGitChanges,
   onSwitchToEdit,
   onEditNode,
+  focusRequest,
 }) => {
   const { t } = useTranslation();
   const [ratio, setRatio] = useState<number>(() => loadStoredRatio());
@@ -76,6 +85,17 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
       // ignore quota errors
     }
   }, [ratio]);
+
+  // Honour external "show this node" requests (PropertyOverlay → Overview).
+  // Defer one frame so InstructionsPanel has rendered the new section list.
+  useEffect(() => {
+    if (!focusRequest) return;
+    const id = focusRequest.nodeId;
+    const handle = requestAnimationFrame(() => {
+      instructionsRef.current?.scrollToNode(id);
+    });
+    return () => cancelAnimationFrame(handle);
+  }, [focusRequest]);
 
   const handleSplitterMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();

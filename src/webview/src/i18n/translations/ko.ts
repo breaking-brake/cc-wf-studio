@@ -16,7 +16,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'loading.openWorkflow': '워크플로 여는 중...',
 
   // Overview mode
-  'overview.label': '오버뷰',
+  'overview.label': 'View',
   'overview.loading': '워크플로 로딩 중...',
   'overview.parseError': '워크플로 파싱에 실패했습니다',
   'overview.openInEditor': '에디터에서 열기',
@@ -40,8 +40,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.refreshList': '워크플로 목록 새로고침',
 
   // Toolbar view mode
-  'toolbar.viewMode.switchToOverview': '오버뷰 모드로 전환',
-  'toolbar.viewMode.switchToEdit': '편집 모드로 전환',
+  'toolbar.viewMode.switchToOverview': 'View 모드로 전환',
+  'toolbar.viewMode.switchToEdit': '캔버스로 돌아가기',
 
   // Toolbar interaction mode
   'toolbar.interactionMode.panButton': '손바닥',
@@ -244,6 +244,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Property Panel
   'property.title': '속성',
+  'property.showInOverview': 'View 모드에서 보기',
 
   // Common property labels
   'property.nodeName': '노드 이름',

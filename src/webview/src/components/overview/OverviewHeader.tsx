@@ -1,13 +1,12 @@
 /**
  * Header for Overview mode. Displays workflow name, description, status badges
- * (Before / After / Historical), and the "Switch to Edit" / "Open in Editor" actions.
+ * (Before / After / Historical), and the "Switch to Edit" action.
  */
 
 import type { Workflow } from '@shared/types/messages';
-import { ExternalLink, Pencil } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import type React from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
-import { vscode } from '../../main';
 
 interface OverviewHeaderProps {
   workflow: Workflow | null;
@@ -24,12 +23,6 @@ export const OverviewHeader: React.FC<OverviewHeaderProps> = ({
   onSwitchToEdit,
 }) => {
   const { t } = useTranslation();
-
-  const handleOpenInEditor = () => {
-    vscode.postMessage({
-      type: 'OPEN_WORKFLOW_IN_EDITOR',
-    });
-  };
 
   return (
     <header
@@ -59,7 +52,6 @@ export const OverviewHeader: React.FC<OverviewHeaderProps> = ({
           >
             {workflow?.name || t('overview.loading')}
           </h2>
-          <Badge>{t('overview.label')}</Badge>
           {isHistoricalVersion && <Badge variant="info">{t('overview.versionBefore')}</Badge>}
           {hasGitChanges && !isHistoricalVersion && (
             <Badge variant="success">{t('overview.versionAfter')}</Badge>
@@ -82,16 +74,15 @@ export const OverviewHeader: React.FC<OverviewHeaderProps> = ({
         )}
       </div>
       <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-        {!isHistoricalVersion && (
-          <button type="button" onClick={handleOpenInEditor} style={iconButtonStyle}>
-            <ExternalLink size={14} />
-            <span style={{ marginLeft: '4px' }}>{t('overview.openInEditor')}</span>
-          </button>
-        )}
         {onSwitchToEdit && (
-          <button type="button" onClick={onSwitchToEdit} style={iconButtonStyle}>
-            <Pencil size={14} />
-            <span style={{ marginLeft: '4px' }}>{t('toolbar.viewMode.switchToEdit')}</span>
+          <button
+            type="button"
+            onClick={onSwitchToEdit}
+            title={t('toolbar.viewMode.switchToEdit')}
+            aria-label={t('toolbar.viewMode.switchToEdit')}
+            style={iconButtonStyle}
+          >
+            <ArrowLeft size={14} />
           </button>
         )}
       </div>

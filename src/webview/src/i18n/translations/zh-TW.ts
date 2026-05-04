@@ -16,7 +16,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'loading.openWorkflow': '正在開啟工作流程...',
 
   // Overview mode
-  'overview.label': '俯瞰',
+  'overview.label': 'View',
   'overview.loading': '正在載入工作流程...',
   'overview.parseError': '工作流程解析失敗',
   'overview.openInEditor': '在編輯器中開啟',
@@ -40,8 +40,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.refreshList': '重新整理工作流清單',
 
   // Toolbar view mode
-  'toolbar.viewMode.switchToOverview': '切換至俯瞰模式',
-  'toolbar.viewMode.switchToEdit': '切換至編輯模式',
+  'toolbar.viewMode.switchToOverview': '切換至 View 模式',
+  'toolbar.viewMode.switchToEdit': '返回畫布',
 
   // Toolbar interaction mode
   'toolbar.interactionMode.panButton': '手掌',
@@ -238,6 +238,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
 
   // Property Panel
   'property.title': '屬性',
+  'property.showInOverview': '在 View 模式中檢視',
 
   // Common property labels
   'property.nodeName': '節點名稱',

@@ -16,7 +16,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'loading.openWorkflow': 'Opening workflow...',
 
   // Overview mode
-  'overview.label': 'Overview',
+  'overview.label': 'View',
   'overview.loading': 'Loading workflow...',
   'overview.parseError': 'Failed to parse workflow',
   'overview.openInEditor': 'Open in Editor',
@@ -40,8 +40,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.refreshList': 'Refresh workflow list',
 
   // Toolbar view mode
-  'toolbar.viewMode.switchToOverview': 'Switch to Overview',
-  'toolbar.viewMode.switchToEdit': 'Switch to Edit',
+  'toolbar.viewMode.switchToOverview': 'Switch to View',
+  'toolbar.viewMode.switchToEdit': 'Back to canvas',
 
   // Toolbar interaction mode
   'toolbar.interactionMode.panButton': 'Hand',
@@ -246,6 +246,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Property Panel
   'property.title': 'Properties',
+  'property.showInOverview': 'Show in View',
 
   // Common property labels
   'property.nodeName': 'Node Name',

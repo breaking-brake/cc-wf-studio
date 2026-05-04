@@ -16,7 +16,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'loading.openWorkflow': 'ワークフローを開いています...',
 
   // Overview mode
-  'overview.label': '俯瞰',
+  'overview.label': 'View',
   'overview.loading': 'ワークフローを読み込み中...',
   'overview.parseError': 'ワークフローの解析に失敗しました',
   'overview.openInEditor': 'エディタで開く',
@@ -40,8 +40,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.refreshList': 'ワークフローリストを更新',
 
   // Toolbar view mode
-  'toolbar.viewMode.switchToOverview': '俯瞰モードに切り替え',
-  'toolbar.viewMode.switchToEdit': '編集モードに切り替え',
+  'toolbar.viewMode.switchToOverview': 'Viewモードに切り替え',
+  'toolbar.viewMode.switchToEdit': 'キャンバスに戻る',
 
   // Toolbar interaction mode
   'toolbar.interactionMode.panButton': '手のひら',
@@ -244,6 +244,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Property Panel
   'property.title': 'プロパティ',
+  'property.showInOverview': 'Viewモードで表示',
 
   // Common property labels
   'property.nodeName': 'ノード名',
