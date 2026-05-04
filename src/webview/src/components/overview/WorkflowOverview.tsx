@@ -83,6 +83,7 @@ export const WorkflowOverview: React.FC<WorkflowOverviewProps> = ({
   const [ratio, setRatio] = useState<number>(() => loadStoredRatio(splitRatioStorageKey));
   const splitContainerRef = useRef<HTMLDivElement>(null);
   const isResizingRef = useRef(false);
+  const cleanupDragRef = useRef<(() => void) | null>(null);
   const instructionsRef = useRef<InstructionsPanelHandle>(null);
   const [activeSanitizedNodeId, setActiveSanitizedNodeId] = useState<string | null>(null);
 
@@ -103,6 +104,16 @@ export const WorkflowOverview: React.FC<WorkflowOverviewProps> = ({
     return () => cancelAnimationFrame(handle);
   }, [focusRequest]);
 
+  // Drop any in-flight document drag listeners if we unmount mid-drag
+  // (e.g. dialog overlay closes while the splitter is being dragged).
+  useEffect(() => {
+    return () => {
+      cleanupDragRef.current?.();
+      cleanupDragRef.current = null;
+      isResizingRef.current = false;
+    };
+  }, []);
+
   const handleSplitterMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     isResizingRef.current = true;
@@ -115,14 +126,19 @@ export const WorkflowOverview: React.FC<WorkflowOverviewProps> = ({
       const next = (moveEvent.clientX - rect.left) / rect.width;
       setRatio(Math.min(MAX_RATIO, Math.max(MIN_RATIO, next)));
     };
-    const handleUp = () => {
+    const detach = () => {
       isResizingRef.current = false;
       document.removeEventListener('mousemove', handleMove);
       document.removeEventListener('mouseup', handleUp);
     };
+    const handleUp = () => {
+      detach();
+      cleanupDragRef.current = null;
+    };
 
     document.addEventListener('mousemove', handleMove);
     document.addEventListener('mouseup', handleUp);
+    cleanupDragRef.current = detach;
   }, []);
 
   const handleNodeClick = useCallback((nodeId: string) => {
@@ -253,7 +269,7 @@ export const WorkflowOverview: React.FC<WorkflowOverviewProps> = ({
         </div>
         <div
           role="slider"
-          aria-orientation="vertical"
+          aria-orientation="horizontal"
           aria-label="Resize Overview panels"
           aria-valuemin={Math.round(MIN_RATIO * 100)}
           aria-valuemax={Math.round(MAX_RATIO * 100)}
