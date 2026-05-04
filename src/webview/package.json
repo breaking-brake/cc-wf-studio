@@ -30,7 +30,7 @@
     "reactflow": "^11.10.0",
     "remark-gfm": "^4.0.1",
     "zundo": "^2.3.0",
-    "zustand": "^5.0.10"
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@types/react": "^19.2.7",
