@@ -15,13 +15,16 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'loading.importWorkflow': 'ワークフローをインポート中...',
   'loading.openWorkflow': 'ワークフローを開いています...',
 
-  // Preview mode
-  'preview.label': 'プレビュー',
-  'preview.loading': 'ワークフローを読み込み中...',
-  'preview.parseError': 'ワークフローの解析に失敗しました',
-  'preview.openInEditor': '編集',
-  'preview.versionBefore': '修正前',
-  'preview.versionAfter': '修正後',
+  // Overview mode
+  'overview.label': 'View',
+  'overview.loading': 'ワークフローを読み込み中...',
+  'overview.parseError': 'ワークフローの解析に失敗しました',
+  'overview.openInEditor': 'エディタで開く',
+  'overview.versionBefore': '修正前',
+  'overview.versionAfter': '修正後',
+  'overview.emptyState.title': '表示する指示がありません',
+  'overview.emptyState.description':
+    'このワークフローにはまだ指示用ノードがありません。Editモードに切り替えて Sub-Agent / Prompt / Skill などのノードを追加すると、ここで俯瞰できるようになります。',
 
   // Toolbar
   'toolbar.workflowNamePlaceholder': 'ワークフロー名',
@@ -35,6 +38,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.load': '読み込み',
   'toolbar.loading': '読み込み中...',
   'toolbar.refreshList': 'ワークフローリストを更新',
+
+  // Toolbar view mode
+  'toolbar.viewMode.switchToOverview': 'Viewモードに切り替え',
+  'toolbar.viewMode.switchToEdit': 'キャンバスに戻る',
 
   // Toolbar interaction mode
   'toolbar.interactionMode.panButton': '手のひら',
@@ -237,6 +244,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Property Panel
   'property.title': 'プロパティ',
+  'property.showInOverview': 'Viewモードで表示',
 
   // Common property labels
   'property.nodeName': 'ノード名',

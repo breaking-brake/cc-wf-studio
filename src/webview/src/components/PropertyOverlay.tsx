@@ -21,6 +21,7 @@ import {
   type SwitchNodeData,
   VALIDATION_RULES,
 } from '@shared/types/workflow-definition';
+import { BookOpen } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import type { Node } from 'reactflow';
@@ -47,6 +48,12 @@ interface PropertyOverlayProps {
   overrideSelectedNodeId?: string | null;
   /** Override close handler (for SubAgentFlowDialog local state) */
   onClose?: () => void;
+  /**
+   * Optional handler invoked when the user requests to view this node in
+   * Overview mode. Receives the original node id. The host should switch
+   * to overview mode and scroll/centre on this node.
+   */
+  onShowInOverview?: (nodeId: string) => void;
 }
 
 /**
@@ -55,6 +62,7 @@ interface PropertyOverlayProps {
 export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
   overrideSelectedNodeId,
   onClose,
+  onShowInOverview,
 }) => {
   const { t } = useTranslation();
   const {
@@ -113,22 +121,51 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
         >
           {t('property.title')}
         </div>
-        <button
-          type="button"
-          onClick={handleClose}
-          style={{
-            padding: '4px 8px',
-            backgroundColor: 'transparent',
-            color: 'var(--vscode-foreground)',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '16px',
-          }}
-          aria-label="Close"
-        >
-          ✕
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          {onShowInOverview && selectedNode && (
+            <button
+              type="button"
+              onClick={() => onShowInOverview(selectedNode.id)}
+              title={t('property.showInOverview')}
+              aria-label={t('property.showInOverview')}
+              style={{
+                padding: '4px 6px',
+                backgroundColor: 'transparent',
+                color: 'var(--vscode-foreground)',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                  'var(--vscode-toolbar-hoverBackground, rgba(255,255,255,0.1))';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent';
+              }}
+            >
+              <BookOpen size={14} />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleClose}
+            style={{
+              padding: '4px 8px',
+              backgroundColor: 'transparent',
+              color: 'var(--vscode-foreground)',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '16px',
+            }}
+            aria-label={t('common.close')}
+          >
+            ✕
+          </button>
+        </div>
       </div>
 
       {/* Show content only when a node is selected */}

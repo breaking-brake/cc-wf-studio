@@ -22,7 +22,13 @@ export function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.
   // Get current locale for i18n
   const locale = getCurrentLocale();
 
-  // Get URIs for webview resources
+  // Get URIs for webview resources.
+  // NOTE: Do NOT append a cache-bust query to the script URL. The webview
+  // entry is `<script type="module">` and dynamically-imported chunks (e.g.
+  // `mermaid.core.js`) re-import `./main.js` *without* the query. With the
+  // query the browser treats `main.js` and `main.js?v=...` as two different
+  // modules, evaluates both, and calls `acquireVsCodeApi()` twice (which
+  // throws "An instance of the VS Code API has already been acquired").
   const scriptUri = webview.asWebviewUri(
     vscode.Uri.joinPath(extensionUri, 'src', 'webview', 'dist', 'assets', 'main.js')
   );
@@ -43,7 +49,7 @@ export function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'none';
       style-src ${webview.cspSource} 'unsafe-inline';
-      script-src 'nonce-${nonce}';
+      script-src 'nonce-${nonce}' 'strict-dynamic';
       img-src ${webview.cspSource} https:;
       font-src ${webview.cspSource};
     ">
@@ -59,7 +65,7 @@ export function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.
     <script nonce="${nonce}">
       window.initialLocale = "${locale}";
     </script>
-    <script nonce="${nonce}" src="${scriptUri}"></script>
+    <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`;
 }

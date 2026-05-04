@@ -7,6 +7,10 @@
 
 import * as path from 'node:path';
 import { BUILT_IN_SUB_AGENTS } from '../../shared/constants/built-in-sub-agents';
+import {
+  generateExecutionInstructions,
+  generateMermaidFlowchart,
+} from '../../shared/services/workflow-prompt-generator';
 import type {
   SubAgentFlowNode,
   SubAgentNode,
@@ -18,10 +22,6 @@ import {
   nodeNameToFileName,
 } from './export-service';
 import type { FileService } from './file-service';
-import {
-  generateExecutionInstructions,
-  generateMermaidFlowchart,
-} from './workflow-prompt-generator';
 
 /**
  * Cursor skill export result
