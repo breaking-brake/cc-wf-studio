@@ -29,6 +29,7 @@ src/webview/index.html
 .specify/**
 .claude/**
 specs/**
+poc/**
 
 # Test files
 **/__tests__/**

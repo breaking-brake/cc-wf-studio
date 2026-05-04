@@ -59,9 +59,7 @@ jobs:
 
       - name: Package extension with new version
         if: steps.semantic_release.outcome == 'success'
-        run: |
-          npm install -g @vscode/vsce
-          vsce package
+        run: npm run package
 
       - name: Upload VSIX to release
         if: steps.semantic_release.outcome == 'success'
