@@ -117,7 +117,6 @@
     "format": "biome format --write .",
     "check": "biome check --write .",
     "test": "cd src/webview && npm run test",
-    "test:e2e": "wdio run wdio.conf.ts",
     "package": "vsce package"
   },
   "devDependencies": {
