@@ -402,6 +402,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
     '警告：AI获取工作流后画布已被修改。请仔细检查变更内容后再接受。',
   'dialog.diffPreview.applyAnyway': '仍然应用',
   'dialog.diffPreview.retryWithLatest': '使用最新重试',
+  'dialog.diffPreview.previewOverview': '预览',
+  'dialog.diffPreview.closeOverview': '关闭预览',
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': '重置工作流',

@@ -416,6 +416,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
     '警告: AIがワークフローを取得した後にキャンバスが変更されています。変更内容を慎重に確認してください。',
   'dialog.diffPreview.applyAnyway': '変更を適用',
   'dialog.diffPreview.retryWithLatest': '最新で再試行',
+  'dialog.diffPreview.previewOverview': 'プレビュー',
+  'dialog.diffPreview.closeOverview': 'プレビューを閉じる',
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': 'ワークフローをリセット',

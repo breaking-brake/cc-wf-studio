@@ -393,6 +393,8 @@ export interface WebviewTranslationKeys {
   'dialog.diffPreview.revisionConflict': string;
   'dialog.diffPreview.applyAnyway': string;
   'dialog.diffPreview.retryWithLatest': string;
+  'dialog.diffPreview.previewOverview': string;
+  'dialog.diffPreview.closeOverview': string;
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': string;
