@@ -35,6 +35,8 @@ interface OverviewModeProps {
    * still fire.
    */
   focusRequest?: { nodeId: string; key: number } | null;
+  /** When non-null, View renders a parse-error banner instead of the panes. */
+  parseError?: string | null;
 }
 
 const RATIO_STORAGE_KEY = 'cc-wf-studio.overviewMermaidPanelRatio';
@@ -68,6 +70,7 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
   onSwitchToEdit,
   onEditNode,
   focusRequest,
+  parseError,
 }) => {
   const { t } = useTranslation();
   const [ratio, setRatio] = useState<number>(() => loadStoredRatio());
@@ -123,11 +126,68 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
     instructionsRef.current?.scrollToNode(nodeId);
   }, []);
 
+  /** Keyboard support for the resize splitter (a11y for slider role). */
+  const handleSplitterKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    const STEP = 0.05;
+    switch (e.key) {
+      case 'ArrowLeft':
+        e.preventDefault();
+        setRatio((r) => Math.max(MIN_RATIO, r - STEP));
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        setRatio((r) => Math.min(MAX_RATIO, r + STEP));
+        break;
+      case 'Home':
+        e.preventDefault();
+        setRatio(MIN_RATIO);
+        break;
+      case 'End':
+        e.preventDefault();
+        setRatio(MAX_RATIO);
+        break;
+    }
+  }, []);
+
   const hasContent = useMemo(
     () => (workflow ? isInstructionalWorkflow(workflow) : false),
     [workflow]
   );
 
+  if (parseError) {
+    return (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px',
+          gap: '8px',
+          color: 'var(--vscode-errorForeground)',
+          backgroundColor: 'var(--vscode-editor-background)',
+        }}
+        role="alert"
+      >
+        <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>{t('overview.parseError')}</h3>
+        <pre
+          style={{
+            margin: 0,
+            maxWidth: '720px',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+            fontFamily: 'var(--vscode-editor-font-family)',
+            fontSize: '12px',
+            color: 'var(--vscode-descriptionForeground)',
+          }}
+        >
+          {parseError}
+        </pre>
+      </div>
+    );
+  }
   if (!workflow) {
     return (
       <div
@@ -196,6 +256,7 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
           aria-valuenow={Math.round(ratio * 100)}
           tabIndex={0}
           onMouseDown={handleSplitterMouseDown}
+          onKeyDown={handleSplitterKeyDown}
           style={{
             width: '6px',
             cursor: 'ew-resize',

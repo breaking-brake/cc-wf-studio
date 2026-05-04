@@ -19,7 +19,6 @@ import type {
   BranchNode,
   CodexNode,
   Connection,
-  GroupNode,
   IfElseNode,
   McpNode,
   PromptNode,
@@ -219,9 +218,8 @@ function formatNode(
     case 'subAgentFlow':
       lines.push(formatSubAgentFlow(node as SubAgentFlowNode, workflow));
       break;
-    case 'group':
-      lines.push(`**Type**: Group — ${escapeInline((node as GroupNode).data.label || 'Group')}`);
-      break;
+    // group nodes are filtered out before reaching this switch (see the
+    // ordered loop above), so no case is needed here.
     default:
       lines.push(`**Type**: ${type}`);
       break;
@@ -355,7 +353,7 @@ function formatIfElse(node: IfElseNode): string {
   const out: string[] = ['**Type**: If/Else'];
   if (node.data.evaluationTarget?.trim()) {
     out.push('');
-    out.push(`**評価対象**: ${escapeInline(node.data.evaluationTarget.trim())}`);
+    out.push(`**Evaluation target**: ${escapeInline(node.data.evaluationTarget.trim())}`);
   }
   return out.join('\n');
 }
@@ -364,7 +362,7 @@ function formatSwitch(node: SwitchNode): string {
   const out: string[] = ['**Type**: Switch'];
   if (node.data.evaluationTarget?.trim()) {
     out.push('');
-    out.push(`**評価対象**: ${escapeInline(node.data.evaluationTarget.trim())}`);
+    out.push(`**Evaluation target**: ${escapeInline(node.data.evaluationTarget.trim())}`);
   }
   return out.join('\n');
 }
@@ -476,7 +474,7 @@ function formatSubAgentFlow(node: SubAgentFlowNode, workflow: Workflow): string 
   const flow = workflow.subAgentFlows?.find((f) => f.id === d.subAgentFlowId);
   const target = flow ? `\`${flow.name}\`` : `\`${d.subAgentFlowId}\``;
   out.push('');
-  out.push(`**参照先 flow**: ${target}`);
+  out.push(`**Referenced flow**: ${target}`);
   return out.join('\n');
 }
 
@@ -571,7 +569,17 @@ function quote(text: string): string {
     .join('\n');
 }
 
-/** Trim an inline string to one line, escaping control characters. */
+/**
+ * Trim an inline string to one line and escape the Markdown specials that
+ * actually corrupt the surrounding contexts where this helper is used (bold
+ * spans, link text, list bullets, pipe-separated tables). We deliberately do
+ * NOT escape `.` `(` `)` `!` etc. — they appear constantly in plain prose
+ * (sentence punctuation, parenthetical) and would just clutter the output
+ * with backslashes.
+ */
 function escapeInline(text: string): string {
-  return text.replace(/\s+/g, ' ').trim();
+  return text
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/([\\`*_[\]|<>])/g, '\\$1');
 }

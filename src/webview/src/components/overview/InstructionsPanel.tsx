@@ -10,6 +10,7 @@
 import { generateOverviewMarkdown } from '@shared/services/workflow-overview-formatter';
 import { sanitizeNodeId } from '@shared/services/workflow-prompt-generator';
 import type { Workflow } from '@shared/types/messages';
+import { ExternalLink } from 'lucide-react';
 import type React from 'react';
 import {
   forwardRef,
@@ -22,6 +23,7 @@ import {
 } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { openExternalUrl } from '../../services/vscode-bridge';
 
 const SECTION_ANCHOR_PREFIX = '#overview-section-';
 const EDIT_LINK_PREFIX = 'edit:';
@@ -293,12 +295,15 @@ export const InstructionsPanel = forwardRef<InstructionsPanelHandle, Instruction
           if (!onEditNode) return null;
           const sanitized = href.slice(EDIT_LINK_PREFIX.length);
           const target = workflow.nodes.find((n) => sanitizeNodeId(n.id) === sanitized);
+          // Hide the link entirely if the target node disappeared from the
+          // live workflow — clicking would otherwise be a silent no-op.
+          if (!target) return null;
           return (
             <a
               href={href}
               onClick={(e) => {
                 e.preventDefault();
-                if (target) onEditNode(target.id);
+                onEditNode(target.id);
               }}
               title="Switch to Edit mode and pan the canvas to this node"
               style={{
@@ -325,14 +330,33 @@ export const InstructionsPanel = forwardRef<InstructionsPanelHandle, Instruction
             </a>
           );
         }
+        // External URLs (auto-linked from prompt body etc.). VSCode webviews
+        // do not honour `target="_blank"`, so we delegate to vscode.openExternal
+        // via the bridge utility.
         return (
           <a
             href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: 'var(--vscode-textLink-foreground)' }}
+            role="button"
+            tabIndex={0}
+            onClick={(e) => {
+              e.preventDefault();
+              if (href) openExternalUrl(href);
+            }}
+            onKeyDown={(e) => {
+              if ((e.key === 'Enter' || e.key === ' ') && href) {
+                e.preventDefault();
+                openExternalUrl(href);
+              }
+            }}
+            style={{
+              color: 'var(--vscode-textLink-foreground)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '2px',
+            }}
           >
             {children}
+            <ExternalLink size={11} />
           </a>
         );
       },

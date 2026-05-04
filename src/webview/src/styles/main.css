@@ -366,6 +366,7 @@ body.tour-floating-visible .react-flow__panel.bottom.right {
 .overview-mermaid-stage g.node.overview-active > rect,
 .overview-mermaid-stage g.node.overview-active > polygon,
 .overview-mermaid-stage g.node.overview-active > circle,
+.overview-mermaid-stage g.node.overview-active > ellipse,
 .overview-mermaid-stage g.node.overview-active > path {
   /* biome-ignore lint/complexity/noImportantStyles: override mermaid inline styles */
   stroke: var(--vscode-focusBorder) !important;

@@ -16,6 +16,8 @@ import type {
   InitialStatePayload,
   McpServerStatusPayload,
   OverviewModeInitPayload,
+  OverviewParseErrorPayload,
+  OverviewUpdatePayload,
   PlannedSubAgentFile,
   Workflow,
 } from '@shared/types/messages';
@@ -199,6 +201,9 @@ const App: React.FC = () => {
   // file explorer). In that case there is no live canvas to go back to,
   // so navigation buttons (Back-to-canvas, per-section Edit) are hidden.
   const [overviewIsExternal, setOverviewIsExternal] = useState<boolean>(false);
+  // JSON parse failure surfaced from the workflow-preview-editor-provider so
+  // the user knows why the View pane is empty.
+  const [overviewParseError, setOverviewParseError] = useState<string | null>(null);
   const [overviewHasGitChanges, setOverviewHasGitChanges] = useState<boolean>(false);
 
   const [error, setError] = useState<ErrorPayload | null>(null);
@@ -383,7 +388,20 @@ const App: React.FC = () => {
         setOverviewIsHistoricalVersion(payload.isHistoricalVersion ?? false);
         setOverviewHasGitChanges(payload.hasGitChanges ?? false);
         setOverviewIsExternal(true);
+        setOverviewParseError(null);
+        // Clear any stale focus request from a previous PropertyOverlay
+        // "Show in View" so the new external workflow does not auto-scroll
+        // to an unrelated node.
+        setOverviewFocusRequest(null);
         setMode('overview');
+      } else if (message.type === 'OVERVIEW_UPDATE') {
+        // The source JSON file changed; refresh the displayed workflow.
+        const payload = message.payload as OverviewUpdatePayload;
+        setOverviewWorkflow(payload.workflow);
+        setOverviewParseError(null);
+      } else if (message.type === 'OVERVIEW_PARSE_ERROR') {
+        const payload = message.payload as OverviewParseErrorPayload;
+        setOverviewParseError(payload.error);
       } else if (message.type === 'INITIAL_STATE') {
         // Switch to edit mode
         setMode('edit');
@@ -688,6 +706,7 @@ const App: React.FC = () => {
                 }
           }
           focusRequest={overviewFocusRequest}
+          parseError={overviewParseError}
         />
       </div>
     );
@@ -732,6 +751,9 @@ const App: React.FC = () => {
           setOverviewIsHistoricalVersion(false);
           setOverviewHasGitChanges(false);
           setOverviewIsExternal(false);
+          // Plain Toolbar entry — no per-node focus, drop any prior request.
+          setOverviewFocusRequest(null);
+          setOverviewParseError(null);
           setMode('overview');
         }}
       />

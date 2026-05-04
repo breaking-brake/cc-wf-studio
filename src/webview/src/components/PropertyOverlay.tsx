@@ -161,7 +161,7 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
               cursor: 'pointer',
               fontSize: '16px',
             }}
-            aria-label="Close"
+            aria-label={t('common.close')}
           >
             ✕
           </button>
