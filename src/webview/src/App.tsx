@@ -194,6 +194,11 @@ const App: React.FC = () => {
     key: number;
   } | null>(null);
   const [overviewIsHistoricalVersion, setOverviewIsHistoricalVersion] = useState<boolean>(false);
+  // True when View was opened via the workflow-preview-editor-provider (i.e.
+  // the user opened a `.vscode/workflows/*.json` from git history / diff /
+  // file explorer). In that case there is no live canvas to go back to,
+  // so navigation buttons (Back-to-canvas, per-section Edit) are hidden.
+  const [overviewIsExternal, setOverviewIsExternal] = useState<boolean>(false);
   const [overviewHasGitChanges, setOverviewHasGitChanges] = useState<boolean>(false);
 
   const [error, setError] = useState<ErrorPayload | null>(null);
@@ -377,6 +382,7 @@ const App: React.FC = () => {
         setOverviewWorkflow(payload.workflow);
         setOverviewIsHistoricalVersion(payload.isHistoricalVersion ?? false);
         setOverviewHasGitChanges(payload.hasGitChanges ?? false);
+        setOverviewIsExternal(true);
         setMode('overview');
       } else if (message.type === 'INITIAL_STATE') {
         // Switch to edit mode
@@ -663,14 +669,14 @@ const App: React.FC = () => {
           isHistoricalVersion={overviewIsHistoricalVersion}
           hasGitChanges={overviewHasGitChanges}
           onSwitchToEdit={
-            overviewIsHistoricalVersion
+            overviewIsExternal
               ? undefined
               : () => {
                   setMode('edit');
                 }
           }
           onEditNode={
-            overviewIsHistoricalVersion
+            overviewIsExternal
               ? undefined
               : (nodeId) => {
                   // Switch back to Edit mode, select the node (auto-opens
@@ -725,6 +731,7 @@ const App: React.FC = () => {
           setOverviewWorkflow(live);
           setOverviewIsHistoricalVersion(false);
           setOverviewHasGitChanges(false);
+          setOverviewIsExternal(false);
           setMode('overview');
         }}
       />
@@ -806,6 +813,7 @@ const App: React.FC = () => {
                   setOverviewWorkflow(live);
                   setOverviewIsHistoricalVersion(false);
                   setOverviewHasGitChanges(false);
+                  setOverviewIsExternal(false);
                   setOverviewFocusRequest({ nodeId, key: Date.now() });
                   setMode('overview');
                 }}

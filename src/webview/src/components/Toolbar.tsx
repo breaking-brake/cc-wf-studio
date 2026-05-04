@@ -1486,32 +1486,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 t('toolbar.load')
               )}
             </button>
-
-            {/* Overview Mode Toggle */}
-            {onSwitchToOverview && (
-              <button
-                type="button"
-                onClick={onSwitchToOverview}
-                title={t('toolbar.viewMode.switchToOverview')}
-                aria-label={t('toolbar.viewMode.switchToOverview')}
-                style={{
-                  padding: isCompact ? '4px 8px' : '4px 12px',
-                  backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                  color: 'var(--vscode-button-secondaryForeground)',
-                  border: 'none',
-                  borderRadius: '2px',
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                }}
-              >
-                <BookOpen size={16} />
-                {!isCompact && t('overview.label')}
-              </button>
-            )}
           </div>
         </div>
 
@@ -2577,6 +2551,32 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               <Sparkles size={14} />
               {!isCompact && t('toolbar.refineWithAI')}
             </button>
+
+            {/* View Toggle */}
+            {onSwitchToOverview && (
+              <button
+                type="button"
+                onClick={onSwitchToOverview}
+                title={t('toolbar.viewMode.switchToOverview')}
+                aria-label={t('toolbar.viewMode.switchToOverview')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: isCompact ? '0' : '4px',
+                  padding: isCompact ? '4px 8px' : '4px 12px',
+                  backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                  color: 'var(--vscode-button-secondaryForeground)',
+                  border: 'none',
+                  borderRadius: '2px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <BookOpen size={14} />
+                {!isCompact && t('overview.label')}
+              </button>
+            )}
 
             {/* More Actions Dropdown */}
             <MoreActionsDropdown

@@ -285,8 +285,12 @@ export const InstructionsPanel = forwardRef<InstructionsPanelHandle, Instruction
           );
         }
         // "Edit on canvas" links → resolve sanitized id back to the original
-        // workflow node id and bubble up to the parent.
+        // workflow node id and bubble up to the parent. When `onEditNode` is
+        // not provided (e.g. read-only previews from git history/diff),
+        // hide the link entirely so the user is not offered an action that
+        // cannot work.
         if (href?.startsWith(EDIT_LINK_PREFIX)) {
+          if (!onEditNode) return null;
           const sanitized = href.slice(EDIT_LINK_PREFIX.length);
           const target = workflow.nodes.find((n) => sanitizeNodeId(n.id) === sanitized);
           return (
@@ -294,7 +298,7 @@ export const InstructionsPanel = forwardRef<InstructionsPanelHandle, Instruction
               href={href}
               onClick={(e) => {
                 e.preventDefault();
-                if (target) onEditNode?.(target.id);
+                if (target) onEditNode(target.id);
               }}
               title="Switch to Edit mode and pan the canvas to this node"
               style={{
