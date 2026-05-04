@@ -14,7 +14,15 @@ import {
   sanitizeNodeId,
 } from '@shared/services/workflow-prompt-generator';
 import type { Workflow } from '@shared/types/messages';
-import { Maximize2, Minus, Plus } from 'lucide-react';
+import {
+  Locate,
+  LocateOff,
+  Maximize2,
+  Minus,
+  MoveHorizontal,
+  MoveVertical,
+  Plus,
+} from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -58,6 +66,17 @@ const MERMAID_THEME_LIGHT = {
 const MIN_SCALE = 0.2;
 const MAX_SCALE = 4;
 const FIT_PADDING = 24;
+const DIRECTION_STORAGE_KEY = 'cc-wf-studio.overviewMermaidDirection';
+type FlowDirection = 'TD' | 'LR';
+function loadStoredDirection(): FlowDirection {
+  // Default is LR (left-to-right). Only an explicit stored 'TD' opts back in.
+  try {
+    const v = localStorage.getItem(DIRECTION_STORAGE_KEY);
+    return v === 'TD' ? 'TD' : 'LR';
+  } catch {
+    return 'LR';
+  }
+}
 
 function detectVscodeTheme(): 'dark' | 'light' {
   if (typeof document === 'undefined') return 'dark';
@@ -121,6 +140,17 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
     transformRef.current = transform;
   }, [transform]);
 
+  // Flowchart layout direction (TD = top-down, LR = left-to-right). Persisted
+  // in localStorage so the user's preference survives reloads.
+  const [direction, setDirection] = useState<FlowDirection>(() => loadStoredDirection());
+  useEffect(() => {
+    try {
+      localStorage.setItem(DIRECTION_STORAGE_KEY, direction);
+    } catch {
+      // ignore quota errors
+    }
+  }, [direction]);
+
   const source = useMemo(() => {
     const raw = generateMermaidFlowchart({
       nodes: workflow.nodes,
@@ -132,9 +162,10 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
       // Overview shows the full prompt in the right-hand instructions panel,
       // so the diagram only needs the node type + title.
       labelMode: 'concise',
+      direction,
     });
     return stripFences(raw);
-  }, [workflow.nodes, workflow.connections]);
+  }, [workflow.nodes, workflow.connections, direction]);
 
   const idLookup = useMemo(() => buildIdLookup(workflow), [workflow]);
 
@@ -169,6 +200,48 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
   useEffect(() => {
     applyActiveHighlight();
   }, [activeSanitizedNodeId, applyActiveHighlight]);
+
+  // ---- Follow mode -------------------------------------------------------
+  // When ON, programmatically pan the stage so the active node stays visible
+  // in the viewport. Default: ON (the natural reading flow expectation).
+  const [followActive, setFollowActive] = useState(true);
+  /** Pan the stage so the highlighted node lies inside the viewport (with
+   * margin). No-op if the node is already comfortably visible. */
+  const ensureNodeVisible = useCallback((sanitized: string) => {
+    const stage = stageRef.current;
+    const viewport = viewportRef.current;
+    if (!stage || !viewport) return;
+    const nodeEl = stage.querySelector<SVGElement>(
+      `g.node[data-overview-sanitized="${cssEscape(sanitized)}"]`
+    );
+    if (!nodeEl) return;
+    const nodeRect = nodeEl.getBoundingClientRect();
+    const vpRect = viewport.getBoundingClientRect();
+    const MARGIN = 32;
+    const visible =
+      nodeRect.left >= vpRect.left + MARGIN &&
+      nodeRect.right <= vpRect.right - MARGIN &&
+      nodeRect.top >= vpRect.top + MARGIN &&
+      nodeRect.bottom <= vpRect.bottom - MARGIN;
+    if (visible) return;
+    // Move the node centre to the viewport centre.
+    const dx = (vpRect.left + vpRect.right) / 2 - (nodeRect.left + nodeRect.right) / 2;
+    const dy = (vpRect.top + vpRect.bottom) / 2 - (nodeRect.top + nodeRect.bottom) / 2;
+    const cur = transformRef.current;
+    // Mark the stage as "animating" so the CSS transition kicks in for this
+    // pan only; user-driven drag/wheel never touches this attribute.
+    stage.setAttribute('data-follow-animating', 'true');
+    setTransform({ scale: cur.scale, x: cur.x + dx, y: cur.y + dy });
+    window.setTimeout(() => stage.removeAttribute('data-follow-animating'), 400);
+  }, []);
+  // Whenever the active node changes (and follow mode is on), re-centre.
+  useEffect(() => {
+    if (!followActive) return;
+    if (!activeSanitizedNodeId) return;
+    // Defer one frame so the highlight class has been applied first.
+    const id = activeSanitizedNodeId;
+    requestAnimationFrame(() => ensureNodeVisible(id));
+  }, [activeSanitizedNodeId, followActive, ensureNodeVisible]);
 
   /** Scale the SVG so it fully fits the viewport, then centre it. */
   const fitToViewport = useCallback(() => {
@@ -344,6 +417,8 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
     };
     const onMouseUp = () => {
       dragStart = null;
+      // Restore the open-hand cursor.
+      viewport.removeAttribute('data-dragging');
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
     };
@@ -354,6 +429,8 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
       e.preventDefault();
       const t = transformRef.current;
       dragStart = { x: e.clientX, y: e.clientY, tx: t.x, ty: t.y };
+      // Switch to the closed-fist (grabbing) cursor while the drag is held.
+      viewport.setAttribute('data-dragging', 'true');
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
     };
@@ -468,6 +545,23 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
         <ZoomButton title="Fit to view" onClick={fitToViewport}>
           <Maximize2 size={14} />
         </ZoomButton>
+        <ZoomButton
+          title={followActive ? 'Follow active node: on' : 'Follow active node: off'}
+          onClick={() => setFollowActive((v) => !v)}
+          active={followActive}
+        >
+          {followActive ? <Locate size={14} /> : <LocateOff size={14} />}
+        </ZoomButton>
+        <ZoomButton
+          title={
+            direction === 'TD'
+              ? 'Layout: top-down (click to switch to left-to-right)'
+              : 'Layout: left-to-right (click to switch to top-down)'
+          }
+          onClick={() => setDirection((d) => (d === 'TD' ? 'LR' : 'TD'))}
+        >
+          {direction === 'TD' ? <MoveVertical size={14} /> : <MoveHorizontal size={14} />}
+        </ZoomButton>
       </div>
       <div
         style={{
@@ -493,11 +587,14 @@ const ZoomButton: React.FC<{
   title: string;
   onClick: () => void;
   children: React.ReactNode;
-}> = ({ title, onClick, children }) => (
+  /** When true, render the button in a pressed/highlighted state. */
+  active?: boolean;
+}> = ({ title, onClick, children, active }) => (
   <button
     type="button"
     title={title}
     aria-label={title}
+    aria-pressed={active}
     onClick={onClick}
     // Prevent the click on a zoom button from triggering the viewport's
     // mousedown (which would start a pan gesture).
@@ -508,8 +605,10 @@ const ZoomButton: React.FC<{
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: 'transparent',
-      color: 'var(--vscode-foreground)',
+      backgroundColor: active
+        ? 'color-mix(in srgb, var(--vscode-focusBorder) 25%, transparent)'
+        : 'transparent',
+      color: active ? 'var(--vscode-focusBorder)' : 'var(--vscode-foreground)',
       border: 'none',
       borderRadius: 3,
       cursor: 'pointer',

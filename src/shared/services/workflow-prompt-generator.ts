@@ -37,6 +37,12 @@ export interface MermaidSource {
    *   detail panel already shows the prompt body.
    */
   labelMode?: 'detailed' | 'concise';
+  /**
+   * Flowchart layout direction.
+   * - 'TD' (default): top-down — same as historical exports.
+   * - 'LR': left-to-right.
+   */
+  direction?: 'TD' | 'LR';
 }
 
 /**
@@ -92,7 +98,7 @@ export function escapeLabel(label: string): string {
  * Generate Mermaid flowchart from workflow or subworkflow
  */
 export function generateMermaidFlowchart(source: MermaidSource): string {
-  const { nodes, connections, labelMode = 'detailed' } = source;
+  const { nodes, connections, labelMode = 'detailed', direction = 'TD' } = source;
   const concise = labelMode === 'concise';
   /** Resolve the user-visible title for a node (data.label > node.name > fallback). */
   const titleOf = (node: WorkflowNode, fallback: string): string => {
@@ -106,7 +112,7 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
   const lines: string[] = [];
 
   lines.push('```mermaid');
-  lines.push('flowchart TD');
+  lines.push(`flowchart ${direction}`);
 
   // Identify group nodes and their children
   const groupNodes = nodes.filter((n) => (n.type as string) === 'group');
