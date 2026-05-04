@@ -70,43 +70,93 @@ export function generateOverviewMarkdown(workflow: Workflow): string {
 // ============================================================================
 
 /**
- * BFS from the Start node(s). Ports are visited in fromPort order so the
- * resulting order is deterministic for branched flows.
+ * Cycle-tolerant Kahn-style topological sort. A node is added to the result
+ * only after every predecessor has been emitted, so merge points like
  *
- * Nodes not reachable from any Start are appended at the end so they are
- * still rendered (won't silently disappear from the doc).
+ *     A ─┬─→ B ─┐
+ *        └─────→ C
+ *
+ * appear after both A and B (instead of being pulled forward by the shorter
+ * path during a naive BFS).
+ *
+ * When the workflow contains a cycle, Kahn's queue empties while some nodes
+ * still have in-degree > 0. We then pick the unprocessed node with the
+ * smallest remaining in-degree (tie-break by declaration order), force it
+ * into the queue, and resume — effectively breaking the cycle at its most
+ * "predecessor-like" node so the remaining members can flow.
+ *
+ * Unreachable nodes (no predecessors at all) start out with in-degree 0 and
+ * are picked up by the same loop, so they still render at a sensible point
+ * rather than silently disappearing.
  */
 function topologicalOrder(workflow: Workflow): WorkflowNode[] {
   const result: WorkflowNode[] = [];
-  const visited = new Set<string>();
   const byId = new Map(workflow.nodes.map((n) => [n.id, n]));
+  const declarationOrder = new Map(workflow.nodes.map((n, i) => [n.id, i]));
 
+  // Build outgoing edge buckets and the in-degree map.
   const outgoing = new Map<string, Connection[]>();
-  for (const conn of workflow.connections) {
-    const list = outgoing.get(conn.from) ?? [];
-    list.push(conn);
-    outgoing.set(conn.from, list);
+  const inDegree = new Map<string, number>();
+  for (const node of workflow.nodes) {
+    inDegree.set(node.id, 0);
+    outgoing.set(node.id, []);
   }
+  for (const conn of workflow.connections) {
+    if (!byId.has(conn.from) || !byId.has(conn.to)) continue;
+    outgoing.get(conn.from)?.push(conn);
+    inDegree.set(conn.to, (inDegree.get(conn.to) ?? 0) + 1);
+  }
+  // Sort each node's outgoing edges by fromPort so branch-0 fans out before
+  // branch-1, etc. (deterministic order for branched flows).
   for (const list of outgoing.values()) {
     list.sort((a, b) => (a.fromPort || '').localeCompare(b.fromPort || ''));
   }
 
-  const starts = workflow.nodes.filter((n) => (n.type as string) === 'start');
-  const queue: WorkflowNode[] = [...starts];
-  while (queue.length > 0) {
-    const node = queue.shift();
-    if (!node || visited.has(node.id)) continue;
-    visited.add(node.id);
+  const processed = new Set<string>();
+
+  /** Visit a node: emit it to the result and decrement its successors' in-degree. */
+  const visit = (node: WorkflowNode) => {
+    if (processed.has(node.id)) return;
+    processed.add(node.id);
     result.push(node);
     for (const conn of outgoing.get(node.id) ?? []) {
       const next = byId.get(conn.to);
-      if (next && !visited.has(next.id)) queue.push(next);
+      if (!next || processed.has(next.id)) continue;
+      const nextDeg = (inDegree.get(next.id) ?? 0) - 1;
+      inDegree.set(next.id, nextDeg);
+      if (nextDeg <= 0) ready.push(next);
     }
-  }
+  };
 
-  // Anything we didn't reach: append in declaration order.
-  for (const node of workflow.nodes) {
-    if (!visited.has(node.id)) result.push(node);
+  // Seed the ready queue with everything that has no incoming edges.
+  // Start nodes go first, then everything else in declaration order.
+  const ready: WorkflowNode[] = workflow.nodes
+    .filter((n) => (inDegree.get(n.id) ?? 0) === 0)
+    .sort((a, b) => {
+      const aStart = (a.type as string) === 'start' ? 0 : 1;
+      const bStart = (b.type as string) === 'start' ? 0 : 1;
+      if (aStart !== bStart) return aStart - bStart;
+      return (declarationOrder.get(a.id) ?? 0) - (declarationOrder.get(b.id) ?? 0);
+    });
+
+  while (true) {
+    while (ready.length > 0) {
+      const node = ready.shift();
+      if (!node || processed.has(node.id)) continue;
+      visit(node);
+    }
+    // Anything still unprocessed is part of a cycle (or a cycle's downstream
+    // chain). Pick the candidate that has the fewest remaining predecessors
+    // so we break the cycle at the most natural entry point.
+    const remaining = workflow.nodes.filter((n) => !processed.has(n.id));
+    if (remaining.length === 0) break;
+    remaining.sort((a, b) => {
+      const da = inDegree.get(a.id) ?? 0;
+      const db = inDegree.get(b.id) ?? 0;
+      if (da !== db) return da - db;
+      return (declarationOrder.get(a.id) ?? 0) - (declarationOrder.get(b.id) ?? 0);
+    });
+    ready.push(remaining[0]);
   }
 
   return result;
