@@ -926,6 +926,7 @@ const App: React.FC = () => {
       {/* Diff Preview Dialog for MCP apply_workflow */}
       <DiffPreviewDialog
         isOpen={pendingMcpApply !== null}
+        workflow={pendingMcpApply?.workflow ?? null}
         diffSummary={pendingMcpApply?.diffSummary ?? null}
         description={pendingMcpApply?.description}
         plannedFiles={pendingMcpApply?.plannedFiles}

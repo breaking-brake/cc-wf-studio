@@ -1,13 +1,18 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import type { PlannedSubAgentFile } from '@shared/types/messages';
-import { FileText } from 'lucide-react';
+import type { PlannedSubAgentFile, Workflow } from '@shared/types/messages';
+import { FileText, X } from 'lucide-react';
 import type React from 'react';
+import { useEffect, useState } from 'react';
 import { getNodeTypeIcon } from '../../constants/node-type-icons';
 import { useTranslation } from '../../i18n/i18n-context';
 import type { WorkflowDiffSummary } from '../../utils/workflow-diff';
+import { WorkflowOverview } from '../overview/WorkflowOverview';
+
+const PREVIEW_RATIO_STORAGE_KEY = 'cc-wf-studio.overviewMermaidPanelRatio.preview';
 
 interface DiffPreviewDialogProps {
   isOpen: boolean;
+  workflow?: Workflow | null;
   diffSummary: WorkflowDiffSummary | null;
   description?: string;
   plannedFiles?: PlannedSubAgentFile[];
@@ -19,6 +24,7 @@ interface DiffPreviewDialogProps {
 
 export const DiffPreviewDialog: React.FC<DiffPreviewDialogProps> = ({
   isOpen,
+  workflow,
   diffSummary,
   description,
   plannedFiles,
@@ -28,6 +34,11 @@ export const DiffPreviewDialog: React.FC<DiffPreviewDialogProps> = ({
   onRetry,
 }) => {
   const { t } = useTranslation();
+  const [showOverview, setShowOverview] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) setShowOverview(false);
+  }, [isOpen]);
 
   if (!diffSummary) return null;
 
@@ -384,22 +395,26 @@ export const DiffPreviewDialog: React.FC<DiffPreviewDialogProps> = ({
               style={{
                 display: 'flex',
                 gap: '8px',
-                justifyContent: 'flex-end',
+                justifyContent: 'space-between',
+                alignItems: 'center',
               }}
             >
               <button
                 type="button"
-                onClick={onReject}
+                onClick={() => setShowOverview(true)}
+                disabled={!workflow}
                 style={{
                   padding: '6px 16px',
                   backgroundColor: 'var(--vscode-button-secondaryBackground)',
                   color: 'var(--vscode-button-secondaryForeground)',
                   border: 'none',
                   borderRadius: '2px',
-                  cursor: 'pointer',
+                  cursor: workflow ? 'pointer' : 'not-allowed',
                   fontSize: '13px',
+                  opacity: workflow ? 1 : 0.5,
                 }}
                 onMouseEnter={(e) => {
+                  if (!workflow) return;
                   e.currentTarget.style.backgroundColor =
                     'var(--vscode-button-secondaryHoverBackground)';
                 }}
@@ -408,36 +423,85 @@ export const DiffPreviewDialog: React.FC<DiffPreviewDialogProps> = ({
                     'var(--vscode-button-secondaryBackground)';
                 }}
               >
-                {t('dialog.diffPreview.reject')}
+                {t('dialog.diffPreview.previewOverview')}
               </button>
-              {hasRevisionConflict && onRetry ? (
-                <>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={onReject}
+                  style={{
+                    padding: '6px 16px',
+                    backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                    color: 'var(--vscode-button-secondaryForeground)',
+                    border: 'none',
+                    borderRadius: '2px',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor =
+                      'var(--vscode-button-secondaryHoverBackground)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor =
+                      'var(--vscode-button-secondaryBackground)';
+                  }}
+                >
+                  {t('dialog.diffPreview.reject')}
+                </button>
+                {hasRevisionConflict && onRetry ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={onAccept}
+                      style={{
+                        padding: '6px 16px',
+                        backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                        color: 'var(--vscode-button-secondaryForeground)',
+                        border: 'none',
+                        borderRadius: '2px',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                          'var(--vscode-button-secondaryHoverBackground)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                          'var(--vscode-button-secondaryBackground)';
+                      }}
+                    >
+                      {t('dialog.diffPreview.applyAnyway')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onRetry}
+                      style={{
+                        padding: '6px 16px',
+                        backgroundColor: 'var(--vscode-button-background)',
+                        color: 'var(--vscode-button-foreground)',
+                        border: 'none',
+                        borderRadius: '2px',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                          'var(--vscode-button-hoverBackground)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+                      }}
+                    >
+                      {t('dialog.diffPreview.retryWithLatest')}
+                    </button>
+                  </>
+                ) : (
                   <button
                     type="button"
                     onClick={onAccept}
-                    style={{
-                      padding: '6px 16px',
-                      backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                      color: 'var(--vscode-button-secondaryForeground)',
-                      border: 'none',
-                      borderRadius: '2px',
-                      cursor: 'pointer',
-                      fontSize: '13px',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor =
-                        'var(--vscode-button-secondaryHoverBackground)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor =
-                        'var(--vscode-button-secondaryBackground)';
-                    }}
-                  >
-                    {t('dialog.diffPreview.applyAnyway')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onRetry}
                     style={{
                       padding: '6px 16px',
                       backgroundColor: 'var(--vscode-button-background)',
@@ -456,37 +520,106 @@ export const DiffPreviewDialog: React.FC<DiffPreviewDialogProps> = ({
                       e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
                     }}
                   >
-                    {t('dialog.diffPreview.retryWithLatest')}
+                    {t('dialog.diffPreview.accept')}
                   </button>
-                </>
-              ) : (
-                <button
-                  type="button"
-                  onClick={onAccept}
-                  style={{
-                    padding: '6px 16px',
-                    backgroundColor: 'var(--vscode-button-background)',
-                    color: 'var(--vscode-button-foreground)',
-                    border: 'none',
-                    borderRadius: '2px',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
-                  }}
-                >
-                  {t('dialog.diffPreview.accept')}
-                </button>
-              )}
+                )}
+              </div>
             </div>
           </Dialog.Content>
         </Dialog.Overlay>
       </Dialog.Portal>
+      {/* Overview preview overlay (rendered above the diff dialog) */}
+      <Dialog.Root
+        open={showOverview}
+        onOpenChange={(open) => {
+          if (!open) setShowOverview(false);
+        }}
+      >
+        <Dialog.Portal>
+          <Dialog.Overlay
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10002,
+            }}
+          >
+            <Dialog.Content
+              onEscapeKeyDown={() => setShowOverview(false)}
+              style={{
+                position: 'relative',
+                width: '92vw',
+                height: '88vh',
+                maxWidth: '1400px',
+                display: 'flex',
+                flexDirection: 'column',
+                backgroundColor: 'var(--vscode-editor-background)',
+                border: '1px solid var(--vscode-panel-border)',
+                borderRadius: '4px',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
+                outline: 'none',
+                overflow: 'hidden',
+              }}
+            >
+              <Dialog.Title
+                style={{
+                  position: 'absolute',
+                  width: 1,
+                  height: 1,
+                  padding: 0,
+                  margin: -1,
+                  overflow: 'hidden',
+                  clip: 'rect(0,0,0,0)',
+                  whiteSpace: 'nowrap',
+                  border: 0,
+                }}
+              >
+                {t('dialog.diffPreview.previewOverview')}
+              </Dialog.Title>
+              <button
+                type="button"
+                onClick={() => setShowOverview(false)}
+                aria-label={t('dialog.diffPreview.closeOverview')}
+                title={t('dialog.diffPreview.closeOverview')}
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 4,
+                  backgroundColor: 'transparent',
+                  color: 'var(--vscode-foreground)',
+                  border: 'none',
+                  borderRadius: 0,
+                  cursor: 'pointer',
+                  opacity: 0.85,
+                  transition: 'opacity 0.15s ease',
+                  zIndex: 2,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '0.55';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '0.85';
+                }}
+              >
+                <X size={20} />
+              </button>
+              <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
+                <WorkflowOverview
+                  workflow={workflow ?? null}
+                  splitRatioStorageKey={PREVIEW_RATIO_STORAGE_KEY}
+                />
+              </div>
+            </Dialog.Content>
+          </Dialog.Overlay>
+        </Dialog.Portal>
+      </Dialog.Root>
     </Dialog.Root>
   );
 };

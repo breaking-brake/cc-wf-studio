@@ -417,6 +417,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Warning: The canvas was modified after the AI fetched the workflow. Review the changes carefully before accepting.',
   'dialog.diffPreview.applyAnyway': 'Apply Anyway',
   'dialog.diffPreview.retryWithLatest': 'Retry with Latest',
+  'dialog.diffPreview.previewOverview': 'Preview',
+  'dialog.diffPreview.closeOverview': 'Close Preview',
 
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': 'Reset Workflow',

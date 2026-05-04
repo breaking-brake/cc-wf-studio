@@ -402,21 +402,23 @@ sequenceDiagram
 - ESCキー、オーバーレイクリックなどの標準動作が統一される
 - z-index管理が容易
 
-### z-index 階層設計（3層構造）
+### z-index 階層設計（4層構造）
 
-```
-レイヤー        z-index   用途
+```text
+レイヤー         z-index   用途
 ─────────────────────────────────────────────────────
-Base           9999      単独ダイアログ、親ダイアログ
-Nested         10000     ネストされた子ダイアログ
-Confirm        10001     確認ダイアログ（最優先）
+Base            9999      単独ダイアログ、親ダイアログ
+Nested          10000     ネストされた子ダイアログ
+Confirm         10001     確認ダイアログ
+PreviewOverlay  10002     確認ダイアログから開くフルサイズプレビュー
 ```
 
 | z-index | 用途 | 例 |
 |---------|------|-----|
 | **9999** | 単独ダイアログ、親ダイアログ | McpNodeDialog, SkillBrowserDialog, SlackShareDialog |
 | **10000** | ネストされた子ダイアログ | SkillCreationDialog（SkillBrowserDialog内）, SlackManualTokenDialog |
-| **10001** | 確認・警告ダイアログ | ConfirmDialog（削除確認など） |
+| **10001** | 確認・警告ダイアログ | ConfirmDialog（削除確認など）, DiffPreviewDialog |
+| **10002** | 確認ダイアログから開くフルサイズプレビュー | DiffPreviewDialog の Overview プレビュー |
 
 ### 実装パターン
 
@@ -430,6 +432,7 @@ const Z_INDEX = {
   DIALOG_BASE: 9999,
   DIALOG_NESTED: 10000,
   DIALOG_CONFIRM: 10001,
+  DIALOG_PREVIEW_OVERLAY: 10002,
 } as const;
 
 export function MyDialog({ isOpen, onClose }: Props) {
@@ -477,6 +480,7 @@ export function MyDialog({ isOpen, onClose }: Props) {
   - 単独/親ダイアログ → 9999
   - ネストされる子ダイアログ → 10000
   - 確認ダイアログ → 10001
+  - 確認ダイアログから開くフルサイズプレビュー → 10002
 - [ ] ESCキーでの閉じる動作が正しく機能する
 - [ ] オーバーレイクリックでの閉じる動作が正しく機能する
 
@@ -487,6 +491,8 @@ export function MyDialog({ isOpen, onClose }: Props) {
 | ダイアログ | z-index | 役割 | 状態 |
 |-----------|---------|------|------|
 | ConfirmDialog | 10001 | 確認ダイアログ | ✅ |
+| DiffPreviewDialog | 10001 | 確認ダイアログ（AI編集） | ✅ |
+| DiffPreviewDialog の Overview プレビュー | 10002 | 確認ダイアログから開くフルサイズプレビュー | ✅ |
 | SkillCreationDialog | 10000 | 子ダイアログ | ✅ |
 | SlackManualTokenDialog | 10000 | 子ダイアログ | ✅ |
 | SkillBrowserDialog | 9999 | 親ダイアログ | ✅ |
