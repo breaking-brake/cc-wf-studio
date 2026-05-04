@@ -662,6 +662,18 @@ const App: React.FC = () => {
                   setMode('edit');
                 }
           }
+          onEditNode={
+            overviewIsHistoricalVersion
+              ? undefined
+              : (nodeId) => {
+                  // Switch back to Edit mode, select the node (auto-opens
+                  // the property overlay) and ask the canvas to pan to it.
+                  setMode('edit');
+                  const store = useWorkflowStore.getState();
+                  store.setSelectedNodeId(nodeId);
+                  store.requestFocusNode(nodeId);
+                }
+          }
         />
       </div>
     );

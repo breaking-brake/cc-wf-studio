@@ -172,8 +172,13 @@ function formatNode(
   byId: Map<string, WorkflowNode>
 ): string {
   const lines: string[] = [];
-  const heading = `## ${sanitizeNodeId(node.id)}(${titleOf(node)})`;
+  const sanitized = sanitizeNodeId(node.id);
+  const heading = `## ${sanitized}(${titleOf(node)})`;
   lines.push(heading);
+  lines.push('');
+  // Per-section action: jump to this node on the canvas in Edit mode.
+  // The `edit:{sanitized}` URL scheme is intercepted in InstructionsPanel.
+  lines.push(`[✏ Edit](edit:${sanitized})`);
   lines.push('');
 
   const type = node.type as string;

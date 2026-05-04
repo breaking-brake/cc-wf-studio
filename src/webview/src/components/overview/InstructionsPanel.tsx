@@ -24,6 +24,7 @@ import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 const SECTION_ANCHOR_PREFIX = '#overview-section-';
+const EDIT_LINK_PREFIX = 'edit:';
 
 export interface InstructionsPanelHandle {
   scrollToNode: (nodeId: string) => void;
@@ -37,6 +38,12 @@ interface InstructionsPanelProps {
    * or null when the user has scrolled above the first section.
    */
   onActiveSectionChange?: (sanitizedNodeId: string | null) => void;
+  /**
+   * Called when the user clicks "Edit on canvas" inside a node section.
+   * Receives the *original* (un-sanitized) node id. Parent should switch
+   * to edit mode, select the node, and pan the canvas to it.
+   */
+  onEditNode?: (nodeId: string) => void;
 }
 
 /** Extract sanitized node ID from heading text like "node-1(Sub-Agent: name)". */
@@ -45,8 +52,18 @@ function extractNodeIdFromHeading(text: string): string | null {
   return m ? m[1] : null;
 }
 
+/**
+ * react-markdown's default urlTransform strips non-http(s) schemes for
+ * security. We use the custom `edit:{sanitized}` scheme to wire the
+ * "Edit on canvas" links, so we need a pass-through to keep them intact.
+ * The custom `a` renderer is responsible for safely handling them.
+ */
+function passThroughUrl(url: string): string {
+  return url;
+}
+
 export const InstructionsPanel = forwardRef<InstructionsPanelHandle, InstructionsPanelProps>(
-  ({ workflow, onActiveSectionChange }, ref) => {
+  ({ workflow, onActiveSectionChange, onEditNode }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [highlightedSanitizedId, setHighlightedSanitizedId] = useState<string | null>(null);
     const highlightTimerRef = useRef<number | null>(null);
@@ -267,6 +284,43 @@ export const InstructionsPanel = forwardRef<InstructionsPanelHandle, Instruction
             </a>
           );
         }
+        // "Edit on canvas" links → resolve sanitized id back to the original
+        // workflow node id and bubble up to the parent.
+        if (href?.startsWith(EDIT_LINK_PREFIX)) {
+          const sanitized = href.slice(EDIT_LINK_PREFIX.length);
+          const target = workflow.nodes.find((n) => sanitizeNodeId(n.id) === sanitized);
+          return (
+            <a
+              href={href}
+              onClick={(e) => {
+                e.preventDefault();
+                if (target) onEditNode?.(target.id);
+              }}
+              title="Switch to Edit mode and pan the canvas to this node"
+              style={{
+                display: 'inline-block',
+                fontSize: '11px',
+                padding: '1px 8px',
+                marginBottom: '4px',
+                borderRadius: '3px',
+                color: 'var(--vscode-button-secondaryForeground)',
+                backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                textDecoration: 'none',
+                border: '1px solid var(--vscode-button-border, transparent)',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor =
+                  'var(--vscode-button-secondaryHoverBackground)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor =
+                  'var(--vscode-button-secondaryBackground)';
+              }}
+            >
+              {children}
+            </a>
+          );
+        }
         return (
           <a
             href={href}
@@ -357,7 +411,11 @@ export const InstructionsPanel = forwardRef<InstructionsPanelHandle, Instruction
       >
         {/* Workflow header (everything before the first --- separator) */}
         {header.trim() && (
-          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={markdownComponents}
+            urlTransform={passThroughUrl}
+          >
             {header}
           </ReactMarkdown>
         )}
@@ -373,7 +431,11 @@ export const InstructionsPanel = forwardRef<InstructionsPanelHandle, Instruction
               data-active-section={isActive ? 'true' : undefined}
               data-section-id={section.sanitizedId ?? undefined}
             >
-              <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={markdownComponents}
+                urlTransform={passThroughUrl}
+              >
                 {section.body}
               </ReactMarkdown>
             </div>

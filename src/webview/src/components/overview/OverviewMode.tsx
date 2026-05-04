@@ -22,6 +22,11 @@ interface OverviewModeProps {
   isHistoricalVersion: boolean;
   hasGitChanges: boolean;
   onSwitchToEdit?: () => void;
+  /**
+   * Switch to Edit mode and focus a specific node on the canvas. Receives
+   * the original (un-sanitized) node id.
+   */
+  onEditNode?: (nodeId: string) => void;
 }
 
 const RATIO_STORAGE_KEY = 'cc-wf-studio.overviewMermaidPanelRatio';
@@ -53,6 +58,7 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
   isHistoricalVersion,
   hasGitChanges,
   onSwitchToEdit,
+  onEditNode,
 }) => {
   const { t } = useTranslation();
   const [ratio, setRatio] = useState<number>(() => loadStoredRatio());
@@ -193,6 +199,7 @@ export const OverviewMode: React.FC<OverviewModeProps> = ({
               ref={instructionsRef}
               workflow={workflow}
               onActiveSectionChange={setActiveSanitizedNodeId}
+              onEditNode={onEditNode}
             />
           ) : (
             <OverviewEmptyState />
