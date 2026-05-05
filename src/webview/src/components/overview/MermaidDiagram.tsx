@@ -100,11 +100,12 @@ function stripFences(source: string): string {
  * matching inline lucide SVG (see `lucide-svg-inline.ts`). The marker text
  * is emitted by `generateMermaidFlowchart({ inlineIcons: true })` and
  * survives mermaid's strict-mode label escaping because it contains no HTML
- * chars. Unknown icon names drop to an empty string so the diagram still
- * renders without a stray placeholder.
+ * chars. Unknown icon names leave the original marker in place so mapping
+ * drift between the emitter and `LUCIDE_SVG` stays visible in the rendered
+ * diagram instead of silently disappearing.
  */
 function replaceInlineIconMarkers(svg: string): string {
-  return svg.replace(INLINE_ICON_MARKER_PATTERN, (_match, name) => LUCIDE_SVG[name] ?? '');
+  return svg.replace(INLINE_ICON_MARKER_PATTERN, (match, name) => LUCIDE_SVG[name] ?? match);
 }
 
 /**

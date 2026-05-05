@@ -229,7 +229,9 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
       const askNode = node as AskUserQuestionNode;
       if (concise) {
         const title = titleOf(askNode, 'Question');
-        return `${indent}${nodeId}{${conciseTypeAndName('askUserQuestion', 'AskUserQuestion', title)}}`;
+        // Hyphens keep `ASK-USER-QUESTION` readable instead of running letters
+        // together (matches the Markdown formatter's `**Type**: ASK-USER-QUESTION`).
+        return `${indent}${nodeId}{${conciseTypeAndName('askUserQuestion', 'Ask-User-Question', title)}}`;
       }
       const questionText = askNode.data.questionText || 'Question';
       return `${indent}${nodeId}{${escapeLabel('AskUserQuestion')}:<br/>${escapeLabel(questionText)}}`;
@@ -297,7 +299,10 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
     }
     if (nodeType === 'subAgentFlow') {
       const label = node.name || 'Sub-Agent Flow';
-      return `${indent}${nodeId}[["${escapeLabel(withIcon('subAgentFlow', label))}"]]`;
+      if (concise) {
+        return `${indent}${nodeId}[["${conciseTypeAndName('subAgentFlow', 'Sub-Agent Flow', label)}"]]`;
+      }
+      return `${indent}${nodeId}[["${escapeLabel(`Sub-Agent Flow: ${label}`)}"]]`;
     }
     if (nodeType === 'codex') {
       const codexNode = node as CodexNode;

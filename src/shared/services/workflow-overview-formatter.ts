@@ -330,7 +330,7 @@ function formatAskUserQuestion(node: AskUserQuestionNode): string {
     : d.multiSelect
       ? 'multi-select'
       : 'single-select';
-  out.push(`**Type**: ASKUSERQUESTION (${mode})`);
+  out.push(`**Type**: ASK-USER-QUESTION (${mode})`);
   if (d.questionText?.trim()) {
     out.push('');
     out.push(`**Question**: ${escapeInline(d.questionText.trim())}`);
