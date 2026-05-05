@@ -11,9 +11,13 @@
 
 import {
   generateMermaidFlowchart,
+  INLINE_ICON_MARKER_PATTERN,
   sanitizeNodeId,
 } from '@shared/services/workflow-prompt-generator';
 import type { Workflow } from '@shared/types/messages';
+// Lucide icon font: provides `.icon-<name>` classes used by post-render
+// marker replacement (see `replaceInlineIconMarkers`).
+import 'lucide-static/font/lucide.css';
 import {
   Locate,
   LocateOff,
@@ -94,6 +98,19 @@ function stripFences(source: string): string {
 }
 
 /**
+ * Replace `__lu:icon-name__` markers in the rendered SVG string with
+ * `<i class="icon-name" aria-hidden="true"></i>` tags. The marker text is
+ * emitted by `generateMermaidFlowchart({ inlineIcons: true })` and survives
+ * mermaid's strict-mode label escaping because it contains no HTML chars.
+ */
+function replaceInlineIconMarkers(svg: string): string {
+  return svg.replace(
+    INLINE_ICON_MARKER_PATTERN,
+    (_match, name) => `<i class="overview-mermaid-icon icon-${name}" aria-hidden="true"></i>`
+  );
+}
+
+/**
  * Build a sanitized→original ID lookup so clicks on the SVG (which uses
  * sanitized IDs) can route back to the workflow node IDs the parent expects.
  */
@@ -163,6 +180,9 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
       // so the diagram only needs the node type + title.
       labelMode: 'concise',
       direction,
+      // Prefix each label with `__lu:icon-name__` markers; we swap them for
+      // lucide icon `<i>` tags after mermaid renders the SVG.
+      inlineIcons: true,
     });
     return stripFences(raw);
   }, [workflow.nodes, workflow.connections, direction]);
@@ -309,7 +329,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
         const { svg } = await mermaid.render(renderId, source);
         if (cancelled) return;
 
-        stage.innerHTML = svg;
+        stage.innerHTML = replaceInlineIconMarkers(svg);
         setRenderError(null);
 
         const svgEl = stage.querySelector('svg');

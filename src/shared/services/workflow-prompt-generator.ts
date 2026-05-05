@@ -43,6 +43,55 @@ export interface MermaidSource {
    * - 'LR': left-to-right.
    */
   direction?: 'TD' | 'LR';
+  /**
+   * When true, prefix each node label with an inline icon marker of the form
+   * `__lu:<icon-name>__` (e.g. `__lu:play__`). The marker is plain text in
+   * the Mermaid source; the renderer is expected to swap markers for actual
+   * icon `<i class="icon-...">` tags after `mermaid.render()` returns the
+   * SVG. This keeps `securityLevel: 'strict'` and our `escapeLabel` intact.
+   *
+   * Currently only honored alongside `labelMode: 'concise'` (Overview view).
+   */
+  inlineIcons?: boolean;
+}
+
+/**
+ * Marker prefix written into Mermaid labels and replaced post-render with a
+ * lucide icon `<i>` tag. Kept here (next to the marker emitter) so the
+ * renderer can import the same constant for its replace pattern.
+ */
+export const INLINE_ICON_MARKER_PREFIX = '__lu:';
+export const INLINE_ICON_MARKER_SUFFIX = '__';
+/** RegExp source matching `__lu:icon-name__`. icon name is kebab-case. */
+export const INLINE_ICON_MARKER_PATTERN = /__lu:([a-z][a-z0-9-]*)__/g;
+
+/**
+ * Mapping from node type to a lucide icon name (kebab-case, matches the
+ * `icon-<name>` CSS classes shipped by the `lucide-static` font package).
+ *
+ * Icons mirror the lucide-react components used by the canvas/palette:
+ * see `src/webview/src/constants/node-type-icons.ts` for the source of truth.
+ */
+const NODE_INLINE_ICON: Record<string, string> = {
+  start: 'play',
+  end: 'square',
+  prompt: 'message-square',
+  subAgent: 'bot',
+  subAgentFlow: 'bot',
+  skill: 'zap',
+  mcp: 'plug',
+  codex: 'terminal',
+  ifElse: 'git-branch',
+  branch: 'git-branch',
+  switch: 'git-fork',
+  askUserQuestion: 'shield-question',
+};
+
+/** Build the inline marker string for a given node type, or empty if none. */
+function inlineIconMarker(nodeType: string): string {
+  const name = NODE_INLINE_ICON[nodeType];
+  if (!name) return '';
+  return `${INLINE_ICON_MARKER_PREFIX}${name}${INLINE_ICON_MARKER_SUFFIX} `;
 }
 
 /**
@@ -98,8 +147,35 @@ export function escapeLabel(label: string): string {
  * Generate Mermaid flowchart from workflow or subworkflow
  */
 export function generateMermaidFlowchart(source: MermaidSource): string {
-  const { nodes, connections, labelMode = 'detailed', direction = 'TD' } = source;
+  const {
+    nodes,
+    connections,
+    labelMode = 'detailed',
+    direction = 'TD',
+    inlineIcons = false,
+  } = source;
   const concise = labelMode === 'concise';
+  const useInlineIcons = inlineIcons && concise;
+
+  /** Prefix the label with `__lu:foo__ ` if inline icons are active. */
+  const withIcon = (nodeType: string, label: string): string =>
+    useInlineIcons ? `${inlineIconMarker(nodeType)}${label}` : label;
+  /**
+   * Uppercase the node-type prefix (e.g. `Sub-Agent`, `Prompt`, `If/Else`)
+   * in concise mode so the Overview Mermaid reads as a flat catalogue
+   * (`PROMPT`, `SUB-AGENT`). The user-supplied title/name is left untouched.
+   * Detailed mode (AI export) is unaffected.
+   */
+  const upperType = (typeLabel: string): string => (concise ? typeLabel.toUpperCase() : typeLabel);
+  /**
+   * Build the inner label for a `type + name` rectangular node in concise
+   * mode (Overview): `__lu:icon__ TYPE<br/>name`. Type and name end up on
+   * separate visual lines; the icon sits next to the type. The literal
+   * `<br/>` is inserted *after* escapeLabel — escapeLabel would otherwise
+   * mangle it into `&#60;br/&#62;`.
+   */
+  const conciseTypeAndName = (nodeType: string, typeLabel: string, name: string): string =>
+    `${escapeLabel(withIcon(nodeType, upperType(typeLabel)))}<br/>${escapeLabel(name)}`;
   /** Resolve the user-visible title for a node (data.label > node.name > fallback). */
   const titleOf = (node: WorkflowNode, fallback: string): string => {
     const data = (node as { data?: { label?: string } }).data;
@@ -136,17 +212,24 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
     const nodeType = node.type as string;
 
     if (nodeType === 'group') return null; // handled as subgraph
-    if (nodeType === 'start') return `${indent}${nodeId}([Start])`;
-    if (nodeType === 'end') return `${indent}${nodeId}([End])`;
+    if (nodeType === 'start') {
+      return `${indent}${nodeId}([${escapeLabel(withIcon('start', upperType('Start')))}])`;
+    }
+    if (nodeType === 'end') {
+      return `${indent}${nodeId}([${escapeLabel(withIcon('end', upperType('End')))}])`;
+    }
     if (nodeType === 'subAgent') {
       const agentName = node.name || 'Sub-Agent';
+      if (concise) {
+        return `${indent}${nodeId}[${conciseTypeAndName('subAgent', 'Sub-Agent', agentName)}]`;
+      }
       return `${indent}${nodeId}[${escapeLabel(`Sub-Agent: ${agentName}`)}]`;
     }
     if (nodeType === 'askUserQuestion') {
       const askNode = node as AskUserQuestionNode;
       if (concise) {
         const title = titleOf(askNode, 'Question');
-        return `${indent}${nodeId}{${escapeLabel('AskUserQuestion')}:<br/>${escapeLabel(title)}}`;
+        return `${indent}${nodeId}{${conciseTypeAndName('askUserQuestion', 'AskUserQuestion', title)}}`;
       }
       const questionText = askNode.data.questionText || 'Question';
       return `${indent}${nodeId}{${escapeLabel('AskUserQuestion')}:<br/>${escapeLabel(questionText)}}`;
@@ -156,21 +239,21 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
       const branchType = branchNode.data.branchType === 'conditional' ? 'Branch' : 'Switch';
       if (concise) {
         const title = titleOf(branchNode, branchType);
-        return `${indent}${nodeId}{${escapeLabel(branchType)}:<br/>${escapeLabel(title)}}`;
+        return `${indent}${nodeId}{${conciseTypeAndName('branch', branchType, title)}}`;
       }
       return `${indent}${nodeId}{${escapeLabel(branchType)}:<br/>Conditional Branch}`;
     }
     if (nodeType === 'ifElse') {
       if (concise) {
         const title = titleOf(node, 'If/Else');
-        return `${indent}${nodeId}{If/Else:<br/>${escapeLabel(title)}}`;
+        return `${indent}${nodeId}{${conciseTypeAndName('ifElse', 'If/Else', title)}}`;
       }
       return `${indent}${nodeId}{If/Else:<br/>Conditional Branch}`;
     }
     if (nodeType === 'switch') {
       if (concise) {
         const title = titleOf(node, 'Switch');
-        return `${indent}${nodeId}{Switch:<br/>${escapeLabel(title)}}`;
+        return `${indent}${nodeId}{${conciseTypeAndName('switch', 'Switch', title)}}`;
       }
       return `${indent}${nodeId}{Switch:<br/>Conditional Branch}`;
     }
@@ -178,7 +261,7 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
       const promptNode = node as PromptNode;
       if (concise) {
         const title = titleOf(promptNode, 'Prompt');
-        return `${indent}${nodeId}[${escapeLabel(`Prompt: ${title}`)}]`;
+        return `${indent}${nodeId}[${conciseTypeAndName('prompt', 'Prompt', title)}]`;
       }
       const promptText = promptNode.data.prompt?.split('\n')[0] || 'Prompt';
       const label = promptText.length > 30 ? `${promptText.substring(0, 27)}...` : promptText;
@@ -187,6 +270,9 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
     if (nodeType === 'skill') {
       const skillNode = node as SkillNode;
       const skillName = skillNode.data.name || 'Skill';
+      if (concise) {
+        return `${indent}${nodeId}[[${conciseTypeAndName('skill', 'Skill', skillName)}]]`;
+      }
       return `${indent}${nodeId}[[${escapeLabel(`Skill: ${skillName}`)}]]`;
     }
     if (nodeType === 'mcp') {
@@ -194,7 +280,7 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
       const mcpData = mcpNode.data;
       if (concise) {
         const title = titleOf(mcpNode, mcpData?.toolName || mcpData?.serverId || 'MCP');
-        return `${indent}${nodeId}[[${escapeLabel(`MCP: ${title}`)}]]`;
+        return `${indent}${nodeId}[[${conciseTypeAndName('mcp', 'MCP', title)}]]`;
       }
       let mcpLabel = 'MCP Tool';
       if (mcpData) {
@@ -211,11 +297,14 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
     }
     if (nodeType === 'subAgentFlow') {
       const label = node.name || 'Sub-Agent Flow';
-      return `${indent}${nodeId}[["${escapeLabel(label)}"]]`;
+      return `${indent}${nodeId}[["${escapeLabel(withIcon('subAgentFlow', label))}"]]`;
     }
     if (nodeType === 'codex') {
       const codexNode = node as CodexNode;
       const codexName = codexNode.data.label || 'Codex Agent';
+      if (concise) {
+        return `${indent}${nodeId}[[${conciseTypeAndName('codex', 'Codex', codexName)}]]`;
+      }
       return `${indent}${nodeId}[[${escapeLabel(`Codex: ${codexName}`)}]]`;
     }
     return null;

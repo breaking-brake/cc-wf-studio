@@ -23,6 +23,7 @@ import {
 } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { NODE_TYPE_ICONS } from '../../constants/node-type-icons';
 import { openExternalUrl } from '../../services/vscode-bridge';
 
 const SECTION_ANCHOR_PREFIX = '#overview-section-';
@@ -71,6 +72,16 @@ export const InstructionsPanel = forwardRef<InstructionsPanelHandle, Instruction
     const highlightTimerRef = useRef<number | null>(null);
 
     const markdown = useMemo(() => generateOverviewMarkdown(workflow), [workflow]);
+
+    // Map sanitized id → node type so the h2 heading renderer can pick the
+    // matching lucide icon (mirrors the canvas/palette icons via NODE_TYPE_ICONS).
+    const nodeTypeBySanitized = useMemo(() => {
+      const map = new Map<string, string>();
+      for (const node of workflow.nodes) {
+        map.set(sanitizeNodeId(node.id), node.type as string);
+      }
+      return map;
+    }, [workflow.nodes]);
 
     /**
      * Split the document into the workflow header (everything before the
@@ -150,6 +161,14 @@ export const InstructionsPanel = forwardRef<InstructionsPanelHandle, Instruction
         const sanitized = extractNodeIdFromHeading(text);
         const id = sanitized ? `overview-section-${sanitized}` : undefined;
         const isHighlighted = sanitized === highlightedSanitizedId;
+        // Only the per-node section heading (h2) gets a lucide icon prefix —
+        // h3/h4 are nested in the prompt body and stay plain. The icon is
+        // resolved from the same NODE_TYPE_ICONS map the canvas uses, so the
+        // Overview Markdown matches the canvas/palette one-to-one.
+        const NodeIcon =
+          level === 2 && sanitized
+            ? NODE_TYPE_ICONS[nodeTypeBySanitized.get(sanitized) ?? '']
+            : undefined;
         return (
           <Tag
             id={id}
@@ -161,6 +180,17 @@ export const InstructionsPanel = forwardRef<InstructionsPanelHandle, Instruction
               ...defaultStyle,
             }}
           >
+            {NodeIcon && (
+              <NodeIcon
+                size={18}
+                aria-hidden="true"
+                style={{
+                  display: 'inline',
+                  verticalAlign: '-0.18em',
+                  marginRight: '0.4em',
+                }}
+              />
+            )}
             {children}
           </Tag>
         );

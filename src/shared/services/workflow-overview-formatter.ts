@@ -221,7 +221,7 @@ function formatNode(
     // group nodes are filtered out before reaching this switch (see the
     // ordered loop above), so no case is needed here.
     default:
-      lines.push(`**Type**: ${type}`);
+      lines.push(`**Type**: ${type.toUpperCase()}`);
       break;
   }
 
@@ -250,11 +250,11 @@ function titleOf(node: WorkflowNode): string {
 // ----- start / end --------------------------------------------------------
 
 function formatStart(node: WorkflowNode): string {
-  return `**Type**: Start${labelHint(node)}`;
+  return `**Type**: START${labelHint(node)}`;
 }
 
 function formatEnd(node: WorkflowNode): string {
-  return `**Type**: End${labelHint(node)}`;
+  return `**Type**: END${labelHint(node)}`;
 }
 
 function labelHint(node: WorkflowNode): string {
@@ -271,7 +271,7 @@ function labelHint(node: WorkflowNode): string {
 function formatSubAgent(node: SubAgentNode): string {
   const out: string[] = [];
   const d = node.data;
-  const typeBadge = d.builtInType ? `Sub-Agent · built-in: \`${d.builtInType}\`` : 'Sub-Agent';
+  const typeBadge = d.builtInType ? `SUB-AGENT · built-in: \`${d.builtInType}\`` : 'SUB-AGENT';
   out.push(`**Type**: ${typeBadge}`);
   if (d.description?.trim()) {
     out.push('');
@@ -304,7 +304,7 @@ function formatSubAgent(node: SubAgentNode): string {
 
 function formatPrompt(node: PromptNode): string {
   const out: string[] = [];
-  out.push('**Type**: Prompt (orchestrator)');
+  out.push('**Type**: PROMPT');
   const body = node.data.prompt?.trim();
   if (body) {
     out.push('');
@@ -330,7 +330,7 @@ function formatAskUserQuestion(node: AskUserQuestionNode): string {
     : d.multiSelect
       ? 'multi-select'
       : 'single-select';
-  out.push(`**Type**: AskUserQuestion (${mode})`);
+  out.push(`**Type**: ASKUSERQUESTION (${mode})`);
   if (d.questionText?.trim()) {
     out.push('');
     out.push(`**Question**: ${escapeInline(d.questionText.trim())}`);
@@ -350,7 +350,7 @@ function formatAskUserQuestion(node: AskUserQuestionNode): string {
 // ----- ifElse / switch / branch -------------------------------------------
 
 function formatIfElse(node: IfElseNode): string {
-  const out: string[] = ['**Type**: If/Else'];
+  const out: string[] = ['**Type**: IF/ELSE'];
   if (node.data.evaluationTarget?.trim()) {
     out.push('');
     out.push(`**Evaluation target**: ${escapeInline(node.data.evaluationTarget.trim())}`);
@@ -359,7 +359,7 @@ function formatIfElse(node: IfElseNode): string {
 }
 
 function formatSwitch(node: SwitchNode): string {
-  const out: string[] = ['**Type**: Switch'];
+  const out: string[] = ['**Type**: SWITCH'];
   if (node.data.evaluationTarget?.trim()) {
     out.push('');
     out.push(`**Evaluation target**: ${escapeInline(node.data.evaluationTarget.trim())}`);
@@ -368,7 +368,7 @@ function formatSwitch(node: SwitchNode): string {
 }
 
 function formatBranch(node: BranchNode): string {
-  const branchType = node.data.branchType === 'switch' ? 'Switch' : 'Branch';
+  const branchType = node.data.branchType === 'switch' ? 'SWITCH' : 'BRANCH';
   return `**Type**: ${branchType} (legacy)`;
 }
 
@@ -378,7 +378,7 @@ function formatSkill(node: SkillNode): string {
   const out: string[] = [];
   const d = node.data;
   const mode = d.executionMode === 'load' ? 'load' : 'execute';
-  out.push(`**Type**: Skill (${mode})`);
+  out.push(`**Type**: SKILL (${mode})`);
   if (d.description?.trim()) {
     out.push('');
     out.push(quote(d.description.trim()));
@@ -450,7 +450,7 @@ function formatParamValue(value: unknown): string {
 function formatCodex(node: CodexNode): string {
   const out: string[] = [];
   const d = node.data;
-  out.push(`**Type**: Codex Agent (${d.promptMode})`);
+  out.push(`**Type**: CODEX AGENT (${d.promptMode})`);
   if (d.prompt?.trim()) {
     out.push('');
     out.push(fence(d.prompt.trim()));
@@ -465,7 +465,7 @@ function formatCodex(node: CodexNode): string {
 // ----- subAgentFlow -------------------------------------------------------
 
 function formatSubAgentFlow(node: SubAgentFlowNode, workflow: Workflow): string {
-  const out: string[] = ['**Type**: Sub-Agent Flow'];
+  const out: string[] = ['**Type**: SUB-AGENT FLOW'];
   const d = node.data;
   if (d.description?.trim()) {
     out.push('');

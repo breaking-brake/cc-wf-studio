@@ -12,6 +12,12 @@ import { defineConfig } from 'vite';
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
+  // Webview is loaded via vscode `webview.asWebviewUri()`; absolute `/assets/...`
+  // URLs in bundled CSS resolve against the webview origin (NOT the extension's
+  // resource root), so font/image references break under the CSP. Relative paths
+  // (`./asset.woff2`) resolve against the loaded stylesheet URL, which IS inside
+  // the extension's translated webview path — so fonts/images work correctly.
+  base: './',
   build: {
     outDir: 'dist',
     emptyOutDir: true,
