@@ -100,6 +100,13 @@ export function escapeLabel(label: string): string {
 export function generateMermaidFlowchart(source: MermaidSource): string {
   const { nodes, connections, labelMode = 'detailed', direction = 'TD' } = source;
   const concise = labelMode === 'concise';
+  /**
+   * Uppercase the node-type prefix (`Sub-Agent`, `Prompt`, `If/Else`, etc.)
+   * in concise mode so the Overview Mermaid reads as a flat catalogue
+   * (`PROMPT: title`, `SUB-AGENT: name`). User-supplied titles/names are
+   * untouched. Detailed mode (AI export) is unaffected.
+   */
+  const upperType = (typeLabel: string): string => (concise ? typeLabel.toUpperCase() : typeLabel);
   /** Resolve the user-visible title for a node (data.label > node.name > fallback). */
   const titleOf = (node: WorkflowNode, fallback: string): string => {
     const data = (node as { data?: { label?: string } }).data;
@@ -136,41 +143,44 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
     const nodeType = node.type as string;
 
     if (nodeType === 'group') return null; // handled as subgraph
-    if (nodeType === 'start') return `${indent}${nodeId}([Start])`;
-    if (nodeType === 'end') return `${indent}${nodeId}([End])`;
+    if (nodeType === 'start') return `${indent}${nodeId}([${upperType('Start')}])`;
+    if (nodeType === 'end') return `${indent}${nodeId}([${upperType('End')}])`;
     if (nodeType === 'subAgent') {
       const agentName = node.name || 'Sub-Agent';
-      return `${indent}${nodeId}[${escapeLabel(`Sub-Agent: ${agentName}`)}]`;
+      return `${indent}${nodeId}[${escapeLabel(`${upperType('Sub-Agent')}: ${agentName}`)}]`;
     }
     if (nodeType === 'askUserQuestion') {
       const askNode = node as AskUserQuestionNode;
+      // Hyphens keep `ASK-USER-QUESTION` legible vs. running letters together;
+      // detailed mode keeps the original `AskUserQuestion` token unchanged.
+      const head = concise ? upperType('Ask-User-Question') : 'AskUserQuestion';
       if (concise) {
         const title = titleOf(askNode, 'Question');
-        return `${indent}${nodeId}{${escapeLabel('AskUserQuestion')}:<br/>${escapeLabel(title)}}`;
+        return `${indent}${nodeId}{${escapeLabel(head)}:<br/>${escapeLabel(title)}}`;
       }
       const questionText = askNode.data.questionText || 'Question';
-      return `${indent}${nodeId}{${escapeLabel('AskUserQuestion')}:<br/>${escapeLabel(questionText)}}`;
+      return `${indent}${nodeId}{${escapeLabel(head)}:<br/>${escapeLabel(questionText)}}`;
     }
     if (nodeType === 'branch') {
       const branchNode = node as BranchNode;
       const branchType = branchNode.data.branchType === 'conditional' ? 'Branch' : 'Switch';
       if (concise) {
         const title = titleOf(branchNode, branchType);
-        return `${indent}${nodeId}{${escapeLabel(branchType)}:<br/>${escapeLabel(title)}}`;
+        return `${indent}${nodeId}{${escapeLabel(upperType(branchType))}:<br/>${escapeLabel(title)}}`;
       }
       return `${indent}${nodeId}{${escapeLabel(branchType)}:<br/>Conditional Branch}`;
     }
     if (nodeType === 'ifElse') {
       if (concise) {
         const title = titleOf(node, 'If/Else');
-        return `${indent}${nodeId}{If/Else:<br/>${escapeLabel(title)}}`;
+        return `${indent}${nodeId}{${upperType('If/Else')}:<br/>${escapeLabel(title)}}`;
       }
       return `${indent}${nodeId}{If/Else:<br/>Conditional Branch}`;
     }
     if (nodeType === 'switch') {
       if (concise) {
         const title = titleOf(node, 'Switch');
-        return `${indent}${nodeId}{Switch:<br/>${escapeLabel(title)}}`;
+        return `${indent}${nodeId}{${upperType('Switch')}:<br/>${escapeLabel(title)}}`;
       }
       return `${indent}${nodeId}{Switch:<br/>Conditional Branch}`;
     }
@@ -178,7 +188,7 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
       const promptNode = node as PromptNode;
       if (concise) {
         const title = titleOf(promptNode, 'Prompt');
-        return `${indent}${nodeId}[${escapeLabel(`Prompt: ${title}`)}]`;
+        return `${indent}${nodeId}[${escapeLabel(`${upperType('Prompt')}: ${title}`)}]`;
       }
       const promptText = promptNode.data.prompt?.split('\n')[0] || 'Prompt';
       const label = promptText.length > 30 ? `${promptText.substring(0, 27)}...` : promptText;
@@ -187,14 +197,14 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
     if (nodeType === 'skill') {
       const skillNode = node as SkillNode;
       const skillName = skillNode.data.name || 'Skill';
-      return `${indent}${nodeId}[[${escapeLabel(`Skill: ${skillName}`)}]]`;
+      return `${indent}${nodeId}[[${escapeLabel(`${upperType('Skill')}: ${skillName}`)}]]`;
     }
     if (nodeType === 'mcp') {
       const mcpNode = node as McpNode;
       const mcpData = mcpNode.data;
       if (concise) {
         const title = titleOf(mcpNode, mcpData?.toolName || mcpData?.serverId || 'MCP');
-        return `${indent}${nodeId}[[${escapeLabel(`MCP: ${title}`)}]]`;
+        return `${indent}${nodeId}[[${escapeLabel(`${upperType('MCP')}: ${title}`)}]]`;
       }
       let mcpLabel = 'MCP Tool';
       if (mcpData) {
@@ -216,7 +226,7 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
     if (nodeType === 'codex') {
       const codexNode = node as CodexNode;
       const codexName = codexNode.data.label || 'Codex Agent';
-      return `${indent}${nodeId}[[${escapeLabel(`Codex: ${codexName}`)}]]`;
+      return `${indent}${nodeId}[[${escapeLabel(`${upperType('Codex')}: ${codexName}`)}]]`;
     }
     return null;
   };
