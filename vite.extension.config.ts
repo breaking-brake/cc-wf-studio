@@ -7,7 +7,7 @@ import { defineConfig } from 'vite';
  * This bundles src/extension/** TypeScript files into a single output file
  * with all dependencies (including @modelcontextprotocol/sdk) included.
  */
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   build: {
     // Library mode for Node.js environment (Extension Host)
     lib: {
@@ -19,8 +19,8 @@ export default defineConfig({
     // Output directory
     outDir: 'dist',
 
-    // Generate source maps for debugging
-    sourcemap: true,
+    // Generate source maps only in development mode
+    sourcemap: mode === 'development',
 
     // Minification (disable for easier debugging, enable for production)
     minify: false,
@@ -99,4 +99,4 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
     },
   },
-});
+}));

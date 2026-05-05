@@ -10,7 +10,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
   build: {
     outDir: 'dist',
@@ -25,8 +25,8 @@ export default defineConfig({
         assetFileNames: 'assets/[name].[ext]',
       },
     },
-    // Generate sourcemaps for debugging
-    sourcemap: true,
+    // Generate sourcemaps only in development mode
+    sourcemap: mode === 'development',
     // Target modern browsers (VSCode uses Electron)
     target: 'esnext',
     minify: 'esbuild',
@@ -50,4 +50,4 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
-});
+}));

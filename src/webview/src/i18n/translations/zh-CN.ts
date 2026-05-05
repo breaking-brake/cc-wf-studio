@@ -981,4 +981,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'sample.githubIssuePlanning.name': 'GitHub Issue 规划',
   'sample.githubIssuePlanning.description':
     'GitHub Issue 规划工作流：获取 Issue、分析现有代码、验证修复、回顾总结。',
+  'sample.dailyDevFlowWithWorktree.name': '基于 Git Worktree 的日常开发流程',
+  'sample.dailyDevFlowWithWorktree.description':
+    '使用 git worktree 的日常开发流程：任务访谈、分支提议与 worktree 创建、代码调查、计划制定、确认、实现、质量检查、提交与 PR 草稿。',
 };

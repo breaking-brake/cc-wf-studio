@@ -1021,4 +1021,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'sample.githubIssuePlanning.name': 'GitHub Issue プランニング',
   'sample.githubIssuePlanning.description':
     'GitHub Issueに対するプランニングワークフロー：Issue取得、現状コード分析、修正の検証確認、振り返り。',
+  'sample.dailyDevFlowWithWorktree.name': 'Git Worktreeを使った日常開発フロー',
+  'sample.dailyDevFlowWithWorktree.description':
+    'git worktreeを使った日常開発フロー：タスクヒアリング、ブランチ提案＆worktree作成、調査、計画、承認、実装、品質チェック、コミット＆PR下書き。',
 };

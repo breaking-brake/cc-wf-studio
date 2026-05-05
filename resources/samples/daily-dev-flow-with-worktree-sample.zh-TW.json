@@ -1,0 +1,231 @@
+{
+  "meta": {
+    "id": "daily-dev-flow-with-worktree-sample",
+    "nameKey": "sample.dailyDevFlowWithWorktree.name",
+    "descriptionKey": "sample.dailyDevFlowWithWorktree.description",
+    "difficulty": "intermediate",
+    "tags": ["development", "git", "worktree"],
+    "nodeCount": 14
+  },
+  "workflow": {
+    "id": "workflow-daily-dev-flow-with-worktree",
+    "name": "daily-dev-flow-with-worktree",
+    "version": "1.0.0",
+    "nodes": [
+      {
+        "id": "group-1",
+        "type": "group",
+        "name": "group-1",
+        "position": { "x": 300, "y": 150 },
+        "data": { "label": "1. 任務梳理" },
+        "style": { "width": 400, "height": 320 }
+      },
+      {
+        "id": "group-2",
+        "type": "group",
+        "name": "group-2",
+        "position": { "x": 800, "y": 150 },
+        "data": { "label": "2. 調研與規劃" },
+        "style": { "width": 400, "height": 480 }
+      },
+      {
+        "id": "group-3",
+        "type": "group",
+        "name": "group-3",
+        "position": { "x": 1300, "y": 150 },
+        "data": { "label": "3. 實作" },
+        "style": { "width": 400, "height": 200 }
+      },
+      {
+        "id": "group-4",
+        "type": "group",
+        "name": "group-4",
+        "position": { "x": 1800, "y": 150 },
+        "data": { "label": "4. 驗證與提交" },
+        "style": { "width": 400, "height": 320 }
+      },
+      {
+        "id": "start-1",
+        "type": "start",
+        "name": "start-1",
+        "position": { "x": 100, "y": 300 },
+        "data": { "label": "Start" }
+      },
+      {
+        "id": "prompt-hear-task",
+        "type": "prompt",
+        "name": "prompt-hear-task",
+        "position": { "x": 30, "y": 60 },
+        "data": {
+          "label": "了解開發任務",
+          "prompt": "向使用者詳細了解本次開發任務的內容。\n\n需要確認的面向：\n- 目標（新增功能 / 修正缺陷 / 改善 / 重構 / 文件等）\n- 影響範圍（受影響的檔案、模組、功能）\n- 參考資訊（Issue 編號、Slack 連結、相關 PR、重現步驟、紀錄等）\n- 完成條件（驗收標準、確認方式）\n- 緊急度與優先順序\n\n推進方式：\n1. 把缺失的資訊分批詢問，每次 1~3 個（避免連環追問）\n2. 把已收集的內容簡潔地彙整展示給使用者，對齊認知\n3. 在確認「按此內容繼續建立分支並展開調研，可以嗎？」後再進入下一步"
+        },
+        "parentId": "group-1"
+      },
+      {
+        "id": "prompt-branch-and-worktree",
+        "type": "prompt",
+        "name": "prompt-branch-and-worktree",
+        "position": { "x": 30, "y": 200 },
+        "data": {
+          "label": "提議分支並建立 worktree",
+          "prompt": "依據訪談結果提議 Git 分支名稱，取得使用者核准後建立 worktree。\n\n分支命名慣例：\n- conventional 前綴 + kebab-case\n- 前綴：feat / fix / improvement / chore / docs / refactor\n- 例：feat/mcp-stdio-warning, fix/save-button-disabled, improvement/toolbar-layout\n- 控制在 50 字元左右\n\n步驟：\n1. 依據訪談內容決定前綴與摘要 slug，提供 1~2 個分支名稱候選\n2. 接受使用者的核准 / 修改意見（直到核准為止）\n3. 一旦核准，執行：\n     mkdir -p ../.worktree && git worktree add ../.worktree/<slug> -b <branch-name>\n   （在父層目錄放置專屬於本儲存庫的 `.worktree/`。若與既有 worktree 衝突，請附加序號）\n4. 將建立好的 worktree 路徑告知使用者，並說明後續工作將在該路徑中進行\n5. 如有需要，向使用者確認是否 cd 切換至 worktree"
+        },
+        "parentId": "group-1"
+      },
+      {
+        "id": "subagent-explore-codebase",
+        "type": "subAgent",
+        "name": "subagent-explore-codebase",
+        "position": { "x": 30, "y": 60 },
+        "data": {
+          "description": "針對請求的任務調研程式碼庫",
+          "agentDefinition": "Codebase exploration agent. Read-only investigation focused on identifying files, symbols, and patterns relevant to the requested development task. Returns a structured summary that downstream planning can act on without re-reading the same files.",
+          "prompt": "針對訪談中達成共識的開發任務，調研實作所需的程式碼庫。\n\n調研角度：\n- 辨識相關的檔案 / 模組 / 目錄\n- 既有的相似功能、可參考的模式\n- 影響面（呼叫端、相依性、型別定義、測試）\n- 相關的 schema、設定、文件\n- 需要注意的限制（CLAUDE.md 規則、既有的設計決策）\n\n輸出格式 (Markdown):\n## Relevant Files\n- path:line — 角色\n## Existing Patterns\n- 可參考的既有實作\n## Impact Surface\n- 變更受影響的位置\n## Constraints / Notes\n- 注意點、設計前提\n\n切勿憑猜測填寫，務必實際讀取檔案並給出依據。",
+          "builtInType": "explore",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "subagent-plan",
+        "type": "subAgent",
+        "name": "subagent-plan",
+        "position": { "x": 30, "y": 200 },
+        "data": {
+          "description": "根據調研設計實作計畫",
+          "agentDefinition": "Implementation planning agent. Designs a step-by-step plan that turns the investigation results into an actionable diff. Does NOT modify code — only proposes the plan.",
+          "prompt": "依據訪談內容與上一步的調研結果，擬定實作計畫。\n\n計畫應包含：\n- 待變更/新增檔案清單（path）\n- 各檔案的具體變更內容（函式新增·修改、型別·schema 變更、UI 變更等）\n- 實作順序（依步驟，每步的完成條件）\n- 與既有設計·規範一致性的備註\n- 風險 / 取捨 / 替代方案\n- 驗證方式（npm run check / build / 手動 E2E 檢查點）\n\n格式為 Markdown。暫不實作，僅回傳計畫。\n下一步會將計畫呈現給使用者以取得核准。",
+          "builtInType": "plan",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "prompt-confirm-plan",
+        "type": "prompt",
+        "name": "prompt-confirm-plan",
+        "position": { "x": 30, "y": 360 },
+        "data": {
+          "label": "請使用者確認計畫",
+          "prompt": "將上一步的實作計畫呈現給使用者並取得核准。\n\n推進方式：\n1. 簡潔彙整計畫核心（要改什麼、改在哪、按什麼順序）\n2. 全文以可摺疊的形式整理，需要時可供參考\n3. 接收使用者的修改要求；輕微則直接修正，較大則考慮重跑 plan 階段\n4. 明確詢問「依此計畫進入實作，可以嗎？」以取得核准\n5. 在取得明確核准前不進入下一步\n\n核准後，再次確認正在目標分支·worktree 中工作，再繼續下一步。"
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "subagent-implement",
+        "type": "subAgent",
+        "name": "subagent-implement",
+        "position": { "x": 30, "y": 60 },
+        "data": {
+          "description": "在程式碼庫中實作已核准的計畫",
+          "agentDefinition": "Implementation agent. Applies code changes according to the approved plan, following project conventions in CLAUDE.md. Avoids unrelated refactors and keeps changes minimal and focused.",
+          "prompt": "依據已核准的實作計畫修改程式碼。\n\n指引：\n- 遵循 CLAUDE.md 的程式碼規範·提交規範·i18n 政策\n- 不進行計畫外不必要的重構或抽象\n- 與既有命名·風格保持一致\n- 必要時同步更新型別定義與測試資料\n- 預設不加註解（遵循 CLAUDE.md 政策）\n- 不在中途停留，依計畫範圍完成到底\n\n完成後回傳變更的檔案以及主要變更內容的摘要。",
+          "builtInType": "general-purpose",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-3"
+      },
+      {
+        "id": "prompt-quality-checks",
+        "type": "prompt",
+        "name": "prompt-quality-checks",
+        "position": { "x": 30, "y": 60 },
+        "data": {
+          "label": "執行 npm check 與 build",
+          "prompt": "對實作完成的程式碼執行品質檢查。\n\n執行指令（於 worktree 根目錄）：\n1. npm run check   # Biome lint + format（含 auto-fix）\n2. npm run build   # Extension + Webview 建置\n\n因應：\n- 若 check 自動修正了差異，請確認這些差異\n- 若任一指令失敗，定位原因並修正，反覆執行直到兩者皆通過\n- 若修正延伸到計畫外區域，向使用者確認方針\n\n兩者皆通過後，將輸出摘要（變更檔案 / 是否有警告）回報給使用者，再進入下一步。"
+        },
+        "parentId": "group-4"
+      },
+      {
+        "id": "prompt-commit-and-pr",
+        "type": "prompt",
+        "name": "prompt-commit-and-pr",
+        "position": { "x": 30, "y": 200 },
+        "data": {
+          "label": "提交並起草 PR 內文",
+          "prompt": "將通過品質檢查的變更提交，並起草 PR 內文。\n\n提交（遵循 CLAUDE.md）：\n- 格式：<type>: <subject>（subject 不超過 50 字元，祈使語氣，無句點）\n- type：feat / fix / improvement / docs / refactor / chore\n- 內文為 3~5 行 bullet，僅描述「做了什麼」\n- 範例：\n    fix: add missing MCP node definition to workflow schema\n\n    - Added 'mcp' to supportedNodeTypes\n    - Added complete MCP node type definition\n    - Fixes MCP_INVALID_PARAMETERS validation errors\n\nPR 草稿（英文，遵循 CLAUDE.md）：\n- Title：與提交訊息同等簡潔（不超過 70 字元）\n- Body：\n    ## Summary\n    - 1~3 bullet\n    ## Test plan\n    - [ ] 手動 E2E 驗證清單\n    - [ ] npm run check / build 通過\n\n步驟：\n1. 以 git diff 檢視已暫存的差異\n2. 依 CLAUDE.md 的 squash merge 前提撰寫簡潔的提交訊息\n3. git commit（push 或 gh pr create 須先與使用者確認）\n4. 將 PR 草稿呈現給使用者，依需求修改後再提交"
+        },
+        "parentId": "group-4"
+      },
+      {
+        "id": "end-1",
+        "type": "end",
+        "name": "end-1",
+        "position": { "x": 2300, "y": 300 },
+        "data": { "label": "End" }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c1",
+        "from": "start-1",
+        "to": "prompt-hear-task",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c2",
+        "from": "prompt-hear-task",
+        "to": "prompt-branch-and-worktree",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c3",
+        "from": "prompt-branch-and-worktree",
+        "to": "subagent-explore-codebase",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c4",
+        "from": "subagent-explore-codebase",
+        "to": "subagent-plan",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c5",
+        "from": "subagent-plan",
+        "to": "prompt-confirm-plan",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c6",
+        "from": "prompt-confirm-plan",
+        "to": "subagent-implement",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c7",
+        "from": "subagent-implement",
+        "to": "prompt-quality-checks",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c8",
+        "from": "prompt-quality-checks",
+        "to": "prompt-commit-and-pr",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c9",
+        "from": "prompt-commit-and-pr",
+        "to": "end-1",
+        "fromPort": "output",
+        "toPort": "input"
+      }
+    ],
+    "createdAt": "2026-05-05T00:00:00.000Z",
+    "updatedAt": "2026-05-05T00:00:00.000Z",
+    "subAgentFlows": []
+  }
+}

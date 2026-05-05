@@ -1,0 +1,231 @@
+{
+  "meta": {
+    "id": "daily-dev-flow-with-worktree-sample",
+    "nameKey": "sample.dailyDevFlowWithWorktree.name",
+    "descriptionKey": "sample.dailyDevFlowWithWorktree.description",
+    "difficulty": "intermediate",
+    "tags": ["development", "git", "worktree"],
+    "nodeCount": 14
+  },
+  "workflow": {
+    "id": "workflow-daily-dev-flow-with-worktree",
+    "name": "daily-dev-flow-with-worktree",
+    "version": "1.0.0",
+    "nodes": [
+      {
+        "id": "group-1",
+        "type": "group",
+        "name": "group-1",
+        "position": { "x": 300, "y": 150 },
+        "data": { "label": "1. 작업 파악" },
+        "style": { "width": 400, "height": 320 }
+      },
+      {
+        "id": "group-2",
+        "type": "group",
+        "name": "group-2",
+        "position": { "x": 800, "y": 150 },
+        "data": { "label": "2. 조사 및 계획" },
+        "style": { "width": 400, "height": 480 }
+      },
+      {
+        "id": "group-3",
+        "type": "group",
+        "name": "group-3",
+        "position": { "x": 1300, "y": 150 },
+        "data": { "label": "3. 구현" },
+        "style": { "width": 400, "height": 200 }
+      },
+      {
+        "id": "group-4",
+        "type": "group",
+        "name": "group-4",
+        "position": { "x": 1800, "y": 150 },
+        "data": { "label": "4. 검증 및 제출" },
+        "style": { "width": 400, "height": 320 }
+      },
+      {
+        "id": "start-1",
+        "type": "start",
+        "name": "start-1",
+        "position": { "x": 100, "y": 300 },
+        "data": { "label": "Start" }
+      },
+      {
+        "id": "prompt-hear-task",
+        "type": "prompt",
+        "name": "prompt-hear-task",
+        "position": { "x": 30, "y": 60 },
+        "data": {
+          "label": "개발 작업 인터뷰",
+          "prompt": "이번 개발 작업의 내용을 사용자에게 자세히 인터뷰한다.\n\n파악할 항목:\n- 목표(기능 추가 / 버그 수정 / 개선 / 리팩토링 / 문서 등)\n- 대상 범위(영향받는 파일·모듈·기능)\n- 참고 정보(Issue 번호, Slack 링크, 관련 PR, 재현 절차, 로그 등)\n- 완료 조건(승인 기준·확인 방법)\n- 긴급도·우선순위 감각\n\n진행 방식:\n1. 부족한 정보를 1~3개씩 묶어서 질문한다(질문 공세는 피한다)\n2. 모은 내용을 간결하게 요약해 사용자에게 보여주고 인식을 맞춘다\n3. \"이 내용으로 브랜치 작성 및 조사로 진행해도 될까요?\"라고 확인한 뒤 다음 단계로 이동한다"
+        },
+        "parentId": "group-1"
+      },
+      {
+        "id": "prompt-branch-and-worktree",
+        "type": "prompt",
+        "name": "prompt-branch-and-worktree",
+        "position": { "x": 30, "y": 200 },
+        "data": {
+          "label": "브랜치 제안 및 worktree 생성",
+          "prompt": "인터뷰 결과를 바탕으로 Git 브랜치 이름을 제안하고, 사용자 승인 후 worktree를 생성한다.\n\n브랜치 명명 규칙:\n- conventional prefix + kebab-case\n- prefix: feat / fix / improvement / chore / docs / refactor\n- 예: feat/mcp-stdio-warning, fix/save-button-disabled, improvement/toolbar-layout\n- 50자 이내로 유지한다\n\n절차:\n1. 인터뷰 내용에서 prefix와 요약 슬러그를 정해 브랜치 이름 후보를 1~2개 제시한다\n2. 사용자에게 승인 / 수정안을 받는다(승인될 때까지 반복)\n3. 승인되면 다음을 실행한다:\n     mkdir -p ../.worktree && git worktree add ../.worktree/<slug> -b <branch-name>\n   (해당 리포지토리 전용 `.worktree/` 디렉터리를 부모 계층에 두는 운용. 기존 worktree와 충돌하면 일련번호를 붙인다)\n4. 생성된 worktree 경로를 사용자에게 알리고, 이후 작업은 거기서 진행한다고 공유한다\n5. 필요하면 cd로 worktree에 이동할지 사용자에게 확인한다"
+        },
+        "parentId": "group-1"
+      },
+      {
+        "id": "subagent-explore-codebase",
+        "type": "subAgent",
+        "name": "subagent-explore-codebase",
+        "position": { "x": 30, "y": 60 },
+        "data": {
+          "description": "요청된 작업을 위한 코드베이스 조사",
+          "agentDefinition": "Codebase exploration agent. Read-only investigation focused on identifying files, symbols, and patterns relevant to the requested development task. Returns a structured summary that downstream planning can act on without re-reading the same files.",
+          "prompt": "인터뷰에서 합의한 개발 작업의 구현에 필요한 코드베이스를 조사한다.\n\n조사 관점:\n- 관련 파일 / 모듈 / 디렉터리 식별\n- 기존 유사 기능·참조 가능한 패턴\n- 영향 범위(호출부, 의존성, 타입 정의, 테스트)\n- 관련 스키마, 설정, 문서\n- 주의해야 할 제약(CLAUDE.md 규칙, 기존 설계상의 결정)\n\n출력 포맷 (Markdown):\n## Relevant Files\n- path:line — 역할\n## Existing Patterns\n- 참고할 수 있는 기존 구현\n## Impact Surface\n- 변경의 영향을 받는 부분\n## Constraints / Notes\n- 주의점, 설계 전제\n\n추측으로 채우지 말고 실제로 파일을 읽어 근거를 제시한다.",
+          "builtInType": "explore",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "subagent-plan",
+        "type": "subAgent",
+        "name": "subagent-plan",
+        "position": { "x": 30, "y": 200 },
+        "data": {
+          "description": "조사 결과로부터 구현 계획 설계",
+          "agentDefinition": "Implementation planning agent. Designs a step-by-step plan that turns the investigation results into an actionable diff. Does NOT modify code — only proposes the plan.",
+          "prompt": "인터뷰 내용과 앞 단계 조사 결과를 바탕으로 구현 계획을 세운다.\n\n계획에 포함할 내용:\n- 변경/추가할 파일 목록(path)\n- 각 파일별 구체적인 변경 내용(함수 추가·수정, 타입·스키마 변경, UI 변경점 등)\n- 구현 순서(단계 단위, 각 단계의 완료 조건)\n- 기존 설계·규약과의 정합성에 관한 메모\n- 리스크 / 트레이드오프 / 대안\n- 동작 확인 방법(npm run check / build / 수동 E2E 체크 관점)\n\n포맷은 Markdown. 구현은 아직 하지 말고 계획만 반환한다.\n계획은 다음 단계에서 사용자에게 제시해 승인을 받는 것을 전제로 한다.",
+          "builtInType": "plan",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "prompt-confirm-plan",
+        "type": "prompt",
+        "name": "prompt-confirm-plan",
+        "position": { "x": 30, "y": 360 },
+        "data": {
+          "label": "사용자에게 계획 승인 받기",
+          "prompt": "앞 단계의 구현 계획을 사용자에게 제시하고 승인을 받는다.\n\n진행 방식:\n1. 계획의 핵심(무엇을, 어디를, 어떤 순서로 바꿀지)을 간결하게 요약해 제시\n2. 전문은 접기 형태로 정리하거나 필요할 때 참조할 수 있도록 한다\n3. 사용자의 수정 요청을 받아 경미하면 직접 수정, 큰 변경이면 plan 단계 재실행을 검토한다\n4. \"이 계획으로 구현에 진행해도 될까요?\"라고 명확히 승인을 받는다\n5. 승인되지 않는 한 다음 단계로 진행하지 않는다\n\n승인 후, 대상 브랜치·worktree에서 작업 중임을 다시 확인한 뒤 다음으로 진행한다."
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "subagent-implement",
+        "type": "subAgent",
+        "name": "subagent-implement",
+        "position": { "x": 30, "y": 60 },
+        "data": {
+          "description": "승인된 계획을 코드베이스에 구현",
+          "agentDefinition": "Implementation agent. Applies code changes according to the approved plan, following project conventions in CLAUDE.md. Avoids unrelated refactors and keeps changes minimal and focused.",
+          "prompt": "승인된 구현 계획에 따라 코드를 수정한다.\n\n가이드라인:\n- CLAUDE.md의 코딩 규약·커밋 규약·i18n 방침을 따른다\n- 계획에 적혀 있지 않은 불필요한 리팩토링이나 추상화는 하지 않는다\n- 기존 명명·스타일에 맞춘다\n- 필요에 따라 타입 정의나 테스트 데이터도 갱신\n- 주석은 원칙적으로 추가하지 않는다(CLAUDE.md 정책 준수)\n- 부분 구현으로 멈추지 않고 계획의 범위를 끝까지 진행한다\n\n완료되면 변경한 파일과 주요 변경 내용 요약을 반환한다.",
+          "builtInType": "general-purpose",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-3"
+      },
+      {
+        "id": "prompt-quality-checks",
+        "type": "prompt",
+        "name": "prompt-quality-checks",
+        "position": { "x": 30, "y": 60 },
+        "data": {
+          "label": "npm check & build 실행",
+          "prompt": "구현이 끝난 코드에 대해 품질 검사를 실행한다.\n\n실행 명령(worktree 루트에서):\n1. npm run check   # Biome lint + format(auto-fix 포함)\n2. npm run build   # Extension + Webview 빌드\n\n대응:\n- check에서 auto-fix된 차분이 있으면 확인\n- 둘 중 하나라도 실패하면 원인을 특정해 수정하고, 둘 다 통과할 때까지 반복\n- 수정이 계획 외 영역으로 번지면 사용자에게 방침을 확인한다\n\n둘 다 통과하면 출력 요약(변경 파일 / 경고 유무)을 사용자에게 보고하고 다음 단계로 진행한다."
+        },
+        "parentId": "group-4"
+      },
+      {
+        "id": "prompt-commit-and-pr",
+        "type": "prompt",
+        "name": "prompt-commit-and-pr",
+        "position": { "x": 30, "y": 200 },
+        "data": {
+          "label": "커밋 및 PR 본문 초안 작성",
+          "prompt": "품질 검사를 통과한 변경을 커밋하고 PR 본문 초안을 작성한다.\n\n커밋 (CLAUDE.md 준수):\n- 형식: <type>: <subject> (subject는 50자 이내, 명령형, 마침표 없음)\n- type: feat / fix / improvement / docs / refactor / chore\n- 본문은 3~5줄 bullet로 \"무엇을\" 변경했는지만\n- 예:\n    fix: add missing MCP node definition to workflow schema\n\n    - Added 'mcp' to supportedNodeTypes\n    - Added complete MCP node type definition\n    - Fixes MCP_INVALID_PARAMETERS validation errors\n\nPR 초안 (영어, CLAUDE.md 준수):\n- Title: 커밋 메시지 정도의 간결함(70자 이내)\n- Body:\n    ## Summary\n    - 1~3 bullet\n    ## Test plan\n    - [ ] 수동 E2E로 확인한 내용 체크리스트\n    - [ ] npm run check / build 통과\n\n절차:\n1. 스테이징된 차분을 git diff로 확인\n2. CLAUDE.md의 squash merge 전제에 맞춰 간결한 커밋 메시지 작성\n3. git commit (push나 gh pr create는 사용자에게 확인한 뒤 실행)\n4. PR 본문 초안을 사용자에게 제시하고, 필요하면 수정한 뒤 제출"
+        },
+        "parentId": "group-4"
+      },
+      {
+        "id": "end-1",
+        "type": "end",
+        "name": "end-1",
+        "position": { "x": 2300, "y": 300 },
+        "data": { "label": "End" }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c1",
+        "from": "start-1",
+        "to": "prompt-hear-task",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c2",
+        "from": "prompt-hear-task",
+        "to": "prompt-branch-and-worktree",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c3",
+        "from": "prompt-branch-and-worktree",
+        "to": "subagent-explore-codebase",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c4",
+        "from": "subagent-explore-codebase",
+        "to": "subagent-plan",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c5",
+        "from": "subagent-plan",
+        "to": "prompt-confirm-plan",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c6",
+        "from": "prompt-confirm-plan",
+        "to": "subagent-implement",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c7",
+        "from": "subagent-implement",
+        "to": "prompt-quality-checks",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c8",
+        "from": "prompt-quality-checks",
+        "to": "prompt-commit-and-pr",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c9",
+        "from": "prompt-commit-and-pr",
+        "to": "end-1",
+        "fromPort": "output",
+        "toPort": "input"
+      }
+    ],
+    "createdAt": "2026-05-05T00:00:00.000Z",
+    "updatedAt": "2026-05-05T00:00:00.000Z",
+    "subAgentFlows": []
+  }
+}

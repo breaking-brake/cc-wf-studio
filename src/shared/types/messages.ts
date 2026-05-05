@@ -7,7 +7,7 @@
 import type { Connection, Workflow, WorkflowNode } from './workflow-definition';
 
 // Re-export Workflow for convenience
-export type { Workflow, WorkflowNode, Connection };
+export type { Connection, Workflow, WorkflowNode };
 
 // ============================================================================
 // Base Message
@@ -1114,6 +1114,15 @@ export interface SampleWorkflowLoadedPayload {
   workflow: Workflow;
 }
 
+export interface PreviewSampleWorkflowRequestPayload {
+  sampleId: string;
+}
+
+export interface SampleWorkflowPreviewLoadedPayload {
+  sampleId: string;
+  workflow: Workflow;
+}
+
 // ============================================================================
 // Extension → Webview Messages
 // ============================================================================
@@ -1265,7 +1274,8 @@ export type ExtensionMessage =
   | Message<void, 'COMMENTARY_SESSION_ENDED'>
   | Message<CommentaryErrorPayload, 'COMMENTARY_ERROR'>
   | Message<SampleWorkflowListPayload, 'SAMPLE_WORKFLOW_LIST'>
-  | Message<SampleWorkflowLoadedPayload, 'SAMPLE_WORKFLOW_LOADED'>;
+  | Message<SampleWorkflowLoadedPayload, 'SAMPLE_WORKFLOW_LOADED'>
+  | Message<SampleWorkflowPreviewLoadedPayload, 'SAMPLE_WORKFLOW_PREVIEW_LOADED'>;
 
 // ============================================================================
 // AI Slack Description Generation Payloads
@@ -2439,7 +2449,8 @@ export type WebviewMessage =
     >
   | Message<void, 'STOP_COMMENTARY'>
   | Message<void, 'LIST_SAMPLE_WORKFLOWS'>
-  | Message<LoadSampleWorkflowRequestPayload, 'LOAD_SAMPLE_WORKFLOW'>;
+  | Message<LoadSampleWorkflowRequestPayload, 'LOAD_SAMPLE_WORKFLOW'>
+  | Message<PreviewSampleWorkflowRequestPayload, 'PREVIEW_SAMPLE_WORKFLOW'>;
 
 // ============================================================================
 // Error Codes

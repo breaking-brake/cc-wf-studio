@@ -1012,4 +1012,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'sample.githubIssuePlanning.name': 'GitHub Issue 플래닝',
   'sample.githubIssuePlanning.description':
     'GitHub Issue 플래닝 워크플로우: Issue 조회, 현재 코드 분석, 수정 검증 확인, 회고.',
+  'sample.dailyDevFlowWithWorktree.name': 'Git Worktree 기반 일일 개발 플로우',
+  'sample.dailyDevFlowWithWorktree.description':
+    'git worktree를 활용한 일일 개발 플로우: 작업 인터뷰, 브랜치 제안 및 worktree 생성, 코드 조사, 계획 수립, 승인, 구현, 품질 검사, 커밋 및 PR 초안 작성.',
 };
