@@ -378,11 +378,3 @@ body.tour-floating-visible .react-flow__panel.bottom.right {
 .overview-mermaid-stage g.node.overview-active {
   transition: filter 0.15s ease;
 }
-
-/* Inline lucide SVG injected post-render into Mermaid foreignObject labels.
- * Sizing and vertical alignment live on the SVG's inline style (set by
- * `lucide-svg-inline.ts`) so they survive any external `svg { width: ... }`
- * rules. This rule just adds a small gap between the icon and the label text. */
-.overview-mermaid-stage .overview-mermaid-icon {
-  margin-right: 0.35em;
-}

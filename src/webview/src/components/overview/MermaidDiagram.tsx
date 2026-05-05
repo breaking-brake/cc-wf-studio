@@ -11,7 +11,6 @@
 
 import {
   generateMermaidFlowchart,
-  INLINE_ICON_MARKER_PATTERN,
   sanitizeNodeId,
 } from '@shared/services/workflow-prompt-generator';
 import type { Workflow } from '@shared/types/messages';
@@ -26,7 +25,6 @@ import {
 } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { LUCIDE_SVG } from './lucide-svg-inline';
 
 interface MermaidDiagramProps {
   workflow: Workflow;
@@ -93,19 +91,6 @@ function stripFences(source: string): string {
     .replace(/^\s*```mermaid\s*\n/, '')
     .replace(/\n```\s*$/, '')
     .trim();
-}
-
-/**
- * Replace `__lu:icon-name__` markers in the rendered SVG string with the
- * matching inline lucide SVG (see `lucide-svg-inline.ts`). The marker text
- * is emitted by `generateMermaidFlowchart({ inlineIcons: true })` and
- * survives mermaid's strict-mode label escaping because it contains no HTML
- * chars. Unknown icon names leave the original marker in place so mapping
- * drift between the emitter and `LUCIDE_SVG` stays visible in the rendered
- * diagram instead of silently disappearing.
- */
-function replaceInlineIconMarkers(svg: string): string {
-  return svg.replace(INLINE_ICON_MARKER_PATTERN, (match, name) => LUCIDE_SVG[name] ?? match);
 }
 
 /**
@@ -178,9 +163,6 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
       // so the diagram only needs the node type + title.
       labelMode: 'concise',
       direction,
-      // Prefix each label with `__lu:icon-name__` markers; we swap them for
-      // lucide icon `<i>` tags after mermaid renders the SVG.
-      inlineIcons: true,
     });
     return stripFences(raw);
   }, [workflow.nodes, workflow.connections, direction]);
@@ -327,7 +309,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
         const { svg } = await mermaid.render(renderId, source);
         if (cancelled) return;
 
-        stage.innerHTML = replaceInlineIconMarkers(svg);
+        stage.innerHTML = svg;
         setRenderError(null);
 
         const svgEl = stage.querySelector('svg');
