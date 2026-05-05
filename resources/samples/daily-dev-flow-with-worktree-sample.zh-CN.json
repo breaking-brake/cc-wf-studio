@@ -1,0 +1,231 @@
+{
+  "meta": {
+    "id": "daily-dev-flow-with-worktree-sample",
+    "nameKey": "sample.dailyDevFlowWithWorktree.name",
+    "descriptionKey": "sample.dailyDevFlowWithWorktree.description",
+    "difficulty": "intermediate",
+    "tags": ["development", "git", "worktree"],
+    "nodeCount": 14
+  },
+  "workflow": {
+    "id": "workflow-daily-dev-flow-with-worktree",
+    "name": "daily-dev-flow-with-worktree",
+    "version": "1.0.0",
+    "nodes": [
+      {
+        "id": "group-1",
+        "type": "group",
+        "name": "group-1",
+        "position": { "x": 300, "y": 150 },
+        "data": { "label": "1. 任务梳理" },
+        "style": { "width": 400, "height": 320 }
+      },
+      {
+        "id": "group-2",
+        "type": "group",
+        "name": "group-2",
+        "position": { "x": 800, "y": 150 },
+        "data": { "label": "2. 调研与规划" },
+        "style": { "width": 400, "height": 480 }
+      },
+      {
+        "id": "group-3",
+        "type": "group",
+        "name": "group-3",
+        "position": { "x": 1300, "y": 150 },
+        "data": { "label": "3. 实现" },
+        "style": { "width": 400, "height": 200 }
+      },
+      {
+        "id": "group-4",
+        "type": "group",
+        "name": "group-4",
+        "position": { "x": 1800, "y": 150 },
+        "data": { "label": "4. 验证与提交" },
+        "style": { "width": 400, "height": 320 }
+      },
+      {
+        "id": "start-1",
+        "type": "start",
+        "name": "start-1",
+        "position": { "x": 100, "y": 300 },
+        "data": { "label": "Start" }
+      },
+      {
+        "id": "prompt-hear-task",
+        "type": "prompt",
+        "name": "prompt-hear-task",
+        "position": { "x": 30, "y": 60 },
+        "data": {
+          "label": "了解开发任务",
+          "prompt": "向用户详细了解本次开发任务的内容。\n\n需要确认的方面：\n- 目标（新增功能 / 修复缺陷 / 改进 / 重构 / 文档等）\n- 影响范围（受影响的文件、模块、功能）\n- 参考信息（Issue 编号、Slack 链接、相关 PR、复现步骤、日志等）\n- 完成条件（验收标准、确认方式）\n- 紧急度与优先级\n\n推进方式：\n1. 把缺失的信息分批询问，每次 1~3 个（避免连环追问）\n2. 把已收集的内容简洁地汇总展示给用户，对齐认知\n3. 在确认\"按此内容继续创建分支并展开调研，可以吗？\"后再进入下一步"
+        },
+        "parentId": "group-1"
+      },
+      {
+        "id": "prompt-branch-and-worktree",
+        "type": "prompt",
+        "name": "prompt-branch-and-worktree",
+        "position": { "x": 30, "y": 200 },
+        "data": {
+          "label": "提议分支并创建 worktree",
+          "prompt": "根据访谈结果提议 Git 分支名，获得用户批准后创建 worktree。\n\n分支命名约定：\n- conventional 前缀 + kebab-case\n- 前缀：feat / fix / improvement / chore / docs / refactor\n- 例：feat/mcp-stdio-warning, fix/save-button-disabled, improvement/toolbar-layout\n- 控制在 50 字符左右\n\n步骤：\n1. 根据访谈内容确定前缀与摘要 slug，提供 1~2 个分支名候选\n2. 接受用户的批准 / 修改意见（直到批准为止）\n3. 一旦批准，执行：\n     mkdir -p ../.worktree && git worktree add ../.worktree/<slug> -b <branch-name>\n   （在父级目录放置专属于本仓库的 `.worktree/`。如与已有 worktree 冲突，附加序号）\n4. 把创建好的 worktree 路径告知用户，并说明后续工作将在该路径中进行\n5. 如有需要，向用户确认是否 cd 切换到 worktree"
+        },
+        "parentId": "group-1"
+      },
+      {
+        "id": "subagent-explore-codebase",
+        "type": "subAgent",
+        "name": "subagent-explore-codebase",
+        "position": { "x": 30, "y": 60 },
+        "data": {
+          "description": "针对请求的任务调研代码库",
+          "agentDefinition": "Codebase exploration agent. Read-only investigation focused on identifying files, symbols, and patterns relevant to the requested development task. Returns a structured summary that downstream planning can act on without re-reading the same files.",
+          "prompt": "对访谈中达成一致的开发任务实施所需的代码库进行调研。\n\n调研角度：\n- 识别相关的文件 / 模块 / 目录\n- 既有的相似功能、可参考的模式\n- 影响面（调用方、依赖、类型定义、测试）\n- 相关的 schema、配置、文档\n- 需要注意的约束（CLAUDE.md 规则、既有的设计决策）\n\n输出格式 (Markdown):\n## Relevant Files\n- path:line — 角色\n## Existing Patterns\n- 可参考的既有实现\n## Impact Surface\n- 变更受影响的位置\n## Constraints / Notes\n- 注意点、设计前提\n\n不要靠猜测填写，要实际读取文件并给出依据。",
+          "builtInType": "explore",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "subagent-plan",
+        "type": "subAgent",
+        "name": "subagent-plan",
+        "position": { "x": 30, "y": 200 },
+        "data": {
+          "description": "根据调研设计实现计划",
+          "agentDefinition": "Implementation planning agent. Designs a step-by-step plan that turns the investigation results into an actionable diff. Does NOT modify code — only proposes the plan.",
+          "prompt": "基于访谈内容与上一步的调研结果，制定实现计划。\n\n计划应包含：\n- 待变更/新增文件列表（path）\n- 各文件的具体变更内容（函数新增·修改、类型·schema 变更、UI 变更等）\n- 实现顺序（按步骤，每步的完成条件）\n- 与既有设计·规约一致性的备注\n- 风险 / 取舍 / 备选方案\n- 验证方式（npm run check / build / 手动 E2E 检查点）\n\n格式为 Markdown。暂不实现，仅返回计划。\n下一步将把计划呈现给用户以获得批准。",
+          "builtInType": "plan",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "prompt-confirm-plan",
+        "type": "prompt",
+        "name": "prompt-confirm-plan",
+        "position": { "x": 30, "y": 360 },
+        "data": {
+          "label": "请用户确认计划",
+          "prompt": "把上一步的实现计划呈现给用户以获得批准。\n\n推进方式：\n1. 简洁汇总计划核心（要改什么、改哪里、按什么顺序）\n2. 全文以折叠形式整理，需要时可参考\n3. 接收用户的修改请求；轻微则直接修改，较大则考虑重新执行 plan 阶段\n4. 明确询问\"按此计划进入实现，可以吗？\"以获得批准\n5. 在获得明确批准之前不进入下一步\n\n获得批准后，再次确认正在目标分支·worktree 中工作，再继续下一步。"
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "subagent-implement",
+        "type": "subAgent",
+        "name": "subagent-implement",
+        "position": { "x": 30, "y": 60 },
+        "data": {
+          "description": "在代码库中实现已批准的计划",
+          "agentDefinition": "Implementation agent. Applies code changes according to the approved plan, following project conventions in CLAUDE.md. Avoids unrelated refactors and keeps changes minimal and focused.",
+          "prompt": "按照已批准的实现计划修改代码。\n\n指南：\n- 遵循 CLAUDE.md 的编码规约·提交规约·i18n 方针\n- 不做计划外的不必要重构或抽象\n- 与既有命名·风格保持一致\n- 必要时同步更新类型定义与测试数据\n- 默认不添加注释（遵循 CLAUDE.md 政策）\n- 不在中途停留，按计划范围完成到底\n\n完成后返回变更的文件以及主要变更内容的摘要。",
+          "builtInType": "general-purpose",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-3"
+      },
+      {
+        "id": "prompt-quality-checks",
+        "type": "prompt",
+        "name": "prompt-quality-checks",
+        "position": { "x": 30, "y": 60 },
+        "data": {
+          "label": "执行 npm check 与 build",
+          "prompt": "对实现完毕的代码执行质量检查。\n\n执行命令（在 worktree 根目录）：\n1. npm run check   # Biome lint + format（带 auto-fix）\n2. npm run build   # Extension + Webview 构建\n\n应对：\n- 若 check 自动修复了差异，确认这些差异\n- 若任一命令失败，定位原因后修复，反复运行直至两者都通过\n- 若修复扩展到计划外区域，向用户确认方针\n\n两者都通过后，将输出摘要（变更文件 / 是否有警告）报告给用户，再进入下一步。"
+        },
+        "parentId": "group-4"
+      },
+      {
+        "id": "prompt-commit-and-pr",
+        "type": "prompt",
+        "name": "prompt-commit-and-pr",
+        "position": { "x": 30, "y": 200 },
+        "data": {
+          "label": "提交并起草 PR 正文",
+          "prompt": "把通过质量检查的变更提交，并起草 PR 正文。\n\n提交（遵循 CLAUDE.md）：\n- 格式：<type>: <subject>（subject 不超过 50 字符，祈使语气，无句号）\n- type：feat / fix / improvement / docs / refactor / chore\n- 正文为 3~5 行 bullet，仅描述\"做了什么\"\n- 示例：\n    fix: add missing MCP node definition to workflow schema\n\n    - Added 'mcp' to supportedNodeTypes\n    - Added complete MCP node type definition\n    - Fixes MCP_INVALID_PARAMETERS validation errors\n\nPR 草稿（英文，遵循 CLAUDE.md）：\n- Title：与提交信息同等简洁（不超过 70 字符）\n- Body：\n    ## Summary\n    - 1~3 bullet\n    ## Test plan\n    - [ ] 手动 E2E 验证清单\n    - [ ] npm run check / build 通过\n\n步骤：\n1. 用 git diff 检查已暂存的差异\n2. 按 CLAUDE.md 的 squash merge 前提撰写简洁的提交信息\n3. git commit（push 或 gh pr create 须先与用户确认）\n4. 把 PR 草稿呈现给用户，按需修改后再提交"
+        },
+        "parentId": "group-4"
+      },
+      {
+        "id": "end-1",
+        "type": "end",
+        "name": "end-1",
+        "position": { "x": 2300, "y": 300 },
+        "data": { "label": "End" }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c1",
+        "from": "start-1",
+        "to": "prompt-hear-task",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c2",
+        "from": "prompt-hear-task",
+        "to": "prompt-branch-and-worktree",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c3",
+        "from": "prompt-branch-and-worktree",
+        "to": "subagent-explore-codebase",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c4",
+        "from": "subagent-explore-codebase",
+        "to": "subagent-plan",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c5",
+        "from": "subagent-plan",
+        "to": "prompt-confirm-plan",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c6",
+        "from": "prompt-confirm-plan",
+        "to": "subagent-implement",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c7",
+        "from": "subagent-implement",
+        "to": "prompt-quality-checks",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c8",
+        "from": "prompt-quality-checks",
+        "to": "prompt-commit-and-pr",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c9",
+        "from": "prompt-commit-and-pr",
+        "to": "end-1",
+        "fromPort": "output",
+        "toPort": "input"
+      }
+    ],
+    "createdAt": "2026-05-05T00:00:00.000Z",
+    "updatedAt": "2026-05-05T00:00:00.000Z",
+    "subAgentFlows": []
+  }
+}
