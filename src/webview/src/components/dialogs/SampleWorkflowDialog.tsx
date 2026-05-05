@@ -6,12 +6,15 @@
  */
 
 import * as Dialog from '@radix-ui/react-dialog';
+import type { Workflow } from '@shared/types/messages';
+import { X } from 'lucide-react';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { SampleWorkflowMeta } from '../../../../shared/types/sample-workflow';
 import { useTranslation } from '../../i18n/i18n-context';
 import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
 import { vscode } from '../../main';
+import { WorkflowOverview } from '../overview/WorkflowOverview';
 
 interface SampleWorkflowDialogProps {
   isOpen: boolean;
@@ -30,6 +33,13 @@ export const SampleWorkflowDialog: React.FC<SampleWorkflowDialogProps> = ({
   const { t } = useTranslation();
   const [samples, setSamples] = useState<SampleWorkflowMeta[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [previewWorkflow, setPreviewWorkflow] = useState<Workflow | null>(null);
+  const [previewLoadingId, setPreviewLoadingId] = useState<string | null>(null);
+  const previewLoadingIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    previewLoadingIdRef.current = previewLoadingId;
+  }, [previewLoadingId]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -38,12 +48,18 @@ export const SampleWorkflowDialog: React.FC<SampleWorkflowDialogProps> = ({
 
     setIsLoading(true);
 
-    // Listen for sample workflow list response
+    // Listen for sample workflow list / preview response
     const handler = (event: MessageEvent) => {
       const message = event.data;
       if (message.type === 'SAMPLE_WORKFLOW_LIST') {
         setSamples(message.payload?.samples ?? []);
         setIsLoading(false);
+      } else if (message.type === 'SAMPLE_WORKFLOW_PREVIEW_LOADED') {
+        const payload = message.payload;
+        if (payload?.sampleId === previewLoadingIdRef.current) {
+          setPreviewWorkflow(payload.workflow);
+          setPreviewLoadingId(null);
+        }
       }
     };
 
@@ -62,11 +78,18 @@ export const SampleWorkflowDialog: React.FC<SampleWorkflowDialogProps> = ({
     if (!isOpen) {
       setSamples([]);
       setIsLoading(true);
+      setPreviewWorkflow(null);
+      setPreviewLoadingId(null);
     }
   }, [isOpen]);
 
   const getNodeCountLabel = (count: number): string => {
     return t('sample.dialog.nodeCount').replace('{{count}}', String(count));
+  };
+
+  const handlePreview = (sampleId: string) => {
+    setPreviewLoadingId(sampleId);
+    vscode.postMessage({ type: 'PREVIEW_SAMPLE_WORKFLOW', payload: { sampleId } });
   };
 
   return (
@@ -237,8 +260,38 @@ export const SampleWorkflowDialog: React.FC<SampleWorkflowDialogProps> = ({
                         {t(sample.descriptionKey as keyof WebviewTranslationKeys)}
                       </p>
 
-                      {/* Load button */}
-                      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      {/* Preview + Load buttons */}
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePreview(sample.id);
+                          }}
+                          disabled={previewLoadingId === sample.id}
+                          style={{
+                            padding: '4px 14px',
+                            backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                            color: 'var(--vscode-button-secondaryForeground)',
+                            border: 'none',
+                            borderRadius: '2px',
+                            cursor: previewLoadingId === sample.id ? 'wait' : 'pointer',
+                            fontSize: '12px',
+                            fontWeight: 500,
+                            opacity: previewLoadingId === sample.id ? 0.7 : 1,
+                          }}
+                          onMouseEnter={(e) => {
+                            if (previewLoadingId === sample.id) return;
+                            e.currentTarget.style.backgroundColor =
+                              'var(--vscode-button-secondaryHoverBackground)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor =
+                              'var(--vscode-button-secondaryBackground)';
+                          }}
+                        >
+                          Preview
+                        </button>
                         <button
                           type="button"
                           onClick={(e) => {
@@ -275,6 +328,98 @@ export const SampleWorkflowDialog: React.FC<SampleWorkflowDialogProps> = ({
           </Dialog.Content>
         </Dialog.Overlay>
       </Dialog.Portal>
+      {/* Preview overlay (rendered above the sample list dialog) */}
+      <Dialog.Root
+        open={previewWorkflow !== null}
+        onOpenChange={(open) => {
+          if (!open) setPreviewWorkflow(null);
+        }}
+      >
+        <Dialog.Portal>
+          <Dialog.Overlay
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10002,
+            }}
+          >
+            <Dialog.Content
+              onEscapeKeyDown={() => setPreviewWorkflow(null)}
+              style={{
+                position: 'relative',
+                width: '92vw',
+                height: '88vh',
+                maxWidth: '1400px',
+                display: 'flex',
+                flexDirection: 'column',
+                backgroundColor: 'var(--vscode-editor-background)',
+                border: '1px solid var(--vscode-panel-border)',
+                borderRadius: '4px',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
+                outline: 'none',
+                overflow: 'hidden',
+              }}
+            >
+              <Dialog.Title
+                style={{
+                  position: 'absolute',
+                  width: 1,
+                  height: 1,
+                  padding: 0,
+                  margin: -1,
+                  overflow: 'hidden',
+                  clip: 'rect(0,0,0,0)',
+                  whiteSpace: 'nowrap',
+                  border: 0,
+                }}
+              >
+                {t('dialog.diffPreview.previewOverview')}
+              </Dialog.Title>
+              <button
+                type="button"
+                onClick={() => setPreviewWorkflow(null)}
+                aria-label={t('dialog.diffPreview.closeOverview')}
+                title={t('dialog.diffPreview.closeOverview')}
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 4,
+                  backgroundColor: 'transparent',
+                  color: 'var(--vscode-foreground)',
+                  border: 'none',
+                  borderRadius: 0,
+                  cursor: 'pointer',
+                  opacity: 0.85,
+                  transition: 'opacity 0.15s ease',
+                  zIndex: 2,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '0.55';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '0.85';
+                }}
+              >
+                <X size={20} />
+              </button>
+              <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
+                <WorkflowOverview
+                  workflow={previewWorkflow}
+                  splitRatioStorageKey="cc-wf-studio.overviewMermaidPanelRatio.samplePreview"
+                />
+              </div>
+            </Dialog.Content>
+          </Dialog.Overlay>
+        </Dialog.Portal>
+      </Dialog.Root>
     </Dialog.Root>
   );
 };

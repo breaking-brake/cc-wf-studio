@@ -14,6 +14,7 @@ import * as vscode from 'vscode';
 import type {
   SampleWorkflowListPayload,
   SampleWorkflowLoadedPayload,
+  SampleWorkflowPreviewLoadedPayload,
 } from '../../shared/types/messages';
 import type { SampleWorkflowFile } from '../../shared/types/sample-workflow';
 
@@ -155,6 +156,39 @@ export async function listSampleWorkflows(
   }
 }
 
+type ResolveResult =
+  | { ok: true; parsed: SampleWorkflowFile; selected: ParsedFilename }
+  | { ok: false; message: string };
+
+async function resolveAndReadSample(
+  extensionPath: string,
+  sampleId: string
+): Promise<ResolveResult> {
+  if (!SAMPLE_ID_PATTERN.test(sampleId)) {
+    return { ok: false, message: `Invalid sample workflow ID: "${sampleId}"` };
+  }
+  const baseDir = path.resolve(extensionPath, 'resources', 'samples');
+  const parsedFiles = await readParsedFilesIn(baseDir);
+  const groups = groupBySampleId(parsedFiles);
+  const groupFiles = groups.get(sampleId);
+  if (!groupFiles) {
+    return { ok: false, message: `Sample workflow "${sampleId}" not found` };
+  }
+  const preferredLocale = vscode.env.language || 'en';
+  const selected = selectFileForLocale(groupFiles, preferredLocale);
+  if (!selected) {
+    return { ok: false, message: `Sample workflow "${sampleId}" not found` };
+  }
+  const filename = buildFilename(selected);
+  const filePath = path.resolve(baseDir, filename);
+  if (!filePath.startsWith(baseDir + path.sep)) {
+    return { ok: false, message: `Invalid sample workflow ID: "${sampleId}"` };
+  }
+  const content = await fs.readFile(filePath, 'utf-8');
+  const parsed: SampleWorkflowFile = JSON.parse(content);
+  return { ok: true, parsed, selected };
+}
+
 /**
  * Load a specific sample workflow and send it to webview.
  * Picks the locale variant matching VSCode's display language, with fallback chain.
@@ -166,73 +200,27 @@ export async function loadSampleWorkflow(
   requestId?: string
 ): Promise<void> {
   try {
-    if (!SAMPLE_ID_PATTERN.test(sampleId)) {
+    const result = await resolveAndReadSample(extensionPath, sampleId);
+    if (!result.ok) {
       webview.postMessage({
         type: 'ERROR',
         requestId,
         payload: {
           code: 'LOAD_FAILED',
-          message: `Invalid sample workflow ID: "${sampleId}"`,
+          message: result.message,
         },
       });
       return;
     }
 
-    const baseDir = path.resolve(extensionPath, 'resources', 'samples');
-    const parsedFiles = await readParsedFilesIn(baseDir);
-    const groups = groupBySampleId(parsedFiles);
-    const groupFiles = groups.get(sampleId);
-    if (!groupFiles) {
-      webview.postMessage({
-        type: 'ERROR',
-        requestId,
-        payload: {
-          code: 'LOAD_FAILED',
-          message: `Sample workflow "${sampleId}" not found`,
-        },
-      });
-      return;
-    }
-
-    const preferredLocale = vscode.env.language || 'en';
-    const selected = selectFileForLocale(groupFiles, preferredLocale);
-    if (!selected) {
-      webview.postMessage({
-        type: 'ERROR',
-        requestId,
-        payload: {
-          code: 'LOAD_FAILED',
-          message: `Sample workflow "${sampleId}" not found`,
-        },
-      });
-      return;
-    }
-
-    const filename = buildFilename(selected);
-    const filePath = path.resolve(baseDir, filename);
-    if (!filePath.startsWith(baseDir + path.sep)) {
-      webview.postMessage({
-        type: 'ERROR',
-        requestId,
-        payload: {
-          code: 'LOAD_FAILED',
-          message: `Invalid sample workflow ID: "${sampleId}"`,
-        },
-      });
-      return;
-    }
-
-    const content = await fs.readFile(filePath, 'utf-8');
-    const parsed: SampleWorkflowFile = JSON.parse(content);
-
-    const payload: SampleWorkflowLoadedPayload = { workflow: parsed.workflow };
+    const payload: SampleWorkflowLoadedPayload = { workflow: result.parsed.workflow };
     webview.postMessage({
       type: 'SAMPLE_WORKFLOW_LOADED',
       requestId,
       payload,
     });
 
-    console.log(`Sample workflow loaded: ${sampleId} (${selected.locale ?? 'no-locale'})`);
+    console.log(`Sample workflow loaded: ${sampleId} (${result.selected.locale ?? 'no-locale'})`);
   } catch (error) {
     webview.postMessage({
       type: 'ERROR',
@@ -240,6 +228,53 @@ export async function loadSampleWorkflow(
       payload: {
         code: 'LOAD_FAILED',
         message: error instanceof Error ? error.message : 'Failed to load sample workflow',
+        details: error,
+      },
+    });
+  }
+}
+
+/**
+ * Load a specific sample workflow for preview only (does not apply to canvas).
+ */
+export async function previewSampleWorkflow(
+  extensionPath: string,
+  webview: vscode.Webview,
+  sampleId: string,
+  requestId?: string
+): Promise<void> {
+  try {
+    const result = await resolveAndReadSample(extensionPath, sampleId);
+    if (!result.ok) {
+      webview.postMessage({
+        type: 'ERROR',
+        requestId,
+        payload: {
+          code: 'LOAD_FAILED',
+          message: result.message,
+        },
+      });
+      return;
+    }
+
+    const payload: SampleWorkflowPreviewLoadedPayload = {
+      sampleId,
+      workflow: result.parsed.workflow,
+    };
+    webview.postMessage({
+      type: 'SAMPLE_WORKFLOW_PREVIEW_LOADED',
+      requestId,
+      payload,
+    });
+
+    console.log(`Sample workflow previewed: ${sampleId}`);
+  } catch (error) {
+    webview.postMessage({
+      type: 'ERROR',
+      requestId,
+      payload: {
+        code: 'LOAD_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to preview sample workflow',
         details: error,
       },
     });
