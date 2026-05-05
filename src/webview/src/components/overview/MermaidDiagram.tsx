@@ -15,9 +15,6 @@ import {
   sanitizeNodeId,
 } from '@shared/services/workflow-prompt-generator';
 import type { Workflow } from '@shared/types/messages';
-// Lucide icon font: provides `.icon-<name>` classes used by post-render
-// marker replacement (see `replaceInlineIconMarkers`).
-import 'lucide-static/font/lucide.css';
 import {
   Locate,
   LocateOff,
@@ -29,6 +26,7 @@ import {
 } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { LUCIDE_SVG } from './lucide-svg-inline';
 
 interface MermaidDiagramProps {
   workflow: Workflow;
@@ -98,16 +96,15 @@ function stripFences(source: string): string {
 }
 
 /**
- * Replace `__lu:icon-name__` markers in the rendered SVG string with
- * `<i class="icon-name" aria-hidden="true"></i>` tags. The marker text is
- * emitted by `generateMermaidFlowchart({ inlineIcons: true })` and survives
- * mermaid's strict-mode label escaping because it contains no HTML chars.
+ * Replace `__lu:icon-name__` markers in the rendered SVG string with the
+ * matching inline lucide SVG (see `lucide-svg-inline.ts`). The marker text
+ * is emitted by `generateMermaidFlowchart({ inlineIcons: true })` and
+ * survives mermaid's strict-mode label escaping because it contains no HTML
+ * chars. Unknown icon names drop to an empty string so the diagram still
+ * renders without a stray placeholder.
  */
 function replaceInlineIconMarkers(svg: string): string {
-  return svg.replace(
-    INLINE_ICON_MARKER_PATTERN,
-    (_match, name) => `<i class="overview-mermaid-icon icon-${name}" aria-hidden="true"></i>`
-  );
+  return svg.replace(INLINE_ICON_MARKER_PATTERN, (_match, name) => LUCIDE_SVG[name] ?? '');
 }
 
 /**

@@ -379,14 +379,11 @@ body.tour-floating-visible .react-flow__panel.bottom.right {
   transition: filter 0.15s ease;
 }
 
-/* Inline lucide icons injected post-render into Mermaid foreignObject labels.
- * Sized slightly smaller than the surrounding label text so the icon reads as
- * a visual prefix, not a second column. */
+/* Inline lucide SVG injected post-render into Mermaid foreignObject labels.
+ * width/height attrs on the <svg> control raster size; this rule just gives
+ * a small right margin and nudges the icon down to sit on the text baseline. */
 .overview-mermaid-stage .overview-mermaid-icon {
   display: inline-block;
-  font-size: 1.05em;
-  line-height: 1;
   margin-right: 0.35em;
-  vertical-align: -0.15em;
-  font-style: normal;
+  vertical-align: -0.2em;
 }
