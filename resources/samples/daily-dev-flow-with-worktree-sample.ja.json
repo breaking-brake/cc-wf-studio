@@ -112,7 +112,7 @@
         },
         "data": {
           "label": "Propose branch & create worktree",
-          "prompt": "ヒアリング結果をもとに Git ブランチ名を提案し、ユーザー承認後に worktree を作成する。\n\nブランチ命名規則:\n- conventional prefix + ケバブケース\n- prefix: feat / fix / improvement / chore / docs / refactor\n- 例: feat/mcp-stdio-warning, fix/save-button-disabled, improvement/toolbar-layout\n- 50文字程度に収める\n\n手順:\n1. ヒアリング内容から prefix と要約スラッグを決め、ブランチ名候補を1〜2個提示する\n2. ユーザーから承認 / 修正案を受ける（承認されるまで繰り返す）\n3. 承認されたら以下を実行する:\n     git worktree add ../$(basename $PWD)-<slug> -b <branch-name>\n   （リポジトリの命名規則に合わせてパスを調整。既存worktreeと衝突する場合は連番を付ける）\n4. 作成された worktree のパスをユーザーに伝え、以降の作業はそこで行うことを共有する\n5. 必要なら cd で worktree に移動するかユーザーに確認する"
+          "prompt": "ヒアリング結果をもとに Git ブランチ名を提案し、ユーザー承認後に worktree を作成する。\n\nブランチ命名規則:\n- conventional prefix + ケバブケース\n- prefix: feat / fix / improvement / chore / docs / refactor\n- 例: feat/mcp-stdio-warning, fix/save-button-disabled, improvement/toolbar-layout\n- 50文字程度に収める\n\n手順:\n1. ヒアリング内容から prefix と要約スラッグを決め、ブランチ名候補を1〜2個提示する\n2. ユーザーから承認 / 修正案を受ける（承認されるまで繰り返す）\n3. 承認されたら以下を実行する:\n     mkdir -p ../.worktree && git worktree add ../.worktree/<slug> -b <branch-name>\n   （本リポジトリ専用の `.worktree/` ディレクトリを親階層に置く運用。既存worktreeと衝突する場合は連番を付ける）\n4. 作成された worktree のパスをユーザーに伝え、以降の作業はそこで行うことを共有する\n5. 必要なら cd で worktree に移動するかユーザーに確認する"
         },
         "parentId": "group-1"
       },
