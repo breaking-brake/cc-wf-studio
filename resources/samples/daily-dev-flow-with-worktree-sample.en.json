@@ -1,0 +1,297 @@
+{
+  "meta": {
+    "id": "daily-dev-flow-with-worktree-sample",
+    "nameKey": "sample.dailyDevFlowWithWorktree.name",
+    "descriptionKey": "sample.dailyDevFlowWithWorktree.description",
+    "difficulty": "intermediate",
+    "tags": ["development", "git", "worktree"],
+    "nodeCount": 14
+  },
+  "workflow": {
+    "id": "workflow-daily-dev-flow-with-worktree",
+    "name": "daily-dev-flow-with-worktree",
+    "version": "1.0.0",
+    "nodes": [
+      {
+        "id": "group-1",
+        "type": "group",
+        "name": "group-1",
+        "position": {
+          "x": 300,
+          "y": 150
+        },
+        "data": {
+          "label": "1. Task Discovery"
+        },
+        "style": {
+          "width": 400,
+          "height": 320
+        }
+      },
+      {
+        "id": "group-2",
+        "type": "group",
+        "name": "group-2",
+        "position": {
+          "x": 800,
+          "y": 150
+        },
+        "data": {
+          "label": "2. Investigation & Planning"
+        },
+        "style": {
+          "width": 400,
+          "height": 480
+        }
+      },
+      {
+        "id": "group-3",
+        "type": "group",
+        "name": "group-3",
+        "position": {
+          "x": 1300,
+          "y": 150
+        },
+        "data": {
+          "label": "3. Implementation"
+        },
+        "style": {
+          "width": 400,
+          "height": 200
+        }
+      },
+      {
+        "id": "group-4",
+        "type": "group",
+        "name": "group-4",
+        "position": {
+          "x": 1800,
+          "y": 150
+        },
+        "data": {
+          "label": "4. Verification & Submission"
+        },
+        "style": {
+          "width": 400,
+          "height": 320
+        }
+      },
+      {
+        "id": "start-1",
+        "type": "start",
+        "name": "start-1",
+        "position": {
+          "x": 100,
+          "y": 300
+        },
+        "data": {
+          "label": "Start"
+        }
+      },
+      {
+        "id": "prompt-hear-task",
+        "type": "prompt",
+        "name": "prompt-hear-task",
+        "position": {
+          "x": 30,
+          "y": 60
+        },
+        "data": {
+          "label": "Hear development task",
+          "prompt": "Interview the user in detail about the development task at hand.\n\nThings to find out:\n- Goal (new feature / bug fix / improvement / refactoring / docs, etc.)\n- Scope (affected files, modules, features)\n- References (issue number, Slack link, related PR, repro steps, logs, etc.)\n- Definition of done (acceptance criteria, verification method)\n- Urgency / priority\n\nHow to proceed:\n1. Ask 1-3 missing questions at a time, batched (do not interrogate)\n2. Summarize what you have gathered and confirm the understanding with the user\n3. Confirm \"Ready to proceed to branch creation and investigation with this content?\" before moving on"
+        },
+        "parentId": "group-1"
+      },
+      {
+        "id": "prompt-branch-and-worktree",
+        "type": "prompt",
+        "name": "prompt-branch-and-worktree",
+        "position": {
+          "x": 30,
+          "y": 200
+        },
+        "data": {
+          "label": "Propose branch & create worktree",
+          "prompt": "Based on the interview, propose a Git branch name and create a worktree after user approval.\n\nBranch naming convention:\n- conventional prefix + kebab-case\n- prefix: feat / fix / improvement / chore / docs / refactor\n- examples: feat/mcp-stdio-warning, fix/save-button-disabled, improvement/toolbar-layout\n- keep it under ~50 characters\n\nSteps:\n1. Decide a prefix and a summary slug from the interview, then offer 1-2 branch name candidates\n2. Receive approval / revisions from the user (repeat until approved)\n3. Once approved, run:\n     git worktree add ../$(basename $PWD)-<slug> -b <branch-name>\n   (Adjust the path to fit the repo's convention. Append a counter if it collides with an existing worktree.)\n4. Tell the user the worktree path and that subsequent work will happen there\n5. Ask the user whether to cd into the worktree if needed"
+        },
+        "parentId": "group-1"
+      },
+      {
+        "id": "subagent-explore-codebase",
+        "type": "subAgent",
+        "name": "subagent-explore-codebase",
+        "position": {
+          "x": 30,
+          "y": 60
+        },
+        "data": {
+          "description": "Investigate codebase for the requested task",
+          "agentDefinition": "Codebase exploration agent. Read-only investigation focused on identifying files, symbols, and patterns relevant to the requested development task. Returns a structured summary that downstream planning can act on without re-reading the same files.",
+          "prompt": "Investigate the codebase for the development task agreed upon in the interview.\n\nInvestigation perspectives:\n- Identify relevant files / modules / directories\n- Existing similar features and reference patterns\n- Impact surface (callers, dependencies, type definitions, tests)\n- Related schemas, configuration, and documentation\n- Constraints to be aware of (CLAUDE.md rules, existing design decisions)\n\nOutput format (Markdown):\n## Relevant Files\n- path:line — role\n## Existing Patterns\n- existing implementations to reference\n## Impact Surface\n- areas affected by the change\n## Constraints / Notes\n- caveats and design assumptions\n\nDo not fill in by guesswork — actually read files and cite evidence.",
+          "builtInType": "explore",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "subagent-plan",
+        "type": "subAgent",
+        "name": "subagent-plan",
+        "position": {
+          "x": 30,
+          "y": 200
+        },
+        "data": {
+          "description": "Design implementation plan from investigation",
+          "agentDefinition": "Implementation planning agent. Designs a step-by-step plan that turns the investigation results into an actionable diff. Does NOT modify code — only proposes the plan.",
+          "prompt": "Based on the interview and prior investigation results, design an implementation plan.\n\nWhat the plan must contain:\n- List of files to be changed/added (paths)\n- Concrete changes for each file (function additions/edits, type or schema changes, UI changes, etc.)\n- Implementation order (step by step, with completion criteria for each step)\n- Notes on consistency with existing design and conventions\n- Risks / trade-offs / alternatives\n- How to verify (npm run check / build / manual E2E checkpoints)\n\nFormat: Markdown. Do not implement yet — return only the plan.\nThe plan will be presented to the user in the next step for approval.",
+          "builtInType": "plan",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "prompt-confirm-plan",
+        "type": "prompt",
+        "name": "prompt-confirm-plan",
+        "position": {
+          "x": 30,
+          "y": 360
+        },
+        "data": {
+          "label": "Confirm plan with user",
+          "prompt": "Present the implementation plan from the previous step to the user and obtain approval.\n\nHow to proceed:\n1. Summarize the core of the plan concisely (what, where, in what order it will change)\n2. Make the full text available for reference (collapse-style or on demand)\n3. Receive revision requests from the user — apply minor edits directly; for major changes, consider re-running the plan stage\n4. Explicitly ask \"OK to proceed to implementation with this plan?\"\n5. Do not move on until you have explicit approval\n\nAfter approval, reconfirm that work is happening on the target branch / worktree before proceeding."
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "subagent-implement",
+        "type": "subAgent",
+        "name": "subagent-implement",
+        "position": {
+          "x": 30,
+          "y": 60
+        },
+        "data": {
+          "description": "Implement approved plan in the codebase",
+          "agentDefinition": "Implementation agent. Applies code changes according to the approved plan, following project conventions in CLAUDE.md. Avoids unrelated refactors and keeps changes minimal and focused.",
+          "prompt": "Modify the code per the approved implementation plan.\n\nGuidelines:\n- Follow CLAUDE.md coding conventions, commit conventions, and i18n policy\n- Do not perform unnecessary refactors or abstractions outside the plan\n- Match existing naming and style\n- Update type definitions and test data as needed\n- Do not add comments by default (per CLAUDE.md policy)\n- Do not stop at a partial implementation — finish the planned scope\n\nWhen done, return a summary of changed files and the main changes.",
+          "builtInType": "general-purpose",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-3"
+      },
+      {
+        "id": "prompt-quality-checks",
+        "type": "prompt",
+        "name": "prompt-quality-checks",
+        "position": {
+          "x": 30,
+          "y": 60
+        },
+        "data": {
+          "label": "Run npm check & build",
+          "prompt": "Run quality checks against the implemented code.\n\nCommands to run (at the worktree root):\n1. npm run check   # Biome lint + format (with auto-fix)\n2. npm run build   # Extension + Webview build\n\nResponse:\n- If `check` auto-fixed anything, review the diff\n- If either fails, identify the cause, fix it, and re-run until both pass\n- If fixes spill outside the planned scope, confirm the approach with the user\n\nOnce both pass, report the output summary (changed files / warnings) to the user and proceed to the next step."
+        },
+        "parentId": "group-4"
+      },
+      {
+        "id": "prompt-commit-and-pr",
+        "type": "prompt",
+        "name": "prompt-commit-and-pr",
+        "position": {
+          "x": 30,
+          "y": 200
+        },
+        "data": {
+          "label": "Commit & draft PR body",
+          "prompt": "Commit the changes that passed quality checks and draft the PR body.\n\nCommit (per CLAUDE.md):\n- Format: <type>: <subject>  (subject ≤ 50 chars, imperative, no period)\n- type: feat / fix / improvement / docs / refactor / chore\n- Body: 3-5 bullets describing only \"what\" changed\n- Example:\n    fix: add missing MCP node definition to workflow schema\n\n    - Added 'mcp' to supportedNodeTypes\n    - Added complete MCP node type definition\n    - Fixes MCP_INVALID_PARAMETERS validation errors\n\nPR draft (English, per CLAUDE.md):\n- Title: as concise as the commit message (≤ 70 chars)\n- Body:\n    ## Summary\n    - 1-3 bullets\n    ## Test plan\n    - [ ] Manual E2E checklist of what was verified\n    - [ ] npm run check / build pass\n\nSteps:\n1. Verify staged diff with git diff\n2. Compose a concise commit message aligned with CLAUDE.md's squash-merge convention\n3. git commit (confirm with the user before push or `gh pr create`)\n4. Present the PR body draft to the user, edit if requested, then submit"
+        },
+        "parentId": "group-4"
+      },
+      {
+        "id": "end-1",
+        "type": "end",
+        "name": "end-1",
+        "position": {
+          "x": 2300,
+          "y": 300
+        },
+        "data": {
+          "label": "End"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c1",
+        "from": "start-1",
+        "to": "prompt-hear-task",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c2",
+        "from": "prompt-hear-task",
+        "to": "prompt-branch-and-worktree",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c3",
+        "from": "prompt-branch-and-worktree",
+        "to": "subagent-explore-codebase",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c4",
+        "from": "subagent-explore-codebase",
+        "to": "subagent-plan",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c5",
+        "from": "subagent-plan",
+        "to": "prompt-confirm-plan",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c6",
+        "from": "prompt-confirm-plan",
+        "to": "subagent-implement",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c7",
+        "from": "subagent-implement",
+        "to": "prompt-quality-checks",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c8",
+        "from": "prompt-quality-checks",
+        "to": "prompt-commit-and-pr",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c9",
+        "from": "prompt-commit-and-pr",
+        "to": "end-1",
+        "fromPort": "output",
+        "toPort": "input"
+      }
+    ],
+    "createdAt": "2026-05-05T00:00:00.000Z",
+    "updatedAt": "2026-05-05T00:00:00.000Z",
+    "subAgentFlows": []
+  }
+}
