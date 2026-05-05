@@ -26,15 +26,33 @@ import terminal from 'lucide-static/icons/terminal.svg?raw';
 import zap from 'lucide-static/icons/zap.svg?raw';
 
 /**
- * Strip the leading license comment, drop the original width/height/class
- * attributes, and stamp our own. Done once at module load so the lookup map
- * holds ready-to-inject markup.
+ * Strip the leading license comment, then rewrite the *root* `<svg>` opening
+ * tag: drop its `width`/`height`/`class`/`style`/`xmlns` (we'll add our own)
+ * while preserving all other attributes (`viewBox`, `fill`, `stroke`, etc.)
+ * and — critically — leaving every descendant element untouched. An earlier
+ * iteration scrubbed those attribute names everywhere, which silently broke
+ * icons whose `<rect>` children rely on `width`/`height` to define the
+ * rectangle (e.g. `bot`, where the body became invisible).
+ *
+ * Width/height are pinned via *inline style* (in addition to the attributes)
+ * so any nested CSS that targets `svg` cannot stretch the icon — Mermaid's
+ * foreignObject context is busy and an inherited `width: 100%` rule would
+ * otherwise blow the icon up.
+ *
+ * Done once at module load so the lookup map holds ready-to-inject markup.
  */
 function prep(raw: string): string {
   return raw
     .replace(/<!--[\s\S]*?-->\s*/g, '')
-    .replace(/\s+(?:width|height|class)="[^"]*"/g, '')
-    .replace(/<svg/, '<svg class="overview-mermaid-icon" width="14" height="14" aria-hidden="true"')
+    .replace(/<svg\b([^>]*)>/, (_match, attrs: string) => {
+      const cleaned = attrs.replace(/\s+(?:width|height|class|style|xmlns)="[^"]*"/g, '');
+      // 1.1em width/height keeps the icon proportional to surrounding label
+      // text (matches the prior lucide-static font sizing); vertical-align
+      // shifts the icon down so its visual centre meets the text baseline.
+      // Inline style overrides any inherited `svg { width: 100% }` rules
+      // that would otherwise stretch the icon to fill the foreignObject.
+      return `<svg xmlns="http://www.w3.org/2000/svg" class="overview-mermaid-icon" aria-hidden="true" style="width:1.1em;height:1.1em;flex:none;display:inline-block;vertical-align:-0.2em"${cleaned}>`;
+    })
     .trim();
 }
 
