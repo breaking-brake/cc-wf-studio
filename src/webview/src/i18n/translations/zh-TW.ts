@@ -983,4 +983,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'sample.githubIssuePlanning.name': 'GitHub Issue 規劃',
   'sample.githubIssuePlanning.description':
     'GitHub Issue 規劃工作流程：取得 Issue、分析現有程式碼、驗證修復、回顧總結。',
+  'sample.dailyDevFlowWithWorktree.name': '基於 Git Worktree 的日常開發流程',
+  'sample.dailyDevFlowWithWorktree.description':
+    '使用 git worktree 的日常開發流程：任務訪談、分支提議與 worktree 建立、程式碼調查、計畫制定、確認、實作、品質檢查、提交與 PR 草稿。',
 };

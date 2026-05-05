@@ -941,4 +941,6 @@ export interface WebviewTranslationKeys {
   'sample.dialog.loadButton': string;
   'sample.githubIssuePlanning.name': string;
   'sample.githubIssuePlanning.description': string;
+  'sample.dailyDevFlowWithWorktree.name': string;
+  'sample.dailyDevFlowWithWorktree.description': string;
 }

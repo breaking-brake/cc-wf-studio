@@ -1027,4 +1027,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'sample.githubIssuePlanning.name': 'GitHub Issue Planning',
   'sample.githubIssuePlanning.description':
     'A planning workflow for GitHub issues: fetch issue, analyze current code, verify fixes, and retrospective.',
+  'sample.dailyDevFlowWithWorktree.name': 'Daily Dev Flow with Git Worktree',
+  'sample.dailyDevFlowWithWorktree.description':
+    'Daily development flow using git worktree: hear task, propose branch & create worktree, investigate, plan, confirm, implement, run quality checks, commit & draft PR.',
 };

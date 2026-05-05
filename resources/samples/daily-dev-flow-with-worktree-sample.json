@@ -1,0 +1,297 @@
+{
+  "meta": {
+    "id": "daily-dev-flow-with-worktree-sample",
+    "nameKey": "sample.dailyDevFlowWithWorktree.name",
+    "descriptionKey": "sample.dailyDevFlowWithWorktree.description",
+    "difficulty": "intermediate",
+    "tags": ["development", "git", "worktree"],
+    "nodeCount": 14
+  },
+  "workflow": {
+    "id": "workflow-daily-dev-flow-with-worktree",
+    "name": "daily-dev-flow-with-worktree",
+    "version": "1.0.0",
+    "nodes": [
+      {
+        "id": "group-1",
+        "type": "group",
+        "name": "group-1",
+        "position": {
+          "x": 300,
+          "y": 150
+        },
+        "data": {
+          "label": "1. Task Discovery"
+        },
+        "style": {
+          "width": 400,
+          "height": 320
+        }
+      },
+      {
+        "id": "group-2",
+        "type": "group",
+        "name": "group-2",
+        "position": {
+          "x": 800,
+          "y": 150
+        },
+        "data": {
+          "label": "2. Investigation & Planning"
+        },
+        "style": {
+          "width": 400,
+          "height": 480
+        }
+      },
+      {
+        "id": "group-3",
+        "type": "group",
+        "name": "group-3",
+        "position": {
+          "x": 1300,
+          "y": 150
+        },
+        "data": {
+          "label": "3. Implementation"
+        },
+        "style": {
+          "width": 400,
+          "height": 200
+        }
+      },
+      {
+        "id": "group-4",
+        "type": "group",
+        "name": "group-4",
+        "position": {
+          "x": 1800,
+          "y": 150
+        },
+        "data": {
+          "label": "4. Verification & Submission"
+        },
+        "style": {
+          "width": 400,
+          "height": 320
+        }
+      },
+      {
+        "id": "start-1",
+        "type": "start",
+        "name": "start-1",
+        "position": {
+          "x": 100,
+          "y": 300
+        },
+        "data": {
+          "label": "Start"
+        }
+      },
+      {
+        "id": "prompt-hear-task",
+        "type": "prompt",
+        "name": "prompt-hear-task",
+        "position": {
+          "x": 30,
+          "y": 60
+        },
+        "data": {
+          "label": "Hear development task",
+          "prompt": "ユーザーに今回の開発タスクの内容を詳しくヒアリングする。\n\n聞き出す観点:\n- ゴール（機能追加 / バグ修正 / 改善 / リファクタリング / ドキュメント等）\n- 対象範囲（影響を受けるファイル・モジュール・機能）\n- 参考情報（Issue番号、Slackリンク、関連PR、再現手順、ログ等）\n- 完了条件（受け入れ基準・確認方法）\n- 緊急度・優先度の温度感\n\n進め方:\n1. 不足している情報を1〜3個ずつ質問してまとめて聞く（質問攻めにしない）\n2. 集まった内容を簡潔に要約してユーザーに見せ、認識合わせをする\n3. 「この内容でブランチ作成と調査に進んでOK？」と確認してから次へ進む"
+        },
+        "parentId": "group-1"
+      },
+      {
+        "id": "prompt-branch-and-worktree",
+        "type": "prompt",
+        "name": "prompt-branch-and-worktree",
+        "position": {
+          "x": 30,
+          "y": 200
+        },
+        "data": {
+          "label": "Propose branch & create worktree",
+          "prompt": "ヒアリング結果をもとに Git ブランチ名を提案し、ユーザー承認後に worktree を作成する。\n\nブランチ命名規則:\n- conventional prefix + ケバブケース\n- prefix: feat / fix / improvement / chore / docs / refactor\n- 例: feat/mcp-stdio-warning, fix/save-button-disabled, improvement/toolbar-layout\n- 50文字程度に収める\n\n手順:\n1. ヒアリング内容から prefix と要約スラッグを決め、ブランチ名候補を1〜2個提示する\n2. ユーザーから承認 / 修正案を受ける（承認されるまで繰り返す）\n3. 承認されたら以下を実行する:\n     git worktree add ../$(basename $PWD)-<slug> -b <branch-name>\n   （リポジトリの命名規則に合わせてパスを調整。既存worktreeと衝突する場合は連番を付ける）\n4. 作成された worktree のパスをユーザーに伝え、以降の作業はそこで行うことを共有する\n5. 必要なら cd で worktree に移動するかユーザーに確認する"
+        },
+        "parentId": "group-1"
+      },
+      {
+        "id": "subagent-explore-codebase",
+        "type": "subAgent",
+        "name": "subagent-explore-codebase",
+        "position": {
+          "x": 30,
+          "y": 60
+        },
+        "data": {
+          "description": "Investigate codebase for the requested task",
+          "agentDefinition": "Codebase exploration agent. Read-only investigation focused on identifying files, symbols, and patterns relevant to the requested development task. Returns a structured summary that downstream planning can act on without re-reading the same files.",
+          "prompt": "ヒアリングで合意した開発タスクの実装に必要なコードベース調査を行う。\n\n調査観点:\n- 関連ファイル / モジュール / ディレクトリの特定\n- 既存の類似機能・参照できるパターン\n- 影響範囲（呼び出し元、依存関係、型定義、テスト）\n- 関連するスキーマ、設定、ドキュメント\n- 注意すべき制約（CLAUDE.md のルール、既存の設計上の決定）\n\n出力フォーマット (Markdown):\n## Relevant Files\n- path:line — 役割\n## Existing Patterns\n- 参考にできる既存実装\n## Impact Surface\n- 変更で影響を受ける箇所\n## Constraints / Notes\n- 注意点、設計上の前提\n\n推測で埋めずに、実際にファイルを読んで根拠を示す。",
+          "builtInType": "explore",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "subagent-plan",
+        "type": "subAgent",
+        "name": "subagent-plan",
+        "position": {
+          "x": 30,
+          "y": 200
+        },
+        "data": {
+          "description": "Design implementation plan from investigation",
+          "agentDefinition": "Implementation planning agent. Designs a step-by-step plan that turns the investigation results into an actionable diff. Does NOT modify code — only proposes the plan.",
+          "prompt": "ヒアリング内容と前段の調査結果をもとに、実装計画を立てる。\n\n計画に含める内容:\n- 変更/追加するファイルの一覧（path）\n- 各ファイルでの具体的な変更内容（関数追加・修正、型・スキーマ変更、UIの変更点など）\n- 実装順序（ステップ単位、各ステップの完了条件）\n- 既存設計・規約との整合性に関するメモ\n- リスク / トレードオフ / 代替案\n- 動作確認方法（npm run check / build / 手動E2Eのチェック観点）\n\nフォーマットは Markdown。実装はまだ行わず、計画のみを返す。\n計画は次ステップでユーザーに提示して承認を取る前提。",
+          "builtInType": "plan",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "prompt-confirm-plan",
+        "type": "prompt",
+        "name": "prompt-confirm-plan",
+        "position": {
+          "x": 30,
+          "y": 360
+        },
+        "data": {
+          "label": "Confirm plan with user",
+          "prompt": "前ステップの実装計画をユーザーに提示し、承認を取る。\n\n進め方:\n1. 計画の核心部分（何を、どこを、どの順で変えるか）を簡潔に要約して提示\n2. 全文は折りたたみ風にまとめるか、必要に応じて参照できるようにする\n3. ユーザーからの修正要望を受け取り、軽微なら直接修正、大きな変更なら plan 段階の再実行を検討する\n4. 「この計画で実装に進んでOK？」と明確に承認を取る\n5. 承認されない限り次のステップには進まない\n\n承認後、対象ブランチ・worktree で作業中であることを再確認してから次に進む。"
+        },
+        "parentId": "group-2"
+      },
+      {
+        "id": "subagent-implement",
+        "type": "subAgent",
+        "name": "subagent-implement",
+        "position": {
+          "x": 30,
+          "y": 60
+        },
+        "data": {
+          "description": "Implement approved plan in the codebase",
+          "agentDefinition": "Implementation agent. Applies code changes according to the approved plan, following project conventions in CLAUDE.md. Avoids unrelated refactors and keeps changes minimal and focused.",
+          "prompt": "承認された実装計画に従って、コードを修正する。\n\nガイドライン:\n- CLAUDE.md のコーディング規約・コミット規約・i18n方針に従う\n- 計画に書かれていない不要なリファクタリングや抽象化は行わない\n- 既存の命名・スタイルに合わせる\n- 必要に応じて型定義やテストデータも更新\n- コメントは原則追加しない（CLAUDE.md ポリシー準拠）\n- 部分的な実装で止めず、計画のスコープは完了まで進める\n\n完了したら、変更したファイルと主な変更内容のサマリを返す。",
+          "builtInType": "general-purpose",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        },
+        "parentId": "group-3"
+      },
+      {
+        "id": "prompt-quality-checks",
+        "type": "prompt",
+        "name": "prompt-quality-checks",
+        "position": {
+          "x": 30,
+          "y": 60
+        },
+        "data": {
+          "label": "Run npm check & build",
+          "prompt": "実装が終わったコードに対して品質チェックを実行する。\n\n実行コマンド（worktree のルートで）:\n1. npm run check   # Biome lint + format（auto-fix付き）\n2. npm run build   # Extension + Webview ビルド\n\n対応:\n- check で auto-fix された差分があれば確認\n- どちらかで失敗したら原因を特定して修正し、両方通るまで繰り返す\n- 修正が計画外の領域に及びそうなら、ユーザーに方針確認をする\n\n両方通ったら、出力サマリ（変更ファイル / 警告の有無）をユーザーに報告して次のステップへ。"
+        },
+        "parentId": "group-4"
+      },
+      {
+        "id": "prompt-commit-and-pr",
+        "type": "prompt",
+        "name": "prompt-commit-and-pr",
+        "position": {
+          "x": 30,
+          "y": 200
+        },
+        "data": {
+          "label": "Commit & draft PR body",
+          "prompt": "品質チェックが通った変更をコミットし、PR 本文の下書きを作成する。\n\nコミット (CLAUDE.md 準拠):\n- 形式: <type>: <subject>（subject は 50 文字以内、命令形、ピリオドなし）\n- type: feat / fix / improvement / docs / refactor / chore\n- 本文は 3〜5 行の bullet で「何を」変えたかのみ\n- 例:\n    fix: add missing MCP node definition to workflow schema\n\n    - Added 'mcp' to supportedNodeTypes\n    - Added complete MCP node type definition\n    - Fixes MCP_INVALID_PARAMETERS validation errors\n\nPR 下書き (英語、CLAUDE.md 準拠):\n- Title: コミットメッセージ相当のシンプルさ（70 文字以内）\n- Body:\n    ## Summary\n    - 1〜3 bullet\n    ## Test plan\n    - [ ] 手動 E2E で確認した内容のチェックリスト\n    - [ ] npm run check / build 通過\n\n手順:\n1. ステージング済みの差分を git diff で確認\n2. CLAUDE.md の squash merge 前提に合わせて簡潔なコミットメッセージを作成\n3. git commit（push や gh pr create はユーザーに確認してから実行）\n4. PR 本文の下書きをユーザーに提示し、必要があれば修正してから提出"
+        },
+        "parentId": "group-4"
+      },
+      {
+        "id": "end-1",
+        "type": "end",
+        "name": "end-1",
+        "position": {
+          "x": 2300,
+          "y": 300
+        },
+        "data": {
+          "label": "End"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c1",
+        "from": "start-1",
+        "to": "prompt-hear-task",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c2",
+        "from": "prompt-hear-task",
+        "to": "prompt-branch-and-worktree",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c3",
+        "from": "prompt-branch-and-worktree",
+        "to": "subagent-explore-codebase",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c4",
+        "from": "subagent-explore-codebase",
+        "to": "subagent-plan",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c5",
+        "from": "subagent-plan",
+        "to": "prompt-confirm-plan",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c6",
+        "from": "prompt-confirm-plan",
+        "to": "subagent-implement",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c7",
+        "from": "subagent-implement",
+        "to": "prompt-quality-checks",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c8",
+        "from": "prompt-quality-checks",
+        "to": "prompt-commit-and-pr",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c9",
+        "from": "prompt-commit-and-pr",
+        "to": "end-1",
+        "fromPort": "output",
+        "toPort": "input"
+      }
+    ],
+    "createdAt": "2026-05-05T00:00:00.000Z",
+    "updatedAt": "2026-05-05T00:00:00.000Z",
+    "subAgentFlows": []
+  }
+}
