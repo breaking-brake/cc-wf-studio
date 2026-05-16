@@ -1,99 +1,69 @@
 /**
- * `ccwf run <file>` — plan + write a workflow's `.claude/*` files into cwd.
+ * `ccwf run <file>` — for now, a thin wrapper over `ccwf export`.
  *
- * Phase 4a: file-write only. The command produces:
- *   - .claude/agents/<sub-agent>.md for inline SubAgent nodes
- *   - .claude/agents/<workflow>_<flow>.md for SubAgentFlow definitions
- *   - .claude/commands/<workflow>.md for the SlashCommand entry
- * and then prints a follow-up instruction on stdout. Launching `claude` is
- * deferred to Phase 4b (`--launch` flag).
- *
- * `--overwrite` is required when any of the target files already exist; this
- * guards against accidentally clobbering hand-edited agents.
+ * Today this just calls `runExport` and appends a "next step" hint pointing
+ * the user at Claude Code (or the chosen agent). In a later phase, `run` will
+ * spawn `claude` itself and let the agent perform the skill export +
+ * execution. The contract for `<file>` and the flags (`--agent`, `--cwd`,
+ * `--overwrite`) is intentionally identical to `ccwf export` so the future
+ * change is backward-compatible.
  */
 
-import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { type PlannedExportFile, nodeNameToFileName, planWorkflowExportFiles } from '@cc-wf-studio/core';
 import { Command } from 'commander';
-import { WorkflowLoadError, loadWorkflowFromFile } from '../utils/load-workflow.js';
+import { WorkflowLoadError } from '../utils/load-workflow.js';
+import { asSupportedAgent, runExport } from './export.js';
 
-interface RunOptions {
+interface CommanderRunOptions {
+  agent: string;
   overwrite: boolean;
-  /** Project root to write into. Defaults to `process.cwd()`. */
   cwd?: string;
 }
 
-function resolvePlanned(rootDir: string, file: PlannedExportFile): string {
-  return path.join(rootDir, ...file.relativePath.split('/'));
-}
-
-async function pathExists(target: string): Promise<boolean> {
-  try {
-    await fs.stat(target);
-    return true;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
-    throw error;
-  }
-}
+const NEXT_STEP_HINTS: Record<string, (slash: string) => string> = {
+  'claude-code': (slash) => `launch Claude Code and run \`/${slash}\``,
+  antigravity: (slash) => `open Antigravity and run the "${slash}" skill`,
+  codex: (slash) => `start Codex CLI and run \`$${slash}\``,
+  copilot: (slash) => `start Copilot CLI and run \`/${slash}\``,
+  cursor: (slash) => `open Cursor and trigger the "${slash}" skill`,
+  gemini: (slash) => `start Gemini CLI and run \`${slash}\``,
+  'roo-code': (slash) => `open Roo Code and run \`:${slash}\``,
+};
 
 export function registerRunCommand(program: Command): void {
   program
     .command('run')
-    .description('Materialise a workflow as .claude/agents and .claude/commands files in cwd.')
+    .description(
+      'Materialise the workflow (same as ccwf export) and print follow-up instructions for the target agent.'
+    )
     .argument('<file>', 'Path to a workflow JSON file.')
+    .option(
+      '--agent <name>',
+      'Target agent (claude-code | antigravity | codex | copilot | cursor | gemini | roo-code).',
+      'claude-code'
+    )
     .option('--overwrite', 'Overwrite existing files instead of erroring.', false)
     .option(
       '--cwd <dir>',
-      'Project root to write into. Defaults to process.cwd(). Useful for tests.'
+      'Output root. Defaults to process.cwd(). Useful for tests / scripted runs.'
     )
-    .action(async (file: string, options: RunOptions) => {
+    .action(async (file: string, options: CommanderRunOptions) => {
       try {
-        const { workflow } = await loadWorkflowFromFile(file);
-        const rootDir = path.resolve(options.cwd ?? process.cwd());
-        const plan = planWorkflowExportFiles(workflow);
+        const agent = asSupportedAgent(options.agent);
+        const result = await runExport({
+          file,
+          agent,
+          overwrite: options.overwrite,
+          cwd: options.cwd,
+        });
 
-        if (!options.overwrite) {
-          const conflicts: string[] = [];
-          for (const planned of plan) {
-            const absPath = resolvePlanned(rootDir, planned);
-            if (await pathExists(absPath)) {
-              conflicts.push(absPath);
-            }
-          }
-          if (conflicts.length > 0) {
-            process.stderr.write(
-              `error: ${conflicts.length} file(s) already exist. Pass --overwrite to replace them:\n`
-            );
-            for (const absPath of conflicts) {
-              process.stderr.write(`  - ${absPath}\n`);
-            }
-            process.exit(1);
-          }
+        process.stdout.write(`✓ Wrote ${result.writtenPaths.length} file(s):\n`);
+        for (const writtenPath of result.writtenPaths) {
+          process.stdout.write(`  - ${path.relative(result.rootDir, writtenPath)}\n`);
         }
 
-        const writtenPaths: string[] = [];
-        const ensuredDirs = new Set<string>();
-        for (const planned of plan) {
-          const absPath = resolvePlanned(rootDir, planned);
-          const dir = path.dirname(absPath);
-          if (!ensuredDirs.has(dir)) {
-            await fs.mkdir(dir, { recursive: true });
-            ensuredDirs.add(dir);
-          }
-          await fs.writeFile(absPath, planned.contents, 'utf-8');
-          writtenPaths.push(absPath);
-        }
-
-        const slashName = nodeNameToFileName(workflow.name);
-        process.stdout.write(`✓ Wrote ${writtenPaths.length} file(s):\n`);
-        for (const writtenPath of writtenPaths) {
-          process.stdout.write(`  - ${path.relative(rootDir, writtenPath)}\n`);
-        }
-        process.stdout.write(
-          `\nNext: launch Claude Code in ${rootDir} and run \`/${slashName}\`.\n`
-        );
+        const hint = NEXT_STEP_HINTS[agent](result.slashName);
+        process.stdout.write(`\nNext: in ${result.rootDir}, ${hint}.\n`);
       } catch (error) {
         if (error instanceof WorkflowLoadError) {
           process.stderr.write(`error: ${error.message}\n`);
