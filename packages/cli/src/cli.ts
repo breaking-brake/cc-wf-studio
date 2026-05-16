@@ -10,6 +10,7 @@
  */
 
 import { Command } from 'commander';
+import { registerExportCommand } from './commands/export.js';
 import { registerMcpCommand } from './commands/mcp.js';
 import { registerRenderCommand } from './commands/render.js';
 import { registerRunCommand } from './commands/run.js';
@@ -25,6 +26,7 @@ program
 registerRenderCommand(program);
 registerValidateCommand(program);
 registerMcpCommand(program);
+registerExportCommand(program);
 registerRunCommand(program);
 
 program.parseAsync(process.argv).catch((error) => {
