@@ -19,7 +19,7 @@ import {
   planAgentSkillFiles,
   planWorkflowExportFiles,
 } from '@cc-wf-studio/core';
-import { Command } from 'commander';
+import { Command, InvalidArgumentError } from 'commander';
 import { WorkflowLoadError, loadWorkflowFromFile } from '../utils/load-workflow.js';
 
 const CLAUDE_CODE_AGENT = 'claude-code' as const;
@@ -58,9 +58,9 @@ function parseAgentOption(value: string): SupportedAgent {
   if ((SUPPORTED_AGENTS as readonly string[]).includes(value)) {
     return value as SupportedAgent;
   }
-  throw new Error(
-    `Unknown --agent value '${value}'. Expected one of: ${SUPPORTED_AGENTS.join(', ')}.`
-  );
+  // InvalidArgumentError is commander's signal for "render this as a clean
+  // CLI error, not an uncaught exception with a stack trace".
+  throw new InvalidArgumentError(`Expected one of: ${SUPPORTED_AGENTS.join(', ')}.`);
 }
 
 function resolvePlanned(rootDir: string, file: PlannedExportFile): string {

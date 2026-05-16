@@ -7,7 +7,7 @@
  * `mermaid-cli` or similar.
  */
 
-import { Command } from 'commander';
+import { Command, InvalidArgumentError } from 'commander';
 import {
   generateExecutionInstructions,
   generateMermaidFlowchart,
@@ -30,7 +30,7 @@ export function registerRenderCommand(program: Command): void {
       'Output format: "md" (default) or "mermaid".',
       (value): RenderFormat => {
         if (value !== 'mermaid' && value !== 'md') {
-          throw new Error(`Unknown --format value '${value}'. Expected 'mermaid' or 'md'.`);
+          throw new InvalidArgumentError("Expected 'mermaid' or 'md'.");
         }
         return value;
       },
