@@ -5,7 +5,7 @@
  * Based on: /specs/001-cc-wf-studio/research.md section 3.3
  */
 
-import type { AskUserQuestionData } from '@shared/types/workflow-definition';
+import type { AskUserQuestionData } from '@cc-wf-studio/core';
 import { ShieldQuestion } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { Handle, type NodeProps, Position, useUpdateNodeInternals } from 'reactflow';

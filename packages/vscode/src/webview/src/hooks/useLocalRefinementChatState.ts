@@ -5,7 +5,7 @@
  * Used by SubAgentFlowDialog to maintain isolated chat history from main workflow.
  */
 
-import type { ConversationHistory, ConversationMessage } from '@shared/types/workflow-definition';
+import type { ConversationHistory, ConversationMessage } from '@cc-wf-studio/core';
 import { useCallback, useMemo, useState } from 'react';
 import type { SessionStatus } from '../stores/refinement-store';
 import type { RefinementChatState, RefinementErrorCode } from '../types/refinement-chat-state';

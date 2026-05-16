@@ -13,7 +13,7 @@
  * Opens at the final step based on existing nodeData, allowing users to go back.
  */
 
-import type { McpNodeData, McpNodeMode } from '@shared/types/mcp-node';
+import type { McpNodeData, McpNodeMode } from '@cc-wf-studio/core/mcp';
 import type { McpToolReference } from '@shared/types/messages';
 import { useCallback, useMemo, useState } from 'react';
 

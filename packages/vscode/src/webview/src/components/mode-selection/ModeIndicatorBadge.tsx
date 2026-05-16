@@ -7,7 +7,7 @@
  * Based on: specs/001-mcp-natural-language-mode/tasks.md T016
  */
 
-import type { McpNodeMode } from '@shared/types/mcp-node';
+import type { McpNodeMode } from '@cc-wf-studio/core/mcp';
 import { useTranslation } from '../../i18n/i18n-context';
 
 interface ModeIndicatorBadgeProps {

@@ -5,6 +5,15 @@
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md
  */
 
+import {
+  type ConversationHistory,
+  NodeType,
+  type SkillNodeData,
+  type SubAgentFlow,
+  type SubAgentFlowNodeData,
+  validateAIGeneratedWorkflow,
+  type Workflow,
+} from '@cc-wf-studio/core';
 import type {
   AiCliProvider,
   ClaudeModel,
@@ -13,16 +22,7 @@ import type {
   CopilotModel,
   SkillReference,
 } from '../../shared/types/messages';
-import {
-  type ConversationHistory,
-  NodeType,
-  type SkillNodeData,
-  type SubAgentFlow,
-  type SubAgentFlowNodeData,
-  type Workflow,
-} from '../../shared/types/workflow-definition';
 import { log } from '../extension';
-import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
 import {
   estimateTokens,
   getConfiguredSchemaFormat,

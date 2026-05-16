@@ -8,8 +8,8 @@
  * At runtime, sub-agent flows are executed as Sub-Agents.
  */
 
-import type { SubAgentFlowNodeData } from '@shared/types/workflow-definition';
-import { SUB_AGENT_COLORS } from '@shared/types/workflow-definition';
+import type { SubAgentFlowNodeData } from '@cc-wf-studio/core';
+import { SUB_AGENT_COLORS } from '@cc-wf-studio/core';
 import { Bot } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';

@@ -8,7 +8,7 @@
 
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import type { SchemaFormat } from '../../shared/types/ai-metrics';
+import type { SchemaFormat } from '@cc-wf-studio/core';
 
 // In-memory caches for loaded schemas
 let cachedJsonSchema: unknown | undefined;

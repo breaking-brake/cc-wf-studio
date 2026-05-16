@@ -11,7 +11,7 @@
  * Extension-side validation (schema-parser.ts) is the authoritative source.
  */
 
-import type { ToolParameter } from '@shared/types/mcp-node';
+import type { ToolParameter } from '@cc-wf-studio/core/mcp';
 
 /**
  * Extended ToolParameter with validation metadata

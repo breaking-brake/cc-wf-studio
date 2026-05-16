@@ -7,7 +7,7 @@
  * Based on: specs/001-skill-node/design.md Section 6.1
  */
 
-import type { SkillNodeData } from '@shared/types/workflow-definition';
+import type { SkillNodeData } from '@cc-wf-studio/core';
 import { Zap } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';

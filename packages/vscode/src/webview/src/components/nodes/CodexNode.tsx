@@ -7,7 +7,7 @@
  * Phase 1: UI/data model only (CLI execution is out of scope)
  */
 
-import type { CodexNodeData } from '@shared/types/workflow-definition';
+import type { CodexNodeData } from '@cc-wf-studio/core';
 import { Terminal } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';

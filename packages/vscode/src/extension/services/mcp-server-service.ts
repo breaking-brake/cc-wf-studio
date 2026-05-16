@@ -12,6 +12,7 @@
  */
 
 import * as http from 'node:http';
+import type { Workflow } from '@cc-wf-studio/core';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import type * as vscode from 'vscode';
@@ -22,7 +23,6 @@ import type {
   McpConfigTarget,
   PlannedSubAgentFile,
 } from '../../shared/types/messages';
-import type { Workflow } from '../../shared/types/workflow-definition';
 import { log } from '../extension';
 import { registerMcpTools } from './mcp-server-tools';
 

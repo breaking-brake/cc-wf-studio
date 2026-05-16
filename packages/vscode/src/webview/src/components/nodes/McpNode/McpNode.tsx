@@ -8,7 +8,7 @@
  * Task: T027
  */
 
-import type { McpNodeData } from '@shared/types/workflow-definition';
+import type { McpNodeData } from '@cc-wf-studio/core';
 import { Plug } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';

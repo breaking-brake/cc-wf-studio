@@ -10,6 +10,7 @@
  * Enhancement: T046 - Updated handleGetMcpTools to use getTools() with built-in caching
  */
 
+import type { McpServerReference } from '@cc-wf-studio/core/mcp';
 import * as vscode from 'vscode';
 import type {
   CheckMcpBearerTokenPayload,
@@ -109,9 +110,7 @@ export async function handleListMcpServers(
 
     // Convert McpServerWithSource to McpServerReference
     // Note: status is omitted because config readers can't determine connection status
-    const convertToServerReference = (
-      server: McpServerWithSource
-    ): import('../../shared/types/mcp-node').McpServerReference => ({
+    const convertToServerReference = (server: McpServerWithSource): McpServerReference => ({
       id: server.id,
       name: server.id, // Use ID as name since config files don't have separate name
       scope: 'user', // Config file servers are always user scope
@@ -126,7 +125,7 @@ export async function handleListMcpServers(
 
     // Combine CLI results and config file servers
     // Use id + source combination as unique key to allow same server ID from different sources
-    const mergedServers: import('../../shared/types/mcp-node').McpServerReference[] = [];
+    const mergedServers: McpServerReference[] = [];
     const seenServerKeys = new Set<string>();
 
     // Helper to create unique key from id and source

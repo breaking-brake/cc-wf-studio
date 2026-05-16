@@ -5,7 +5,7 @@
  * Variable 2-N way branching for multiple conditional paths
  */
 
-import type { SwitchNodeData } from '@shared/types/workflow-definition';
+import type { SwitchNodeData } from '@cc-wf-studio/core';
 import { GitFork } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { Handle, type NodeProps, Position, useUpdateNodeInternals } from 'reactflow';

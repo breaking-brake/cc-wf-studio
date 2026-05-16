@@ -5,7 +5,7 @@
  * Handles backward compatibility for workflow structure changes.
  */
 
-import type { Workflow } from '../../shared/types/workflow-definition';
+import type { Workflow } from '../types/workflow-definition';
 
 /**
  * Apply all workflow migrations

@@ -4,6 +4,7 @@
  * Handles Export/Run for Google Gemini CLI integration
  */
 
+import { NodeType } from '@cc-wf-studio/core';
 import * as vscode from 'vscode';
 import type {
   ExportForGeminiCliPayload,
@@ -12,7 +13,6 @@ import type {
   RunForGeminiCliPayload,
   RunForGeminiCliSuccessPayload,
 } from '../../shared/types/messages';
-import { NodeType } from '../../shared/types/workflow-definition';
 import { extractMcpServerIdsFromWorkflow } from '../services/copilot-export-service';
 import type { FileService } from '../services/file-service';
 import {

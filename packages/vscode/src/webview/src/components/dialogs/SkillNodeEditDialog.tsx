@@ -7,9 +7,9 @@
  * Based on: McpNodeEditDialog pattern
  */
 
+import type { SkillNodeData } from '@cc-wf-studio/core';
+import { VALIDATION_RULES } from '@cc-wf-studio/core';
 import * as Dialog from '@radix-ui/react-dialog';
-import type { SkillNodeData } from '@shared/types/workflow-definition';
-import { VALIDATION_RULES } from '@shared/types/workflow-definition';
 import { useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 import { useWorkflowStore } from '../../stores/workflow-store';

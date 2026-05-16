@@ -8,7 +8,7 @@
  * Task: T036
  */
 
-import type { ToolParameter } from '@shared/types/mcp-node';
+import type { ToolParameter } from '@cc-wf-studio/core/mcp';
 import { useState } from 'react';
 import { useTranslation } from '../../../i18n/i18n-context';
 

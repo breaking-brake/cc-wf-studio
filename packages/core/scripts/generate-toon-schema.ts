@@ -8,8 +8,10 @@
 
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { encode } from '@toon-format/toon';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const RESOURCES_DIR = path.resolve(__dirname, '../resources');
 const JSON_SCHEMA_PATH = path.join(RESOURCES_DIR, 'workflow-schema.json');
 const TOON_SCHEMA_PATH = path.join(RESOURCES_DIR, 'workflow-schema.toon');

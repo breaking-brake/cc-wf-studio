@@ -7,8 +7,7 @@
  * Exposes an imperative `scrollToNode(nodeId)` via `forwardRef`.
  */
 
-import { generateOverviewMarkdown } from '@shared/services/workflow-overview-formatter';
-import { sanitizeNodeId } from '@shared/services/workflow-prompt-generator';
+import { generateOverviewMarkdown, sanitizeNodeId } from '@cc-wf-studio/core';
 import type { Workflow } from '@shared/types/messages';
 import { ExternalLink } from 'lucide-react';
 import type React from 'react';

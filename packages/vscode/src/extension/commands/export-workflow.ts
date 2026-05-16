@@ -5,6 +5,7 @@
  */
 
 import * as path from 'node:path';
+import { validateAIGeneratedWorkflow } from '@cc-wf-studio/core';
 import type { Webview } from 'vscode';
 import * as vscode from 'vscode';
 import type {
@@ -22,7 +23,6 @@ import {
   hasNonStandardSkills,
   promptAndNormalizeSkills,
 } from '../services/skill-normalization-service';
-import { validateAIGeneratedWorkflow } from '../utils/validate-workflow';
 
 /**
  * Export workflow to .claude format

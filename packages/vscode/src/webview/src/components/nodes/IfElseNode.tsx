@@ -5,7 +5,7 @@
  * Fixed 2-way branching for True/False, Yes/No, Success/Error conditions
  */
 
-import type { IfElseNodeData } from '@shared/types/workflow-definition';
+import type { IfElseNodeData } from '@cc-wf-studio/core';
 import { GitBranch } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { Handle, type NodeProps, Position, useUpdateNodeInternals } from 'reactflow';

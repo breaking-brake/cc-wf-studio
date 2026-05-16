@@ -4,7 +4,7 @@
  * Based on: /specs/001-cc-wf-studio/contracts/extension-webview-api.md
  */
 
-import type { Connection, Workflow, WorkflowNode } from './workflow-definition';
+import type { Connection, Workflow, WorkflowNode } from '@cc-wf-studio/core';
 
 // Re-export Workflow for convenience
 export type { Connection, Workflow, WorkflowNode };
@@ -397,7 +397,7 @@ export interface SkillValidationSuccessPayload {
 // AI Workflow Refinement Payloads (001-ai-workflow-refinement)
 // ============================================================================
 
-import type { ConversationHistory, ConversationMessage } from './workflow-definition';
+import type { ConversationHistory, ConversationMessage } from '@cc-wf-studio/core';
 
 /**
  * Claude model selection for AI refinement
@@ -633,7 +633,7 @@ export interface SubAgentFlowRefinementSuccessPayload {
 // MCP Node Payloads (001-mcp-node)
 // ============================================================================
 
-import type { McpServerReference, McpToolReference } from './mcp-node';
+import type { McpServerReference, McpToolReference } from '@cc-wf-studio/core/mcp';
 
 // Re-export for Webview usage
 export type { McpServerReference, McpToolReference };
@@ -1103,7 +1103,7 @@ export interface GetSkillVersionDetailsFailedPayload {
 // ============================================================================
 
 export interface SampleWorkflowListPayload {
-  samples: import('./sample-workflow').SampleWorkflowMeta[];
+  samples: import('@cc-wf-studio/core').SampleWorkflowMeta[];
 }
 
 export interface LoadSampleWorkflowRequestPayload {

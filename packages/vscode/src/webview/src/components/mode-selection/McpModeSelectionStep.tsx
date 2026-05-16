@@ -5,7 +5,7 @@
  * (aiToolSelection / aiParameterConfig / manualParameterConfig)
  */
 
-import type { McpNodeMode } from '@shared/types/mcp-node';
+import type { McpNodeMode } from '@cc-wf-studio/core/mcp';
 import { useTranslation } from '../../i18n/i18n-context';
 
 interface McpModeSelectionStepProps {

@@ -7,7 +7,7 @@
  * Updated: Phase 3.8 - Added error state display
  */
 
-import type { ConversationMessage } from '@shared/types/workflow-definition';
+import type { ConversationMessage } from '@cc-wf-studio/core';
 import { useResponsiveFonts } from '../../contexts/ResponsiveFontContext';
 import { useTranslation } from '../../i18n/i18n-context';
 import type { WebviewTranslationKeys } from '../../i18n/translation-keys';

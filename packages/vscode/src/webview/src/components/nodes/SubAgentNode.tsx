@@ -5,9 +5,8 @@
  * Based on: /specs/001-cc-wf-studio/research.md section 3.2
  */
 
-import { BUILT_IN_SUB_AGENTS } from '@shared/constants/built-in-sub-agents';
-import type { SubAgentData } from '@shared/types/workflow-definition';
-import { SUB_AGENT_COLORS } from '@shared/types/workflow-definition';
+import type { SubAgentData } from '@cc-wf-studio/core';
+import { BUILT_IN_SUB_AGENTS, SUB_AGENT_COLORS } from '@cc-wf-studio/core';
 import { Bot } from 'lucide-react';
 import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';

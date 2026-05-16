@@ -8,7 +8,7 @@
  * Updated: Controlled Component - Accept conversationHistory from props
  */
 
-import type { ConversationHistory } from '@shared/types/workflow-definition';
+import type { ConversationHistory } from '@cc-wf-studio/core';
 import { ExternalLink } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useResponsiveFonts } from '../../contexts/ResponsiveFontContext';

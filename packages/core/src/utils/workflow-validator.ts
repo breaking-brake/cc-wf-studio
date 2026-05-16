@@ -7,7 +7,7 @@
  * Based on specs/001-slack-workflow-sharing/contracts/extension-host-api-contracts.md
  */
 
-import type { Workflow } from '../../shared/types/workflow';
+import type { Workflow } from '../types/workflow-definition';
 
 /**
  * Validation result
@@ -96,6 +96,6 @@ export function validateWorkflowFile(content: string): ValidationResult {
 
   return {
     valid: true,
-    workflow: workflow as Workflow,
+    workflow: workflow as unknown as Workflow,
   };
 }

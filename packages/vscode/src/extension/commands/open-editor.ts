@@ -7,6 +7,7 @@
 
 import * as crypto from 'node:crypto';
 import * as path from 'node:path';
+import { migrateWorkflow, validateWorkflowFile } from '@cc-wf-studio/core';
 import * as vscode from 'vscode';
 import type {
   AiEditingProvider,
@@ -40,9 +41,7 @@ import { executeSlashCommandInTerminal } from '../services/terminal-execution-se
 import { listCopilotModels } from '../services/vscode-lm-service';
 import { AnthropicApiKeyManager } from '../utils/anthropic-api-key-manager';
 import { countUnreadVersions, extractVersions, parseChangelog } from '../utils/changelog-parser';
-import { migrateWorkflow } from '../utils/migrate-workflow';
 import { SlackTokenManager } from '../utils/slack-token-manager';
-import { validateWorkflowFile } from '../utils/workflow-validator';
 import { getWebviewContent } from '../webview-content';
 import { handleExportForAntigravity, handleRunForAntigravity } from './antigravity-handlers';
 import {

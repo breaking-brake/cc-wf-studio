@@ -7,12 +7,11 @@
 
 import { execFileSync } from 'node:child_process';
 import * as path from 'node:path';
+import type { Workflow } from '@cc-wf-studio/core';
+import { migrateWorkflow, validateWorkflowFile } from '@cc-wf-studio/core';
 import * as vscode from 'vscode';
-import type { Workflow } from '../../shared/types/workflow-definition';
 import { loadWorkflowIntoEditor, prepareEditorForLoad } from '../commands/open-editor';
 import { log } from '../extension';
-import { migrateWorkflow } from '../utils/migrate-workflow';
-import { validateWorkflowFile } from '../utils/workflow-validator';
 import { getWebviewContent } from '../webview-content';
 
 /**

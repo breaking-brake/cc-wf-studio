@@ -5,7 +5,7 @@
  * (App.tsx for main workflow, SubAgentFlowDialog for SubAgentFlow)
  */
 
-import type { ConversationHistory, ConversationMessage } from '@shared/types/workflow-definition';
+import type { ConversationHistory, ConversationMessage } from '@cc-wf-studio/core';
 import type { SessionStatus } from '../stores/refinement-store';
 
 /** Error codes for refinement failures */

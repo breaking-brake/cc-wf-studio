@@ -8,6 +8,7 @@
  */
 
 import * as path from 'node:path';
+import { migrateWorkflow, validateWorkflowFile } from '@cc-wf-studio/core';
 import * as vscode from 'vscode';
 import type { ImportWorkflowFromSlackPayload } from '../../shared/types/messages';
 import { log } from '../extension';
@@ -17,9 +18,7 @@ import type {
   ImportWorkflowFailedEvent,
   ImportWorkflowSuccessEvent,
 } from '../types/slack-messages';
-import { migrateWorkflow } from '../utils/migrate-workflow';
 import { handleSlackError, type SlackErrorInfo } from '../utils/slack-error-handler';
-import { validateWorkflowFile } from '../utils/workflow-validator';
 
 /**
  * Handle workflow import from Slack

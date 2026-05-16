@@ -11,7 +11,7 @@
  * 4. Final config (only for aiParameterConfig / manualParameterConfig)
  */
 
-import type { McpNodeMode } from '@shared/types/mcp-node';
+import type { McpNodeMode } from '@cc-wf-studio/core/mcp';
 import type { McpServerReference, McpToolReference } from '@shared/types/messages';
 import { useCallback, useMemo, useState } from 'react';
 

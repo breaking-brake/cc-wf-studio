@@ -5,8 +5,8 @@
  * Used by SubAgent and SubAgentFlow nodes.
  */
 
+import { SUB_AGENT_COLORS } from '@cc-wf-studio/core';
 import * as Select from '@radix-ui/react-select';
-import { SUB_AGENT_COLORS } from '@shared/types/workflow-definition';
 import type React from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
 

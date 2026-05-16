@@ -9,10 +9,7 @@
  *   diagram is readable even when it is much larger than the panel.
  */
 
-import {
-  generateMermaidFlowchart,
-  sanitizeNodeId,
-} from '@shared/services/workflow-prompt-generator';
+import { generateMermaidFlowchart, sanitizeNodeId } from '@cc-wf-studio/core';
 import type { Workflow } from '@shared/types/messages';
 import {
   Locate,

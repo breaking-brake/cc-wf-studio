@@ -4,7 +4,7 @@
  * Custom React Flow node for conditional branching based on natural language conditions
  */
 
-import type { BranchNodeData } from '@shared/types/workflow-definition';
+import type { BranchNodeData } from '@cc-wf-studio/core';
 import { GitBranch } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { Handle, type NodeProps, Position, useUpdateNodeInternals } from 'reactflow';

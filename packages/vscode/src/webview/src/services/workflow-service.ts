@@ -13,7 +13,7 @@ import {
   VALIDATION_RULES,
   type Workflow,
   type WorkflowNode,
-} from '@shared/types/workflow-definition';
+} from '@cc-wf-studio/core';
 import type { Edge, Node } from 'reactflow';
 
 /**

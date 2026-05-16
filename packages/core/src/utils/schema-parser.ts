@@ -8,7 +8,7 @@
  * Task: T030
  */
 
-import type { ToolParameter } from '../../shared/types/mcp-node';
+import type { ToolParameter } from '../types/mcp-node';
 
 /**
  * JSON Schema property definition

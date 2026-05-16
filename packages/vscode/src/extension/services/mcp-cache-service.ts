@@ -5,7 +5,7 @@
  * Cache strategy: No automatic refresh - user must manually refresh (per contracts/mcp-cli.schema.json)
  */
 
-import type { McpServerReference, McpToolReference } from '../../shared/types/mcp-node';
+import type { McpServerReference, McpToolReference } from '@cc-wf-studio/core/mcp';
 import { log } from '../extension';
 
 /**

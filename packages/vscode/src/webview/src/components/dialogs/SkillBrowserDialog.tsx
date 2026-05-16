@@ -7,9 +7,9 @@
  * Based on: specs/001-skill-node/design.md Section 6.2
  */
 
+import { NodeType, VALIDATION_RULES } from '@cc-wf-studio/core';
 import * as Dialog from '@radix-ui/react-dialog';
 import type { SkillReference } from '@shared/types/messages';
-import { NodeType, VALIDATION_RULES } from '@shared/types/workflow-definition';
 import { ExternalLink } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';

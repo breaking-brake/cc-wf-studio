@@ -5,9 +5,6 @@
  * Based on: /specs/001-cc-wf-studio/research.md section 3.4
  */
 
-import type { McpNodeData } from '@shared/types/mcp-node';
-import { normalizeMcpNodeData } from '@shared/types/mcp-node';
-import type { Workflow } from '@shared/types/messages';
 import type {
   HookEntry,
   HookType,
@@ -17,8 +14,11 @@ import type {
   SubAgentFlow,
   WorkflowHooks,
   WorkflowNode,
-} from '@shared/types/workflow-definition';
-import { NodeType } from '@shared/types/workflow-definition';
+} from '@cc-wf-studio/core';
+import { NodeType } from '@cc-wf-studio/core';
+import type { McpNodeData } from '@cc-wf-studio/core/mcp';
+import { normalizeMcpNodeData } from '@cc-wf-studio/core/mcp';
+import type { Workflow } from '@shared/types/messages';
 import type { Edge, Node, OnConnect, OnEdgesChange, OnNodesChange } from 'reactflow';
 import { addEdge, applyEdgeChanges, applyNodeChanges } from 'reactflow';
 import { temporal } from 'zundo';

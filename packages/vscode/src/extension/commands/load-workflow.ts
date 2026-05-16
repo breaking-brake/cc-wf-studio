@@ -4,10 +4,10 @@
  * Loads a specific workflow file and sends it to the Webview
  */
 
+import { migrateWorkflow } from '@cc-wf-studio/core';
 import type { Webview } from 'vscode';
 import type { LoadWorkflowPayload } from '../../shared/types/messages';
 import type { FileService } from '../services/file-service';
-import { migrateWorkflow } from '../utils/migrate-workflow';
 
 /**
  * Load a specific workflow and send to webview
