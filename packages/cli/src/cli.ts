@@ -11,6 +11,7 @@
 
 import { Command } from 'commander';
 import { registerRenderCommand } from './commands/render.js';
+import { registerValidateCommand } from './commands/validate.js';
 
 const program = new Command();
 
@@ -20,6 +21,7 @@ program
   .version('0.0.0');
 
 registerRenderCommand(program);
+registerValidateCommand(program);
 
 program.parseAsync(process.argv).catch((error) => {
   process.stderr.write(`${error instanceof Error ? error.stack ?? error.message : String(error)}\n`);
