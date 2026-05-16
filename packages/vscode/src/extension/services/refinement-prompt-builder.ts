@@ -5,8 +5,8 @@
  * TOON format reduces token consumption by ~7% compared to freetext.
  */
 
-import { encode } from '@toon-format/toon';
 import type { ConversationHistory, Workflow } from '@cc-wf-studio/core';
+import { encode } from '@toon-format/toon';
 import { getCurrentLocale } from '../i18n/i18n-service';
 import {
   CLARIFICATION_TRIGGERS,

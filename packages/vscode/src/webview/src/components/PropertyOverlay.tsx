@@ -7,11 +7,10 @@
  * Updated: Added "Edit in Editor" button for textarea fields
  */
 
-import { BUILT_IN_SUB_AGENTS } from '@cc-wf-studio/core';
-import type { McpNodeData } from '@cc-wf-studio/core/mcp';
 import {
   type AskUserQuestionData,
   type BranchNodeData,
+  BUILT_IN_SUB_AGENTS,
   type CodexNodeData,
   type IfElseNodeData,
   type SkillNodeData,
@@ -21,6 +20,7 @@ import {
   type SwitchNodeData,
   VALIDATION_RULES,
 } from '@cc-wf-studio/core';
+import type { McpNodeData } from '@cc-wf-studio/core/mcp';
 import { BookOpen } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';

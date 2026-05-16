@@ -5,6 +5,7 @@
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 2.2
  */
 
+import type { ConversationMessage } from '@cc-wf-studio/core';
 import type * as vscode from 'vscode';
 import type {
   CancelRefinementPayload,
@@ -18,7 +19,6 @@ import type {
   RefineWorkflowPayload,
   SubAgentFlowRefinementSuccessPayload,
 } from '../../shared/types/messages';
-import type { ConversationMessage } from '@cc-wf-studio/core';
 import { log } from '../extension';
 import { cancelAiRequest } from '../services/ai-provider';
 import {

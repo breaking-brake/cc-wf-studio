@@ -4,6 +4,7 @@
  * Handles Export/Run for OpenAI Codex CLI integration
  */
 
+import { NodeType } from '@cc-wf-studio/core';
 import * as vscode from 'vscode';
 import type {
   CodexOperationFailedPayload,
@@ -12,7 +13,6 @@ import type {
   RunForCodexCliPayload,
   RunForCodexCliSuccessPayload,
 } from '../../shared/types/messages';
-import { NodeType } from '@cc-wf-studio/core';
 import {
   checkCodexMultiAgentEnabled,
   enableCodexMultiAgent,

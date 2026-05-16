@@ -4,8 +4,8 @@
  * Collects and logs metrics for A/B comparison of schema formats.
  */
 
-import * as vscode from 'vscode';
 import type { AIGenerationMetrics, SchemaFormat } from '@cc-wf-studio/core';
+import * as vscode from 'vscode';
 import { log } from '../extension';
 
 // In-memory storage for session metrics

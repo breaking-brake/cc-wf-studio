@@ -7,8 +7,8 @@
  * Based on: specs/001-mcp-natural-language-mode/tasks.md T017, T048
  */
 
-import * as Dialog from '@radix-ui/react-dialog';
 import { NodeType } from '@cc-wf-studio/core';
+import * as Dialog from '@radix-ui/react-dialog';
 import { ExternalLink } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useMcpCreationWizard, WizardStep } from '../../hooks/useMcpCreationWizard';

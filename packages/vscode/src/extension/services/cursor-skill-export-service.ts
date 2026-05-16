@@ -6,15 +6,11 @@
  */
 
 import * as path from 'node:path';
-import { BUILT_IN_SUB_AGENTS } from '@cc-wf-studio/core';
+import type { SubAgentFlowNode, SubAgentNode, Workflow } from '@cc-wf-studio/core';
 import {
+  BUILT_IN_SUB_AGENTS,
   generateExecutionInstructions,
   generateMermaidFlowchart,
-} from '@cc-wf-studio/core';
-import type {
-  SubAgentFlowNode,
-  SubAgentNode,
-  Workflow,
 } from '@cc-wf-studio/core';
 import {
   generateSubAgentFile,

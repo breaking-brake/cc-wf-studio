@@ -10,13 +10,13 @@
 
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+import type { SampleWorkflowFile } from '@cc-wf-studio/core';
 import * as vscode from 'vscode';
 import type {
   SampleWorkflowListPayload,
   SampleWorkflowLoadedPayload,
   SampleWorkflowPreviewLoadedPayload,
 } from '../../shared/types/messages';
-import type { SampleWorkflowFile } from '@cc-wf-studio/core';
 
 const LOCALE_SUFFIX_PATTERN = /^([a-z]{2})(-[a-z]{2,4})?$/i;
 const SAMPLE_ID_PATTERN = /^[a-z0-9][a-z0-9-]*$/i;

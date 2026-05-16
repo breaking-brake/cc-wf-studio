@@ -4,6 +4,7 @@
  * Handles Export/Run for Roo Code integration
  */
 
+import { NodeType } from '@cc-wf-studio/core';
 import * as vscode from 'vscode';
 import type {
   ExportForRooCodePayload,
@@ -12,7 +13,6 @@ import type {
   RunForRooCodePayload,
   RunForRooCodeSuccessPayload,
 } from '../../shared/types/messages';
-import { NodeType } from '@cc-wf-studio/core';
 import { extractMcpServerIdsFromWorkflow } from '../services/copilot-export-service';
 import { nodeNameToFileName } from '../services/export-service';
 import type { FileService } from '../services/file-service';

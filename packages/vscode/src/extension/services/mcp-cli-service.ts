@@ -11,8 +11,8 @@
  * See: Issue #79 - Windows environment compatibility
  */
 
-import nanoSpawn from 'nano-spawn';
 import type { McpServerReference, McpToolReference } from '@cc-wf-studio/core/mcp';
+import nanoSpawn from 'nano-spawn';
 import { log } from '../extension';
 import { getClaudeSpawnCommand } from './claude-cli-path';
 import { getCachedTools, setCachedTools } from './mcp-cache-service';

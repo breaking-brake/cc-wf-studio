@@ -5,10 +5,10 @@
  * UX aligned with SkillBrowserDialog: browse-first with inline create option.
  */
 
-import * as Dialog from '@radix-ui/react-dialog';
-import { BUILT_IN_SUB_AGENTS } from '@cc-wf-studio/core';
-import type { CommandReference } from '@shared/types/messages';
 import type { BuiltInSubAgentType } from '@cc-wf-studio/core';
+import { BUILT_IN_SUB_AGENTS } from '@cc-wf-studio/core';
+import * as Dialog from '@radix-ui/react-dialog';
+import type { CommandReference } from '@shared/types/messages';
 import { ExternalLink } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';

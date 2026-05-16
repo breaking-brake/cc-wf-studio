@@ -4,8 +4,8 @@
  * Reads workflow-related settings from VSCode configuration.
  */
 
-import * as vscode from 'vscode';
 import { VALIDATION_RULES } from '@cc-wf-studio/core';
+import * as vscode from 'vscode';
 
 /**
  * Get the maximum number of nodes allowed in a workflow.

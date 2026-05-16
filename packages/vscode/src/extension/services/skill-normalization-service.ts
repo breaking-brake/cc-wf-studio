@@ -14,8 +14,8 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import * as vscode from 'vscode';
 import type { SkillNode, Workflow } from '@cc-wf-studio/core';
+import * as vscode from 'vscode';
 import { getProjectSkillsDir, getWorkspaceRoot } from '../utils/path-utils';
 
 /**

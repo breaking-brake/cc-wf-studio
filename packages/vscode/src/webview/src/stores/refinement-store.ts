@@ -5,6 +5,7 @@
  * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.1
  */
 
+import type { ConversationHistory, ConversationMessage } from '@cc-wf-studio/core';
 import type {
   AiCliProvider,
   ClaudeModel,
@@ -13,7 +14,6 @@ import type {
   CopilotModel,
   CopilotModelInfo,
 } from '@shared/types/messages';
-import type { ConversationHistory, ConversationMessage } from '@cc-wf-studio/core';
 import { create } from 'zustand';
 import { listCopilotModels } from '../services/refinement-service';
 

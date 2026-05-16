@@ -13,8 +13,8 @@
  * 3. Final config (only for aiParameterConfig / manualParameterConfig)
  */
 
-import * as Dialog from '@radix-ui/react-dialog';
 import type { McpNodeData } from '@cc-wf-studio/core/mcp';
+import * as Dialog from '@radix-ui/react-dialog';
 import { useEffect, useState } from 'react';
 import { EditWizardStep, useMcpEditWizard } from '../../hooks/useMcpEditWizard';
 import { useTranslation } from '../../i18n/i18n-context';

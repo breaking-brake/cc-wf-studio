@@ -8,10 +8,10 @@
  * allowing us to retrieve tool lists directly from the MCP protocol.
  */
 
+import type { McpToolReference, ToolParameter } from '@cc-wf-studio/core/mcp';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import type { McpToolReference, ToolParameter } from '@cc-wf-studio/core/mcp';
 import { log } from '../extension';
 
 /**

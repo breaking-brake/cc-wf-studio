@@ -5,6 +5,7 @@
  * Based on: /specs/001-ai-workflow-refinement/tasks.md T009
  */
 
+import type { ConversationHistory, Workflow } from '@cc-wf-studio/core';
 import type {
   AiCliProvider,
   ClaudeModel,
@@ -18,7 +19,6 @@ import type {
   RefineWorkflowPayload,
   SubAgentFlowRefinementSuccessPayload,
 } from '@shared/types/messages';
-import type { ConversationHistory, Workflow } from '@cc-wf-studio/core';
 import { vscode } from '../main';
 
 /**
