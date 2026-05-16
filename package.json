@@ -18,5 +18,8 @@
     "lint": "pnpm -r run lint",
     "format": "pnpm -r run format",
     "test": "pnpm -r run test"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.31.0"
   }
 }

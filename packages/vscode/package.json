@@ -3,6 +3,7 @@
   "displayName": "Claude Code Workflow Studio",
   "description": "Visual Workflow Editor for Claude Code, GitHub Copilot, and more AI agents",
   "version": "3.34.1",
+  "private": true,
   "publisher": "breaking-brake",
   "icon": "resources/icon.png",
   "repository": {
