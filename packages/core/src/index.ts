@@ -19,6 +19,7 @@ export * from './constants/built-in-sub-agents.js';
 // Pure formatters / generators.
 export * from './services/workflow-prompt-generator.js';
 export * from './services/workflow-overview-formatter.js';
+export * from './services/workflow-export.js';
 
 // Pure validation, migration, schema parsing.
 export * from './utils/validate-workflow.js';
