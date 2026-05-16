@@ -19,7 +19,8 @@ pnpm add -D @cc-wf-studio/cli
 | `ccwf render <file>` | Print a Mermaid + execution-instructions Markdown bundle to stdout. |
 | `ccwf validate <file>` | Schema-check the workflow JSON. Exit 0/1. `--json` for machine-readable output. |
 | `ccwf mcp --file <file>` | Run the cc-wf-studio stdio MCP server in-process against `<file>`. |
-| `ccwf run <file>` | Materialise the workflow into `<cwd>/.claude/agents/*.md` and `<cwd>/.claude/commands/<workflow>.md`. |
+| `ccwf export <file>` | Materialise the workflow as agent-skill files for a target agent (`--agent <name>`, default `claude-code`). |
+| `ccwf run <file>` | Today: identical to `ccwf export` plus a "next step" hint. Phase 4b will let the agent spawn itself and perform the export + execution. |
 
 ### `ccwf render`
 
@@ -57,17 +58,37 @@ Example `.mcp.json`:
 }
 ```
 
+### `ccwf export`
+
+```sh
+ccwf export ./my-workflow.json                                # --agent claude-code (default)
+ccwf export ./my-workflow.json --agent cursor                  # cursor
+ccwf export ./my-workflow.json --agent codex --cwd /tmp/proj   # codex into a different root
+ccwf export ./my-workflow.json --overwrite                     # replace existing files
+```
+
+Output layout by target agent:
+
+| `--agent` | Files emitted (relative to `--cwd` / `process.cwd()`) |
+|---|---|
+| `claude-code` (default) | `.claude/agents/<sub-agent>.md` (for inline SubAgent nodes) + `.claude/skills/<workflow>.md` |
+| `antigravity` | `.agent/skills/<workflow>/SKILL.md` |
+| `codex` | `.codex/skills/<workflow>/SKILL.md` |
+| `copilot` | `.github/skills/<workflow>/SKILL.md` |
+| `cursor` | `.cursor/skills/<workflow>/SKILL.md` + `.cursor/agents/<sub-agent>.md` |
+| `gemini` | `.gemini/skills/<workflow>/SKILL.md` |
+| `roo-code` | `.roo/skills/<workflow>/SKILL.md` |
+
+`.claude/commands/` is the previous home for the workflow entry; Claude Code is folding it into `.claude/skills/`, and `ccwf export --agent claude-code` writes the new path. Existing `.claude/commands/<workflow>.md` files are not deleted automatically.
+
 ### `ccwf run`
 
 ```sh
-ccwf run ./.vscode/workflows/my-workflow.json               # write into cwd
-ccwf run ./.vscode/workflows/my-workflow.json --overwrite   # replace existing files
-ccwf run ./my-workflow.json --cwd /tmp/my-project           # write into a different root
+ccwf run ./my-workflow.json                                    # same files as export, plus a hint
+ccwf run ./my-workflow.json --agent cursor                     # forwarded to export
 ```
 
-Refuses to clobber existing `.claude/*` files unless `--overwrite` is passed. After writing, prints the slash-command name to invoke from within Claude Code (`/<workflow-name>`).
-
-`--launch` (auto-spawn `claude`) is planned for Phase 4b. For now, run `ccwf run`, then launch Claude Code yourself.
+Today `ccwf run` is a thin wrapper over `ccwf export` (same flags: `--agent`, `--cwd`, `--overwrite`). It adds an agent-specific "next step" line to stdout. **Phase 4b will replace its body** so the chosen agent spawns itself and performs both the skill conversion and the execution — the surface stays compatible.
 
 ## Fixtures
 
