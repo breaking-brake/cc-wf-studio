@@ -17,6 +17,7 @@ import { registerMcpCommand } from './commands/mcp.js';
 import { registerPreviewCommand } from './commands/preview.js';
 import { registerRenderCommand } from './commands/render.js';
 import { registerRunCommand } from './commands/run.js';
+import { registerUninstallSkillsCommand } from './commands/uninstall-skills.js';
 import { registerValidateCommand } from './commands/validate.js';
 
 const program = new Command();
@@ -34,6 +35,7 @@ registerRunCommand(program);
 registerPreviewCommand(program);
 registerCanvasCommand(program);
 registerInstallSkillsCommand(program);
+registerUninstallSkillsCommand(program);
 
 program.parseAsync(process.argv).catch((error) => {
   process.stderr.write(`${error instanceof Error ? error.stack ?? error.message : String(error)}\n`);

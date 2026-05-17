@@ -149,18 +149,28 @@ Typical `.mcp.json` snippet for Claude Code:
 
 The MCP server exposes 6 tools: `get_workflow_schema`, `get_current_workflow`, `apply_workflow`, `update_nodes`, `list_available_agents`, `highlight_group_node`. Use these when the user wants AI-driven editing of the workflow itself (not just rendering / running it).
 
-### `ccwf install-skills`
+### `ccwf install-skills` / `ccwf uninstall-skills`
 
-Copy this Skill bundle into a discoverable location.
+Copy this Skill bundle into a discoverable location, or remove it again.
 
 ```bash
-ccwf install-skills                # ~/.claude/skills/ccwf-cli/ (user-scope)
-ccwf install-skills --project      # ./.claude/skills/ccwf-cli/ (project-scope)
-ccwf install-skills --overwrite    # replace an existing copy
-ccwf install-skills --dry-run      # print paths without writing
+ccwf install-skills                  # ~/.claude/skills/ccwf-cli/ (user-scope)
+ccwf install-skills --project        # ./.claude/skills/ccwf-cli/ (project-scope)
+ccwf install-skills --overwrite      # replace an existing copy
+ccwf install-skills --dry-run        # print paths without writing
+
+ccwf uninstall-skills                # remove from ~/.claude/skills/
+ccwf uninstall-skills --project      # remove from ./.claude/skills/
+ccwf uninstall-skills --dry-run      # print deletions without writing
 ```
 
-If the user mentions installing the Skill, teaching Claude Code about `ccwf`, or setting up the integration, this is the answer.
+Use cases:
+
+- "Install the ccwf skill" / "teach Claude Code about ccwf" → `ccwf install-skills`
+- "Update the ccwf skill" / "refresh the install" → `ccwf uninstall-skills && ccwf install-skills`
+- "Remove the ccwf skill" / "cleanup before uninstalling the CLI" → `ccwf uninstall-skills`
+
+`uninstall-skills` is idempotent: running it twice prints "nothing to remove" the second time and exits 0.
 
 ## Mapping user phrasing to subcommands
 
@@ -177,6 +187,8 @@ Use this as a lookup when the user describes intent in natural language. If the 
 | "Edit the canvas without VSCode", "editor を browser で開いて"                       | `ccwf canvas <file>` (mention experimental)  |
 | "Let an MCP client edit this workflow"                                              | `ccwf mcp --file <file>` and configure `.mcp.json` |
 | "Install the ccwf skill / teach Claude about ccwf"                                  | `ccwf install-skills [--project]`            |
+| "Update / refresh the ccwf skill"                                                   | `ccwf uninstall-skills && ccwf install-skills` |
+| "Remove the ccwf skill / cleanup"                                                   | `ccwf uninstall-skills [--project]`          |
 
 ## Tips & gotchas
 

@@ -24,6 +24,7 @@ pnpm add -D @cc-wf-studio/cli
 | `ccwf preview <file>` | Open a read-only viewer (Mermaid + per-node Markdown panes) in a local browser. Auto-reloads when the file changes. |
 | `ccwf canvas <file>` | (Experimental) Open the **full editable** cc-wf-studio canvas in a local browser. Saves write back to the same file. |
 | `ccwf install-skills` | Copy the bundled Claude Code Skill into `~/.claude/skills/` (or `./.claude/skills/` with `--project`) so AI agents learn when to use ccwf. |
+| `ccwf uninstall-skills` | Remove the bundled Claude Code Skill from `~/.claude/skills/` (or `./.claude/skills/` with `--project`). Idempotent. |
 
 ### `ccwf render`
 
@@ -133,18 +134,24 @@ ccwf canvas ./my-workflow.json --port 51234   # pin to a port
 
 The bundled webview's VSCode message protocol is emulated by a small polyfill (`bootstrap.js`) injected into `index.html`. The webview source is **unchanged** — `window.acquireVsCodeApi` returns a WebSocket-backed transport that talks to this CLI process.
 
-### `ccwf install-skills`
+### `ccwf install-skills` / `ccwf uninstall-skills`
 
 ```sh
-ccwf install-skills                # ~/.claude/skills/ccwf-cli (user-scope, default)
-ccwf install-skills --project      # ./.claude/skills/ccwf-cli (commit to share with the team)
-ccwf install-skills --overwrite    # replace an existing copy
-ccwf install-skills --dry-run      # print paths, write nothing
+ccwf install-skills                  # ~/.claude/skills/ccwf-cli (user-scope, default)
+ccwf install-skills --project        # ./.claude/skills/ccwf-cli (commit to share with the team)
+ccwf install-skills --overwrite      # replace an existing copy
+ccwf install-skills --dry-run        # print paths, write nothing
+
+ccwf uninstall-skills                # remove the user-scope copy
+ccwf uninstall-skills --project      # remove the project-scope copy
+ccwf uninstall-skills --dry-run      # print deletions, write nothing
 ```
 
 Installs a [Claude Code Skill](https://code.claude.com/docs/en/skills) that teaches AI agents (Claude Code in particular) when to reach for `ccwf` and which subcommand fits each user phrasing. The skill auto-triggers when the user mentions viewing, validating, executing, or converting a workflow file — Claude then runs `ccwf` through Bash without per-command permission prompts (the skill whitelists `Bash(ccwf:*)` via `allowed-tools`).
 
 After installing, open or restart your Claude Code session so the skill loads.
+
+To refresh after upgrading the CLI, chain the two commands: `ccwf uninstall-skills && ccwf install-skills`. `uninstall-skills` is idempotent (a no-op when the destination is already empty).
 
 ## Fixtures
 
