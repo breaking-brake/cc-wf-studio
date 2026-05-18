@@ -130,7 +130,29 @@ sequenceDiagram
 
 ## Usage Examples
 
-Coming soon - Sample workflows and tutorials are under development.
+### Sample Workflows
+
+The extension includes built-in sample workflows to help you get started. Access them via:
+
+1. **Start Menu**: Click "Sample" when you first open the extension
+2. **Toolbar**: Click the "More" menu (⋮) and select "Sample Workflows"
+
+#### Available Samples
+
+| Name | Difficulty | Description |
+|------|------------|-------------|
+| **Getting Started** | Beginner | A simple workflow demonstrating basic prompt nodes and branching logic (7 nodes) |
+| **Code Review** | Intermediate | An automated code review workflow for GitHub PRs with submission options (15 nodes) |
+| **GitHub Issue Planning** | Advanced | A complete workflow: fetch issue, analyze code, verify fixes, and retrospective (29 nodes) |
+
+### Creating Your First Workflow
+
+1. Click **New** in the start menu or toolbar
+2. Add nodes from the node palette on the left
+3. Connect nodes by dragging from output ports to input ports
+4. Save your workflow with Ctrl+S
+
+For more advanced features, explore the skill browser and MCP node integration to connect with external services.
 
 ## License
 
