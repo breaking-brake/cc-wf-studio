@@ -4,6 +4,12 @@ Pure logic shared by every cc-wf-studio interface — the VSCode extension, the 
 
 This is the "brain" of the monorepo. See the [root README](../../README.md) for how the three interfaces compose around it.
 
+## Install
+
+```sh
+npm install @cc-wf-studio/core
+```
+
 ## What's inside
 
 | Module | Purpose |

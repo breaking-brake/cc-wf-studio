@@ -132,6 +132,15 @@ sequenceDiagram
 
 Coming soon - Sample workflows and tutorials are under development.
 
+## Use without VSCode
+
+The extension is one of three entry points to the same workflow JSON. Outside VSCode you can drive the canvas through:
+
+- **[`@cc-wf-studio/cli`](https://www.npmjs.com/package/@cc-wf-studio/cli)** — `ccwf preview` opens a read-only browser viewer for any workflow file, `ccwf export` / `ccwf run` materialise it as Agent Skills, `ccwf canvas` runs the full editor in a localhost browser.
+- **[`@cc-wf-studio/mcp`](https://www.npmjs.com/package/@cc-wf-studio/mcp)** — the same MCP tools this extension exposes to in-canvas AI editing, available standalone via `npx @cc-wf-studio/mcp --file <workflow.json>` so an external Claude Code (or any MCP client) can read and edit your workflows.
+
+Same `workflow.json`, three interfaces. See the [monorepo README](https://github.com/breaking-brake/cc-wf-studio#readme) for the full story.
+
 ## License
 
 This project is licensed under the **GNU Affero General Public License v3.0** (AGPL-3.0-or-later).

@@ -2,7 +2,7 @@
 
 MCP (Model Context Protocol) server toolkit for [cc-wf-studio](https://github.com/breaking-brake/cc-wf-studio) workflows. Ships tool definitions, an IO adapter contract, and a standalone stdio bin (`ccwf-mcp`) that AI clients can use to edit workflow JSON files without the VSCode canvas.
 
-> One of the three interfaces sharing a workflow file: this MCP server, the `@cc-wf-studio/cli`, and the [`cc-wf-studio` VSCode extension](https://marketplace.visualstudio.com/items?itemName=breaking-brake.cc-wf-studio). See the [monorepo README](https://github.com/breaking-brake/cc-wf-studio#readme) for the bigger picture.
+> One of the three interfaces sharing a workflow file: this MCP server, the [`@cc-wf-studio/cli`](https://www.npmjs.com/package/@cc-wf-studio/cli), and the [`cc-wf-studio` VSCode extension](https://marketplace.visualstudio.com/items?itemName=breaking-brake.cc-wf-studio). See the [monorepo README](https://github.com/breaking-brake/cc-wf-studio#readme) for the bigger picture.
 
 The package is the deduplicated home of the 6 cc-wf-studio MCP tools. Both the VSCode extension (canvas mode, HTTP transport) and the standalone bin (file mode, stdio transport) configure the same tool registrations through a shared factory.
 

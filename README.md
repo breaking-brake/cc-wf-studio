@@ -8,6 +8,8 @@
   <a href="https://github.com/breaking-brake/cc-wf-studio/stargazers"><img src="https://img.shields.io/github/stars/breaking-brake/cc-wf-studio" alt="GitHub Stars" /></a>
   <a href="https://marketplace.visualstudio.com/items?itemName=breaking-brake.cc-wf-studio"><img src="https://vsmarketplacebadges.dev/version-short/breaking-brake.cc-wf-studio.svg?label=VS%20Marketplace" alt="VS Code Marketplace" /></a>
   <a href="https://open-vsx.org/extension/breaking-brake/cc-wf-studio"><img src="https://img.shields.io/open-vsx/v/breaking-brake/cc-wf-studio?label=OpenVSX" alt="OpenVSX" /></a>
+  <a href="https://www.npmjs.com/package/@cc-wf-studio/cli"><img src="https://img.shields.io/npm/v/@cc-wf-studio/cli?label=npm%20%2F%20cli" alt="npm @cc-wf-studio/cli" /></a>
+  <a href="https://www.npmjs.com/package/@cc-wf-studio/mcp"><img src="https://img.shields.io/npm/v/@cc-wf-studio/mcp?label=npm%20%2F%20mcp" alt="npm @cc-wf-studio/mcp" /></a>
   <a href="https://deepwiki.com/breaking-brake/cc-wf-studio"><img src="https://img.shields.io/badge/Ask-DeepWiki-009485" alt="Ask DeepWiki" /></a>
 </p>
 
@@ -44,8 +46,46 @@ Design workflows on a canvas. Export as Markdown your AI agent already understan
 
 > **Note:** Agents other than Claude Code require activation from Toolbar's **More** menu.
 
-<!-- Hero image placeholder - recommended size: 1600x900px or 16:9 aspect ratio -->
-<!-- Place image at: /resources/hero.png -->
+---
+
+## Use it without VSCode, too
+
+The VSCode extension is the most ergonomic editor, but it isn't the only entry point. The same `workflow.json` drives a CLI and an MCP server — pick whichever interface fits the situation.
+
+```mermaid
+flowchart LR
+    Wf(["workflow.json"])
+
+    subgraph IDE["🪟 VSCode Extension"]
+        Canvas["React Flow canvas<br/>+ editor + Slack share"]
+    end
+
+    subgraph Mcp["🔌 MCP Server"]
+        AIClient["Claude Code,<br/>MCP Inspector, ..."]
+        McpServer["@cc-wf-studio/mcp<br/>(stdio: <code>ccwf-mcp</code>)"]
+        AIClient --> McpServer
+    end
+
+    subgraph Cli["💻 CLI"]
+        CliBin["@cc-wf-studio/cli<br/>(<code>ccwf render | validate | export | run | preview | canvas | mcp</code>)"]
+    end
+
+    Wf <-->|edit| Canvas
+    Wf <-->|read / write| McpServer
+    Wf <-->|read / write| CliBin
+
+    Canvas -.->|writes skills + agents| Output["Agent skills on disk<br/>(.claude/, .codex/, .cursor/, ...)"]
+    McpServer -.-> Output
+    CliBin -.-> Output
+```
+
+| Interface | Try it | Best for | Docs |
+|---|---|---|---|
+| **VSCode extension** | `code --install-extension breaking-brake.cc-wf-studio` | Designing workflows visually | [`packages/vscode`](./packages/vscode/README.md) |
+| **CLI (`ccwf`)** | `npx @cc-wf-studio/cli --help` | Terminal / CI / SSH / Codespaces — render, validate, preview, export, run a workflow without VSCode | [`packages/cli`](./packages/cli/README.md) |
+| **MCP server (`ccwf-mcp`)** | Add to your MCP client's `.mcp.json` so Claude Code (or any MCP client) can read and edit workflows over stdio | Letting an external AI client read and edit your workflows through MCP tools | [`packages/mcp`](./packages/mcp/README.md) |
+
+There is no "VSCode-only" path: a workflow you draw in the canvas is the same file `ccwf preview` will render in a browser, and the same file an external Claude Code can edit through MCP.
 
 ---
 

@@ -2,7 +2,7 @@
 
 Command-line tool (`ccwf`) for [cc-wf-studio](https://github.com/breaking-brake/cc-wf-studio) workflows. Renders, validates, materialises, and serves a workflow JSON from a terminal — no VSCode required.
 
-> One of the three interfaces sharing a workflow file: this CLI, the `@cc-wf-studio/mcp` stdio server, and the [`cc-wf-studio` VSCode extension](https://marketplace.visualstudio.com/items?itemName=breaking-brake.cc-wf-studio). See the [monorepo README](https://github.com/breaking-brake/cc-wf-studio#readme) for the bigger picture.
+> One of the three interfaces sharing a workflow file: this CLI, the [`@cc-wf-studio/mcp`](https://www.npmjs.com/package/@cc-wf-studio/mcp) stdio server, and the [`cc-wf-studio` VSCode extension](https://marketplace.visualstudio.com/items?itemName=breaking-brake.cc-wf-studio). See the [monorepo README](https://github.com/breaking-brake/cc-wf-studio#readme) for the bigger picture.
 
 ## Install
 
