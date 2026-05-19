@@ -23,7 +23,10 @@
   },
   "devDependencies": {
     "@cc-wf-studio/cli": "workspace:*",
-    "@changesets/cli": "^2.31.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "semantic-release": "^24.2.0",
+    "semantic-release-monorepo": "^8.0.2",
     "tsx": "^4.19.2"
   }
 }
