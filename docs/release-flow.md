@@ -112,6 +112,15 @@ pnpm changeset
 
 The interactive prompt asks: which packages changed, the bump level (`patch` / `minor` / `major`), and a summary used for the CHANGELOG entry. Commit the generated file alongside your code. You never hand-edit `CHANGELOG.md` — Changesets generates it.
 
+### Changeset bot
+
+The [changeset-bot](https://github.com/apps/changeset-bot) GitHub App is installed on this repository. It comments on every PR to show whether a changeset is present:
+
+- **🦋 Changeset detected** — the PR adds a `.changeset/*.md` file (a real bump or an empty one).
+- **⚠️ No Changeset found** — the PR adds none. This is a *reminder, not a blocker* — merging is still allowed. If the PR genuinely needs no release, add an empty changeset (`pnpm changeset add --empty`) to make the intent explicit and clear the warning.
+
+There is no hard CI gate that fails the build on a missing changeset; the bot comment plus the human review at the "Version Packages" PR are the safety net.
+
 ## What doesn't trigger a release
 
 - Pushes to branches other than `main` (the version-PR workflow only watches `main`).
