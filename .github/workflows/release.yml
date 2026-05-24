@@ -57,6 +57,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Abort if pending changesets (Version PR not merged)
+        run: |
+          # Backstop for the production guard: if production was updated without
+          # merging the "Version Packages" PR first, unconsumed changesets remain
+          # and publishing would silently no-op. Fail loudly instead.
+          PENDING=$(ls .changeset/*.md 2>/dev/null | grep -v 'README.md' || true)
+          if [ -n "$PENDING" ]; then
+            echo "::error::Pending changesets on ${{ inputs.ref }} — merge the 'Version Packages' PR before releasing. Aborting:"
+            echo "$PENDING"
+            exit 1
+          fi
+          echo "OK: no pending changesets."
+
       - name: Build all packages
         run: pnpm -r run build
 
