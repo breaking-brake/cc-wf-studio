@@ -209,14 +209,16 @@ export function WhatsNewDialog({
                       }}
                     >
                       <span style={{ fontSize: '14px', fontWeight: 600 }}>v{entry.version}</span>
-                      <span
-                        style={{
-                          fontSize: '11px',
-                          color: 'var(--vscode-descriptionForeground)',
-                        }}
-                      >
-                        ({entry.date})
-                      </span>
+                      {entry.date && (
+                        <span
+                          style={{
+                            fontSize: '11px',
+                            color: 'var(--vscode-descriptionForeground)',
+                          }}
+                        >
+                          ({entry.date})
+                        </span>
+                      )}
                       {entry.compareUrl && (
                         <span
                           role="button"
