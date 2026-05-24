@@ -1,5 +1,11 @@
 # @cc-wf-studio/core
 
+## 0.1.1
+
+### Patch Changes
+
+- 37475fc: Relicense from AGPL-3.0-or-later to **MIT**. The headless library and tooling packages are now permissively licensed to encourage reuse and embedding; the VSCode extension (`cc-wf-studio`) remains AGPL-3.0-or-later. Each package now ships its own `LICENSE` file in the published tarball. This is a license loosening — no code or API change — so existing usage is unaffected.
+
 ## 0.1.0
 
 ### Minor Changes
