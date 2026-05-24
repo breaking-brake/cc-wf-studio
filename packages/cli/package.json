@@ -45,6 +45,6 @@
     "@types/ws": "^8.5.13",
     "cc-wf-studio-webview": "workspace:*",
     "tsx": "^4.19.2",
-    "typescript": "^5.3.0"
+    "typescript": "^6.0.3"
   }
 }

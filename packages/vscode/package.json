@@ -128,7 +128,7 @@
     "@types/vscode": "^1.80.0",
     "@vscode/vsce": "^3.9.1",
     "cc-wf-studio-webview": "workspace:*",
-    "typescript": "^5.3.0",
+    "typescript": "^6.0.3",
     "vite": "^7.3.0"
   },
   "dependencies": {
