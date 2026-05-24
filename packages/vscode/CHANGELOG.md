@@ -1,4 +1,4 @@
-## [3.34.1](https://github.com/breaking-brake/cc-wf-studio/compare/v3.34.0...v3.34.1) (2026-05-05)
+# cc-wf-studio
 
 ## 3.34.2
 
@@ -7,6 +7,9 @@
 - Updated dependencies [37475fc]
   - @cc-wf-studio/core@0.1.1
   - @cc-wf-studio/mcp@0.1.2
+- Fix the "What's New" / changelog viewer to recognize Changesets-format version headings (`## x.y.z`) in addition to the legacy Semantic Release format (`## [x.y.z](url) (date)`).
+
+## [3.34.1](https://github.com/breaking-brake/cc-wf-studio/compare/v3.34.0...v3.34.1) (2026-05-05)
 
 ### Improvements
 
