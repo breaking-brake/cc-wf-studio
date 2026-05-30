@@ -9,6 +9,10 @@ dist/
 # Generated files
 *.generated.ts
 
+# Synced schema artifacts (copied from packages/core at build time)
+packages/vscode/resources/workflow-schema.json
+packages/vscode/resources/workflow-schema.toon
+
 # IDE
 .idea/
 

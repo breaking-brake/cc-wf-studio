@@ -1,144 +1,29 @@
 {
-  "name": "cc-wf-studio",
-  "displayName": "Claude Code Workflow Studio",
-  "description": "Visual Workflow Editor for Claude Code, GitHub Copilot, and more AI agents",
-  "version": "3.34.1",
-  "publisher": "breaking-brake",
-  "icon": "resources/icon.png",
+  "name": "cc-wf-studio-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Monorepo root for cc-wf-studio (VSCode extension, MCP server, CLI, and core schema)",
   "repository": {
     "type": "git",
     "url": "https://github.com/breaking-brake/cc-wf-studio"
   },
-  "homepage": "https://breaking-brake.github.io/",
   "license": "AGPL-3.0-or-later",
-  "keywords": [
-    "ai",
-    "claude",
-    "claude code",
-    "claude-code",
-    "codex",
-    "copilot",
-    "roo",
-    "gemini",
-    "antigravity",
-    "cursor"
-  ],
+  "packageManager": "pnpm@11.1.2",
   "engines": {
-    "vscode": "^1.80.0"
+    "node": ">=20"
   },
-  "categories": [
-    "AI",
-    "Visualization"
-  ],
-  "main": "./dist/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "cc-wf-studio.openEditor",
-        "title": "CC Workflow Studio: Open Editor",
-        "icon": {
-          "light": "resources/icon.png",
-          "dark": "resources/icon.png"
-        }
-      }
-    ],
-    "menus": {
-      "editor/title": [
-        {
-          "command": "cc-wf-studio.openEditor",
-          "group": "navigation"
-        }
-      ]
-    },
-    "customEditors": [
-      {
-        "viewType": "cc-wf-studio.workflowPreview",
-        "displayName": "Workflow Preview",
-        "selector": [
-          {
-            "filenamePattern": "**/.vscode/workflows/*.json"
-          }
-        ],
-        "priority": "default"
-      }
-    ],
-    "configuration": {
-      "title": "CC Workflow Studio",
-      "properties": {
-        "cc-wf-studio.ai.schemaFormat": {
-          "type": "string",
-          "enum": [
-            "json",
-            "toon"
-          ],
-          "default": "toon",
-          "description": "Schema format for AI prompts. 'toon' reduces token consumption by ~23%."
-        },
-        "cc-wf-studio.ai.collectMetrics": {
-          "type": "boolean",
-          "default": false,
-          "description": "Collect and log metrics for A/B comparison of schema formats. Note: Prompt format is always 'toon'."
-        },
-        "cc-wf-studio.workflow.maxNodes": {
-          "type": "number",
-          "default": 100,
-          "minimum": 10,
-          "maximum": 500,
-          "description": "Maximum number of nodes allowed in a workflow."
-        },
-        "cc-wf-studio.mcp.port": {
-          "type": "number",
-          "default": 6282,
-          "minimum": 1024,
-          "maximum": 65535,
-          "description": "Port number for the built-in MCP server. Change only if the default port (6282) is already in use."
-        }
-      }
-    }
-  },
-  "activationEvents": [
-    "onUri"
-  ],
   "scripts": {
-    "vscode:prepublish": "npm run build",
-    "generate:toon": "npx tsx scripts/generate-toon-schema.ts",
-    "generate:editing-flow": "npx tsx scripts/generate-editing-flow.ts",
-    "build": "npm run generate:toon && npm run generate:editing-flow && npm run build:webview && npm run build:extension",
-    "build:dev": "npm run build:webview:dev && npm run build:extension:dev",
-    "build:webview": "cd src/webview && npm run build",
-    "build:webview:dev": "cd src/webview && npm run build:dev",
-    "build:extension": "vite build --config vite.extension.config.ts",
-    "build:extension:dev": "vite build --config vite.extension.config.ts --mode development",
-    "compile": "tsc -p ./",
-    "watch": "vite build --config vite.extension.config.ts --watch",
-    "watch:webview": "cd src/webview && npm run dev",
-    "debug": "npm run build && code --extensionDevelopmentPath=. --new-window",
-    "lint": "biome lint .",
-    "format": "biome format --write .",
-    "check": "biome check --write .",
-    "test": "cd src/webview && npm run test",
-    "package": "vsce package"
+    "build": "pnpm -r run build",
+    "check": "pnpm -r run check",
+    "lint": "pnpm -r run lint",
+    "format": "pnpm -r run format",
+    "test": "pnpm -r run test",
+    "ccwf": "node packages/cli/dist/cli.js",
+    "ccwf:dev": "tsx packages/cli/src/cli.ts"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.4",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/exec": "^7.1.0",
-    "@semantic-release/git": "^10.0.1",
-    "@types/node": "^25.0.3",
-    "@types/vscode": "^1.80.0",
-    "@vscode/vsce": "^3.9.1",
-    "conventional-changelog-conventionalcommits": "^9.1.0",
-    "semantic-release": "^25.0.2",
-    "typescript": "^5.3.0",
-    "vite": "^7.3.0"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.26.0",
-    "@slack/web-api": "^7.13.0",
-    "@toon-format/toon": "^2.1.0",
-    "fflate": "^0.8.2",
-    "marked": "^15.0.12",
-    "nano-spawn": "^2.0.0",
-    "smol-toml": "^1.6.0"
+    "@cc-wf-studio/cli": "workspace:*",
+    "@changesets/cli": "^2.31.0",
+    "tsx": "^4.19.2"
   }
 }

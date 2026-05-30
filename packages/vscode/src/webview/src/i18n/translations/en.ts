@@ -1,0 +1,1033 @@
+/**
+ * CC Workflow Studio - Webview English Translations
+ */
+
+import type { WebviewTranslationKeys } from '../translation-keys';
+
+export const enWebviewTranslations: WebviewTranslationKeys = {
+  // Common
+  loading: 'Loading',
+  description: 'Description',
+  optional: 'Optional',
+  cancel: 'Cancel',
+  'common.close': 'Close',
+  'common.cancel': 'Cancel',
+  'loading.importWorkflow': 'Importing workflow...',
+  'loading.openWorkflow': 'Opening workflow...',
+
+  // Overview mode
+  'overview.label': 'View',
+  'overview.loading': 'Loading workflow...',
+  'overview.parseError': 'Failed to parse workflow',
+  'overview.openInEditor': 'Open in Editor',
+  'overview.versionBefore': 'Before',
+  'overview.versionAfter': 'After',
+  'overview.emptyState.title': 'No instructions to display',
+  'overview.emptyState.description':
+    'This workflow has no instructional nodes yet. Switch to Edit mode and add nodes such as Sub-Agent, Prompt, or Skill to populate the overview.',
+
+  // Toolbar
+  'toolbar.workflowNamePlaceholder': 'Workflow name',
+  'toolbar.save': 'Save',
+  'toolbar.saving': 'Saving...',
+  'toolbar.export': 'Export',
+  'toolbar.export.tooltip': 'Export as Slash Command and save to .claude/skills/',
+  'toolbar.exporting': 'Exporting...',
+  'toolbar.refineWithAI': 'Edit with AI',
+  'toolbar.selectWorkflow': 'Select workflow...',
+  'toolbar.load': 'Load',
+  'toolbar.loading': 'Loading...',
+  'toolbar.refreshList': 'Refresh workflow list',
+
+  // Toolbar view mode
+  'toolbar.viewMode.switchToOverview': 'Switch to View',
+  'toolbar.viewMode.switchToEdit': 'Back to canvas',
+
+  // Toolbar interaction mode
+  'toolbar.interactionMode.panButton': 'Hand',
+  'toolbar.interactionMode.rangeSelectionButton': 'Select',
+  'toolbar.interactionMode.switchToPan': 'Switch to Hand Tool mode',
+  'toolbar.interactionMode.switchToSelection': 'Switch to Selection mode',
+  'toolbar.edgeAnimation.enable': 'Enable edge animation',
+  'toolbar.edgeAnimation.disable': 'Disable edge animation',
+  'toolbar.highlight.enable': 'Enable group node highlight',
+  'toolbar.highlight.disable': 'Disable group node highlight',
+  'toolbar.highlight.confirmDisable.title': 'Disable Group Node Highlight',
+  'toolbar.highlight.confirmDisable.message':
+    'A group node is currently highlighted. Are you sure you want to disable the highlight?',
+  'toolbar.highlight.confirmDisable.confirm': 'Disable',
+  'toolbar.highlight.confirmDisable.cancel': 'Cancel',
+  'toolbar.undo': 'Undo',
+  'toolbar.redo': 'Redo',
+  'toolbar.scrollMode.switchToClassic': 'Switch to Classic mode (scroll = zoom)',
+  'toolbar.scrollMode.switchToFreehand': 'Switch to Freehand mode (scroll = pan)',
+
+  // Toolbar minimap toggle
+  'toolbar.minimapToggle.hidden': 'Hidden',
+  'toolbar.minimapToggle.auto': 'Show on Scroll',
+  'toolbar.minimapToggle.always': 'Always Show',
+
+  // Toolbar errors
+  'toolbar.error.workflowNameRequired': 'Workflow name is required',
+  'toolbar.error.workflowNameInvalid':
+    'Use only lowercase letters (a-z), numbers, hyphens, and underscores',
+  'toolbar.error.workflowNameRequiredForExport': 'Workflow name is required for export',
+  'toolbar.error.selectWorkflowToLoad': 'Please select a workflow to load',
+  'toolbar.error.validationFailed': 'Workflow validation failed',
+  'toolbar.error.missingEndNode': 'Workflow must have at least one End node',
+  'toolbar.error.noActiveWorkflow': 'Please load a workflow first',
+  'toolbar.error.invalidWorkflowFile':
+    'Invalid workflow file. Please select a valid JSON workflow file.',
+  'toolbar.generateNameWithAI': 'Generate name with AI',
+  'toolbar.error.nameGenerationFailed':
+    'Failed to generate workflow name. Please try again or enter manually.',
+
+  // Toolbar slash command group
+  'toolbar.run': 'Run',
+  'toolbar.running': 'Running...',
+
+  // Toolbar slash command options dropdown
+  'toolbar.slashCommandOptions.frontmatterReferenceUrl':
+    'https://code.claude.com/docs/en/skills#frontmatter-reference',
+
+  // Toolbar hooks configuration dropdown
+  'hooks.title': 'Hooks',
+  'hooks.preToolUse': 'PreToolUse',
+  'hooks.postToolUse': 'PostToolUse',
+  'hooks.stop': 'Stop',
+  'hooks.addEntry': 'Add',
+  'hooks.removeEntry': 'Remove',
+  'hooks.matcher.description': 'Tool name pattern to match',
+  'hooks.once.description': 'Run only once per session',
+  'hooks.validation.commandRequired': 'command is required',
+  'hooks.validation.commandTooLong': 'command exceeds maximum length',
+  'hooks.validation.matcherRequired': 'matcher is required for this hook type',
+
+  // Argument Hint configuration
+  'argumentHint.example': 'Example:',
+  'argumentHint.exampleAdd': 'add tag',
+  'argumentHint.exampleRemove': 'remove tag',
+  'argumentHint.exampleList': 'list all',
+
+  // Toolbar more actions dropdown
+  'toolbar.moreActions': 'More',
+  'toolbar.help': 'Help',
+  'toolbar.whatsNew': "What's New",
+  'whatsNew.title': "What's New",
+  'whatsNew.viewAllReleases': 'View all releases',
+  'whatsNew.showBadge': 'Unread badge',
+
+  // Copilot Execution Mode
+  'copilot.mode.tooltip': 'Select Copilot execution mode',
+  'copilot.mode.cli': 'Copilot CLI',
+  'copilot.mode.vscode': 'VSCode Copilot',
+
+  // Node Palette
+  'palette.title': 'Node Palette',
+  'palette.basicNodes': 'Basic Nodes',
+  'palette.specialNodes': 'Special Nodes',
+  'palette.controlFlow': 'Control Flow',
+  'palette.layout': 'Layout',
+  'palette.quickStart': '💡 Quick Start',
+
+  // Node types
+  'node.prompt.title': 'Prompt',
+  'node.prompt.description': 'Template with variables',
+  'node.subAgent.title': 'Sub-Agent',
+  'node.subAgent.description': 'Execute a specialized task',
+  'node.end.title': 'End',
+  'node.end.description': 'Workflow termination point',
+  'node.branch.title': 'Branch',
+  'node.branch.description': 'Conditional branching logic',
+  'node.branch.deprecationNotice': 'Deprecated. Please migrate to If/Else or Switch nodes',
+  'node.ifElse.title': 'If/Else',
+  'node.ifElse.description': 'Binary conditional branch (True/False)',
+  'node.switch.title': 'Switch',
+  'node.switch.description': 'Multi-way conditional branch (2-N cases)',
+  'node.askUserQuestion.title': 'Ask User Question',
+  'node.askUserQuestion.description': 'Branch based on user choice',
+  'node.skill.title': 'Skill',
+  'node.skill.description': 'Execute a Claude Code Skill',
+
+  // Group Node
+  'node.group.title': 'Group',
+  'node.group.description': 'Visual grouping container for nodes',
+  'property.group.members': 'Members',
+  'property.group.empty': 'Drag nodes into this group to organize your workflow.',
+
+  // Codex Node (Feature: 518-codex-agent-node)
+  'node.codex.title': 'Codex Agent',
+  'node.codex.description': 'Execute OpenAI Codex CLI',
+  'node.codex.untitled': 'Untitled Codex Agent',
+  'node.codex.aiGenerated': 'AI Generated',
+
+  // Codex Dialog (Feature: 518-codex-agent-node)
+  'codex.title': 'Create Codex Agent',
+  'codex.description': 'Configure an OpenAI Codex CLI agent for your workflow.',
+  'codex.nameLabel': 'Name',
+  'codex.namePlaceholder': 'e.g., code-reviewer',
+  'codex.promptModeLabel': 'Prompt Mode',
+  'codex.promptMode.fixed': 'Fixed',
+  'codex.promptMode.aiGenerated': 'AI Generated',
+  'codex.promptMode.aiGeneratedHelp':
+    'The orchestrating AI agent will generate instructions based on context.',
+  'codex.promptLabel': 'Prompt',
+  'codex.promptPlaceholder': 'Enter instructions for the Codex agent...',
+  'codex.promptGuidanceLabel': 'Guidance (Optional)',
+  'codex.promptGuidancePlaceholder': 'Optional hints for the AI when generating instructions...',
+  'codex.modelLabel': 'Model',
+  'codex.model.custom': 'Custom',
+  'codex.customModelPlaceholder': 'e.g., gpt-6.0-codex',
+  'codex.reasoningEffortLabel': 'Reasoning Effort',
+  'codex.reasoningEffort.low': 'Low',
+  'codex.reasoningEffort.medium': 'Medium',
+  'codex.reasoningEffort.high': 'High',
+  'codex.sandboxLabel': 'Sandbox Mode',
+  'codex.sandbox.readOnly': 'Read Only',
+  'codex.sandbox.workspaceWrite': 'Workspace Write',
+  'codex.sandbox.dangerFullAccess': 'Full Access (Dangerous)',
+  'codex.sandboxHelp': 'Controls file system access permissions for the Codex agent.',
+  'codex.sandboxDefaultHelp': 'Uses Codex default behavior (no -s option specified).',
+  'codex.advancedOptions': 'Advanced Options',
+  'codex.skipGitRepoCheckWarning':
+    'This option is usually required for workflow execution. Enables execution outside trusted Git repositories.',
+  'codex.createButton': 'Create',
+  'codex.cancelButton': 'Cancel',
+  'codex.error.nameRequired': 'Name is required',
+  'codex.error.nameTooLong': 'Name must be 64 characters or less',
+  'codex.error.nameInvalidPattern':
+    'Name must contain only alphanumeric characters, hyphens, and underscores',
+  'codex.error.promptRequired': 'Prompt is required',
+  'codex.error.promptTooLong': 'Prompt must be 10,000 characters or less',
+  'codex.error.modelRequired': 'Model name is required',
+  'codex.nameHelp': 'Alphanumeric characters, hyphens, and underscores only',
+
+  // SubAgentFlow Node (Feature: 089-subworkflow)
+  'node.subAgentFlow.title': 'Sub-Agent Flow',
+  'node.subAgentFlow.description': 'Execute Sub-Agent with detailed control',
+  'node.subAgentFlow.linked': 'Linked',
+  'node.subAgentFlow.notLinked': 'Not linked',
+  'node.subAgentFlow.untitled': 'Untitled Sub-Agent Flow',
+  'node.subAgentFlow.subAgentFlowNotFound': 'Sub-Agent Flow not found',
+  'node.subAgentFlow.selectSubAgentFlow': 'Select a sub-agent flow to execute',
+
+  // SubAgentFlow Panel (Feature: 089-subworkflow)
+  'subAgentFlow.panel.title': 'Sub-Agent Flows',
+  'subAgentFlow.create': 'New',
+  'subAgentFlow.delete': 'Delete',
+  'subAgentFlow.mainWorkflow': 'Main Workflow',
+  'subAgentFlow.empty': 'No sub-agent flows yet',
+  'subAgentFlow.default.name': 'subagentflow',
+  'subAgentFlow.editing': 'Editing:',
+  'subAgentFlow.edit': 'Edit Sub-Agent Flow',
+  'subAgentFlow.clickToEdit': 'Click to edit name',
+  'subAgentFlow.namePlaceholder': 'e.g., data-processing',
+  'subAgentFlow.dialog.close': 'Close and return to main workflow',
+  'subAgentFlow.dialog.submit': 'Submit and add to workflow',
+  'subAgentFlow.dialog.cancel': 'Cancel and discard changes',
+  'subAgentFlow.generateNameWithAI': 'Generate name with AI',
+
+  // SubAgentFlow AI Edit
+  'subAgentFlow.aiEdit.title': 'AI Edit',
+  'subAgentFlow.aiEdit.toggleButton': 'Toggle AI Edit Mode',
+
+  // SubAgentFlow validation errors
+  'error.subAgentFlow.nameRequired': 'Name is required',
+  'error.subAgentFlow.nameTooLong': 'Name must be 50 characters or less',
+  'error.subAgentFlow.invalidName':
+    'Name must contain only lowercase letters (a-z), numbers, hyphens, and underscores',
+
+  // Quick start instructions
+  'palette.nestedNotAllowed': 'Not available in Sub-Agent Flow (nesting not supported)',
+  'palette.instruction.addNode': 'Click a node to add it to the canvas',
+  'palette.instruction.dragNode': 'Drag nodes to reposition them',
+  'palette.instruction.connectNodes': 'Connect nodes by dragging from output to input handles',
+  'palette.instruction.editProperties': 'Select a node to edit its properties',
+
+  // Property Panel
+  'property.title': 'Properties',
+  'property.showInOverview': 'Show in View',
+
+  // Common property labels
+  'property.nodeName': 'Node Name',
+  'property.nodeName.placeholder': 'Enter node name',
+  'property.nodeName.help': 'Used for exported file name (e.g., "data-analysis")',
+  'property.description': 'Description',
+  'property.prompt': 'Prompt',
+  'property.model': 'Model',
+  'property.label': 'Label',
+  'property.label.placeholder': 'Enter label',
+  'property.evaluationTarget': 'Evaluation Target',
+  'property.evaluationTarget.placeholder': 'e.g., Result of the previous step',
+  'property.evaluationTarget.help': 'Describe what to evaluate in the branch condition',
+
+  // Start/End node descriptions
+  'property.startNodeDescription':
+    'Start node marks the beginning of the workflow. It cannot be deleted and has no editable properties.',
+  'property.endNodeDescription':
+    'End node marks the completion of the workflow. At least one End node is required for export.',
+  'property.unknownNodeType': 'Unknown node type:',
+
+  // Sub-Agent properties
+  'property.tools': 'Tools (comma-separated)',
+  'property.tools.placeholder': 'e.g., Read,Write,Bash',
+  'property.tools.help': 'Leave empty for all tools',
+  'property.memory': 'Memory',
+  'property.memory.referenceUrl':
+    'https://code.claude.com/docs/en/sub-agents#enable-persistent-memory',
+  'properties.subAgent.color': 'Color',
+  'properties.subAgent.colorPlaceholder': 'Select color...',
+  'properties.subAgent.colorNone': 'None',
+  'properties.subAgent.colorHelp': 'Visual indicator color for this sub-agent',
+
+  // Skill properties
+  'property.skillPath': 'Skill Path',
+  'property.scope': 'Scope',
+  'property.scope.user': 'User',
+  'property.scope.project': 'Project',
+  'property.scope.local': 'Local',
+  // Legacy key for backward compatibility
+  'property.scope.personal': 'Personal',
+  'property.validationStatus': 'Validation Status',
+  'property.validationStatus.valid': 'Valid',
+  'property.validationStatus.missing': 'Missing',
+  'property.validationStatus.invalid': 'Invalid',
+  'property.validationStatus.valid.tooltip': 'Skill is valid and ready to use',
+  'property.validationStatus.missing.tooltip': 'SKILL.md file not found at specified path',
+  'property.validationStatus.invalid.tooltip': 'SKILL.md has invalid YAML frontmatter',
+  'property.allowedTools': 'Allowed Tools',
+
+  // Codex Agent properties
+
+  // AskUserQuestion properties
+  'property.questionText': 'Question',
+  'property.multiSelect': 'Multiple Selection',
+  'property.multiSelect.enabled': 'User can select multiple options (outputs selected list)',
+  'property.multiSelect.disabled': 'User selects one option (branches to corresponding node)',
+  'property.aiSuggestions': 'AI Suggests Options',
+  'property.aiSuggestions.enabled': 'AI will dynamically generate options based on context',
+  'property.aiSuggestions.disabled': 'Manually define options below',
+  'property.options': 'Options',
+  'property.optionsCount': 'Options ({count}/4)',
+  'property.optionNumber': 'Option {number}',
+  'property.addOption': '+ Add Option',
+  'property.remove': 'Remove',
+  'property.optionLabel.placeholder': 'Label',
+  'property.optionDescription.placeholder': 'Description',
+
+  // Prompt properties
+  'property.prompt.label': 'Prompt',
+  'property.prompt.placeholder': 'Enter prompt with {{variables}}',
+  'property.prompt.help': 'Use {{variableName}} syntax for dynamic values',
+  'property.detectedVariables': 'Detected Variables ({count})',
+  'property.variablesSubstituted': 'Variables will be substituted at runtime',
+
+  // Branch properties
+  'property.branchType': 'Branch Type',
+  'property.conditional': 'Conditional (2-way)',
+  'property.switch': 'Switch (Multi-way)',
+  'property.branchType.conditional.help': '2 branches (True/False)',
+  'property.branchType.switch.help': 'Multiple branches (2-N way)',
+  'property.branches': 'Branches',
+  'property.branchesCount': 'Branches ({count})',
+  'property.branchNumber': 'Branch {number}',
+  'property.addBranch': '+ Add Branch',
+  'property.branchLabel': 'Label',
+  'property.branchLabel.placeholder': 'e.g., Success, Error',
+  'property.branchCondition': 'Condition (natural language)',
+  'property.branchCondition.placeholder': 'e.g., If the previous process succeeded',
+  'property.minimumBranches': 'Minimum 2 branches required',
+
+  // Default node labels
+  'default.newSubAgent': 'New Sub-Agent',
+  'default.enterPrompt': 'Enter your prompt here',
+  'default.newQuestion': 'New Question',
+  'default.option': 'Option',
+  'default.firstOption': 'First option',
+  'default.secondOption': 'Second option',
+  'default.newOption': 'New option',
+  'default.newPrompt': 'New Prompt',
+  'default.prompt': 'Enter your prompt here.\n\nYou can use variables like {{variableName}}.',
+  'default.branchTrue': 'True',
+  'default.branchTrueCondition': 'When condition is true',
+  'default.branchFalse': 'False',
+  'default.branchFalseCondition': 'When condition is false',
+  'default.case1': 'Case 1',
+  'default.case1Condition': 'When condition 1 is met',
+  'default.case2': 'Case 2',
+  'default.case2Condition': 'When condition 2 is met',
+  'default.defaultBranch': 'default',
+  'default.defaultBranchCondition': 'Other cases',
+  'default.conditionPrefix': 'When condition ',
+  'default.conditionSuffix': ' is met',
+
+  // Tour
+  'tour.welcome': 'Welcome to CC Workflow Studio!\n\nLet us walk you through the basics.',
+  'tour.canvas':
+    'This is the workflow canvas. Place nodes and connect them to build a processing pipeline.\n\nDrag nodes to move them, and drag handles (⚪) to connect nodes together.',
+  'tour.propertyPanel':
+    'Click a node to open the Property Panel.\n\nHere you can configure node name, prompt, model selection, and more.',
+  'tour.nodePalette':
+    'Add nodes to your workflow from the Node Palette.\n\nPrompt, Sub-Agent, Skill, MCP Tool, If/Else, Switch, and more are available.',
+  'tour.toolbarActions':
+    'Save, load, convert, and run workflows from the toolbar.\n\nThe "Run" button lets you execute your workflow directly in Claude Code.',
+  'tour.refineWithAI':
+    'Use "Edit with AI" to generate or improve workflows through an interactive chat.\n\nYou can start from an empty canvas or refine existing workflows conversationally.',
+  'tour.finish':
+    "That's the end of the tour!\n\nFeel free to start building your workflow.\nYou can revisit this tour anytime from the Help option in the More menu.",
+
+  // Tour buttons
+  'tour.button.back': 'Back',
+  'tour.button.close': 'Close',
+  'tour.button.finish': 'Finish',
+  'tour.button.next': 'Next',
+  'tour.button.skip': 'Skip',
+  'tour.button.minimize': 'Minimize',
+  'tour.button.resume': 'Resume Tour',
+
+  // Delete Confirmation Dialog
+  'dialog.deleteNode.title': 'Delete Node',
+  'dialog.deleteNode.message': 'Are you sure you want to delete this node?',
+  'dialog.deleteNode.confirm': 'Delete',
+  'dialog.deleteNode.cancel': 'Cancel',
+
+  // Load Workflow Confirmation Dialog (when opening from preview with unsaved changes)
+  'dialog.loadWorkflow.title': 'Unsaved Changes',
+  'dialog.loadWorkflow.message':
+    'You have unsaved changes. Loading a new workflow will discard them. Do you want to continue?',
+  'dialog.loadWorkflow.confirm': 'Discard & Load',
+  'dialog.loadWorkflow.cancel': 'Cancel',
+
+  // Diff Preview Dialog (MCP apply_workflow)
+  'dialog.diffPreview.title': 'Review Workflow Changes',
+  'dialog.diffPreview.description':
+    'An AI agent is proposing the following changes to the workflow:',
+  'dialog.diffPreview.newWorkflow': 'An AI agent is creating a new workflow:',
+  'dialog.diffPreview.nameChange': 'Name:',
+  'dialog.diffPreview.nodes': 'Nodes',
+  'dialog.diffPreview.connections': 'Connections',
+  'dialog.diffPreview.connectionsAdded': 'added',
+  'dialog.diffPreview.connectionsRemoved': 'removed',
+  'dialog.diffPreview.noChanges': 'No changes detected.',
+  'dialog.diffPreview.agentDescription': 'Agent description',
+  'dialog.diffPreview.filesToCreate': 'Files to be created',
+  'dialog.diffPreview.accept': 'Accept',
+  'dialog.diffPreview.reject': 'Reject',
+  'dialog.diffPreview.revisionConflict':
+    'Warning: The canvas was modified after the AI fetched the workflow. Review the changes carefully before accepting.',
+  'dialog.diffPreview.applyAnyway': 'Apply Anyway',
+  'dialog.diffPreview.retryWithLatest': 'Retry with Latest',
+  'dialog.diffPreview.previewOverview': 'Preview',
+  'dialog.diffPreview.closeOverview': 'Close Preview',
+
+  // Reset Workflow Confirmation Dialog
+  'toolbar.resetWorkflow': 'Reset Workflow',
+  'toolbar.focusMode': 'Focus Mode',
+  'dialog.resetWorkflow.title': 'Reset Workflow',
+  'dialog.resetWorkflow.message':
+    'Are you sure you want to reset the workflow? All nodes except Start and End will be removed.',
+  'dialog.resetWorkflow.confirm': 'Reset',
+
+  // Skill Browser Dialog
+  'skill.browser.title': 'Browse Skills',
+  'skill.browser.description': 'Select an Agent Skill to add to your workflow.',
+  'skill.browser.selectSkill': 'Select Skill',
+  'skill.browser.browseSkills': 'Browse Skills',
+  'skill.browser.userTab': 'User',
+  'skill.browser.projectTab': 'Project',
+  'skill.browser.localTab': 'Local',
+  // Scope descriptions for beginners
+  'skill.browser.userDescription': 'Available in all projects.',
+  'skill.browser.projectDescription': 'Available only in this project (shared).',
+  'skill.browser.localDescription': 'Available only in this project (private).',
+  'skill.browser.filterPlaceholder': 'Filter by skill name...',
+  // Legacy key for backward compatibility
+  'skill.browser.personalTab': 'Personal',
+  'skill.browser.noSkills': 'No Skills found in this directory',
+  'skill.browser.loading': 'Loading Skills...',
+  'skill.browser.selectButton': 'Add to Workflow',
+  'skill.browser.cancelButton': 'Cancel',
+  'skill.browser.skillName': 'Skill Name',
+  'skill.browser.skillDescription': 'Description',
+  'skill.browser.skillPath': 'Path',
+  'skill.browser.validationStatus': 'Status',
+
+  // Skill Browser Settings Step
+  'skill.browser.configureButton': 'Configure',
+  'skill.browser.addButton': 'Add to Workflow',
+  'skill.browser.backToList': 'Back',
+
+  // Skill Browser Actions
+  'skill.action.refresh': 'Refresh',
+  'skill.refreshing': 'Refreshing...',
+
+  // Skill Browser Errors
+  'skill.error.loadFailed': 'Failed to load Skills. Please check your Skill directories.',
+  'skill.error.noSelection': 'Please select a Skill',
+  'skill.error.unknown': 'An unexpected error occurred',
+  'skill.error.refreshFailed': 'Failed to refresh Skills',
+
+  // Skill Creation Dialog
+  'skill.creation.title': 'Create New Skill',
+  'skill.creation.description':
+    'Create a new Claude Code Skill. Skills are specialized tools that can be invoked by Claude Code to perform specific tasks.',
+  'skill.creation.nameLabel': 'Skill Name',
+  'skill.creation.nameHint': 'Lowercase letters, numbers, and hyphens only (max 64 characters)',
+  'skill.creation.descriptionLabel': 'Description',
+  'skill.creation.descriptionPlaceholder':
+    'Brief description of what this Skill does and when to use it',
+  'skill.creation.instructionsLabel': 'Instructions',
+  'skill.creation.instructionsPlaceholder':
+    'Enter detailed instructions in Markdown format.\n\nExample:\n# My Skill\n\nThis Skill performs...',
+  'skill.creation.instructionsHint': 'Markdown-formatted instructions for Claude Code',
+  'skill.creation.allowedToolsLabel': 'Allowed Tools (optional)',
+  'skill.creation.allowedToolsHint': 'Comma-separated list of tool names (e.g., Read, Grep, Glob)',
+  'skill.creation.scopeLabel': 'Scope',
+  'skill.creation.scopeUser': 'User (~/.claude/skills/)',
+  'skill.creation.scopeProject': 'Project (.claude/skills/)',
+  // Legacy key for backward compatibility
+  'skill.creation.scopePersonal': 'Personal (~/.claude/skills/)',
+  'skill.creation.cancelButton': 'Cancel',
+  'skill.creation.createButton': 'Create Skill',
+  'skill.creation.creatingButton': 'Creating...',
+  'skill.creation.error.unknown': 'Failed to create Skill. Please try again.',
+
+  // Skill Execution Mode
+  'property.skill.executionMode': 'Execution Mode',
+  'property.skill.executionMode.execute': 'Execute',
+  'property.skill.executionMode.load': 'Load as Knowledge',
+  'property.skill.executionMode.execute.description':
+    'Execute the Skill as an action in the workflow',
+  'property.skill.executionMode.load.description':
+    'Load the Skill content as knowledge context without executing it',
+  'property.skill.executionPrompt': 'Prompt',
+  'property.skill.executionPrompt.placeholder':
+    'Enter additional instructions for executing this Skill...',
+
+  // Skill Edit Dialog
+  'skill.editDialog.title': 'Edit Skill Settings',
+  'skill.editDialog.saveButton': 'Save',
+  'skill.editDialog.cancelButton': 'Cancel',
+
+  // Skill Validation Errors
+  'skill.validation.nameRequired': 'Skill name is required',
+  'skill.validation.nameTooLong': 'Skill name must be 64 characters or less',
+  'skill.validation.nameInvalidFormat':
+    'Skill name must contain only lowercase letters, numbers, and hyphens',
+  'skill.validation.descriptionRequired': 'Description is required',
+  'skill.validation.descriptionTooLong': 'Description must be 1024 characters or less',
+  'skill.validation.instructionsRequired': 'Instructions are required',
+  'skill.validation.scopeRequired': 'Please select a scope (Personal or Project)',
+
+  // Workflow Refinement (001-ai-workflow-refinement)
+  'refinement.toolbar.refineButton': 'Edit with AI',
+  'refinement.toolbar.refineButton.tooltip': 'Open chat to edit this workflow with AI assistance',
+
+  // Refinement Chat Panel (Short form keys for components)
+  'refinement.title': 'Edit with AI',
+  'refinement.inputPlaceholder': 'Describe the changes you want to make...',
+  'refinement.sendButton': 'Send',
+  'refinement.cancelButton': 'Cancel',
+  'refinement.processing': 'Processing...',
+  'refinement.aiProcessing': 'AI is processing your request...',
+  'refinement.iterationCounter': 'Edits: {current}',
+  'refinement.iterationCounter.tooltip':
+    'High edit counts may slow down save/load operations and impact editing workflow',
+  'refinement.warning.title': 'Long Conversation',
+  'refinement.warning.message':
+    'The conversation history is getting large, which may increase file size and impact performance. Consider clearing the conversation history.',
+
+  // Refinement Chat Panel (Detailed keys)
+  'refinement.chat.title': 'Workflow Refinement Chat',
+  'refinement.chat.description':
+    'Chat with AI to iteratively improve your workflow. Describe what changes you want, and the AI will update the workflow automatically.',
+  'refinement.chat.inputPlaceholder': 'Describe the changes you want (e.g., "Add error handling")',
+  'refinement.chat.sendButton': 'Send',
+  'refinement.chat.sendButton.shortcut': 'Ctrl+Enter to send',
+  'refinement.chat.sendButton.shortcutMac': 'Cmd+Enter to send',
+  'refinement.chat.cancelButton': 'Cancel',
+  'refinement.chat.closeButton': 'Close',
+  'refinement.chat.clearButton': 'Clear Conversation',
+  'refinement.chat.clearButton.tooltip': 'Clear conversation history and start fresh',
+  'refinement.chat.useSkillsCheckbox': 'Include Skills',
+  'refinement.chat.useCodexNodesCheckbox': 'Include Codex Nodes',
+
+  // Timeout selector
+  'refinement.timeout.label': 'Timeout',
+  'refinement.timeout.ariaLabel': 'Select AI refinement timeout duration',
+
+  // Model selector
+  'refinement.model.label': 'Model',
+
+  // Provider selector
+  'refinement.provider.label': 'AI Provider',
+
+  // Settings dropdown
+  'refinement.settings.title': 'Settings',
+
+  'refinement.chat.claudeMdTip':
+    '💡 Tip: Add workflow-specific rules and constraints to CLAUDE.md for more accurate AI edits',
+  'refinement.chat.refining': 'AI is refining workflow... This may take up to 120 seconds.',
+  'refinement.chat.progressTime': '{elapsed}s / {max}s',
+  'refinement.chat.characterCount': '{count} / {max} characters',
+  'refinement.chat.iterationCounter': 'Iteration {current} / {max}',
+  'refinement.chat.iterationWarning': 'Approaching iteration limit ({current}/{max})',
+  'refinement.chat.iterationLimitReached':
+    'Maximum iteration limit reached ({max}). Please clear conversation to continue.',
+  'refinement.chat.noMessages': 'No messages yet. Start by describing what you want to improve.',
+  'refinement.chat.userMessageLabel': 'You',
+  'refinement.chat.aiMessageLabel': 'AI',
+  'refinement.chat.success': 'Workflow refined successfully!',
+  'refinement.chat.changesSummary': 'Changes: {summary}',
+
+  // Refinement Success Messages
+  'refinement.success.defaultMessage': 'Workflow has been updated.',
+
+  // Refinement Session Status
+  'refinement.session.warningDialog.title': 'AI Editing Session Reconnected',
+  'refinement.session.warningDialog.message':
+    'The AI conversation session could not be continued due to reasons such as switching AI providers, loading a workflow shared by others, or session expiration, so a new conversation session was started.\n\nAdditional context that the AI remembered in the previous conversation session (file contents, tool execution results, etc.) may have been lost.\n\nPlease re-share any relevant information in your message if needed.',
+  'refinement.session.warningDialog.ok': 'OK',
+
+  // Refinement Errors
+  'refinement.error.emptyMessage': 'Please enter a message',
+  'refinement.error.messageTooLong': 'Message is too long (max {max} characters)',
+  'refinement.error.commandNotFound':
+    'Claude Code CLI not found. Please install Claude Code to use AI refinement.',
+  'refinement.error.modelNotSupported':
+    'The selected model is not supported or access is not enabled. You can enable access by selecting and using the model in Copilot Chat once.',
+  'refinement.error.copilotNotAvailable':
+    'Copilot is not available. Please ensure VS Code 1.89+ and GitHub Copilot extension are installed.',
+  'refinement.error.timeout':
+    'AI refinement timed out. Please adjust the timeout value and try again. Simplifying the request is also recommended.',
+  'refinement.error.parseError':
+    'Failed to parse AI response. Please try again or rephrase your request.',
+  'refinement.error.validationError':
+    'Refined workflow failed validation. Please try a different request.',
+  'refinement.error.prohibitedNodeType':
+    'SubAgent, SubAgentFlow, and AskUserQuestion nodes cannot be used in Sub-Agent Flows.',
+  'refinement.error.iterationLimitReached':
+    'Maximum iteration limit (20) has been reached. Clear conversation history to start fresh, or manually edit the workflow.',
+  'refinement.error.unknown': 'An unexpected error occurred. Check logs for details.',
+
+  // Refinement Error Display (Phase 3.8)
+  'refinement.error.retryButton': 'Retry',
+
+  // Processing Overlay (Phase 3.10)
+  'refinement.processingOverlay': 'AI is processing your request...',
+
+  // Clear Conversation Confirmation
+  'refinement.clearDialog.title': 'Clear Conversation',
+  'refinement.clearDialog.message':
+    'Are you sure you want to clear the conversation history? This cannot be undone.',
+  'refinement.clearDialog.confirm': 'Clear',
+  'refinement.clearDialog.cancel': 'Cancel',
+
+  // Initial instructional message (Phase 3.12)
+  'refinement.initialMessage.description':
+    'Describe the workflow you want to achieve in natural language.',
+  // Provider-specific notes
+  'refinement.initialMessage.noteClaudeCode': '※ This feature uses Claude Code.',
+  'refinement.initialMessage.noteCodex': '※ This feature uses Codex CLI.',
+  // Copilot-specific note with link
+  'refinement.initialMessage.noteCopilot':
+    '※ This feature requests your GitHub Copilot through the VSCode Language Model API.',
+
+  // MCP Node (Feature: 001-mcp-node)
+  'node.mcp.title': 'MCP Tool',
+  'node.mcp.description': 'Execute MCP tool',
+
+  // MCP Server List
+  'mcp.loading.servers': 'Loading available MCP servers in this project...',
+  'mcp.error.serverLoadFailed': 'Failed to load MCP servers',
+  'mcp.empty.servers': 'No available MCP servers in this project.',
+  'mcp.empty.servers.hint': 'Please configure MCP servers for Claude Code.',
+
+  // MCP Tool List
+  'mcp.loading.tools': 'Loading tools...',
+  'mcp.error.toolLoadFailed': 'Failed to load tools from server',
+  'mcp.empty.tools': 'No tools available for this server',
+
+  // MCP Cache Actions
+  'mcp.action.refresh': 'Refresh',
+  'mcp.refreshing': 'Refreshing...',
+  'mcp.error.refreshFailed': 'Failed to refresh MCP cache',
+
+  // MCP Tool Search
+  'mcp.search.placeholder': 'Search tools by name or description...',
+  'mcp.search.noResults': 'No tools found matching "{query}"',
+  'mcp.search.serverPlaceholder': 'Filter servers by name...',
+  'mcp.search.noServers': 'No servers found matching "{query}"',
+  'mcp.browse.servers': 'Browse MCP Servers',
+
+  // MCP Node Dialog
+  'mcp.dialog.title': 'MCP Tool Configuration',
+  'mcp.dialog.selectServer': 'Select MCP Server',
+  'mcp.dialog.selectTool': 'Select Tool',
+  'mcp.dialog.addButton': 'Add Tool',
+  'mcp.dialog.cancelButton': 'Cancel',
+  'mcp.dialog.nextButton': 'Next',
+  'mcp.dialog.backButton': 'Back',
+  'mcp.dialog.saveButton': 'Create Node',
+  'mcp.dialog.error.noServerSelected': 'Please select an MCP server',
+  'mcp.dialog.error.noToolSelected': 'Please select a tool',
+  'mcp.dialog.error.incompleteWizard': 'Please complete all required steps',
+  'mcp.dialog.error.cannotProceed': 'Please fill in all required fields to proceed',
+  'mcp.dialog.error.invalidMode': 'Invalid mode selected',
+
+  // MCP Property Panel
+  'property.mcp.serverId': 'Server',
+  'property.mcp.toolName': 'Tool Name',
+  'property.mcp.toolDescription': 'Description',
+  'property.mcp.parameters': 'Parameters',
+  'property.mcp.parameterValues': 'Parameter Values',
+  'property.mcp.parameterCount': 'Parameter Count',
+  'property.mcp.editParameters': 'Edit Parameters',
+  'property.mcp.edit.manualParameterConfig': 'Edit Parameters',
+  'property.mcp.edit.aiParameterConfig': 'Edit Parameter Content',
+  'property.mcp.edit.aiToolSelection': 'Edit Task Content',
+  'property.mcp.taskDescription': 'Task Content',
+  'property.mcp.parameterDescription': 'Parameter Content',
+  'property.mcp.configuredValues': 'Configured Values',
+  'property.mcp.infoNote':
+    'MCP tool properties are loaded from the server. Click "Edit Parameters" to configure parameter values.',
+
+  // MCP Parameter Form
+  'mcp.parameter.formTitle': 'Tool Parameters',
+  'mcp.parameter.noParameters': 'This tool has no parameters',
+  'mcp.parameter.selectOption': '-- Select an option --',
+  'mcp.parameter.enterValue': 'Enter value',
+  'mcp.parameter.minLength': 'Min length',
+  'mcp.parameter.maxLength': 'Max length',
+  'mcp.parameter.pattern': 'Pattern',
+  'mcp.parameter.minimum': 'Min',
+  'mcp.parameter.maximum': 'Max',
+  'mcp.parameter.default': 'Default',
+  'mcp.parameter.addItem': 'Add item',
+  'mcp.parameter.add': 'Add',
+  'mcp.parameter.remove': 'Remove',
+  'mcp.parameter.arrayCount': 'Items',
+  'mcp.parameter.jsonFormat': 'JSON format required',
+  'mcp.parameter.jsonInvalid': 'Invalid JSON format',
+  'mcp.parameter.objectInvalid': 'Value must be a JSON object',
+  'mcp.parameter.unsupportedType': 'Unsupported parameter type: {type} for {name}',
+  'mcp.parameter.validationErrors': 'Please fix the following validation errors:',
+
+  // MCP Edit Dialog
+  'mcp.editDialog.title': 'Configure MCP Tool',
+  'mcp.editDialog.saveButton': 'Save',
+  'mcp.editDialog.cancelButton': 'Cancel',
+  'mcp.editDialog.loading': 'Loading tool schema...',
+  'mcp.editDialog.error.schemaLoadFailed': 'Failed to load tool schema',
+
+  // MCP Natural Language Mode (Feature: 001-mcp-natural-language-mode)
+
+  // Mode Selection
+  'mcp.modeSelection.title': 'Select Configuration Mode',
+  'mcp.modeSelection.subtitle': 'Choose how you want to configure this MCP tool',
+  'mcp.modeSelection.manualParameterConfig.title': 'Manual Parameter Configuration',
+  'mcp.modeSelection.manualParameterConfig.description':
+    'Configure MCP server, MCP tool, and all parameters explicitly. High reproducibility, best for technical users.',
+  'mcp.modeSelection.aiParameterConfig.title': 'AI Parameter Configuration',
+  'mcp.modeSelection.aiParameterConfig.description':
+    'Select MCP server and MCP tool, describe parameters in natural language. Balanced approach.',
+  'mcp.modeSelection.aiToolSelection.title': 'AI Tool Selection',
+  'mcp.modeSelection.aiToolSelection.description':
+    'Select MCP server only, describe entire task in natural language. Simplest, lowest reproducibility.',
+
+  // Parameter Detailed Config Step
+  'mcp.parameterDetailedConfig.title': 'Configure Tool Parameters',
+
+  // Natural Language Input
+  'mcp.naturalLanguage.paramDescription.label': 'Parameter Content',
+  'mcp.naturalLanguage.paramDescription.placeholder':
+    'Describe what you want to do with this tool (e.g., "Check if Lambda is available in us-east-1")...',
+  'mcp.naturalLanguage.taskDescription.label': 'Task Content',
+  'mcp.naturalLanguage.taskDescription.placeholder':
+    'Describe the task you want to accomplish (e.g., "Find documentation about S3 bucket policies")...',
+
+  // Mode Switch Warnings
+  'mcp.modeSwitch.warning.title': 'Mode Switch Warning',
+  'mcp.modeSwitch.warning.message':
+    'Switching from {currentMode} to {newMode} will change how this node is configured. Your current configuration will be preserved but may not be visible in the new mode. You can switch back to {currentMode} at any time to restore the previous configuration.',
+  'mcp.modeSwitch.warning.continueButton': 'Continue',
+  'mcp.modeSwitch.warning.cancelButton': 'Cancel',
+  'mcp.modeSwitch.dataPreserved': 'Your data will be preserved',
+  'mcp.modeSwitch.canRevert': 'You can switch back at any time',
+
+  // Validation Errors
+  'mcp.error.paramDescRequired':
+    'Please provide a parameter description to help Claude Code understand your intent.',
+  'mcp.error.taskDescRequired': 'Please provide a task description with a clear goal.',
+  'mcp.error.noToolsAvailable': 'No tools available from the selected MCP server',
+  'mcp.error.toolListOutdated':
+    'Tool list snapshot is more than 7 days old. Please re-edit this node to capture the latest available tools.',
+  'mcp.error.modeConfigMissing': 'Mode configuration is missing. Please reconfigure this node.',
+  'mcp.error.invalidModeConfig':
+    'Mode configuration is invalid. Please check your natural language description or switch to Detailed Mode.',
+
+  // Mode Indicator Tooltips
+  'mcp.mode.detailed.tooltip': 'Detailed Mode: All parameters explicitly configured',
+  'mcp.mode.naturalLanguageParam.tooltip': 'Natural Language Parameter Mode: "{description}"',
+  'mcp.mode.fullNaturalLanguage.tooltip': 'Full Natural Language Mode: "{taskDescription}"',
+
+  // Slack Integration
+  'slack.connect': 'Connect to Slack',
+  'slack.disconnect': 'Disconnect',
+  'slack.connecting': 'Connecting...',
+  'slack.connected': 'Connected to {workspaceName}',
+  'slack.notConnected': 'Not connected to Slack',
+
+  // Slack Manual Token
+  'slack.manualToken.title': 'Connect to Slack',
+  'slack.manualToken.description': 'Connect to your workspace through your own Slack App.',
+  'slack.manualToken.howToGet.title': 'How to set up Slack App',
+  'slack.manualToken.howToGet.step1': 'Create Slack App (at api.slack.com/apps)',
+  'slack.manualToken.howToGet.step2': 'Add User Token Scopes (OAuth & Permissions):',
+  'slack.manualToken.howToGet.step3': 'Install App to your workspace (OAuth & Permissions)',
+  'slack.manualToken.howToGet.step4': 'Copy User Token (xoxp-...) from OAuth & Permissions page',
+  'slack.manualToken.security.title': 'Security & Privacy',
+  'slack.manualToken.security.notice':
+    'Note: This feature communicates with Slack servers (not local-only operation)',
+  'slack.manualToken.security.storage': 'Token stored in VSCode Secret Storage (OS Keychain)',
+  'slack.manualToken.security.transmission':
+    'Only sent to Slack API (api.slack.com) for validation',
+  'slack.manualToken.security.deletion': 'Can be deleted anytime',
+  'slack.manualToken.security.sharing':
+    'User Token has channel read/write and other permissions. Only share within trusted communities.',
+  'slack.manualToken.userToken.label': 'User OAuth Token',
+  'slack.manualToken.error.tokenRequired': 'User Token is required',
+  'slack.manualToken.error.invalidTokenFormat': 'User Token must start with "xoxp-"',
+  'slack.manualToken.error.userTokenRequired': 'User Token is required for secure channel listing',
+  'slack.manualToken.error.invalidUserTokenFormat': 'User Token must start with "xoxp-"',
+  'slack.manualToken.connecting': 'Connecting...',
+  'slack.manualToken.connect': 'Connect',
+  'slack.manualToken.deleteButton': 'Delete Saved Auth Token',
+  'slack.manualToken.deleteConfirm.title': 'Delete Token',
+  'slack.manualToken.deleteConfirm.message':
+    'Are you sure you want to delete the saved auth token?',
+  'slack.manualToken.deleteConfirm.confirm': 'Delete',
+  'slack.manualToken.deleteConfirm.cancel': 'Cancel',
+
+  // Slack Share
+  'slack.share.button': 'Share',
+  'slack.share.title': 'Share to Slack',
+  'slack.share.selectChannel': 'Select channel',
+  'slack.share.selectChannelPlaceholder': 'Choose a channel...',
+  'slack.share.sharing': 'Sharing...',
+  'slack.share.failed': 'Failed to share workflow',
+
+  // Slack Description AI Generation
+  'slack.description.generateFailed':
+    'Failed to generate description. Please try again or write manually.',
+
+  // Slack Connect
+  'slack.connect.button': 'Connect to Slack',
+  'slack.connect.connecting': 'Connecting...',
+  'slack.connect.description': 'Connect your Slack workspace to share workflows with your team.',
+  'slack.connect.success': 'Successfully connected to {workspaceName}',
+  'slack.connect.failed': 'Failed to connect to Slack',
+  'slack.connect.title': 'Connect to Slack',
+  'slack.connect.tab.oauth': 'Connect Slack App to Workspace',
+  'slack.connect.tab.manual': 'Connect with Your Own Slack App',
+
+  // Slack OAuth
+  'slack.oauth.description':
+    'Click the Connect to Workspace button to display a confirmation screen for granting "CC Workflow Studio" access to Slack.\nOnce you grant permission, the Slack App for integration will be installed to your workspace.',
+  'slack.oauth.termsOfService': 'Terms of Service',
+  'slack.oauth.privacyPolicy': 'Privacy Policy',
+  'slack.oauth.supportPage': 'Support Page',
+  'slack.oauth.connectButton': 'Connect to Workspace',
+  'slack.oauth.status.initiated': 'Opening browser for authentication...',
+  'slack.oauth.status.polling': 'Waiting for authentication...',
+  'slack.oauth.status.waitingHint':
+    'Complete the authentication in your browser, then return here.',
+  'slack.oauth.cancelled': 'Authentication was cancelled',
+  'slack.oauth.reviewNotice.message':
+    'This Slack App has not been submitted to the Slack Marketplace.\nA warning will be displayed on the permission screen.',
+
+  // Slack Reconnect
+  'slack.reconnect.button': 'Reconnect to Slack',
+  'slack.reconnect.reconnecting': 'Reconnecting...',
+  'slack.reconnect.description':
+    'Re-authenticate with Slack to update permissions or refresh connection.',
+  'slack.reconnect.success': 'Successfully reconnected to {workspaceName}',
+  'slack.reconnect.failed': 'Failed to reconnect to Slack',
+
+  // Slack Import
+  'slack.import.title': 'Import from Slack',
+  'slack.import.importing': 'Importing...',
+  'slack.import.success': 'Workflow imported successfully',
+  'slack.import.failed': 'Failed to import workflow',
+  'slack.import.confirmOverwrite': 'A workflow with this name already exists. Overwrite?',
+
+  // Slack Search
+  'slack.search.title': 'Search Workflows',
+  'slack.search.placeholder': 'Search by name, author, or channel...',
+  'slack.search.searching': 'Searching...',
+  'slack.search.noResults': 'No workflows found',
+
+  // Slack Scopes - reasons why each scope is required
+  'slack.scopes.chatWrite.reason': 'to share workflows',
+  'slack.scopes.filesRead.reason': 'to import workflows',
+  'slack.scopes.filesWrite.reason': 'to attach workflow files',
+  'slack.scopes.channelsRead.reason': 'to select destination channel',
+  'slack.scopes.groupsRead.reason': 'to select private channels',
+
+  // Slack Errors
+  'slack.error.channelNotFound': 'Channel not found',
+  'slack.error.noWorkspaces': 'No workspaces connected',
+  'slack.error.noChannels': 'No channels available',
+  'slack.error.notInChannel': 'Slack App has not been added to the destination channel.',
+  'slack.error.networkError': 'Network error. Please check your connection.',
+  'slack.error.rateLimited': 'Rate limit exceeded. Please try again in {seconds} seconds.',
+  'slack.error.invalidAuth': 'Slack token is invalid.',
+  'slack.error.missingScope': 'Required permissions are missing.',
+  'slack.error.fileTooLarge': 'File size is too large.',
+  'slack.error.invalidFileType': 'Unsupported file type.',
+  'slack.error.internalError': 'Slack internal error occurred.',
+  'slack.error.notAuthed': 'Authentication credentials not provided.',
+  'slack.error.invalidCode': 'Authentication code is invalid or expired.',
+  'slack.error.badClientSecret': 'Client secret is invalid.',
+  'slack.error.invalidGrantType': 'Invalid authentication type.',
+  'slack.error.accountInactive': 'Account has been deactivated.',
+  'slack.error.invalidQuery': 'Invalid search query.',
+  'slack.error.msgTooLong': 'Message is too long.',
+  'slack.error.workspaceNotConnected': 'Not connected to the source Slack workspace.',
+  'slack.error.unknownError': 'An unknown error occurred.',
+  'slack.error.unknownApiError': 'Slack API error occurred.',
+
+  // Sensitive Data Warning
+  'slack.sensitiveData.warning.title': 'Sensitive Data Detected',
+  'slack.sensitiveData.warning.message':
+    'The following sensitive data was detected in your workflow:',
+  'slack.sensitiveData.warning.continue': 'Share Anyway',
+  'slack.sensitiveData.warning.cancel': 'Cancel',
+
+  // Slack Import Connection Required Dialog
+  'slack.import.connectionRequired.title': 'Slack Connection Required',
+  'slack.import.connectionRequired.message':
+    'Please connect to the source Slack workspace to import this workflow. The workflow file is hosted in a workspace that you are not currently connected to.',
+  'slack.import.connectionRequired.workspaceInfo': 'Source Workspace:',
+  'slack.import.connectionRequired.connectButton': 'Connect to Slack',
+
+  // Edit in VSCode Editor
+  'editor.openInEditor': 'Edit in Editor',
+  'editor.openInEditor.tooltip': 'Open in VSCode editor for full editing features',
+
+  // Workflow Settings / Memo Panel
+  'workflow.settings.title': 'Workflow Settings',
+  'workflow.settings.description.label': 'Description',
+  'workflow.settings.description.placeholder':
+    'Enter a description for this workflow (e.g., what it does, when to use it)...',
+  'workflow.settings.generateWithAI': 'Generate with AI',
+
+  // MCP Server Section
+  'mcpSection.description.line1': 'Edit workflows interactively with AI.',
+  'mcpSection.description.line2': 'Select an agent to get started.',
+  'mcpSection.reviewBeforeApply': 'Review changes before applying',
+
+  // Description Panel (Canvas)
+  'description.panel.title': 'Description',
+  'description.panel.show': 'Show description panel',
+  'description.panel.hide': 'Hide description panel',
+
+  // Sub-Agent Creation Dialog (Feature: 636 - Use Existing Agent)
+  'subAgent.dialog.title': 'Browse Sub-Agent',
+  'subAgent.dialog.createNew': 'Create New',
+  'subAgent.dialog.createNew.description': 'Create a new Sub-Agent from scratch',
+  'subAgent.dialog.useExisting': 'Use Existing Agent',
+  'subAgent.dialog.useExisting.description': 'Reuse an existing .claude/agents/*.md file',
+  'subAgent.dialog.selectCommand': 'Select a Command',
+  'subAgent.dialog.userTab': 'User',
+  'subAgent.dialog.projectTab': 'Project',
+  'subAgent.dialog.filterPlaceholder': 'Filter by name...',
+  'subAgent.dialog.noCommands': 'No commands found in this directory',
+  'subAgent.dialog.loading': 'Loading commands...',
+  'subAgent.dialog.addButton': 'Add to Workflow',
+  'subAgent.dialog.cancelButton': 'Cancel',
+  'subAgent.dialog.backButton': 'Back',
+  'subAgent.dialog.loadFailed': 'Failed to load commands. Please check the commands directory.',
+  'subAgent.dialog.description': 'Select a Sub-Agent to add to your workflow.',
+  'subAgent.dialog.selectSubAgent': 'Select Sub-Agent',
+  'subAgent.dialog.browseSubAgents': 'Browse Sub-Agents',
+  'subAgent.dialog.userDescription':
+    'Commands from ~/.claude/agents/ — available across all projects.',
+  'subAgent.dialog.projectDescription': 'Commands from .claude/agents/ — specific to this project.',
+  'subAgent.dialog.localDescription':
+    'Agents provided by installed Claude Code plugins. These agents are read-only and managed by their respective plugins.',
+  'subAgent.property.linkedCommand': 'Linked Command',
+
+  // Sub-Agent Form Dialog (Create New)
+  'subAgent.form.title': 'Create New Sub-Agent',
+  'subAgent.form.description': 'Define a new Sub-Agent node with custom settings.',
+  'subAgent.form.agentTypeLabel': 'Agent Type',
+  'subAgent.form.agentType.claudeCode': 'Claude Code',
+  'subAgent.form.agentType.other': 'Other',
+  'subAgent.form.descriptionLabel': 'Description',
+  'subAgent.form.descriptionPlaceholder': 'Brief description of this agent...',
+  'subAgent.form.agentDefinitionLabel': 'Agent Definition',
+  'subAgent.form.agentDefinitionPlaceholder':
+    'Define what this agent IS — its capabilities, role, and behavior...',
+  'subAgent.form.promptLabel': 'Prompt',
+  'subAgent.form.promptPlaceholder': 'Enter what you want this agent to do...',
+  'subAgent.form.modelLabel': 'Model',
+  'subAgent.form.toolsLabel': 'Tools',
+  'subAgent.form.toolsHint': 'Comma-separated list of allowed tools (e.g., Read, Grep, Glob)',
+  'subAgent.form.memoryLabel': 'Memory Scope',
+  'subAgent.form.memoryNone': 'None',
+  'subAgent.form.cancelButton': 'Cancel',
+  'subAgent.form.createButton': 'Create',
+  'subAgent.form.editTitle': 'Edit Sub-Agent',
+  'subAgent.form.saveButton': 'Save',
+  'subAgent.property.editButton': 'Edit',
+  'subAgent.form.error.descriptionRequired': 'Description is required.',
+  'subAgent.form.error.agentDefinitionRequired': 'Agent Definition is required.',
+  'subAgent.form.error.promptRequired': 'Prompt is required.',
+
+  // Sub-Agent Built-in Presets
+  'subAgent.dialog.builtInTab': 'Built-in',
+  'subAgent.dialog.builtInDescription':
+    'Built-in sub-agents optimized for Claude Code.\nFor other AI Agents, these presets are exported as regular sub-agents that emulate similar behavior.',
+  'subAgent.builtIn.controlledByPreset': 'Controlled by preset',
+  'subAgent.builtIn.generalPurpose.description':
+    'General-purpose agent for researching complex questions, searching code, and executing multi-step tasks.',
+  'subAgent.builtIn.generalPurpose.defaultAgentDefinition':
+    'General-purpose agent for researching complex questions, searching for code, and executing multi-step tasks. Has access to all tools.',
+  'subAgent.builtIn.generalPurpose.defaultPrompt': 'Research and complete the following task:',
+  'subAgent.builtIn.explore.description':
+    'Fast read-only agent for exploring codebases — find files, search code, and answer codebase questions.',
+  'subAgent.builtIn.explore.defaultAgentDefinition':
+    'Fast agent specialized for exploring codebases. Use for quick file searches, keyword searches, and answering questions about the codebase. Read-only — no Write/Edit tools.',
+  'subAgent.builtIn.explore.defaultPrompt':
+    'Explore the codebase and answer the following question:',
+  'subAgent.builtIn.plan.description':
+    'Software architect agent for designing implementation plans and identifying critical files.',
+  'subAgent.builtIn.plan.defaultAgentDefinition':
+    'Software architect agent for designing implementation plans. Returns step-by-step plans, identifies critical files, and considers architectural trade-offs. Read-only — no Write/Edit tools.',
+  'subAgent.builtIn.plan.defaultPrompt':
+    'Design an implementation plan for the following requirement:',
+
+  // Claude API Upload Dialog
+  'claudeApi.description':
+    'Upload workflows as Agent Skills to Claude API and run them via the Messages API.\nCombined with MCP servers, code execution, and other skills, you can publish specialized AI agents as APIs for document processing, data analysis, customer support, and more.',
+
+  // Commentary AI
+  'commentary.toggle': 'Toggle Commentary AI',
+  'commentary.waiting': 'Waiting for agent activity...',
+  'commentary.inactive': 'Run a workflow with Commentary enabled to see real-time commentary.',
+  'commentary.providerSelect': 'Select Commentary AI provider',
+
+  // Sample Workflows
+  'toolbar.sampleWorkflows': 'Sample Workflows',
+  'sample.dialog.title': 'Sample Workflows',
+  'sample.dialog.description': 'Load a sample workflow to explore what you can build.',
+  'sample.dialog.nodeCount': '{{count}} nodes',
+  'sample.dialog.loadButton': 'Load',
+  'sample.githubIssuePlanning.name': 'GitHub Issue Planning',
+  'sample.githubIssuePlanning.description':
+    'A planning workflow for GitHub issues: fetch issue, analyze current code, verify fixes, and retrospective.',
+  'sample.dailyDevFlowWithWorktree.name': 'Daily Dev Flow with Git Worktree',
+  'sample.dailyDevFlowWithWorktree.description':
+    'Daily development flow using git worktree: hear task, propose branch & create worktree, investigate, plan, confirm, implement, run quality checks, commit & draft PR.',
+};

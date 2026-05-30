@@ -1,0 +1,607 @@
+/**
+ * MCP Node Creation Dialog Component
+ *
+ * Feature: 001-mcp-natural-language-mode
+ * Purpose: Step-by-step wizard for creating MCP nodes with mode selection
+ *
+ * Based on: specs/001-mcp-natural-language-mode/tasks.md T017, T048
+ */
+
+import { NodeType } from '@cc-wf-studio/core';
+import * as Dialog from '@radix-ui/react-dialog';
+import { ExternalLink } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useMcpCreationWizard, WizardStep } from '../../hooks/useMcpCreationWizard';
+import { useTranslation } from '../../i18n/i18n-context';
+import { checkMcpBearerToken, deleteMcpBearerToken } from '../../services/mcp-service';
+import { openExternalUrl } from '../../services/vscode-bridge';
+import { useWorkflowStore } from '../../stores/workflow-store';
+import { WizardStepIndicator } from '../common/WizardStepIndicator';
+import { McpServerList } from '../mcp/McpServerList';
+import { McpToolList } from '../mcp/McpToolList';
+import { McpToolSearch } from '../mcp/McpToolSearch';
+
+const PULSE_MCP_URL = 'https://www.pulsemcp.com/servers';
+
+import { AiParameterConfigInput } from '../mode-selection/AiParameterConfigInput';
+import { AiToolSelectionInput } from '../mode-selection/AiToolSelectionInput';
+import { McpModeSelectionStep } from '../mode-selection/McpModeSelectionStep';
+import { ParameterDetailedConfigStep } from '../mode-selection/ParameterDetailedConfigStep';
+
+interface McpNodeDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function McpNodeDialog({ isOpen, onClose }: McpNodeDialogProps) {
+  const { t } = useTranslation();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [showValidation, setShowValidation] = useState(false);
+
+  const [hasToken, setHasToken] = useState(false);
+  const [removingToken, setRemovingToken] = useState(false);
+  const [toolListRefreshKey, setToolListRefreshKey] = useState(0);
+
+  const wizard = useMcpCreationWizard();
+  const { addNode, nodes } = useWorkflowStore();
+
+  /**
+   * Reset validation state when wizard step changes
+   */
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Need to reset validation when step changes
+  useEffect(() => {
+    setShowValidation(false);
+    setError(null);
+  }, [wizard.state.currentStep]);
+
+  /**
+   * Check if a Bearer token exists for the selected server when entering ToolOrTaskConfig step
+   */
+  useEffect(() => {
+    if (
+      wizard.state.currentStep === WizardStep.ToolOrTaskConfig &&
+      wizard.state.selectedServer?.id
+    ) {
+      checkMcpBearerToken(wizard.state.selectedServer.id)
+        .then((result) => setHasToken(result.exists))
+        .catch(() => setHasToken(false));
+    } else {
+      setHasToken(false);
+    }
+  }, [wizard.state.currentStep, wizard.state.selectedServer?.id]);
+
+  const handleRemoveToken = async () => {
+    if (!wizard.state.selectedServer?.id) return;
+    setRemovingToken(true);
+    try {
+      const result = await deleteMcpBearerToken(wizard.state.selectedServer.id);
+      if (result.success) {
+        setHasToken(false);
+        setToolListRefreshKey((k) => k + 1);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setRemovingToken(false);
+    }
+  };
+
+  /**
+   * Calculate non-overlapping position for new node
+   */
+  const calculateNonOverlappingPosition = (
+    defaultX: number,
+    defaultY: number
+  ): { x: number; y: number } => {
+    const OFFSET_X = 30;
+    const OFFSET_Y = 30;
+    const NODE_WIDTH = 250;
+    const NODE_HEIGHT = 100;
+
+    let newX = defaultX;
+    let newY = defaultY;
+
+    for (let i = 0; i < 100; i++) {
+      const hasOverlap = nodes.some((node) => {
+        const xOverlap =
+          Math.abs(node.position.x - newX) < NODE_WIDTH &&
+          Math.abs(node.position.y - newY) < NODE_HEIGHT;
+        return xOverlap;
+      });
+
+      if (!hasOverlap) {
+        return { x: newX, y: newY };
+      }
+
+      newX += OFFSET_X;
+      newY += OFFSET_Y;
+    }
+
+    return { x: newX, y: newY };
+  };
+
+  const handleSaveNode = () => {
+    if (!wizard.isComplete) {
+      setError(t('mcp.dialog.error.incompleteWizard'));
+      return;
+    }
+
+    if (!wizard.state.selectedServer) {
+      setError(t('mcp.dialog.error.noServerSelected'));
+      return;
+    }
+
+    const position = calculateNonOverlappingPosition(300, 250);
+    const nodeId = `mcp-${Date.now()}`;
+
+    // Build node data based on mode
+    switch (wizard.finalMode) {
+      case 'manualParameterConfig': {
+        if (!wizard.state.selectedTool) {
+          setError(t('mcp.dialog.error.noToolSelected'));
+          return;
+        }
+
+        addNode({
+          id: nodeId,
+          type: NodeType.Mcp,
+          position,
+          data: {
+            mode: 'manualParameterConfig',
+            serverId: wizard.state.selectedServer.id,
+            source: wizard.state.selectedServer.source,
+            toolName: wizard.state.selectedTool.name,
+            toolDescription: wizard.state.selectedTool.description || '',
+            parameters: wizard.state.selectedTool.parameters || [],
+            parameterValues: wizard.state.manualParameterValues,
+            validationStatus: 'valid',
+            outputPorts: 1,
+          },
+        });
+        break;
+      }
+
+      case 'aiParameterConfig': {
+        if (!wizard.state.selectedTool) {
+          setError(t('mcp.dialog.error.noToolSelected'));
+          return;
+        }
+
+        // Validate parameter description (T036)
+        if (
+          !wizard.state.aiParameterConfigDescription ||
+          wizard.state.aiParameterConfigDescription.trim().length === 0
+        ) {
+          setError(t('mcp.error.paramDescRequired'));
+          return;
+        }
+
+        addNode({
+          id: nodeId,
+          type: NodeType.Mcp,
+          position,
+          data: {
+            mode: 'aiParameterConfig',
+            serverId: wizard.state.selectedServer.id,
+            source: wizard.state.selectedServer.source,
+            toolName: wizard.state.selectedTool.name,
+            toolDescription: wizard.state.selectedTool.description || '',
+            parameters: wizard.state.selectedTool.parameters || [],
+            aiParameterConfig: {
+              description: wizard.state.aiParameterConfigDescription,
+              timestamp: new Date().toISOString(),
+            },
+            validationStatus: 'valid',
+            outputPorts: 1,
+          },
+        });
+        break;
+      }
+
+      case 'aiToolSelection': {
+        // Validate task description (T048)
+        if (
+          !wizard.state.naturalLanguageTaskDescription ||
+          wizard.state.naturalLanguageTaskDescription.trim().length === 0
+        ) {
+          setError(t('mcp.error.taskDescRequired'));
+          return;
+        }
+
+        addNode({
+          id: nodeId,
+          type: NodeType.Mcp,
+          position,
+          data: {
+            mode: 'aiToolSelection',
+            serverId: wizard.state.selectedServer.id,
+            source: wizard.state.selectedServer.source,
+            aiToolSelectionConfig: {
+              taskDescription: wizard.state.naturalLanguageTaskDescription,
+              timestamp: new Date().toISOString(),
+            },
+            validationStatus: 'valid',
+            outputPorts: 1,
+          },
+        });
+        break;
+      }
+
+      default:
+        setError(t('mcp.dialog.error.invalidMode'));
+        return;
+    }
+
+    handleClose();
+  };
+
+  const handleClose = () => {
+    wizard.reset();
+    setSearchQuery('');
+    setError(null);
+    onClose();
+  };
+
+  /**
+   * Render step content based on current wizard step
+   */
+  const renderStepContent = () => {
+    switch (wizard.state.currentStep) {
+      case WizardStep.ServerSelection:
+        return (
+          <div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                margin: '0 0 12px 0',
+              }}
+            >
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: 'var(--vscode-foreground)',
+                }}
+              >
+                {t('mcp.dialog.selectServer')}
+              </h3>
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={() => openExternalUrl(PULSE_MCP_URL)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    openExternalUrl(PULSE_MCP_URL);
+                  }
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  cursor: 'pointer',
+                  color: 'var(--vscode-textLink-foreground)',
+                  fontSize: '12px',
+                }}
+                title={PULSE_MCP_URL}
+              >
+                {t('mcp.browse.servers')} (pulsemcp.com)
+                <ExternalLink size={11} />
+              </span>
+            </div>
+            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <McpServerList
+                onServerSelect={(server) => {
+                  wizard.setServer(server);
+                  setError(null);
+                }}
+                selectedServerId={wizard.state.selectedServer?.id}
+                selectedServerSource={wizard.state.selectedServer?.source}
+              />
+            </div>
+          </div>
+        );
+
+      case WizardStep.ModeSelection:
+        return (
+          <McpModeSelectionStep
+            selectedMode={wizard.state.selectedMode}
+            onModeChange={(mode) => {
+              wizard.setSelectedMode(mode);
+              setError(null);
+            }}
+          />
+        );
+
+      case WizardStep.ToolOrTaskConfig:
+        if (wizard.state.selectedMode === 'aiToolSelection') {
+          return (
+            <AiToolSelectionInput
+              value={wizard.state.naturalLanguageTaskDescription}
+              onChange={(value) => {
+                wizard.setNaturalLanguageTaskDescription(value);
+                setError(null);
+              }}
+              showValidation={showValidation}
+            />
+          );
+        }
+        // aiParameterConfig / manualParameterConfig → Tool selection
+        return (
+          <div>
+            {hasToken && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '8px 12px',
+                  marginBottom: '12px',
+                  backgroundColor: 'var(--vscode-editor-inactiveSelectionBackground)',
+                  border: '1px solid var(--vscode-panel-border)',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                }}
+              >
+                <span style={{ color: 'var(--vscode-foreground)' }}>
+                  Saved authentication token
+                </span>
+                <button
+                  type="button"
+                  onClick={handleRemoveToken}
+                  disabled={removingToken}
+                  style={{
+                    padding: '3px 10px',
+                    backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                    color: 'var(--vscode-button-secondaryForeground)',
+                    border: 'none',
+                    borderRadius: '3px',
+                    fontSize: '11px',
+                    cursor: removingToken ? 'not-allowed' : 'pointer',
+                    opacity: removingToken ? 0.6 : 1,
+                  }}
+                >
+                  {removingToken ? 'Removing...' : 'Remove'}
+                </button>
+              </div>
+            )}
+            <h3
+              style={{
+                margin: '0 0 12px 0',
+                fontSize: '14px',
+                fontWeight: 600,
+                color: 'var(--vscode-foreground)',
+              }}
+            >
+              {t('mcp.dialog.selectTool')}
+            </h3>
+            <McpToolSearch value={searchQuery} onChange={setSearchQuery} disabled={false} />
+            <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+              <McpToolList
+                serverId={wizard.state.selectedServer?.id || ''}
+                onToolSelect={(tool) => {
+                  wizard.setTool(tool);
+                  setError(null);
+                }}
+                selectedToolName={wizard.state.selectedTool?.name}
+                searchQuery={searchQuery}
+                refreshKey={toolListRefreshKey}
+                onTokenSaved={() => setHasToken(true)}
+              />
+            </div>
+          </div>
+        );
+
+      case WizardStep.FinalConfig:
+        if (wizard.state.selectedMode === 'aiParameterConfig') {
+          return (
+            <AiParameterConfigInput
+              value={wizard.state.aiParameterConfigDescription}
+              onChange={(value) => {
+                wizard.setAiParameterConfigDescription(value);
+                setError(null);
+              }}
+              showValidation={showValidation}
+            />
+          );
+        }
+        // manualParameterConfig
+        return (
+          <ParameterDetailedConfigStep
+            serverId={wizard.state.selectedServer?.id || ''}
+            toolName={wizard.state.selectedTool?.name || ''}
+            parameterValues={wizard.state.manualParameterValues}
+            onChange={(values) => {
+              wizard.setManualParameterValues(values);
+              setError(null);
+            }}
+            showValidation={showValidation}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  /**
+   * Determine button label based on wizard state
+   */
+  const getActionButtonLabel = (): string => {
+    if (wizard.isComplete) {
+      return t('mcp.dialog.saveButton');
+    }
+    return t('mcp.dialog.nextButton');
+  };
+
+  /**
+   * Handle action button click (Next or Save)
+   */
+  const handleActionButton = () => {
+    // Enable validation display
+    setShowValidation(true);
+
+    if (wizard.isComplete) {
+      handleSaveNode();
+    } else {
+      if (wizard.canProceed) {
+        wizard.nextStep();
+      } else {
+        setError(t('mcp.dialog.error.cannotProceed'));
+      }
+    }
+  };
+
+  return (
+    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+        >
+          <Dialog.Content
+            style={{
+              backgroundColor: 'var(--vscode-editor-background)',
+              border: '1px solid var(--vscode-panel-border)',
+              borderRadius: '6px',
+              padding: '24px',
+              maxWidth: '600px',
+              width: '90%',
+              maxHeight: '90vh',
+              overflow: 'auto',
+            }}
+          >
+            {/* Dialog Header */}
+            <Dialog.Title
+              style={{
+                margin: '0 0 8px 0',
+                fontSize: '18px',
+                fontWeight: 600,
+                color: 'var(--vscode-foreground)',
+              }}
+            >
+              {t('mcp.dialog.title')}
+            </Dialog.Title>
+
+            {/* Step Indicator */}
+            <WizardStepIndicator
+              currentStep={wizard.state.currentStep}
+              totalSteps={wizard.totalSteps}
+            />
+
+            {/* Visually Hidden Accessibility Description */}
+            <Dialog.Description
+              style={{
+                position: 'absolute',
+                width: '1px',
+                height: '1px',
+                overflow: 'hidden',
+                clip: 'rect(0, 0, 0, 0)',
+              }}
+            >
+              Step {wizard.state.currentStep} of {wizard.totalSteps}
+            </Dialog.Description>
+
+            {/* Error Message */}
+            {error && (
+              <div
+                style={{
+                  marginBottom: '16px',
+                  padding: '12px',
+                  backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
+                  border: '1px solid var(--vscode-inputValidation-errorBorder)',
+                  borderRadius: '4px',
+                  color: 'var(--vscode-errorForeground)',
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            {/* Step Content */}
+            <div style={{ marginBottom: '20px', minHeight: '300px' }}>{renderStepContent()}</div>
+
+            {/* Dialog Actions */}
+            <div
+              style={{
+                display: 'flex',
+                gap: '12px',
+                justifyContent: 'flex-end',
+                paddingTop: '20px',
+                borderTop: '1px solid var(--vscode-panel-border)',
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleClose}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                  color: 'var(--vscode-button-secondaryForeground)',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                }}
+              >
+                {t('mcp.dialog.cancelButton')}
+              </button>
+
+              {/* Back Button */}
+              {wizard.state.currentStep !== WizardStep.ServerSelection && (
+                <button
+                  type="button"
+                  onClick={wizard.prevStep}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                    color: 'var(--vscode-button-secondaryForeground)',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                  }}
+                >
+                  {t('mcp.dialog.backButton')}
+                </button>
+              )}
+
+              {/* Next/Save Button */}
+              <button
+                type="button"
+                onClick={handleActionButton}
+                disabled={!wizard.canProceed}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: wizard.canProceed
+                    ? 'var(--vscode-button-background)'
+                    : 'var(--vscode-button-secondaryBackground)',
+                  color: wizard.canProceed
+                    ? 'var(--vscode-button-foreground)'
+                    : 'var(--vscode-descriptionForeground)',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: wizard.canProceed ? 'pointer' : 'not-allowed',
+                  fontSize: '13px',
+                  opacity: wizard.canProceed ? 1 : 0.6,
+                }}
+              >
+                {getActionButtonLabel()}
+              </button>
+            </div>
+          </Dialog.Content>
+        </Dialog.Overlay>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}

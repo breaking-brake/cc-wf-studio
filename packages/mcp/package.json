@@ -1,0 +1,45 @@
+{
+  "name": "@cc-wf-studio/mcp",
+  "version": "0.1.2",
+  "description": "MCP server toolkit for cc-wf-studio workflows. Ships tool definitions, an IO adapter contract, and a stdio bin (ccwf-mcp) for file-mode usage.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "ccwf-mcp": "./dist/mcp.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/breaking-brake/cc-wf-studio",
+    "directory": "packages/mcp"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x dist/mcp.js",
+    "check": "tsc --noEmit",
+    "lint": "echo 'mcp: no lint config yet'",
+    "format": "echo 'mcp: no format config yet'",
+    "test": "echo 'mcp: no tests yet'",
+    "smoke": "tsx scripts/smoke.mts"
+  },
+  "dependencies": {
+    "@cc-wf-studio/core": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.3.0"
+  }
+}

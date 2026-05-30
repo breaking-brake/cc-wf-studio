@@ -2,11 +2,12 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
-      "script": "watch",
+      "label": "watch:extension",
+      "type": "shell",
+      "command": "pnpm --filter cc-wf-studio run watch",
       "problemMatcher": {
         "owner": "vite",
-        "fileLocation": ["relative", "${workspaceFolder}"],
+        "fileLocation": ["relative", "${workspaceFolder}/packages/vscode"],
         "pattern": {
           "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
           "file": 1,
@@ -31,16 +32,17 @@
       }
     },
     {
-      "type": "npm",
-      "script": "compile",
-      "problemMatcher": "$tsc",
-      "group": "build"
+      "label": "build:webview",
+      "type": "shell",
+      "command": "pnpm --filter cc-wf-studio-webview run build",
+      "problemMatcher": []
     },
     {
-      "label": "Build Webview",
+      "label": "typecheck:extension",
       "type": "shell",
-      "command": "cd src/webview && npm run build",
-      "problemMatcher": []
+      "command": "pnpm --filter cc-wf-studio exec tsc -p ./",
+      "problemMatcher": "$tsc",
+      "group": "build"
     }
   ]
 }

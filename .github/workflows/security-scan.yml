@@ -6,10 +6,9 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'package.json'
-      - 'package-lock.json'
-      - 'src/webview/package.json'
-      - 'src/webview/package-lock.json'
+      - 'packages/vscode/package.json'
+      - 'packages/vscode/src/webview/package.json'
+      - 'pnpm-lock.yaml'
   schedule:
     # 毎週月曜日 12:00 JST (03:00 UTC) に実行
     - cron: '0 3 * * 1'
@@ -31,60 +30,58 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'pnpm'
 
-      - name: Install root dependencies
-        run: npm ci
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Install webview dependencies
-        run: |
-          cd src/webview
-          npm ci
-
-      # ルートプロジェクトのスキャン
-      - name: Run Snyk to check root project
+      # VSCode 拡張パッケージのスキャン
+      - name: Run Snyk on VSCode extension
         uses: snyk/actions/node@v1.0.0
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --severity-threshold=high --file=package.json --project-name=cc-wf-studio-root
+          args: --severity-threshold=high --file=packages/vscode/package.json --project-name=cc-wf-studio-vscode
 
-      # Webviewプロジェクトのスキャン
-      - name: Run Snyk to check webview project
+      # Webview のスキャン
+      - name: Run Snyk on webview
         uses: snyk/actions/node@v1.0.0
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --severity-threshold=high --file=src/webview/package.json --project-name=cc-wf-studio-webview
+          args: --severity-threshold=high --file=packages/vscode/src/webview/package.json --project-name=cc-wf-studio-webview
 
-      # SARIF形式でのスキャン（GitHub Code Scanning用 - プロジェクトごとに分割）
-      - name: Generate SARIF for root project
+      # SARIF形式でのスキャン（GitHub Code Scanning用）
+      - name: Generate SARIF for VSCode extension
         uses: snyk/actions/node@v1.0.0
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --severity-threshold=low --file=package.json --sarif-file-output=snyk-root.sarif
+          args: --severity-threshold=low --file=packages/vscode/package.json --sarif-file-output=snyk-vscode.sarif
 
-      - name: Generate SARIF for webview project
+      - name: Generate SARIF for webview
         uses: snyk/actions/node@v1.0.0
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --severity-threshold=low --file=src/webview/package.json --sarif-file-output=snyk-webview.sarif
+          args: --severity-threshold=low --file=packages/vscode/src/webview/package.json --sarif-file-output=snyk-webview.sarif
 
-      # すべてのプロジェクトのモニタリング（継続的な監視）
+      # すべてのプロジェクトのモニタリング
       - name: Monitor all projects with Snyk
         uses: snyk/actions/node@v1.0.0
         env:
@@ -93,15 +90,15 @@ jobs:
           command: monitor
           args: --all-projects
 
-      # GitHub Code Scanningへのアップロード（プロジェクトごとに分割）
-      - name: Upload root project results to GitHub Code Scanning
+      # GitHub Code Scanning へのアップロード
+      - name: Upload VSCode extension results to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
-          sarif_file: snyk-root.sarif
-          category: snyk-root
+          sarif_file: snyk-vscode.sarif
+          category: snyk-vscode
 
-      - name: Upload webview project results to GitHub Code Scanning
+      - name: Upload webview results to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:

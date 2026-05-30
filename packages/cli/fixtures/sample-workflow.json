@@ -1,0 +1,35 @@
+{
+  "id": "sample-render-workflow",
+  "name": "sample-render-workflow",
+  "description": "Minimal workflow used by ccwf README examples and smoke tests.",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "start-1",
+      "type": "start",
+      "name": "start",
+      "position": { "x": 0, "y": 0 },
+      "data": {}
+    },
+    {
+      "id": "prompt-1",
+      "type": "prompt",
+      "name": "greet-user",
+      "position": { "x": 200, "y": 0 },
+      "data": { "prompt": "Say hello in one short sentence." }
+    },
+    {
+      "id": "end-1",
+      "type": "end",
+      "name": "end",
+      "position": { "x": 400, "y": 0 },
+      "data": {}
+    }
+  ],
+  "connections": [
+    { "id": "c-1", "from": "start-1", "to": "prompt-1" },
+    { "id": "c-2", "from": "prompt-1", "to": "end-1" }
+  ],
+  "createdAt": "2026-05-16T00:00:00.000Z",
+  "updatedAt": "2026-05-16T00:00:00.000Z"
+}

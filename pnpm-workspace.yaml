@@ -1,0 +1,9 @@
+packages:
+  - "packages/*"
+  - "packages/vscode/src/webview"
+
+# Allow postinstall scripts for selected native/binary-bundling deps.
+allowBuilds:
+  "@vscode/vsce-sign": true
+  esbuild: true
+  keytar: true

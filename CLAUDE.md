@@ -24,17 +24,23 @@ Auto-generated from all feature plans. Last updated: 2025-11-01
 
 ## Project Structure
 
+pnpm monorepo. Four packages under `packages/`:
+
 ```text
-src/
-tests/
-resources/
-  workflow-schema.json   # ワークフロースキーマ定義（ソース）
-  workflow-schema.toon   # AI向け最適化フォーマット（ビルド時に .json から自動生成。手動編集しない）
+packages/
+  core/      # @cc-wf-studio/core  — shared types, validators, Mermaid/Markdown generators, schema (no fs/UI/network)
+  mcp/       # @cc-wf-studio/mcp   — MCP server toolkit + ccwf-mcp stdio bin
+  cli/       # @cc-wf-studio/cli   — ccwf CLI (render/validate/export/run/preview/canvas/mcp), bundles the webview
+  vscode/    # cc-wf-studio        — VSCode extension (canvas, Slack share, in-canvas AI editing)
+    src/
+    src/webview/   # cc-wf-studio-webview — React webview UI (bundled into the extension + cli)
+    resources/     # workflow-schema.{json,toon} synced from core at build time
 ```
 
 ### Schema Files
-- `resources/workflow-schema.json` がスキーマのソースファイル
-- `resources/workflow-schema.toon` は `workflow-schema.json` からビルド時に自動生成される。**直接編集しないこと**
+- **Source of truth**: `packages/core/resources/workflow-schema.json`
+- `packages/core/resources/workflow-schema.toon` is auto-generated from the `.json` at build time (`generate:toon`). **Do not edit it manually.**
+- `packages/vscode/resources/workflow-schema.{json,toon}` are synced from core during the extension build (`sync:schema`) — do not edit there either.
 
 ## Development Workflow & Commands
 
@@ -81,32 +87,33 @@ fix: add missing MCP node definition to workflow schema
 
 ### Code Quality Checks (Required Before Commit/PR)
 
-**Always run these commands in the following order after code modifications:**
+**This is a pnpm monorepo — use `pnpm`, not `npm`. Always run these from the repo root after code modifications:**
 
 ```bash
-npm run check   # Run all Biome checks (lint + format, with auto-fix)
-npm run build   # Build extension and webview (verify compilation)
+pnpm check   # pnpm -r run check across all packages (Biome lint+format on vscode, tsc on others)
+pnpm build   # pnpm -r run build across all packages (verify compilation)
 ```
+
+To target a single package, filter: `pnpm -F @cc-wf-studio/cli run check` / `pnpm -F cc-wf-studio run build`.
 
 ### Command Execution Timing
 
 #### During Development
 1. **After code modification**:
    ```bash
-   npm run check
+   pnpm check
    ```
-   - Runs lint + format with auto-fix in a single command
+   - Runs lint + format (vscode) and type-checks every package
 
 2. **Before manual E2E testing**:
    ```bash
-   npm run build
+   pnpm build
    ```
-   - Compiles TypeScript and builds extension
-   - Required for testing changes in VSCode
+   - Compiles all packages; required for testing the extension / CLI
 
 3. **Before git commit**:
    ```bash
-   npm run check
+   pnpm check
    ```
    - Ensures all code quality standards are met
    - Prevents committing code with linting/formatting issues
@@ -114,88 +121,74 @@ npm run build   # Build extension and webview (verify compilation)
 #### Testing
 - **Unit/Integration tests**: Not required (manual E2E testing only)
 - **Manual E2E testing**: Required for all feature changes and bug fixes
-  - Run `npm run build` first
+  - Run `pnpm build` first
   - Test in VSCode Extension Development Host
 
-## Version Update Procedure
+## Version Update & Release Procedure
 
-**IMPORTANT: Version updates and releases are fully automated via Semantic Release and GitHub Actions.**
+**IMPORTANT: Versioning is driven by [Changesets](https://github.com/changesets/changesets). Publishing is a manual GitHub Actions dispatch. Do NOT hand-edit `version` fields in `package.json`.**
 
-### Automated Release Process
+### The four published artifacts
 
-This project uses **Semantic Release** with **GitHub Actions** for fully automated versioning, changelog generation, and publishing.
+This is a pnpm monorepo with independently versioned packages:
 
-#### Release Workflow (`.github/workflows/release.yml`)
+| Package | Published to | Tag format |
+|---|---|---|
+| `@cc-wf-studio/core` | npm | `@cc-wf-studio/core@x.y.z` |
+| `@cc-wf-studio/mcp` | npm | `@cc-wf-studio/mcp@x.y.z` |
+| `@cc-wf-studio/cli` | npm | `@cc-wf-studio/cli@x.y.z` |
+| `cc-wf-studio` (VSCode extension) | GitHub Release (VSIX attachment) | `cc-wf-studio@x.y.z` |
 
-**Trigger**: Push to `production` branch
+`cc-wf-studio-webview` is in the Changesets `ignore` list — it is bundled into `@cc-wf-studio/cli` and the extension at build time, never published on its own.
 
-**Automated Steps**:
-1. **Semantic Release** analyzes commit messages and determines version bump
-2. **Version Update**: Updates `package.json`, `src/webview/package.json`, `src/webview/package-lock.json`
-3. **Changelog Generation**: Automatically updates `CHANGELOG.md`
-4. **Git Commit**: Creates release commit with message `chore(release): ${version} [skip ci]`
-5. **GitHub Release**: Creates GitHub release with release notes
-6. **VSIX Build**: Builds and packages the extension
-7. **VSIX Upload**: Uploads `.vsix` file to GitHub release
-8. **Version Sync**: Merges version changes from `production` to `main` branch
+### Per-PR step: add a changeset
 
-#### Commit Message Convention (Conventional Commits)
+When a change should be released, add a changeset describing it:
 
-The version bump is determined by commit message prefixes:
-
-- `feat:` → **Minor** version bump (e.g., 2.0.0 → 2.1.0)
-- `fix:` → **Patch** version bump (e.g., 2.1.0 → 2.1.1)
-- `improvement:` → **Patch** version bump (minor enhancements to existing features)
-- `perf:` → **Patch** version bump
-- `revert:` → **Patch** version bump
-- **BREAKING CHANGE** in commit body → **Major** version bump (e.g., 2.1.0 → 3.0.0)
-- `docs:`, `style:`, `chore:`, `refactor:`, `test:`, `build:`, `ci:` → No release
-
-**Example commit messages**:
 ```bash
-feat: add MCP node integration
-fix: resolve parameter validation issue
-feat!: redesign workflow export format (BREAKING CHANGE)
+pnpm changeset
+# interactive: select which package(s) to bump, choose patch/minor/major,
+# write a one-line summary (this becomes the CHANGELOG entry)
 ```
 
-#### Changelog Sections (`.releaserc.json`)
+This writes a `.changeset/<slug>.md` file — commit it alongside your code. **You never hand-edit `CHANGELOG.md`; Changesets generates it.** If a PR genuinely needs no release (CI/docs-only tooling), run `pnpm changeset add --empty`.
 
-Generated changelog groups commits by type:
+`updateInternalDependencies: "patch"` is set, so bumping `@cc-wf-studio/core` automatically bumps `cli` / `mcp` (patch) and updates their dependency ranges — no need to author separate changesets for the dependents.
 
-- **Features** (`feat:`)
-- **Bug Fixes** (`fix:`)
-- **Improvements** (`improvement:`)
-- **Performance Improvements** (`perf:`)
-- **Reverts** (`revert:`)
-- **Code Refactoring** (`refactor:`) - hidden
-- **Documentation** (`docs:`) - visible
-- **Styles** (`style:`) - hidden
-- **Tests** (`test:`) - hidden
-- **Build System** (`build:`) - hidden
-- **Continuous Integration** (`ci:`) - hidden
-- **Miscellaneous Chores** (`chore:`) - hidden
+### Release flow (two workflows)
 
-#### Automated File Updates
+```
+1. feature PR + .changeset/*.md  →  merge to main
+2. release-version-pr.yml (on main push) opens / updates the
+   "Version Packages" PR — a preview of the version bumps + CHANGELOG diff
+3. merge the "Version Packages" PR  →  main now carries bumped versions
+   and consumed changesets
+4. promote main → production  (push or PR)
+5. GitHub → Actions → "Release — Publish" → Run workflow (ref: production)
+   → publishes every pending npm package and, if cc-wf-studio was bumped,
+     builds + uploads the VSIX to its GitHub Release
+```
 
-Semantic Release automatically updates:
-- `package.json` (root)
-- `src/webview/package.json`
-- `src/webview/package-lock.json`
-- `CHANGELOG.md`
+- **`.github/workflows/release-version-pr.yml`** — trigger: push to `main`. Runs `changesets/action` *version step only*. No publish.
+- **`.github/workflows/release.yml`** — trigger: `workflow_dispatch` (input `ref`, default `production`). Builds, runs `changesets/action` *publish step* (`pnpm changeset publish`), then detects the `cc-wf-studio@*` tag and uploads the VSIX.
 
-These files are committed with `[skip ci]` to prevent infinite loops.
+### npm authentication: OIDC Trusted Publishing
 
-#### Manual Version Updates (NOT RECOMMENDED)
+npm publishes use **OIDC Trusted Publishing** — there is no `NPM_TOKEN` secret. Each of `@cc-wf-studio/{core,mcp,cli}` has a Trusted Publisher configured on npmjs.com pointing at `breaking-brake/cc-wf-studio` → `release.yml`. The publish workflow sets `NPM_CONFIG_PROVENANCE: 'true'`, so each release carries a provenance attestation.
 
-**DO NOT manually update version numbers unless absolutely necessary.**
+### VS Marketplace / Open VSX publishing (manual, by the Repository Owner)
 
-If manual update is required:
-1. Update `package.json` (root directory) - `"version"` field
-2. Update `src/webview/package.json` - `"version"` field
-3. Run `cd src/webview && npm install` to update `package-lock.json`
-4. Commit all three files together
+The publish workflow does **not** push the extension to the Marketplace. It only **builds the `.vsix` and attaches it to the `cc-wf-studio@x.y.z` GitHub Release**. The actual store publish is a manual step performed by the Repository Owner:
 
-Manual version updates will be overwritten by the next automated release.
+1. The "Release — Publish" workflow uploads `packages/vscode/*.vsix` to the GitHub Release for that version.
+2. The Repository Owner downloads that `.vsix` from the GitHub Release.
+3. The Repository Owner uploads it manually to the VS Marketplace (and Open VSX) via the publisher portal.
+
+So the `.vsix` on the GitHub Release is the source artifact for the store listing — there is no `vsce publish` / `ovsx publish` in CI.
+
+### If you must set a version by hand (rare)
+
+Prefer `pnpm changeset` always. Only edit a `packages/*/package.json` `version` field directly when bootstrapping or fixing a broken state, and expect the next Changesets release to take over from there.
 
 ## Code Style
 
