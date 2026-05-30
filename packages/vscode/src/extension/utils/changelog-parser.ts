@@ -61,7 +61,9 @@ export function parseChangelog(content: string, maxEntries = 5): ChangelogEntry[
         if (entries.length >= maxEntries) break;
       }
 
-      // Parse version heading inline tokens
+      // Parse version heading inline tokens. Two formats are supported:
+      //   semantic-release: "## [3.34.1](compareUrl) (2026-05-05)"
+      //   changesets:       "## 3.34.2"
       const inlineTokens = (token as Tokens.Heading).tokens || [];
       let version = '';
       let compareUrl = '';
@@ -69,11 +71,17 @@ export function parseChangelog(content: string, maxEntries = 5): ChangelogEntry[
 
       for (const t of inlineTokens) {
         if (t.type === 'link' && !version) {
+          // semantic-release: version + compare URL come from the link
           version = t.text;
           compareUrl = t.href;
         } else if (t.type === 'text') {
           const dateMatch = t.raw.match(/\(([^)]+)\)/);
           if (dateMatch) date = dateMatch[1];
+          // changesets: no link — the bare "x.y.z" text is the version
+          if (!version) {
+            const versionMatch = t.raw.match(/^\s*(\d[^\s(]*)/);
+            if (versionMatch) version = versionMatch[1];
+          }
         }
       }
 
@@ -119,14 +127,17 @@ export function parseChangelog(content: string, maxEntries = 5): ChangelogEntry[
   return entries;
 }
 
-const VERSION_HEADING = /^## \[([^\]]+)\]/;
+// Matches both heading formats:
+//   semantic-release: "## [3.34.1](url) ..."  → group 1
+//   changesets:       "## 3.34.2"             → group 2
+const VERSION_HEADING = /^## (?:\[([^\]]+)\]|(\d[^\s]*))/;
 
 export function extractVersions(content: string): string[] {
   const versions: string[] = [];
   for (const line of content.split('\n')) {
     const match = line.match(VERSION_HEADING);
     if (match) {
-      versions.push(match[1]);
+      versions.push(match[1] ?? match[2]);
     }
   }
   return versions;

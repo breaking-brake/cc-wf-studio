@@ -1,12 +1,13 @@
-## [3.34.1](https://github.com/breaking-brake/cc-wf-studio/compare/v3.34.0...v3.34.1) (2026-05-05)
+# cc-wf-studio
 
 ## 3.34.2
 
 ### Patch Changes
 
-- Updated dependencies [37475fc]
-  - @cc-wf-studio/core@0.1.1
-  - @cc-wf-studio/mcp@0.1.2
+- Improvement: the "What's New" panel now correctly parses the new release-notes format (some entries previously displayed with empty version labels).
+- Internal: restructured the codebase into a pnpm monorepo (no other user-facing changes).
+
+## [3.34.1](https://github.com/breaking-brake/cc-wf-studio/compare/v3.34.0...v3.34.1) (2026-05-05)
 
 ### Improvements
 

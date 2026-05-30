@@ -91,12 +91,6 @@ importers:
 
   packages/vscode:
     dependencies:
-      '@cc-wf-studio/core':
-        specifier: workspace:*
-        version: link:../core
-      '@cc-wf-studio/mcp':
-        specifier: workspace:*
-        version: link:../mcp
       '@modelcontextprotocol/sdk':
         specifier: ^1.26.0
         version: 1.29.0(zod@4.4.3)
@@ -125,6 +119,12 @@ importers:
       '@biomejs/biome':
         specifier: 2.4.4
         version: 2.4.4
+      '@cc-wf-studio/core':
+        specifier: workspace:*
+        version: link:../core
+      '@cc-wf-studio/mcp':
+        specifier: workspace:*
+        version: link:../mcp
       '@types/node':
         specifier: ^25.0.3
         version: 25.8.0
