@@ -120,7 +120,7 @@
     "format": "biome format --write .",
     "check": "biome check --write .",
     "test": "pnpm --filter cc-wf-studio-webview run test",
-    "package": "vsce package --no-dependencies"
+    "package": "vsce package --no-dependencies --baseImagesUrl https://github.com/breaking-brake/cc-wf-studio/raw/HEAD/packages/vscode --baseContentUrl https://github.com/breaking-brake/cc-wf-studio/blob/HEAD/packages/vscode"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.4",
