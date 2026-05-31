@@ -128,6 +128,8 @@ To target a single package, filter: `pnpm -F @cc-wf-studio/cli run check` / `pnp
 
 **IMPORTANT: Versioning is driven by [Changesets](https://github.com/changesets/changesets). A release is cut manually (you open the Release PR) and publishes automatically when that PR merges into `main`. Do NOT hand-edit `version` fields in `package.json`.**
 
+> **Releasing is a human-only action — AI agents must not self-trigger it.** Do not run the "Release — Create Release PR" workflow, do not merge the Release PR into `main`, and do not dispatch publish workflows. Merging the Release PR is an irreversible npm publish. Agents may prepare changes (incl. changesets) and explain the procedure, but a human performs the actual release.
+
 ### The four published artifacts
 
 This is a pnpm monorepo with independently versioned packages:

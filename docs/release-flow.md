@@ -12,6 +12,9 @@ This repository uses **[Changesets](https://github.com/changesets/changesets)** 
 6. Review and **merge that Release PR into `main`**. The merge triggers **"Release — Publish"** automatically: it publishes the npm packages, creates the tags, and uploads the VSIX for `cc-wf-studio`.
 7. The Repository Owner uploads the VSIX from the GitHub Release to the VS Marketplace / Open VSX (manual — see below).
 
+> [!IMPORTANT]
+> **Releasing is a human-only action.** AI agents must NOT self-trigger any release step — do not run the "Release — Create Release PR" workflow, do not merge the Release PR into `main`, and do not dispatch publish workflows. Merging the Release PR is an irreversible publish (npm cannot be re-published). Agents may *prepare* changes and *explain* this procedure, but a human performs the actual release actions.
+
 ## Design: confirm = release
 
 The Release PR is created **manually** (deliberate "cut a release" action) and merging it **auto-publishes**. Because the version-bump commit and the publish happen on the same branch back-to-back, a version can never sit "confirmed but unpublished" — so npm version numbers never skip. To avoid frequent/jumpy versions, simply let changesets accumulate on `main` and cut a release only when ready; multiple pending changesets collapse into a single bump (highest level wins).

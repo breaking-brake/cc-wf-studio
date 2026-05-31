@@ -31,7 +31,7 @@ So the job here is not just "open a PR" — it's "open a PR that the release pip
    - If a `.changeset/*.md` already covers this change, confirm it names the right package(s) and bump level, and move on.
    - If the change should be released and no changeset exists, create one with `pnpm changeset` — select the affected package(s) from step 2, choose patch/minor/major, and write a one-line summary (this becomes the CHANGELOG entry). Note: bumping `@cc-wf-studio/core` auto-bumps its dependents, so you don't author separate changesets for `cli`/`mcp`.
    - If the change genuinely needs no release (CI-only, tooling, docs), record that intent explicitly with `pnpm changeset add --empty` so the pipeline isn't left guessing.
-   - Why this matters: releases are cut later by manually opening the Release PR (which consumes the accumulated changesets) and merging it — that merge auto-publishes. A PR that lands without the right changeset silently never gets released. (See the `cut-release` skill / `docs/release-flow.md` for the release side.)
+   - Why this matters: releases are cut later by manually opening the Release PR (which consumes the accumulated changesets) and merging it — that merge auto-publishes. A PR that lands without the right changeset silently never gets released. (See `docs/release-flow.md` for the release side — releasing is a human-only action, not something to self-trigger.)
 
 4. **Verify the build is green** before opening the PR:
    - Run `pnpm check && pnpm build` from the repo root (Biome + type-checks, then full compilation). Reviewers and CI expect a clean tree, and catching breakage now is cheaper than after review.
