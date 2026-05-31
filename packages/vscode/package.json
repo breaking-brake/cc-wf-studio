@@ -2,7 +2,7 @@
   "name": "cc-wf-studio",
   "displayName": "Claude Code Workflow Studio",
   "description": "Visual Workflow Editor for Claude Code, GitHub Copilot, and more AI agents",
-  "version": "3.34.2",
+  "version": "3.34.3",
   "private": true,
   "publisher": "breaking-brake",
   "icon": "resources/icon.png",
@@ -120,7 +120,7 @@
     "format": "biome format --write .",
     "check": "biome check --write .",
     "test": "pnpm --filter cc-wf-studio-webview run test",
-    "package": "vsce package --no-dependencies"
+    "package": "vsce package --no-dependencies --baseImagesUrl https://github.com/breaking-brake/cc-wf-studio/raw/HEAD/packages/vscode --baseContentUrl https://github.com/breaking-brake/cc-wf-studio/blob/HEAD/packages/vscode"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.4",

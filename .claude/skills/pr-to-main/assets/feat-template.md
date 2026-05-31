@@ -11,10 +11,14 @@ Closes #[issue-number]
 ## Changes
 
 **New Files:**
-- `path/to/file.ts` - [Purpose]
+- `packages/<pkg>/src/...` - [Purpose]
 
 **Modified Files:**
-- `path/to/file.ts` - [Changes]
+- `packages/<pkg>/src/...` - [Changes]
+
+## Release
+
+- Changeset: [e.g. `minor` for `@cc-wf-studio/core` / no release needed (empty)]
 
 ## Screenshots / Demo
 

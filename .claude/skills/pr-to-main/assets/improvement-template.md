@@ -16,7 +16,11 @@ Closes #[issue-number]
 
 ## Changes
 
-- `path/to/file.ts` - [Changes]
+- `packages/<pkg>/src/...` - [Changes]
+
+## Release
+
+- Changeset: [e.g. `patch` for `cc-wf-studio` / no release needed (empty)]
 
 ## Testing
 

@@ -1,5 +1,11 @@
 # cc-wf-studio
 
+## 3.34.3
+
+### Patch Changes
+
+- efe5e3b: fix: correct README image base URL for monorepo layout
+
 ## 3.34.2
 
 ### Patch Changes

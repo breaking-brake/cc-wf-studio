@@ -1,48 +1,38 @@
 ## Summary
 
-Merge latest changes from `main` to `production` for automated release vX.Y.Z.
+Promote `main` to `production` to release the pending package version bumps. Versions and CHANGELOGs were already produced by the merged "Version Packages" PR (Changesets) — this PR only moves them to `production` for publishing.
+
+## Packages to Release
+
+| Package | production | → main (this release) |
+|---|---|---|
+| `@cc-wf-studio/core` | A.B.C | A.B.C |
+| `@cc-wf-studio/mcp` | A.B.C | A.B.C |
+| `@cc-wf-studio/cli` | A.B.C | A.B.C |
+| `cc-wf-studio` (extension) | A.B.C | X.Y.Z |
+
+(List only the rows that change; leave others as-is for context.)
 
 ## Included Changes
 
-### Features
-- feat: [description] (#PR)
+- [type: short description] (#PR)
 
-### Bug Fixes
-- fix: [description] (#PR)
+## What Publishing Will Do
 
-### Enhancements
-- chore: [description] (#PR)
+After this PR merges, manually run **Actions → "Release — Publish"** (`workflow_dispatch`, ref `production`). It will:
 
-## Release Version Calculation
+1. `pnpm changeset publish` — publish npm packages whose version is ahead of the registry (`@cc-wf-studio/{core,mcp,cli}`, via OIDC Trusted Publishing).
+2. Create git tags, including `cc-wf-studio@X.Y.Z` for the extension.
+3. If `cc-wf-studio` was bumped: build the VSIX and attach it to the GitHub Release.
 
-**vX.Y.Z** (minor/patch/major bump)
+**Note:** The VS Marketplace / Open VSX store upload is a separate manual step by the Repository Owner (downloads the VSIX from the GitHub Release) — CI does not publish to the stores.
 
-Semantic Release will analyze commits since the last release (vA.B.C):
-- ✅ `feat: [desc]` (#PR) → **minor bump**
-- ✅ `fix: [desc]` (#PR) → **patch bump**
-- ❌ `chore: [desc]` (#PR) → no version bump
+## Preconditions
 
-Result: **A.B.C + [bump type] = X.Y.Z**
-
-## CHANGELOG.md Contents
-
-The following will be included:
-- [Feature/Fix descriptions]
-
-Chore commits will not appear in CHANGELOG.
-
-## Release Automation
-
-This merge will trigger:
-1. Analyze commit messages for version bump
-2. Update version in package.json files
-3. Generate CHANGELOG.md
-4. Create GitHub release
-5. Build and upload VSIX package
-6. Sync version changes back to main
+- [x] No pending `.changeset/*.md` on `main` (the "Version Packages" PR is merged).
 
 ## Merge Strategy
 
-**Use merge commit** (not squash) to preserve commit history for Semantic Release.
+**Use a merge commit** (not squash) so `production` mirrors `main` exactly.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
