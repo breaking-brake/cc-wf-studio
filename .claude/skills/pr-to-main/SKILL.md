@@ -51,7 +51,7 @@ So the job here is not just "open a PR" — it's "open a PR that the release pip
 - **Title** — `main` merges via **squash**, so the PR title *becomes* the squash commit subject. It must therefore follow the commit convention: `<type>(<scope>): <description>`.
   - `<type>`: matches the change type from step 2 — `fix` / `feat` / `improvement` / `docs` / `refactor` / `chore` / `ci`.
   - `<scope>`: the affected package/area from step 2 — `vscode`, `cli`, `mcp`, `core` (use the directory name, not the npm name). List several as `(cli, mcp)`. **Omit the scope** for repo-wide changes (root config, `.github/`, top-level docs), e.g. `ci: guard against pending changesets`.
-  - `<description>`: imperative mood, no trailing period, concise (aim ≤50 chars per the commit guideline; GitHub appends ` (#NN)` on squash, so don't pad it).
+  - `<description>`: imperative mood, no trailing period, concise (aim ≤50 chars per the commit guideline; GitHub appends a `(#NN)` suffix, with a leading space, on squash — so don't pad it).
   - Examples (from this repo's history): `fix(vscode): parse Changesets-format CHANGELOG`, `feat(cli): ccwf install-skills subcommand`, `docs: add root README for the monorepo`.
 - **Body**: in the **Changes** section, write real monorepo paths (`packages/vscode/src/...`, `packages/core/...`), not generic placeholders.
 - Mention the changeset in the body so reviewers can see the intended release effect — e.g. "Adds a `patch` changeset for `cc-wf-studio`" or "No release needed (empty changeset)".

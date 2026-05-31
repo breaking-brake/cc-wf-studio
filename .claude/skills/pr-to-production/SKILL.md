@@ -9,7 +9,7 @@ Promote `main` to `production` so the publish workflow can release the pending p
 
 **Important: this repo uses Changesets, not semantic-release.** Versions are NOT computed from commit messages. The bump already happened earlier in the flow:
 
-```
+```text
 1. feature PR + .changeset/*.md            → merged to main
 2. release-version-pr.yml opens/updates the
    "Version Packages" PR (bumps + CHANGELOG) → merged to main
