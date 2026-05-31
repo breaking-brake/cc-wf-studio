@@ -126,7 +126,7 @@ To target a single package, filter: `pnpm -F @cc-wf-studio/cli run check` / `pnp
 
 ## Version Update & Release Procedure
 
-**IMPORTANT: Versioning is driven by [Changesets](https://github.com/changesets/changesets). Publishing is a manual GitHub Actions dispatch. Do NOT hand-edit `version` fields in `package.json`.**
+**IMPORTANT: Versioning is driven by [Changesets](https://github.com/changesets/changesets). A release is cut manually (you open the Release PR) and publishes automatically when that PR merges into `main`. Do NOT hand-edit `version` fields in `package.json`.**
 
 ### The four published artifacts
 
@@ -155,26 +155,28 @@ This writes a `.changeset/<slug>.md` file — commit it alongside your code. **Y
 
 `updateInternalDependencies: "patch"` is set, so bumping `@cc-wf-studio/core` automatically bumps `cli` / `mcp` (patch) and updates their dependency ranges — no need to author separate changesets for the dependents.
 
-### Release flow (two workflows)
+### Release flow (manual Release PR → auto publish on merge)
 
 ```
-1. feature PR + .changeset/*.md  →  merge to main
-2. release-version-pr.yml (on main push) opens / updates the
-   "Version Packages" PR — a preview of the version bumps + CHANGELOG diff
-3. merge the "Version Packages" PR  →  main now carries bumped versions
-   and consumed changesets
-4. promote main → production  (push or PR)
-5. GitHub → Actions → "Release — Publish" → Run workflow (ref: production)
-   → publishes every pending npm package and, if cc-wf-studio was bumped,
-     builds + uploads the VSIX to its GitHub Release
+1. feature PR + .changeset/*.md  →  merge to main   (just accumulates; no release)
+2. when ready, run "Release — Create Release PR" (Actions, manual dispatch)
+   → opens / updates the "Version Packages" PR — a preview of the bumps + CHANGELOG
+3. review + merge the "Version Packages" PR into main
+   → the merge push triggers "Release — Publish" automatically:
+     publishes every pending npm package, creates tags, and if cc-wf-studio
+     was bumped, builds + uploads the VSIX to its GitHub Release
+4. Repository Owner uploads the VSIX from the GitHub Release to the stores (manual)
 ```
 
-- **`.github/workflows/release-version-pr.yml`** — trigger: push to `main`. Runs `changesets/action` *version step only*. No publish.
-- **`.github/workflows/release.yml`** — trigger: `workflow_dispatch` (input `ref`, default `production`). Builds, runs `changesets/action` *publish step* (`pnpm changeset publish`), then detects the `cc-wf-studio@*` tag and uploads the VSIX.
+Confirm = release: because the version bump and publish happen on `main` back-to-back, a version never sits "confirmed but unpublished", so version numbers don't skip. Let changesets accumulate and cut a release only when ready.
+
+- **`.github/workflows/release-version-pr.yml`** — trigger: **`workflow_dispatch`** (manual). Runs `changesets/action` *version step only* — opens / updates the Release PR. No publish. Intentionally manual so "cut a release" is deliberate.
+- **`.github/workflows/release.yml`** — trigger: **push to `main`** (+ `workflow_dispatch` fallback). A `check` job skips ordinary feature merges (pending changesets present); on a release push (none pending) the `publish` job runs `changesets/action` *publish step* (`pnpm changeset publish`), then detects the `cc-wf-studio@*` tag and uploads the VSIX.
+- `production` is **frozen / legacy** — not part of the flow; do not promote to it. (Past tags/Releases are unaffected — tags are independent of branches.)
 
 ### npm authentication: OIDC Trusted Publishing
 
-npm publishes use **OIDC Trusted Publishing** — there is no `NPM_TOKEN` secret. Each of `@cc-wf-studio/{core,mcp,cli}` has a Trusted Publisher configured on npmjs.com pointing at `breaking-brake/cc-wf-studio` → `release.yml`. The publish workflow sets `NPM_CONFIG_PROVENANCE: 'true'`, so each release carries a provenance attestation.
+npm publishes use **OIDC Trusted Publishing** — there is no `NPM_TOKEN` secret. Each of `@cc-wf-studio/{core,mcp,cli}` has a Trusted Publisher configured on npmjs.com pointing at `breaking-brake/cc-wf-studio` → `release.yml`. The trusted publisher is bound to the workflow **file name** (not its trigger), so keep the publish logic in `release.yml`. The publish workflow sets `NPM_CONFIG_PROVENANCE: 'true'`, so each release carries a provenance attestation.
 
 ### VS Marketplace / Open VSX publishing (manual, by the Repository Owner)
 

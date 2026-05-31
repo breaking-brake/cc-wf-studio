@@ -1,14 +1,16 @@
-name: Release — Version PR
+name: Release — Create Release PR
 
-# Opens / updates the "Version Packages" PR on every push to main. Merging
-# that PR consumes the pending .changeset/*.md files, bumps versions, and
-# regenerates CHANGELOG.md. No publish happens here — publishing is a separate
-# manual dispatch (see release.yml) that runs from the production branch.
+# Manually opens / updates the "Version Packages" (Release) PR. Run this from the
+# Actions UI when you decide to cut a release. It collects all pending
+# .changeset/*.md files into a PR previewing the version bumps + CHANGELOG diff.
+# Nothing is published here — merging the PR into main is what triggers the
+# automatic publish (see release.yml, which runs on push to main).
+#
+# This is intentionally manual (workflow_dispatch) so that "cut a release" is a
+# deliberate action rather than a bot PR that updates on every push to main.
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: write
