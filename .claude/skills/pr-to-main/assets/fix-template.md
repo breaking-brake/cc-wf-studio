@@ -16,9 +16,13 @@
 
 ### Changes
 
-**File**: `path/to/file.ts`
+**File**: `packages/<pkg>/src/...`
 
 [List of changes]
+
+## Release
+
+- Changeset: [e.g. `patch` for `cc-wf-studio` / no release needed (empty)]
 
 ## Impact
 
