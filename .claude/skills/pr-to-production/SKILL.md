@@ -1,94 +1,70 @@
 ---
 name: pr-to-production
-description: Create a release PR from main to production branch. Use when the user says "リリースPR", "productionにPR", "リリース準備", or wants to trigger a release.
+description: Create a release PR promoting main to the production branch in this pnpm + Changesets monorepo. Use when the user says "リリースPR", "productionにPR", "リリース準備", or wants to trigger a release. This promotes already-bumped versions to production so the manual "Release — Publish" workflow can publish them.
 ---
 
 # PR to Production Branch (Release)
 
-Create release PR from main to production for semantic-release.
+Promote `main` to `production` so the publish workflow can release the pending packages.
+
+**Important: this repo uses Changesets, not semantic-release.** Versions are NOT computed from commit messages. The bump already happened earlier in the flow:
+
+```
+1. feature PR + .changeset/*.md            → merged to main
+2. release-version-pr.yml opens/updates the
+   "Version Packages" PR (bumps + CHANGELOG) → merged to main
+3. main now carries bumped versions and consumed changesets
+4. promote main → production               ← THIS SKILL creates that PR
+5. Actions → "Release — Publish" (ref: production, manual workflow_dispatch)
+   → publishes npm packages + uploads the VSIX if cc-wf-studio was bumped
+```
+
+So this skill's job is step 4: open a PR from `main` to `production` that mirrors the current state of main. It does **not** bump versions or write CHANGELOGs — those are already on main.
+
+## Precondition: no pending changesets on main
+
+The release will silently no-op (and a CI guard fails the promote) if unconsumed changesets are still on main — that means the "Version Packages" PR has not been merged yet. Check first:
+
+```bash
+git fetch origin production main --quiet
+git ls-tree -r --name-only origin/main -- .changeset | grep -E '\.changeset/.+\.md$' | grep -v 'README.md'
+```
+
+If that lists any `.changeset/*.md` besides `README.md`, **stop** and tell the user to merge the "Version Packages" PR first. Only proceed when there are none.
 
 ## Workflow
 
-1. **Fetch latest from remote** (required first):
-   - `git fetch origin production main --quiet`
-   - **IMPORTANT**: Always use remote refs (`origin/production`, `origin/main`) for comparison. Local branches may be stale.
+1. **Fetch latest** (required first): `git fetch origin production main --quiet`. Always compare against remote refs (`origin/main`, `origin/production`) — local branches may be stale.
 
-2. **Gather context** (parallel):
-   - `git log origin/production..origin/main --oneline` for commits to release
-   - `git ls-remote --tags origin | grep -E 'refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$' | sed 's/.*refs\/tags\///' | sort -V | tail -1` for latest release version from remote
-   - `git rev-list --count origin/production..origin/main` to check if main is ahead of production
+2. **Check the precondition** above (pending changesets). Abort if any remain.
 
-3. **Analyze commits**:
-   - Categorize by type: feat, fix, chore, etc.
-   - Calculate expected version bump
+3. **Gather context** (parallel):
+   - `git log origin/production..origin/main --oneline` — commits to be released.
+   - `git rev-list --count origin/production..origin/main` — confirm main is ahead. If `0`, there is nothing to release.
+   - Read each `packages/*/package.json` `version` on `origin/main` to report the versions that will publish, and compare against `origin/production` to see which packages actually changed:
+     ```bash
+     for p in core mcp cli vscode; do
+       echo "$p -> main: $(git show origin/main:packages/$p/package.json | grep '"version"' | head -1) | prod: $(git show origin/production:packages/$p/package.json | grep '"version"' | head -1)"
+     done
+     ```
 
-4. **Create PR**:
-   - Use `gh pr create` with base `production`
-   - Use template from `assets/pr-template.md`
+4. **Create the PR**:
+   - `gh pr create --base production --head main` using `assets/pr-template.md`.
+   - Title: `Release: <summary>` (e.g. `Release: cc-wf-studio@3.34.3` for a single-package release, or `Release: core/cli/mcp + extension` when several bump together).
 
-## Version Bump Rules
+## What publishing does (for the PR body)
 
-- `feat:` → **minor** (1.0.0 → 1.1.0)
-- `fix:`, `perf:`, `revert:` → **patch** (1.0.0 → 1.0.1)
-- `BREAKING CHANGE` → **major** (1.0.0 → 2.0.0)
-- `docs:`, `chore:`, `ci:` → no bump
+After this PR merges to production, the **manual** "Release — Publish" workflow (`workflow_dispatch`, ref `production`) runs `pnpm changeset publish`, which:
+
+- Publishes to npm any of `@cc-wf-studio/{core,mcp,cli}` whose version is ahead of the registry (OIDC Trusted Publishing, no token).
+- Creates the git tags (including `cc-wf-studio@x.y.z` for the private extension, since `privatePackages.tag` is on).
+- If `cc-wf-studio` was bumped, builds the VSIX and attaches it to its GitHub Release. **The store upload to VS Marketplace / Open VSX is then a manual step by the Repository Owner** — CI does not run `vsce publish`.
+
+## Merge strategy
+
+Use a **merge commit** (not squash) so `production` mirrors `main` exactly — the publish step reads versions from the production tree, and the histories should stay aligned.
 
 ## PR Format
 
-**Language**: Always write PR title and body in English
-
-**Title**: `Release: vX.Y.Z`
-
-**Body**: Use template at `assets/pr-template.md`
-
-## Example
-
-```bash
-gh pr create --base production --title "Release: v0.2.0" --body "$(cat <<'EOF'
-## Summary
-
-Merge latest changes from `main` to `production` for automated release v0.2.0.
-
-## Included Changes
-
-### Features
-- feat: add chunk-based translation for large documents (#5)
-
-### Enhancements
-- chore: setup semantic-release (#4)
-
-## Release Version Calculation
-
-**v0.2.0** (minor bump)
-
-Semantic Release will analyze commits since v0.1.1:
-- ✅ `feat: add chunk-based translation` (#5) → **minor bump**
-- ❌ `chore: setup semantic-release` (#4) → no version bump
-
-Result: **0.1.1 + minor = 0.2.0**
-
-## CHANGELOG.md Contents
-
-The following features will be included:
-- Add chunk-based translation for large documents (#5)
-
-Setup semantic-release (#4) will not appear in CHANGELOG.
-
-## Release Automation
-
-This merge will trigger:
-1. Analyze commit messages (0.1.1 → 0.2.0)
-2. Update version in package.json files
-3. Generate CHANGELOG.md with features
-4. Create GitHub release
-5. Build and upload VSIX package
-6. Sync version changes back to main
-
-## Merge Strategy
-
-**Use merge commit** (not squash) to preserve commit history for Semantic Release.
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-EOF
-)"
-```
+- **Language**: always write the PR title and body in English (repo rule).
+- **Body**: use `assets/pr-template.md`.
