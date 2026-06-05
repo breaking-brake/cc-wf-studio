@@ -1,12 +1,11 @@
 /**
- * `ccwf preview` HTTP server (+ optional Server-Sent Events for --watch).
+ * `ccwf preview` HTTP server with live-reload via Server-Sent Events.
  *
  * Unlike `ccwf canvas`, this server is read-only: there's no WebSocket and no
  * message-channel emulation. It just:
  *   - serves the bundled `overview.html` with an injected
  *     `<script>window.__CC_WF_PREVIEW__ = {...}</script>`
  *   - serves `/assets/*` from the same dist directory
-
  *   - holds long-lived `/<sessionId>/events` SSE connections that the page reloads on
  *     when the source file changes (and that drive auto-shutdown)
  *
@@ -60,7 +59,7 @@ export interface PreviewServerOptions {
 export interface PreviewBootstrap {
   workflow: unknown;
   locale: string;
-  /** Optional SSE URL for live-reload (set automatically when --watch). */
+  /** Optional SSE URL for live-reload (set automatically by `ccwf preview`). */
   sseUrl?: string;
 }
 

@@ -1,5 +1,5 @@
 /**
- * Debounced filesystem watcher for `ccwf preview --watch`.
+ * Debounced filesystem watcher for `ccwf preview`.
  *
  * Wraps `fs.watch` (no extra dependency) with a small trailing debounce so that
  * editors that write atomically (rename-replace, write-truncate-then-fill) only
