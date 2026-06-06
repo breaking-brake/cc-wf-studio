@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cc-wf-studio.dev/schemas/project-context-0.1.json",
+  "title": "project-context.json",
+  "description": "Structure + intent snapshot of a TypeScript/JavaScript project, produced by an independent extractor and consumed by AI workflow generators as ADVISORY context (not a runtime-enforced contract). Mirrors the design philosophy of CC Workflow Studio's workflow JSON: stable ids, a discriminating `kind`, deterministic structural fields kept separate from natural-language intent, and a top-level metadata block.",
+  "type": "object",
+  "required": ["schemaVersion", "metadata", "files"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semver of this file format. Lets consumers migrate. PoC: 0.1.0."
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["description", "project", "generatedAt", "generator"],
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Human/AI-readable note about what this file is for."
+        },
+        "project": {
+          "type": "object",
+          "required": ["name", "root", "languages"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string", "description": "Project / repo name." },
+            "root": {
+              "type": "string",
+              "description": "Repo root the paths are relative to (usually \".\")."
+            },
+            "languages": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["typescript", "javascript"] },
+              "minItems": 1,
+              "description": "PoC supports TS/JS only."
+            },
+            "summary": {
+              "type": "string",
+              "maxLength": 600,
+              "description": "MEANING LAYER (LLM-generated, project level). 1-3 lines: what this project is and how it is structured. Lets the generation prompt drop 'this project is ...' boilerplate."
+            }
+          }
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of the (manual, full) regeneration."
+        },
+        "generator": {
+          "type": "object",
+          "required": ["name", "version"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "version": { "type": "string" }
+          }
+        },
+        "structureFingerprint": {
+          "type": "string",
+          "description": "OPTIONAL / FUTURE. Single hash over the structure layer (paths + exports + kinds). Used only as a staleness *signal* (warn 'structure changed since intent was written'). NOT used for diff/partial updates in the PoC — full manual regeneration only."
+        }
+      }
+    },
+    "files": {
+      "type": "array",
+      "description": "One entry per source file. Analogous to workflow `nodes`. The PoC deliberately omits inter-file edges (the analogue of workflow `connections`) — a flat catalogue, not a call graph.",
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "kind", "exports"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^f-[a-z0-9]+$",
+            "description": "Stable id (e.g. \"f-001\"). Stable across regenerations for the same path so consumers/diffs can reference a file by id."
+          },
+          "path": {
+            "type": "string",
+            "description": "STRUCTURE LAYER (deterministic). Repo-relative POSIX path."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "component",
+              "hook",
+              "store",
+              "service",
+              "command",
+              "api",
+              "type",
+              "util",
+              "schema",
+              "entry",
+              "test",
+              "config",
+              "other"
+            ],
+            "description": "STRUCTURE LAYER (heuristic). Best-effort classification from path/filename/extension. Advisory only — wrong guesses are acceptable in the PoC."
+          },
+          "exports": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "STRUCTURE LAYER (deterministic, via ts-morph). Names of top-level exported symbols (functions, classes, consts, types, interfaces, enums). The 'where is X defined' index that saves the agent a grep."
+          },
+          "intent": {
+            "type": "string",
+            "maxLength": 280,
+            "description": "MEANING LAYER (LLM-generated, file level). One line: what this file is FOR / its responsibility. Optional so a 'structure-only' run can omit it (experiment Pattern A)."
+          },
+          "intentStatus": {
+            "type": "string",
+            "enum": ["fresh", "stale", "missing"],
+            "default": "fresh",
+            "description": "Freshness of `intent`. 'missing' = never generated; 'stale' = structure changed since intent was written (future staleness signal). Advisory."
+          }
+        }
+      }
+    }
+  }
+}

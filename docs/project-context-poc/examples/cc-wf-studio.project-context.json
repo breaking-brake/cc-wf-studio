@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "0.1.0",
+  "metadata": {
+    "description": "Illustrative project-context for the cc-wf-studio monorepo. Hand-authored from real files to show the target shape; a real run would be produced by the ts-morph extractor.",
+    "project": {
+      "name": "cc-wf-studio",
+      "root": ".",
+      "languages": ["typescript"],
+      "summary": "pnpm monorepo for CC Workflow Studio: a VSCode extension + CLI + MCP server that let users build visual AI-agent workflows and export them as Claude Code instructions. `core` holds the shared schema, types, validators and Markdown/Mermaid generators (no fs/UI/network)."
+    },
+    "generatedAt": "2026-06-06T00:00:00Z",
+    "generator": { "name": "project-context-extractor", "version": "0.1.0" }
+  },
+  "files": [
+    {
+      "id": "f-001",
+      "path": "packages/core/src/types/workflow-definition.ts",
+      "kind": "type",
+      "exports": [
+        "NodeType",
+        "Position",
+        "WorkflowMetadata",
+        "SubAgentData",
+        "SUB_AGENT_COLORS",
+        "AskUserQuestionData",
+        "PromptNodeData",
+        "IfElseNodeData",
+        "SwitchNodeData",
+        "SkillNodeData",
+        "McpNodeData",
+        "CodexNodeData",
+        "WorkflowNode",
+        "Connection",
+        "Workflow",
+        "VALIDATION_RULES"
+      ],
+      "intent": "Canonical TypeScript types for a workflow: nodes, per-node data shapes, connections, and the top-level Workflow object plus validation-rule constants.",
+      "intentStatus": "fresh"
+    },
+    {
+      "id": "f-002",
+      "path": "packages/core/src/services/workflow-prompt-generator.ts",
+      "kind": "service",
+      "exports": [
+        "MermaidSource",
+        "sanitizeNodeId",
+        "escapeLabel",
+        "generateMermaidFlowchart",
+        "ExportProvider",
+        "ExecutionInstructionsOptions",
+        "generateExecutionInstructions"
+      ],
+      "intent": "Turns a workflow into the AI export artifact: a Mermaid flowchart plus per-node execution instructions, with provider-specific tool wording.",
+      "intentStatus": "fresh"
+    },
+    {
+      "id": "f-003",
+      "path": "packages/core/src/services/workflow-overview-formatter.ts",
+      "kind": "service",
+      "exports": ["generateOverviewMarkdown"],
+      "intent": "Human-readable Markdown view of a whole workflow, one section per node in topological order (Overview pane). NOT the AI export format.",
+      "intentStatus": "fresh"
+    },
+    {
+      "id": "f-004",
+      "path": "packages/core/src/utils/schema-parser.ts",
+      "kind": "util",
+      "exports": [
+        "JsonSchemaProperty",
+        "JsonSchema",
+        "ExtendedToolParameter",
+        "parseJsonSchema",
+        "validateParameterValue"
+      ],
+      "intent": "Parses MCP tool JSON Schema into ToolParameter objects and validates concrete parameter values against the constraints.",
+      "intentStatus": "fresh"
+    },
+    {
+      "id": "f-005",
+      "path": "packages/mcp/src/tools.ts",
+      "kind": "service",
+      "exports": ["registerWorkflowTools"],
+      "intent": "Registers the MCP tools (get_current_workflow, get_workflow_schema, apply_workflow, update_nodes, list_available_agents, highlight_group_node) that external AI agents use to read/edit the canvas.",
+      "intentStatus": "fresh"
+    },
+    {
+      "id": "f-006",
+      "path": "packages/core/resources/workflow-schema.json",
+      "kind": "schema",
+      "exports": [],
+      "intent": "Source-of-truth workflow schema. Advisory instructions that steer how AI agents generate workflows (not runtime constraints); .toon is auto-generated from it.",
+      "intentStatus": "fresh"
+    },
+    {
+      "id": "f-007",
+      "path": "packages/core/src/utils/validate-workflow.ts",
+      "kind": "util",
+      "exports": ["validateAIGeneratedWorkflow"],
+      "intent": "Validates an AI-generated workflow object before it is applied to the canvas; returns structured errors.",
+      "intentStatus": "stale"
+    }
+  ]
+}
