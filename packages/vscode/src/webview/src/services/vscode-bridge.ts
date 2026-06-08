@@ -1159,6 +1159,102 @@ export function launchAiAgent(provider: AiEditingProvider): Promise<void> {
   });
 }
 
+/**
+ * Import a published Agent Skill as a workflow (one-click orchestration)
+ *
+ * Automatically starts the MCP server, writes config, and launches the
+ * import-skill agent, which reads a published SKILL.md and reconstructs it
+ * as a workflow on the canvas.
+ *
+ * @param provider - AI editing provider to launch
+ * @returns Promise that resolves when the agent is launched
+ */
+export function importSkill(provider: AiEditingProvider): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (
+          message.type === 'IMPORT_SKILL_SUCCESS' ||
+          message.type === 'ANTIGRAVITY_MCP_REFRESH_NEEDED'
+        ) {
+          resolve();
+        } else if (message.type === 'IMPORT_SKILL_FAILED') {
+          reject(new Error(message.payload?.errorMessage || 'Failed to launch import skill agent'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    vscode.postMessage({
+      type: 'IMPORT_SKILL',
+      requestId,
+      payload: { provider },
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
+/**
+ * Generate a guided tour for the current workflow (one-click orchestration)
+ *
+ * Automatically starts the MCP server, writes config, and launches the
+ * generate-workflow-tour agent, which reads the current workflow and adds a `tour`
+ * to it on the canvas.
+ *
+ * @param provider - AI editing provider to launch
+ * @returns Promise that resolves when the agent is launched
+ */
+export function generateTour(provider: AiEditingProvider): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+
+        if (
+          message.type === 'GENERATE_TOUR_SUCCESS' ||
+          message.type === 'ANTIGRAVITY_MCP_REFRESH_NEEDED'
+        ) {
+          resolve();
+        } else if (message.type === 'GENERATE_TOUR_FAILED') {
+          reject(
+            new Error(message.payload?.errorMessage || 'Failed to launch generate tour agent')
+          );
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    vscode.postMessage({
+      type: 'GENERATE_TOUR',
+      requestId,
+      payload: { provider },
+    });
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 30000);
+  });
+}
+
 // ============================================================================
 // Utility Functions
 // ============================================================================

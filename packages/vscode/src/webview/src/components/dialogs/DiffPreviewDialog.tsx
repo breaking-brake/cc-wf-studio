@@ -1,6 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import type { PlannedSubAgentFile, Workflow } from '@shared/types/messages';
-import { FileText, X } from 'lucide-react';
+import type { Workflow } from '@shared/types/messages';
+import { X } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { getNodeTypeIcon } from '../../constants/node-type-icons';
@@ -15,7 +15,6 @@ interface DiffPreviewDialogProps {
   workflow?: Workflow | null;
   diffSummary: WorkflowDiffSummary | null;
   description?: string;
-  plannedFiles?: PlannedSubAgentFile[];
   hasRevisionConflict?: boolean;
   onAccept: () => void;
   onReject: () => void;
@@ -27,7 +26,6 @@ export const DiffPreviewDialog: React.FC<DiffPreviewDialogProps> = ({
   workflow,
   diffSummary,
   description,
-  plannedFiles,
   hasRevisionConflict,
   onAccept,
   onReject,
@@ -337,55 +335,6 @@ export const DiffPreviewDialog: React.FC<DiffPreviewDialogProps> = ({
                       -{diffSummary.removedConnections} {t('dialog.diffPreview.connectionsRemoved')}
                     </span>
                   )}
-                </div>
-              )}
-
-              {/* Files to be created section */}
-              {plannedFiles && plannedFiles.length > 0 && (
-                <div style={{ marginTop: '12px' }}>
-                  <div
-                    style={{
-                      fontWeight: 500,
-                      marginBottom: '4px',
-                      color: 'var(--vscode-descriptionForeground)',
-                    }}
-                  >
-                    {t('dialog.diffPreview.filesToCreate')}:
-                  </div>
-                  {plannedFiles.map((file) => (
-                    <div
-                      key={file.nodeId}
-                      style={{
-                        paddingLeft: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                      }}
-                    >
-                      <FileText
-                        size={13}
-                        style={{
-                          color: 'var(--vscode-gitDecoration-addedResourceForeground, #73c991)',
-                          flexShrink: 0,
-                        }}
-                      />
-                      <span
-                        style={{
-                          color: 'var(--vscode-gitDecoration-addedResourceForeground, #73c991)',
-                        }}
-                      >
-                        {file.filePath.replace(/^.*?(\.claude\/)/, '.$1')}
-                      </span>
-                      <span
-                        style={{
-                          color: 'var(--vscode-descriptionForeground)',
-                          marginLeft: '4px',
-                        }}
-                      >
-                        ({file.nodeName})
-                      </span>
-                    </div>
-                  ))}
                 </div>
               )}
             </div>

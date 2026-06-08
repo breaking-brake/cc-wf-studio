@@ -11,7 +11,8 @@ description: AI workflow editor for CC Workflow Studio. Create and edit visual A
    - **New workflow or structural changes** (add/remove nodes/connections): use `apply_workflow`
    - **Partial updates to existing nodes** (change name, position, or data): use `update_nodes` (more token-efficient)
    - Fix errors if any
-6. Ask for feedback, repeat from step 4
+6. **After creating a new workflow or making substantial structural changes**, briefly offer (one line) to generate a guided tour — e.g. "I can also generate a guided tour of this workflow so others can follow it — want me to?" Offer it only once at a natural stopping point (not on every small edit), and do NOT auto-generate without the user agreeing. If they agree, add a top-level `tour` array (a sibling of `nodes`/`connections`) and apply it with `apply_workflow`. Each entry is `{ "order": 1, "title": "...", "description": "what these nodes do and why", "nodeIds": ["start-1"], "languageLesson": "optional" }`; scale the step count to the workflow size (small → ~one step per node, larger → group related nodes to ~8–15 steps), `order` 1-based, every `nodeIds` entry a real node id, start with an overview and end at completion, in the user's language. The canvas then shows a "Start Workflow Tour" button.
+7. Ask for feedback, repeat from step 4
 
 ## Group Node
 

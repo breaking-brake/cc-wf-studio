@@ -5,7 +5,7 @@
  * mode switching) onto the reusable WorkflowOverview view.
  */
 
-import type { Workflow } from '@shared/types/messages';
+import type { AiEditingProvider, Workflow } from '@shared/types/messages';
 import type React from 'react';
 import { WorkflowOverview } from './WorkflowOverview';
 
@@ -29,6 +29,8 @@ interface OverviewModeProps {
   focusRequest?: { nodeId: string; key: number } | null;
   /** When non-null, View renders a parse-error banner instead of the panes. */
   parseError?: string | null;
+  /** Launch guided-tour generation (VSCode only; omitted for read-only hosts). */
+  onGenerateTour?: (provider: AiEditingProvider) => Promise<void> | void;
 }
 
 export const OverviewMode: React.FC<OverviewModeProps> = (props) => <WorkflowOverview {...props} />;

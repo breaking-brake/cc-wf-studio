@@ -43,11 +43,13 @@ import { OverviewMode } from './components/overview/OverviewMode';
 import { PropertyOverlay } from './components/PropertyOverlay';
 import { Toolbar } from './components/Toolbar';
 import { Tour } from './components/Tour';
+import { TourPanel } from './components/TourPanel';
 import { WorkflowEditor } from './components/WorkflowEditor';
 import { useCollapsiblePanel } from './hooks/useCollapsiblePanel';
 import { useIsCompactMode } from './hooks/useWindowWidth';
 import { useTranslation } from './i18n/i18n-context';
 import { vscode } from './main';
+import { generateTour } from './services/vscode-bridge';
 import { deserializeWorkflow, serializeWorkflow } from './services/workflow-service';
 import { useCommentaryStore } from './stores/commentary-store';
 import { useRefinementStore } from './stores/refinement-store';
@@ -76,6 +78,7 @@ const App: React.FC = () => {
     selectedNodeId,
     activeSubAgentFlowId,
     setActiveSubAgentFlowId,
+    isTourActive,
   } = useWorkflowStore();
   // Commentary AI store
   const { isEnabled: isCommentaryEnabled } = useCommentaryStore();
@@ -707,6 +710,7 @@ const App: React.FC = () => {
           }
           focusRequest={overviewFocusRequest}
           parseError={overviewParseError}
+          onGenerateTour={overviewIsExternal ? undefined : (provider) => generateTour(provider)}
         />
       </div>
     );
@@ -746,6 +750,11 @@ const App: React.FC = () => {
           );
           if (activeWorkflow?.id) {
             live.id = activeWorkflow.id;
+          }
+          // Carry the guided tour through (serializeWorkflow drops it) so the
+          // Overview can play it.
+          if (activeWorkflow?.tour) {
+            live.tour = activeWorkflow.tour;
           }
           setOverviewWorkflow(live);
           setOverviewIsHistoricalVersion(false);
@@ -832,6 +841,10 @@ const App: React.FC = () => {
                   if (activeWorkflow?.id) {
                     live.id = activeWorkflow.id;
                   }
+                  // Carry the guided tour through (serializeWorkflow drops it).
+                  if (activeWorkflow?.tour) {
+                    live.tour = activeWorkflow.tour;
+                  }
                   setOverviewWorkflow(live);
                   setOverviewIsHistoricalVersion(false);
                   setOverviewHasGitChanges(false);
@@ -855,6 +868,13 @@ const App: React.FC = () => {
         <Collapsible.Root open={isCommentaryEnabled}>
           <Collapsible.Content className="refinement-panel-collapsible">
             <CommentaryPanel onClose={handleCloseCommentaryPanel} />
+          </Collapsible.Content>
+        </Collapsible.Root>
+
+        {/* Guided Tour player — right sidebar (slides in like the AI Edit panel) */}
+        <Collapsible.Root open={isTourActive}>
+          <Collapsible.Content className="refinement-panel-collapsible">
+            <TourPanel />
           </Collapsible.Content>
         </Collapsible.Root>
       </div>
@@ -929,7 +949,6 @@ const App: React.FC = () => {
         workflow={pendingMcpApply?.workflow ?? null}
         diffSummary={pendingMcpApply?.diffSummary ?? null}
         description={pendingMcpApply?.description}
-        plannedFiles={pendingMcpApply?.plannedFiles}
         hasRevisionConflict={pendingMcpApply?.hasRevisionConflict}
         onAccept={handleAcceptMcpApply}
         onReject={handleRejectMcpApply}

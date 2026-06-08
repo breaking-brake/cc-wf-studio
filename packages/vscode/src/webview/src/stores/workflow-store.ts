@@ -76,6 +76,10 @@ interface WorkflowStore {
    *  request. Used by the Overview mode "Edit on canvas" links. */
   requestedFocusNodeId: string | null;
 
+  // Guided Tour player state (reads steps from activeWorkflow.tour)
+  isTourActive: boolean;
+  tourStepIndex: number;
+
   // Group Node Highlight State (for MCP execution tracking)
   highlightedGroupNodeId: string | null;
   isHighlightEnabled: boolean;
@@ -142,6 +146,18 @@ interface WorkflowStore {
    *  Overview mode). The canvas-side hook clears it after centring. */
   requestFocusNode: (nodeId: string) => void;
   clearRequestedFocusNodeId: () => void;
+
+  // Guided Tour
+  /** Start the tour from step 0 (no-op if the active workflow has no tour) */
+  startTour: () => void;
+  /** Stop the tour */
+  endTour: () => void;
+  /** Jump to a tour step (clamped to valid range) */
+  setTourStepIndex: (index: number) => void;
+  /** Advance to the next tour step (clamped) */
+  nextTourStep: () => void;
+  /** Go back to the previous tour step (clamped) */
+  prevTourStep: () => void;
   removeNode: (nodeId: string) => void;
   requestDeleteNode: (nodeId: string) => void;
   confirmDeleteNodes: () => void;
@@ -350,6 +366,8 @@ export const useWorkflowStore = create<WorkflowStore>()(
       },
       lastAddedNodeId: null,
       requestedFocusNodeId: null,
+      isTourActive: false,
+      tourStepIndex: 0,
       highlightedGroupNodeId: null,
       isHighlightEnabled: true,
       mcpServerRunning: false,
@@ -679,6 +697,31 @@ export const useWorkflowStore = create<WorkflowStore>()(
         set({ requestedFocusNodeId: null });
       },
 
+      startTour: () => {
+        const tour = get().activeWorkflow?.tour;
+        if (!tour || tour.length === 0) return;
+        set({ isTourActive: true, tourStepIndex: 0 });
+      },
+
+      endTour: () => {
+        set({ isTourActive: false });
+      },
+
+      setTourStepIndex: (index: number) => {
+        const tour = get().activeWorkflow?.tour;
+        if (!tour || tour.length === 0) return;
+        const clamped = Math.max(0, Math.min(index, tour.length - 1));
+        set({ tourStepIndex: clamped });
+      },
+
+      nextTourStep: () => {
+        get().setTourStepIndex(get().tourStepIndex + 1);
+      },
+
+      prevTourStep: () => {
+        get().setTourStepIndex(get().tourStepIndex - 1);
+      },
+
       setHighlightedGroupNodeId: (id: string | null) => {
         set({ highlightedGroupNodeId: id });
       },
@@ -867,6 +910,9 @@ export const useWorkflowStore = create<WorkflowStore>()(
           highlightedGroupNodeId: null,
           activeWorkflow: workflow,
           subAgentFlows: workflow.subAgentFlows || [],
+          // Reset any running tour when a new workflow is loaded/applied
+          isTourActive: false,
+          tourStepIndex: 0,
         });
         // Clear undo/redo history to prevent cross-workflow undo
         useWorkflowStore.temporal.getState().clear();
@@ -908,6 +954,9 @@ export const useWorkflowStore = create<WorkflowStore>()(
           highlightedGroupNodeId: null,
           activeWorkflow: workflow,
           subAgentFlows: workflow.subAgentFlows || [],
+          // Reset any running tour when a new workflow is loaded/applied
+          isTourActive: false,
+          tourStepIndex: 0,
         });
       },
 
@@ -947,6 +996,9 @@ export const useWorkflowStore = create<WorkflowStore>()(
           highlightedGroupNodeId: null,
           activeWorkflow: workflow,
           subAgentFlows: workflow.subAgentFlows || [],
+          // Reset any running tour when a new workflow is loaded/applied
+          isTourActive: false,
+          tourStepIndex: 0,
         });
         // Clear undo/redo history to prevent cross-workflow undo
         // Skip clearing when explicitly requested (e.g., MCP apply on same workflow)

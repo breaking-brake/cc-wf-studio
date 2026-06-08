@@ -4,10 +4,10 @@
  * Based on: /specs/001-cc-wf-studio/contracts/extension-webview-api.md
  */
 
-import type { Connection, Workflow, WorkflowNode } from '@cc-wf-studio/core';
+import type { Connection, TourStep, Workflow, WorkflowNode } from '@cc-wf-studio/core';
 
 // Re-export Workflow for convenience
-export type { Connection, Workflow, WorkflowNode };
+export type { Connection, TourStep, Workflow, WorkflowNode };
 
 // ============================================================================
 // Base Message
@@ -1244,6 +1244,10 @@ export type ExtensionMessage =
   | Message<RunAiEditingSkillFailedPayload, 'RUN_AI_EDITING_SKILL_FAILED'>
   | Message<LaunchAiAgentSuccessPayload, 'LAUNCH_AI_AGENT_SUCCESS'>
   | Message<LaunchAiAgentFailedPayload, 'LAUNCH_AI_AGENT_FAILED'>
+  | Message<ImportSkillSuccessPayload, 'IMPORT_SKILL_SUCCESS'>
+  | Message<ImportSkillFailedPayload, 'IMPORT_SKILL_FAILED'>
+  | Message<GenerateTourSuccessPayload, 'GENERATE_TOUR_SUCCESS'>
+  | Message<GenerateTourFailedPayload, 'GENERATE_TOUR_FAILED'>
   | Message<AntigravityMcpRefreshNeededPayload, 'ANTIGRAVITY_MCP_REFRESH_NEEDED'>
   | Message<UploadToClaudeApiSuccessPayload, 'UPLOAD_TO_CLAUDE_API_SUCCESS'>
   | Message<UploadToClaudeApiFailedPayload, 'UPLOAD_TO_CLAUDE_API_FAILED'>
@@ -2152,6 +2156,66 @@ export interface LaunchAiAgentFailedPayload {
 }
 
 /**
+ * Import skill request payload (Webview → Extension)
+ * One-click: start server → write config → launch the import-skill agent,
+ * which reconstructs a published Agent Skill as a workflow on the canvas.
+ */
+export interface ImportSkillPayload {
+  /** AI editing provider to launch */
+  provider: AiEditingProvider;
+}
+
+/**
+ * Import skill success payload (Extension → Webview)
+ */
+export interface ImportSkillSuccessPayload {
+  /** Provider that was launched */
+  provider: AiEditingProvider;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Import skill failed payload (Extension → Webview)
+ */
+export interface ImportSkillFailedPayload {
+  /** Error message */
+  errorMessage: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Generate tour request payload (Webview → Extension)
+ * One-click: start server → write config → launch the generate-workflow-tour
+ * agent, which adds a guided tour to the current workflow on the canvas.
+ */
+export interface GenerateTourPayload {
+  /** AI editing provider to launch */
+  provider: AiEditingProvider;
+}
+
+/**
+ * Generate tour success payload (Extension → Webview)
+ */
+export interface GenerateTourSuccessPayload {
+  /** Provider that was launched */
+  provider: AiEditingProvider;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
+ * Generate tour failed payload (Extension → Webview)
+ */
+export interface GenerateTourFailedPayload {
+  /** Error message */
+  errorMessage: string;
+  /** Timestamp */
+  timestamp: string; // ISO 8601
+}
+
+/**
  * Antigravity MCP refresh needed payload (Extension → Webview)
  *
  * Sent when MCP config was newly written and Antigravity needs to reload MCP settings.
@@ -2417,6 +2481,8 @@ export type WebviewMessage =
   | Message<void, 'GET_MCP_SERVER_STATUS'>
   | Message<RunAiEditingSkillPayload, 'RUN_AI_EDITING_SKILL'>
   | Message<LaunchAiAgentPayload, 'LAUNCH_AI_AGENT'>
+  | Message<ImportSkillPayload, 'IMPORT_SKILL'>
+  | Message<GenerateTourPayload, 'GENERATE_TOUR'>
   | Message<SetReviewBeforeApplyPayload, 'SET_REVIEW_BEFORE_APPLY'>
   | Message<void, 'OPEN_ANTIGRAVITY_MCP_SETTINGS'>
   | Message<ConfirmAntigravityCascadeLaunchPayload, 'CONFIRM_ANTIGRAVITY_CASCADE_LAUNCH'>

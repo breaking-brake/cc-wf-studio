@@ -12,7 +12,9 @@ import * as vscode from 'vscode';
 import type {
   AiEditingProvider,
   ApplyWorkflowFromMcpResponsePayload,
+  GenerateTourPayload,
   GetCurrentWorkflowResponsePayload,
+  ImportSkillPayload,
   LaunchAiAgentPayload,
   McpConfigTarget,
   RecentWorkflowItem,
@@ -23,7 +25,11 @@ import type {
 } from '../../shared/types/messages';
 import { getMcpServerManager, log } from '../extension';
 import { translate } from '../i18n/i18n-service';
-import { generateAndRunAiEditingSkill } from '../services/ai-editing-skill-service';
+import {
+  generateAndRunAiEditingSkill,
+  generateAndRunGenerateTourSkill,
+  generateAndRunImportSkill,
+} from '../services/ai-editing-skill-service';
 import {
   openAntigravityMcpSettings,
   startAntigravityTask,
@@ -1991,6 +1997,270 @@ export function registerOpenEditorCommand(
                   payload: {
                     errorMessage:
                       error instanceof Error ? error.message : 'Failed to launch AI agent',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+            }
+
+            case 'IMPORT_SKILL': {
+              // One-click skill import: start server → write config → launch the
+              // import-skill agent, which reconstructs a published Agent Skill as
+              // a workflow on the canvas.
+              const importPayload = message.payload as ImportSkillPayload | undefined;
+              if (!importPayload?.provider) break;
+
+              try {
+                const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+                if (!workspacePath) {
+                  throw new Error('No workspace folder is open');
+                }
+
+                const importManager = getMcpServerManager();
+                if (!importManager) {
+                  throw new Error('MCP server manager is not available');
+                }
+
+                // 1. Start server if not running
+                let serverPort = importManager.getPort();
+                if (!importManager.isRunning()) {
+                  serverPort = await importManager.start(
+                    context.extensionPath,
+                    getConfiguredMcpPort()
+                  );
+                }
+                const serverUrl = `http://127.0.0.1:${serverPort}/mcp`;
+
+                // 1.5. Track provider for schema variant selection
+                importManager.setCurrentProvider(importPayload.provider);
+
+                // 2. Write config for this provider if not yet written
+                const requiredTargets = getConfigTargetsForProvider(importPayload.provider);
+                const alreadyWritten = importManager.getWrittenConfigs();
+                const newTargets = requiredTargets.filter((t) => !alreadyWritten.has(t));
+                if (newTargets.length > 0) {
+                  const written = await writeAllAgentConfigs(newTargets, serverUrl, workspacePath);
+                  importManager.addWrittenConfigs(written);
+                }
+
+                // Check for port mismatch in config files
+                if (serverPort !== null) {
+                  const primaryTarget = requiredTargets[0];
+                  const { mismatch, configPort } = await checkPortMismatch(
+                    primaryTarget,
+                    serverPort,
+                    workspacePath
+                  );
+                  if (mismatch) {
+                    vscode.window.showWarningMessage(
+                      `MCP port mismatch: server is running on port ${serverPort}, but ${primaryTarget} config has port ${configPort}. Rewriting config.`
+                    );
+                    for (const t of requiredTargets) {
+                      importManager.getWrittenConfigs().delete(t);
+                    }
+                    const rewritten = await writeAllAgentConfigs(
+                      requiredTargets,
+                      serverUrl,
+                      workspacePath
+                    );
+                    importManager.addWrittenConfigs(rewritten);
+                  }
+                }
+
+                // 3. Send MCP_SERVER_STATUS update
+                webview.postMessage({
+                  type: 'MCP_SERVER_STATUS',
+                  payload: {
+                    running: true,
+                    port: serverPort,
+                    configsWritten: [...importManager.getWrittenConfigs()],
+                    reviewBeforeApply: importManager.getReviewBeforeApply(),
+                  },
+                });
+
+                // 4. Generate and run the import-skill agent
+                await generateAndRunImportSkill(
+                  importPayload.provider as AiEditingProvider,
+                  context.extensionPath,
+                  workspacePath
+                );
+
+                // For Antigravity, pause and let the user manually refresh MCP
+                if (importPayload.provider === 'antigravity') {
+                  webview.postMessage({
+                    type: 'ANTIGRAVITY_MCP_REFRESH_NEEDED',
+                    requestId: message.requestId,
+                    payload: {
+                      context: 'ai-editing' as const,
+                      skillName: 'import-skill',
+                    },
+                  });
+                  log('INFO', 'Antigravity MCP refresh needed for import, waiting for user', {
+                    port: serverPort,
+                  });
+                  break;
+                }
+
+                webview.postMessage({
+                  type: 'IMPORT_SKILL_SUCCESS',
+                  requestId: message.requestId,
+                  payload: {
+                    provider: importPayload.provider,
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+
+                log('INFO', 'Import skill agent launched via one-click', {
+                  provider: importPayload.provider,
+                  port: serverPort,
+                });
+              } catch (error) {
+                log('ERROR', 'Failed to launch import skill agent', {
+                  error: error instanceof Error ? error.message : String(error),
+                });
+                webview.postMessage({
+                  type: 'IMPORT_SKILL_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorMessage:
+                      error instanceof Error
+                        ? error.message
+                        : 'Failed to launch import skill agent',
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+              break;
+            }
+
+            case 'GENERATE_TOUR': {
+              // One-click tour generation: start server → write config → launch
+              // the generate-workflow-tour agent, which adds a guided tour to the
+              // current workflow on the canvas.
+              const tourPayload = message.payload as GenerateTourPayload | undefined;
+              if (!tourPayload?.provider) break;
+
+              try {
+                const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+                if (!workspacePath) {
+                  throw new Error('No workspace folder is open');
+                }
+
+                const tourManager = getMcpServerManager();
+                if (!tourManager) {
+                  throw new Error('MCP server manager is not available');
+                }
+
+                // 1. Start server if not running
+                let serverPort = tourManager.getPort();
+                if (!tourManager.isRunning()) {
+                  serverPort = await tourManager.start(
+                    context.extensionPath,
+                    getConfiguredMcpPort()
+                  );
+                }
+                const serverUrl = `http://127.0.0.1:${serverPort}/mcp`;
+
+                // 1.5. Track provider for schema variant selection
+                tourManager.setCurrentProvider(tourPayload.provider);
+
+                // 2. Write config for this provider if not yet written
+                const requiredTargets = getConfigTargetsForProvider(tourPayload.provider);
+                const alreadyWritten = tourManager.getWrittenConfigs();
+                const newTargets = requiredTargets.filter((t) => !alreadyWritten.has(t));
+                if (newTargets.length > 0) {
+                  const written = await writeAllAgentConfigs(newTargets, serverUrl, workspacePath);
+                  tourManager.addWrittenConfigs(written);
+                }
+
+                // Check for port mismatch in config files
+                if (serverPort !== null) {
+                  const primaryTarget = requiredTargets[0];
+                  const { mismatch, configPort } = await checkPortMismatch(
+                    primaryTarget,
+                    serverPort,
+                    workspacePath
+                  );
+                  if (mismatch) {
+                    vscode.window.showWarningMessage(
+                      `MCP port mismatch: server is running on port ${serverPort}, but ${primaryTarget} config has port ${configPort}. Rewriting config.`
+                    );
+                    for (const t of requiredTargets) {
+                      tourManager.getWrittenConfigs().delete(t);
+                    }
+                    const rewritten = await writeAllAgentConfigs(
+                      requiredTargets,
+                      serverUrl,
+                      workspacePath
+                    );
+                    tourManager.addWrittenConfigs(rewritten);
+                  }
+                }
+
+                // 3. Send MCP_SERVER_STATUS update
+                webview.postMessage({
+                  type: 'MCP_SERVER_STATUS',
+                  payload: {
+                    running: true,
+                    port: serverPort,
+                    configsWritten: [...tourManager.getWrittenConfigs()],
+                    reviewBeforeApply: tourManager.getReviewBeforeApply(),
+                  },
+                });
+
+                // 4. Generate and run the generate-workflow-tour agent
+                await generateAndRunGenerateTourSkill(
+                  tourPayload.provider as AiEditingProvider,
+                  context.extensionPath,
+                  workspacePath
+                );
+
+                // For Antigravity, pause and let the user manually refresh MCP
+                if (tourPayload.provider === 'antigravity') {
+                  webview.postMessage({
+                    type: 'ANTIGRAVITY_MCP_REFRESH_NEEDED',
+                    requestId: message.requestId,
+                    payload: {
+                      context: 'ai-editing' as const,
+                      skillName: 'generate-workflow-tour',
+                    },
+                  });
+                  log(
+                    'INFO',
+                    'Antigravity MCP refresh needed for generate-workflow-tour, waiting for user',
+                    {
+                      port: serverPort,
+                    }
+                  );
+                  break;
+                }
+
+                webview.postMessage({
+                  type: 'GENERATE_TOUR_SUCCESS',
+                  requestId: message.requestId,
+                  payload: {
+                    provider: tourPayload.provider,
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+
+                log('INFO', 'Generate tour agent launched via one-click', {
+                  provider: tourPayload.provider,
+                  port: serverPort,
+                });
+              } catch (error) {
+                log('ERROR', 'Failed to launch generate tour agent', {
+                  error: error instanceof Error ? error.message : String(error),
+                });
+                webview.postMessage({
+                  type: 'GENERATE_TOUR_FAILED',
+                  requestId: message.requestId,
+                  payload: {
+                    errorMessage:
+                      error instanceof Error
+                        ? error.message
+                        : 'Failed to launch generate tour agent',
                     timestamp: new Date().toISOString(),
                   },
                 });

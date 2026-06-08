@@ -7,10 +7,14 @@
  * that different host containers can keep independent layout preferences.
  */
 
-import type { Workflow } from '@shared/types/messages';
+import type { AiEditingProvider, Workflow } from '@shared/types/messages';
+import { GraduationCap } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTourKeyboardNav } from '../../hooks/useTourKeyboardNav';
 import { useTranslation } from '../../i18n/i18n-context';
+import { GenerateTourPopover } from '../GenerateTourPopover';
+import { TourStepCard } from '../TourStepCard';
 import { InstructionsPanel, type InstructionsPanelHandle } from './InstructionsPanel';
 import { MermaidDiagram } from './MermaidDiagram';
 import { OverviewEmptyState } from './OverviewEmptyState';
@@ -42,12 +46,36 @@ interface WorkflowOverviewProps {
   splitRatioStorageKey?: string;
   /** Hide the header entirely (e.g. when the host renders its own title bar). */
   hideHeader?: boolean;
+  /**
+   * Launch guided-tour generation for this workflow. Provided only by hosts
+   * that can generate (the VSCode editor); omitted in read-only contexts like
+   * `ccwf preview`, where generation isn't possible.
+   */
+  onGenerateTour?: (provider: AiEditingProvider) => Promise<void> | void;
 }
 
 const DEFAULT_RATIO_STORAGE_KEY = 'cc-wf-studio.overviewMermaidPanelRatio';
 const MIN_RATIO = 0.25;
 const MAX_RATIO = 0.75;
 const DEFAULT_RATIO = 0.5;
+
+const FLOATING_PILL_STYLE: React.CSSProperties = {
+  position: 'absolute',
+  bottom: '24px',
+  right: '24px',
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '6px',
+  padding: '8px 14px',
+  fontSize: '12px',
+  backgroundColor: 'var(--vscode-button-background)',
+  color: 'var(--vscode-button-foreground)',
+  border: 'none',
+  borderRadius: '20px',
+  boxShadow: '0 4px 14px rgba(0, 0, 0, 0.3)',
+  cursor: 'pointer',
+  zIndex: 40,
+};
 
 function loadStoredRatio(storageKey: string): number {
   try {
@@ -78,6 +106,7 @@ export const WorkflowOverview: React.FC<WorkflowOverviewProps> = ({
   parseError,
   splitRatioStorageKey = DEFAULT_RATIO_STORAGE_KEY,
   hideHeader = false,
+  onGenerateTour,
 }) => {
   const { t } = useTranslation();
   const [ratio, setRatio] = useState<number>(() => loadStoredRatio(splitRatioStorageKey));
@@ -86,6 +115,40 @@ export const WorkflowOverview: React.FC<WorkflowOverviewProps> = ({
   const cleanupDragRef = useRef<(() => void) | null>(null);
   const instructionsRef = useRef<InstructionsPanelHandle>(null);
   const [activeSanitizedNodeId, setActiveSanitizedNodeId] = useState<string | null>(null);
+
+  // Guided tour (read-only player). Steps come from the workflow itself, so
+  // both `ccwf preview` and the in-editor Overview mode play tours.
+  const tour = useMemo(() => workflow?.tour ?? [], [workflow]);
+  const [isTourActive, setIsTourActive] = useState(false);
+  const [tourStepIndex, setTourStepIndex] = useState(0);
+
+  // Reset the tour whenever the workflow changes identity.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset only on workflow change
+  useEffect(() => {
+    setIsTourActive(false);
+    setTourStepIndex(0);
+  }, [workflow]);
+
+  // Spotlight the current tour step by scrolling its first node into view —
+  // this reuses the same path as `focusRequest` (InstructionsPanel scroll →
+  // Mermaid follow / section glow).
+  useEffect(() => {
+    if (!isTourActive) return;
+    const stepNodeId = tour[tourStepIndex]?.nodeIds[0];
+    if (!stepNodeId) return;
+    const handle = requestAnimationFrame(() => {
+      instructionsRef.current?.scrollToNode(stepNodeId);
+    });
+    return () => cancelAnimationFrame(handle);
+  }, [isTourActive, tourStepIndex, tour]);
+
+  // ← / → navigate steps while the tour is playing.
+  const goPrevTourStep = useCallback(() => setTourStepIndex((i) => Math.max(0, i - 1)), []);
+  const goNextTourStep = useCallback(
+    () => setTourStepIndex((i) => Math.min(Math.max(tour.length - 1, 0), i + 1)),
+    [tour.length]
+  );
+  useTourKeyboardNav(isTourActive, goPrevTourStep, goNextTourStep);
 
   useEffect(() => {
     try {
@@ -227,6 +290,7 @@ export const WorkflowOverview: React.FC<WorkflowOverviewProps> = ({
   return (
     <div
       style={{
+        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
@@ -295,18 +359,75 @@ export const WorkflowOverview: React.FC<WorkflowOverviewProps> = ({
             borderLeft: '1px solid var(--vscode-panel-border)',
           }}
         >
-          {hasContent ? (
-            <InstructionsPanel
-              ref={instructionsRef}
-              workflow={workflow}
-              onActiveSectionChange={setActiveSanitizedNodeId}
-              onEditNode={onEditNode}
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            {hasContent ? (
+              <InstructionsPanel
+                ref={instructionsRef}
+                workflow={workflow}
+                onActiveSectionChange={setActiveSanitizedNodeId}
+                onEditNode={onEditNode}
+              />
+            ) : (
+              <OverviewEmptyState />
+            )}
+          </div>
+          {/* Docked tour area: sits at the bottom of the right pane so it never
+              covers the instructions. */}
+          {isTourActive && tour[tourStepIndex] && (
+            <TourStepCard
+              variant="docked"
+              step={tour[tourStepIndex]}
+              index={tourStepIndex}
+              total={tour.length}
+              onPrev={() => setTourStepIndex((i) => Math.max(0, i - 1))}
+              onNext={() => setTourStepIndex((i) => Math.min(tour.length - 1, i + 1))}
+              onClose={() => setIsTourActive(false)}
+              onRegenerate={onGenerateTour}
             />
-          ) : (
-            <OverviewEmptyState />
           )}
         </div>
       </div>
+
+      {/* Floating tour control (hidden while a tour is playing) */}
+      {!isTourActive &&
+        (tour.length > 0 ? (
+          <button
+            type="button"
+            onClick={() => {
+              setTourStepIndex(0);
+              setIsTourActive(true);
+            }}
+            title={`Start workflow tour (${tour.length} steps)`}
+            style={FLOATING_PILL_STYLE}
+          >
+            <GraduationCap size={14} />
+            Start Workflow Tour
+          </button>
+        ) : onGenerateTour ? (
+          <GenerateTourPopover onGenerate={onGenerateTour}>
+            <button type="button" title="Generate a workflow tour" style={FLOATING_PILL_STYLE}>
+              <GraduationCap size={14} />
+              Generate Workflow Tour
+            </button>
+          </GenerateTourPopover>
+        ) : (
+          // Read-only context (e.g. ccwf preview): generation isn't available
+          // here — passive hint only.
+          <div
+            title="This workflow has no guided tour."
+            style={{
+              ...FLOATING_PILL_STYLE,
+              backgroundColor: 'var(--vscode-badge-background)',
+              color: 'var(--vscode-badge-foreground)',
+              boxShadow: 'none',
+              cursor: 'default',
+              opacity: 0.8,
+            }}
+          >
+            <GraduationCap size={14} />
+            No workflow tour
+          </div>
+        ))}
     </div>
   );
 };

@@ -14,10 +14,8 @@
  * - `lastKnownWorkflow` cache is returned when the webview is closed
  */
 
-import * as fs from 'node:fs/promises';
 import * as http from 'node:http';
-import * as path from 'node:path';
-import type { Workflow, WorkflowNode } from '@cc-wf-studio/core';
+import type { Workflow } from '@cc-wf-studio/core';
 import {
   type AgentCommandInfo,
   type ApplyWorkflowOptions,
@@ -39,9 +37,7 @@ import type {
   McpConfigTarget,
 } from '../../shared/types/messages';
 import { log } from '../extension';
-import { getProjectCommandsDir } from '../utils/path-utils';
 import { scanAllCommands } from './command-service';
-import { generateSubAgentFile, nodeNameToFileName } from './export-service';
 import { getDefaultSchemaPath, loadWorkflowSchemaToon } from './schema-loader-service';
 
 const REQUEST_TIMEOUT_MS = 10000;
@@ -52,8 +48,6 @@ interface PendingRequest<T> {
   reject: (reason: Error) => void;
   timer: ReturnType<typeof setTimeout>;
 }
-
-type PlannedFileWithContent = PlannedSubAgentFile & { content: string };
 
 export class McpServerManager implements WorkflowIoAdapter {
   private httpServer: http.Server | null = null;
@@ -391,12 +385,12 @@ export class McpServerManager implements WorkflowIoAdapter {
     };
   }
 
-  async planAndPersistSubAgentFiles(workflow: Workflow): Promise<PlannedSubAgentFile[]> {
-    const planned = await planSubAgentFiles(workflow);
-    if (planned.length > 0) {
-      await executeSubAgentFileCreation(planned);
-    }
-    return planned.map(({ content: _content, ...rest }) => rest);
+  async planAndPersistSubAgentFiles(_workflow: Workflow): Promise<PlannedSubAgentFile[]> {
+    // AI-edit applies are visual-only: sub-agent nodes stay inline (their
+    // agentDefinition / prompt live on the node). Agent `.claude/agents/*.md`
+    // files are materialised later by export / run — never during apply — so a
+    // rejected diff can no longer write files to disk.
+    return [];
   }
 
   // -----------------------------------------------------------------------
@@ -434,124 +428,4 @@ export class McpServerManager implements WorkflowIoAdapter {
       }
     }
   }
-}
-
-// ---------------------------------------------------------------------------
-// Sub-agent file planning helpers (moved from the deleted mcp-server-tools.ts).
-// They live next to the canvas adapter because the auto-create flow is
-// canvas-mode-specific: only the manager has the right project dir context.
-// ---------------------------------------------------------------------------
-
-async function planSubAgentFiles(workflow: unknown): Promise<PlannedFileWithContent[]> {
-  if (typeof workflow !== 'object' || workflow === null) {
-    return [];
-  }
-
-  const wf = workflow as { nodes?: WorkflowNode[] };
-  if (!Array.isArray(wf.nodes)) {
-    return [];
-  }
-
-  const subAgentNodes = wf.nodes.filter(
-    (n) =>
-      n.type === 'subAgent' &&
-      !(n.data as { commandFilePath?: string }).commandFilePath &&
-      !(n.data as { builtInType?: string }).builtInType
-  );
-
-  if (subAgentNodes.length === 0) {
-    return [];
-  }
-
-  const projectAgentsDir = getProjectCommandsDir();
-  if (!projectAgentsDir) {
-    return [];
-  }
-
-  const planned: PlannedFileWithContent[] = [];
-
-  for (const node of subAgentNodes) {
-    const data = node.data as {
-      description?: string;
-      agentDefinition?: string;
-      prompt?: string;
-      model?: string;
-      tools?: string;
-      memory?: string;
-      color?: string;
-      commandFilePath?: string;
-      commandScope?: string;
-      outputPorts?: number;
-    };
-
-    const baseName = nodeNameToFileName(data.description || node.name || 'sub-agent');
-
-    let fileName = `${baseName}.md`;
-    let filePath = path.join(projectAgentsDir, fileName);
-    let suffix = 1;
-    try {
-      while (
-        await fs
-          .access(filePath)
-          .then(() => true)
-          .catch(() => false)
-      ) {
-        fileName = `${baseName}-${suffix}.md`;
-        filePath = path.join(projectAgentsDir, fileName);
-        suffix++;
-      }
-    } catch {
-      // fs.access throws on not-found; that's the happy path.
-    }
-
-    const pseudoNode = {
-      id: node.id,
-      type: 'subAgent' as const,
-      name: data.description || node.name || 'sub-agent',
-      position: node.position,
-      data: {
-        description: data.description || '',
-        agentDefinition: data.agentDefinition || '',
-        prompt: data.prompt || '',
-        model: data.model,
-        tools: data.tools,
-        memory: data.memory as 'user' | 'project' | 'local' | undefined,
-        color: data.color,
-        outputPorts: data.outputPorts || 1,
-      },
-    };
-
-    const content = generateSubAgentFile(pseudoNode);
-
-    // Mutate in-place so downstream validation passes.
-    data.commandFilePath = filePath;
-    data.commandScope = 'project';
-
-    planned.push({
-      nodeId: node.id,
-      nodeName: data.description || node.name || 'sub-agent',
-      filePath,
-      content,
-    });
-  }
-
-  return planned;
-}
-
-async function executeSubAgentFileCreation(
-  plannedFiles: PlannedFileWithContent[]
-): Promise<string[]> {
-  if (plannedFiles.length === 0) return [];
-
-  const dir = path.dirname(plannedFiles[0].filePath);
-  const dotClaudeDir = path.dirname(dir);
-  await fs.mkdir(dotClaudeDir, { recursive: true });
-  await fs.mkdir(dir, { recursive: true });
-
-  const createdFiles: string[] = [];
-  for (const file of plannedFiles) {
-    await fs.writeFile(file.filePath, file.content, 'utf-8');
-    createdFiles.push(file.filePath);
-  }
-  return createdFiles;
 }

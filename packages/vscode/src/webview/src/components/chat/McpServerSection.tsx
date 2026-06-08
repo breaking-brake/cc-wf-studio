@@ -12,27 +12,62 @@
  */
 
 import type { AiEditingProvider, McpServerStatusPayload } from '@shared/types/messages';
-import { Check, ChevronDown, ChevronRight, ExternalLink, Play, Plug, Square } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  FileInput,
+  GraduationCap,
+  type LucideIcon,
+  Pencil,
+  Plug,
+  Square,
+} from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { useEnabledAiProviders } from '../../hooks/useEnabledAiProviders';
 import { useTranslation } from '../../i18n/i18n-context';
 import { vscode } from '../../main';
-import { launchAiAgent, openExternalUrl } from '../../services/vscode-bridge';
-import { useRefinementStore } from '../../stores/refinement-store';
+import {
+  generateTour,
+  importSkill,
+  launchAiAgent,
+  openExternalUrl,
+} from '../../services/vscode-bridge';
 
-interface AiEditButton {
-  provider: AiEditingProvider;
+/** Agent actions that can be run with the selected provider */
+type AgentAction = 'edit' | 'import' | 'tour';
+
+interface AgentActionDef {
+  action: AgentAction;
   label: string;
+  runningLabel: string;
+  title: string;
+  icon: LucideIcon;
 }
 
-const AI_EDIT_BUTTONS: AiEditButton[] = [
-  { provider: 'claude-code', label: 'Claude Code' },
-  { provider: 'copilot-chat', label: 'Copilot Chat' },
-  { provider: 'copilot-cli', label: 'Copilot CLI' },
-  { provider: 'codex', label: 'Codex CLI' },
-  { provider: 'roo-code', label: 'Roo Code' },
-  { provider: 'gemini', label: 'Gemini CLI' },
-  { provider: 'antigravity', label: 'Antigravity' },
-  { provider: 'cursor', label: 'Cursor' },
+const AGENT_ACTIONS: AgentActionDef[] = [
+  {
+    action: 'edit',
+    label: 'AI Edit',
+    runningLabel: 'Launching…',
+    title: 'Create or edit this workflow with the selected AI agent',
+    icon: Pencil,
+  },
+  {
+    action: 'import',
+    label: 'Import Skill → Workflow',
+    runningLabel: 'Importing…',
+    title: 'Import a published Agent Skill (SKILL.md) as a workflow on the canvas',
+    icon: FileInput,
+  },
+  {
+    action: 'tour',
+    label: 'Generate Workflow Tour',
+    runningLabel: 'Generating…',
+    title: 'Generate a guided tour for the current workflow',
+    icon: GraduationCap,
+  },
 ];
 
 interface McpServerSectionProps {
@@ -44,50 +79,10 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
   const { t } = useTranslation();
   const [isRunning, setIsRunning] = useState(false);
   const [port, setPort] = useState<number | null>(null);
-  const [launchingProvider, setLaunchingProvider] = useState<AiEditingProvider | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<AiEditingProvider>('claude-code');
+  const [runningAction, setRunningAction] = useState<AgentAction | null>(null);
   const [reviewBeforeApply, setReviewBeforeApply] = useState(true);
-  const {
-    isCopilotChatEnabled,
-    isCopilotCliEnabled,
-    isCodexEnabled,
-    isRooCodeEnabled,
-    isGeminiEnabled,
-    isAntigravityEnabled,
-    isCursorEnabled,
-  } = useRefinementStore();
-
-  const visibleButtons = useMemo(() => {
-    return AI_EDIT_BUTTONS.filter((button) => {
-      switch (button.provider) {
-        case 'claude-code':
-          return true;
-        case 'copilot-cli':
-          return isCopilotCliEnabled;
-        case 'copilot-chat':
-          return isCopilotChatEnabled;
-        case 'codex':
-          return isCodexEnabled;
-        case 'roo-code':
-          return isRooCodeEnabled;
-        case 'gemini':
-          return isGeminiEnabled;
-        case 'antigravity':
-          return isAntigravityEnabled;
-        case 'cursor':
-          return isCursorEnabled;
-        default:
-          return false;
-      }
-    });
-  }, [
-    isCopilotChatEnabled,
-    isCopilotCliEnabled,
-    isCodexEnabled,
-    isRooCodeEnabled,
-    isGeminiEnabled,
-    isAntigravityEnabled,
-    isCursorEnabled,
-  ]);
+  const visibleButtons = useEnabledAiProviders();
 
   // Listen for MCP server status updates
   useEffect(() => {
@@ -109,19 +104,33 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
     return () => window.removeEventListener('message', handler);
   }, []);
 
-  const handleLaunch = useCallback(
-    async (provider: AiEditingProvider) => {
-      if (launchingProvider) return;
-      setLaunchingProvider(provider);
+  // Keep the selected provider valid when the visible set changes (e.g. a
+  // provider is toggled off). Falls back to the always-available Claude Code.
+  useEffect(() => {
+    if (!visibleButtons.some((b) => b.provider === selectedProvider)) {
+      setSelectedProvider('claude-code');
+    }
+  }, [visibleButtons, selectedProvider]);
+
+  const runAction = useCallback(
+    async (action: AgentAction) => {
+      if (runningAction) return;
+      setRunningAction(action);
       try {
-        await launchAiAgent(provider);
+        if (action === 'edit') {
+          await launchAiAgent(selectedProvider);
+        } else if (action === 'import') {
+          await importSkill(selectedProvider);
+        } else {
+          await generateTour(selectedProvider);
+        }
       } catch {
         // Error is handled by the extension host
       } finally {
-        setLaunchingProvider(null);
+        setRunningAction(null);
       }
     },
-    [launchingProvider]
+    [runningAction, selectedProvider]
   );
 
   const handleStop = useCallback(() => {
@@ -264,7 +273,54 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
             <span>{t('mcpSection.reviewBeforeApply')}</span>
           </button>
 
-          {/* AI Agent Buttons */}
+          {/* Provider selector: pick one agent, then run an action below */}
+          <div style={{ marginBottom: '8px' }}>
+            <div
+              style={{
+                fontSize: '10px',
+                opacity: 0.7,
+                marginBottom: '4px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+              }}
+            >
+              Agent
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+              {visibleButtons.map((button) => {
+                const isSelected = selectedProvider === button.provider;
+                return (
+                  <button
+                    key={button.provider}
+                    type="button"
+                    onClick={() => setSelectedProvider(button.provider)}
+                    disabled={runningAction !== null}
+                    aria-pressed={isSelected}
+                    style={{
+                      padding: '4px 10px',
+                      fontSize: '11px',
+                      borderRadius: '12px',
+                      cursor: runningAction !== null ? 'default' : 'pointer',
+                      border: isSelected
+                        ? '1px solid var(--vscode-focusBorder)'
+                        : '1px solid var(--vscode-panel-border)',
+                      backgroundColor: isSelected
+                        ? 'var(--vscode-button-background)'
+                        : 'transparent',
+                      color: isSelected
+                        ? 'var(--vscode-button-foreground)'
+                        : 'var(--vscode-foreground)',
+                      opacity: runningAction !== null ? 0.6 : 1,
+                    }}
+                  >
+                    {button.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Action buttons: run with the selected provider */}
           <div
             style={{
               border: '1px solid var(--vscode-panel-border)',
@@ -275,30 +331,35 @@ export function McpServerSection({ isCollapsed, onToggleCollapse }: McpServerSec
               gap: '6px',
             }}
           >
-            {visibleButtons.map((button) => (
-              <button
-                key={button.provider}
-                type="button"
-                onClick={() => handleLaunch(button.provider)}
-                disabled={launchingProvider !== null}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '8px 8px',
-                  fontSize: '11px',
-                  backgroundColor: 'var(--vscode-button-secondaryBackground)',
-                  color: 'var(--vscode-button-secondaryForeground)',
-                  border: 'none',
-                  borderRadius: '3px',
-                  cursor: launchingProvider !== null ? 'wait' : 'pointer',
-                  opacity: launchingProvider !== null ? 0.6 : 1,
-                }}
-              >
-                <Play size={10} />
-                {launchingProvider === button.provider ? 'Launching...' : button.label}
-              </button>
-            ))}
+            {AGENT_ACTIONS.map((a) => {
+              const Icon = a.icon;
+              const isRunning = runningAction === a.action;
+              return (
+                <button
+                  key={a.action}
+                  type="button"
+                  onClick={() => runAction(a.action)}
+                  disabled={runningAction !== null}
+                  title={a.title}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 8px',
+                    fontSize: '11px',
+                    backgroundColor: 'var(--vscode-button-secondaryBackground)',
+                    color: 'var(--vscode-button-secondaryForeground)',
+                    border: 'none',
+                    borderRadius: '3px',
+                    cursor: runningAction !== null ? 'wait' : 'pointer',
+                    opacity: runningAction !== null && !isRunning ? 0.6 : 1,
+                  }}
+                >
+                  <Icon size={11} />
+                  {isRunning ? a.runningLabel : a.label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Stop Server button (visible only when running) */}
