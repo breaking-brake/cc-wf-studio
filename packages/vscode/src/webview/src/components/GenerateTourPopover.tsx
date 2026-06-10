@@ -15,7 +15,7 @@ import * as Popover from '@radix-ui/react-popover';
 import type { AiEditingProvider } from '@shared/types/messages';
 import { GraduationCap } from 'lucide-react';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useEnabledAiProviders } from '../hooks/useEnabledAiProviders';
 
 interface GenerateTourPopoverProps {
@@ -52,6 +52,14 @@ export function GenerateTourPopover({
   const [open, setOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<AiEditingProvider>('claude-code');
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Fall back to Claude Code if the selected provider is no longer enabled
+  // (e.g. its extension/CLI was toggled off after selection).
+  useEffect(() => {
+    if (!providers.some((p) => p.provider === selectedProvider)) {
+      setSelectedProvider('claude-code');
+    }
+  }, [providers, selectedProvider]);
 
   const handleGenerate = async () => {
     if (isGenerating) return;

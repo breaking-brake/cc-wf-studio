@@ -68,15 +68,14 @@ export const StartTourButton: React.FC = () => {
   // No tour → popover offering to generate one (with agent selection).
   return (
     <GenerateTourPopover onGenerate={(provider) => generateTour(provider)}>
-      <div
-        role="button"
-        tabIndex={0}
+      <button
+        type="button"
         aria-label="Generate a workflow tour"
         title="Generate a workflow tour"
-        style={{ ...ROUND_BUTTON_STYLE, opacity: 0.7 }}
+        style={{ ...ROUND_BUTTON_STYLE, padding: 0, opacity: 0.7 }}
       >
         <GraduationCap size={14} style={{ color: 'var(--vscode-foreground)' }} />
-      </div>
+      </button>
     </GenerateTourPopover>
   );
 };

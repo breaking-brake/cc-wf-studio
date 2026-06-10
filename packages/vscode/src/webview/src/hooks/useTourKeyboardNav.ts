@@ -18,6 +18,9 @@ export function useTourKeyboardNav(active: boolean, onPrev: () => void, onNext: 
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
       if (isTypingTarget(e.target)) return;
+      // Leave modified arrow combos (Ctrl/Alt/Meta/Shift + Arrow) to the
+      // browser/editor — don't hijack navigation shortcuts.
+      if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
         onPrev();

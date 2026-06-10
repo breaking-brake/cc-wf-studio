@@ -276,14 +276,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         workflowDescription || undefined,
         activeWorkflow?.conversationHistory,
         subAgentFlows,
-        slashCommandOptions
+        slashCommandOptions,
+        activeWorkflow?.tour
       );
-
-      // Persist the guided tour (serializeWorkflow rebuilds from the canvas and
-      // does not carry it) so it survives a save/reload round-trip.
-      if (activeWorkflow?.tour) {
-        workflow.tour = activeWorkflow.tour;
-      }
 
       // Validate workflow before saving
       validateWorkflow(workflow);
@@ -1295,13 +1290,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       workflowDescription || undefined,
       activeWorkflow?.conversationHistory,
       subAgentFlows,
-      slashCommandOptions
+      slashCommandOptions,
+      activeWorkflow?.tour
     );
-    // Preserve the guided tour (serializeWorkflow rebuilds from the canvas and
-    // drops it) so opening the AI Edit panel doesn't wipe an existing tour.
-    if (activeWorkflow?.tour) {
-      currentWorkflow.tour = activeWorkflow.tour;
-    }
     setActiveWorkflow(currentWorkflow);
 
     // Load or initialize conversation history

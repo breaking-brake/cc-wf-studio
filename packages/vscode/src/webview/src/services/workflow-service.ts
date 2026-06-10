@@ -10,6 +10,7 @@ import {
   type ConversationHistory,
   type SlashCommandOptions,
   type SubAgentFlow,
+  type TourStep,
   VALIDATION_RULES,
   type Workflow,
   type WorkflowNode,
@@ -35,7 +36,8 @@ export function serializeWorkflow(
   workflowDescription?: string,
   conversationHistory?: ConversationHistory,
   subAgentFlows?: SubAgentFlow[],
-  slashCommandOptions?: SlashCommandOptions
+  slashCommandOptions?: SlashCommandOptions,
+  tour?: TourStep[]
 ): Workflow {
   // Convert React Flow nodes to WorkflowNodes
   const workflowNodes: WorkflowNode[] = nodes.map((node) => ({
@@ -107,6 +109,10 @@ export function serializeWorkflow(
           ...(argumentHint && argumentHint.length > 0 && { argumentHint }),
         }
       : undefined,
+    // Carry the guided tour through serialization (rebuilt from the canvas,
+    // which doesn't hold it) so save / Overview / AI-edit / MCP round-trips
+    // preserve it. Callers pass the live `activeWorkflow.tour`.
+    ...(tour && tour.length > 0 ? { tour } : {}),
   };
 
   return workflow;

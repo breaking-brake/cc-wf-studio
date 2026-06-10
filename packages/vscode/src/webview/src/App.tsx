@@ -509,7 +509,9 @@ const App: React.FC = () => {
               workflowName || 'Untitled',
               workflowDescription || undefined,
               activeWorkflow.conversationHistory,
-              subAgentFlows
+              subAgentFlows,
+              undefined,
+              activeWorkflow.tour
             )
           : null;
         // Preserve original ID
@@ -746,15 +748,12 @@ const App: React.FC = () => {
             workflowName || 'Untitled',
             workflowDescription || undefined,
             activeWorkflow?.conversationHistory,
-            subAgentFlows
+            subAgentFlows,
+            undefined,
+            activeWorkflow?.tour
           );
           if (activeWorkflow?.id) {
             live.id = activeWorkflow.id;
-          }
-          // Carry the guided tour through (serializeWorkflow drops it) so the
-          // Overview can play it.
-          if (activeWorkflow?.tour) {
-            live.tour = activeWorkflow.tour;
           }
           setOverviewWorkflow(live);
           setOverviewIsHistoricalVersion(false);
@@ -836,14 +835,12 @@ const App: React.FC = () => {
                     workflowName || 'Untitled',
                     workflowDescription || undefined,
                     activeWorkflow?.conversationHistory,
-                    subAgentFlows
+                    subAgentFlows,
+                    undefined,
+                    activeWorkflow?.tour
                   );
                   if (activeWorkflow?.id) {
                     live.id = activeWorkflow.id;
-                  }
-                  // Carry the guided tour through (serializeWorkflow drops it).
-                  if (activeWorkflow?.tour) {
-                    live.tour = activeWorkflow.tour;
                   }
                   setOverviewWorkflow(live);
                   setOverviewIsHistoricalVersion(false);
