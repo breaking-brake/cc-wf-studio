@@ -1,5 +1,13 @@
 # @cc-wf-studio/mcp
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [181d985]
+- Updated dependencies [4403233]
+  - @cc-wf-studio/core@0.2.0
+
 ## 0.1.2
 
 ### Patch Changes

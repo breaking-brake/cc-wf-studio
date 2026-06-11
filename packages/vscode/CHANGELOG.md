@@ -1,5 +1,31 @@
 # cc-wf-studio
 
+## 3.35.0
+
+### Minor Changes
+
+- 181d985: feat: AI-agent workflow actions (Import Skill, Generate Tour) with a guided tour player
+
+  - The MCP "AI Edit" panel now lets you pick an agent (Claude Code, Copilot, Codex, …) once, then run any action with it: **AI Edit**, **Import Skill → Workflow**, or **Generate Workflow Tour**
+  - **Import Skill** reconstructs a published Agent Skill (SKILL.md) as a workflow on the canvas, generating a guided tour alongside the nodes
+  - **Generate Workflow Tour** adds a guided tour to the workflow you are currently editing
+  - Workflows gain an optional `tour` field (`TourStep[]`) in `@cc-wf-studio/core`
+  - New tour player: a "Start tour" button (shown when a workflow has a tour) and a step-by-step card. On the editing canvas it spotlights and centres each step's nodes; in the read-only Overview it scrolls/follows them in the Mermaid + instructions panes
+  - The Overview tour works in the in-editor Overview mode **and** in `ccwf preview` — so tours can be played from the CLI without VS Code
+  - Tours are persisted with the workflow on save, so they survive a save/reload round-trip
+  - New `ccwf tour <file> [--agent ...]` CLI command launches an AI agent (claude-code / codex / copilot / gemini) that writes a `tour` into the workflow file — tour generation without VS Code
+
+- 4403233: fix: switch the Roo Code integration to Zoo Code (#770). The sunset Roo Code extension is replaced by its maintained community fork: the extension now detects `ZooCodeOrganization.zoo-code` first (falling back to the legacy Roo Code extension if installed), launches skills with Zoo Code's `/<skill>` slash syntax, and all UI labels, generated skill instructions, and CLI hints now say "Zoo Code". The `roo-code` agent ID and `.roo/` output paths are unchanged because Zoo Code still reads `.roo/skills/` and `.roo/mcp.json`.
+
+### Patch Changes
+
+- 2603914: chore(deps): bump bundled transitive deps to patch security advisories — hono >=4.12.21 (Set-Cookie injection, routing, IP-restriction bypass, JWT scheme), qs >=6.15.2 (DoS). Lockfile-only; no package.json range changes.
+- 181d985: fix: don't create `.claude/agents/*.md` files during AI editing
+
+  - AI-edit applies no longer write sub-agent files to disk: rejecting the diff no longer leaves orphaned (and mis-named, e.g. `-1.md`) agent files behind
+  - Sub-agent nodes stay inline (agentDefinition/prompt) on the canvas; agent files are materialised only on export/run
+  - Removed the "files to be created" list from the AI-edit confirmation dialog
+
 ## 3.34.3
 
 ### Patch Changes
