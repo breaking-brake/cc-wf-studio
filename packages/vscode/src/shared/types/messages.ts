@@ -1837,11 +1837,11 @@ export interface CodexOperationFailedPayload {
 }
 
 // ============================================================================
-// Roo Code Integration Payloads (Beta)
+// Zoo Code (formerly Roo Code) Integration Payloads (Beta)
 // ============================================================================
 
 /**
- * Export workflow for Roo Code payload (Skills format)
+ * Export workflow for Zoo Code payload (Skills format)
  * Exports to .roo/skills/{name}/SKILL.md
  */
 export interface ExportForRooCodePayload {
@@ -1852,7 +1852,7 @@ export interface ExportForRooCodePayload {
 }
 
 /**
- * Export for Roo Code success payload
+ * Export for Zoo Code success payload
  */
 export interface ExportForRooCodeSuccessPayload {
   /** Skill name */
@@ -1864,8 +1864,8 @@ export interface ExportForRooCodeSuccessPayload {
 }
 
 /**
- * Run workflow for Roo Code payload
- * Exports and runs via Roo Code Extension API
+ * Run workflow for Zoo Code payload
+ * Exports and runs via Zoo Code Extension API
  */
 export interface RunForRooCodePayload {
   /** Workflow to run */
@@ -1875,19 +1875,19 @@ export interface RunForRooCodePayload {
 }
 
 /**
- * Run for Roo Code success payload
+ * Run for Zoo Code success payload
  */
 export interface RunForRooCodeSuccessPayload {
   /** Workflow name */
   workflowName: string;
-  /** Whether Roo Code was opened */
+  /** Whether Zoo Code was opened */
   rooCodeOpened: boolean;
   /** Timestamp */
   timestamp: string; // ISO 8601
 }
 
 /**
- * Roo Code operation failed payload
+ * Zoo Code operation failed payload
  */
 export interface RooCodeOperationFailedPayload {
   /** Error code */

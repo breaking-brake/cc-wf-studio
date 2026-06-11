@@ -1,5 +1,5 @@
 /**
- * Roo Code Skill Export — facade over the core planner.
+ * Zoo Code (formerly Roo Code) Skill Export — facade over the core planner.
  * See `agent-skill-export-helper.ts` for the I/O implementation.
  */
 

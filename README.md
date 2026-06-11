@@ -39,7 +39,7 @@ Design workflows on a canvas. Export as Markdown your AI agent already understan
 | GitHub Copilot Chat | `.github/prompts/` | [Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) |
 | GitHub Copilot CLI | `.github/skills/` | [Copilot CLI](https://github.com/github/copilot-cli) |
 | OpenAI Codex CLI | `.codex/skills/` | [Codex CLI](https://github.com/openai/codex) |
-| Roo Code | `.roo/skills/` | [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) |
+| Zoo Code (formerly Roo Code) | `.roo/skills/` | [Zoo Code](https://marketplace.visualstudio.com/items?itemName=ZooCodeOrganization.zoo-code) |
 | Gemini CLI | `.gemini/skills/` | [Gemini CLI](https://github.com/google-gemini/gemini-cli) |
 | Antigravity | `.agent/skills/` | [Antigravity](https://antigravity.google/) |
 | Cursor | `.cursor/agents/` `.cursor/skills/` | [Cursor](https://github.com/cursor/cursor) |

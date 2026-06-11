@@ -596,7 +596,7 @@ function getAgentName(provider: ExportProvider): string {
     case 'gemini':
       return 'Gemini CLI';
     case 'roo-code':
-      return 'Roo Code';
+      return 'Zoo Code';
     case 'antigravity':
       return 'Antigravity';
     case 'cursor':

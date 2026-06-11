@@ -1,7 +1,9 @@
 /**
- * Claude Code Workflow Studio - Roo Code Integration Handlers
+ * Claude Code Workflow Studio - Roo Code / Zoo Code Integration Handlers
  *
- * Handles Export/Run for Roo Code integration
+ * Handles Export/Run for Zoo Code (formerly Roo Code) integration.
+ * Internal identifiers keep the 'roo-code' name because Zoo Code still
+ * reads the `.roo/` project directory.
  */
 
 import { NodeType } from '@cc-wf-studio/core';
@@ -16,7 +18,11 @@ import type {
 import { extractMcpServerIdsFromWorkflow } from '../services/copilot-export-service';
 import { nodeNameToFileName } from '../services/export-service';
 import type { FileService } from '../services/file-service';
-import { isRooCodeInstalled, startRooCodeTask } from '../services/roo-code-extension-service';
+import {
+  getInstalledRooCodeFlavor,
+  skillLaunchText,
+  startRooCodeTask,
+} from '../services/roo-code-extension-service';
 import {
   previewMcpSyncForRooCode,
   syncMcpConfigForRooCode,
@@ -31,7 +37,7 @@ import {
 } from '../services/skill-normalization-service';
 
 /**
- * Handle Export for Roo Code request
+ * Handle Export for Zoo Code request
  *
  * Exports workflow to Skills format (.roo/skills/name/SKILL.md)
  *
@@ -49,13 +55,13 @@ export async function handleExportForRooCode(
   try {
     const { workflow } = payload;
 
-    // Warn about SubAgent limitations in Roo Code
+    // Warn about SubAgent limitations in Zoo Code
     const hasSubAgentNodes = workflow.nodes.some(
       (node) => node.type === NodeType.SubAgent || node.type === NodeType.SubAgentFlow
     );
     if (hasSubAgentNodes) {
       const result = await vscode.window.showWarningMessage(
-        'This workflow contains Sub-Agent nodes.\n\nRoo Code does not have a Sub-Agent feature. Sub-Agents will be substituted with child tasks (new_task), which cannot run in parallel.',
+        'This workflow contains Sub-Agent nodes.\n\nZoo Code does not have a Sub-Agent feature. Sub-Agents will be substituted with child tasks (new_task), which cannot run in parallel.',
         { modal: true },
         'Continue'
       );
@@ -118,7 +124,7 @@ export async function handleExportForRooCode(
     });
 
     vscode.window.showInformationMessage(
-      `Exported workflow as Roo Code skill: ${exportResult.skillPath}`
+      `Exported workflow as Zoo Code skill: ${exportResult.skillPath}`
     );
   } catch (error) {
     const failedPayload: RooCodeOperationFailedPayload = {
@@ -135,10 +141,10 @@ export async function handleExportForRooCode(
 }
 
 /**
- * Handle Run for Roo Code request
+ * Handle Run for Zoo Code request
  *
  * Exports workflow to Skills format, syncs MCP config,
- * and starts Roo Code with :skill command via Extension API
+ * and starts Zoo Code with the skill launch command via Extension API
  *
  * @param fileService - File service instance
  * @param webview - Webview for sending responses
@@ -172,18 +178,18 @@ export async function handleRunForRooCode(
 
       if (normalizeResult.normalizedSkills && normalizeResult.normalizedSkills.length > 0) {
         console.log(
-          `[Roo Code] Copied ${normalizeResult.normalizedSkills.length} skill(s) to .claude/skills/`
+          `[Zoo Code] Copied ${normalizeResult.normalizedSkills.length} skill(s) to .claude/skills/`
         );
       }
     }
 
-    // Step 0.75: Warn about SubAgent limitations in Roo Code
+    // Step 0.75: Warn about SubAgent limitations in Zoo Code
     const hasSubAgentNodes = workflow.nodes.some(
       (node) => node.type === NodeType.SubAgent || node.type === NodeType.SubAgentFlow
     );
     if (hasSubAgentNodes) {
       const result = await vscode.window.showWarningMessage(
-        'This workflow contains Sub-Agent nodes.\n\nRoo Code does not have a Sub-Agent feature. Sub-Agents will be substituted with child tasks (new_task), which cannot run in parallel.',
+        'This workflow contains Sub-Agent nodes.\n\nZoo Code does not have a Sub-Agent feature. Sub-Agents will be substituted with child tasks (new_task), which cannot run in parallel.',
         { modal: true },
         'Continue'
       );
@@ -206,7 +212,7 @@ export async function handleRunForRooCode(
       if (mcpSyncPreview.serversToAdd.length > 0) {
         const serverList = mcpSyncPreview.serversToAdd.map((s) => `  • ${s}`).join('\n');
         const result = await vscode.window.showInformationMessage(
-          `The following MCP servers will be added to .roo/mcp.json for Roo Code:\n\n${serverList}\n\nProceed?`,
+          `The following MCP servers will be added to .roo/mcp.json for Zoo Code:\n\n${serverList}\n\nProceed?`,
           { modal: true },
           'Yes',
           'No'
@@ -257,12 +263,13 @@ export async function handleRunForRooCode(
       syncedMcpServers = await syncMcpConfigForRooCode(mcpServerIds, workspacePath);
     }
 
-    // Step 5: Start Roo Code with :skill command via Extension API
+    // Step 5: Start Zoo Code (or legacy Roo Code) with the skill launch command via Extension API
     const skillName = nodeNameToFileName(workflow.name);
+    const flavor = getInstalledRooCodeFlavor();
     let rooCodeOpened = false;
 
-    if (isRooCodeInstalled()) {
-      rooCodeOpened = await startRooCodeTask(`:skill ${skillName}`);
+    if (flavor) {
+      rooCodeOpened = await startRooCodeTask(skillLaunchText(flavor, skillName));
     }
 
     // Send success response
@@ -283,11 +290,12 @@ export async function handleRunForRooCode(
       syncedMcpServers.length > 0
         ? ` (MCP servers: ${syncedMcpServers.join(', ')} added to .roo/mcp.json)`
         : '';
+    const agentLabel = flavor === 'roo-code-legacy' ? 'Roo Code (legacy)' : 'Zoo Code';
     const rooCodeInfo = rooCodeOpened
       ? ''
-      : ' (Roo Code extension not found - skill exported only)';
+      : ' (Zoo Code extension not found - skill exported only)';
     vscode.window.showInformationMessage(
-      `Running workflow via Roo Code: ${workflow.name}${configInfo}${rooCodeInfo}`
+      `Running workflow via ${agentLabel}: ${workflow.name}${configInfo}${rooCodeInfo}`
     );
   } catch (error) {
     const failedPayload: RooCodeOperationFailedPayload = {

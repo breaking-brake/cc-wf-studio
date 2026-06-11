@@ -1,10 +1,10 @@
 /**
- * Claude Code Workflow Studio - Roo Code MCP Sync Service
+ * Claude Code Workflow Studio - Zoo Code (formerly Roo Code) MCP Sync Service
  *
  * Handles MCP server configuration sync to {workspace}/.roo/mcp.json
- * for Roo Code execution.
+ * for Zoo Code execution.
  *
- * Note: Roo Code uses JSON format for MCP configuration:
+ * Note: Zoo Code uses JSON format for MCP configuration:
  * - Config path: {workspace}/.roo/mcp.json
  * - MCP servers section: mcpServers.{server_name}
  */
@@ -14,14 +14,14 @@ import * as path from 'node:path';
 import { getMcpServerConfig } from './mcp-config-reader';
 
 /**
- * Roo Code mcp.json structure
+ * Zoo Code mcp.json structure
  */
 interface RooCodeMcpConfig {
   mcpServers?: Record<string, RooCodeMcpServerEntry>;
 }
 
 /**
- * MCP server configuration entry for Roo Code
+ * MCP server configuration entry for Zoo Code
  */
 interface RooCodeMcpServerEntry {
   command?: string;
@@ -43,14 +43,14 @@ export interface RooCodeMcpSyncPreviewResult {
 }
 
 /**
- * Get the Roo Code MCP config file path
+ * Get the Zoo Code MCP config file path
  */
 function getRooCodeMcpConfigPath(workspacePath: string): string {
   return path.join(workspacePath, '.roo', 'mcp.json');
 }
 
 /**
- * Read existing Roo Code MCP config
+ * Read existing Zoo Code MCP config
  */
 async function readRooCodeMcpConfig(workspacePath: string): Promise<RooCodeMcpConfig> {
   const configPath = getRooCodeMcpConfigPath(workspacePath);
@@ -65,7 +65,7 @@ async function readRooCodeMcpConfig(workspacePath: string): Promise<RooCodeMcpCo
 }
 
 /**
- * Write Roo Code MCP config to file
+ * Write Zoo Code MCP config to file
  *
  * @param workspacePath - Workspace path
  * @param config - Config to write
@@ -127,7 +127,7 @@ export async function previewMcpSyncForRooCode(
 }
 
 /**
- * Sync MCP server configurations to .roo/mcp.json for Roo Code
+ * Sync MCP server configurations to .roo/mcp.json for Zoo Code
  *
  * Reads MCP server configs from all Claude Code scopes (project, local, user)
  * and writes them to .roo/mcp.json in JSON format.
@@ -179,7 +179,7 @@ export async function syncMcpConfigForRooCode(
       continue;
     }
 
-    // Convert to Roo Code format
+    // Convert to Zoo Code format
     const rooCodeEntry: RooCodeMcpServerEntry = {};
 
     if (serverConfig.command) {

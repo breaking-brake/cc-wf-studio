@@ -36,6 +36,8 @@ export type AgentSkillProvider =
   | 'copilot'
   | 'cursor'
   | 'gemini'
+  // Targets Zoo Code, the maintained fork of the sunset Roo Code extension.
+  // The ID stays 'roo-code' because Zoo Code still reads `.roo/skills/`.
   | 'roo-code';
 
 interface AgentSkillSpec {

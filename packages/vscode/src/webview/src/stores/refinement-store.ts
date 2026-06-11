@@ -31,7 +31,7 @@ const COPILOT_CHAT_ENABLED_STORAGE_KEY = 'cc-wf-studio:copilot-chat-enabled';
 const COPILOT_CLI_ENABLED_STORAGE_KEY = 'cc-wf-studio:copilot-cli-enabled';
 // Note: This key is shared with Toolbar.tsx for the "Codex (Beta)" toggle
 const CODEX_ENABLED_STORAGE_KEY = 'cc-wf-studio:codex-beta-enabled';
-// Note: This key is shared with Toolbar.tsx for the "Roo Code (Beta)" toggle
+// Note: This key is shared with Toolbar.tsx for the "Zoo Code (Beta)" toggle
 const ROO_CODE_ENABLED_STORAGE_KEY = 'cc-wf-studio:roo-code-beta-enabled';
 // Note: This key is shared with Toolbar.tsx for the "Gemini CLI (Beta)" toggle
 const GEMINI_ENABLED_STORAGE_KEY = 'cc-wf-studio:gemini-beta-enabled';
@@ -384,7 +384,7 @@ function saveCodexEnabledToStorage(enabled: boolean): void {
 }
 
 /**
- * Load Roo Code enabled state from localStorage
+ * Load Zoo Code enabled state from localStorage
  */
 function loadRooCodeEnabledFromStorage(): boolean {
   try {
@@ -396,7 +396,7 @@ function loadRooCodeEnabledFromStorage(): boolean {
 }
 
 /**
- * Save Roo Code enabled state to localStorage
+ * Save Zoo Code enabled state to localStorage
  */
 function saveRooCodeEnabledToStorage(enabled: boolean): void {
   try {

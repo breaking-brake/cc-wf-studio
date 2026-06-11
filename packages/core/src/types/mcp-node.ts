@@ -14,6 +14,7 @@ export type McpConfigSource =
   | 'copilot'
   | 'codex'
   | 'gemini'
+  // '.roo/' directory — read by Zoo Code (formerly Roo Code)
   | 'roo'
   | 'antigravity'
   | 'cursor';

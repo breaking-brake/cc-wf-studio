@@ -122,7 +122,7 @@ export function getCodexProjectSkillsDir(): string | null {
 }
 
 /**
- * Get the Roo Code user-scope Skills directory path
+ * Get the Zoo Code (formerly Roo Code) user-scope Skills directory path
  *
  * @returns Absolute path to ~/.roo/skills/
  *
@@ -135,7 +135,7 @@ export function getRooUserSkillsDir(): string {
 }
 
 /**
- * Get the Roo Code project-scope Skills directory path
+ * Get the Zoo Code (formerly Roo Code) project-scope Skills directory path
  *
  * @returns Absolute path to .roo/skills/ in workspace root, or null if no workspace
  *
@@ -376,7 +376,7 @@ export function getCursorUserMcpConfigPath(): string {
 }
 
 /**
- * Get the Roo Code project-scope MCP config path (.roo/mcp.json)
+ * Get the Zoo Code (formerly Roo Code) project-scope MCP config path (.roo/mcp.json)
  *
  * @returns Absolute path to project MCP config, or null if no workspace
  *

@@ -21,7 +21,7 @@ export const AI_PROVIDER_OPTIONS: AiProviderOption[] = [
   { provider: 'copilot-chat', label: 'Copilot Chat' },
   { provider: 'copilot-cli', label: 'Copilot CLI' },
   { provider: 'codex', label: 'Codex CLI' },
-  { provider: 'roo-code', label: 'Roo Code' },
+  { provider: 'roo-code', label: 'Zoo Code' },
   { provider: 'gemini', label: 'Gemini CLI' },
   { provider: 'antigravity', label: 'Antigravity' },
   { provider: 'cursor', label: 'Cursor' },

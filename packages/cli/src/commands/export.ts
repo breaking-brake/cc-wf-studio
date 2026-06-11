@@ -152,7 +152,7 @@ export function registerExportCommand(program: Command): void {
     .argument('<file>', 'Path to a workflow JSON file.')
     .option<SupportedAgent>(
       '--agent <name>',
-      `Target agent. One of: ${SUPPORTED_AGENTS.join(', ')}.`,
+      `Target agent. One of: ${SUPPORTED_AGENTS.join(', ')}. roo-code targets Zoo Code, the maintained fork of the sunset Roo Code.`,
       parseAgentOption,
       CLAUDE_CODE_AGENT
     )

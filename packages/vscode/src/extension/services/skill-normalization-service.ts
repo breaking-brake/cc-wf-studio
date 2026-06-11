@@ -31,7 +31,7 @@ const NON_STANDARD_SKILL_PATTERNS = [
   '.github/skills/', // GitHub Copilot CLI
   '.copilot/skills/', // GitHub Copilot CLI (alternative)
   '.codex/skills/', // OpenAI Codex CLI
-  '.roo/skills/', // Roo Code
+  '.roo/skills/', // Zoo Code
   '.gemini/skills/', // Google Gemini CLI
   '.agent/skills/', // Google Antigravity
   '.cursor/skills/', // Cursor (Anysphere)
@@ -79,7 +79,7 @@ function getStandardSkillPatterns(targetCli: TargetCli): string[] {
       patterns.push('.codex/skills/');
       break;
     case 'roo-code':
-      // Roo Code considers .roo/skills/ as native
+      // Zoo Code considers .roo/skills/ as native
       patterns.push('.roo/skills/');
       break;
     case 'gemini':
