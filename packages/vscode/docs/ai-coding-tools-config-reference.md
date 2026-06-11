@@ -949,7 +949,7 @@ mode: mode-slug                      # Optional, mode to use when executing
 **globalStorage paths:**
 - macOS: `~/Library/Application Support/Code/User/globalStorage/zoocodeorganization.zoo-code/`
 - Linux: `~/.config/Code/User/globalStorage/zoocodeorganization.zoo-code/`
-- Windows: `%APPDATA%\Code\User\globalStorage\rooveterinaryinc.roo-cline\`
+- Windows: `%APPDATA%\Code\User\globalStorage\zoocodeorganization.zoo-code\`
 
 **Schema:**
 ```yaml
