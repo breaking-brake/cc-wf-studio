@@ -12,7 +12,11 @@ import * as vscode from 'vscode';
 import { log } from '../extension';
 import { isAntigravityInstalled } from './antigravity-extension-service';
 import { isCursorInstalled } from './cursor-extension-service';
-import { isRooCodeInstalled, startRooCodeTask } from './roo-code-extension-service';
+import {
+  getInstalledRooCodeFlavor,
+  skillLaunchText,
+  startRooCodeTask,
+} from './roo-code-extension-service';
 
 export type AiEditingProvider =
   | 'claude-code'
@@ -167,10 +171,13 @@ async function launchProvider(
     }
 
     case 'roo-code': {
-      if (isRooCodeInstalled()) {
-        await startRooCodeTask(`:skill ${skillName}`);
+      const flavor = getInstalledRooCodeFlavor();
+      if (flavor) {
+        await startRooCodeTask(skillLaunchText(flavor, skillName));
       } else {
-        throw new Error('Roo Code extension is not installed.');
+        throw new Error(
+          'Zoo Code extension is not installed. (The legacy Roo Code extension is also supported if installed.)'
+        );
       }
       break;
     }

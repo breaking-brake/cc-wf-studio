@@ -108,7 +108,7 @@ Output by `--agent`:
 | `copilot`              | `.github/skills/<workflow>/SKILL.md`                                                         |
 | `cursor`               | `.cursor/skills/<workflow>/SKILL.md` + `.cursor/agents/<sub-agent>.md`                       |
 | `gemini`               | `.gemini/skills/<workflow>/SKILL.md`                                                         |
-| `roo-code`             | `.roo/skills/<workflow>/SKILL.md`                                                            |
+| `roo-code` (Zoo Code)  | `.roo/skills/<workflow>/SKILL.md`                                                            |
 
 Use `export` (rather than `run`) when the user wants the *files only* — e.g. checking generated content into git, inspecting before execution, or generating Skills for multiple agents in batch.
 

@@ -49,7 +49,7 @@ const NEXT_STEP_HINTS: Record<string, (slash: string) => string> = {
   gemini: (slash) =>
     `run \`${slash}\` in Gemini CLI. If the skill isn't found, restart Gemini CLI to pick up the new file.`,
   'roo-code': (slash) =>
-    `run \`:${slash}\` in Roo Code. If the skill isn't found, restart Roo Code to pick up the new file.`,
+    `run \`/${slash}\` in Zoo Code. If the skill isn't found, restart Zoo Code to pick up the new file.`,
 };
 
 export function registerRunCommand(program: Command): void {
@@ -61,7 +61,7 @@ export function registerRunCommand(program: Command): void {
     .argument('<file>', 'Path to a workflow JSON file.')
     .option(
       '--agent <name>',
-      'Target agent (claude-code | antigravity | codex | copilot | cursor | gemini | roo-code).',
+      'Target agent (claude-code | antigravity | codex | copilot | cursor | gemini | roo-code). roo-code targets Zoo Code, the maintained fork of the sunset Roo Code.',
       'claude-code'
     )
     .option('--overwrite', 'Overwrite existing files instead of erroring.', false)

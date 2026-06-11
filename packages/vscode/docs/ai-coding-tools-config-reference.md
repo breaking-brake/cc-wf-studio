@@ -10,7 +10,7 @@ Created by referencing official documentation for each tool.
 | Claude Code | Project<br>User | Project<br>User | Project<br>User | Project<br>User | Project<br>User | Project |
 | Gemini CLI | Project<br>User | Project<br>User | Project<br>User | - | Project<br>User | Project |
 | Antigravity | Project | Project<br>User | Workflows | Agent mode | Project | - |
-| Roo Code | Project<br>Global | Project<br>Global | Project<br>Global | Project<br>Global | Project<br>Global | Project |
+| Zoo Code (formerly Roo Code) | Project<br>Global | Project<br>Global | Project<br>Global | Project<br>Global | Project<br>Global | Project |
 | VSCode Copilot Chat | Project<br>User | Project<br>User | Project<br>User | Project | Project<br>User | - |
 | Copilot CLI | Project | Project<br>Global | - | Project<br>Global | Global | - |
 | Codex CLI (OpenAI) | Project<br>Global | Project<br>User<br>Admin | - | - | Global | - |
@@ -855,17 +855,14 @@ X-Custom-Header = "value"
 
 ---
 
-## Roo Code
+## Zoo Code (formerly Roo Code)
 
-Roo Code (formerly Roo Cline) is a VSCode extension for AI-assisted coding with customizable modes.
+Zoo Code is the maintained community fork of Roo Code (which itself forked from Roo Cline), a VSCode extension for AI-assisted coding with customizable modes. The original Roo Code extension and its Router service were sunset in 2026; Zoo Code keeps the same `.roo/` configuration layout. The directory layouts below apply to both.
 
 > **Reference:**
-> - [Roo Code Documentation](https://docs.roocode.com/)
-> - [Custom Instructions](https://docs.roocode.com/features/custom-instructions)
-> - [Skills](https://docs.roocode.com/features/skills)
-> - [Slash Commands](https://docs.roocode.com/features/slash-commands)
-> - [Custom Modes](https://docs.roocode.com/features/custom-modes)
-> - [MCP in Roo Code](https://docs.roocode.com/features/mcp/using-mcp-in-roo)
+> - [Zoo Code Documentation](https://docs.zoocode.dev/)
+> - [Roo → Zoo migration guide](https://docs.zoocode.dev/roo-to-zoo-migration)
+> - Legacy Roo Code docs: [Custom Instructions](https://docs.roocode.com/features/custom-instructions), [Skills](https://docs.roocode.com/features/skills), [Slash Commands](https://docs.roocode.com/features/slash-commands), [Custom Modes](https://docs.roocode.com/features/custom-modes), [MCP](https://docs.roocode.com/features/mcp/using-mcp-in-roo)
 
 ### Rules (Instructions)
 
@@ -950,8 +947,8 @@ mode: mode-slug                      # Optional, mode to use when executing
 | **Global (legacy)** | `{globalStorage}/settings/custom_modes.json` | JSON | Global custom modes (legacy) |
 
 **globalStorage paths:**
-- macOS: `~/Library/Application Support/Code/User/globalStorage/rooveterinaryinc.roo-cline/`
-- Linux: `~/.config/Code/User/globalStorage/rooveterinaryinc.roo-cline/`
+- macOS: `~/Library/Application Support/Code/User/globalStorage/zoocodeorganization.zoo-code/`
+- Linux: `~/.config/Code/User/globalStorage/zoocodeorganization.zoo-code/`
 - Windows: `%APPDATA%\Code\User\globalStorage\rooveterinaryinc.roo-cline\`
 
 **Schema:**
@@ -1046,15 +1043,15 @@ customModes:
 Project Root/
 ├── CLAUDE.md                           # Claude Code (root rule)
 ├── GEMINI.md                           # Gemini CLI (project instructions)
-├── AGENTS.md                           # Codex CLI, Copilot CLI, VSCode Copilot Chat, Roo Code (root rule)
+├── AGENTS.md                           # Codex CLI, Copilot CLI, VSCode Copilot Chat, Zoo Code (root rule)
 ├── AGENTS.override.md                  # Codex CLI (override)
 ├── .mcp.json                           # Claude Code (MCP)
 ├── .claudeignore                       # Claude Code (ignore)
 ├── .geminiignore                       # Gemini CLI (ignore)
-├── .rooignore                          # Roo Code (ignore)
-├── .roomodes                           # Roo Code (project custom modes, YAML/JSON)
-├── .roorules                           # Roo Code (fallback rules)
-├── .roorules-{modeSlug}               # Roo Code (fallback mode-specific rules)
+├── .rooignore                          # Zoo Code (ignore)
+├── .roomodes                           # Zoo Code (project custom modes, YAML/JSON)
+├── .roorules                           # Zoo Code (fallback rules)
+├── .roorules-{modeSlug}               # Zoo Code (fallback mode-specific rules)
 │
 ├── .claude/
 │   ├── CLAUDE.local.md                 # Claude Code (local memory, gitignored)
@@ -1088,13 +1085,13 @@ Project Root/
 │   └── skills/{name}/SKILL.md          # VSCode Copilot Chat, Copilot CLI (skills)
 │
 ├── .roo/
-│   ├── rules/                          # Roo Code (project rules, all modes)
-│   ├── rules-{modeSlug}/              # Roo Code (project mode-specific rules)
-│   ├── skills/{name}/SKILL.md          # Roo Code (project skills)
-│   ├── skills-{modeSlug}/{name}/SKILL.md  # Roo Code (project mode-specific skills)
-│   ├── commands/*.md                   # Roo Code (project slash commands)
-│   ├── mcp.json                        # Roo Code (project MCP)
-│   └── system-prompt-{mode-slug}       # Roo Code (system prompt override)
+│   ├── rules/                          # Zoo Code (project rules, all modes)
+│   ├── rules-{modeSlug}/              # Zoo Code (project mode-specific rules)
+│   ├── skills/{name}/SKILL.md          # Zoo Code (project skills)
+│   ├── skills-{modeSlug}/{name}/SKILL.md  # Zoo Code (project mode-specific skills)
+│   ├── commands/*.md                   # Zoo Code (project slash commands)
+│   ├── mcp.json                        # Zoo Code (project MCP)
+│   └── system-prompt-{mode-slug}       # Zoo Code (system prompt override)
 │
 └── .vscode/
     └── mcp.json                        # VSCode Copilot Chat (MCP)
@@ -1136,21 +1133,22 @@ User Home (~)/
 │   └── session-state/                  # Copilot CLI (session storage)
 │
 └── .roo/
-    ├── rules/                          # Roo Code (global rules, all modes)
-    ├── rules-{modeSlug}/              # Roo Code (global mode-specific rules)
-    ├── skills/{name}/SKILL.md          # Roo Code (global skills)
-    ├── skills-{modeSlug}/{name}/SKILL.md  # Roo Code (global mode-specific skills)
-    └── commands/*.md                   # Roo Code (global slash commands)
+    ├── rules/                          # Zoo Code (global rules, all modes)
+    ├── rules-{modeSlug}/              # Zoo Code (global mode-specific rules)
+    ├── skills/{name}/SKILL.md          # Zoo Code (global skills)
+    ├── skills-{modeSlug}/{name}/SKILL.md  # Zoo Code (global mode-specific skills)
+    └── commands/*.md                   # Zoo Code (global slash commands)
 
-# Roo Code VS Code Extension Global Storage
-# macOS:   ~/Library/Application Support/Code/User/globalStorage/rooveterinaryinc.roo-cline/
-# Linux:   ~/.config/Code/User/globalStorage/rooveterinaryinc.roo-cline/
-# Windows: %APPDATA%\Code\User\globalStorage\rooveterinaryinc.roo-cline\
+# Zoo Code VS Code Extension Global Storage
+# (legacy Roo Code used rooveterinaryinc.roo-cline in the same locations)
+# macOS:   ~/Library/Application Support/Code/User/globalStorage/zoocodeorganization.zoo-code/
+# Linux:   ~/.config/Code/User/globalStorage/zoocodeorganization.zoo-code/
+# Windows: %APPDATA%\Code\User\globalStorage\zoocodeorganization.zoo-code\
 {globalStorage}/
 └── settings/
-    ├── cline_mcp_settings.json         # Roo Code (global MCP)
-    ├── custom_modes.yaml               # Roo Code (global custom modes, recommended)
-    └── custom_modes.json               # Roo Code (global custom modes, legacy)
+    ├── cline_mcp_settings.json         # Zoo Code (global MCP)
+    ├── custom_modes.yaml               # Zoo Code (global custom modes, recommended)
+    └── custom_modes.json               # Zoo Code (global custom modes, legacy)
 ```
 
 ---
@@ -1188,14 +1186,15 @@ User Home (~)/
 - [Gemini CLI MCP Servers](https://geminicli.com/docs/tools/mcp-server/)
 - [Gemini CLI .geminiignore](https://geminicli.com/docs/cli/gemini-ignore/)
 - [Gemini CLI Extensions](https://geminicli.com/docs/extensions/)
-- [Roo Code Documentation](https://docs.roocode.com/)
-- [Roo Code Custom Instructions](https://docs.roocode.com/features/custom-instructions)
-- [Roo Code Skills](https://docs.roocode.com/features/skills)
-- [Roo Code Slash Commands](https://docs.roocode.com/features/slash-commands)
-- [Roo Code Custom Modes](https://docs.roocode.com/features/custom-modes)
-- [Roo Code MCP](https://docs.roocode.com/features/mcp/using-mcp-in-roo)
-- [Roo Code .rooignore](https://docs.roocode.com/features/rooignore)
-- [Roo Code System Prompt Override](https://docs.roocode.com/advanced-usage/footgun-prompting)
+- [Zoo Code Documentation](https://docs.zoocode.dev/)
+- Legacy Roo Code docs (layout still applies to Zoo Code):
+  - [Roo Code Custom Instructions](https://docs.roocode.com/features/custom-instructions)
+  - [Roo Code Skills](https://docs.roocode.com/features/skills)
+  - [Roo Code Slash Commands](https://docs.roocode.com/features/slash-commands)
+  - [Roo Code Custom Modes](https://docs.roocode.com/features/custom-modes)
+  - [Roo Code MCP](https://docs.roocode.com/features/mcp/using-mcp-in-roo)
+  - [Roo Code .rooignore](https://docs.roocode.com/features/rooignore)
+  - [Roo Code System Prompt Override](https://docs.roocode.com/advanced-usage/footgun-prompting)
 - [Use custom instructions in VS Code](https://code.visualstudio.com/docs/copilot/customization/custom-instructions)
 - [Use Agent Skills in VS Code](https://code.visualstudio.com/docs/copilot/customization/agent-skills)
 - [Use prompt files in VS Code](https://code.visualstudio.com/docs/copilot/customization/prompt-files)

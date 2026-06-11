@@ -195,7 +195,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   // Codex integration
   const [isCodexExporting, setIsCodexExporting] = useState(false);
   const [isCodexRunning, setIsCodexRunning] = useState(false);
-  // Roo Code integration
+  // Zoo Code integration
   const [isRooCodeExporting, setIsRooCodeExporting] = useState(false);
   const [isRooCodeRunning, setIsRooCodeRunning] = useState(false);
   // Gemini CLI integration
@@ -799,7 +799,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   };
 
   // ============================================================================
-  // Roo Code Integration Handlers
+  // Zoo Code Integration Handlers
   // ============================================================================
 
   const handleRooCodeExport = async () => {
@@ -838,11 +838,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       const { isHighlightEnabled } = useWorkflowStore.getState();
       const result = await exportForRooCode(workflow, { highlightEnabled: isHighlightEnabled });
-      console.log('Workflow exported as skill for Roo Code:', result.skillPath);
+      console.log('Workflow exported as skill for Zoo Code:', result.skillPath);
     } catch (error) {
       onError({
         code: 'EXPORT_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to export for Roo Code',
+        message: error instanceof Error ? error.message : 'Failed to export for Zoo Code',
         details: error,
       });
     } finally {
@@ -886,11 +886,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       const { isHighlightEnabled } = useWorkflowStore.getState();
       const result = await runForRooCode(workflow, { highlightEnabled: isHighlightEnabled });
-      console.log('Workflow run for Roo Code:', result.workflowName);
+      console.log('Workflow run for Zoo Code:', result.workflowName);
     } catch (error) {
       onError({
         code: 'RUN_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to run for Roo Code',
+        message: error instanceof Error ? error.message : 'Failed to run for Zoo Code',
         details: error,
       });
     } finally {
@@ -1964,7 +1964,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 </div>
               )}
 
-              {/* Vertical Divider - shown when Roo Code is enabled */}
+              {/* Vertical Divider - shown when Zoo Code is enabled */}
               {isRooCodeEnabled && (
                 <div
                   style={{
@@ -1976,7 +1976,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 />
               )}
 
-              {/* Roo Code Column - shown when Roo Code is enabled */}
+              {/* Zoo Code Column - shown when Zoo Code is enabled */}
               {isRooCodeEnabled && (
                 <div
                   style={{
@@ -1992,7 +1992,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    Roo Code
+                    Zoo Code
                   </span>
                   <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                     <div style={{ display: 'flex' }}>

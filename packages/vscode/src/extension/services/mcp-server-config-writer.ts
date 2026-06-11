@@ -6,7 +6,7 @@
  *
  * Supported targets:
  * - Claude Code: {workspace}/.mcp.json
- * - Roo Code: {workspace}/.roo/mcp.json
+ * - Zoo Code: {workspace}/.roo/mcp.json
  * - VSCode Copilot: {workspace}/.vscode/mcp.json
  * - Copilot CLI: ~/.copilot/mcp-config.json (global)
  * - Codex CLI: ~/.codex/config.toml (global)
@@ -167,7 +167,7 @@ export async function writeAgentConfig(
       config.mcpServers[SERVER_ENTRY_NAME] = { type: 'http', url: serverUrl, tools: ['*'] };
       await writeJsonConfig(filePath, config);
     } else if (target === 'roo-code') {
-      // Roo Code uses "mcpServers" key with type "streamable-http"
+      // Zoo Code uses "mcpServers" key with type "streamable-http"
       const filePath = getConfigPath(target, workspacePath);
       const config = await readJsonConfig(filePath);
       if (!config.mcpServers) {

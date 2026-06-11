@@ -769,7 +769,7 @@ export function registerOpenEditorCommand(
               break;
 
             case 'EXPORT_FOR_ROO_CODE':
-              // Export workflow for Roo Code (Skills format)
+              // Export workflow for Zoo Code (Skills format)
               if (message.payload?.workflow) {
                 await handleExportForRooCode(
                   fileService,
@@ -791,7 +791,7 @@ export function registerOpenEditorCommand(
               break;
 
             case 'RUN_FOR_ROO_CODE':
-              // Run workflow for Roo Code (via Extension API)
+              // Run workflow for Zoo Code (via Extension API)
               if (message.payload?.workflow) {
                 try {
                   await ensureMcpServerForRun(
@@ -800,7 +800,7 @@ export function registerOpenEditorCommand(
                     fileService.getWorkspacePath()
                   );
                 } catch (mcpError) {
-                  log('WARN', 'Failed to auto-start MCP server for Roo Code run', {
+                  log('WARN', 'Failed to auto-start MCP server for Zoo Code run', {
                     error: mcpError instanceof Error ? mcpError.message : String(mcpError),
                   });
                 }

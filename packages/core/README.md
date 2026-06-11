@@ -20,7 +20,7 @@ npm install @cc-wf-studio/core
 | `services/workflow-prompt-generator` | `generateMermaidFlowchart`, `generateExecutionInstructions`, `sanitizeNodeId` + the `ExportProvider` union. |
 | `services/workflow-overview-formatter` | `generateOverviewMarkdown` — the per-node Markdown the canvas Overview panel and `ccwf preview` render side-by-side with the Mermaid diagram. |
 | `services/workflow-export` | Pure `.claude/*` file generators (`generateSubAgentFile`, `generateSlashCommandFile`, `nodeNameToFileName`, `escapeYamlString`, `validateClaudeFileFormat`) and `planWorkflowExportFiles(workflow)` — the planner Claude Code's `ccwf export` walks. |
-| `services/agent-skill-export` | `AgentSkillProvider` union + `generateAgentSkillContent` and `planAgentSkillFiles(workflow, agent)` for every non-Claude agent (Antigravity / Codex / Copilot / Cursor / Gemini / Roo Code). |
+| `services/agent-skill-export` | `AgentSkillProvider` union + `generateAgentSkillContent` and `planAgentSkillFiles(workflow, agent)` for every non-Claude agent (Antigravity / Codex / Copilot / Cursor / Gemini / Zoo Code). |
 | `utils/validate-workflow` | `validateAIGeneratedWorkflow` — the schema check `ccwf validate` runs. |
 | `utils/migrate-workflow` | Forward-migration of older workflow JSON to the current schema. |
 | `utils/schema-parser` | Helpers that load the bundled workflow schema (`resources/workflow-schema.toon`). |

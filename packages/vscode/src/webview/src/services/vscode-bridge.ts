@@ -645,11 +645,11 @@ export function runForCodexCli(
 }
 
 // ============================================================================
-// Roo Code Integration Functions (Beta)
+// Zoo Code Integration Functions (Beta)
 // ============================================================================
 
 /**
- * Export workflow for Roo Code (Beta)
+ * Export workflow for Zoo Code (Beta)
  *
  * Exports the workflow to Skills format (.roo/skills/name/SKILL.md)
  *
@@ -679,7 +679,7 @@ export function exportForRooCode(
             timestamp: new Date().toISOString(),
           });
         } else if (message.type === 'EXPORT_FOR_ROO_CODE_FAILED') {
-          reject(new Error(message.payload?.errorMessage || 'Failed to export for Roo Code'));
+          reject(new Error(message.payload?.errorMessage || 'Failed to export for Zoo Code'));
         }
       }
     };
@@ -705,10 +705,10 @@ export function exportForRooCode(
 }
 
 /**
- * Run workflow for Roo Code (Beta)
+ * Run workflow for Zoo Code (Beta)
  *
- * Exports the workflow to Roo Code Skills format and starts
- * Roo Code with :skill command via Extension API
+ * Exports the workflow to Zoo Code Skills format and starts
+ * Zoo Code with the skill launch command via Extension API
  *
  * @param workflow - Workflow to run
  * @returns Promise that resolves with run result
@@ -736,7 +736,7 @@ export function runForRooCode(
             timestamp: new Date().toISOString(),
           });
         } else if (message.type === 'RUN_FOR_ROO_CODE_FAILED') {
-          reject(new Error(message.payload?.errorMessage || 'Failed to run for Roo Code'));
+          reject(new Error(message.payload?.errorMessage || 'Failed to run for Zoo Code'));
         }
       }
     };

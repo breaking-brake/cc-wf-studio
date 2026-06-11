@@ -362,7 +362,7 @@ export function MoreActionsDropdown({
                   {isCodexEnabled && <Check size={14} />}
                 </DropdownMenu.Item>
 
-                {/* Roo Code Toggle */}
+                {/* Zoo Code Toggle */}
                 <DropdownMenu.Item
                   onSelect={(event) => {
                     event.preventDefault();
@@ -381,7 +381,7 @@ export function MoreActionsDropdown({
                   }}
                 >
                   <Bot size={14} />
-                  <span style={{ flex: 1 }}>Roo Code</span>
+                  <span style={{ flex: 1 }}>Zoo Code</span>
                   {isRooCodeEnabled && <Check size={14} />}
                 </DropdownMenu.Item>
 

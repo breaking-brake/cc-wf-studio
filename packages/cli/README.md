@@ -83,7 +83,7 @@ Output layout by target agent:
 | `copilot` | `.github/skills/<workflow>/SKILL.md` |
 | `cursor` | `.cursor/skills/<workflow>/SKILL.md` + `.cursor/agents/<sub-agent>.md` |
 | `gemini` | `.gemini/skills/<workflow>/SKILL.md` |
-| `roo-code` | `.roo/skills/<workflow>/SKILL.md` |
+| `roo-code` (Zoo Code, the maintained Roo Code fork) | `.roo/skills/<workflow>/SKILL.md` |
 
 `.claude/commands/` is the previous home for the workflow entry; Claude Code is folding it into `.claude/skills/`, where each skill is a *directory* containing `SKILL.md` (see the Agent Skills format). `ccwf export --agent claude-code` writes to the new directory-based layout. Existing `.claude/commands/<workflow>.md` files are not deleted automatically.
 

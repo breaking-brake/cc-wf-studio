@@ -328,7 +328,7 @@ export interface SubAgentFlowNodeData {
 export interface McpNodeData {
   /** MCP server identifier (from 'claude mcp list') */
   serverId: string;
-  /** Source provider of the MCP server (claude, copilot, codex, gemini, roo) */
+  /** Source provider of the MCP server (claude, copilot, codex, gemini, roo — '.roo/' is read by Zoo Code, formerly Roo Code) */
   source?: 'claude' | 'copilot' | 'codex' | 'gemini' | 'roo';
   /** Tool function name from the MCP server (optional for aiToolSelection mode) */
   toolName?: string;

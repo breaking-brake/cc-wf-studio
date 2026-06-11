@@ -55,7 +55,7 @@ const PROVIDER_CONFIG: Record<
     },
   },
   roo: {
-    label: 'Roo Code',
+    label: 'Zoo Code',
     colors: {
       light: '#FFFFFF', // White background (light theme)
       dark: '#1E1E1E', // Black background (dark theme)
