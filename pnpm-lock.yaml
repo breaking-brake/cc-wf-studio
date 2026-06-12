@@ -53,6 +53,10 @@ importers:
         version: 5.9.3
 
   packages/core:
+    dependencies:
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       '@toon-format/toon':
         specifier: ^2.1.0

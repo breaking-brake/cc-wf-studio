@@ -13,11 +13,13 @@ import {
   BUILT_IN_SUB_AGENTS,
   type CodexNodeData,
   type IfElseNodeData,
+  isFieldAppliedToTarget,
   type SkillNodeData,
   SUB_AGENT_COLORS,
   type SubAgentData,
   type SubAgentFlowNodeData,
   type SwitchNodeData,
+  subAgentPropertySchema,
   VALIDATION_RULES,
 } from '@cc-wf-studio/core';
 import type { McpNodeData } from '@cc-wf-studio/core/mcp';
@@ -417,6 +419,11 @@ const SubAgentProperties: React.FC<{
   const agentType = data.agentType || 'claudeCode';
   const isClaudeCode = agentType === 'claudeCode';
   const isBuiltIn = !!data.builtInType;
+  // Active export target drives which fields are shown. The agentType toggle is
+  // binary today (claudeCode vs other); 'other' maps to a representative
+  // non-Claude-Code target so claudeCode-only fields are hidden. Per-target
+  // selection in the panel is a future branch.
+  const exportTarget = isClaudeCode ? 'claudeCode' : 'adk';
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const labelStyle: React.CSSProperties = {
@@ -575,8 +582,10 @@ const SubAgentProperties: React.FC<{
         </div>
       </div>
 
-      {/* Claude Code-specific fields (read-only) */}
-      {isClaudeCode && (
+      {/* Claude Code-specific fields (read-only). Scoped by the property schema:
+          model/tools/memory/color are targets:['claudeCode'], so they show only
+          when the active target applies. */}
+      {isFieldAppliedToTarget(subAgentPropertySchema, 'model', exportTarget) && (
         <>
           {/* Model */}
           <div>

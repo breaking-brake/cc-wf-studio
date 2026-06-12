@@ -10,7 +10,11 @@
  */
 
 import type { BuiltInSubAgentType } from '@cc-wf-studio/core';
-import { BUILT_IN_SUB_AGENTS } from '@cc-wf-studio/core';
+import {
+  BUILT_IN_SUB_AGENTS,
+  isFieldAppliedToTarget,
+  subAgentPropertySchema,
+} from '@cc-wf-studio/core';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
 import { useCallback, useEffect, useId, useState } from 'react';
@@ -172,6 +176,9 @@ export function SubAgentFormDialog({
   };
 
   const isClaudeCode = agentType === 'claudeCode';
+  // Active export target drives field scoping (see PropertyOverlay). Binary
+  // today: 'other' maps to a representative non-Claude-Code target.
+  const exportTarget = isClaudeCode ? 'claudeCode' : 'adk';
   const isBuiltIn = !!formData.builtInType;
   const builtInPreset = isBuiltIn
     ? BUILT_IN_SUB_AGENTS.find((p) => p.type === formData.builtInType)
@@ -529,8 +536,9 @@ export function SubAgentFormDialog({
                 )}
               </div>
 
-              {/* Claude Code-specific fields */}
-              {isClaudeCode && (
+              {/* Claude Code-specific fields. Scoped by the property schema:
+                  model/tools/memory/color are targets:['claudeCode']. */}
+              {isFieldAppliedToTarget(subAgentPropertySchema, 'model', exportTarget) && (
                 <>
                   {/* Model — read-only for built-in */}
                   {isBuiltIn && builtInPreset ? (

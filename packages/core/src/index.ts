@@ -22,6 +22,10 @@ export * from './services/workflow-overview-formatter.js';
 export * from './services/workflow-export.js';
 export * from './services/agent-skill-export.js';
 
+// Node property schemas — zod-based, target-scoped field definitions
+// (UI scoping + export warnings + runtime validation). See ./schema.
+export * from './schema/index.js';
+
 // Pure validation, migration, schema parsing.
 export * from './utils/validate-workflow.js';
 export * from './utils/migrate-workflow.js';
