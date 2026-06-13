@@ -10,15 +10,12 @@
  */
 
 import type { BuiltInSubAgentType } from '@cc-wf-studio/core';
-import {
-  BUILT_IN_SUB_AGENTS,
-  isFieldAppliedToTarget,
-  subAgentPropertySchema,
-} from '@cc-wf-studio/core';
+import { BUILT_IN_SUB_AGENTS } from '@cc-wf-studio/core';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { useTranslation } from '../../i18n/i18n-context';
+import { CollapsibleSection } from '../common/CollapsibleSection';
 import type { SubAgentColor } from '../common/ColorPicker';
 import { ColorPicker } from '../common/ColorPicker';
 import { EditInEditorButton } from '../common/EditInEditorButton';
@@ -130,18 +127,6 @@ export function SubAgentFormDialog({
     onClose();
   }, [onClose]);
 
-  const handleAgentTypeChange = (type: AgentType) => {
-    setAgentType(type);
-    setFormData((prev) => ({
-      ...prev,
-      agentType: type,
-      // Reset Claude Code-specific fields when switching to "other"
-      ...(type === 'other'
-        ? { model: 'inherit' as const, tools: '', memory: '' as const, color: undefined }
-        : {}),
-    }));
-  };
-
   const handleSubmit = useCallback(() => {
     const validationErrors: FormErrors = {};
 
@@ -175,31 +160,10 @@ export function SubAgentFormDialog({
     }
   };
 
-  const isClaudeCode = agentType === 'claudeCode';
-  // Active export target drives field scoping (see PropertyOverlay). Binary
-  // today: 'other' maps to a representative non-Claude-Code target.
-  const exportTarget = isClaudeCode ? 'claudeCode' : 'adk';
   const isBuiltIn = !!formData.builtInType;
   const builtInPreset = isBuiltIn
     ? BUILT_IN_SUB_AGENTS.find((p) => p.type === formData.builtInType)
     : undefined;
-
-  const radioLabelStyle = (isActive: boolean): React.CSSProperties => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '10px 16px',
-    fontSize: '13px',
-    fontWeight: isActive ? 600 : 400,
-    color: 'var(--vscode-foreground)',
-    cursor: 'pointer',
-    borderRadius: '4px',
-    border: `1px solid ${isActive ? 'var(--vscode-focusBorder)' : 'var(--vscode-input-border)'}`,
-    backgroundColor: isActive
-      ? 'var(--vscode-list-activeSelectionBackground)'
-      : 'var(--vscode-input-background)',
-    flex: 1,
-  });
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -281,47 +245,6 @@ export function SubAgentFormDialog({
                     Built-in
                   </span>
                   <span style={{ fontWeight: 600 }}>{builtInPreset.displayName}</span>
-                </div>
-              )}
-
-              {/* Agent Type Selector (hidden for built-in) */}
-              {!isBuiltIn && (
-                <div>
-                  <div
-                    style={{
-                      display: 'block',
-                      marginBottom: '8px',
-                      fontSize: '13px',
-                      fontWeight: 500,
-                      color: 'var(--vscode-foreground)',
-                    }}
-                  >
-                    {t('subAgent.form.agentTypeLabel')}
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <label style={radioLabelStyle(isClaudeCode)}>
-                      <input
-                        type="radio"
-                        name="agentType"
-                        value="claudeCode"
-                        checked={isClaudeCode}
-                        onChange={() => handleAgentTypeChange('claudeCode')}
-                        style={{ cursor: 'pointer' }}
-                      />
-                      {t('subAgent.form.agentType.claudeCode')}
-                    </label>
-                    <label style={radioLabelStyle(!isClaudeCode)}>
-                      <input
-                        type="radio"
-                        name="agentType"
-                        value="other"
-                        checked={!isClaudeCode}
-                        onChange={() => handleAgentTypeChange('other')}
-                        style={{ cursor: 'pointer' }}
-                      />
-                      {t('subAgent.form.agentType.other')}
-                    </label>
-                  </div>
                 </div>
               )}
 
@@ -536,9 +459,13 @@ export function SubAgentFormDialog({
                 )}
               </div>
 
-              {/* Claude Code-specific fields. Scoped by the property schema:
-                  model/tools/memory/color are targets:['claudeCode']. */}
-              {isFieldAppliedToTarget(subAgentPropertySchema, 'model', exportTarget) && (
+              {/* Claude Code settings — grouped in their own box so the scope is
+                  explicit: model/tools/memory/color apply only when this
+                  sub-agent is exported to Claude Code (targets:['claudeCode']). */}
+              <CollapsibleSection
+                title={t('subAgent.section.claudeCode')}
+                hint={t('subAgent.section.claudeCode.hint')}
+              >
                 <>
                   {/* Model — read-only for built-in */}
                   {isBuiltIn && builtInPreset ? (
@@ -803,7 +730,15 @@ export function SubAgentFormDialog({
                     />
                   )}
                 </>
-              )}
+              </CollapsibleSection>
+
+              {/* Other agent settings — no per-node settings yet; the box
+                  reserves the slot for future target-specific fields. */}
+              <CollapsibleSection title={t('subAgent.section.other')} defaultOpen={false}>
+                <div style={{ fontSize: '13px', color: 'var(--vscode-descriptionForeground)' }}>
+                  {t('subAgent.section.other.empty')}
+                </div>
+              </CollapsibleSection>
             </div>
 
             {/* Actions */}

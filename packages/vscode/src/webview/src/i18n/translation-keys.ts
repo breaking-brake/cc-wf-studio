@@ -890,6 +890,10 @@ export interface WebviewTranslationKeys {
   'subAgent.form.agentTypeLabel': string;
   'subAgent.form.agentType.claudeCode': string;
   'subAgent.form.agentType.other': string;
+  'subAgent.section.claudeCode': string;
+  'subAgent.section.claudeCode.hint': string;
+  'subAgent.section.other': string;
+  'subAgent.section.other.empty': string;
   'subAgent.form.descriptionLabel': string;
   'subAgent.form.descriptionPlaceholder': string;
   'subAgent.form.agentDefinitionLabel': string;

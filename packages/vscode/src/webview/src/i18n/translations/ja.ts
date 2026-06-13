@@ -958,6 +958,12 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.agentTypeLabel': 'エージェントタイプ',
   'subAgent.form.agentType.claudeCode': 'Claude Code',
   'subAgent.form.agentType.other': 'その他',
+  'subAgent.section.claudeCode': 'Claude Code 設定',
+  'subAgent.section.claudeCode.hint':
+    'このサブエージェントを Claude Code にエクスポートするときに適用されます。',
+  'subAgent.section.other': 'その他のエージェント設定',
+  'subAgent.section.other.empty':
+    'このエージェント固有の設定はまだありません（その他のエージェントは共通設定のみを使用します）。',
   'subAgent.form.descriptionLabel': '説明',
   'subAgent.form.descriptionPlaceholder': 'このエージェントの簡単な説明...',
   'subAgent.form.agentDefinitionLabel': 'エージェント定義',

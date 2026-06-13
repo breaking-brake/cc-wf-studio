@@ -964,6 +964,11 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.agentTypeLabel': 'Agent Type',
   'subAgent.form.agentType.claudeCode': 'Claude Code',
   'subAgent.form.agentType.other': 'Other',
+  'subAgent.section.claudeCode': 'Claude Code Settings',
+  'subAgent.section.claudeCode.hint': 'Applied when this sub-agent is exported to Claude Code.',
+  'subAgent.section.other': 'Other Agent Settings',
+  'subAgent.section.other.empty':
+    'No agent-specific settings yet — other agents use the common settings only.',
   'subAgent.form.descriptionLabel': 'Description',
   'subAgent.form.descriptionPlaceholder': 'Brief description of this agent...',
   'subAgent.form.agentDefinitionLabel': 'Agent Definition',

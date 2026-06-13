@@ -13,13 +13,11 @@ import {
   BUILT_IN_SUB_AGENTS,
   type CodexNodeData,
   type IfElseNodeData,
-  isFieldAppliedToTarget,
   type SkillNodeData,
   SUB_AGENT_COLORS,
   type SubAgentData,
   type SubAgentFlowNodeData,
   type SwitchNodeData,
-  subAgentPropertySchema,
   VALIDATION_RULES,
 } from '@cc-wf-studio/core';
 import type { McpNodeData } from '@cc-wf-studio/core/mcp';
@@ -35,6 +33,7 @@ import { openExternalUrl } from '../services/vscode-bridge';
 import { useWorkflowStore } from '../stores/workflow-store';
 import type { PromptNodeData } from '../types/node-types';
 import { extractVariables } from '../utils/template-utils';
+import { CollapsibleSection } from './common/CollapsibleSection';
 import { ColorPicker } from './common/ColorPicker';
 import { EditInEditorButton } from './common/EditInEditorButton';
 import { ResizeHandle } from './common/ResizeHandle';
@@ -416,14 +415,11 @@ const SubAgentProperties: React.FC<{
 }> = ({ node, updateNodeData }) => {
   const { t } = useTranslation();
   const data = node.data;
+  // `agentType` is retained for backward compatibility but no longer toggles
+  // the panel: settings are grouped per agent into collapsible sections so each
+  // setting's scope is visually explicit (see CollapsibleSection).
   const agentType = data.agentType || 'claudeCode';
-  const isClaudeCode = agentType === 'claudeCode';
   const isBuiltIn = !!data.builtInType;
-  // Active export target drives which fields are shown. The agentType toggle is
-  // binary today (claudeCode vs other); 'other' maps to a representative
-  // non-Claude-Code target so claudeCode-only fields are hidden. Per-target
-  // selection in the panel is a future branch.
-  const exportTarget = isClaudeCode ? 'claudeCode' : 'adk';
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const labelStyle: React.CSSProperties = {
@@ -532,16 +528,6 @@ const SubAgentProperties: React.FC<{
         {t('subAgent.property.editButton')}
       </button>
 
-      {/* Agent Type (read-only) */}
-      <div>
-        <div style={labelStyle}>{t('subAgent.form.agentTypeLabel')}</div>
-        <div style={valueStyle}>
-          {isClaudeCode
-            ? t('subAgent.form.agentType.claudeCode')
-            : t('subAgent.form.agentType.other')}
-        </div>
-      </div>
-
       {/* Description (read-only) */}
       <div>
         <div style={labelStyle}>{t('property.description')}</div>
@@ -582,10 +568,13 @@ const SubAgentProperties: React.FC<{
         </div>
       </div>
 
-      {/* Claude Code-specific fields (read-only). Scoped by the property schema:
-          model/tools/memory/color are targets:['claudeCode'], so they show only
-          when the active target applies. */}
-      {isFieldAppliedToTarget(subAgentPropertySchema, 'model', exportTarget) && (
+      {/* Claude Code settings (read-only). Grouped in their own box so the
+          scope is explicit: model/tools/memory/color apply only when this
+          sub-agent is exported to Claude Code (targets:['claudeCode']). */}
+      <CollapsibleSection
+        title={t('subAgent.section.claudeCode')}
+        hint={t('subAgent.section.claudeCode.hint')}
+      >
         <>
           {/* Model */}
           <div>
@@ -640,7 +629,15 @@ const SubAgentProperties: React.FC<{
             </div>
           )}
         </>
-      )}
+      </CollapsibleSection>
+
+      {/* Other agent settings — no per-node settings yet; the box reserves the
+          slot for future target-specific fields (e.g. ADK model selection). */}
+      <CollapsibleSection title={t('subAgent.section.other')} defaultOpen={false}>
+        <div style={{ ...valueStyle, color: 'var(--vscode-descriptionForeground)' }}>
+          {t('subAgent.section.other.empty')}
+        </div>
+      </CollapsibleSection>
 
       {/* Edit Dialog */}
       <SubAgentFormDialog
@@ -663,10 +660,13 @@ const SubAgentProperties: React.FC<{
             agentDefinition: formData.agentDefinition,
             prompt: formData.prompt,
             agentType: formData.agentType,
-            model: formData.agentType === 'claudeCode' ? formData.model : undefined,
-            tools: formData.agentType === 'claudeCode' ? formData.tools || undefined : undefined,
-            memory: formData.agentType === 'claudeCode' ? formData.memory || undefined : undefined,
-            color: formData.agentType === 'claudeCode' ? formData.color : undefined,
+            // Claude Code settings are always persisted now (no longer gated by
+            // an agentType toggle). They apply on Claude Code export and are
+            // reported as ignored by other targets at export time.
+            model: formData.model,
+            tools: formData.tools || undefined,
+            memory: formData.memory || undefined,
+            color: formData.color,
           });
 
           if (data.commandFilePath) {
