@@ -952,6 +952,11 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.agentTypeLabel': '에이전트 유형',
   'subAgent.form.agentType.claudeCode': 'Claude Code',
   'subAgent.form.agentType.other': '기타',
+  'subAgent.section.claudeCode': 'Claude Code 설정',
+  'subAgent.section.claudeCode.hint': '이 서브 에이전트를 Claude Code로 내보낼 때 적용됩니다.',
+  'subAgent.section.other': '기타 에이전트 설정',
+  'subAgent.section.other.empty':
+    '아직 에이전트별 설정이 없습니다 — 다른 에이전트는 공통 설정만 사용합니다.',
   'subAgent.form.descriptionLabel': '설명',
   'subAgent.form.descriptionPlaceholder': '이 에이전트에 대한 간단한 설명...',
   'subAgent.form.agentDefinitionLabel': '에이전트 정의',
