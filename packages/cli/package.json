@@ -41,7 +41,7 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@types/node": "^25.0.3",
+    "@types/node": "^25.9.1",
     "@types/ws": "^8.5.13",
     "cc-wf-studio-webview": "workspace:*",
     "tsx": "^4.19.2",
