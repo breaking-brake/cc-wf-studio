@@ -125,7 +125,7 @@
     "package": "vsce package --no-dependencies --baseImagesUrl https://github.com/breaking-brake/cc-wf-studio/raw/HEAD/packages/vscode --baseContentUrl https://github.com/breaking-brake/cc-wf-studio/blob/HEAD/packages/vscode"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.4",
+    "@biomejs/biome": "2.4.16",
     "@cc-wf-studio/core": "workspace:*",
     "@cc-wf-studio/mcp": "workspace:*",
     "@types/node": "^25.0.3",
