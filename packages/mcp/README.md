@@ -79,4 +79,4 @@ The `FileWorkflowAdapter` and the VSCode extension's `McpServerManager` are the 
 
 ## License
 
-AGPL-3.0-or-later. See [LICENSE](https://github.com/breaking-brake/cc-wf-studio/blob/main/LICENSE).
+MIT. See [LICENSE](https://github.com/breaking-brake/cc-wf-studio/blob/main/packages/mcp/LICENSE).
