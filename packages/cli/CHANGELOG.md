@@ -1,5 +1,15 @@
 # @cc-wf-studio/cli
 
+## 0.2.1
+
+### Patch Changes
+
+- 638706b: Fix license stated in package READMEs: core/mcp/cli are MIT (not AGPL). Links now point to each package's own MIT LICENSE.
+- Updated dependencies [3295d3c]
+- Updated dependencies [638706b]
+  - @cc-wf-studio/core@0.3.0
+  - @cc-wf-studio/mcp@0.1.4
+
 ## 0.2.0
 
 ### Minor Changes
