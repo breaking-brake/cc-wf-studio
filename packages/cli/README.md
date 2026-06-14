@@ -179,4 +179,4 @@ Use `ccwf:dev` while iterating on a subcommand; use `ccwf` (built) before pushin
 
 ## License
 
-AGPL-3.0-or-later. See [LICENSE](https://github.com/breaking-brake/cc-wf-studio/blob/main/LICENSE).
+MIT. See [LICENSE](https://github.com/breaking-brake/cc-wf-studio/blob/main/packages/cli/LICENSE).

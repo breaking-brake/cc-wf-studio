@@ -174,17 +174,11 @@ Coming soon - Sample workflows and tutorials are under development.
 
 ## License
 
-This project is licensed under the **GNU Affero General Public License v3.0** (AGPL-3.0-or-later).
+The VSCode extension (`cc-wf-studio`) is licensed under the **GNU Affero General Public License v3.0** (AGPL-3.0-or-later).
 
 See the [LICENSE](./LICENSE) file for the full license text.
 
-### What this means
-
-- You can use, modify, and distribute this software
-- If you modify and deploy this software (including as a network service), you must:
-  - Make your modified source code available under AGPL-3.0
-  - Provide access to the source code for users interacting with the service
-- Commercial use is allowed, but proprietary modifications are not
+The reusable libraries published to npm — [`@cc-wf-studio/core`](./packages/core/LICENSE), [`@cc-wf-studio/mcp`](./packages/mcp/LICENSE), and [`@cc-wf-studio/cli`](./packages/cli/LICENSE) — are released under the more permissive **MIT** license. Each package ships its own LICENSE file, which takes precedence for that package.
 
 Copyright (c) 2025 breaking-brake
 
