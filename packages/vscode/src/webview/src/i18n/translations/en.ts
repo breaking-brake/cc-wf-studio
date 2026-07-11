@@ -265,9 +265,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeName.placeholder': 'Enter node name',
   'property.nodeName.help': 'Used for exported file name (e.g., "data-analysis")',
   'property.select.custom': 'Custom...',
-  'property.description': 'Description',
   'property.prompt': 'Prompt',
-  'property.model': 'Model',
 
   // Start/End node descriptions
   'property.startNodeDescription':
@@ -277,10 +275,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.unknownNodeType': 'Unknown node type:',
 
   // Sub-Agent properties
-  'property.tools': 'Tools (comma-separated)',
-  'property.tools.placeholder': 'e.g., Read,Write,Bash',
-  'property.tools.help': 'Leave empty for all tools',
-  'property.memory': 'Memory',
   'property.memory.referenceUrl':
     'https://code.claude.com/docs/en/sub-agents#enable-persistent-memory',
   'properties.subAgent.color': 'Color',
@@ -289,21 +283,17 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'properties.subAgent.colorHelp': 'Visual indicator color for this sub-agent',
 
   // Skill properties
-  'property.skillPath': 'Skill Path',
-  'property.scope': 'Scope',
   'property.scope.user': 'User',
   'property.scope.project': 'Project',
   'property.scope.local': 'Local',
   // Legacy key for backward compatibility
   'property.scope.personal': 'Personal',
-  'property.validationStatus': 'Validation Status',
   'property.validationStatus.valid': 'Valid',
   'property.validationStatus.missing': 'Missing',
   'property.validationStatus.invalid': 'Invalid',
   'property.validationStatus.valid.tooltip': 'Skill is valid and ready to use',
   'property.validationStatus.missing.tooltip': 'SKILL.md file not found at specified path',
   'property.validationStatus.invalid.tooltip': 'SKILL.md has invalid YAML frontmatter',
-  'property.allowedTools': 'Allowed Tools',
 
   // Codex Agent properties
 
@@ -957,6 +947,39 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.agentTypeLabel': 'Agent Type',
   'subAgent.form.agentType.claudeCode': 'Claude Code',
   'subAgent.form.agentType.other': 'Other',
+  'skill.field.name': 'Name',
+  'skill.field.description': 'Description',
+  'skill.field.skillPath': 'Skill Path',
+  'skill.field.scope': 'Scope',
+  'skill.field.validationStatus': 'Validation Status',
+  'skill.field.allowedTools': 'Allowed Tools',
+  'skill.field.executionMode': 'Execution Mode',
+  'skill.field.executionPrompt': 'Prompt',
+  'skill.field.source': 'Source',
+  'skill.field.pluginName': 'Plugin Name',
+  'mcp.field.serverId': 'Server',
+  'mcp.field.toolName': 'Tool Name',
+  'mcp.field.toolDescription': 'Description',
+  'mcp.field.validationStatus': 'Validation Status',
+  'mcp.field.parameters': 'Parameter Count',
+  'mcp.field.mode': 'Mode',
+  'mcp.field.aiToolSelectionConfig': 'Task Content',
+  'mcp.field.aiParameterConfig': 'Parameter Content',
+  'mcp.field.parameterValues': 'Configured Values',
+  'subAgentFlow.field.subAgentFlowId': 'Sub-Agent Flow ID',
+  'subAgentFlow.field.label': 'Label',
+  'subAgentFlow.field.description': 'Description',
+  'subAgentFlow.field.model': 'Model',
+  'subAgentFlow.field.model.option.sonnet': 'Sonnet',
+  'subAgentFlow.field.model.option.opus': 'Opus',
+  'subAgentFlow.field.model.option.haiku': 'Haiku',
+  'subAgentFlow.field.model.option.fable': 'Fable',
+  'subAgentFlow.field.model.option.inherit': 'Inherit',
+  'subAgentFlow.field.memory': 'Memory',
+  'subAgentFlow.field.tools': 'Tools (comma-separated)',
+  'subAgentFlow.field.tools.placeholder': 'e.g., Read,Write,Bash',
+  'subAgentFlow.field.tools.help': 'Leave empty for all tools',
+  'subAgentFlow.field.color': 'Color',
   'askUserQuestion.field.questionText': 'Question',
   'askUserQuestion.field.multiSelect': 'Multiple Selection',
   'askUserQuestion.field.useAiSuggestions': 'AI Suggests Options',
