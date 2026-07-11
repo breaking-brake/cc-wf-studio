@@ -255,9 +255,6 @@ export interface WebviewTranslationKeys {
   'property.description': string;
   'property.prompt': string;
   'property.model': string;
-  'property.evaluationTarget': string;
-  'property.evaluationTarget.placeholder': string;
-  'property.evaluationTarget.help': string;
 
   // Start/End node descriptions
   'property.startNodeDescription': string;
@@ -293,17 +290,11 @@ export interface WebviewTranslationKeys {
   'property.allowedTools': string;
 
   // AskUserQuestion properties
-  'property.questionText': string;
-  'property.multiSelect': string;
   'property.multiSelect.enabled': string;
   'property.multiSelect.disabled': string;
-  'property.aiSuggestions': string;
   'property.aiSuggestions.enabled': string;
   'property.aiSuggestions.disabled': string;
   'property.options': string;
-  'property.optionsCount': string;
-  'property.optionNumber': string;
-  'property.addOption': string;
   'property.remove': string;
   'property.optionLabel.placeholder': string;
   'property.optionDescription.placeholder': string;
@@ -313,15 +304,9 @@ export interface WebviewTranslationKeys {
   'property.variablesSubstituted': string;
 
   // Branch properties
-  'property.branchType': string;
-  'property.conditional': string;
-  'property.switch': string;
   'property.branchType.conditional.help': string;
   'property.branchType.switch.help': string;
   'property.branches': string;
-  'property.branchesCount': string;
-  'property.branchNumber': string;
-  'property.addBranch': string;
   'property.branchLabel': string;
   'property.branchLabel.placeholder': string;
   'property.branchCondition': string;
@@ -895,6 +880,30 @@ export interface WebviewTranslationKeys {
   'subAgent.form.agentTypeLabel': string;
   'subAgent.form.agentType.claudeCode': string;
   'subAgent.form.agentType.other': string;
+  // Schema-driven property panel field labels (askUserQuestion/branch/ifElse/switch)
+  'askUserQuestion.field.questionText': string;
+  'askUserQuestion.field.multiSelect': string;
+  'askUserQuestion.field.useAiSuggestions': string;
+  'askUserQuestion.field.options': string;
+  'askUserQuestion.field.options.item': string;
+  'askUserQuestion.field.options.add': string;
+  'branch.field.branchType': string;
+  'branch.field.branchType.option.conditional': string;
+  'branch.field.branchType.option.switch': string;
+  'branch.field.branches': string;
+  'branch.field.branches.item': string;
+  'branch.field.branches.add': string;
+  'ifElse.field.evaluationTarget': string;
+  'ifElse.field.evaluationTarget.placeholder': string;
+  'ifElse.field.evaluationTarget.help': string;
+  'ifElse.field.branches': string;
+  'ifElse.field.branches.item': string;
+  'switch.field.evaluationTarget': string;
+  'switch.field.evaluationTarget.placeholder': string;
+  'switch.field.evaluationTarget.help': string;
+  'switch.field.branches': string;
+  'switch.field.branches.item': string;
+  'switch.field.branches.add': string;
   // Schema-driven property panel field labels (prompt/branchSession/codex/group)
   'prompt.field.label': string;
   'prompt.field.label.placeholder': string;

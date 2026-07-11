@@ -6,11 +6,15 @@
  * types move from the legacy ternary chain into this map.
  */
 
+import { askUserQuestionPanelConfig } from './panels/ask-user-question-panel';
+import { branchPanelConfig } from './panels/branch-panel';
 import { branchSessionPanelConfig } from './panels/branch-session-panel';
 import { codexPanelConfig } from './panels/codex-panel';
 import { groupPanelConfig } from './panels/group-panel';
+import { ifElsePanelConfig } from './panels/if-else-panel';
 import { promptPanelConfig } from './panels/prompt-panel';
 import { subAgentPanelConfig } from './panels/sub-agent-panel';
+import { switchPanelConfig } from './panels/switch-panel';
 import type { NodePanelConfig } from './types';
 
 export const NODE_PANELS: Record<string, NodePanelConfig> = {
@@ -19,4 +23,8 @@ export const NODE_PANELS: Record<string, NodePanelConfig> = {
   branchSession: branchSessionPanelConfig,
   codex: codexPanelConfig,
   group: groupPanelConfig,
+  askUserQuestion: askUserQuestionPanelConfig,
+  branch: branchPanelConfig,
+  ifElse: ifElsePanelConfig,
+  switch: switchPanelConfig,
 };

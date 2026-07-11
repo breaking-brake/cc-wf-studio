@@ -18,11 +18,18 @@
 
 import { NodeType } from '../types/workflow-definition.js';
 import type { PropertySchema } from './field.js';
+import {
+  askUserQuestionPropertySchema,
+  deriveAskUserQuestionUpdate,
+} from './nodes/ask-user-question-schema.js';
+import { branchPropertySchema, deriveBranchUpdate } from './nodes/branch-schema.js';
 import { branchSessionPropertySchema } from './nodes/branch-session-schema.js';
 import { codexPropertySchema } from './nodes/codex-schema.js';
 import { groupPropertySchema } from './nodes/group-schema.js';
+import { deriveIfElseUpdate, ifElsePropertySchema } from './nodes/if-else-schema.js';
 import { promptPropertySchema } from './nodes/prompt-schema.js';
 import { subAgentPropertySchema } from './nodes/sub-agent-schema.js';
+import { deriveSwitchUpdate, switchPropertySchema } from './nodes/switch-schema.js';
 
 /** Property schemas for the node types migrated to the schema-driven model. */
 export const NODE_PROPERTY_SCHEMAS: Partial<Record<NodeType, PropertySchema>> = {
@@ -31,6 +38,10 @@ export const NODE_PROPERTY_SCHEMAS: Partial<Record<NodeType, PropertySchema>> = 
   [NodeType.BranchSession]: branchSessionPropertySchema,
   [NodeType.Codex]: codexPropertySchema,
   [NodeType.Group]: groupPropertySchema,
+  [NodeType.AskUserQuestion]: askUserQuestionPropertySchema,
+  [NodeType.Branch]: branchPropertySchema,
+  [NodeType.IfElse]: ifElsePropertySchema,
+  [NodeType.Switch]: switchPropertySchema,
 };
 
 /**
@@ -43,4 +54,9 @@ export type DeriveUpdateFn = (
   patch: Record<string, unknown>,
 ) => Record<string, unknown>;
 
-export const NODE_DERIVE_FNS: Partial<Record<NodeType, DeriveUpdateFn>> = {};
+export const NODE_DERIVE_FNS: Partial<Record<NodeType, DeriveUpdateFn>> = {
+  [NodeType.AskUserQuestion]: deriveAskUserQuestionUpdate,
+  [NodeType.Branch]: deriveBranchUpdate,
+  [NodeType.IfElse]: deriveIfElseUpdate,
+  [NodeType.Switch]: deriveSwitchUpdate,
+};

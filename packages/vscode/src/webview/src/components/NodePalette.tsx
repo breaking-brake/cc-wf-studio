@@ -6,7 +6,12 @@
  */
 
 import type { BuiltInSubAgentType, SubAgentFlow, SubAgentModel } from '@cc-wf-studio/core';
-import { BUILT_IN_SUB_AGENTS, NodeType } from '@cc-wf-studio/core';
+import {
+  BUILT_IN_SUB_AGENTS,
+  generateBranchId,
+  generateOptionId,
+  NodeType,
+} from '@cc-wf-studio/core';
 import type { CommandReference } from '@shared/types/messages';
 import {
   Bot,
@@ -230,8 +235,16 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
       data: {
         questionText: t('default.newQuestion'),
         options: [
-          { label: `${t('default.option')} 1`, description: t('default.firstOption') },
-          { label: `${t('default.option')} 2`, description: t('default.secondOption') },
+          {
+            id: generateOptionId(),
+            label: `${t('default.option')} 1`,
+            description: t('default.firstOption'),
+          },
+          {
+            id: generateOptionId(),
+            label: `${t('default.option')} 2`,
+            description: t('default.secondOption'),
+          },
         ],
         outputPorts: 2,
       },
@@ -291,8 +304,16 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
       data: {
         branchType: 'conditional' as const,
         branches: [
-          { label: t('default.branchTrue'), condition: t('default.branchTrueCondition') },
-          { label: t('default.branchFalse'), condition: t('default.branchFalseCondition') },
+          {
+            id: generateBranchId(),
+            label: t('default.branchTrue'),
+            condition: t('default.branchTrueCondition'),
+          },
+          {
+            id: generateBranchId(),
+            label: t('default.branchFalse'),
+            condition: t('default.branchFalseCondition'),
+          },
         ],
         outputPorts: 2,
       },
@@ -309,8 +330,16 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
       data: {
         evaluationTarget: '',
         branches: [
-          { label: t('default.branchTrue'), condition: t('default.branchTrueCondition') },
-          { label: t('default.branchFalse'), condition: t('default.branchFalseCondition') },
+          {
+            id: generateBranchId(),
+            label: t('default.branchTrue'),
+            condition: t('default.branchTrueCondition'),
+          },
+          {
+            id: generateBranchId(),
+            label: t('default.branchFalse'),
+            condition: t('default.branchFalseCondition'),
+          },
         ],
         outputPorts: 2 as const,
       },
@@ -327,9 +356,20 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
       data: {
         evaluationTarget: '',
         branches: [
-          { label: t('default.case1'), condition: t('default.case1Condition'), isDefault: false },
-          { label: t('default.case2'), condition: t('default.case2Condition'), isDefault: false },
           {
+            id: generateBranchId(),
+            label: t('default.case1'),
+            condition: t('default.case1Condition'),
+            isDefault: false,
+          },
+          {
+            id: generateBranchId(),
+            label: t('default.case2'),
+            condition: t('default.case2Condition'),
+            isDefault: false,
+          },
+          {
+            id: generateBranchId(),
             label: t('default.defaultBranch'),
             condition: t('default.defaultBranchCondition'),
             isDefault: true,
