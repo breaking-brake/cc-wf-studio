@@ -252,9 +252,7 @@ export interface WebviewTranslationKeys {
   'property.nodeName.placeholder': string;
   'property.nodeName.help': string;
   'property.select.custom': string;
-  'property.description': string;
   'property.prompt': string;
-  'property.model': string;
 
   // Start/End node descriptions
   'property.startNodeDescription': string;
@@ -262,10 +260,6 @@ export interface WebviewTranslationKeys {
   'property.unknownNodeType': string;
 
   // Sub-Agent properties
-  'property.tools': string;
-  'property.tools.placeholder': string;
-  'property.tools.help': string;
-  'property.memory': string;
   'property.memory.referenceUrl': string;
   'properties.subAgent.color': string;
   'properties.subAgent.colorPlaceholder': string;
@@ -273,21 +267,17 @@ export interface WebviewTranslationKeys {
   'properties.subAgent.colorHelp': string;
 
   // Skill properties
-  'property.skillPath': string;
-  'property.scope': string;
   'property.scope.user': string;
   'property.scope.project': string;
   'property.scope.local': string;
   // Legacy key for backward compatibility
   'property.scope.personal': string;
-  'property.validationStatus': string;
   'property.validationStatus.valid': string;
   'property.validationStatus.missing': string;
   'property.validationStatus.invalid': string;
   'property.validationStatus.valid.tooltip': string;
   'property.validationStatus.missing.tooltip': string;
   'property.validationStatus.invalid.tooltip': string;
-  'property.allowedTools': string;
 
   // AskUserQuestion properties
   'property.multiSelect.enabled': string;
@@ -880,6 +870,40 @@ export interface WebviewTranslationKeys {
   'subAgent.form.agentTypeLabel': string;
   'subAgent.form.agentType.claudeCode': string;
   'subAgent.form.agentType.other': string;
+  // Schema-driven property panel field labels (skill/mcp/subAgentFlow)
+  'skill.field.name': string;
+  'skill.field.description': string;
+  'skill.field.skillPath': string;
+  'skill.field.scope': string;
+  'skill.field.validationStatus': string;
+  'skill.field.allowedTools': string;
+  'skill.field.executionMode': string;
+  'skill.field.executionPrompt': string;
+  'skill.field.source': string;
+  'skill.field.pluginName': string;
+  'mcp.field.serverId': string;
+  'mcp.field.toolName': string;
+  'mcp.field.toolDescription': string;
+  'mcp.field.validationStatus': string;
+  'mcp.field.parameters': string;
+  'mcp.field.mode': string;
+  'mcp.field.aiToolSelectionConfig': string;
+  'mcp.field.aiParameterConfig': string;
+  'mcp.field.parameterValues': string;
+  'subAgentFlow.field.subAgentFlowId': string;
+  'subAgentFlow.field.label': string;
+  'subAgentFlow.field.description': string;
+  'subAgentFlow.field.model': string;
+  'subAgentFlow.field.model.option.sonnet': string;
+  'subAgentFlow.field.model.option.opus': string;
+  'subAgentFlow.field.model.option.haiku': string;
+  'subAgentFlow.field.model.option.fable': string;
+  'subAgentFlow.field.model.option.inherit': string;
+  'subAgentFlow.field.memory': string;
+  'subAgentFlow.field.tools': string;
+  'subAgentFlow.field.tools.placeholder': string;
+  'subAgentFlow.field.tools.help': string;
+  'subAgentFlow.field.color': string;
   // Schema-driven property panel field labels (askUserQuestion/branch/ifElse/switch)
   'askUserQuestion.field.questionText': string;
   'askUserQuestion.field.multiSelect': string;

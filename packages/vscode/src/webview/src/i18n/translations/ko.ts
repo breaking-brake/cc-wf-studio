@@ -263,9 +263,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeName.placeholder': '노드 이름 입력',
   'property.nodeName.help': '내보내기 파일 이름으로 사용됨 (예: "data-analysis")',
   'property.select.custom': '사용자 지정...',
-  'property.description': '설명',
   'property.prompt': '프롬프트',
-  'property.model': '모델',
 
   // Start/End node descriptions
   'property.startNodeDescription':
@@ -275,10 +273,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.unknownNodeType': '알 수 없는 노드 유형:',
 
   // Sub-Agent properties
-  'property.tools': '도구 (쉼표로 구분)',
-  'property.tools.placeholder': '예: Read,Write,Bash',
-  'property.tools.help': '모든 도구를 사용하려면 비워 두세요',
-  'property.memory': '메모리',
   'property.memory.referenceUrl': 'https://code.claude.com/docs/ko/sub-agents#지속적-메모리-활성화',
   'properties.subAgent.color': '색상',
   'properties.subAgent.colorPlaceholder': '색상 선택...',
@@ -286,14 +280,11 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'properties.subAgent.colorHelp': '이 서브 에이전트의 시각적 식별 색상',
 
   // Skill properties
-  'property.skillPath': 'Skill 경로',
-  'property.scope': '범위',
   'property.scope.user': '사용자',
   'property.scope.project': '프로젝트',
   'property.scope.local': '로컬',
   // Legacy key for backward compatibility
   'property.scope.personal': '개인',
-  'property.validationStatus': '검증 상태',
   'property.validationStatus.valid': '유효함',
   'property.validationStatus.missing': '찾을 수 없음',
   'property.validationStatus.invalid': '유효하지 않음',
@@ -301,7 +292,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.validationStatus.missing.tooltip': '지정된 경로에서 SKILL.md 파일을 찾을 수 없습니다',
   'property.validationStatus.invalid.tooltip':
     'SKILL.md에 유효하지 않은 YAML frontmatter가 있습니다',
-  'property.allowedTools': '허용된 도구',
 
   // Codex Agent properties
 
@@ -945,6 +935,39 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.agentTypeLabel': '에이전트 유형',
   'subAgent.form.agentType.claudeCode': 'Claude Code',
   'subAgent.form.agentType.other': '기타',
+  'skill.field.name': '이름',
+  'skill.field.description': '설명',
+  'skill.field.skillPath': 'Skill 경로',
+  'skill.field.scope': '범위',
+  'skill.field.validationStatus': '검증 상태',
+  'skill.field.allowedTools': '허용된 도구',
+  'skill.field.executionMode': '실행 모드',
+  'skill.field.executionPrompt': '프롬프트',
+  'skill.field.source': '소스',
+  'skill.field.pluginName': '플러그인 이름',
+  'mcp.field.serverId': '서버',
+  'mcp.field.toolName': '도구 이름',
+  'mcp.field.toolDescription': '설명',
+  'mcp.field.validationStatus': '검증 상태',
+  'mcp.field.parameters': '매개변수 개수',
+  'mcp.field.mode': '모드',
+  'mcp.field.aiToolSelectionConfig': '작업 내용',
+  'mcp.field.aiParameterConfig': '매개변수 내용',
+  'mcp.field.parameterValues': '구성된 값',
+  'subAgentFlow.field.subAgentFlowId': 'Sub-Agent Flow ID',
+  'subAgentFlow.field.label': '레이블',
+  'subAgentFlow.field.description': '설명',
+  'subAgentFlow.field.model': '모델',
+  'subAgentFlow.field.model.option.sonnet': 'Sonnet',
+  'subAgentFlow.field.model.option.opus': 'Opus',
+  'subAgentFlow.field.model.option.haiku': 'Haiku',
+  'subAgentFlow.field.model.option.fable': 'Fable',
+  'subAgentFlow.field.model.option.inherit': 'Inherit',
+  'subAgentFlow.field.memory': '메모리',
+  'subAgentFlow.field.tools': '도구 (쉼표로 구분)',
+  'subAgentFlow.field.tools.placeholder': '예: Read,Write,Bash',
+  'subAgentFlow.field.tools.help': '모든 도구를 사용하려면 비워 두세요',
+  'subAgentFlow.field.color': '색상',
   'askUserQuestion.field.questionText': '질문',
   'askUserQuestion.field.multiSelect': '다중 선택',
   'askUserQuestion.field.useAiSuggestions': 'AI가 옵션 제안',

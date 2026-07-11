@@ -263,9 +263,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeName.placeholder': 'ノード名を入力',
   'property.nodeName.help': 'エクスポート時のファイル名に使用されます（例: "data-analysis"）',
   'property.select.custom': 'カスタム...',
-  'property.description': '説明',
   'property.prompt': 'プロンプト',
-  'property.model': 'モデル',
 
   // Start/End node descriptions
   'property.startNodeDescription':
@@ -275,10 +273,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.unknownNodeType': '不明なノードタイプ:',
 
   // Sub-Agent properties
-  'property.tools': 'ツール（カンマ区切り）',
-  'property.tools.placeholder': '例: Read,Write,Bash',
-  'property.tools.help': '空欄で全てのツールを使用',
-  'property.memory': 'メモリ',
   'property.memory.referenceUrl':
     'https://code.claude.com/docs/ja/sub-agents#永続メモリを有効にする',
   'properties.subAgent.color': '色',
@@ -287,21 +281,17 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'properties.subAgent.colorHelp': 'このサブエージェントの視覚的な識別色',
 
   // Skill properties
-  'property.skillPath': 'Skillパス',
-  'property.scope': 'スコープ',
   'property.scope.user': 'ユーザー',
   'property.scope.project': 'プロジェクト',
   'property.scope.local': 'ローカル',
   // Legacy key for backward compatibility
   'property.scope.personal': 'パーソナル',
-  'property.validationStatus': '検証ステータス',
   'property.validationStatus.valid': '有効',
   'property.validationStatus.missing': '見つかりません',
   'property.validationStatus.invalid': '無効',
   'property.validationStatus.valid.tooltip': 'Skillは有効で使用可能です',
   'property.validationStatus.missing.tooltip': '指定されたパスにSKILL.mdファイルが見つかりません',
   'property.validationStatus.invalid.tooltip': 'SKILL.mdのYAMLフロントマターが無効です',
-  'property.allowedTools': '許可ツール',
 
   // Codex Agent properties
 
@@ -951,6 +941,39 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.agentTypeLabel': 'エージェントタイプ',
   'subAgent.form.agentType.claudeCode': 'Claude Code',
   'subAgent.form.agentType.other': 'その他',
+  'skill.field.name': '名前',
+  'skill.field.description': '説明',
+  'skill.field.skillPath': 'Skillパス',
+  'skill.field.scope': 'スコープ',
+  'skill.field.validationStatus': '検証ステータス',
+  'skill.field.allowedTools': '許可ツール',
+  'skill.field.executionMode': '実行モード',
+  'skill.field.executionPrompt': 'プロンプト',
+  'skill.field.source': 'ソース',
+  'skill.field.pluginName': 'プラグイン名',
+  'mcp.field.serverId': 'サーバー',
+  'mcp.field.toolName': 'ツール名',
+  'mcp.field.toolDescription': '説明',
+  'mcp.field.validationStatus': '検証ステータス',
+  'mcp.field.parameters': 'パラメータ数',
+  'mcp.field.mode': 'モード',
+  'mcp.field.aiToolSelectionConfig': 'タスク内容',
+  'mcp.field.aiParameterConfig': 'パラメータ内容',
+  'mcp.field.parameterValues': '設定値',
+  'subAgentFlow.field.subAgentFlowId': 'Sub-Agent Flow ID',
+  'subAgentFlow.field.label': 'ラベル',
+  'subAgentFlow.field.description': '説明',
+  'subAgentFlow.field.model': 'モデル',
+  'subAgentFlow.field.model.option.sonnet': 'Sonnet',
+  'subAgentFlow.field.model.option.opus': 'Opus',
+  'subAgentFlow.field.model.option.haiku': 'Haiku',
+  'subAgentFlow.field.model.option.fable': 'Fable',
+  'subAgentFlow.field.model.option.inherit': 'Inherit',
+  'subAgentFlow.field.memory': 'メモリ',
+  'subAgentFlow.field.tools': 'ツール（カンマ区切り）',
+  'subAgentFlow.field.tools.placeholder': '例: Read,Write,Bash',
+  'subAgentFlow.field.tools.help': '空欄で全てのツールを使用',
+  'subAgentFlow.field.color': '色',
   'askUserQuestion.field.questionText': '質問',
   'askUserQuestion.field.multiSelect': '複数選択',
   'askUserQuestion.field.useAiSuggestions': 'AI が選択肢を提案',

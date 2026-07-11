@@ -27,7 +27,10 @@ import { branchSessionPropertySchema } from './nodes/branch-session-schema.js';
 import { codexPropertySchema } from './nodes/codex-schema.js';
 import { groupPropertySchema } from './nodes/group-schema.js';
 import { deriveIfElseUpdate, ifElsePropertySchema } from './nodes/if-else-schema.js';
+import { mcpPropertySchema } from './nodes/mcp-schema.js';
 import { promptPropertySchema } from './nodes/prompt-schema.js';
+import { skillPropertySchema } from './nodes/skill-schema.js';
+import { subAgentFlowPropertySchema } from './nodes/sub-agent-flow-schema.js';
 import { subAgentPropertySchema } from './nodes/sub-agent-schema.js';
 import { deriveSwitchUpdate, switchPropertySchema } from './nodes/switch-schema.js';
 
@@ -42,6 +45,9 @@ export const NODE_PROPERTY_SCHEMAS: Partial<Record<NodeType, PropertySchema>> = 
   [NodeType.Branch]: branchPropertySchema,
   [NodeType.IfElse]: ifElsePropertySchema,
   [NodeType.Switch]: switchPropertySchema,
+  [NodeType.Skill]: skillPropertySchema,
+  [NodeType.Mcp]: mcpPropertySchema,
+  [NodeType.SubAgentFlow]: subAgentFlowPropertySchema,
 };
 
 /**
