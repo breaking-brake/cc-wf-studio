@@ -18,9 +18,13 @@ export const MCP_NODE_MODES = [
   'aiToolSelection',
 ] as const;
 
-/** The node's effective mode (legacy nodes without `mode` are manual). */
+/** The node's effective mode. Missing or unrecognized values fall back to
+ *  'manualParameterConfig' (the backward-compatibility default). */
 export function mcpModeOf(data: Record<string, unknown>): (typeof MCP_NODE_MODES)[number] {
-  return (data.mode as (typeof MCP_NODE_MODES)[number]) || 'manualParameterConfig';
+  const mode = data.mode;
+  return MCP_NODE_MODES.includes(mode as (typeof MCP_NODE_MODES)[number])
+    ? (mode as (typeof MCP_NODE_MODES)[number])
+    : 'manualParameterConfig';
 }
 
 const hasToolInfo = (data: Record<string, unknown>) => mcpModeOf(data) !== 'aiToolSelection';

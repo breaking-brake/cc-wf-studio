@@ -36,6 +36,7 @@ const SubAgentFlowHeader: React.FC<PanelSlotProps> = ({ node }) => {
       )}
       <button
         type="button"
+        className="nodrag"
         onClick={() => subAgentFlowId && setActiveSubAgentFlowId(subAgentFlowId)}
         style={{
           width: '100%',

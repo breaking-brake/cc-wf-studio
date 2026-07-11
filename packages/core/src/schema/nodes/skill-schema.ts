@@ -58,7 +58,7 @@ export const skillPropertySchema = {
     visibleWhen: (data) =>
       (data.executionMode || 'execute') === 'execute' && !!data.executionPrompt,
   }),
-  source: field(z.enum(['individual', 'plugin']).optional(), {
+  source: field(z.enum(['claude', 'copilot']).optional(), {
     targets: 'all',
     labelKey: 'skill.field.source',
   }),
