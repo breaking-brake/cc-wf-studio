@@ -43,6 +43,11 @@ export const SchemaField: React.FC<SchemaFieldProps> = ({
     return null;
   }
 
+  // A custom control on a field without `control` owns the whole rendering.
+  if (CustomControl && !meta.control) {
+    return <CustomControl {...controlProps} readonly={fieldReadonly} />;
+  }
+
   const showLabel = !(mode === 'edit' && meta.control === 'checkbox');
   const help = stOptional(meta.helpKey);
 

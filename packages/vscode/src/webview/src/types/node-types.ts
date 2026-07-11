@@ -5,6 +5,7 @@
  * ReactFlowのNode型を拡張し、各ノードタイプに固有のデータ構造を提供します。
  */
 
+import type { BranchSessionNodeData, PromptNodeData } from '@cc-wf-studio/core';
 import type { Node } from 'reactflow';
 
 // ============================================================================
@@ -59,39 +60,8 @@ export type EndNode = Node<EndNodeData, 'end'>;
 // Prompt Node
 // ============================================================================
 
-/**
- * Promptノードのデータ構造
- *
- * AIエージェントに送信するプロンプトテキストを定義するノードです。
- */
-export interface PromptNodeData {
-  /**
-   * ノードのラベル (省略可能)
-   * デフォルト: "Prompt"
-   */
-  label?: string;
-
-  /**
-   * プロンプトテキスト (必須)
-   *
-   * Mustache形式の変数 ({{variableName}}) をサポートします。
-   * 実行時に変数が置換されます。
-   *
-   * @example
-   * "Generate a {{language}} function that {{description}}"
-   */
-  prompt: string;
-
-  /**
-   * プレースホルダー変数のマッピング (省略可能)
-   *
-   * 実行時に前段のノードから値を受け取り、プロンプト内の変数を置換します。
-   *
-   * @example
-   * { "language": "TypeScript", "description": "validates email addresses" }
-   */
-  variables?: Record<string, string>;
-}
+// PromptNodeData is defined in @cc-wf-studio/core (single source of truth).
+export type { PromptNodeData };
 
 /**
  * Promptノード型
@@ -165,31 +135,8 @@ export type BranchNode = Node<BranchNodeData, 'branch'>;
 // Branch Session Node
 // ============================================================================
 
-/**
- * Branch Sessionノードのデータ構造 (Claude Code 限定)
- *
- * ワークフローを一時停止し、ユーザーが Claude Code のブランチセッション
- * (/branch) で AI と共同作業した後、親セッション (/resume) に引き継いで
- * 続行するヒューマン・イン・ザ・ループ・チェックポイントです。
- */
-export interface BranchSessionNodeData {
-  /**
-   * ノードのラベル (必須)
-   */
-  label: string;
-
-  /**
-   * ブランチセッションでの作業内容 (省略可能)
-   *
-   * 人と AI の共同作業のスコープ。生成される指示文に埋め込まれます。
-   */
-  workDescription?: string;
-
-  /**
-   * 出力ポート数 (1固定)
-   */
-  outputPorts: 1;
-}
+// BranchSessionNodeData is defined in @cc-wf-studio/core (single source of truth).
+export type { BranchSessionNodeData };
 
 /**
  * Branch Sessionノード型

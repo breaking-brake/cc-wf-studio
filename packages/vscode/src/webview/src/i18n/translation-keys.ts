@@ -158,9 +158,6 @@ export interface WebviewTranslationKeys {
   // Branch Session Node (Feature: branch-session-node, Claude Code only)
   'node.branchSession.title': string;
   'node.branchSession.description': string;
-  'property.branchSession.workDescription': string;
-  'property.branchSession.workDescriptionPlaceholder': string;
-  'property.branchSession.workDescription.help': string;
   'property.branchSession.claudeCodeOnlyNotice': string;
   'default.newBranchSession': string;
   'dialog.claudeOnlyWarning.title': string;
@@ -258,8 +255,6 @@ export interface WebviewTranslationKeys {
   'property.description': string;
   'property.prompt': string;
   'property.model': string;
-  'property.label': string;
-  'property.label.placeholder': string;
   'property.evaluationTarget': string;
   'property.evaluationTarget.placeholder': string;
   'property.evaluationTarget.help': string;
@@ -314,9 +309,6 @@ export interface WebviewTranslationKeys {
   'property.optionDescription.placeholder': string;
 
   // Prompt properties
-  'property.prompt.label': string;
-  'property.prompt.placeholder': string;
-  'property.prompt.help': string;
   'property.detectedVariables': string;
   'property.variablesSubstituted': string;
 
@@ -903,6 +895,35 @@ export interface WebviewTranslationKeys {
   'subAgent.form.agentTypeLabel': string;
   'subAgent.form.agentType.claudeCode': string;
   'subAgent.form.agentType.other': string;
+  // Schema-driven property panel field labels (prompt/branchSession/codex/group)
+  'prompt.field.label': string;
+  'prompt.field.label.placeholder': string;
+  'prompt.field.prompt': string;
+  'prompt.field.prompt.placeholder': string;
+  'prompt.field.prompt.help': string;
+  'prompt.field.variables': string;
+  'branchSession.field.label': string;
+  'branchSession.field.label.placeholder': string;
+  'branchSession.field.workDescription': string;
+  'branchSession.field.workDescription.placeholder': string;
+  'branchSession.field.workDescription.help': string;
+  'codex.field.label': string;
+  'codex.field.label.help': string;
+  'codex.field.promptMode': string;
+  'codex.field.promptMode.option.fixed': string;
+  'codex.field.promptMode.option.ai-generated': string;
+  'codex.field.prompt': string;
+  'codex.field.prompt.placeholder': string;
+  'codex.field.model': string;
+  'codex.field.reasoningEffort': string;
+  'codex.field.reasoningEffort.option.low': string;
+  'codex.field.reasoningEffort.option.medium': string;
+  'codex.field.reasoningEffort.option.high': string;
+  'codex.field.skipGitRepoCheck': string;
+  'codex.field.sandbox': string;
+  'codex.section.advanced': string;
+  'group.field.label': string;
+  'group.field.label.placeholder': string;
   // Schema-driven property panel field labels (subAgent)
   'subAgent.field.description': string;
   'subAgent.field.agentDefinition': string;

@@ -28,7 +28,7 @@ export const TextareaControl: React.FC<ControlProps> = ({
         value={text}
         onChange={(e) => onChange(e.target.value)}
         disabled={locked}
-        rows={4}
+        rows={6}
         placeholder={stOptional(field.meta.placeholderKey)}
         style={{ ...textareaStyle, ...(locked ? readonlyInputExtra : {}) }}
       />

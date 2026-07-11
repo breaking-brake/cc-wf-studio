@@ -51,6 +51,11 @@ export interface NodePanelConfig {
   Header?: React.FC<PanelSlotProps>;
   /** Rendered below the schema fields (extra sections, navigation). */
   Footer?: React.FC<PanelSlotProps>;
-  /** Per-field component overrides, keyed by field name. */
+  /** Per-field component overrides, keyed by field name. A custom control for
+   *  a field WITHOUT `meta.control` replaces the whole field rendering (no
+   *  label/help framing); with `meta.control` set it replaces the input only. */
   customControls?: Record<string, React.FC<ControlProps>>;
+  /** Initial open state per sectionKey, computed from node data
+   *  (default: open). E.g. codex 'advanced' opens only when sandbox is set. */
+  sectionDefaultOpen?: Record<string, (data: Record<string, unknown>) => boolean>;
 }

@@ -165,11 +165,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'node.branchSession.title': 'Branch Session',
   'node.branchSession.description':
     'Pause for joint human+AI work in a branch session (Claude Code only)',
-  'property.branchSession.workDescription': 'Work Description',
-  'property.branchSession.workDescriptionPlaceholder':
-    'What the user and AI will work on together in the branch session (optional)',
-  'property.branchSession.workDescription.help':
-    'Injected into the generated instructions so the session knows the scope of the joint work',
   'property.branchSession.claudeCodeOnlyNotice':
     'This node only works on Claude Code. It pauses the workflow so the user can work interactively with the AI in a branch session (/branch), then hand the results back (/resume).',
   'default.newBranchSession': 'New Branch Session',
@@ -273,8 +268,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.description': 'Description',
   'property.prompt': 'Prompt',
   'property.model': 'Model',
-  'property.label': 'Label',
-  'property.label.placeholder': 'Enter label',
   'property.evaluationTarget': 'Evaluation Target',
   'property.evaluationTarget.placeholder': 'e.g., Result of the previous step',
   'property.evaluationTarget.help': 'Describe what to evaluate in the branch condition',
@@ -334,9 +327,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.optionDescription.placeholder': 'Description',
 
   // Prompt properties
-  'property.prompt.label': 'Prompt',
-  'property.prompt.placeholder': 'Enter prompt with {{variables}}',
-  'property.prompt.help': 'Use {{variableName}} syntax for dynamic values',
   'property.detectedVariables': 'Detected Variables ({count})',
   'property.variablesSubstituted': 'Variables will be substituted at runtime',
 
@@ -982,6 +972,36 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.agentTypeLabel': 'Agent Type',
   'subAgent.form.agentType.claudeCode': 'Claude Code',
   'subAgent.form.agentType.other': 'Other',
+  'prompt.field.label': 'Label',
+  'prompt.field.label.placeholder': 'Enter label',
+  'prompt.field.prompt': 'Prompt',
+  'prompt.field.prompt.placeholder': 'Enter prompt with {{variables}}',
+  'prompt.field.prompt.help': 'Use {{variableName}} syntax for dynamic values',
+  'prompt.field.variables': 'Variables',
+  'branchSession.field.label': 'Label',
+  'branchSession.field.label.placeholder': 'Enter label',
+  'branchSession.field.workDescription': 'Work Description',
+  'branchSession.field.workDescription.placeholder':
+    'What the user and AI will work on together in the branch session (optional)',
+  'branchSession.field.workDescription.help':
+    'Injected into the generated instructions so the session knows the scope of the joint work',
+  'codex.field.label': 'Node Name',
+  'codex.field.label.help': 'Used for exported file name (e.g., "data-analysis")',
+  'codex.field.promptMode': 'Prompt Mode',
+  'codex.field.promptMode.option.fixed': 'Fixed',
+  'codex.field.promptMode.option.ai-generated': 'AI Generated',
+  'codex.field.prompt': 'Prompt',
+  'codex.field.prompt.placeholder': 'Enter instructions for the Codex agent...',
+  'codex.field.model': 'Model',
+  'codex.field.reasoningEffort': 'Reasoning Effort',
+  'codex.field.reasoningEffort.option.low': 'Low',
+  'codex.field.reasoningEffort.option.medium': 'Medium',
+  'codex.field.reasoningEffort.option.high': 'High',
+  'codex.field.skipGitRepoCheck': '--skip-git-repo-check',
+  'codex.field.sandbox': 'Sandbox Mode',
+  'codex.section.advanced': 'Advanced Options',
+  'group.field.label': 'Node Name',
+  'group.field.label.placeholder': 'Group',
   'subAgent.field.description': 'Description',
   'subAgent.field.agentDefinition': 'Agent Definition',
   'subAgent.field.prompt': 'Prompt',

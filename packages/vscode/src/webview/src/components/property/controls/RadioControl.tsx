@@ -1,4 +1,5 @@
 import type React from 'react';
+import { useSchemaTranslation } from '../schema-i18n';
 import type { ControlProps } from '../types';
 
 export const RadioControl: React.FC<ControlProps> = ({
@@ -9,8 +10,10 @@ export const RadioControl: React.FC<ControlProps> = ({
   readonly,
   onChange,
 }) => {
+  const { stOptional } = useSchemaTranslation();
   const options = field.meta.options ?? [];
   const groupName = `schema-field-${nodeId}-${fieldName}`;
+  const optionLabel = (opt: string) => stOptional(`${field.meta.labelKey}.option.${opt}`) ?? opt;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -36,7 +39,7 @@ export const RadioControl: React.FC<ControlProps> = ({
             onChange={() => onChange(opt)}
             disabled={readonly}
           />
-          {opt}
+          {optionLabel(opt)}
         </label>
       ))}
     </div>
