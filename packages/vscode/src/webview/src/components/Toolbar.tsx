@@ -4,6 +4,7 @@
  * Provides Save and Load functionality for workflows
  */
 
+import { CLAUDE_CODE_ONLY_NODE_TYPES, type NodeType } from '@cc-wf-studio/core';
 import type { Workflow } from '@shared/types/messages';
 import {
   BookOpen,
@@ -164,6 +165,25 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   // Copilot Chat integration
   const [isCopilotChatExporting, setIsCopilotChatExporting] = useState(false);
   const [isCopilotChatRunning, setIsCopilotChatRunning] = useState(false);
+  // Claude Code-only node warning (shown before exporting/running for non-Claude targets)
+  const [showClaudeOnlyConfirm, setShowClaudeOnlyConfirm] = useState(false);
+  const pendingClaudeOnlyActionRef = useRef<(() => Promise<void>) | null>(null);
+
+  /**
+   * Gate non-Claude-Code export/run actions: if the canvas contains
+   * Claude Code-only nodes (e.g. branchSession), ask for confirmation first.
+   */
+  const guardClaudeCodeOnly = (action: () => Promise<void>) => {
+    const hasClaudeOnlyNodes = nodes.some(
+      (n) => n.type && CLAUDE_CODE_ONLY_NODE_TYPES.has(n.type as NodeType)
+    );
+    if (hasClaudeOnlyNodes) {
+      pendingClaudeOnlyActionRef.current = action;
+      setShowClaudeOnlyConfirm(true);
+    } else {
+      void action();
+    }
+  };
 
   // Sync commentary state to Extension Host on mount (restores localStorage state after reload)
   const commentarySyncedRef = useRef(false);
@@ -1722,7 +1742,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     <div style={{ display: 'flex' }}>
                       <button
                         type="button"
-                        onClick={handleCopilotChatExport}
+                        onClick={() => guardClaudeCodeOnly(handleCopilotChatExport)}
                         disabled={isCopilotChatExporting}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
@@ -1750,7 +1770,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       </button>
                       <button
                         type="button"
-                        onClick={handleCopilotChatRun}
+                        onClick={() => guardClaudeCodeOnly(handleCopilotChatRun)}
                         disabled={isCopilotChatRunning}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
@@ -1814,7 +1834,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     <div style={{ display: 'flex' }}>
                       <button
                         type="button"
-                        onClick={handleCopilotCliExport}
+                        onClick={() => guardClaudeCodeOnly(handleCopilotCliExport)}
                         disabled={isCopilotCliExporting}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
@@ -1842,7 +1862,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       </button>
                       <button
                         type="button"
-                        onClick={handleCopilotCliRun}
+                        onClick={() => guardClaudeCodeOnly(handleCopilotCliRun)}
                         disabled={isCopilotCliRunning}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
@@ -1906,7 +1926,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     <div style={{ display: 'flex' }}>
                       <button
                         type="button"
-                        onClick={handleCodexExport}
+                        onClick={() => guardClaudeCodeOnly(handleCodexExport)}
                         disabled={isCodexExporting}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
@@ -1934,7 +1954,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       </button>
                       <button
                         type="button"
-                        onClick={handleCodexRun}
+                        onClick={() => guardClaudeCodeOnly(handleCodexRun)}
                         disabled={isCodexRunning}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
@@ -1998,7 +2018,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     <div style={{ display: 'flex' }}>
                       <button
                         type="button"
-                        onClick={handleRooCodeExport}
+                        onClick={() => guardClaudeCodeOnly(handleRooCodeExport)}
                         disabled={isRooCodeExporting}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
@@ -2026,7 +2046,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       </button>
                       <button
                         type="button"
-                        onClick={handleRooCodeRun}
+                        onClick={() => guardClaudeCodeOnly(handleRooCodeRun)}
                         disabled={isRooCodeRunning}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
@@ -2090,7 +2110,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     <div style={{ display: 'flex' }}>
                       <button
                         type="button"
-                        onClick={handleGeminiExport}
+                        onClick={() => guardClaudeCodeOnly(handleGeminiExport)}
                         disabled={isGeminiExporting}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
@@ -2118,7 +2138,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       </button>
                       <button
                         type="button"
-                        onClick={handleGeminiRun}
+                        onClick={() => guardClaudeCodeOnly(handleGeminiRun)}
                         disabled={isGeminiRunning}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
@@ -2182,7 +2202,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     <div style={{ display: 'flex' }}>
                       <button
                         type="button"
-                        onClick={handleAntigravityExport}
+                        onClick={() => guardClaudeCodeOnly(handleAntigravityExport)}
                         disabled={isAntigravityExporting}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
@@ -2210,7 +2230,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       </button>
                       <button
                         type="button"
-                        onClick={handleAntigravityRun}
+                        onClick={() => guardClaudeCodeOnly(handleAntigravityRun)}
                         disabled={isAntigravityRunning}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
@@ -2274,7 +2294,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     <div style={{ display: 'flex' }}>
                       <button
                         type="button"
-                        onClick={handleCursorExport}
+                        onClick={() => guardClaudeCodeOnly(handleCursorExport)}
                         disabled={isCursorExporting}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
@@ -2302,7 +2322,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       </button>
                       <button
                         type="button"
-                        onClick={handleCursorRun}
+                        onClick={() => guardClaudeCodeOnly(handleCursorRun)}
                         disabled={isCursorRunning}
                         style={{
                           padding: isCompact ? '4px 8px' : '4px 12px',
@@ -2632,6 +2652,25 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           cancelLabel={t('common.cancel')}
           onConfirm={handleResetWorkflow}
           onCancel={() => setShowResetConfirm(false)}
+        />
+
+        {/* Claude Code-only Node Export Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={showClaudeOnlyConfirm}
+          title={t('dialog.claudeOnlyExport.title')}
+          message={t('dialog.claudeOnlyExport.message')}
+          confirmLabel={t('dialog.claudeOnlyExport.confirm')}
+          cancelLabel={t('common.cancel')}
+          onConfirm={() => {
+            setShowClaudeOnlyConfirm(false);
+            const action = pendingClaudeOnlyActionRef.current;
+            pendingClaudeOnlyActionRef.current = null;
+            if (action) void action();
+          }}
+          onCancel={() => {
+            setShowClaudeOnlyConfirm(false);
+            pendingClaudeOnlyActionRef.current = null;
+          }}
         />
 
         {/* What's New Dialog */}

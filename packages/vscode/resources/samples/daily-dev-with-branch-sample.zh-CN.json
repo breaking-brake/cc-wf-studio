@@ -1,0 +1,207 @@
+{
+  "meta": {
+    "id": "daily-dev-with-branch-sample",
+    "nameKey": "sample.dailyDevWithBranch.name",
+    "descriptionKey": "sample.dailyDevWithBranch.description",
+    "difficulty": "intermediate",
+    "tags": [
+      "development",
+      "branch-session",
+      "human-in-the-loop"
+    ],
+    "nodeCount": 8
+  },
+  "workflow": {
+    "id": "workflow-daily-dev-with-branch",
+    "name": "daily-dev-with-branch",
+    "version": "1.0.0",
+    "nodes": [
+      {
+        "id": "start-1",
+        "type": "start",
+        "name": "start-1",
+        "position": {
+          "x": 120,
+          "y": 315
+        },
+        "data": {
+          "label": "Start"
+        }
+      },
+      {
+        "id": "hearing-1",
+        "type": "prompt",
+        "name": "hearing-1",
+        "position": {
+          "x": 300,
+          "y": 300
+        },
+        "data": {
+          "label": "Hearing",
+          "prompt": "向用户了解今天想要实现的目标。明确以下内容:\n- 想要实现的事情（目标）\n- 背景与动机\n- 涉及范围（目标仓库、目录、功能）\n- 约束条件（时间、不可改动的部分、依赖关系等）\n- 完成条件（以什么作为完成的标准）\n\n如有不明确之处请追加提问，最后将访谈结果以列表形式总结并请用户确认。"
+        }
+      },
+      {
+        "id": "planning-1",
+        "type": "subAgent",
+        "name": "planning-1",
+        "position": {
+          "x": 645,
+          "y": 300
+        },
+        "data": {
+          "description": "基于访谈结果制定实现计划",
+          "agentDefinition": "专门设计实现计划的规划代理。调查代码库，制定考虑架构权衡的分步实现计划。",
+          "prompt": "基于上一步的访谈结果制定实现计划。\n- 调查相关代码库，确定需要修改的文件\n- 按顺序列出实现步骤\n- 写明风险、注意事项和验证方法\n最终输出分步的实现计划。",
+          "builtInType": "plan",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        }
+      },
+      {
+        "id": "development-1",
+        "type": "subAgent",
+        "name": "development-1",
+        "position": {
+          "x": 975,
+          "y": 300
+        },
+        "data": {
+          "description": "按照实现计划执行开发",
+          "agentDefinition": "负责代码实现、编辑和测试执行的通用开发代理。忠实遵循实现计划，并报告变更内容和验证结果。",
+          "prompt": "按照上一步制定的实现计划执行开发。\n- 按计划的步骤顺序实现\n- 遵循现有代码的风格与规范\n- 尽可能通过测试或构建验证\n完成后，报告修改的文件列表、实现内容和验证结果。",
+          "builtInType": "general-purpose",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        }
+      },
+      {
+        "id": "branch-session-1",
+        "type": "branchSession",
+        "name": "branch-session-1",
+        "position": {
+          "x": 1305,
+          "y": 300
+        },
+        "data": {
+          "label": "Branch Session Work",
+          "workDescription": "由人与AI共同完成对开发结果的答疑、代码评审和修改工作。以对话方式确认实现内容、调整命名与设计、解决疑问，并将结果交接回父会话。",
+          "outputPorts": 1
+        }
+      },
+      {
+        "id": "completion-check-1",
+        "type": "askUserQuestion",
+        "name": "completion-check-1",
+        "position": {
+          "x": 1665,
+          "y": 285
+        },
+        "data": {
+          "questionText": "已收到分支会话的报告。本次工作可以视为完成吗？",
+          "options": [
+            {
+              "id": "opt-done",
+              "label": "完成",
+              "description": "工作已完成。进入回顾阶段"
+            },
+            {
+              "id": "opt-continue",
+              "label": "继续",
+              "description": "仍有剩余工作。再次进入分支会话继续提问和修改"
+            }
+          ],
+          "multiSelect": false,
+          "useAiSuggestions": false,
+          "outputPorts": 2
+        }
+      },
+      {
+        "id": "retrospective-1",
+        "type": "prompt",
+        "name": "retrospective-1",
+        "position": {
+          "x": 2010,
+          "y": 300
+        },
+        "data": {
+          "label": "Retrospective",
+          "prompt": "回顾本次工作，梳理希望延续到今后的改进点。\n\n1. 列出本次会话中获得的经验、遇到的问题、反复出现的指摘\n2. 针对每一项，判断应记录到哪里:\n   - 更新 CLAUDE.md（项目整体的永久规则与规范）\n   - 更新或新增 .claude/rules/（特定主题的详细规则）\n   - 记录到 MEMORY.md（跨会话需要记住的事实与上下文）\n   - 无需记录（仅限本次的事件）\n3. 将判断结果提交给用户确认，对已批准的项目实际更新或添加文件\n\n更新完成后，报告所记录内容的列表。"
+        }
+      },
+      {
+        "id": "end-1",
+        "type": "end",
+        "name": "end-1",
+        "position": {
+          "x": 2325,
+          "y": 315
+        },
+        "data": {
+          "label": "End"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c1",
+        "from": "start-1",
+        "to": "hearing-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c2",
+        "from": "hearing-1",
+        "to": "planning-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c3",
+        "from": "planning-1",
+        "to": "development-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c4",
+        "from": "development-1",
+        "to": "branch-session-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c5",
+        "from": "branch-session-1",
+        "to": "completion-check-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c6",
+        "from": "completion-check-1",
+        "to": "retrospective-1",
+        "fromPort": "branch-0",
+        "toPort": "input"
+      },
+      {
+        "id": "c7",
+        "from": "completion-check-1",
+        "to": "branch-session-1",
+        "fromPort": "branch-1",
+        "toPort": "input"
+      },
+      {
+        "id": "c8",
+        "from": "retrospective-1",
+        "to": "end-1",
+        "fromPort": "output",
+        "toPort": "input"
+      }
+    ],
+    "createdAt": "2026-07-11T00:00:00.000Z",
+    "updatedAt": "2026-07-11T00:00:00.000Z",
+    "subAgentFlows": []
+  }
+}

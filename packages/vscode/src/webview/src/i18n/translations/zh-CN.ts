@@ -157,6 +157,21 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'node.codex.untitled': '未命名Codex Agent',
   'node.codex.aiGenerated': 'AI生成',
 
+  // Branch Session Node (Feature: branch-session-node, Claude Code only)
+  'node.branchSession.title': 'Branch Session',
+  'node.branchSession.description': '暂停工作流，让用户与AI在分支会话中协作（仅限Claude Code）',
+  'property.branchSession.workDescription': '工作内容',
+  'property.branchSession.workDescriptionPlaceholder':
+    '用户与AI在分支会话中共同完成的工作内容（可选）',
+  'property.branchSession.workDescription.help': '将嵌入生成的指令中，使会话了解协作范围',
+  'property.branchSession.claudeCodeOnlyNotice':
+    '此节点仅适用于Claude Code。它会暂停工作流，用户可在分支会话（/branch）中与AI交互协作，然后将结果交回（/resume）继续执行。',
+  'default.newBranchSession': '新Branch Session',
+  'dialog.claudeOnlyExport.title': 'Claude Code专用节点',
+  'dialog.claudeOnlyExport.message':
+    '此工作流包含仅在Claude Code上运行的分支会话节点。其他AI代理无法执行这些步骤。仍要导出吗？',
+  'dialog.claudeOnlyExport.confirm': '仍然导出',
+
   // Codex Dialog (Feature: 518-codex-agent-node)
   'codex.title': '创建Codex Agent',
   'codex.description': '为工作流配置OpenAI Codex CLI代理。',
@@ -988,4 +1003,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'sample.dailyDevFlowWithWorktree.name': '基于 Git Worktree 的日常开发流程',
   'sample.dailyDevFlowWithWorktree.description':
     '使用 git worktree 的日常开发流程：任务访谈、分支提议与 worktree 创建、代码调查、计划制定、确认、实现、质量检查、提交与 PR 草稿。',
+  'sample.dailyDevWithBranch.name': '使用分支会话的日常开发',
+  'sample.dailyDevWithBranch.description':
+    '访谈→计划→实现后，将评审与修改分离到 Claude Code 分支会话中由人与AI共同完成的日常开发流程。冗长的交互式评审在分支中消耗上下文，父会话保持轻量并可循环至完成。适合长期消耗上下文的中大型任务。仅限 Claude Code。',
 };

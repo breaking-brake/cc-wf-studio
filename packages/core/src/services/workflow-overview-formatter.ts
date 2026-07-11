@@ -17,6 +17,7 @@
 import type {
   AskUserQuestionNode,
   BranchNode,
+  BranchSessionNode,
   CodexNode,
   Connection,
   IfElseNode,
@@ -214,6 +215,9 @@ function formatNode(
       break;
     case 'codex':
       lines.push(formatCodex(node as CodexNode));
+      break;
+    case 'branchSession':
+      lines.push(formatBranchSession(node as BranchSessionNode));
       break;
     case 'subAgentFlow':
       lines.push(formatSubAgentFlow(node as SubAgentFlowNode, workflow));
@@ -459,6 +463,18 @@ function formatCodex(node: CodexNode): string {
   if (d.sandbox) meta.push(`Sandbox: \`${d.sandbox}\``);
   out.push('');
   out.push(meta.join(' · '));
+  return out.join('\n');
+}
+
+// ----- branchSession ------------------------------------------------------
+
+function formatBranchSession(node: BranchSessionNode): string {
+  const out: string[] = ['**Type**: BRANCH SESSION (human-in-the-loop checkpoint, Claude Code only)'];
+  const d = node.data;
+  if (d.workDescription?.trim()) {
+    out.push('');
+    out.push(quote(d.workDescription.trim()));
+  }
   return out.join('\n');
 }
 

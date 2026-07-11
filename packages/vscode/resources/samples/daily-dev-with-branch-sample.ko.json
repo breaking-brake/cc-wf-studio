@@ -1,0 +1,207 @@
+{
+  "meta": {
+    "id": "daily-dev-with-branch-sample",
+    "nameKey": "sample.dailyDevWithBranch.name",
+    "descriptionKey": "sample.dailyDevWithBranch.description",
+    "difficulty": "intermediate",
+    "tags": [
+      "development",
+      "branch-session",
+      "human-in-the-loop"
+    ],
+    "nodeCount": 8
+  },
+  "workflow": {
+    "id": "workflow-daily-dev-with-branch",
+    "name": "daily-dev-with-branch",
+    "version": "1.0.0",
+    "nodes": [
+      {
+        "id": "start-1",
+        "type": "start",
+        "name": "start-1",
+        "position": {
+          "x": 120,
+          "y": 315
+        },
+        "data": {
+          "label": "Start"
+        }
+      },
+      {
+        "id": "hearing-1",
+        "type": "prompt",
+        "name": "hearing-1",
+        "position": {
+          "x": 300,
+          "y": 300
+        },
+        "data": {
+          "label": "Hearing",
+          "prompt": "오늘 실현하고 싶은 것을 사용자에게 인터뷰하세요. 다음을 명확히 합니다:\n- 실현하고 싶은 것(목표)\n- 배경·동기\n- 대상 범위(대상 저장소·디렉터리·기능)\n- 제약 조건(시간, 건드리면 안 되는 부분, 의존 관계 등)\n- 완료 조건(무엇으로 완료로 볼 것인가)\n\n모호한 점이 있으면 추가로 질문하고, 마지막에 인터뷰 결과를 목록으로 요약하여 사용자에게 확인을 받으세요."
+        }
+      },
+      {
+        "id": "planning-1",
+        "type": "subAgent",
+        "name": "planning-1",
+        "position": {
+          "x": 645,
+          "y": 300
+        },
+        "data": {
+          "description": "인터뷰 결과를 바탕으로 구현 계획을 수립한다",
+          "agentDefinition": "구현 계획 설계를 전문으로 하는 플래닝 에이전트. 코드베이스를 조사하고 아키텍처상의 트레이드오프를 고려한 단계별 구현 계획을 작성한다.",
+          "prompt": "이전 단계의 인터뷰 결과를 바탕으로 구현 계획을 수립하세요.\n- 관련 코드베이스를 조사하여 변경이 필요한 파일을 식별한다\n- 구현 단계를 순서대로 나열한다\n- 리스크와 주의점, 검증 방법을 명기한다\n최종적으로 단계별 구현 계획을 출력하세요.",
+          "builtInType": "plan",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        }
+      },
+      {
+        "id": "development-1",
+        "type": "subAgent",
+        "name": "development-1",
+        "position": {
+          "x": 975,
+          "y": 300
+        },
+        "data": {
+          "description": "구현 계획에 따라 개발을 실행한다",
+          "agentDefinition": "코드 구현·편집·테스트 실행까지 수행하는 범용 개발 에이전트. 구현 계획을 충실히 따르고 변경 내용과 검증 결과를 보고한다.",
+          "prompt": "이전 단계에서 수립된 구현 계획에 따라 개발을 실행하세요.\n- 계획의 단계 순서대로 구현한다\n- 기존 코드의 스타일·규약에 맞춘다\n- 가능하면 테스트나 빌드로 동작을 검증한다\n완료 후 변경한 파일 목록·구현 내용·검증 결과를 보고하세요.",
+          "builtInType": "general-purpose",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        }
+      },
+      {
+        "id": "branch-session-1",
+        "type": "branchSession",
+        "name": "branch-session-1",
+        "position": {
+          "x": 1305,
+          "y": 300
+        },
+        "data": {
+          "label": "Branch Session Work",
+          "workDescription": "개발 결과에 대한 질문 응답, 코드 리뷰, 수정 작업을 사람과 AI가 공동으로 수행한다. 구현 내용 확인, 네이밍·설계 조정, 불명확한 점 해소 등을 대화형으로 진행하고 결과를 부모 세션에 인계한다.",
+          "outputPorts": 1
+        }
+      },
+      {
+        "id": "completion-check-1",
+        "type": "askUserQuestion",
+        "name": "completion-check-1",
+        "position": {
+          "x": 1665,
+          "y": 285
+        },
+        "data": {
+          "questionText": "브랜치 세션의 보고를 받았습니다. 이번 작업을 완료로 해도 될까요?",
+          "options": [
+            {
+              "id": "opt-done",
+              "label": "완료",
+              "description": "작업 완료. 회고 단계로 진행"
+            },
+            {
+              "id": "opt-continue",
+              "label": "계속",
+              "description": "아직 작업이 남아 있음. 다시 브랜치 세션에서 질문·수정을 계속"
+            }
+          ],
+          "multiSelect": false,
+          "useAiSuggestions": false,
+          "outputPorts": 2
+        }
+      },
+      {
+        "id": "retrospective-1",
+        "type": "prompt",
+        "name": "retrospective-1",
+        "position": {
+          "x": 2010,
+          "y": 300
+        },
+        "data": {
+          "label": "Retrospective",
+          "prompt": "이번 작업을 돌아보고 앞으로 이어가고 싶은 개선점을 정리하세요.\n\n1. 이번 세션에서 얻은 배움·막혔던 점·반복적으로 발생한 지적을 나열한다\n2. 각각에 대해 다음 중 어디에 기록할지 판단한다:\n   - CLAUDE.md 업데이트(프로젝트 전체의 영구적인 규칙·규약)\n   - .claude/rules/ 업데이트 또는 신규 추가(특정 주제의 상세 규칙)\n   - MEMORY.md에 기록(세션을 넘어 기억하고 싶은 사실·컨텍스트)\n   - 기록 불필요(이번 한정 사건)\n3. 판단 결과를 사용자에게 제시하여 확인을 받고, 승인된 항목에 대해 실제로 파일을 업데이트·추가한다\n\n업데이트가 완료되면 기록한 내용의 목록을 보고하세요."
+        }
+      },
+      {
+        "id": "end-1",
+        "type": "end",
+        "name": "end-1",
+        "position": {
+          "x": 2325,
+          "y": 315
+        },
+        "data": {
+          "label": "End"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c1",
+        "from": "start-1",
+        "to": "hearing-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c2",
+        "from": "hearing-1",
+        "to": "planning-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c3",
+        "from": "planning-1",
+        "to": "development-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c4",
+        "from": "development-1",
+        "to": "branch-session-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c5",
+        "from": "branch-session-1",
+        "to": "completion-check-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c6",
+        "from": "completion-check-1",
+        "to": "retrospective-1",
+        "fromPort": "branch-0",
+        "toPort": "input"
+      },
+      {
+        "id": "c7",
+        "from": "completion-check-1",
+        "to": "branch-session-1",
+        "fromPort": "branch-1",
+        "toPort": "input"
+      },
+      {
+        "id": "c8",
+        "from": "retrospective-1",
+        "to": "end-1",
+        "fromPort": "output",
+        "toPort": "input"
+      }
+    ],
+    "createdAt": "2026-07-11T00:00:00.000Z",
+    "updatedAt": "2026-07-11T00:00:00.000Z",
+    "subAgentFlows": []
+  }
+}

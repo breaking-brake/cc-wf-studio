@@ -31,7 +31,7 @@ import { useTranslation } from '../i18n/i18n-context';
 import { createSubAgent } from '../services/command-browser-service';
 import { openExternalUrl } from '../services/vscode-bridge';
 import { useWorkflowStore } from '../stores/workflow-store';
-import type { PromptNodeData } from '../types/node-types';
+import type { BranchSessionNodeData, PromptNodeData } from '../types/node-types';
 import { extractVariables } from '../utils/template-utils';
 import { CollapsibleSection } from './common/CollapsibleSection';
 import { ColorPicker } from './common/ColorPicker';
@@ -187,7 +187,7 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
             {getNodeTypeLabel(selectedNode.type)}
           </div>
 
-          {/* Node Name (only for subAgent, askUserQuestion, branch, ifElse, switch, prompt, skill, mcp types) */}
+          {/* Node Name (only for subAgent, askUserQuestion, branch, ifElse, switch, prompt, skill, mcp, branchSession types) */}
           {/* Note: codex uses label field instead of name, handled in CodexProperties */}
           {(selectedNode.type === 'subAgent' ||
             selectedNode.type === 'askUserQuestion' ||
@@ -196,7 +196,8 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
             selectedNode.type === 'switch' ||
             selectedNode.type === 'prompt' ||
             selectedNode.type === 'skill' ||
-            selectedNode.type === 'mcp') && (
+            selectedNode.type === 'mcp' ||
+            selectedNode.type === 'branchSession') && (
             <div style={{ marginBottom: '16px' }}>
               <label
                 htmlFor="node-name-input"
@@ -367,6 +368,11 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
           ) : selectedNode.type === 'codex' ? (
             <CodexProperties
               node={selectedNode as Node<CodexNodeData>}
+              updateNodeData={updateNodeData}
+            />
+          ) : selectedNode.type === 'branchSession' ? (
+            <BranchSessionProperties
+              node={selectedNode as Node<BranchSessionNodeData>}
               updateNodeData={updateNodeData}
             />
           ) : selectedNode.type === 'group' ? (
@@ -1158,6 +1164,133 @@ const PromptProperties: React.FC<{
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+/**
+ * Branch Session Properties Editor (Claude Code only)
+ */
+const BranchSessionProperties: React.FC<{
+  node: Node<BranchSessionNodeData>;
+  updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
+}> = ({ node, updateNodeData }) => {
+  const { t } = useTranslation();
+  const data = node.data;
+  const [isEditingWorkDescription, setIsEditingWorkDescription] = useState(false);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {/* Label */}
+      <div>
+        <label
+          htmlFor="branch-session-label-input"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('property.label')}
+        </label>
+        <input
+          id="branch-session-label-input"
+          type="text"
+          value={data.label || ''}
+          onChange={(e) => updateNodeData(node.id, { label: e.target.value })}
+          className="nodrag"
+          placeholder={t('property.label.placeholder')}
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+          }}
+        />
+      </div>
+
+      {/* Work Description */}
+      <div>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '6px',
+          }}
+        >
+          <label
+            htmlFor="branch-session-work-description-textarea"
+            style={{
+              display: 'block',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--vscode-foreground)',
+            }}
+          >
+            {t('property.branchSession.workDescription')}
+          </label>
+          <EditInEditorButton
+            content={data.workDescription || ''}
+            onContentUpdated={(newContent) =>
+              updateNodeData(node.id, { workDescription: newContent })
+            }
+            label={t('property.branchSession.workDescription')}
+            language="markdown"
+            onEditingStateChange={setIsEditingWorkDescription}
+          />
+        </div>
+        <textarea
+          id="branch-session-work-description-textarea"
+          value={data.workDescription || ''}
+          onChange={(e) => updateNodeData(node.id, { workDescription: e.target.value })}
+          className="nodrag"
+          rows={6}
+          placeholder={t('property.branchSession.workDescriptionPlaceholder')}
+          readOnly={isEditingWorkDescription}
+          style={{
+            width: '100%',
+            padding: '6px 8px',
+            backgroundColor: 'var(--vscode-input-background)',
+            color: 'var(--vscode-input-foreground)',
+            border: '1px solid var(--vscode-input-border)',
+            borderRadius: '2px',
+            fontSize: '13px',
+            fontFamily: 'var(--vscode-editor-font-family)',
+            resize: 'vertical',
+            opacity: isEditingWorkDescription ? 0.5 : 1,
+            cursor: isEditingWorkDescription ? 'not-allowed' : 'text',
+          }}
+        />
+        <div
+          style={{
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+            marginTop: '4px',
+          }}
+        >
+          {t('property.branchSession.workDescription.help')}
+        </div>
+      </div>
+
+      {/* Claude Code Only Notice */}
+      <div
+        style={{
+          padding: '12px',
+          backgroundColor: 'var(--vscode-textBlockQuote-background)',
+          border: '1px solid var(--vscode-textBlockQuote-border)',
+          borderRadius: '4px',
+          fontSize: '12px',
+          color: 'var(--vscode-descriptionForeground)',
+        }}
+      >
+        {t('property.branchSession.claudeCodeOnlyNotice')}
+      </div>
     </div>
   );
 };

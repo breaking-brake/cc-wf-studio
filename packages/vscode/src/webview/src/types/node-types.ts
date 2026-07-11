@@ -162,6 +162,43 @@ export interface BranchNodeData {
 export type BranchNode = Node<BranchNodeData, 'branch'>;
 
 // ============================================================================
+// Branch Session Node
+// ============================================================================
+
+/**
+ * Branch Sessionノードのデータ構造 (Claude Code 限定)
+ *
+ * ワークフローを一時停止し、ユーザーが Claude Code のブランチセッション
+ * (/branch) で AI と共同作業した後、親セッション (/resume) に引き継いで
+ * 続行するヒューマン・イン・ザ・ループ・チェックポイントです。
+ */
+export interface BranchSessionNodeData {
+  /**
+   * ノードのラベル (必須)
+   */
+  label: string;
+
+  /**
+   * ブランチセッションでの作業内容 (省略可能)
+   *
+   * 人と AI の共同作業のスコープ。生成される指示文に埋め込まれます。
+   */
+  workDescription?: string;
+
+  /**
+   * 出力ポート数 (1固定)
+   */
+  outputPorts: 1;
+}
+
+/**
+ * Branch Sessionノード型
+ *
+ * ブランチセッション・チェックポイントを表すノード。入力と出力の両方の接続を持ちます。
+ */
+export type BranchSessionNode = Node<BranchSessionNodeData, 'branchSession'>;
+
+// ============================================================================
 // Union Type
 // ============================================================================
 
@@ -171,4 +208,4 @@ export type BranchNode = Node<BranchNodeData, 'branch'>;
  * すべてのカスタムノードタイプを含むユニオン型です。
  * 既存のノードタイプと組み合わせて使用します。
  */
-export type WorkflowNode = StartNode | EndNode | PromptNode | BranchNode;
+export type WorkflowNode = StartNode | EndNode | PromptNode | BranchNode | BranchSessionNode;

@@ -1988,15 +1988,15 @@ export function registerOpenEditorCommand(
                   port: serverPort,
                 });
               } catch (error) {
-                log('ERROR', 'Failed to launch AI agent', {
-                  error: error instanceof Error ? error.message : String(error),
-                });
+                const launchErrMsg =
+                  error instanceof Error ? error.message : 'Failed to launch AI agent';
+                log('ERROR', 'Failed to launch AI agent', { error: launchErrMsg });
+                vscode.window.showErrorMessage(`Failed to launch AI agent: ${launchErrMsg}`);
                 webview.postMessage({
                   type: 'LAUNCH_AI_AGENT_FAILED',
                   requestId: message.requestId,
                   payload: {
-                    errorMessage:
-                      error instanceof Error ? error.message : 'Failed to launch AI agent',
+                    errorMessage: launchErrMsg,
                     timestamp: new Date().toISOString(),
                   },
                 });

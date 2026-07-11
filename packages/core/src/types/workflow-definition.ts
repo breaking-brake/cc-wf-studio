@@ -21,6 +21,7 @@ export enum NodeType {
   Mcp = 'mcp', // New: MCP (Model Context Protocol) tool integration
   SubAgentFlow = 'subAgentFlow', // New: Sub-Agent Flow reference node
   Codex = 'codex', // New: OpenAI Codex CLI integration
+  BranchSession = 'branchSession', // New: human-in-the-loop branch-session checkpoint (Claude Code only)
   Group = 'group', // New: Visual grouping container
 }
 
@@ -396,6 +397,22 @@ export interface CodexNodeData {
   skipGitRepoCheck?: boolean;
 }
 
+/**
+ * Branch Session node data (Claude Code only)
+ *
+ * Human-in-the-loop checkpoint: the workflow pauses and the user works
+ * interactively together with the AI in a Claude Code branch session
+ * (/branch), then hands the results back to the parent session (/resume).
+ */
+export interface BranchSessionNodeData {
+  /** Display label for the branch-session checkpoint */
+  label: string;
+  /** Optional scope of the joint human+AI work, injected into generated instructions */
+  workDescription?: string;
+  /** Number of output ports (fixed at 1) */
+  outputPorts: 1;
+}
+
 // ============================================================================
 // Node Types
 // ============================================================================
@@ -469,6 +486,11 @@ export interface CodexNode extends BaseNode {
   data: CodexNodeData;
 }
 
+export interface BranchSessionNode extends BaseNode {
+  type: NodeType.BranchSession;
+  data: BranchSessionNodeData;
+}
+
 export interface GroupNodeData {
   label: string;
 }
@@ -491,6 +513,7 @@ export type WorkflowNode =
   | McpNode
   | SubAgentFlowNode
   | CodexNode
+  | BranchSessionNode
   | GroupNode;
 
 // ============================================================================
@@ -727,6 +750,12 @@ export const VALIDATION_RULES = {
     NAME_MAX_LENGTH: 64,
     PROMPT_MIN_LENGTH: 1,
     PROMPT_MAX_LENGTH: 10000,
+    OUTPUT_PORTS: 1, // Fixed: 1 output port
+  },
+  BRANCH_SESSION: {
+    LABEL_MIN_LENGTH: 1,
+    LABEL_MAX_LENGTH: 50,
+    WORK_DESCRIPTION_MAX_LENGTH: 2000,
     OUTPUT_PORTS: 1, // Fixed: 1 output port
   },
 } as const;

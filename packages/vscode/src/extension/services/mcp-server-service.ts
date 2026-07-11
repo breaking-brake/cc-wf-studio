@@ -67,7 +67,15 @@ export class McpServerManager implements WorkflowIoAdapter {
 
   async start(extensionPath: string, port?: number): Promise<number> {
     if (this.httpServer) {
-      throw new Error('MCP server is already running');
+      // Idempotent: a listening server is reused instead of erroring.
+      if (this.httpServer.listening && this.port !== null) {
+        return this.port;
+      }
+      // A non-listening server is a leftover from a failed start (e.g.
+      // EADDRINUSE) — dispose it and start fresh.
+      this.httpServer.close();
+      this.httpServer = null;
+      this.port = null;
     }
 
     this.extensionPath = extensionPath;
@@ -149,6 +157,17 @@ export class McpServerManager implements WorkflowIoAdapter {
     const listenPort = port ?? 0;
     const httpServer = this.httpServer;
     return new Promise<number>((resolve, reject) => {
+      // Failed startup must not leave a half-initialized server behind —
+      // otherwise every later start() would wrongly see "already running".
+      const rejectAndCleanup = (error: Error) => {
+        if (this.httpServer === httpServer) {
+          this.httpServer = null;
+          this.port = null;
+        }
+        httpServer.close();
+        reject(error);
+      };
+
       httpServer.listen(listenPort, '127.0.0.1', () => {
         const address = httpServer.address();
         if (address && typeof address !== 'string') {
@@ -156,7 +175,7 @@ export class McpServerManager implements WorkflowIoAdapter {
           log('INFO', `MCP Server: Started on port ${this.port}`);
           resolve(this.port);
         } else {
-          reject(new Error('Failed to get server address'));
+          rejectAndCleanup(new Error('Failed to get server address'));
         }
       });
 
@@ -164,10 +183,10 @@ export class McpServerManager implements WorkflowIoAdapter {
         if (error.code === 'EADDRINUSE') {
           const msg = `Port ${listenPort} is already in use. Change the port in Settings (cc-wf-studio.mcp.port) or close the application using port ${listenPort}.`;
           log('ERROR', 'MCP Server: Port in use', { port: listenPort });
-          reject(new Error(msg));
+          rejectAndCleanup(new Error(msg));
         } else {
           log('ERROR', 'MCP Server: HTTP server error', { error: error.message });
-          reject(error);
+          rejectAndCleanup(error);
         }
       });
     });

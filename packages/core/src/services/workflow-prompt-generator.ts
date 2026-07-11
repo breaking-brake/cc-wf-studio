@@ -10,6 +10,7 @@
 import type {
   AskUserQuestionNode,
   BranchNode,
+  BranchSessionNode,
   CodexNode,
   IfElseNode,
   McpNode,
@@ -227,6 +228,11 @@ export function generateMermaidFlowchart(source: MermaidSource): string {
       const codexNode = node as CodexNode;
       const codexName = codexNode.data.label || 'Codex Agent';
       return `${indent}${nodeId}[[${escapeLabel(`${upperType('Codex')}: ${codexName}`)}]]`;
+    }
+    if (nodeType === 'branchSession') {
+      const title = titleOf(node, 'Branch Session');
+      // Hyphenated like `Sub-Agent` so concise mode reads `BRANCH-SESSION`.
+      return `${indent}${nodeId}[${escapeLabel(`${upperType('Branch-Session')}: ${title}`)}]`;
     }
     return null;
   };
@@ -680,6 +686,9 @@ export function generateExecutionInstructions(
   sections.push(
     '- **Rectangle nodes (Prompt nodes)**: Execute the prompts described in the details section below'
   );
+  sections.push(
+    '- **Rectangle nodes (Branch-Session: ...)**: Human-in-the-loop checkpoints — pause the workflow and guide the user into a Claude Code branch session (see Branch Session Node Details)'
+  );
   sections.push('');
 
   // Group Node Execution Tracking (skipped when highlight is disabled)
@@ -717,6 +726,9 @@ export function generateExecutionInstructions(
   const skillNodes = nodes.filter((n) => n.type === 'skill') as SkillNode[];
   const mcpNodes = nodes.filter((n) => n.type === 'mcp') as McpNode[];
   const codexNodes = nodes.filter((n) => n.type === 'codex') as CodexNode[];
+  const branchSessionNodes = nodes.filter(
+    (n) => n.type === 'branchSession'
+  ) as BranchSessionNode[];
   const askUserQuestionNodes = nodes.filter(
     (n) => n.type === 'askUserQuestion'
   ) as AskUserQuestionNode[];
@@ -927,6 +939,65 @@ export function generateExecutionInstructions(
         }
         sections.push('');
       }
+    }
+  }
+
+  // Branch Session node details (Claude Code only)
+  if (branchSessionNodes.length > 0) {
+    sections.push('### Branch Session Node Details');
+    sections.push('');
+    sections.push(
+      'These nodes are human-in-the-loop checkpoints: the workflow pauses and the user works INTERACTIVELY together with the AI in a Claude Code branch session. This is NOT a sub-agent delegation. This node type only works on Claude Code.'
+    );
+    sections.push('');
+    for (const node of branchSessionNodes) {
+      const nodeId = sanitizeNodeId(node.id);
+      sections.push(`#### ${nodeId}(${node.data.label || 'Branch Session'})`);
+      sections.push('');
+      if (node.data.workDescription?.trim()) {
+        sections.push(`**Work scope**: ${node.data.workDescription.trim()}`);
+        sections.push('');
+      }
+      sections.push('Follow these steps exactly when execution reaches this node:');
+      sections.push('');
+      sections.push('**Step 1 — Guide the user into a branch session, then END YOUR TURN:**');
+      sections.push('');
+      sections.push(
+        '1. Compose a short branch-session name from the task context (alphanumeric and hyphens, e.g. `review-auth-refactor`). Naming the session makes it identifiable later.'
+      );
+      sections.push(
+        "2. Output a message that contains the literal command `/branch <session-name>` so Claude Code's suggestion UI surfaces it and the user can select it directly."
+      );
+      sections.push(
+        '3. State the work scope above (if provided) so the user knows what to do in the branch session.'
+      );
+      sections.push(
+        '4. Tell the user to work freely with the AI in the branch session and, when done, ask the AI to hand off (e.g. say 「引き継いで」/ "hand off").'
+      );
+      sections.push(
+        "5. Do NOT output the parent session ID (the branch session inherently knows its parent's ID). End your turn and wait."
+      );
+      sections.push('');
+      sections.push(
+        '**Step 2 — Handoff (applies when YOU are the branch session and the user asks to hand off):**'
+      );
+      sections.push('');
+      sections.push(
+        '1. Write a handoff markdown file (temporary file under the OS temp directory; decide the path at runtime) summarizing conclusions, decisions, edits made, and next actions.'
+      );
+      sections.push(
+        '2. Copy its content to the clipboard using a command suited to the runtime OS (`pbcopy` on macOS, `Set-Clipboard` on Windows PowerShell, `clip.exe` on cmd/Git Bash, `powershell.exe -c Set-Clipboard` on WSL, `xclip`/`wl-copy` on Linux). Prefer a method that passes UTF-8 safely.'
+      );
+      sections.push(
+        '3. Tell the user to run `/resume <parent-session-id>` and paste the clipboard content. ALWAYS also show the handoff file path as a fallback: in the parent session the user can simply ask the AI to read that file. You know your parent session\'s ID; if it is unknown (e.g. after /compact), ask the user.'
+      );
+      sections.push('');
+      sections.push('**Step 3 — Resume (applies when YOU are the parent session):**');
+      sections.push('');
+      sections.push(
+        "When the user pastes handoff content (or points you at the handoff file) after this checkpoint, treat it as the branch session's handoff result and proceed to the next node in the workflow."
+      );
+      sections.push('');
     }
   }
 

@@ -161,6 +161,23 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'node.codex.untitled': 'Untitled Codex Agent',
   'node.codex.aiGenerated': 'AI Generated',
 
+  // Branch Session Node (Feature: branch-session-node, Claude Code only)
+  'node.branchSession.title': 'Branch Session',
+  'node.branchSession.description':
+    'Pause for joint human+AI work in a branch session (Claude Code only)',
+  'property.branchSession.workDescription': 'Work Description',
+  'property.branchSession.workDescriptionPlaceholder':
+    'What the user and AI will work on together in the branch session (optional)',
+  'property.branchSession.workDescription.help':
+    'Injected into the generated instructions so the session knows the scope of the joint work',
+  'property.branchSession.claudeCodeOnlyNotice':
+    'This node only works on Claude Code. It pauses the workflow so the user can work interactively with the AI in a branch session (/branch), then hand the results back (/resume).',
+  'default.newBranchSession': 'New Branch Session',
+  'dialog.claudeOnlyExport.title': 'Claude Code-only Nodes',
+  'dialog.claudeOnlyExport.message':
+    'This workflow contains Branch Session node(s), which only work on Claude Code. Other AI agents cannot execute these steps. Export anyway?',
+  'dialog.claudeOnlyExport.confirm': 'Export Anyway',
+
   // Codex Dialog (Feature: 518-codex-agent-node)
   'codex.title': 'Create Codex Agent',
   'codex.description': 'Configure an OpenAI Codex CLI agent for your workflow.',
@@ -1035,4 +1052,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'sample.dailyDevFlowWithWorktree.name': 'Daily Dev Flow with Git Worktree',
   'sample.dailyDevFlowWithWorktree.description':
     'Daily development flow using git worktree: hear task, propose branch & create worktree, investigate, plan, confirm, implement, run quality checks, commit & draft PR.',
+  'sample.dailyDevWithBranch.name': 'Daily Dev with Branch Session',
+  'sample.dailyDevWithBranch.description':
+    'Daily development with a human-in-the-loop checkpoint: hear the goal, plan, implement, then review and fix together with the AI in a Claude Code branch session. The long interactive review consumes context in the branch — not in the parent — keeping the parent session lean and cost-efficient through completion. Best for medium-to-large tasks. Claude Code only.',
 };

@@ -161,6 +161,23 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'node.codex.untitled': '제목 없는 Codex Agent',
   'node.codex.aiGenerated': 'AI 생성',
 
+  // Branch Session Node (Feature: branch-session-node, Claude Code only)
+  'node.branchSession.title': 'Branch Session',
+  'node.branchSession.description':
+    '브랜치 세션에서 사람과 AI가 공동 작업하기 위한 일시 정지 지점 (Claude Code 전용)',
+  'property.branchSession.workDescription': '작업 내용',
+  'property.branchSession.workDescriptionPlaceholder':
+    '브랜치 세션에서 사용자와 AI가 함께 수행할 작업 내용 (선택 사항)',
+  'property.branchSession.workDescription.help':
+    '생성된 지시문에 삽입되어 세션이 공동 작업의 범위를 파악할 수 있습니다',
+  'property.branchSession.claudeCodeOnlyNotice':
+    '이 노드는 Claude Code 전용입니다. 워크플로를 일시 정지하고 사용자가 브랜치 세션(/branch)에서 AI와 대화형으로 작업한 후 결과를 인계(/resume)하여 계속합니다.',
+  'default.newBranchSession': '새 Branch Session',
+  'dialog.claudeOnlyExport.title': 'Claude Code 전용 노드',
+  'dialog.claudeOnlyExport.message':
+    '이 워크플로에는 Claude Code에서만 작동하는 브랜치 세션 노드가 포함되어 있습니다. 다른 AI 에이전트는 이 단계를 실행할 수 없습니다. 그래도 내보내시겠습니까?',
+  'dialog.claudeOnlyExport.confirm': '내보내기',
+
   // Codex Dialog (Feature: 518-codex-agent-node)
   'codex.title': 'Codex Agent 생성',
   'codex.description': '워크플로용 OpenAI Codex CLI 에이전트를 구성합니다.',
@@ -1020,4 +1037,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'sample.dailyDevFlowWithWorktree.name': 'Git Worktree 기반 일일 개발 플로우',
   'sample.dailyDevFlowWithWorktree.description':
     'git worktree를 활용한 일일 개발 플로우: 작업 인터뷰, 브랜치 제안 및 worktree 생성, 코드 조사, 계획 수립, 승인, 구현, 품질 검사, 커밋 및 PR 초안 작성.',
+  'sample.dailyDevWithBranch.name': '브랜치 세션을 활용한 일일 개발',
+  'sample.dailyDevWithBranch.description':
+    '인터뷰→계획→구현 후, 리뷰·수정을 Claude Code 브랜치 세션으로 분리하여 사람과 AI가 함께 수행하는 일일 개발 플로우. 긴 대화형 리뷰의 컨텍스트 소비를 분기 쪽에 격리하여 부모 세션을 가볍게 유지한 채 완료까지 반복할 수 있다. 컨텍스트를 오래 소비하는 중~대규모 작업에 적합. Claude Code 전용.',
 };

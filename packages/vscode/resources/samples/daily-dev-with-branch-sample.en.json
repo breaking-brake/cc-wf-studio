@@ -1,0 +1,207 @@
+{
+  "meta": {
+    "id": "daily-dev-with-branch-sample",
+    "nameKey": "sample.dailyDevWithBranch.name",
+    "descriptionKey": "sample.dailyDevWithBranch.description",
+    "difficulty": "intermediate",
+    "tags": [
+      "development",
+      "branch-session",
+      "human-in-the-loop"
+    ],
+    "nodeCount": 8
+  },
+  "workflow": {
+    "id": "workflow-daily-dev-with-branch",
+    "name": "daily-dev-with-branch",
+    "version": "1.0.0",
+    "nodes": [
+      {
+        "id": "start-1",
+        "type": "start",
+        "name": "start-1",
+        "position": {
+          "x": 120,
+          "y": 315
+        },
+        "data": {
+          "label": "Start"
+        }
+      },
+      {
+        "id": "hearing-1",
+        "type": "prompt",
+        "name": "hearing-1",
+        "position": {
+          "x": 300,
+          "y": 300
+        },
+        "data": {
+          "label": "Hearing",
+          "prompt": "Interview the user about what they want to accomplish today. Clarify the following:\n- What they want to achieve (the goal)\n- Background and motivation\n- Scope (target repositories, directories, features)\n- Constraints (time, areas that must not be touched, dependencies, etc.)\n- Completion criteria (what counts as done)\n\nAsk follow-up questions about anything ambiguous, then summarize the interview results as a bulleted list and get the user's confirmation."
+        }
+      },
+      {
+        "id": "planning-1",
+        "type": "subAgent",
+        "name": "planning-1",
+        "position": {
+          "x": 645,
+          "y": 300
+        },
+        "data": {
+          "description": "Create an implementation plan based on the interview results",
+          "agentDefinition": "A planning agent specialized in designing implementation plans. Investigates the codebase and creates a step-by-step implementation plan that weighs architectural trade-offs.",
+          "prompt": "Based on the interview results from the previous step, create an implementation plan.\n- Investigate the relevant codebase and identify the files that need changes\n- List the implementation steps in order\n- Note risks, caveats, and how to verify the changes\nFinally, output a step-by-step implementation plan.",
+          "builtInType": "plan",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        }
+      },
+      {
+        "id": "development-1",
+        "type": "subAgent",
+        "name": "development-1",
+        "position": {
+          "x": 975,
+          "y": 300
+        },
+        "data": {
+          "description": "Execute development according to the implementation plan",
+          "agentDefinition": "A general-purpose development agent that implements, edits code, and runs tests. Follows the implementation plan faithfully and reports the changes and verification results.",
+          "prompt": "Execute development according to the implementation plan created in the previous step.\n- Implement in the order of the planned steps\n- Match the existing code style and conventions\n- Verify the work with tests or builds where possible\nWhen finished, report the list of changed files, what was implemented, and the verification results.",
+          "builtInType": "general-purpose",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        }
+      },
+      {
+        "id": "branch-session-1",
+        "type": "branchSession",
+        "name": "branch-session-1",
+        "position": {
+          "x": 1305,
+          "y": 300
+        },
+        "data": {
+          "label": "Branch Session Work",
+          "workDescription": "The user and the AI work together on answering questions about the development results, reviewing the code, and making fixes. Interactively confirm the implementation, adjust naming and design, resolve open questions, and hand the results back to the parent session.",
+          "outputPorts": 1
+        }
+      },
+      {
+        "id": "completion-check-1",
+        "type": "askUserQuestion",
+        "name": "completion-check-1",
+        "position": {
+          "x": 1665,
+          "y": 285
+        },
+        "data": {
+          "questionText": "Received the report from the branch session. Is this work complete?",
+          "options": [
+            {
+              "id": "opt-done",
+              "label": "Done",
+              "description": "The work is complete. Proceed to the retrospective phase"
+            },
+            {
+              "id": "opt-continue",
+              "label": "Continue",
+              "description": "Work remains. Return to the branch session for more questions and fixes"
+            }
+          ],
+          "multiSelect": false,
+          "useAiSuggestions": false,
+          "outputPorts": 2
+        }
+      },
+      {
+        "id": "retrospective-1",
+        "type": "prompt",
+        "name": "retrospective-1",
+        "position": {
+          "x": 2010,
+          "y": 300
+        },
+        "data": {
+          "label": "Retrospective",
+          "prompt": "Look back on this session and identify improvements to carry forward.\n\n1. List the learnings, stumbling points, and repeatedly raised issues from this session\n2. For each item, decide where it should be recorded:\n   - Update CLAUDE.md (permanent project-wide rules and conventions)\n   - Update or add .claude/rules/ (detailed rules for a specific topic)\n   - Record in MEMORY.md (facts and context to remember across sessions)\n   - No record needed (a one-off event)\n3. Present the decisions to the user for confirmation, and for approved items actually update or add the files\n\nWhen the updates are complete, report a list of what was recorded."
+        }
+      },
+      {
+        "id": "end-1",
+        "type": "end",
+        "name": "end-1",
+        "position": {
+          "x": 2325,
+          "y": 315
+        },
+        "data": {
+          "label": "End"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c1",
+        "from": "start-1",
+        "to": "hearing-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c2",
+        "from": "hearing-1",
+        "to": "planning-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c3",
+        "from": "planning-1",
+        "to": "development-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c4",
+        "from": "development-1",
+        "to": "branch-session-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c5",
+        "from": "branch-session-1",
+        "to": "completion-check-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c6",
+        "from": "completion-check-1",
+        "to": "retrospective-1",
+        "fromPort": "branch-0",
+        "toPort": "input"
+      },
+      {
+        "id": "c7",
+        "from": "completion-check-1",
+        "to": "branch-session-1",
+        "fromPort": "branch-1",
+        "toPort": "input"
+      },
+      {
+        "id": "c8",
+        "from": "retrospective-1",
+        "to": "end-1",
+        "fromPort": "output",
+        "toPort": "input"
+      }
+    ],
+    "createdAt": "2026-07-11T00:00:00.000Z",
+    "updatedAt": "2026-07-11T00:00:00.000Z",
+    "subAgentFlows": []
+  }
+}

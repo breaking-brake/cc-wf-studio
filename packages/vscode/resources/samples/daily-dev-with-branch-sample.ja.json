@@ -1,0 +1,207 @@
+{
+  "meta": {
+    "id": "daily-dev-with-branch-sample",
+    "nameKey": "sample.dailyDevWithBranch.name",
+    "descriptionKey": "sample.dailyDevWithBranch.description",
+    "difficulty": "intermediate",
+    "tags": [
+      "development",
+      "branch-session",
+      "human-in-the-loop"
+    ],
+    "nodeCount": 8
+  },
+  "workflow": {
+    "id": "workflow-daily-dev-with-branch",
+    "name": "daily-dev-with-branch",
+    "version": "1.0.0",
+    "nodes": [
+      {
+        "id": "start-1",
+        "type": "start",
+        "name": "start-1",
+        "position": {
+          "x": 120,
+          "y": 315
+        },
+        "data": {
+          "label": "Start"
+        }
+      },
+      {
+        "id": "hearing-1",
+        "type": "prompt",
+        "name": "hearing-1",
+        "position": {
+          "x": 300,
+          "y": 300
+        },
+        "data": {
+          "label": "Hearing",
+          "prompt": "今日実現したいことをユーザーにヒアリングしてください。以下を明確にします:\n- 実現したいこと（ゴール）\n- 背景・動機\n- 対象範囲（対象リポジトリ・ディレクトリ・機能）\n- 制約条件（時間、触ってはいけない箇所、依存関係など)\n- 完了条件（何をもって完了とするか）\n\n曖昧な点があれば追加で質問し、最後にヒアリング結果を箇条書きで要約してユーザーに確認を取ってください。"
+        }
+      },
+      {
+        "id": "planning-1",
+        "type": "subAgent",
+        "name": "planning-1",
+        "position": {
+          "x": 645,
+          "y": 300
+        },
+        "data": {
+          "description": "ヒアリング結果に基づいて実装プランを策定する",
+          "agentDefinition": "実装計画の設計を専門とするプランニングエージェント。コードベースを調査し、アーキテクチャ上のトレードオフを考慮した段階的な実装計画を作成する。",
+          "prompt": "前段のヒアリング結果を基に、実装プランを策定してください。\n- 関連するコードベースを調査し、変更が必要なファイルを特定する\n- 実装ステップを順序立てて列挙する\n- リスクや注意点、検証方法を明記する\n最終的にステップバイステップの実装計画を出力してください。",
+          "builtInType": "plan",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        }
+      },
+      {
+        "id": "development-1",
+        "type": "subAgent",
+        "name": "development-1",
+        "position": {
+          "x": 975,
+          "y": 300
+        },
+        "data": {
+          "description": "実装プランに従って開発を実行する",
+          "agentDefinition": "コードの実装・編集・テスト実行まで行う汎用開発エージェント。実装計画に忠実に従い、変更内容と検証結果を報告する。",
+          "prompt": "前段で策定された実装プランに従って開発を実行してください。\n- 計画のステップ順に実装する\n- 既存コードのスタイル・規約に合わせる\n- 可能であればテストやビルドで動作を検証する\n完了後、変更したファイル一覧・実装内容・検証結果を報告してください。",
+          "builtInType": "general-purpose",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        }
+      },
+      {
+        "id": "branch-session-1",
+        "type": "branchSession",
+        "name": "branch-session-1",
+        "position": {
+          "x": 1305,
+          "y": 300
+        },
+        "data": {
+          "label": "Branch Session Work",
+          "workDescription": "開発結果に対する質問への回答、コードレビュー、修正作業を人間とAIが共同で行う。実装内容の確認、命名や設計の調整、不明点の解消などを対話的に実施し、結果を親セッションに引き継ぐ。",
+          "outputPorts": 1
+        }
+      },
+      {
+        "id": "completion-check-1",
+        "type": "askUserQuestion",
+        "name": "completion-check-1",
+        "position": {
+          "x": 1665,
+          "y": 285
+        },
+        "data": {
+          "questionText": "ブランチセッションからの報告を受けました。今回の作業は完了としてよいですか？",
+          "options": [
+            {
+              "id": "opt-done",
+              "label": "完了",
+              "description": "作業は完了。振り返りフェーズに進む"
+            },
+            {
+              "id": "opt-continue",
+              "label": "継続",
+              "description": "まだ作業が残っている。再度ブランチセッションで質問・修正を続ける"
+            }
+          ],
+          "multiSelect": false,
+          "useAiSuggestions": false,
+          "outputPorts": 2
+        }
+      },
+      {
+        "id": "retrospective-1",
+        "type": "prompt",
+        "name": "retrospective-1",
+        "position": {
+          "x": 2010,
+          "y": 300
+        },
+        "data": {
+          "label": "Retrospective",
+          "prompt": "今回の作業を振り返り、今後に引き継ぎたい改善点を洗い出してください。\n\n1. 今回のセッションで得られた学び・つまずいた点・繰り返し発生した指摘を列挙する\n2. それぞれについて、以下のどこに記録すべきか判断する:\n   - CLAUDE.md の更新（プロジェクト全体の恒久的なルール・規約）\n   - .claude/rules/ の更新または新規追加（特定トピックの詳細ルール）\n   - MEMORY.md への記録（セッションをまたいで覚えておきたい事実・コンテキスト）\n   - 記録不要（今回限りの事象）\n3. 判断結果をユーザーに提示して確認を取り、承認された項目について実際にファイルを更新・追加する\n\n更新が完了したら、記録した内容の一覧を報告してください。"
+        }
+      },
+      {
+        "id": "end-1",
+        "type": "end",
+        "name": "end-1",
+        "position": {
+          "x": 2325,
+          "y": 315
+        },
+        "data": {
+          "label": "End"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c1",
+        "from": "start-1",
+        "to": "hearing-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c2",
+        "from": "hearing-1",
+        "to": "planning-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c3",
+        "from": "planning-1",
+        "to": "development-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c4",
+        "from": "development-1",
+        "to": "branch-session-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c5",
+        "from": "branch-session-1",
+        "to": "completion-check-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c6",
+        "from": "completion-check-1",
+        "to": "retrospective-1",
+        "fromPort": "branch-0",
+        "toPort": "input"
+      },
+      {
+        "id": "c7",
+        "from": "completion-check-1",
+        "to": "branch-session-1",
+        "fromPort": "branch-1",
+        "toPort": "input"
+      },
+      {
+        "id": "c8",
+        "from": "retrospective-1",
+        "to": "end-1",
+        "fromPort": "output",
+        "toPort": "input"
+      }
+    ],
+    "createdAt": "2026-07-11T00:00:00.000Z",
+    "updatedAt": "2026-07-11T00:00:00.000Z",
+    "subAgentFlows": []
+  }
+}

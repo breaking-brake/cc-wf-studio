@@ -18,6 +18,7 @@ import {
   nodeNameToFileName,
   planAgentSkillFiles,
   planWorkflowExportFiles,
+  workflowContainsClaudeCodeOnlyNodes,
 } from '@cc-wf-studio/core';
 import { Command, InvalidArgumentError } from 'commander';
 import { WorkflowLoadError, loadWorkflowFromFile } from '../utils/load-workflow.js';
@@ -87,6 +88,12 @@ async function pathExists(target: string): Promise<boolean> {
 export async function runExport(options: ExportRunOptions): Promise<ExportRunResult> {
   const { workflow } = await loadWorkflowFromFile(options.file);
   const rootDir = path.resolve(options.cwd ?? process.cwd());
+
+  if (options.agent !== CLAUDE_CODE_AGENT && workflowContainsClaudeCodeOnlyNodes(workflow)) {
+    process.stderr.write(
+      `warning: this workflow contains Claude Code-only node(s) (e.g. branchSession); ${options.agent} cannot execute those steps.\n`
+    );
+  }
 
   const plan =
     options.agent === CLAUDE_CODE_AGENT

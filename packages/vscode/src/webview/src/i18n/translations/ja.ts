@@ -161,6 +161,23 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'node.codex.untitled': '無題のCodex Agent',
   'node.codex.aiGenerated': 'AI生成',
 
+  // Branch Session Node (Feature: branch-session-node, Claude Code only)
+  'node.branchSession.title': 'Branch Session',
+  'node.branchSession.description':
+    'ブランチセッションで人とAIが共同作業するための一時停止点（Claude Code限定）',
+  'property.branchSession.workDescription': '作業内容',
+  'property.branchSession.workDescriptionPlaceholder':
+    'ブランチセッションでユーザーとAIが共同で行う作業内容（省略可能）',
+  'property.branchSession.workDescription.help':
+    '生成される指示文に埋め込まれ、セッションが共同作業のスコープを把握できます',
+  'property.branchSession.claudeCodeOnlyNotice':
+    'このノードはClaude Code専用です。ワークフローを一時停止し、ユーザーがブランチセッション（/branch）でAIと対話的に作業した後、結果を引き継いで（/resume）続行します。',
+  'default.newBranchSession': '新しいBranch Session',
+  'dialog.claudeOnlyExport.title': 'Claude Code専用ノード',
+  'dialog.claudeOnlyExport.message':
+    'このワークフローにはClaude Codeでのみ動作するブランチセッションノードが含まれています。他のAIエージェントはこのステップを実行できません。それでもエクスポートしますか？',
+  'dialog.claudeOnlyExport.confirm': 'エクスポートする',
+
   // Codex Dialog (Feature: 518-codex-agent-node)
   'codex.title': 'Codex Agentを作成',
   'codex.description': 'ワークフロー用のOpenAI Codex CLIエージェントを設定します。',
@@ -1030,4 +1047,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'sample.dailyDevFlowWithWorktree.name': 'Git Worktreeを使った日常開発フロー',
   'sample.dailyDevFlowWithWorktree.description':
     'git worktreeを使った日常開発フロー：タスクヒアリング、ブランチ提案＆worktree作成、調査、計画、承認、実装、品質チェック、コミット＆PR下書き。',
+  'sample.dailyDevWithBranch.name': 'ブランチセッションを使った日常開発',
+  'sample.dailyDevWithBranch.description':
+    'ヒアリング→計画→実装ののち、レビュー・修正をClaude Codeのブランチセッションに分離して人とAIが共同で行う日常開発フロー。対話の長いレビュー作業のコンテキスト消費を分岐先に隔離し、親セッションを軽く保ったまま完了までループできる。長くコンテキストを消費する中〜大規模タスク向け。Claude Code限定。',
 };

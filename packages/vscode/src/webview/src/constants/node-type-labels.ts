@@ -18,6 +18,7 @@ export const NODE_TYPE_LABELS: Record<string, string> = {
   skill: 'Skill',
   mcp: 'MCP Tool',
   codex: 'Codex Agent',
+  branchSession: 'Branch Session',
   group: 'Group',
 } as const;
 

@@ -34,6 +34,7 @@ import { DeletableEdge } from './edges/DeletableEdge';
 import { MinimapContainer } from './MinimapContainer';
 import { AskUserQuestionNodeComponent } from './nodes/AskUserQuestionNode';
 import { BranchNodeComponent } from './nodes/BranchNode';
+import { BranchSessionNode } from './nodes/BranchSessionNode';
 // 新規ノードタイプのインポート
 import { CodexNodeComponent } from './nodes/CodexNode';
 import { EndNode } from './nodes/EndNode';
@@ -68,6 +69,7 @@ const nodeTypes: NodeTypes = {
   mcp: McpNodeComponent, // Feature: 001-mcp-node
   subAgentFlow: SubAgentFlowNodeComponent, // Feature: 089-subworkflow
   codex: CodexNodeComponent, // Feature: 518-codex-agent-node
+  branchSession: BranchSessionNode, // Feature: branch-session-node (Claude Code only)
   group: GroupNodeComponent, // Feature: group-node
 };
 
@@ -483,6 +485,8 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
                           return 'var(--vscode-charts-purple)';
                         case 'codex':
                           return 'var(--vscode-charts-orange)';
+                        case 'branchSession':
+                          return 'var(--vscode-charts-cyan)';
                         case 'group':
                           return 'var(--vscode-panel-border)';
                         default:

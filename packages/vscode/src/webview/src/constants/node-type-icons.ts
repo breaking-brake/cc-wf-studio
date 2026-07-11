@@ -8,6 +8,7 @@ import type { LucideIcon } from 'lucide-react';
 import {
   Bot,
   GitBranch,
+  GitBranchPlus,
   GitFork,
   MessageSquare,
   Play,
@@ -26,6 +27,7 @@ export const NODE_TYPE_ICONS: Record<string, LucideIcon> = {
   subAgent: Bot,
   subAgentFlow: Bot,
   codex: Terminal,
+  branchSession: GitBranchPlus,
   skill: Zap,
   mcp: Plug,
   ifElse: GitBranch,

@@ -15,6 +15,7 @@
       "mcp",
       "subAgentFlow",
       "codex",
+      "branchSession",
       "group"
     ]
   },
@@ -592,6 +593,21 @@
       "inputPorts": 1,
       "outputPorts": 1
     },
+    "branchSession": {
+      "description": "Human-in-the-loop checkpoint (Claude Code ONLY). The workflow pauses and the user opens a Claude Code branch session (/branch) to work interactively TOGETHER WITH the AI (code understanding, review, edits), then hands the results back to the parent session (/resume) and the workflow continues. Use when a step needs joint human+AI work — unlike subAgent (autonomous delegation) or askUserQuestion (a single question). Do NOT use for workflows targeting agents other than Claude Code.",
+      "fields": {
+        "label": { "type": "string", "required": true, "minLength": 1, "maxLength": 50 },
+        "workDescription": {
+          "type": "string",
+          "required": false,
+          "maxLength": 2000,
+          "description": "Scope of the joint human+AI work performed in the branch session (e.g. 'Review the generated code and adjust naming'). Injected into the generated instructions."
+        },
+        "outputPorts": { "type": "number", "required": true, "value": 1 }
+      },
+      "inputPorts": 1,
+      "outputPorts": 1
+    },
     "group": {
       "description": "Visual grouping container for organizing nodes. Does not affect execution flow.",
       "fields": {
@@ -866,11 +882,12 @@
     "description": "Constraints specific to Sub-Agent Flow editing. When refining a Sub-Agent Flow, these rules MUST be followed.",
     "maxNodes": 100,
     "supportedNodeTypes": ["start", "end", "prompt", "ifElse", "switch", "skill", "mcp", "codex"],
-    "prohibitedNodeTypes": ["subAgent", "subAgentFlow", "askUserQuestion"],
+    "prohibitedNodeTypes": ["subAgent", "subAgentFlow", "askUserQuestion", "branchSession"],
     "rules": [
       "Sub-Agent Flows cannot contain SubAgent nodes (Claude Code constraint for sequential execution)",
       "Sub-Agent Flows cannot contain SubAgentFlow nodes (no nesting allowed in Phase 1 MVP)",
       "Sub-Agent Flows cannot contain AskUserQuestion nodes (user interaction not supported in sub-agent context)",
+      "Sub-Agent Flows cannot contain BranchSession nodes (user interaction not supported in sub-agent context)",
       "Sub-Agent Flows must have exactly one Start node and at least one End node",
       "Maximum 100 nodes per Sub-Agent Flow"
     ]

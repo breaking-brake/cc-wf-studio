@@ -155,6 +155,18 @@ export interface WebviewTranslationKeys {
   'node.codex.untitled': string;
   'node.codex.aiGenerated': string;
 
+  // Branch Session Node (Feature: branch-session-node, Claude Code only)
+  'node.branchSession.title': string;
+  'node.branchSession.description': string;
+  'property.branchSession.workDescription': string;
+  'property.branchSession.workDescriptionPlaceholder': string;
+  'property.branchSession.workDescription.help': string;
+  'property.branchSession.claudeCodeOnlyNotice': string;
+  'default.newBranchSession': string;
+  'dialog.claudeOnlyExport.title': string;
+  'dialog.claudeOnlyExport.message': string;
+  'dialog.claudeOnlyExport.confirm': string;
+
   // Codex Dialog (Feature: 518-codex-agent-node)
   'codex.title': string;
   'codex.description': string;
@@ -947,4 +959,6 @@ export interface WebviewTranslationKeys {
   'sample.githubIssuePlanning.description': string;
   'sample.dailyDevFlowWithWorktree.name': string;
   'sample.dailyDevFlowWithWorktree.description': string;
+  'sample.dailyDevWithBranch.name': string;
+  'sample.dailyDevWithBranch.description': string;
 }

@@ -11,6 +11,7 @@ import type { CommandReference } from '@shared/types/messages';
 import {
   Bot,
   GitBranch,
+  GitBranchPlus,
   GitFork,
   MessageSquare,
   PanelLeftClose,
@@ -248,6 +249,21 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
         label: t('default.newPrompt'),
         prompt: t('default.prompt'),
         variables: {},
+      },
+    };
+    addNode(newNode);
+  };
+
+  const handleAddBranchSessionNode = () => {
+    const position = calculateNonOverlappingPosition(350, 200);
+    const newNode = {
+      id: `branch-session-${Date.now()}`,
+      type: 'branchSession' as const,
+      position,
+      data: {
+        label: t('default.newBranchSession'),
+        workDescription: '',
+        outputPorts: 1 as const,
       },
     };
     addNode(newNode);
@@ -946,6 +962,53 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
               }}
             >
               {t('node.askUserQuestion.description')}
+            </div>
+          )}
+        </button>
+      )}
+
+      {/* Branch Session Node Button - hidden in SubAgentFlow edit mode (Claude Code only) */}
+      {!isEditingSubAgentFlow && (
+        <button
+          type="button"
+          onClick={handleAddBranchSessionNode}
+          data-tour="add-branch-session-button"
+          style={{
+            width: '100%',
+            padding: isCompact ? '8px' : '12px',
+            marginBottom: isCompact ? '8px' : '12px',
+            backgroundColor: 'var(--vscode-button-background)',
+            color: 'var(--vscode-button-foreground)',
+            border: '1px solid var(--vscode-button-border)',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: isCompact ? '11px' : '13px',
+            fontWeight: 500,
+            textAlign: 'left',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--vscode-button-hoverBackground)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--vscode-button-background)';
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+            <GitBranchPlus size={14} />
+            {t('node.branchSession.title')}
+          </div>
+          {!isCompact && (
+            <div
+              style={{
+                fontSize: '11px',
+                color: 'var(--vscode-button-foreground)',
+                opacity: 0.8,
+              }}
+            >
+              {t('node.branchSession.description')}
             </div>
           )}
         </button>

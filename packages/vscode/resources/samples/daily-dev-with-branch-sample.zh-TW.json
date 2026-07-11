@@ -1,0 +1,207 @@
+{
+  "meta": {
+    "id": "daily-dev-with-branch-sample",
+    "nameKey": "sample.dailyDevWithBranch.name",
+    "descriptionKey": "sample.dailyDevWithBranch.description",
+    "difficulty": "intermediate",
+    "tags": [
+      "development",
+      "branch-session",
+      "human-in-the-loop"
+    ],
+    "nodeCount": 8
+  },
+  "workflow": {
+    "id": "workflow-daily-dev-with-branch",
+    "name": "daily-dev-with-branch",
+    "version": "1.0.0",
+    "nodes": [
+      {
+        "id": "start-1",
+        "type": "start",
+        "name": "start-1",
+        "position": {
+          "x": 120,
+          "y": 315
+        },
+        "data": {
+          "label": "Start"
+        }
+      },
+      {
+        "id": "hearing-1",
+        "type": "prompt",
+        "name": "hearing-1",
+        "position": {
+          "x": 300,
+          "y": 300
+        },
+        "data": {
+          "label": "Hearing",
+          "prompt": "向使用者了解今天想要實現的目標。明確以下內容:\n- 想要實現的事情（目標）\n- 背景與動機\n- 涉及範圍（目標儲存庫、目錄、功能）\n- 約束條件（時間、不可改動的部分、依賴關係等）\n- 完成條件（以什麼作為完成的標準）\n\n如有不明確之處請追加提問，最後將訪談結果以列表形式總結並請使用者確認。"
+        }
+      },
+      {
+        "id": "planning-1",
+        "type": "subAgent",
+        "name": "planning-1",
+        "position": {
+          "x": 645,
+          "y": 300
+        },
+        "data": {
+          "description": "基於訪談結果制定實作計畫",
+          "agentDefinition": "專門設計實作計畫的規劃代理。調查程式碼庫，制定考慮架構權衡的分步實作計畫。",
+          "prompt": "基於上一步的訪談結果制定實作計畫。\n- 調查相關程式碼庫，確定需要修改的檔案\n- 按順序列出實作步驟\n- 寫明風險、注意事項和驗證方法\n最終輸出分步的實作計畫。",
+          "builtInType": "plan",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        }
+      },
+      {
+        "id": "development-1",
+        "type": "subAgent",
+        "name": "development-1",
+        "position": {
+          "x": 975,
+          "y": 300
+        },
+        "data": {
+          "description": "按照實作計畫執行開發",
+          "agentDefinition": "負責程式碼實作、編輯和測試執行的通用開發代理。忠實遵循實作計畫，並報告變更內容和驗證結果。",
+          "prompt": "按照上一步制定的實作計畫執行開發。\n- 按計畫的步驟順序實作\n- 遵循現有程式碼的風格與規範\n- 盡可能透過測試或建置驗證\n完成後，報告修改的檔案列表、實作內容和驗證結果。",
+          "builtInType": "general-purpose",
+          "agentType": "claudeCode",
+          "outputPorts": 1
+        }
+      },
+      {
+        "id": "branch-session-1",
+        "type": "branchSession",
+        "name": "branch-session-1",
+        "position": {
+          "x": 1305,
+          "y": 300
+        },
+        "data": {
+          "label": "Branch Session Work",
+          "workDescription": "由人與AI共同完成對開發結果的答疑、程式碼審查和修改工作。以對話方式確認實作內容、調整命名與設計、解決疑問，並將結果交接回父工作階段。",
+          "outputPorts": 1
+        }
+      },
+      {
+        "id": "completion-check-1",
+        "type": "askUserQuestion",
+        "name": "completion-check-1",
+        "position": {
+          "x": 1665,
+          "y": 285
+        },
+        "data": {
+          "questionText": "已收到分支工作階段的報告。本次工作可以視為完成嗎？",
+          "options": [
+            {
+              "id": "opt-done",
+              "label": "完成",
+              "description": "工作已完成。進入回顧階段"
+            },
+            {
+              "id": "opt-continue",
+              "label": "繼續",
+              "description": "仍有剩餘工作。再次進入分支工作階段繼續提問和修改"
+            }
+          ],
+          "multiSelect": false,
+          "useAiSuggestions": false,
+          "outputPorts": 2
+        }
+      },
+      {
+        "id": "retrospective-1",
+        "type": "prompt",
+        "name": "retrospective-1",
+        "position": {
+          "x": 2010,
+          "y": 300
+        },
+        "data": {
+          "label": "Retrospective",
+          "prompt": "回顧本次工作，梳理希望延續到今後的改進點。\n\n1. 列出本次工作階段中獲得的經驗、遇到的問題、反覆出現的指摘\n2. 針對每一項，判斷應記錄到哪裡:\n   - 更新 CLAUDE.md（專案整體的永久規則與規範）\n   - 更新或新增 .claude/rules/（特定主題的詳細規則）\n   - 記錄到 MEMORY.md（跨工作階段需要記住的事實與脈絡）\n   - 無需記錄（僅限本次的事件）\n3. 將判斷結果提交給使用者確認，對已核准的項目實際更新或新增檔案\n\n更新完成後，報告所記錄內容的列表。"
+        }
+      },
+      {
+        "id": "end-1",
+        "type": "end",
+        "name": "end-1",
+        "position": {
+          "x": 2325,
+          "y": 315
+        },
+        "data": {
+          "label": "End"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c1",
+        "from": "start-1",
+        "to": "hearing-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c2",
+        "from": "hearing-1",
+        "to": "planning-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c3",
+        "from": "planning-1",
+        "to": "development-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c4",
+        "from": "development-1",
+        "to": "branch-session-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c5",
+        "from": "branch-session-1",
+        "to": "completion-check-1",
+        "fromPort": "output",
+        "toPort": "input"
+      },
+      {
+        "id": "c6",
+        "from": "completion-check-1",
+        "to": "retrospective-1",
+        "fromPort": "branch-0",
+        "toPort": "input"
+      },
+      {
+        "id": "c7",
+        "from": "completion-check-1",
+        "to": "branch-session-1",
+        "fromPort": "branch-1",
+        "toPort": "input"
+      },
+      {
+        "id": "c8",
+        "from": "retrospective-1",
+        "to": "end-1",
+        "fromPort": "output",
+        "toPort": "input"
+      }
+    ],
+    "createdAt": "2026-07-11T00:00:00.000Z",
+    "updatedAt": "2026-07-11T00:00:00.000Z",
+    "subAgentFlows": []
+  }
+}
