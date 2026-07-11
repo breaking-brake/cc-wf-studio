@@ -18,11 +18,19 @@
 
 import { NodeType } from '../types/workflow-definition.js';
 import type { PropertySchema } from './field.js';
+import { branchSessionPropertySchema } from './nodes/branch-session-schema.js';
+import { codexPropertySchema } from './nodes/codex-schema.js';
+import { groupPropertySchema } from './nodes/group-schema.js';
+import { promptPropertySchema } from './nodes/prompt-schema.js';
 import { subAgentPropertySchema } from './nodes/sub-agent-schema.js';
 
 /** Property schemas for the node types migrated to the schema-driven model. */
 export const NODE_PROPERTY_SCHEMAS: Partial<Record<NodeType, PropertySchema>> = {
   [NodeType.SubAgent]: subAgentPropertySchema,
+  [NodeType.Prompt]: promptPropertySchema,
+  [NodeType.BranchSession]: branchSessionPropertySchema,
+  [NodeType.Codex]: codexPropertySchema,
+  [NodeType.Group]: groupPropertySchema,
 };
 
 /**

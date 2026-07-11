@@ -9,6 +9,10 @@
 
 export * from './targets.js';
 export * from './field.js';
+export * from './nodes/branch-session-schema.js';
+export * from './nodes/codex-schema.js';
+export * from './nodes/group-schema.js';
+export * from './nodes/prompt-schema.js';
 export * from './nodes/sub-agent-schema.js';
 export * from './node-schema-registry.js';
 export * from './queries.js';

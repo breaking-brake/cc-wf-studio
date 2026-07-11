@@ -15,9 +15,12 @@ export const SelectControl: React.FC<ControlProps> = ({
   readonly,
   onChange,
 }) => {
-  const { st } = useSchemaTranslation();
+  const { st, stOptional } = useSchemaTranslation();
   const meta = field.meta;
   const options = meta.options ?? [];
+  // Options with a `<labelKey>.option.<value>` translation show it; product
+  // terms (model names etc.) have no such key and render verbatim.
+  const optionLabel = (opt: string) => stOptional(`${meta.labelKey}.option.${opt}`) ?? opt;
 
   // A field whose zod type accepts undefined gets an explicit empty choice.
   const isOptional = field.zod.safeParse(undefined).success;
@@ -52,7 +55,7 @@ export const SelectControl: React.FC<ControlProps> = ({
         {isOptional && <option value="">-</option>}
         {options.map((opt) => (
           <option key={opt} value={opt}>
-            {opt}
+            {optionLabel(opt)}
           </option>
         ))}
         {meta.allowCustom && <option value={CUSTOM}>{st('property.select.custom')}</option>}

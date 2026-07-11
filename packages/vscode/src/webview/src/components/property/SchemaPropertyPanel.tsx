@@ -59,7 +59,16 @@ export const SchemaPropertyPanel: React.FC<SchemaPropertyPanelProps> = ({
   updateNodeData,
 }) => {
   const { st, stOptional } = useSchemaTranslation();
-  const { schema, derive, mode, i18nNamespace, Header, Footer, customControls } = config;
+  const {
+    schema,
+    derive,
+    mode,
+    i18nNamespace,
+    Header,
+    Footer,
+    customControls,
+    sectionDefaultOpen,
+  } = config;
   const data = node.data;
 
   const handleChange = (fieldName: string, value: unknown) => {
@@ -110,10 +119,13 @@ export const SchemaPropertyPanel: React.FC<SchemaPropertyPanelProps> = ({
           return null;
         }
         return (
+          // Keyed by node.id so switching nodes remounts the section and
+          // re-applies the computed defaultOpen (its open state is internal).
           <CollapsibleSection
-            key={item.sectionKey}
+            key={`${node.id}-${item.sectionKey}`}
             title={st(`${i18nNamespace}.section.${item.sectionKey}`)}
             hint={stOptional(`${i18nNamespace}.section.${item.sectionKey}.hint`)}
+            defaultOpen={sectionDefaultOpen?.[item.sectionKey]?.(data) ?? true}
           >
             {children}
           </CollapsibleSection>

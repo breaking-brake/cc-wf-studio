@@ -165,11 +165,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'node.branchSession.title': 'Branch Session',
   'node.branchSession.description':
     'ブランチセッションで人とAIが共同作業するための一時停止点（Claude Code限定）',
-  'property.branchSession.workDescription': '作業内容',
-  'property.branchSession.workDescriptionPlaceholder':
-    'ブランチセッションでユーザーとAIが共同で行う作業内容（省略可能）',
-  'property.branchSession.workDescription.help':
-    '生成される指示文に埋め込まれ、セッションが共同作業のスコープを把握できます',
   'property.branchSession.claudeCodeOnlyNotice':
     'このノードはClaude Code専用です。ワークフローを一時停止し、ユーザーがブランチセッション（/branch）でAIと対話的に作業した後、結果を引き継いで（/resume）続行します。',
   'default.newBranchSession': '新しいBranch Session',
@@ -271,8 +266,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.description': '説明',
   'property.prompt': 'プロンプト',
   'property.model': 'モデル',
-  'property.label': 'ラベル',
-  'property.label.placeholder': 'ラベルを入力',
   'property.evaluationTarget': '評価対象',
   'property.evaluationTarget.placeholder': '例：前のステップの実行結果',
   'property.evaluationTarget.help': '分岐条件で評価する対象を自然言語で記述',
@@ -332,9 +325,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.optionDescription.placeholder': '説明',
 
   // Prompt properties
-  'property.prompt.label': 'プロンプト',
-  'property.prompt.placeholder': '{{variables}}を含むプロンプトを入力',
-  'property.prompt.help': '動的な値には{{variableName}}構文を使用',
   'property.detectedVariables': '検出された変数（{count}）',
   'property.variablesSubstituted': '変数は実行時に置換されます',
 
@@ -976,6 +966,36 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.agentTypeLabel': 'エージェントタイプ',
   'subAgent.form.agentType.claudeCode': 'Claude Code',
   'subAgent.form.agentType.other': 'その他',
+  'prompt.field.label': 'ラベル',
+  'prompt.field.label.placeholder': 'ラベルを入力',
+  'prompt.field.prompt': 'プロンプト',
+  'prompt.field.prompt.placeholder': '{{variables}}を含むプロンプトを入力',
+  'prompt.field.prompt.help': '動的な値には{{variableName}}構文を使用',
+  'prompt.field.variables': '変数',
+  'branchSession.field.label': 'ラベル',
+  'branchSession.field.label.placeholder': 'ラベルを入力',
+  'branchSession.field.workDescription': '作業内容',
+  'branchSession.field.workDescription.placeholder':
+    'ブランチセッションでユーザーとAIが共同で行う作業内容（省略可能）',
+  'branchSession.field.workDescription.help':
+    '生成される指示文に埋め込まれ、セッションが共同作業のスコープを把握できます',
+  'codex.field.label': 'ノード名',
+  'codex.field.label.help': 'エクスポート時のファイル名に使用されます（例: "data-analysis"）',
+  'codex.field.promptMode': 'プロンプトモード',
+  'codex.field.promptMode.option.fixed': '固定',
+  'codex.field.promptMode.option.ai-generated': 'AI生成',
+  'codex.field.prompt': 'プロンプト',
+  'codex.field.prompt.placeholder': 'Codexエージェントへの指示を入力...',
+  'codex.field.model': 'モデル',
+  'codex.field.reasoningEffort': '推論レベル',
+  'codex.field.reasoningEffort.option.low': '低',
+  'codex.field.reasoningEffort.option.medium': '中',
+  'codex.field.reasoningEffort.option.high': '高',
+  'codex.field.skipGitRepoCheck': '--skip-git-repo-check',
+  'codex.field.sandbox': 'サンドボックスモード',
+  'codex.section.advanced': '詳細設定',
+  'group.field.label': 'ノード名',
+  'group.field.label.placeholder': 'Group',
   'subAgent.field.description': '説明',
   'subAgent.field.agentDefinition': 'エージェント定義',
   'subAgent.field.prompt': 'プロンプト',

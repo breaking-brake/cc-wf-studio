@@ -165,11 +165,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'node.branchSession.title': 'Branch Session',
   'node.branchSession.description':
     '브랜치 세션에서 사람과 AI가 공동 작업하기 위한 일시 정지 지점 (Claude Code 전용)',
-  'property.branchSession.workDescription': '작업 내용',
-  'property.branchSession.workDescriptionPlaceholder':
-    '브랜치 세션에서 사용자와 AI가 함께 수행할 작업 내용 (선택 사항)',
-  'property.branchSession.workDescription.help':
-    '생성된 지시문에 삽입되어 세션이 공동 작업의 범위를 파악할 수 있습니다',
   'property.branchSession.claudeCodeOnlyNotice':
     '이 노드는 Claude Code 전용입니다. 워크플로를 일시 정지하고 사용자가 브랜치 세션(/branch)에서 AI와 대화형으로 작업한 후 결과를 인계(/resume)하여 계속합니다.',
   'default.newBranchSession': '새 Branch Session',
@@ -271,8 +266,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.description': '설명',
   'property.prompt': '프롬프트',
   'property.model': '모델',
-  'property.label': '레이블',
-  'property.label.placeholder': '레이블 입력',
   'property.evaluationTarget': '평가 대상',
   'property.evaluationTarget.placeholder': '예: 이전 단계의 실행 결과',
   'property.evaluationTarget.help': '분기 조건에서 평가할 대상을 자연어로 설명',
@@ -332,9 +325,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.optionDescription.placeholder': '설명',
 
   // Prompt properties
-  'property.prompt.label': '프롬프트',
-  'property.prompt.placeholder': '{{variables}}를 포함하는 프롬프트 입력',
-  'property.prompt.help': '동적 값에는 {{variableName}} 구문 사용',
   'property.detectedVariables': '감지된 변수 ({count})',
   'property.variablesSubstituted': '변수는 런타임에 대체됩니다',
 
@@ -970,6 +960,36 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.agentTypeLabel': '에이전트 유형',
   'subAgent.form.agentType.claudeCode': 'Claude Code',
   'subAgent.form.agentType.other': '기타',
+  'prompt.field.label': '레이블',
+  'prompt.field.label.placeholder': '레이블 입력',
+  'prompt.field.prompt': '프롬프트',
+  'prompt.field.prompt.placeholder': '{{variables}}를 포함하는 프롬프트 입력',
+  'prompt.field.prompt.help': '동적 값에는 {{variableName}} 구문 사용',
+  'prompt.field.variables': '변수',
+  'branchSession.field.label': '레이블',
+  'branchSession.field.label.placeholder': '레이블 입력',
+  'branchSession.field.workDescription': '작업 내용',
+  'branchSession.field.workDescription.placeholder':
+    '브랜치 세션에서 사용자와 AI가 함께 수행할 작업 내용 (선택 사항)',
+  'branchSession.field.workDescription.help':
+    '생성된 지시문에 삽입되어 세션이 공동 작업의 범위를 파악할 수 있습니다',
+  'codex.field.label': '노드 이름',
+  'codex.field.label.help': '내보내기 파일 이름으로 사용됨 (예: "data-analysis")',
+  'codex.field.promptMode': '프롬프트 모드',
+  'codex.field.promptMode.option.fixed': '고정',
+  'codex.field.promptMode.option.ai-generated': 'AI 생성',
+  'codex.field.prompt': '프롬프트',
+  'codex.field.prompt.placeholder': 'Codex 에이전트에 대한 지침을 입력하세요...',
+  'codex.field.model': '모델',
+  'codex.field.reasoningEffort': '추론 수준',
+  'codex.field.reasoningEffort.option.low': '낮음',
+  'codex.field.reasoningEffort.option.medium': '중간',
+  'codex.field.reasoningEffort.option.high': '높음',
+  'codex.field.skipGitRepoCheck': '--skip-git-repo-check',
+  'codex.field.sandbox': '샌드박스 모드',
+  'codex.section.advanced': '고급 옵션',
+  'group.field.label': '노드 이름',
+  'group.field.label.placeholder': 'Group',
   'subAgent.field.description': '설명',
   'subAgent.field.agentDefinition': '에이전트 정의',
   'subAgent.field.prompt': '프롬프트',
