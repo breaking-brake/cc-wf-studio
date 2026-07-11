@@ -5,6 +5,7 @@
  * These agents have fixed model and tool configurations controlled by Claude Code.
  */
 
+import type { SubAgentModel } from '../schema/sub-agent-schema.js';
 import type { BuiltInSubAgentType } from '../types/workflow-definition.js';
 
 /** i18n keys for built-in sub-agent presets (must match WebviewTranslationKeys) */
@@ -31,7 +32,7 @@ export interface BuiltInSubAgentPreset {
   /** i18n key for the default task prompt template (what to TELL this agent to do) */
   defaultPromptKey: BuiltInI18nKey;
   /** Model used by this preset (e.g., 'haiku', 'inherit') */
-  model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
+  model?: SubAgentModel;
   /** Whether this preset is read-only (no file writes/edits) */
   readonly?: boolean;
   /** Human-readable tools description (read-only, controlled by preset) */

@@ -58,7 +58,7 @@ nodeTypes:
       model:
         type: string
         required: false
-        enum[4]: sonnet,opus,haiku,inherit
+        enum[5]: sonnet,opus,haiku,fable,inherit
         default: sonnet
       color:
         type: string

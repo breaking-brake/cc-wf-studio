@@ -13,6 +13,7 @@
  */
 
 import { BUILT_IN_SUB_AGENTS } from '../constants/built-in-sub-agents.js';
+import { CC_ONLY_MODELS } from '../schema/sub-agent-schema.js';
 import type { SubAgentFlowNode, SubAgentNode, Workflow } from '../types/workflow-definition.js';
 import {
   type PlannedExportFile,
@@ -175,7 +176,7 @@ export function planAgentSkillFiles(
         relativePath: `${spec.agentsDir}/${fileName}.md`,
         contents: generateSubAgentFile(node, {
           readonly: preset?.readonly,
-          omitModel: node.data.model === 'haiku',
+          omitModel: node.data.model !== undefined && CC_ONLY_MODELS.includes(node.data.model),
         }),
         kind: 'subAgent',
         sourceName: node.name,

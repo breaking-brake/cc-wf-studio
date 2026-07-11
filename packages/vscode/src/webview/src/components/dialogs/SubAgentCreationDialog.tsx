@@ -5,7 +5,7 @@
  * UX aligned with SkillBrowserDialog: browse-first with inline create option.
  */
 
-import type { BuiltInSubAgentType } from '@cc-wf-studio/core';
+import type { BuiltInSubAgentType, SubAgentModel } from '@cc-wf-studio/core';
 import { BUILT_IN_SUB_AGENTS } from '@cc-wf-studio/core';
 import * as Dialog from '@radix-ui/react-dialog';
 import type { CommandReference } from '@shared/types/messages';
@@ -128,7 +128,7 @@ export const SubAgentCreationDialog: React.FC<SubAgentCreationDialogProps> = ({
         agentDefinition: body,
         prompt: 'Execute the following task:',
         agentType: 'claudeCode',
-        model: (frontmatter.model as 'sonnet' | 'opus' | 'haiku' | 'inherit') || 'sonnet',
+        model: (frontmatter.model as SubAgentModel) || 'sonnet',
         tools: frontmatter.tools || '',
         memory: (frontmatter.memory as 'user' | 'project' | 'local' | '') || '',
       });

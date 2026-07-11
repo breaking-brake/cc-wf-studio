@@ -7,6 +7,7 @@
  * All output is in English for consistent AI consumption.
  */
 
+import { CC_ONLY_MODELS } from '../schema/sub-agent-schema.js';
 import type {
   AskUserQuestionNode,
   BranchNode,
@@ -758,7 +759,10 @@ export function generateExecutionInstructions(
         sections.push('');
       }
       const shouldOmitModelForBuiltIn =
-        provider !== 'claude-code' && node.data.builtInType && node.data.model === 'haiku';
+        provider !== 'claude-code' &&
+        node.data.builtInType &&
+        node.data.model !== undefined &&
+        CC_ONLY_MODELS.includes(node.data.model);
       if (node.data.model && node.data.model !== 'inherit' && !shouldOmitModelForBuiltIn) {
         sections.push(`**Model**: ${node.data.model}`);
         sections.push('');

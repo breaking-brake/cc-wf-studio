@@ -56,7 +56,7 @@
         "model": {
           "type": "string",
           "required": false,
-          "enum": ["sonnet", "opus", "haiku", "inherit"],
+          "enum": ["sonnet", "opus", "haiku", "fable", "inherit"],
           "default": "sonnet"
         },
         "color": {

@@ -5,6 +5,7 @@
  * Based on: /specs/001-ai-workflow-generation/research.md Q3
  */
 
+import { SUB_AGENT_MODEL_VALUES } from '../schema/sub-agent-schema.js';
 import {
   type Connection,
   type HookType,
@@ -328,6 +329,7 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
     // Validate SubAgent fields (Feature: 540-persistent-memory, 636-reference-model, 684-built-in-presets)
     if (node.type === NodeType.SubAgent) {
       const subAgentData = node.data as {
+        model?: string;
         memory?: string;
         commandFilePath?: string;
         commandScope?: string;
@@ -358,6 +360,16 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
             field: `nodes[${node.id}].data.commandScope`,
           });
         }
+      }
+      if (
+        subAgentData.model !== undefined &&
+        !(SUB_AGENT_MODEL_VALUES as readonly string[]).includes(subAgentData.model)
+      ) {
+        errors.push({
+          code: 'SUBAGENT_INVALID_MODEL',
+          message: `SubAgent model must be one of: ${SUB_AGENT_MODEL_VALUES.join(', ')}`,
+          field: `nodes[${node.id}].data.model`,
+        });
       }
       if (subAgentData.memory !== undefined) {
         const validMemoryScopes = ['user', 'project', 'local'];

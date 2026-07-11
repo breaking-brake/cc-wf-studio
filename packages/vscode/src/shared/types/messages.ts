@@ -4,7 +4,13 @@
  * Based on: /specs/001-cc-wf-studio/contracts/extension-webview-api.md
  */
 
-import type { Connection, TourStep, Workflow, WorkflowNode } from '@cc-wf-studio/core';
+import type {
+  Connection,
+  SubAgentModel,
+  TourStep,
+  Workflow,
+  WorkflowNode,
+} from '@cc-wf-studio/core';
 
 // Re-export Workflow for convenience
 export type { Connection, TourStep, Workflow, WorkflowNode };
@@ -300,7 +306,7 @@ export interface CreateSubAgentPayload {
   agentDefinition: string;
   prompt: string;
   agentType: 'claudeCode' | 'other';
-  model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
+  model?: SubAgentModel;
   tools?: string;
   commandFilePath?: string;
   memory?: 'user' | 'project' | 'local' | '';

@@ -16,6 +16,12 @@
 import { z } from 'zod';
 import { field, type PropertyField, toZodObject } from './field.js';
 
+export const SUB_AGENT_MODEL_VALUES = ['sonnet', 'opus', 'haiku', 'fable', 'inherit'] as const;
+export type SubAgentModel = (typeof SUB_AGENT_MODEL_VALUES)[number];
+
+/** Models that exist only in Claude Code; exporters for other providers omit them. */
+export const CC_ONLY_MODELS: readonly SubAgentModel[] = ['haiku', 'fable'];
+
 const SUB_AGENT_COLOR_VALUES = [
   'red',
   'blue',
@@ -49,11 +55,11 @@ export const subAgentPropertySchema = {
     control: 'select',
     options: ['claudeCode', 'other'],
   }),
-  model: field(z.enum(['sonnet', 'opus', 'haiku', 'inherit']).optional(), {
+  model: field(z.enum(SUB_AGENT_MODEL_VALUES).optional(), {
     targets: ['claudeCode'],
     labelKey: 'subAgent.field.model',
     control: 'select',
-    options: ['sonnet', 'opus', 'haiku', 'inherit'],
+    options: SUB_AGENT_MODEL_VALUES,
     controlledByBuiltIn: true,
   }),
   tools: field(z.string().optional(), {

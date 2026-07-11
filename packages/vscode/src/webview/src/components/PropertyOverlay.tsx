@@ -17,6 +17,7 @@ import {
   SUB_AGENT_COLORS,
   type SubAgentData,
   type SubAgentFlowNodeData,
+  type SubAgentModel,
   type SwitchNodeData,
   VALIDATION_RULES,
 } from '@cc-wf-studio/core';
@@ -25,6 +26,7 @@ import { BookOpen } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import type { Node } from 'reactflow';
+import { SUB_AGENT_MODEL_OPTIONS } from '../constants/model-options';
 import { getNodeTypeLabel } from '../constants/node-type-labels';
 import { useResizablePanel } from '../hooks/useResizablePanel';
 import { useTranslation } from '../i18n/i18n-context';
@@ -2925,7 +2927,7 @@ const SubAgentFlowProperties: React.FC<{
           value={data.model || 'sonnet'}
           onChange={(e) =>
             updateNodeData(node.id, {
-              model: e.target.value as 'sonnet' | 'opus' | 'haiku' | 'inherit',
+              model: e.target.value as SubAgentModel,
             })
           }
           className="nodrag"
@@ -2939,10 +2941,11 @@ const SubAgentFlowProperties: React.FC<{
             fontSize: '13px',
           }}
         >
-          <option value="sonnet">Sonnet</option>
-          <option value="opus">Opus</option>
-          <option value="haiku">Haiku</option>
-          <option value="inherit">Inherit</option>
+          {SUB_AGENT_MODEL_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
         </select>
       </div>
 

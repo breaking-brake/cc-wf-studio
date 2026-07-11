@@ -9,11 +9,12 @@
  * - "other": Shows only common fields (Description, Prompt)
  */
 
-import type { BuiltInSubAgentType } from '@cc-wf-studio/core';
+import type { BuiltInSubAgentType, SubAgentModel } from '@cc-wf-studio/core';
 import { BUILT_IN_SUB_AGENTS } from '@cc-wf-studio/core';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
 import { useCallback, useEffect, useId, useState } from 'react';
+import { SUB_AGENT_MODEL_OPTIONS } from '../../constants/model-options';
 import { useTranslation } from '../../i18n/i18n-context';
 import { CollapsibleSection } from '../common/CollapsibleSection';
 import type { SubAgentColor } from '../common/ColorPicker';
@@ -52,7 +53,7 @@ export interface SubAgentFormData {
   agentDefinition: string;
   prompt: string;
   agentType: AgentType;
-  model: 'sonnet' | 'opus' | 'haiku' | 'inherit';
+  model: SubAgentModel;
   tools?: string;
   memory?: 'user' | 'project' | 'local' | '';
   color?: SubAgentColor;
@@ -512,9 +513,7 @@ export function SubAgentFormDialog({
                       </label>
                       <Select.Root
                         value={formData.model}
-                        onValueChange={(val) =>
-                          handleFieldChange('model', val as 'sonnet' | 'opus' | 'haiku' | 'inherit')
-                        }
+                        onValueChange={(val) => handleFieldChange('model', val as SubAgentModel)}
                       >
                         <Select.Trigger
                           id={modelId}
@@ -548,12 +547,7 @@ export function SubAgentFormDialog({
                             }}
                           >
                             <Select.Viewport style={{ padding: '4px' }}>
-                              {[
-                                { value: 'sonnet', label: 'Sonnet' },
-                                { value: 'opus', label: 'Opus' },
-                                { value: 'haiku', label: 'Haiku' },
-                                { value: 'inherit', label: 'Inherit' },
-                              ].map((item) => (
+                              {SUB_AGENT_MODEL_OPTIONS.map((item) => (
                                 <Select.Item
                                   key={item.value}
                                   value={item.value}

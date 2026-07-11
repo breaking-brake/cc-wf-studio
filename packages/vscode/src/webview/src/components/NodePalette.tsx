@@ -5,7 +5,7 @@
  * Based on: /specs/001-cc-wf-studio/plan.md
  */
 
-import type { BuiltInSubAgentType, SubAgentFlow } from '@cc-wf-studio/core';
+import type { BuiltInSubAgentType, SubAgentFlow, SubAgentModel } from '@cc-wf-studio/core';
 import { BUILT_IN_SUB_AGENTS, NodeType } from '@cc-wf-studio/core';
 import type { CommandReference } from '@shared/types/messages';
 import {
@@ -209,7 +209,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
         description: formData.description,
         agentDefinition: formData.agentDefinition,
         prompt: formData.prompt,
-        model: (frontmatter.model as 'sonnet' | 'opus' | 'haiku' | 'inherit') || 'sonnet',
+        model: (frontmatter.model as SubAgentModel) || 'sonnet',
         tools: frontmatter.tools,
         memory: frontmatter.memory as 'user' | 'project' | 'local' | undefined,
         outputPorts: 1,

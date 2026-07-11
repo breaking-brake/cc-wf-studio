@@ -4,6 +4,8 @@
  * Based on: /specs/001-cc-wf-studio/data-model.md
  */
 
+import type { SubAgentModel } from '../schema/sub-agent-schema.js';
+
 // ============================================================================
 // Core Enums
 // ============================================================================
@@ -50,7 +52,7 @@ export interface WorkflowMetadata {
 export type SlashCommandContext = 'default' | 'fork';
 
 /** Model options for Slash Command execution */
-export type SlashCommandModel = 'default' | 'sonnet' | 'opus' | 'haiku' | 'inherit';
+export type SlashCommandModel = 'default' | SubAgentModel;
 
 export interface SlashCommandOptions {
   /** Context mode for execution. 'default' means no context line in output */
@@ -120,7 +122,7 @@ export interface SubAgentData {
   /** Agent type: 'claudeCode' shows Claude Code-specific fields, 'other' hides them */
   agentType?: 'claudeCode' | 'other';
   tools?: string;
-  model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
+  model?: SubAgentModel;
   /** Persistent memory scope for cross-conversation knowledge retention */
   memory?: 'user' | 'project' | 'local';
   color?: 'red' | 'blue' | 'green' | 'yellow' | 'purple' | 'orange' | 'pink' | 'cyan';
@@ -317,7 +319,7 @@ export interface SubAgentFlowNodeData {
   /** Number of output ports (fixed at 1 for SubAgentFlow nodes) */
   outputPorts: 1;
   /** Model to use for this sub-agent flow execution */
-  model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
+  model?: SubAgentModel;
   /** Persistent memory scope for cross-conversation knowledge retention */
   memory?: 'user' | 'project' | 'local';
   /** Comma-separated list of allowed tools */

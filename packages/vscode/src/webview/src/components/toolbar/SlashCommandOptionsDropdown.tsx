@@ -2,18 +2,19 @@
  * Slash Command Options Dropdown Component
  *
  * Provides options for Slash Command export (Export/Run):
- * - model: Specify the model to use for execution (inherit/sonnet/opus/haiku)
+ * - model: Specify the model to use for execution (see SUB_AGENT_MODEL_VALUES in core)
  * - context: fork - Exports with `context: fork` for isolated sub-agent execution (Claude Code v2.1.0+)
  * - hooks: Configure execution hooks (PreToolUse, PostToolUse, Stop)
  * - allowedTools: Configure allowed tools for Slash Command execution
  */
 
-import type {
-  HookEntry,
-  HookType,
-  SlashCommandContext,
-  SlashCommandModel,
-  WorkflowHooks,
+import {
+  type HookEntry,
+  type HookType,
+  type SlashCommandContext,
+  type SlashCommandModel,
+  SUB_AGENT_MODEL_VALUES,
+  type WorkflowHooks,
 } from '@cc-wf-studio/core';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import {
@@ -51,10 +52,7 @@ const CONTEXT_PRESETS: { value: SlashCommandContext; label: string }[] = [
 
 const MODEL_PRESETS: { value: SlashCommandModel; label: string }[] = [
   { value: 'default', label: 'default' },
-  { value: 'inherit', label: 'inherit' },
-  { value: 'haiku', label: 'haiku' },
-  { value: 'sonnet', label: 'sonnet' },
-  { value: 'opus', label: 'opus' },
+  ...SUB_AGENT_MODEL_VALUES.map((v) => ({ value: v, label: v })),
 ];
 
 const HOOK_TYPES: {
