@@ -119,8 +119,10 @@ export const SchemaPropertyPanel: React.FC<SchemaPropertyPanelProps> = ({
           return null;
         }
         return (
+          // Keyed by node.id so switching nodes remounts the section and
+          // re-applies the computed defaultOpen (its open state is internal).
           <CollapsibleSection
-            key={item.sectionKey}
+            key={`${node.id}-${item.sectionKey}`}
             title={st(`${i18nNamespace}.section.${item.sectionKey}`)}
             hint={stOptional(`${i18nNamespace}.section.${item.sectionKey}.hint`)}
             defaultOpen={sectionDefaultOpen?.[item.sectionKey]?.(data) ?? true}

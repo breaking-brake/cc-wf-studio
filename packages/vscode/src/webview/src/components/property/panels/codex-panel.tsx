@@ -69,7 +69,7 @@ const CodexSkipGitControl: React.FC<ControlProps> = ({ nodeId, value, readonly, 
         checked={value === true}
         onChange={(e) => onChange(e.target.checked)}
         disabled={readonly}
-        style={{ marginTop: '2px', cursor: 'pointer' }}
+        style={{ marginTop: '2px', cursor: readonly ? 'not-allowed' : 'pointer' }}
       />
       <div>
         <span
@@ -119,7 +119,7 @@ const CodexSandboxControl: React.FC<ControlProps> = ({ nodeId, value, readonly, 
           checked={!!sandbox}
           onChange={(e) => onChange(e.target.checked ? 'read-only' : undefined)}
           disabled={readonly}
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: readonly ? 'not-allowed' : 'pointer' }}
         />
         <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--vscode-foreground)' }}>
           {t('codex.sandboxLabel')}
