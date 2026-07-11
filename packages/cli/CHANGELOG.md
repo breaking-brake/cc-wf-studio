@@ -1,5 +1,14 @@
 # @cc-wf-studio/cli
 
+## 0.2.2
+
+### Patch Changes
+
+- 1119040: Update dependencies to resolve Dependabot alerts: bump ws to ^8.21.0 (CLI), vite to ^7.3.6, and refresh transitive dependencies (hono, dompurify, form-data, undici, markdown-it, linkify-it, js-yaml, esbuild) to patched versions
+- Updated dependencies [8c1e56a]
+  - @cc-wf-studio/core@0.4.0
+  - @cc-wf-studio/mcp@0.1.5
+
 ## 0.2.1
 
 ### Patch Changes

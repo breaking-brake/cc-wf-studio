@@ -1,6 +1,6 @@
 {
   "name": "@cc-wf-studio/core",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Core workflow schema, parser, serializer, Mermaid generation, and Claude Code export logic for cc-wf-studio",
   "license": "MIT",
   "type": "module",

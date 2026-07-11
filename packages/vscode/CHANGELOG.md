@@ -1,5 +1,15 @@
 # cc-wf-studio
 
+## 3.36.0
+
+### Minor Changes
+
+- 8c1e56a: feat: add branchSession node type — a Claude Code-only human-in-the-loop checkpoint where the user works interactively with the AI in a branch session (/branch) and hands results back to the parent session (/resume). Exporting/running workflows containing this node for non-Claude-Code targets shows a confirmation dialog (webview) or a warning (CLI). Includes a new "Daily Dev with Branch Session" sample workflow (5 locales) and a fix for the MCP server manager getting stuck in "already running" after a failed start.
+
+### Patch Changes
+
+- 1119040: Update dependencies to resolve Dependabot alerts: bump ws to ^8.21.0 (CLI), vite to ^7.3.6, and refresh transitive dependencies (hono, dompurify, form-data, undici, markdown-it, linkify-it, js-yaml, esbuild) to patched versions
+
 ## 3.35.1
 
 ### Patch Changes
