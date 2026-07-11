@@ -7,7 +7,7 @@
  */
 
 import { appliesToTarget, type FieldMeta, type PropertySchema } from './field.js';
-import { subAgentPropertySchema, subAgentZodObject } from './sub-agent-schema.js';
+import { subAgentPropertySchema, subAgentZodObject } from './nodes/sub-agent-schema.js';
 import type { ExportTarget } from './targets.js';
 
 /** Ordered list of `{ name, meta }` for rendering a schema's fields. */

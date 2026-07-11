@@ -7,13 +7,39 @@
  * applies to, how the UI renders it). A thin wrapper is preferred over zod's
  * `.meta()`/`.describe()` registry so consumers get strongly-typed access to
  * `targets` and render hints without stringly-typed registry lookups.
+ *
+ * Scope guardrails — what FieldMeta deliberately does NOT model:
+ * - side effects between fields (outputPorts sync etc.) → per-node pure
+ *   `derive*Update` functions exported next to each node schema
+ * - layout/styling hints → declaration order is render order
+ * - dialogs and navigation → Header/Footer slots in the webview panel config
+ * - cross-field validation → zod `refine` on the node's zod object
  */
 
 import { z } from 'zod';
 import { type ExportTarget, type FieldTargets, TARGET_ALL } from './targets.js';
 
 /** UI render hint for a property field. */
-export type FieldControl = 'select' | 'text' | 'tools' | 'color' | 'textarea';
+export type FieldControl =
+  | 'select'
+  | 'text'
+  | 'tools'
+  | 'color'
+  | 'textarea'
+  | 'checkbox'
+  | 'radio'
+  | 'objectArray';
+
+/** One column of an `objectArray` item row (text/textarea only by design). */
+export interface ArrayItemField {
+  /** Property name inside each array item object. */
+  name: string;
+  /** i18n key for the column label (optional — placeholder-only columns). */
+  labelKey?: string;
+  /** i18n key for the input placeholder. */
+  placeholderKey?: string;
+  control: 'text' | 'textarea';
+}
 
 /** Domain metadata attached to a property field. */
 export interface FieldMeta {
@@ -22,13 +48,37 @@ export interface FieldMeta {
   targets: FieldTargets;
   /** i18n key for the field's label (resolved by the webview). */
   labelKey: string;
-  /** How the UI should render the field's control. */
+  /** How the UI should render the field's control.
+   *  `undefined` = data-only field: validated/target-scoped but never rendered
+   *  by the generic panel (e.g. builtInType, MCP dynamic parameters). */
   control?: FieldControl;
-  /** Allowed values for `select`-style controls (single-sourced for the UI). */
+  /** Allowed values for `select`/`radio`-style controls (single-sourced for the UI). */
   options?: readonly string[];
-  /** When true, the value is governed by Claude Code's built-in agent preset
-   *  (e.g. built-in sub-agents control model/tools), so the UI shows it read-only. */
-  controlledByBuiltIn?: boolean;
+  /** i18n key for a help line rendered under the control. */
+  helpKey?: string;
+  /** i18n key for the control's placeholder text. */
+  placeholderKey?: string;
+  /** Groups this field into a CollapsibleSection. The section's title/hint
+   *  resolve to `<i18nNamespace>.section.<sectionKey>` (+ `.hint`) in the
+   *  webview. Fields sharing a key render together at the position of the
+   *  first occurrence, in declaration order. */
+  sectionKey?: string;
+  /** Hide the field unless the predicate holds for the node's current data. */
+  visibleWhen?: (data: Record<string, unknown>) => boolean;
+  /** Render the field read-only while the predicate holds (e.g. built-in
+   *  sub-agent presets controlling model/tools). */
+  readonlyWhen?: (data: Record<string, unknown>) => boolean;
+  /** i18n key for a suffix hint shown when `readonlyWhen` holds
+   *  (e.g. "(controlled by preset)"). */
+  readonlyHintKey?: string;
+  /** textarea only: pair the control with an "edit in external editor" button. */
+  editInEditor?: boolean;
+  /** select only: append a "custom" option that switches to free-text input. */
+  allowCustom?: boolean;
+  /** objectArray only: the columns rendered for each item row. */
+  itemFields?: readonly ArrayItemField[];
+  /** objectArray only: render an item's row read-only (e.g. switch default branch). */
+  itemReadonlyWhen?: (item: Record<string, unknown>) => boolean;
 }
 
 /** A single node property: its zod schema plus {@link FieldMeta}. */

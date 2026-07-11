@@ -15,7 +15,7 @@
 
 import { NodeType, type Workflow } from '../types/workflow-definition.js';
 import { getIgnoredFields } from './queries.js';
-import { subAgentPropertySchema } from './sub-agent-schema.js';
+import { subAgentPropertySchema } from './nodes/sub-agent-schema.js';
 import type { ExportTarget } from './targets.js';
 
 /** One human-readable warning per SubAgent field that `target` ignores. */

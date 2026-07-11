@@ -10,11 +10,9 @@
 import {
   type AskUserQuestionData,
   type BranchNodeData,
-  BUILT_IN_SUB_AGENTS,
   type CodexNodeData,
   type IfElseNodeData,
   type SkillNodeData,
-  SUB_AGENT_COLORS,
   type SubAgentData,
   type SubAgentFlowNodeData,
   type SubAgentModel,
@@ -30,18 +28,17 @@ import { SUB_AGENT_MODEL_OPTIONS } from '../constants/model-options';
 import { getNodeTypeLabel } from '../constants/node-type-labels';
 import { useResizablePanel } from '../hooks/useResizablePanel';
 import { useTranslation } from '../i18n/i18n-context';
-import { createSubAgent } from '../services/command-browser-service';
 import { openExternalUrl } from '../services/vscode-bridge';
 import { useWorkflowStore } from '../stores/workflow-store';
 import type { BranchSessionNodeData, PromptNodeData } from '../types/node-types';
 import { extractVariables } from '../utils/template-utils';
-import { CollapsibleSection } from './common/CollapsibleSection';
 import { ColorPicker } from './common/ColorPicker';
 import { EditInEditorButton } from './common/EditInEditorButton';
 import { ResizeHandle } from './common/ResizeHandle';
 import { McpNodeEditDialog } from './dialogs/McpNodeEditDialog';
 import { SkillNodeEditDialog } from './dialogs/SkillNodeEditDialog';
-import { SubAgentFormDialog } from './dialogs/SubAgentFormDialog';
+import { NODE_PANELS } from './property/node-panels';
+import { SchemaPropertyPanel } from './property/SchemaPropertyPanel';
 
 /**
  * PropertyOverlay Props
@@ -320,10 +317,12 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
             </div>
           )}
 
-          {/* Render properties based on node type */}
-          {selectedNode.type === 'subAgent' ? (
-            <SubAgentProperties
-              node={selectedNode as Node<SubAgentData>}
+          {/* Render properties based on node type. Schema-migrated types render
+              through the generic panel; the ternary chain shrinks per phase. */}
+          {selectedNode.type && NODE_PANELS[selectedNode.type] ? (
+            <SchemaPropertyPanel
+              node={selectedNode as Node<Record<string, unknown>>}
+              config={NODE_PANELS[selectedNode.type]}
               updateNodeData={updateNodeData}
             />
           ) : selectedNode.type === 'askUserQuestion' ? (
@@ -409,283 +408,6 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
           )}
         </>
       )}
-    </div>
-  );
-};
-
-/**
- * Sub-Agent Properties Editor (Read-Only + Edit Modal)
- */
-const SubAgentProperties: React.FC<{
-  node: Node<SubAgentData>;
-  updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
-}> = ({ node, updateNodeData }) => {
-  const { t } = useTranslation();
-  const data = node.data;
-  // `agentType` is retained for backward compatibility but no longer toggles
-  // the panel: settings are grouped per agent into collapsible sections so each
-  // setting's scope is visually explicit (see CollapsibleSection).
-  const agentType = data.agentType || 'claudeCode';
-  const isBuiltIn = !!data.builtInType;
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-
-  const labelStyle: React.CSSProperties = {
-    fontSize: '12px',
-    fontWeight: 600,
-    color: 'var(--vscode-descriptionForeground)',
-    marginBottom: '2px',
-  };
-
-  const valueStyle: React.CSSProperties = {
-    fontSize: '13px',
-    color: 'var(--vscode-foreground)',
-    wordBreak: 'break-word',
-  };
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      {/* Built-in badge */}
-      {isBuiltIn &&
-        (() => {
-          const builtInPreset = BUILT_IN_SUB_AGENTS.find((p) => p.type === data.builtInType);
-          return (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 10px',
-                backgroundColor: 'var(--vscode-textBlockQuote-background)',
-                borderLeft: '3px solid var(--vscode-terminal-ansiGreen)',
-                borderRadius: '0 4px 4px 0',
-                fontSize: '12px',
-              }}
-            >
-              <span
-                style={{
-                  padding: '1px 6px',
-                  backgroundColor: 'var(--vscode-terminal-ansiGreen)',
-                  color: '#ffffff',
-                  borderRadius: '3px',
-                  fontSize: '10px',
-                  fontWeight: 600,
-                }}
-              >
-                Built-in
-              </span>
-              <span style={{ fontWeight: 600 }}>
-                {builtInPreset ? builtInPreset.displayName : data.builtInType}
-              </span>
-            </div>
-          );
-        })()}
-
-      {/* Linked Command Badge (show at top when linked, hidden for built-in) */}
-      {!isBuiltIn && data.commandFilePath && (
-        <div>
-          <div style={labelStyle}>{t('subAgent.property.linkedCommand')}</div>
-          <div
-            style={{
-              padding: '8px 10px',
-              backgroundColor: 'var(--vscode-textBlockQuote-background)',
-              border: '1px solid var(--vscode-textBlockQuote-border)',
-              borderRadius: '4px',
-              fontSize: '12px',
-              fontFamily: 'var(--vscode-editor-font-family)',
-              color: 'var(--vscode-descriptionForeground)',
-              wordBreak: 'break-all',
-            }}
-          >
-            <span
-              style={{
-                display: 'inline-block',
-                padding: '1px 6px',
-                backgroundColor: 'var(--vscode-badge-background)',
-                color: 'var(--vscode-badge-foreground)',
-                borderRadius: '3px',
-                fontSize: '10px',
-                fontWeight: 600,
-                marginRight: '6px',
-                textTransform: 'uppercase',
-              }}
-            >
-              {data.commandScope || 'project'}
-            </span>
-            {data.commandFilePath}
-          </div>
-        </div>
-      )}
-
-      {/* Edit Button */}
-      <button
-        type="button"
-        onClick={() => setIsEditDialogOpen(true)}
-        style={{
-          width: '100%',
-          padding: '8px 16px',
-          fontSize: '13px',
-          fontWeight: 600,
-          border: 'none',
-          borderRadius: '4px',
-          backgroundColor: 'var(--vscode-button-background)',
-          color: 'var(--vscode-button-foreground)',
-          cursor: 'pointer',
-        }}
-      >
-        {t('subAgent.property.editButton')}
-      </button>
-
-      {/* Description (read-only) */}
-      <div>
-        <div style={labelStyle}>{t('property.description')}</div>
-        <div style={valueStyle}>{data.description || '-'}</div>
-      </div>
-
-      {/* Agent Definition (read-only, max 3 lines) */}
-      <div>
-        <div style={labelStyle}>{t('subAgent.form.agentDefinitionLabel')}</div>
-        <div
-          style={{
-            ...valueStyle,
-            fontFamily: 'var(--vscode-editor-font-family)',
-            whiteSpace: 'pre-wrap',
-            maxHeight: '4.5em',
-            lineHeight: '1.5',
-            overflow: 'hidden',
-          }}
-        >
-          {data.agentDefinition || '-'}
-        </div>
-      </div>
-
-      {/* Prompt (read-only, max 3 lines) */}
-      <div>
-        <div style={labelStyle}>{t('subAgent.form.promptLabel')}</div>
-        <div
-          style={{
-            ...valueStyle,
-            fontFamily: 'var(--vscode-editor-font-family)',
-            whiteSpace: 'pre-wrap',
-            maxHeight: '4.5em',
-            lineHeight: '1.5',
-            overflow: 'hidden',
-          }}
-        >
-          {data.prompt || '-'}
-        </div>
-      </div>
-
-      {/* Claude Code settings (read-only). Grouped in their own box so the
-          scope is explicit: model/tools/memory/color apply only when this
-          sub-agent is exported to Claude Code (targets:['claudeCode']). */}
-      <CollapsibleSection
-        title={t('subAgent.section.claudeCode')}
-        hint={t('subAgent.section.claudeCode.hint')}
-      >
-        <>
-          {/* Model */}
-          <div>
-            <div style={labelStyle}>{t('property.model')}</div>
-            <div style={valueStyle}>
-              {isBuiltIn
-                ? `${BUILT_IN_SUB_AGENTS.find((p) => p.type === data.builtInType)?.modelDescription || '-'} (${t('subAgent.builtIn.controlledByPreset')})`
-                : (data.model || 'sonnet').charAt(0).toUpperCase() +
-                  (data.model || 'sonnet').slice(1)}
-            </div>
-          </div>
-
-          {/* Tools */}
-          <div>
-            <div style={labelStyle}>{t('property.tools')}</div>
-            <div style={valueStyle}>
-              {isBuiltIn
-                ? `${BUILT_IN_SUB_AGENTS.find((p) => p.type === data.builtInType)?.toolsDescription || '-'} (${t('subAgent.builtIn.controlledByPreset')})`
-                : data.tools || '-'}
-            </div>
-          </div>
-
-          {/* Memory (hidden for built-in) */}
-          {!isBuiltIn && (
-            <div>
-              <div style={labelStyle}>{t('property.memory')}</div>
-              <div style={valueStyle}>{data.memory || '-'}</div>
-            </div>
-          )}
-
-          {/* Color (hidden for built-in) */}
-          {!isBuiltIn && (
-            <div>
-              <div style={labelStyle}>{t('properties.subAgent.color')}</div>
-              <div style={{ ...valueStyle, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                {data.color ? (
-                  <>
-                    <div
-                      style={{
-                        width: '14px',
-                        height: '14px',
-                        backgroundColor: SUB_AGENT_COLORS[data.color],
-                        borderRadius: '2px',
-                      }}
-                    />
-                    <span style={{ textTransform: 'capitalize' }}>{data.color}</span>
-                  </>
-                ) : (
-                  '-'
-                )}
-              </div>
-            </div>
-          )}
-        </>
-      </CollapsibleSection>
-
-      {/* Other agent settings — no per-node settings yet; the box reserves the
-          slot for future target-specific fields (e.g. ADK model selection). */}
-      <CollapsibleSection title={t('subAgent.section.other')} defaultOpen={false}>
-        <div style={{ ...valueStyle, color: 'var(--vscode-descriptionForeground)' }}>
-          {t('subAgent.section.other.empty')}
-        </div>
-      </CollapsibleSection>
-
-      {/* Edit Dialog */}
-      <SubAgentFormDialog
-        isOpen={isEditDialogOpen}
-        onClose={() => setIsEditDialogOpen(false)}
-        initialData={{
-          description: data.description,
-          agentDefinition: data.agentDefinition,
-          prompt: data.prompt,
-          agentType: agentType,
-          model: data.model || (data.builtInType ? 'inherit' : 'sonnet'),
-          tools: data.tools || '',
-          memory: data.memory || '',
-          color: data.color,
-          builtInType: data.builtInType,
-        }}
-        onSubmit={async (formData) => {
-          updateNodeData(node.id, {
-            description: formData.description,
-            agentDefinition: formData.agentDefinition,
-            prompt: formData.prompt,
-            agentType: formData.agentType,
-            // Claude Code settings are always persisted now (no longer gated by
-            // an agentType toggle). They apply on Claude Code export and are
-            // reported as ignored by other targets at export time.
-            model: formData.model,
-            tools: formData.tools || undefined,
-            memory: formData.memory || undefined,
-            color: formData.color,
-          });
-
-          if (data.commandFilePath) {
-            await createSubAgent({
-              ...formData,
-              commandFilePath: data.commandFilePath,
-            });
-          }
-
-          setIsEditDialogOpen(false);
-        }}
-      />
     </div>
   );
 };

@@ -254,6 +254,7 @@ export interface WebviewTranslationKeys {
   'property.nodeName': string;
   'property.nodeName.placeholder': string;
   'property.nodeName.help': string;
+  'property.select.custom': string;
   'property.description': string;
   'property.prompt': string;
   'property.model': string;
@@ -902,6 +903,16 @@ export interface WebviewTranslationKeys {
   'subAgent.form.agentTypeLabel': string;
   'subAgent.form.agentType.claudeCode': string;
   'subAgent.form.agentType.other': string;
+  // Schema-driven property panel field labels (subAgent)
+  'subAgent.field.description': string;
+  'subAgent.field.agentDefinition': string;
+  'subAgent.field.prompt': string;
+  'subAgent.field.agentType': string;
+  'subAgent.field.model': string;
+  'subAgent.field.tools': string;
+  'subAgent.field.memory': string;
+  'subAgent.field.color': string;
+  'subAgent.field.builtInType': string;
   'subAgent.section.claudeCode': string;
   'subAgent.section.claudeCode.hint': string;
   'subAgent.section.other': string;
