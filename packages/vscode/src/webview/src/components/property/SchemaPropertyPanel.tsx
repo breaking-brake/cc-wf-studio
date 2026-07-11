@@ -4,9 +4,11 @@
  *
  * Render order is schema declaration order. Fields sharing a `sectionKey`
  * render together inside a CollapsibleSection at the position of the key's
- * first occurrence. Fields without a `control` (data-only) and fields whose
- * `visibleWhen` predicate fails are skipped — unless a custom control is
- * registered for them in the panel config.
+ * first occurrence. Fields without a `control` (data-only) are skipped unless
+ * a custom control is registered for them in the panel config. A failing
+ * `visibleWhen` predicate always hides the field — including custom-control
+ * fields: custom controls override how a field renders, not whether it is
+ * visible.
  *
  * Every field change flows through the node's optional `derive` normalizer
  * (outputPorts sync etc.) before `updateNodeData` persists it.
