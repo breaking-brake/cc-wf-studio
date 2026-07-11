@@ -9,7 +9,8 @@
 
 export * from './targets.js';
 export * from './field.js';
-export * from './sub-agent-schema.js';
+export * from './nodes/sub-agent-schema.js';
+export * from './node-schema-registry.js';
 export * from './queries.js';
 export * from './warnings.js';
 export * from './claude-code-only.js';

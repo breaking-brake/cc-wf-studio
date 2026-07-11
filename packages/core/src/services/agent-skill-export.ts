@@ -13,7 +13,7 @@
  */
 
 import { BUILT_IN_SUB_AGENTS } from '../constants/built-in-sub-agents.js';
-import { CC_ONLY_MODELS } from '../schema/sub-agent-schema.js';
+import { CC_ONLY_MODELS } from '../schema/nodes/sub-agent-schema.js';
 import type { SubAgentFlowNode, SubAgentNode, Workflow } from '../types/workflow-definition.js';
 import {
   type PlannedExportFile,

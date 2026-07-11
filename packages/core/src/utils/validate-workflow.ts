@@ -5,7 +5,7 @@
  * Based on: /specs/001-ai-workflow-generation/research.md Q3
  */
 
-import { SUB_AGENT_MODEL_VALUES } from '../schema/sub-agent-schema.js';
+import { SUB_AGENT_MODEL_VALUES } from '../schema/nodes/sub-agent-schema.js';
 import {
   type Connection,
   type HookType,

@@ -5,7 +5,7 @@
  * These agents have fixed model and tool configurations controlled by Claude Code.
  */
 
-import type { SubAgentModel } from '../schema/sub-agent-schema.js';
+import type { SubAgentModel } from '../schema/nodes/sub-agent-schema.js';
 import type { BuiltInSubAgentType } from '../types/workflow-definition.js';
 
 /** i18n keys for built-in sub-agent presets (must match WebviewTranslationKeys) */

@@ -7,7 +7,7 @@
  * All output is in English for consistent AI consumption.
  */
 
-import { CC_ONLY_MODELS } from '../schema/sub-agent-schema.js';
+import { CC_ONLY_MODELS } from '../schema/nodes/sub-agent-schema.js';
 import type {
   AskUserQuestionNode,
   BranchNode,

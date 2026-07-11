@@ -16,25 +16,34 @@ export interface ColorPickerProps {
   value: SubAgentColor | undefined;
   onChange: (color: SubAgentColor | undefined) => void;
   disabled?: boolean;
+  /** Suppress the built-in label/help rows (schema panel renders its own). */
+  hideLabel?: boolean;
 }
 
-export const ColorPicker: React.FC<ColorPickerProps> = ({ value, onChange, disabled = false }) => {
+export const ColorPicker: React.FC<ColorPickerProps> = ({
+  value,
+  onChange,
+  disabled = false,
+  hideLabel = false,
+}) => {
   const { t } = useTranslation();
 
   return (
     <div>
-      <label
-        htmlFor="color-select"
-        style={{
-          display: 'block',
-          fontSize: '12px',
-          fontWeight: 600,
-          color: 'var(--vscode-foreground)',
-          marginBottom: '6px',
-        }}
-      >
-        {t('properties.subAgent.color')}
-      </label>
+      {!hideLabel && (
+        <label
+          htmlFor="color-select"
+          style={{
+            display: 'block',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--vscode-foreground)',
+            marginBottom: '6px',
+          }}
+        >
+          {t('properties.subAgent.color')}
+        </label>
+      )}
       <Select.Root
         value={value || 'none'}
         onValueChange={(val) => onChange(val === 'none' ? undefined : (val as SubAgentColor))}
@@ -133,15 +142,17 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({ value, onChange, disab
           </Select.Content>
         </Select.Portal>
       </Select.Root>
-      <div
-        style={{
-          fontSize: '11px',
-          color: 'var(--vscode-descriptionForeground)',
-          marginTop: '4px',
-        }}
-      >
-        {t('properties.subAgent.colorHelp')}
-      </div>
+      {!hideLabel && (
+        <div
+          style={{
+            fontSize: '11px',
+            color: 'var(--vscode-descriptionForeground)',
+            marginTop: '4px',
+          }}
+        >
+          {t('properties.subAgent.colorHelp')}
+        </div>
+      )}
     </div>
   );
 };

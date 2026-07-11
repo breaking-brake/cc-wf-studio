@@ -4,7 +4,7 @@
  * Based on: /specs/001-cc-wf-studio/data-model.md
  */
 
-import type { SubAgentModel } from '../schema/sub-agent-schema.js';
+import type { SubAgentModel } from '../schema/nodes/sub-agent-schema.js';
 
 // ============================================================================
 // Core Enums
