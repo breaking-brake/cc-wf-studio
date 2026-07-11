@@ -187,8 +187,8 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
             {getNodeTypeLabel(selectedNode.type)}
           </div>
 
-          {/* Node Name (only for subAgent, askUserQuestion, branch, ifElse, switch, prompt, skill, mcp, branchSession types) */}
-          {/* Note: codex uses label field instead of name, handled in CodexProperties */}
+          {/* Node Name (only for subAgent, askUserQuestion, branch, ifElse, switch, prompt, skill, mcp types) */}
+          {/* Note: codex and branchSession use the label field instead of name, handled in their own property editors */}
           {(selectedNode.type === 'subAgent' ||
             selectedNode.type === 'askUserQuestion' ||
             selectedNode.type === 'branch' ||
@@ -196,8 +196,7 @@ export const PropertyOverlay: React.FC<PropertyOverlayProps> = ({
             selectedNode.type === 'switch' ||
             selectedNode.type === 'prompt' ||
             selectedNode.type === 'skill' ||
-            selectedNode.type === 'mcp' ||
-            selectedNode.type === 'branchSession') && (
+            selectedNode.type === 'mcp') && (
             <div style={{ marginBottom: '16px' }}>
               <label
                 htmlFor="node-name-input"

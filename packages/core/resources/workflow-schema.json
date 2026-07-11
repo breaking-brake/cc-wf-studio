@@ -677,7 +677,17 @@
     "portNamingRules": {
       "description": "Port identifier conventions for each node type. Linear nodes: single output. Conditional nodes: multiple outputs (one per branch).",
       "linearNodes": {
-        "types": ["start", "end", "prompt", "subAgent", "skill", "mcp", "subAgentFlow", "codex"],
+        "types": [
+          "start",
+          "end",
+          "prompt",
+          "subAgent",
+          "skill",
+          "mcp",
+          "subAgentFlow",
+          "codex",
+          "branchSession"
+        ],
         "inputPortId": "input",
         "outputPortId": "output",
         "connectionExample": {

@@ -163,9 +163,9 @@ export interface WebviewTranslationKeys {
   'property.branchSession.workDescription.help': string;
   'property.branchSession.claudeCodeOnlyNotice': string;
   'default.newBranchSession': string;
-  'dialog.claudeOnlyExport.title': string;
-  'dialog.claudeOnlyExport.message': string;
-  'dialog.claudeOnlyExport.confirm': string;
+  'dialog.claudeOnlyWarning.title': string;
+  'dialog.claudeOnlyWarning.message': string;
+  'dialog.claudeOnlyWarning.confirm': string;
 
   // Codex Dialog (Feature: 518-codex-agent-node)
   'codex.title': string;

@@ -173,10 +173,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.branchSession.claudeCodeOnlyNotice':
     'このノードはClaude Code専用です。ワークフローを一時停止し、ユーザーがブランチセッション（/branch）でAIと対話的に作業した後、結果を引き継いで（/resume）続行します。',
   'default.newBranchSession': '新しいBranch Session',
-  'dialog.claudeOnlyExport.title': 'Claude Code専用ノード',
-  'dialog.claudeOnlyExport.message':
-    'このワークフローにはClaude Codeでのみ動作するブランチセッションノードが含まれています。他のAIエージェントはこのステップを実行できません。それでもエクスポートしますか？',
-  'dialog.claudeOnlyExport.confirm': 'エクスポートする',
+  'dialog.claudeOnlyWarning.title': 'Claude Code専用ノード',
+  'dialog.claudeOnlyWarning.message':
+    'このワークフローにはClaude Codeでのみ動作するブランチセッションノードが含まれています。他のAIエージェントはこのステップを実行できません。それでも続行しますか？',
+  'dialog.claudeOnlyWarning.confirm': '続行',
 
   // Codex Dialog (Feature: 518-codex-agent-node)
   'codex.title': 'Codex Agentを作成',

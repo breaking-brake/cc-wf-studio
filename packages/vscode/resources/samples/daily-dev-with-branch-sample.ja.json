@@ -4,11 +4,7 @@
     "nameKey": "sample.dailyDevWithBranch.name",
     "descriptionKey": "sample.dailyDevWithBranch.description",
     "difficulty": "intermediate",
-    "tags": [
-      "development",
-      "branch-session",
-      "human-in-the-loop"
-    ],
+    "tags": ["development", "branch-session", "human-in-the-loop"],
     "nodeCount": 8
   },
   "workflow": {

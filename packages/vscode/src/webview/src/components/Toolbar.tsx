@@ -2657,9 +2657,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         {/* Claude Code-only Node Export Confirmation Dialog */}
         <ConfirmDialog
           isOpen={showClaudeOnlyConfirm}
-          title={t('dialog.claudeOnlyExport.title')}
-          message={t('dialog.claudeOnlyExport.message')}
-          confirmLabel={t('dialog.claudeOnlyExport.confirm')}
+          title={t('dialog.claudeOnlyWarning.title')}
+          message={t('dialog.claudeOnlyWarning.message')}
+          confirmLabel={t('dialog.claudeOnlyWarning.confirm')}
           cancelLabel={t('common.cancel')}
           onConfirm={() => {
             setShowClaudeOnlyConfirm(false);

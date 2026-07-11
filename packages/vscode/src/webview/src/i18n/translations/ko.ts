@@ -173,10 +173,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.branchSession.claudeCodeOnlyNotice':
     '이 노드는 Claude Code 전용입니다. 워크플로를 일시 정지하고 사용자가 브랜치 세션(/branch)에서 AI와 대화형으로 작업한 후 결과를 인계(/resume)하여 계속합니다.',
   'default.newBranchSession': '새 Branch Session',
-  'dialog.claudeOnlyExport.title': 'Claude Code 전용 노드',
-  'dialog.claudeOnlyExport.message':
-    '이 워크플로에는 Claude Code에서만 작동하는 브랜치 세션 노드가 포함되어 있습니다. 다른 AI 에이전트는 이 단계를 실행할 수 없습니다. 그래도 내보내시겠습니까?',
-  'dialog.claudeOnlyExport.confirm': '내보내기',
+  'dialog.claudeOnlyWarning.title': 'Claude Code 전용 노드',
+  'dialog.claudeOnlyWarning.message':
+    '이 워크플로에는 Claude Code에서만 작동하는 브랜치 세션 노드가 포함되어 있습니다. 다른 AI 에이전트는 이 단계를 실행할 수 없습니다. 그래도 계속하시겠습니까?',
+  'dialog.claudeOnlyWarning.confirm': '계속',
 
   // Codex Dialog (Feature: 518-codex-agent-node)
   'codex.title': 'Codex Agent 생성',

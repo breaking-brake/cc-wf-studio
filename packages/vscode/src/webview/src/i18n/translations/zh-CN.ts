@@ -167,10 +167,10 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'property.branchSession.claudeCodeOnlyNotice':
     '此节点仅适用于Claude Code。它会暂停工作流，用户可在分支会话（/branch）中与AI交互协作，然后将结果交回（/resume）继续执行。',
   'default.newBranchSession': '新Branch Session',
-  'dialog.claudeOnlyExport.title': 'Claude Code专用节点',
-  'dialog.claudeOnlyExport.message':
-    '此工作流包含仅在Claude Code上运行的分支会话节点。其他AI代理无法执行这些步骤。仍要导出吗？',
-  'dialog.claudeOnlyExport.confirm': '仍然导出',
+  'dialog.claudeOnlyWarning.title': 'Claude Code专用节点',
+  'dialog.claudeOnlyWarning.message':
+    '此工作流包含仅在Claude Code上运行的分支会话节点。其他AI代理无法执行这些步骤。仍要继续吗？',
+  'dialog.claudeOnlyWarning.confirm': '继续',
 
   // Codex Dialog (Feature: 518-codex-agent-node)
   'codex.title': '创建Codex Agent',

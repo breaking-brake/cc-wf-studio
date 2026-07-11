@@ -173,10 +173,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.branchSession.claudeCodeOnlyNotice':
     'This node only works on Claude Code. It pauses the workflow so the user can work interactively with the AI in a branch session (/branch), then hand the results back (/resume).',
   'default.newBranchSession': 'New Branch Session',
-  'dialog.claudeOnlyExport.title': 'Claude Code-only Nodes',
-  'dialog.claudeOnlyExport.message':
-    'This workflow contains Branch Session node(s), which only work on Claude Code. Other AI agents cannot execute these steps. Export anyway?',
-  'dialog.claudeOnlyExport.confirm': 'Export Anyway',
+  'dialog.claudeOnlyWarning.title': 'Claude Code-only Nodes',
+  'dialog.claudeOnlyWarning.message':
+    'This workflow contains Branch Session node(s), which only work on Claude Code. Other AI agents cannot execute these steps. Continue anyway?',
+  'dialog.claudeOnlyWarning.confirm': 'Continue',
 
   // Codex Dialog (Feature: 518-codex-agent-node)
   'codex.title': 'Create Codex Agent',
