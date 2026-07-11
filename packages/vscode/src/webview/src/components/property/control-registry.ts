@@ -1,14 +1,15 @@
 /**
  * Default control component per FieldControl kind.
  *
- * `objectArray` lands in a later phase (array node types); until then a
- * schema declaring it renders nothing rather than crashing.
+ * The bare `objectArray` entry has no add-item factory; panels that need an
+ * add button wrap ObjectArrayControl via `customControls` to supply one.
  */
 
 import type { FieldControl } from '@cc-wf-studio/core';
 import type React from 'react';
 import { CheckboxControl } from './controls/CheckboxControl';
 import { ColorControl } from './controls/ColorControl';
+import { ObjectArrayControl } from './controls/ObjectArrayControl';
 import { RadioControl } from './controls/RadioControl';
 import { SelectControl } from './controls/SelectControl';
 import { TextareaControl } from './controls/TextareaControl';
@@ -24,4 +25,5 @@ export const DEFAULT_CONTROLS: Partial<Record<FieldControl, React.FC<ControlProp
   radio: RadioControl,
   color: ColorControl,
   tools: ToolsControl,
+  objectArray: ObjectArrayControl,
 };

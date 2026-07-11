@@ -100,6 +100,28 @@ export function appliesToTarget(meta: FieldMeta, target: ExportTarget): boolean 
   return meta.targets === TARGET_ALL || meta.targets.includes(target);
 }
 
+/**
+ * Min/max item counts of a zod array type, read from its checks so the UI
+ * never duplicates bounds the validator already declares. `length(n)` yields
+ * `min === max === n` (the UI hides add/remove entirely).
+ */
+export function getArrayBounds(zodType: z.ZodTypeAny): { min?: number; max?: number } {
+  const def = (zodType as { _zod?: { def?: { checks?: unknown[] } } })._zod?.def;
+  let min: number | undefined;
+  let max: number | undefined;
+  for (const check of def?.checks ?? []) {
+    const checkDef = (check as { _zod?: { def?: Record<string, unknown> } })._zod?.def;
+    if (!checkDef) continue;
+    if (checkDef.check === 'min_length') min = checkDef.minimum as number;
+    if (checkDef.check === 'max_length') max = checkDef.maximum as number;
+    if (checkDef.check === 'length_equals') {
+      min = checkDef.length as number;
+      max = checkDef.length as number;
+    }
+  }
+  return { min, max };
+}
+
 /** Build a zod object validator from a property schema. */
 export function toZodObject<S extends PropertySchema>(
   schema: S,

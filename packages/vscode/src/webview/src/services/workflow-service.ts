@@ -8,6 +8,7 @@
 import {
   type Connection,
   type ConversationHistory,
+  ensureNodeDataItemIds,
   type SlashCommandOptions,
   type SubAgentFlow,
   type TourStep,
@@ -142,7 +143,10 @@ export function deserializeWorkflow(workflow: Workflow): {
     id: node.id,
     type: node.type,
     position: node.position,
-    data: node.data,
+    // Backfill array-item IDs (options/branches) once at load time — the
+    // property panel relies on them as stable keys and no longer normalizes
+    // during render.
+    data: ensureNodeDataItemIds(node.type, node.data as Record<string, unknown>),
     ...(node.parentId && { parentId: node.parentId }),
     ...(node.style && { style: node.style }),
   }));

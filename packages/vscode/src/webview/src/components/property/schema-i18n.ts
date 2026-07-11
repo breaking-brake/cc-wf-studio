@@ -14,7 +14,8 @@ import type { WebviewTranslationKeys } from '../../i18n/translation-keys';
 export function useSchemaTranslation() {
   const { t } = useTranslation();
 
-  const st = (key: string): string => t(key as keyof WebviewTranslationKeys) ?? key;
+  const st = (key: string, params?: Record<string, string | number>): string =>
+    t(key as keyof WebviewTranslationKeys, params) ?? key;
 
   const stOptional = (key: string | undefined): string | undefined =>
     key ? (t(key as keyof WebviewTranslationKeys) ?? undefined) : undefined;

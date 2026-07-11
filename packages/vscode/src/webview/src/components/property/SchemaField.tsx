@@ -48,7 +48,12 @@ export const SchemaField: React.FC<SchemaFieldProps> = ({
     return <CustomControl {...controlProps} readonly={fieldReadonly} />;
   }
 
-  const showLabel = !(mode === 'edit' && meta.control === 'checkbox');
+  // checkbox renders its label inline; objectArray renders its own header row
+  // (count + add button) in place of a plain label.
+  const showLabel = !(
+    mode === 'edit' &&
+    (meta.control === 'checkbox' || meta.control === 'objectArray')
+  );
   const help = stOptional(meta.helpKey);
 
   return (
