@@ -1,42 +1,42 @@
 # Dialog Component Design Guidelines
 
-### ライブラリ選択
+## Library choice
 
-**Radix UI Dialog を使用すること（必須）**
+**Radix UI Dialog is mandatory.**
 
-新規ダイアログは必ず `@radix-ui/react-dialog` を使用する。既存のカスタム実装ダイアログは段階的に Radix UI へ移行する。
+Every new dialog must use `@radix-ui/react-dialog`. Existing custom-built dialogs are migrated to Radix UI incrementally.
 
-**理由:**
-- アクセシビリティ（ARIA属性、フォーカス管理）が自動的に処理される
-- ESCキー、オーバーレイクリックなどの標準動作が統一される
-- z-index管理が容易
+**Rationale:**
+- Accessibility (ARIA attributes, focus management) is handled automatically
+- Standard behaviors (ESC key, overlay click) are consistent across dialogs
+- z-index management is straightforward
 
-### z-index 階層設計（4層構造）
+## z-index hierarchy (4 layers)
 
 ```text
-レイヤー         z-index   用途
+Layer           z-index   Purpose
 ─────────────────────────────────────────────────────
-Base            9999      単独ダイアログ、親ダイアログ
-Nested          10000     ネストされた子ダイアログ
-Confirm         10001     確認ダイアログ
-PreviewOverlay  10002     確認ダイアログから開くフルサイズプレビュー
+Base            9999      Standalone dialogs, parent dialogs
+Nested          10000     Child dialogs nested inside a parent
+Confirm         10001     Confirmation dialogs
+PreviewOverlay  10002     Full-size previews opened from a confirmation dialog
 ```
 
-| z-index | 用途 | 例 |
-|---------|------|-----|
-| **9999** | 単独ダイアログ、親ダイアログ | McpNodeDialog, SkillBrowserDialog, SlackShareDialog |
-| **10000** | ネストされた子ダイアログ | SkillCreationDialog（SkillBrowserDialog内）, SlackManualTokenDialog |
-| **10001** | 確認・警告ダイアログ | ConfirmDialog（削除確認など）, DiffPreviewDialog |
-| **10002** | 確認ダイアログから開くフルサイズプレビュー | DiffPreviewDialog の Overview プレビュー |
+| z-index | Purpose | Examples |
+|---------|---------|----------|
+| **9999** | Standalone / parent dialogs | McpNodeDialog, SkillBrowserDialog, SlackShareDialog |
+| **10000** | Nested child dialogs | SkillCreationDialog (inside SkillBrowserDialog), SlackManualTokenDialog |
+| **10001** | Confirmation / warning dialogs | ConfirmDialog (delete confirmation etc.), DiffPreviewDialog |
+| **10002** | Full-size preview opened from a confirmation dialog | DiffPreviewDialog's Overview preview |
 
-### 実装パターン
+## Implementation pattern
 
-#### 基本構造（Radix UI Dialog）
+### Basic structure (Radix UI Dialog)
 
 ```tsx
 import * as Dialog from '@radix-ui/react-dialog';
 
-// z-index定数（推奨: 共通定数ファイルで管理）
+// z-index constants (recommended: manage in a shared constants file)
 const Z_INDEX = {
   DIALOG_BASE: 9999,
   DIALOG_NESTED: 10000,
@@ -56,11 +56,11 @@ export function MyDialog({ isOpen, onClose }: Props) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: Z_INDEX.DIALOG_BASE, // ← 必ず設定
+            zIndex: Z_INDEX.DIALOG_BASE, // ← always set this
           }}
         >
           <Dialog.Content>
-            {/* コンテンツ */}
+            {/* content */}
           </Dialog.Content>
         </Dialog.Overlay>
       </Dialog.Portal>
@@ -69,44 +69,44 @@ export function MyDialog({ isOpen, onClose }: Props) {
 }
 ```
 
-#### ネストダイアログのパターン
+### Nested dialog pattern
 
-親ダイアログ内で子ダイアログを開く場合:
+When opening a child dialog from inside a parent dialog:
 
 ```tsx
-// 親ダイアログ: z-index 9999
+// Parent dialog: z-index 9999
 <SkillBrowserDialog>
-  {/* 子ダイアログ: z-index 10000 */}
+  {/* Child dialog: z-index 10000 */}
   <SkillCreationDialog />
 </SkillBrowserDialog>
 ```
 
-### チェックリスト（新規ダイアログ作成時）
+## Checklist (when creating a new dialog)
 
-- [ ] `@radix-ui/react-dialog` を使用している
-- [ ] `Dialog.Overlay` に `zIndex` を設定している
-- [ ] z-index値が階層設計に従っている
-  - 単独/親ダイアログ → 9999
-  - ネストされる子ダイアログ → 10000
-  - 確認ダイアログ → 10001
-  - 確認ダイアログから開くフルサイズプレビュー → 10002
-- [ ] ESCキーでの閉じる動作が正しく機能する
-- [ ] オーバーレイクリックでの閉じる動作が正しく機能する
+- [ ] Uses `@radix-ui/react-dialog`
+- [ ] Sets `zIndex` on `Dialog.Overlay`
+- [ ] z-index value follows the hierarchy design
+  - Standalone / parent dialog → 9999
+  - Nested child dialog → 10000
+  - Confirmation dialog → 10001
+  - Full-size preview opened from a confirmation dialog → 10002
+- [ ] Closing via ESC key works correctly
+- [ ] Closing via overlay click works correctly
 
-### 現在のダイアログ一覧と状態
+## Current dialog inventory
 
-全てのダイアログが Radix UI Dialog を使用し、z-index階層設計に準拠しています。
+All dialogs use Radix UI Dialog and conform to the z-index hierarchy design.
 
-| ダイアログ | z-index | 役割 | 状態 |
-|-----------|---------|------|------|
-| ConfirmDialog | 10001 | 確認ダイアログ | ✅ |
-| DiffPreviewDialog | 10001 | 確認ダイアログ（AI編集） | ✅ |
-| DiffPreviewDialog の Overview プレビュー | 10002 | 確認ダイアログから開くフルサイズプレビュー | ✅ |
-| SkillCreationDialog | 10000 | 子ダイアログ | ✅ |
-| SlackManualTokenDialog | 10000 | 子ダイアログ | ✅ |
-| SkillBrowserDialog | 9999 | 親ダイアログ | ✅ |
-| McpNodeDialog | 9999 | 単独 | ✅ |
-| SubAgentFlowDialog | 9999 | 親ダイアログ | ✅ |
-| SlackShareDialog | 9999 | 親ダイアログ | ✅ |
-| SlackConnectionRequiredDialog | 9999 | 単独 | ✅ |
-| McpNodeEditDialog | 9999 | 単独 | ✅ |
+| Dialog | z-index | Role | Status |
+|--------|---------|------|--------|
+| ConfirmDialog | 10001 | Confirmation dialog | ✅ |
+| DiffPreviewDialog | 10001 | Confirmation dialog (AI editing) | ✅ |
+| DiffPreviewDialog's Overview preview | 10002 | Full-size preview from a confirmation dialog | ✅ |
+| SkillCreationDialog | 10000 | Child dialog | ✅ |
+| SlackManualTokenDialog | 10000 | Child dialog | ✅ |
+| SkillBrowserDialog | 9999 | Parent dialog | ✅ |
+| McpNodeDialog | 9999 | Standalone | ✅ |
+| SubAgentFlowDialog | 9999 | Parent dialog | ✅ |
+| SlackShareDialog | 9999 | Parent dialog | ✅ |
+| SlackConnectionRequiredDialog | 9999 | Standalone | ✅ |
+| McpNodeEditDialog | 9999 | Standalone | ✅ |

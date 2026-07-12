@@ -1,8 +1,8 @@
 # Architecture Sequence Diagrams
 
-このセクションでは、cc-wf-studioの主要なデータフローをMermaid形式のシーケンス図で説明します。
+This document describes the main data flows of cc-wf-studio as Mermaid sequence diagrams.
 
-### アーキテクチャ概要
+## Architecture overview
 
 ```mermaid
 flowchart TB
@@ -32,7 +32,7 @@ flowchart TB
     ExtHost --> MCP
 ```
 
-### ワークフロー保存フロー
+## Workflow save flow
 
 ```mermaid
 sequenceDiagram
@@ -56,7 +56,7 @@ sequenceDiagram
     Toolbar->>User: Show notification
 ```
 
-### Slack ワークフロー共有フロー
+## Slack workflow share flow
 
 ```mermaid
 sequenceDiagram
@@ -87,7 +87,7 @@ sequenceDiagram
     Dialog->>User: Show permalink
 ```
 
-### Slack ワークフローインポートフロー (Deep Link)
+## Slack workflow import flow (deep link)
 
 ```mermaid
 sequenceDiagram
@@ -112,7 +112,7 @@ sequenceDiagram
     Store->>User: Display on canvas
 ```
 
-### MCP サーバー/ツール取得フロー
+## MCP server/tool discovery flow
 
 ```mermaid
 sequenceDiagram
@@ -144,7 +144,7 @@ sequenceDiagram
     Dialog->>User: Show available tools
 ```
 
-### AI編集フロー (MCP Server-based)
+## AI editing flow (MCP server-based)
 
 ```mermaid
 sequenceDiagram

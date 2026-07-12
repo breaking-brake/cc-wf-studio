@@ -2,15 +2,15 @@
 
 ## External Link Implementation Pattern
 
-Webview から外部URLを開く場合、VSCode の制約上 `<a href>` は使えないため、`openExternalUrl` ユーティリティと `lucide-react` の `ExternalLink` アイコンを使用する。
+To open an external URL from the webview, `<a href>` cannot be used due to VSCode restrictions. Use the `openExternalUrl` utility together with the `ExternalLink` icon from `lucide-react`.
 
-### 実装方法
+### Implementation
 
 ```tsx
 import { ExternalLink } from 'lucide-react';
 import { openExternalUrl } from '../../services/vscode-bridge';
 
-// アイコンリンク（テキストなし）
+// Icon link (no text)
 <span
   role="button"
   tabIndex={0}
@@ -31,9 +31,9 @@ import { openExternalUrl } from '../../services/vscode-bridge';
 </span>
 ```
 
-### 要点
-- `openExternalUrl()` は Extension Host 経由で `vscode.env.openExternal` を呼ぶ
-- `role="button"` + `tabIndex={0}` + `onKeyDown` でアクセシビリティ対応
-- アイコンサイズは周囲のテキストサイズに合わせる（11〜14px）
-- `e.stopPropagation()` はアコーディオンヘッダー内など親要素のクリックイベントと競合する場合に追加する
-- 既存の使用例: `McpServerSection.tsx`, `CodexNodeDialog.tsx`, `ClaudeApiUploadDialog.tsx`
+### Key points
+- `openExternalUrl()` calls `vscode.env.openExternal` via the Extension Host
+- Accessibility: `role="button"` + `tabIndex={0}` + `onKeyDown`
+- Match the icon size to the surrounding text size (11–14px)
+- Add `e.stopPropagation()` when the click would conflict with a parent element's click handler (e.g. inside an accordion header)
+- Existing usages: `McpServerSection.tsx`, `CodexNodeDialog.tsx`, `ClaudeApiUploadDialog.tsx`
