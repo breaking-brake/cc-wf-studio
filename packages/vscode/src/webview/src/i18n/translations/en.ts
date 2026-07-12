@@ -1093,6 +1093,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'executionSession.waiting': 'Waiting for Claude Code activity…',
   'executionSession.metadata': 'Session {{sessionId}} · updated {{time}}',
   'executionSession.waitingForInput': 'Idle / awaiting input',
+  'executionSession.aborted': 'Cancelled',
   'executionSession.failed': 'Failed',
   'executionSession.codexTerminal': 'Interactive Codex terminal',
   'executionSession.focusTerminal': 'Focus the Codex terminal',

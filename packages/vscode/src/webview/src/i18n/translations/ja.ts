@@ -1087,6 +1087,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'executionSession.waiting': 'Claude Code の活動を待機中…',
   'executionSession.metadata': 'セッション {{sessionId}} · 更新 {{time}}',
   'executionSession.waitingForInput': '停止中・入力待ち',
+  'executionSession.aborted': '中止',
   'executionSession.failed': '失敗',
   'executionSession.codexTerminal': 'Codex対話ターミナル',
   'executionSession.focusTerminal': 'Codexターミナルへフォーカス',

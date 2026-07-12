@@ -21,6 +21,8 @@ export interface CommentaryEvent {
 }
 
 export type CommentaryEventCallback = (events: CommentaryEvent[]) => void;
+export type ClaudeTurnStatus = 'running' | 'waiting' | 'failed';
+export type ClaudeTurnStatusCallback = (status: ClaudeTurnStatus, timestamp: string) => void;
 
 /**
  * Resolve the JSONL file path for a given session ID.
@@ -61,18 +63,21 @@ export class CommentaryJsonlWatcher {
   private readonly sessionId: string;
   private readonly workspacePath: string;
   private readonly callback: CommentaryEventCallback;
+  private readonly statusCallback?: ClaudeTurnStatusCallback;
   private readonly pollIntervalMs: number;
 
   constructor(
     sessionId: string,
     workspacePath: string,
     callback: CommentaryEventCallback,
-    pollIntervalMs = 500
+    pollIntervalMs = 500,
+    statusCallback?: ClaudeTurnStatusCallback
   ) {
     this.sessionId = sessionId;
     this.workspacePath = workspacePath;
     this.callback = callback;
     this.pollIntervalMs = pollIntervalMs;
+    this.statusCallback = statusCallback;
 
     log('INFO', 'CommentaryJsonlWatcher initialized', {
       sessionId,
@@ -141,6 +146,7 @@ export class CommentaryJsonlWatcher {
       for (const line of newLines) {
         try {
           const parsed = JSON.parse(line);
+          this.notifyTurnStatus(parsed);
           const event = this.filterEvent(parsed);
           if (event) events.push(event);
         } catch {
@@ -160,6 +166,23 @@ export class CommentaryJsonlWatcher {
       log('DEBUG', 'CommentaryJsonlWatcher poll error', {
         error: error instanceof Error ? error.message : String(error),
       });
+    }
+  }
+
+  /** Observe Claude's own transcript lifecycle without relying on user-configured hooks. */
+  private notifyTurnStatus(entry: Record<string, unknown>): void {
+    if (!this.statusCallback) return;
+    const type = entry.type;
+    const subtype = entry.subtype;
+    const timestamp =
+      typeof entry.timestamp === 'string' ? entry.timestamp : new Date().toISOString();
+
+    if (type === 'user') {
+      this.statusCallback('running', timestamp);
+    } else if (type === 'system' && subtype === 'turn_duration') {
+      this.statusCallback('waiting', timestamp);
+    } else if (type === 'error') {
+      this.statusCallback('failed', timestamp);
     }
   }
 

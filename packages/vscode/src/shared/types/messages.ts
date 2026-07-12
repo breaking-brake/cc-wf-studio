@@ -221,13 +221,18 @@ export interface ExecutionSessionPayload {
   sessionId: string;
   workflowName: string;
   provider?: 'claude-code' | 'codex';
-  status: 'running' | 'waiting' | 'ended' | 'failed';
+  status: 'running' | 'waiting' | 'ended' | 'failed' | 'aborted';
   startedAt: string;
   updatedAt: string;
   lastActivity?: {
     type: 'assistant' | 'tool_use' | 'error';
     summary: string;
   };
+}
+
+/** Identifies the execution session whose terminal should receive focus. */
+export interface FocusExecutionTerminalPayload {
+  runId: string;
 }
 
 // ============================================================================
@@ -2490,7 +2495,7 @@ export type WebviewMessage =
   | Message<ExportForCopilotCliPayload, 'EXPORT_FOR_COPILOT_CLI'>
   | Message<ExportForCodexCliPayload, 'EXPORT_FOR_CODEX_CLI'>
   | Message<RunForCodexCliPayload, 'RUN_FOR_CODEX_CLI'>
-  | Message<void, 'FOCUS_EXECUTION_TERMINAL'>
+  | Message<FocusExecutionTerminalPayload, 'FOCUS_EXECUTION_TERMINAL'>
   | Message<ExportForRooCodePayload, 'EXPORT_FOR_ROO_CODE'>
   | Message<RunForRooCodePayload, 'RUN_FOR_ROO_CODE'>
   | Message<ExportForGeminiCliPayload, 'EXPORT_FOR_GEMINI_CLI'>

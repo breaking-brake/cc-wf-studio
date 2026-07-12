@@ -1007,6 +1007,7 @@ export interface WebviewTranslationKeys {
   'executionSession.waiting': string;
   'executionSession.metadata': string;
   'executionSession.waitingForInput': string;
+  'executionSession.aborted': string;
   'executionSession.failed': string;
   'executionSession.codexTerminal': string;
   'executionSession.focusTerminal': string;

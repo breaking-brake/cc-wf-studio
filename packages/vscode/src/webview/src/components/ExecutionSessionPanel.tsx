@@ -9,18 +9,25 @@ export const ExecutionSessionPanel: React.FC<{ session: ExecutionSessionPayload 
 }) => {
   const { t } = useTranslation();
   const running = session.status === 'running';
-  const canFocusTerminal = session.provider === 'codex' && session.status !== 'ended';
+  const canFocusTerminal = session.status !== 'ended';
   const focusTerminal = () => {
-    if (canFocusTerminal) vscode.postMessage({ type: 'FOCUS_EXECUTION_TERMINAL' });
+    if (canFocusTerminal) {
+      vscode.postMessage({
+        type: 'FOCUS_EXECUTION_TERMINAL',
+        payload: { runId: session.runId },
+      });
+    }
   };
   const statusLabel =
     session.status === 'running'
       ? t('executionSession.running')
       : session.status === 'waiting'
         ? t('executionSession.waitingForInput')
-        : session.status === 'failed'
-          ? t('executionSession.failed')
-          : t('executionSession.ended');
+        : session.status === 'aborted'
+          ? t('executionSession.aborted')
+          : session.status === 'failed'
+            ? t('executionSession.failed')
+            : t('executionSession.ended');
   return (
     <div
       role={canFocusTerminal ? 'button' : undefined}

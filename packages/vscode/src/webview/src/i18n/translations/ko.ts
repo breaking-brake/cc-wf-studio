@@ -1078,6 +1078,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'executionSession.waiting': 'Claude Code 활동을 기다리는 중…',
   'executionSession.metadata': '세션 {{sessionId}} · 업데이트 {{time}}',
   'executionSession.waitingForInput': '유휴・입력 대기 중',
+  'executionSession.aborted': '취소됨',
   'executionSession.failed': '실패',
   'executionSession.codexTerminal': 'Codex 대화형 터미널',
   'executionSession.focusTerminal': 'Codex 터미널에 포커스',

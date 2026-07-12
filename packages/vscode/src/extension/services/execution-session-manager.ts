@@ -14,6 +14,7 @@ export class ExecutionSessionManager {
   private terminalDisposable: vscode.Disposable | null = null;
   private session: ExecutionSessionPayload | null = null;
   private webview: vscode.Webview | null = null;
+  private terminal: vscode.Terminal | null = null;
 
   start(
     runId: string,
@@ -25,35 +26,53 @@ export class ExecutionSessionManager {
   ): void {
     this.stop(false);
     this.webview = webview;
+    this.terminal = terminal;
     const now = new Date().toISOString();
     this.session = {
       runId,
       sessionId,
       workflowName,
+      provider: 'claude-code',
       status: 'running',
       startedAt: now,
       updatedAt: now,
     };
     this.postUpdate();
 
-    this.watcher = new CommentaryJsonlWatcher(sessionId, workspacePath, (events) => {
-      const latest = events.at(-1);
-      if (!latest || !this.session) return;
-      this.session = {
-        ...this.session,
-        updatedAt: latest.timestamp,
-        lastActivity: {
-          type: latest.type,
-          summary: latest.content.replace(/\s+/g, ' ').slice(0, 160),
-        },
-      };
-      this.postUpdate();
-    });
+    this.watcher = new CommentaryJsonlWatcher(
+      sessionId,
+      workspacePath,
+      (events) => {
+        const latest = events.at(-1);
+        if (!latest || !this.session) return;
+        this.session = {
+          ...this.session,
+          updatedAt: latest.timestamp,
+          lastActivity: {
+            type: latest.type,
+            summary: latest.content.replace(/\s+/g, ' ').slice(0, 160),
+          },
+        };
+        this.postUpdate();
+      },
+      500,
+      (status, timestamp) => {
+        if (!this.session || this.session.status === 'ended') return;
+        this.session = { ...this.session, status, updatedAt: timestamp };
+        this.postUpdate();
+      }
+    );
     this.watcher.start();
 
     this.terminalDisposable = vscode.window.onDidCloseTerminal((closedTerminal) => {
       if (closedTerminal === terminal) this.stop(true);
     });
+  }
+
+  focus(runId: string): void {
+    if (this.session?.runId === runId && this.session.status !== 'ended') {
+      this.terminal?.show(false);
+    }
   }
 
   stop(markEnded = true): void {
@@ -69,6 +88,7 @@ export class ExecutionSessionManager {
       };
       this.postUpdate();
     }
+    this.terminal = null;
     if (!markEnded) this.session = null;
   }
 

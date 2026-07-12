@@ -1045,6 +1045,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'executionSession.waiting': '正在等待 Claude Code 活动…',
   'executionSession.metadata': '会话 {{sessionId}} · 更新于 {{time}}',
   'executionSession.waitingForInput': '空闲・等待输入',
+  'executionSession.aborted': '已取消',
   'executionSession.failed': '失败',
   'executionSession.codexTerminal': 'Codex 交互终端',
   'executionSession.focusTerminal': '聚焦 Codex 终端',

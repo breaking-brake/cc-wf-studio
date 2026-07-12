@@ -55,8 +55,10 @@ export class CodexTerminalSessionManager {
     return runId;
   }
 
-  focus(): void {
-    this.terminal?.show(false);
+  focus(runId: string): void {
+    if (this.state?.runId === runId && this.state.status !== 'ended') {
+      this.terminal?.show(false);
+    }
   }
 
   stop(markEnded = true): void {
@@ -182,7 +184,7 @@ export class CodexTerminalSessionManager {
         if (entry.type !== 'event_msg' || !payload) continue;
         if (payload.type === 'task_started') this.updateStatus('running');
         else if (payload.type === 'task_complete') this.updateStatus('waiting');
-        else if (payload.type === 'turn_aborted') this.updateStatus('failed');
+        else if (payload.type === 'turn_aborted') this.updateStatus('aborted');
       } catch {
         // Ignore unknown transcript entries.
       }

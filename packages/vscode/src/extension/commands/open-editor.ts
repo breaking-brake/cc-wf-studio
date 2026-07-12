@@ -2522,7 +2522,8 @@ export function registerOpenEditorCommand(
             }
 
             case 'FOCUS_EXECUTION_TERMINAL': {
-              codexTerminalSessionManager.focus();
+              executionSessionManager.focus(message.payload.runId);
+              codexTerminalSessionManager.focus(message.payload.runId);
               break;
             }
 

@@ -1048,6 +1048,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'executionSession.waiting': '正在等待 Claude Code 活動…',
   'executionSession.metadata': '工作階段 {{sessionId}} · 更新於 {{time}}',
   'executionSession.waitingForInput': '閒置・等待輸入',
+  'executionSession.aborted': '已取消',
   'executionSession.failed': '失敗',
   'executionSession.codexTerminal': 'Codex 互動式終端機',
   'executionSession.focusTerminal': '聚焦 Codex 終端機',
