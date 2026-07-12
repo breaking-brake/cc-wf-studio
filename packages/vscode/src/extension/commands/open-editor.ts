@@ -1878,11 +1878,38 @@ export function registerOpenEditorCommand(
                   if (!workspacePath) {
                     throw new Error('No workspace folder is open');
                   }
-                  await generateAndRunAiEditingSkill(
-                    aiEditPayload.provider as AiEditingProvider,
+                  const provider = aiEditPayload.provider as AiEditingProvider;
+                  const codexBaseline =
+                    provider === 'codex'
+                      ? codexTerminalSessionManager.snapshotSessionFiles()
+                      : new Set<string>();
+                  const launchResult = await generateAndRunAiEditingSkill(
+                    provider,
                     context.extensionPath,
                     workspacePath
                   );
+                  if (
+                    provider === 'claude-code' &&
+                    launchResult.terminal &&
+                    launchResult.sessionId
+                  ) {
+                    executionSessionManager.start(
+                      crypto.randomUUID(),
+                      launchResult.sessionId,
+                      'AI Edit',
+                      workspacePath,
+                      webview,
+                      launchResult.terminal
+                    );
+                  } else if (provider === 'codex' && launchResult.terminal) {
+                    codexTerminalSessionManager.start(
+                      'AI Edit',
+                      workspacePath,
+                      codexBaseline,
+                      webview,
+                      launchResult.terminal
+                    );
+                  }
                   webview.postMessage({
                     type: 'RUN_AI_EDITING_SKILL_SUCCESS',
                     requestId: message.requestId,
@@ -1981,11 +2008,34 @@ export function registerOpenEditorCommand(
                 });
 
                 // 4. Generate and run AI editing skill
-                await generateAndRunAiEditingSkill(
-                  launchPayload.provider as AiEditingProvider,
+                const provider = launchPayload.provider as AiEditingProvider;
+                const codexBaseline =
+                  provider === 'codex'
+                    ? codexTerminalSessionManager.snapshotSessionFiles()
+                    : new Set<string>();
+                const launchResult = await generateAndRunAiEditingSkill(
+                  provider,
                   context.extensionPath,
                   workspacePath
                 );
+                if (provider === 'claude-code' && launchResult.terminal && launchResult.sessionId) {
+                  executionSessionManager.start(
+                    crypto.randomUUID(),
+                    launchResult.sessionId,
+                    'AI Edit',
+                    workspacePath,
+                    webview,
+                    launchResult.terminal
+                  );
+                } else if (provider === 'codex' && launchResult.terminal) {
+                  codexTerminalSessionManager.start(
+                    'AI Edit',
+                    workspacePath,
+                    codexBaseline,
+                    webview,
+                    launchResult.terminal
+                  );
+                }
 
                 // For Antigravity, pause and let the user manually refresh MCP
                 if (launchPayload.provider === 'antigravity') {

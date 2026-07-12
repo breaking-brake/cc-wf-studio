@@ -6,6 +6,7 @@
  * launches the provider to execute it.
  */
 
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
@@ -39,6 +40,11 @@ interface SkillSpec {
   templateFile: string;
   /** Prefix for the launch terminal name (e.g. 'AI Edit', 'Import Skill') */
   terminalLabel: string;
+}
+
+export interface SkillLaunchResult {
+  terminal?: vscode.Terminal;
+  sessionId?: string;
 }
 
 const AI_EDIT_SPEC: SkillSpec = {
@@ -114,18 +120,19 @@ async function launchProvider(
   provider: AiEditingProvider,
   workingDirectory: string,
   spec: SkillSpec
-): Promise<void> {
+): Promise<SkillLaunchResult> {
   const { skillName, terminalLabel } = spec;
   switch (provider) {
     case 'claude-code': {
+      const sessionId = crypto.randomUUID();
       const terminalName = `${terminalLabel}: Claude Code`;
       const terminal = vscode.window.createTerminal({
         name: terminalName,
         cwd: workingDirectory,
       });
       terminal.show(true);
-      terminal.sendText(`claude "/${skillName}"`);
-      break;
+      terminal.sendText(`claude "/${skillName}" --session-id "${sessionId}"`);
+      return { terminal, sessionId };
     }
 
     case 'copilot-cli': {
@@ -136,7 +143,7 @@ async function launchProvider(
       });
       terminal.show(true);
       terminal.sendText(`copilot -i ":skill ${skillName}" --allow-all-tools`);
-      break;
+      return { terminal };
     }
 
     case 'copilot-chat': {
@@ -156,7 +163,7 @@ async function launchProvider(
           throw new Error('GitHub Copilot Chat is not installed or not available.');
         }
       }
-      break;
+      return {};
     }
 
     case 'codex': {
@@ -167,7 +174,7 @@ async function launchProvider(
       });
       terminal.show(true);
       terminal.sendText(`codex "\\$${skillName}"`);
-      break;
+      return { terminal };
     }
 
     case 'roo-code': {
@@ -179,7 +186,7 @@ async function launchProvider(
           'Zoo Code extension is not installed. (The legacy Roo Code extension is also supported if installed.)'
         );
       }
-      break;
+      return {};
     }
 
     case 'gemini': {
@@ -190,7 +197,7 @@ async function launchProvider(
       });
       terminal.show(true);
       terminal.sendText(`gemini -i ":skill ${skillName}"`);
-      break;
+      return { terminal };
     }
 
     case 'antigravity': {
@@ -199,7 +206,7 @@ async function launchProvider(
       if (!isAntigravityInstalled()) {
         throw new Error('Antigravity extension is not installed.');
       }
-      break;
+      return {};
     }
 
     case 'cursor': {
@@ -212,7 +219,7 @@ async function launchProvider(
       } catch {
         throw new Error('Failed to launch Cursor agent.');
       }
-      break;
+      return {};
     }
   }
 }
@@ -226,7 +233,7 @@ async function generateAndRunSkill(
   extensionPath: string,
   workingDirectory: string,
   spec: SkillSpec
-): Promise<void> {
+): Promise<SkillLaunchResult> {
   log('INFO', 'Skill: generating and running', { provider, skill: spec.skillName });
 
   // 1. Load template
@@ -238,8 +245,9 @@ async function generateAndRunSkill(
   log('INFO', 'Skill: wrote skill file', { destPath });
 
   // 3. Launch provider
-  await launchProvider(provider, workingDirectory, spec);
+  const result = await launchProvider(provider, workingDirectory, spec);
   log('INFO', 'Skill: provider launched', { provider, skill: spec.skillName });
+  return result;
 }
 
 /**
@@ -249,8 +257,8 @@ export async function generateAndRunAiEditingSkill(
   provider: AiEditingProvider,
   extensionPath: string,
   workingDirectory: string
-): Promise<void> {
-  await generateAndRunSkill(provider, extensionPath, workingDirectory, AI_EDIT_SPEC);
+): Promise<SkillLaunchResult> {
+  return generateAndRunSkill(provider, extensionPath, workingDirectory, AI_EDIT_SPEC);
 }
 
 /**
