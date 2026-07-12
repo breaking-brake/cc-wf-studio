@@ -12,7 +12,8 @@
  */
 
 import { z } from 'zod';
-import { field, type PropertyField, toZodObject } from '../field.js';
+import type { AskUserQuestionData } from '../../types/workflow-definition.js';
+import { type AssertAssignable, field, type PropertyField, toZodObject } from '../field.js';
 
 const questionOptionZod = z.object({
   id: z.string().optional(),
@@ -84,3 +85,9 @@ export function deriveAskUserQuestionUpdate(
   }
   return patch;
 }
+
+// Compile-time drift guards: schema field names must exist on AskUserQuestionData and
+// declared value types must stay assignable to the interface (optionality may
+// be looser in the schema; see each field's comment).
+export type AskUserQuestionSchemaFieldNamesGuard = AssertAssignable<keyof z.infer<typeof askUserQuestionZodObject>, keyof AskUserQuestionData>;
+export type AskUserQuestionSchemaValueTypesGuard = AssertAssignable<z.infer<typeof askUserQuestionZodObject>, Partial<AskUserQuestionData>>;

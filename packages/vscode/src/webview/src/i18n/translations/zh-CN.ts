@@ -256,7 +256,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeName.placeholder': '输入节点名称',
   'property.nodeName.help': '用于导出的文件名（例如："data-analysis"）',
   'property.select.custom': '自定义...',
-  'property.prompt': '提示',
 
   // Start/End node descriptions
   'property.startNodeDescription': 'Start节点标记工作流的开始。它不能被删除且没有可编辑的属性。',
@@ -290,7 +289,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'property.multiSelect.disabled': '用户选择一个选项（分支到相应节点）',
   'property.aiSuggestions.enabled': 'AI将根据上下文动态生成选项',
   'property.aiSuggestions.disabled': '在下方手动定义选项',
-  'property.options': '选项',
   'property.remove': '删除',
   'property.optionLabel.placeholder': '标签',
   'property.optionDescription.placeholder': '描述',
@@ -302,7 +300,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // Branch properties
   'property.branchType.conditional.help': '2个分支（True/False）',
   'property.branchType.switch.help': '多个分支（2-N向）',
-  'property.branches': '分支',
   'property.branchLabel': '标签',
   'property.branchLabel.placeholder': '例如：成功，错误',
   'property.branchCondition': '条件（自然语言）',
@@ -631,18 +628,13 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // MCP Property Panel
   'property.mcp.serverId': '服务器',
   'property.mcp.toolName': '工具名称',
-  'property.mcp.toolDescription': '描述',
-  'property.mcp.parameters': '参数',
-  'property.mcp.parameterValues': '参数值',
   'property.mcp.parameterCount': '参数数量',
-  'property.mcp.editParameters': '编辑参数',
   'property.mcp.edit.manualParameterConfig': '编辑参数',
   'property.mcp.edit.aiParameterConfig': '编辑参数内容',
   'property.mcp.edit.aiToolSelection': '编辑任务内容',
   'property.mcp.taskDescription': '任务内容',
   'property.mcp.parameterDescription': '参数内容',
   'property.mcp.configuredValues': '配置值',
-  'property.mcp.infoNote': 'MCP工具属性从服务器加载。点击"编辑参数"以配置参数值。',
 
   // MCP Parameter Form
   'mcp.parameter.formTitle': '工具参数',
@@ -901,9 +893,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   // Sub-Agent Form Dialog (Create New)
   'subAgent.form.title': '创建新 Sub-Agent',
   'subAgent.form.description': '使用自定义设置定义新的 Sub-Agent 节点。',
-  'subAgent.form.agentTypeLabel': '代理类型',
-  'subAgent.form.agentType.claudeCode': 'Claude Code',
-  'subAgent.form.agentType.other': '其他',
   'skill.field.name': '名称',
   'skill.field.description': '描述',
   'skill.field.skillPath': 'Skill路径',

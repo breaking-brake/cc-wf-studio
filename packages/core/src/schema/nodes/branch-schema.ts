@@ -7,7 +7,8 @@
  */
 
 import { z } from 'zod';
-import { field, type PropertyField, toZodObject } from '../field.js';
+import type { BranchNodeData } from '../../types/workflow-definition.js';
+import { type AssertAssignable, field, type PropertyField, toZodObject } from '../field.js';
 
 const branchConditionZod = z.object({
   id: z.string().optional(),
@@ -69,3 +70,9 @@ export function deriveBranchUpdate(
   }
   return patch;
 }
+
+// Compile-time drift guards: schema field names must exist on BranchNodeData and
+// declared value types must stay assignable to the interface (optionality may
+// be looser in the schema; see each field's comment).
+export type BranchSchemaFieldNamesGuard = AssertAssignable<keyof z.infer<typeof branchZodObject>, keyof BranchNodeData>;
+export type BranchSchemaValueTypesGuard = AssertAssignable<z.infer<typeof branchZodObject>, Partial<BranchNodeData>>;

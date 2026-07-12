@@ -7,7 +7,8 @@
  */
 
 import { z } from 'zod';
-import { field, type PropertyField, toZodObject } from '../field.js';
+import type { IfElseNodeData } from '../../types/workflow-definition.js';
+import { type AssertAssignable, field, type PropertyField, toZodObject } from '../field.js';
 
 const ifElseConditionZod = z.object({
   id: z.string().optional(),
@@ -59,3 +60,9 @@ export function deriveIfElseUpdate(
   }
   return patch;
 }
+
+// Compile-time drift guards: schema field names must exist on IfElseNodeData and
+// declared value types must stay assignable to the interface (optionality may
+// be looser in the schema; see each field's comment).
+export type IfElseSchemaFieldNamesGuard = AssertAssignable<keyof z.infer<typeof ifElseZodObject>, keyof IfElseNodeData>;
+export type IfElseSchemaValueTypesGuard = AssertAssignable<z.infer<typeof ifElseZodObject>, Partial<IfElseNodeData>>;

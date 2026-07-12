@@ -10,7 +10,8 @@
  */
 
 import { z } from 'zod';
-import { field, type PropertyField, toZodObject } from '../field.js';
+import type { McpNodeData } from '../../types/mcp-node.js';
+import { type AssertAssignable, field, type PropertyField, toZodObject } from '../field.js';
 
 export const MCP_NODE_MODES = [
   'manualParameterConfig',
@@ -90,3 +91,10 @@ export type McpPropertySchema = typeof mcpPropertySchema;
 
 /** zod object validator derived from {@link mcpPropertySchema}. */
 export const mcpZodObject = toZodObject(mcpPropertySchema);
+
+// Compile-time drift guards: schema field names must exist on McpNodeData and
+// declared value types must stay assignable to the interface. Permissive
+// data-only fields (parameters, aiToolSelectionConfig, aiParameterConfig, parameterValues) are exempt — their zod types are
+// intentionally looser than the interface (custom-rendered, dialog-edited).
+export type McpSchemaFieldNamesGuard = AssertAssignable<keyof z.infer<typeof mcpZodObject>, keyof McpNodeData>;
+export type McpSchemaValueTypesGuard = AssertAssignable<Omit<z.infer<typeof mcpZodObject>, 'parameters' | 'aiToolSelectionConfig' | 'aiParameterConfig' | 'parameterValues'>, Partial<Omit<McpNodeData, 'parameters' | 'aiToolSelectionConfig' | 'aiParameterConfig' | 'parameterValues'>>>;

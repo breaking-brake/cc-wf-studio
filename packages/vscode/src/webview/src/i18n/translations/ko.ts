@@ -263,7 +263,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeName.placeholder': '노드 이름 입력',
   'property.nodeName.help': '내보내기 파일 이름으로 사용됨 (예: "data-analysis")',
   'property.select.custom': '사용자 지정...',
-  'property.prompt': '프롬프트',
 
   // Start/End node descriptions
   'property.startNodeDescription':
@@ -300,7 +299,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'property.multiSelect.disabled': '사용자가 하나의 옵션을 선택 (해당 노드로 분기)',
   'property.aiSuggestions.enabled': 'AI가 컨텍스트를 기반으로 옵션을 동적으로 생성합니다',
   'property.aiSuggestions.disabled': '아래에서 옵션을 수동으로 정의',
-  'property.options': '옵션',
   'property.remove': '제거',
   'property.optionLabel.placeholder': '레이블',
   'property.optionDescription.placeholder': '설명',
@@ -312,7 +310,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Branch properties
   'property.branchType.conditional.help': '2개 분기 (True/False)',
   'property.branchType.switch.help': '다중 분기 (2-N 방향)',
-  'property.branches': '분기',
   'property.branchLabel': '레이블',
   'property.branchLabel.placeholder': '예: 성공, 오류',
   'property.branchCondition': '조건 (자연어)',
@@ -653,19 +650,13 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // MCP Property Panel
   'property.mcp.serverId': '서버',
   'property.mcp.toolName': '도구 이름',
-  'property.mcp.toolDescription': '설명',
-  'property.mcp.parameters': '매개변수',
-  'property.mcp.parameterValues': '매개변수 값',
   'property.mcp.parameterCount': '매개변수 개수',
-  'property.mcp.editParameters': '매개변수 편집',
   'property.mcp.edit.manualParameterConfig': '매개변수 편집',
   'property.mcp.edit.aiParameterConfig': '매개변수 내용 편집',
   'property.mcp.edit.aiToolSelection': '작업 내용 편집',
   'property.mcp.taskDescription': '작업 내용',
   'property.mcp.parameterDescription': '매개변수 내용',
   'property.mcp.configuredValues': '구성된 값',
-  'property.mcp.infoNote':
-    'MCP 도구 속성은 서버에서 로드됩니다. "매개변수 편집"을 클릭하여 매개변수 값을 구성하세요.',
 
   // MCP Parameter Form
   'mcp.parameter.formTitle': '도구 매개변수',
@@ -932,9 +923,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   // Sub-Agent Form Dialog (Create New)
   'subAgent.form.title': '새 Sub-Agent 만들기',
   'subAgent.form.description': '사용자 지정 설정으로 새 Sub-Agent 노드를 정의합니다.',
-  'subAgent.form.agentTypeLabel': '에이전트 유형',
-  'subAgent.form.agentType.claudeCode': 'Claude Code',
-  'subAgent.form.agentType.other': '기타',
   'skill.field.name': '이름',
   'skill.field.description': '설명',
   'skill.field.skillPath': 'Skill 경로',

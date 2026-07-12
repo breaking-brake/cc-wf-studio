@@ -263,7 +263,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeName.placeholder': 'ノード名を入力',
   'property.nodeName.help': 'エクスポート時のファイル名に使用されます（例: "data-analysis"）',
   'property.select.custom': 'カスタム...',
-  'property.prompt': 'プロンプト',
 
   // Start/End node descriptions
   'property.startNodeDescription':
@@ -300,7 +299,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'property.multiSelect.disabled': 'ユーザーは1つの選択肢を選択（対応するノードに分岐）',
   'property.aiSuggestions.enabled': 'AIが文脈に基づいて選択肢を動的に生成します',
   'property.aiSuggestions.disabled': '以下で選択肢を手動定義',
-  'property.options': '選択肢',
   'property.remove': '削除',
   'property.optionLabel.placeholder': 'ラベル',
   'property.optionDescription.placeholder': '説明',
@@ -312,7 +310,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Branch properties
   'property.branchType.conditional.help': '2つの分岐（True/False）',
   'property.branchType.switch.help': '複数の分岐（2-N分岐）',
-  'property.branches': '分岐',
   'property.branchLabel': 'ラベル',
   'property.branchLabel.placeholder': '例: 成功, エラー',
   'property.branchCondition': '条件（自然言語）',
@@ -658,19 +655,13 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // MCP Property Panel
   'property.mcp.serverId': 'サーバー',
   'property.mcp.toolName': 'ツール名',
-  'property.mcp.toolDescription': '説明',
-  'property.mcp.parameters': 'パラメータ',
-  'property.mcp.parameterValues': 'パラメータ値',
   'property.mcp.parameterCount': 'パラメータ数',
-  'property.mcp.editParameters': 'パラメータを編集',
   'property.mcp.edit.manualParameterConfig': 'パラメータを編集',
   'property.mcp.edit.aiParameterConfig': 'パラメータ内容を編集',
   'property.mcp.edit.aiToolSelection': 'タスク内容を編集',
   'property.mcp.taskDescription': 'タスク内容',
   'property.mcp.parameterDescription': 'パラメータ内容',
   'property.mcp.configuredValues': '設定値',
-  'property.mcp.infoNote':
-    'MCPツールのプロパティはサーバーから読み込まれます。「パラメータを編集」をクリックしてパラメータ値を設定してください。',
 
   // MCP Parameter Form
   'mcp.parameter.formTitle': 'ツールパラメータ',
@@ -938,9 +929,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Sub-Agent Form Dialog (Create New)
   'subAgent.form.title': '新しいSub-Agentを作成',
   'subAgent.form.description': 'カスタム設定で新しいSub-Agentノードを定義します。',
-  'subAgent.form.agentTypeLabel': 'エージェントタイプ',
-  'subAgent.form.agentType.claudeCode': 'Claude Code',
-  'subAgent.form.agentType.other': 'その他',
   'skill.field.name': '名前',
   'skill.field.description': '説明',
   'skill.field.skillPath': 'Skillパス',

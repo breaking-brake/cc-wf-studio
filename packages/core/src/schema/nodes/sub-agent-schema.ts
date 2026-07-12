@@ -14,7 +14,8 @@
  */
 
 import { z } from 'zod';
-import { field, type PropertyField, toZodObject } from '../field.js';
+import type { SubAgentData } from '../../types/workflow-definition.js';
+import { type AssertAssignable, field, type PropertyField, toZodObject } from '../field.js';
 
 export const SUB_AGENT_MODEL_VALUES = ['sonnet', 'opus', 'haiku', 'fable', 'inherit'] as const;
 export type SubAgentModel = (typeof SUB_AGENT_MODEL_VALUES)[number];
@@ -102,3 +103,9 @@ export const subAgentZodObject = toZodObject(subAgentPropertySchema);
 
 /** Inferred shape of the validated SubAgent property set. */
 export type SubAgentSchemaShape = z.infer<typeof subAgentZodObject>;
+
+// Compile-time drift guards: schema field names must exist on SubAgentData and
+// declared value types must stay assignable to the interface (optionality may
+// be looser in the schema; see each field's comment).
+export type SubAgentSchemaFieldNamesGuard = AssertAssignable<keyof z.infer<typeof subAgentZodObject>, keyof SubAgentData>;
+export type SubAgentSchemaValueTypesGuard = AssertAssignable<z.infer<typeof subAgentZodObject>, Partial<SubAgentData>>;

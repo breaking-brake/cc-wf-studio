@@ -8,7 +8,8 @@
  */
 
 import { z } from 'zod';
-import { field, type PropertyField, toZodObject } from '../field.js';
+import type { PromptNodeData } from '../../types/workflow-definition.js';
+import { type AssertAssignable, field, type PropertyField, toZodObject } from '../field.js';
 
 export const promptPropertySchema = {
   label: field(z.string().optional(), {
@@ -35,3 +36,9 @@ export type PromptPropertySchema = typeof promptPropertySchema;
 
 /** zod object validator derived from {@link promptPropertySchema}. */
 export const promptZodObject = toZodObject(promptPropertySchema);
+
+// Compile-time drift guards: schema field names must exist on PromptNodeData and
+// declared value types must stay assignable to the interface (optionality may
+// be looser in the schema; see each field's comment).
+export type PromptSchemaFieldNamesGuard = AssertAssignable<keyof z.infer<typeof promptZodObject>, keyof PromptNodeData>;
+export type PromptSchemaValueTypesGuard = AssertAssignable<z.infer<typeof promptZodObject>, Partial<PromptNodeData>>;

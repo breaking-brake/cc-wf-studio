@@ -86,8 +86,9 @@ export function clearFieldsNotAppliedToTarget(
   return cleared;
 }
 
-/** Thin `safeParse` wrapper over the SubAgent zod object. Not yet wired into
- *  the hand-written workflow validator (see plan's validation section). */
+/** @deprecated Schema validation is wired into `validateAIGeneratedWorkflow`
+ *  (registry-driven, per present field) — use that instead. Kept for API
+ *  stability. */
 export function validateSubAgentData(data: unknown): ReturnType<typeof subAgentZodObject.safeParse> {
   return subAgentZodObject.safeParse(data);
 }

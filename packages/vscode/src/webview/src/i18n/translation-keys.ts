@@ -252,7 +252,6 @@ export interface WebviewTranslationKeys {
   'property.nodeName.placeholder': string;
   'property.nodeName.help': string;
   'property.select.custom': string;
-  'property.prompt': string;
 
   // Start/End node descriptions
   'property.startNodeDescription': string;
@@ -284,7 +283,6 @@ export interface WebviewTranslationKeys {
   'property.multiSelect.disabled': string;
   'property.aiSuggestions.enabled': string;
   'property.aiSuggestions.disabled': string;
-  'property.options': string;
   'property.remove': string;
   'property.optionLabel.placeholder': string;
   'property.optionDescription.placeholder': string;
@@ -296,7 +294,6 @@ export interface WebviewTranslationKeys {
   // Branch properties
   'property.branchType.conditional.help': string;
   'property.branchType.switch.help': string;
-  'property.branches': string;
   'property.branchLabel': string;
   'property.branchLabel.placeholder': string;
   'property.branchCondition': string;
@@ -606,18 +603,13 @@ export interface WebviewTranslationKeys {
   // MCP Property Panel
   'property.mcp.serverId': string;
   'property.mcp.toolName': string;
-  'property.mcp.toolDescription': string;
-  'property.mcp.parameters': string;
-  'property.mcp.parameterValues': string;
   'property.mcp.parameterCount': string;
-  'property.mcp.editParameters': string;
   'property.mcp.edit.manualParameterConfig': string;
   'property.mcp.edit.aiParameterConfig': string;
   'property.mcp.edit.aiToolSelection': string;
   'property.mcp.taskDescription': string;
   'property.mcp.parameterDescription': string;
   'property.mcp.configuredValues': string;
-  'property.mcp.infoNote': string;
 
   // MCP Parameter Form
   'mcp.parameter.formTitle': string;
@@ -867,9 +859,6 @@ export interface WebviewTranslationKeys {
   // Sub-Agent Form Dialog (Create New)
   'subAgent.form.title': string;
   'subAgent.form.description': string;
-  'subAgent.form.agentTypeLabel': string;
-  'subAgent.form.agentType.claudeCode': string;
-  'subAgent.form.agentType.other': string;
   // Schema-driven property panel field labels (skill/mcp/subAgentFlow)
   'skill.field.name': string;
   'skill.field.description': string;

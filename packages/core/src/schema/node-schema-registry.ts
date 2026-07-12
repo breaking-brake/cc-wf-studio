@@ -3,8 +3,10 @@
  *
  * Maps node types to their schema-driven property definitions under
  * `./nodes/`. Consumed by the webview property panel (rendering), export
- * warning derivation, and (later) the workflow validator, so all three read
- * the same single definition per node.
+ * warning derivation (warnings.ts), and the workflow validator
+ * (validate-workflow.ts: present fields are checked against their zod types;
+ * fields whose `visibleWhen` fails are skipped as inactive), so all three
+ * read the same single definition per node.
  *
  * Adding a field to a node type = edit its `nodes/<type>-schema.ts` + add the
  * `<nodeType>.field.<name>` label to the five webview locale files. If AI

@@ -12,7 +12,8 @@
  */
 
 import { z } from 'zod';
-import { field, type PropertyField, toZodObject } from '../field.js';
+import type { CodexNodeData } from '../../types/workflow-definition.js';
+import { type AssertAssignable, field, type PropertyField, toZodObject } from '../field.js';
 
 /** Predefined Codex model choices; the UI select also allows a custom name. */
 export const CODEX_PREDEFINED_MODELS = [
@@ -73,3 +74,9 @@ export type CodexPropertySchema = typeof codexPropertySchema;
 
 /** zod object validator derived from {@link codexPropertySchema}. */
 export const codexZodObject = toZodObject(codexPropertySchema);
+
+// Compile-time drift guards: schema field names must exist on CodexNodeData and
+// declared value types must stay assignable to the interface (optionality may
+// be looser in the schema; see each field's comment).
+export type CodexSchemaFieldNamesGuard = AssertAssignable<keyof z.infer<typeof codexZodObject>, keyof CodexNodeData>;
+export type CodexSchemaValueTypesGuard = AssertAssignable<z.infer<typeof codexZodObject>, Partial<CodexNodeData>>;
