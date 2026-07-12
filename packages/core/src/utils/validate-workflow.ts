@@ -323,6 +323,18 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
       });
     }
 
+    // Every check below reads node.data properties; corrupted input (null,
+    // missing, or non-object data) must become a structured error, not a
+    // TypeError out of the validator.
+    if (typeof node.data !== 'object' || node.data === null || Array.isArray(node.data)) {
+      errors.push({
+        code: 'INVALID_NODE_DATA',
+        message: `Node "${node.id}" data must be an object`,
+        field: `nodes[${node.id}].data`,
+      });
+      continue;
+    }
+
     // Structural field validation from the node property schema registry —
     // the same zod definitions the property panel renders from, so the UI
     // and this validator cannot drift apart.
