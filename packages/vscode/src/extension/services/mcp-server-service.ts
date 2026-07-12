@@ -65,7 +65,11 @@ export class McpServerManager implements WorkflowIoAdapter {
   >();
   private pendingApplyRequests = new Map<string, PendingRequest<boolean>>();
 
-  async start(extensionPath: string, port?: number): Promise<number> {
+  async start(
+    extensionPath: string,
+    port?: number,
+    onPortFallback?: (preferredPort: number, actualPort: number) => void
+  ): Promise<number> {
     if (this.httpServer) {
       // Idempotent: a listening server is reused instead of erroring.
       if (this.httpServer.listening && this.port !== null) {
@@ -80,7 +84,31 @@ export class McpServerManager implements WorkflowIoAdapter {
 
     this.extensionPath = extensionPath;
 
-    this.httpServer = http.createServer(async (req, res) => {
+    const preferredPort = port ?? 0;
+    this.httpServer = this.buildHttpServer();
+    try {
+      return await this.listenOn(this.httpServer, preferredPort);
+    } catch (error) {
+      // Preferred port taken — common with multiple VS Code windows or a
+      // stale process. Retry once on an OS-assigned free port: callers derive
+      // the server URL and agent configs from the RETURNED port, so running
+      // on a different port is safe.
+      if (preferredPort === 0 || (error as NodeJS.ErrnoException).code !== 'EADDRINUSE') {
+        throw error;
+      }
+      log('WARN', 'MCP Server: Preferred port in use, falling back to an OS-assigned port', {
+        preferredPort,
+      });
+      this.httpServer = this.buildHttpServer();
+      const actualPort = await this.listenOn(this.httpServer, 0);
+      onPortFallback?.(preferredPort, actualPort);
+      return actualPort;
+    }
+  }
+
+  /** Build the HTTP server with the MCP request handler (not yet listening). */
+  private buildHttpServer(): http.Server {
+    return http.createServer(async (req, res) => {
       // DNS rebinding protection: validate Host header
       const host = (req.headers.host || '').split(':')[0];
       if (host !== '127.0.0.1' && host !== 'localhost') {
@@ -153,9 +181,10 @@ export class McpServerManager implements WorkflowIoAdapter {
         res.end(JSON.stringify({ error: 'Method not allowed' }));
       }
     });
+  }
 
-    const listenPort = port ?? 0;
-    const httpServer = this.httpServer;
+  /** Listen on `listenPort` (0 = OS-assigned); resolves with the actual port. */
+  private listenOn(httpServer: http.Server, listenPort: number): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       // Failed startup must not leave a half-initialized server behind —
       // otherwise every later start() would wrongly see "already running".
@@ -183,7 +212,9 @@ export class McpServerManager implements WorkflowIoAdapter {
         if (error.code === 'EADDRINUSE') {
           const msg = `Port ${listenPort} is already in use. Change the port in Settings (cc-wf-studio.mcp.port) or close the application using port ${listenPort}.`;
           log('ERROR', 'MCP Server: Port in use', { port: listenPort });
-          rejectAndCleanup(new Error(msg));
+          // Preserve the errno code so start() can distinguish a port
+          // conflict (retryable on a free port) from other listen failures.
+          rejectAndCleanup(Object.assign(new Error(msg), { code: 'EADDRINUSE' }));
         } else {
           log('ERROR', 'MCP Server: HTTP server error', { error: error.message });
           rejectAndCleanup(error);

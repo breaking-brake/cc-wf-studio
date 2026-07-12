@@ -95,7 +95,7 @@
           "default": 6282,
           "minimum": 1024,
           "maximum": 65535,
-          "description": "Port number for the built-in MCP server. Change only if the default port (6282) is already in use."
+          "description": "Preferred port for the built-in MCP server. If this port is already in use (e.g. by another VS Code window), the server automatically falls back to an OS-assigned free port."
         }
       }
     }
