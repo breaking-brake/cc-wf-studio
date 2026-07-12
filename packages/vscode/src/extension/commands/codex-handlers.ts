@@ -23,6 +23,7 @@ import {
   checkExistingCodexSkill,
   exportWorkflowAsCodexSkill,
 } from '../services/codex-skill-export-service';
+import { codexTerminalSessionManager } from '../services/codex-terminal-session-manager';
 import { extractMcpServerIdsFromWorkflow } from '../services/copilot-export-service';
 import type { FileService } from '../services/file-service';
 import {
@@ -269,11 +270,19 @@ export async function handleRunForCodexCli(
       syncedMcpServers = await syncMcpConfigForCodexCli(mcpServerIds, workspacePath);
     }
 
-    // Step 5: Execute in terminal
+    // Step 5: Keep the native interactive terminal UX and observe its local session transcript.
+    const sessionBaseline = codexTerminalSessionManager.snapshotSessionFiles();
     const terminalResult = executeCodexCliInTerminal({
       skillName: exportResult.skillName,
       workingDirectory: workspacePath,
     });
+    codexTerminalSessionManager.start(
+      workflow.name,
+      workspacePath,
+      sessionBaseline,
+      webview,
+      terminalResult.terminal
+    );
 
     // Send success response
     const successPayload: RunForCodexCliSuccessPayload = {

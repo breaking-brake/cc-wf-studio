@@ -1088,6 +1088,14 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'commentary.waiting': 'Waiting for agent activity...',
   'commentary.inactive': 'Run a workflow with Commentary enabled to see real-time commentary.',
   'commentary.providerSelect': 'Select Commentary AI provider',
+  'executionSession.running': 'Running',
+  'executionSession.ended': 'Ended',
+  'executionSession.waiting': 'Waiting for Claude Code activity…',
+  'executionSession.metadata': 'Session {{sessionId}} · updated {{time}}',
+  'executionSession.waitingForInput': 'Idle / awaiting input',
+  'executionSession.failed': 'Failed',
+  'executionSession.codexTerminal': 'Interactive Codex terminal',
+  'executionSession.focusTerminal': 'Focus the Codex terminal',
 
   // Sample Workflows
   'toolbar.sampleWorkflows': 'Sample Workflows',

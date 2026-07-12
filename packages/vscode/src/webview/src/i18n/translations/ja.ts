@@ -1082,6 +1082,14 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'commentary.inactive':
     'Commentary を有効にしてワークフローを実行すると、リアルタイム実況が表示されます。',
   'commentary.providerSelect': 'Commentary AI プロバイダーを選択',
+  'executionSession.running': '実行中',
+  'executionSession.ended': '終了',
+  'executionSession.waiting': 'Claude Code の活動を待機中…',
+  'executionSession.metadata': 'セッション {{sessionId}} · 更新 {{time}}',
+  'executionSession.waitingForInput': '停止中・入力待ち',
+  'executionSession.failed': '失敗',
+  'executionSession.codexTerminal': 'Codex対話ターミナル',
+  'executionSession.focusTerminal': 'Codexターミナルへフォーカス',
 
   // Sample Workflows
   'toolbar.sampleWorkflows': 'サンプルワークフロー',

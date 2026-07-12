@@ -1002,6 +1002,14 @@ export interface WebviewTranslationKeys {
   'commentary.waiting': string;
   'commentary.inactive': string;
   'commentary.providerSelect': string;
+  'executionSession.running': string;
+  'executionSession.ended': string;
+  'executionSession.waiting': string;
+  'executionSession.metadata': string;
+  'executionSession.waitingForInput': string;
+  'executionSession.failed': string;
+  'executionSession.codexTerminal': string;
+  'executionSession.focusTerminal': string;
 
   // Sample Workflows
   'toolbar.sampleWorkflows': string;

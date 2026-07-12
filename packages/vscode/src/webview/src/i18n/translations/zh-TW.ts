@@ -1043,6 +1043,14 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'commentary.waiting': '等待代理活動中...',
   'commentary.inactive': '啟用 Commentary 並執行工作流程，即可看到即時解說。',
   'commentary.providerSelect': '選擇 Commentary AI 提供商',
+  'executionSession.running': '執行中',
+  'executionSession.ended': '已結束',
+  'executionSession.waiting': '正在等待 Claude Code 活動…',
+  'executionSession.metadata': '工作階段 {{sessionId}} · 更新於 {{time}}',
+  'executionSession.waitingForInput': '閒置・等待輸入',
+  'executionSession.failed': '失敗',
+  'executionSession.codexTerminal': 'Codex 互動式終端機',
+  'executionSession.focusTerminal': '聚焦 Codex 終端機',
 
   // Sample Workflows
   'toolbar.sampleWorkflows': '範例工作流程',

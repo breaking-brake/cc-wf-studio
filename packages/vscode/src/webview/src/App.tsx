@@ -10,6 +10,7 @@ import type {
   AntigravityMcpRefreshNeededPayload,
   ApplyWorkflowFromMcpPayload,
   ErrorPayload,
+  ExecutionSessionPayload,
   GetCurrentWorkflowRequestPayload,
   HighlightGroupNodePayload,
   ImportWorkflowFromSlackPayload,
@@ -38,6 +39,7 @@ import { SlackShareDialog } from './components/dialogs/SlackShareDialog';
 import { SubAgentFlowDialog } from './components/dialogs/SubAgentFlowDialog';
 import { WhatsNewDialog } from './components/dialogs/WhatsNewDialog';
 import { ErrorNotification } from './components/ErrorNotification';
+import { ExecutionSessionPanel } from './components/ExecutionSessionPanel';
 import { NodePalette } from './components/NodePalette';
 import { OverviewMode } from './components/overview/OverviewMode';
 import { PropertyOverlay } from './components/PropertyOverlay';
@@ -210,6 +212,7 @@ const App: React.FC = () => {
   const [overviewHasGitChanges, setOverviewHasGitChanges] = useState<boolean>(false);
 
   const [error, setError] = useState<ErrorPayload | null>(null);
+  const [executionSession, setExecutionSession] = useState<ExecutionSessionPayload | null>(null);
   const [runTour, setRunTour] = useState(false);
   const [tourKey, setTourKey] = useState(0); // Used to force Tour component remount
   const [isSlackShareDialogOpen, setIsSlackShareDialogOpen] = useState(false);
@@ -536,6 +539,8 @@ const App: React.FC = () => {
         if (payload.groupNodeId === null || useWorkflowStore.getState().isHighlightEnabled) {
           useWorkflowStore.getState().setHighlightedGroupNodeId(payload.groupNodeId);
         }
+      } else if (message.type === 'EXECUTION_SESSION_UPDATED') {
+        setExecutionSession(message.payload as ExecutionSessionPayload);
       } else if (message.type === 'ANTIGRAVITY_MCP_REFRESH_NEEDED') {
         const refreshPayload = message.payload as AntigravityMcpRefreshNeededPayload | undefined;
         setMcpRefreshSkillName(refreshPayload?.skillName || 'cc-workflow-ai-editor');
@@ -792,66 +797,72 @@ const App: React.FC = () => {
         </Collapsible.Root>
 
         {/* Center: Workflow Editor with processing overlay (Phase 3.10 - modified) */}
-        <div style={{ flex: 1, position: 'relative' }}>
-          <WorkflowEditor
-            isNodePaletteCollapsed={isNodePaletteCollapsed}
-            onExpandNodePalette={expandNodePalette}
-            showEmptyState={showEmptyState}
-            onOpenSample={() => setIsSampleDialogOpen(true)}
-            onDismissEmptyState={() => setEmptyStateDismissed(true)}
-            onLoadWorkflow={handleLoadWorkflowFromEmptyState}
-            extensionVersion={extensionVersion}
-            recentWorkflows={recentWorkflows}
-            onLoadRecent={(id) => {
-              vscode.postMessage({
-                type: 'LOAD_WORKFLOW',
-                payload: { workflowId: id },
-              });
-            }}
-            onVersionClick={() => setIsWhatsNewFromStartMenu(true)}
-          />
-          {/* Processing overlay for canvas area only (with message centered in canvas) */}
-          <ProcessingOverlay isVisible={isProcessing} message={t('refinement.processingOverlay')} />
-
-          {/* Property Overlay - overlay on canvas right side */}
-          {selectedNodeId && isPropertyOverlayOpen && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 5,
-                right: 5,
-                bottom: 5,
-                zIndex: 10,
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
+            <WorkflowEditor
+              isNodePaletteCollapsed={isNodePaletteCollapsed}
+              onExpandNodePalette={expandNodePalette}
+              showEmptyState={showEmptyState}
+              onOpenSample={() => setIsSampleDialogOpen(true)}
+              onDismissEmptyState={() => setEmptyStateDismissed(true)}
+              onLoadWorkflow={handleLoadWorkflowFromEmptyState}
+              extensionVersion={extensionVersion}
+              recentWorkflows={recentWorkflows}
+              onLoadRecent={(id) => {
+                vscode.postMessage({
+                  type: 'LOAD_WORKFLOW',
+                  payload: { workflowId: id },
+                });
               }}
-            >
-              <PropertyOverlay
-                onShowInOverview={(nodeId) => {
-                  // Snapshot the live canvas, switch to Overview mode and
-                  // ask InstructionsPanel to scroll to the matching section
-                  // (which in turn drives the Mermaid follow-mode pan).
-                  const live = serializeWorkflow(
-                    nodes,
-                    edges,
-                    workflowName || 'Untitled',
-                    workflowDescription || undefined,
-                    activeWorkflow?.conversationHistory,
-                    subAgentFlows,
-                    undefined,
-                    activeWorkflow?.tour
-                  );
-                  if (activeWorkflow?.id) {
-                    live.id = activeWorkflow.id;
-                  }
-                  setOverviewWorkflow(live);
-                  setOverviewIsHistoricalVersion(false);
-                  setOverviewHasGitChanges(false);
-                  setOverviewIsExternal(false);
-                  setOverviewFocusRequest({ nodeId, key: Date.now() });
-                  setMode('overview');
+              onVersionClick={() => setIsWhatsNewFromStartMenu(true)}
+            />
+            {/* Processing overlay for canvas area only (with message centered in canvas) */}
+            <ProcessingOverlay
+              isVisible={isProcessing}
+              message={t('refinement.processingOverlay')}
+            />
+
+            {/* Property Overlay - overlay on canvas right side */}
+            {selectedNodeId && isPropertyOverlayOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 5,
+                  right: 5,
+                  bottom: 5,
+                  zIndex: 10,
                 }}
-              />
-            </div>
-          )}
+              >
+                <PropertyOverlay
+                  onShowInOverview={(nodeId) => {
+                    // Snapshot the live canvas, switch to Overview mode and
+                    // ask InstructionsPanel to scroll to the matching section
+                    // (which in turn drives the Mermaid follow-mode pan).
+                    const live = serializeWorkflow(
+                      nodes,
+                      edges,
+                      workflowName || 'Untitled',
+                      workflowDescription || undefined,
+                      activeWorkflow?.conversationHistory,
+                      subAgentFlows,
+                      undefined,
+                      activeWorkflow?.tour
+                    );
+                    if (activeWorkflow?.id) {
+                      live.id = activeWorkflow.id;
+                    }
+                    setOverviewWorkflow(live);
+                    setOverviewIsHistoricalVersion(false);
+                    setOverviewHasGitChanges(false);
+                    setOverviewIsExternal(false);
+                    setOverviewFocusRequest({ nodeId, key: Date.now() });
+                    setMode('overview');
+                  }}
+                />
+              </div>
+            )}
+          </div>
+          {executionSession && <ExecutionSessionPanel session={executionSession} />}
         </div>
 
         {/* Refinement Panel with Radix Collapsible for slide animation */}

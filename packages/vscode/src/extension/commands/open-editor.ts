@@ -35,7 +35,9 @@ import {
   startAntigravityTask,
 } from '../services/antigravity-extension-service';
 import { cancelGeneration } from '../services/claude-code-service';
+import { codexTerminalSessionManager } from '../services/codex-terminal-session-manager';
 import { CommentarySessionManager } from '../services/commentary-session-manager';
+import { ExecutionSessionManager } from '../services/execution-session-manager';
 import { FileService } from '../services/file-service';
 import {
   checkPortMismatch,
@@ -120,6 +122,7 @@ let slackApiService: SlackApiService;
 let activeOAuthService: ReturnType<typeof createOAuthService> | null = null;
 let anthropicApiKeyManager: AnthropicApiKeyManager;
 let commentarySessionManager: CommentarySessionManager;
+let executionSessionManager: ExecutionSessionManager;
 let isCommentaryEnabled = false;
 let commentaryProvider: import('../../shared/types/messages').CommentaryProvider = 'claude-code';
 let commentaryCopilotModel: import('../../shared/types/messages').CopilotModel | undefined;
@@ -250,6 +253,7 @@ export function registerOpenEditorCommand(
 
       // Initialize Commentary Session Manager
       commentarySessionManager = new CommentarySessionManager();
+      executionSessionManager = new ExecutionSessionManager();
 
       // Create new webview panel
       currentPanel = vscode.window.createWebviewPanel(
@@ -541,7 +545,8 @@ export function registerOpenEditorCommand(
                   }
 
                   // Generate session ID for JSONL tracking (Commentary AI)
-                  const sessionId = isCommentaryEnabled ? crypto.randomUUID() : undefined;
+                  const runId = crypto.randomUUID();
+                  const sessionId = crypto.randomUUID();
 
                   // Run the slash command in terminal
                   const result = executeSlashCommandInTerminal({
@@ -549,6 +554,15 @@ export function registerOpenEditorCommand(
                     workingDirectory: workspacePath,
                     sessionId,
                   });
+
+                  executionSessionManager.start(
+                    runId,
+                    sessionId,
+                    message.payload.workflow.name,
+                    workspacePath,
+                    webview,
+                    result.terminal
+                  );
 
                   // Start Commentary AI if enabled
                   if (isCommentaryEnabled && sessionId) {
@@ -583,6 +597,7 @@ export function registerOpenEditorCommand(
                       terminalName: result.terminalName,
                       timestamp: new Date().toISOString(),
                       sessionId,
+                      runId,
                     },
                   });
                 } catch (error) {
@@ -2506,6 +2521,11 @@ export function registerOpenEditorCommand(
               break;
             }
 
+            case 'FOCUS_EXECUTION_TERMINAL': {
+              codexTerminalSessionManager.focus();
+              break;
+            }
+
             default:
               console.warn('Unknown message type:', message);
           }
@@ -2524,6 +2544,8 @@ export function registerOpenEditorCommand(
           }
           // Stop Commentary AI session
           commentarySessionManager?.dispose();
+          executionSessionManager?.dispose();
+          codexTerminalSessionManager.dispose();
 
           // Disconnect MCP server manager from webview
           const disposeManager = getMcpServerManager();

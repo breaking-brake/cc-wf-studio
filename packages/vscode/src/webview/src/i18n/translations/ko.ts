@@ -1073,6 +1073,14 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'commentary.waiting': '에이전트 활동 대기 중...',
   'commentary.inactive': 'Commentary를 활성화하고 워크플로우를 실행하면 실시간 해설이 표시됩니다.',
   'commentary.providerSelect': 'Commentary AI 프로바이더 선택',
+  'executionSession.running': '실행 중',
+  'executionSession.ended': '종료됨',
+  'executionSession.waiting': 'Claude Code 활동을 기다리는 중…',
+  'executionSession.metadata': '세션 {{sessionId}} · 업데이트 {{time}}',
+  'executionSession.waitingForInput': '유휴・입력 대기 중',
+  'executionSession.failed': '실패',
+  'executionSession.codexTerminal': 'Codex 대화형 터미널',
+  'executionSession.focusTerminal': 'Codex 터미널에 포커스',
 
   // Sample Workflows
   'toolbar.sampleWorkflows': '샘플 워크플로우',

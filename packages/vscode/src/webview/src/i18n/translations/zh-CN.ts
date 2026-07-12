@@ -1040,6 +1040,14 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'commentary.waiting': '等待代理活动中...',
   'commentary.inactive': '启用 Commentary 并运行工作流，即可看到实时解说。',
   'commentary.providerSelect': '选择 Commentary AI 提供商',
+  'executionSession.running': '运行中',
+  'executionSession.ended': '已结束',
+  'executionSession.waiting': '正在等待 Claude Code 活动…',
+  'executionSession.metadata': '会话 {{sessionId}} · 更新于 {{time}}',
+  'executionSession.waitingForInput': '空闲・等待输入',
+  'executionSession.failed': '失败',
+  'executionSession.codexTerminal': 'Codex 交互终端',
+  'executionSession.focusTerminal': '聚焦 Codex 终端',
 
   // Sample Workflows
   'toolbar.sampleWorkflows': '示例工作流',
