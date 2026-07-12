@@ -16,7 +16,7 @@ The following items are product terms and must stay in English in every translat
 - **Node type names inside default node labels** — `default.new<Type>` keys localize only the "New" prefix and keep the node type name in English (ja: `新しいPrompt`, ko: `새 Prompt`, zh-CN: `新Prompt`, zh-TW: `新Prompt`).
 - **Product / agent names** — Claude Code, Copilot, Codex, Gemini, Cursor, Zoo Code, Antigravity, MCP, Skill, Sub-Agent, etc.
 - **Slash commands and CLI commands** — `/branch`, `/resume`, `ccwf`, etc.
-- **Technical identifiers** — file paths, JSON field names, node type strings (`branchSession`), URLs.I
+- **Technical identifiers** — file paths, JSON field names, node type strings (`branchSession`), URLs.
 
 ## Checklist when adding a new node type's i18n keys
 

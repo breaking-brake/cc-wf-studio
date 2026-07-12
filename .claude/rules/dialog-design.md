@@ -98,20 +98,22 @@ When opening a child dialog from inside a parent dialog:
 - [ ] Closing via ESC key works correctly
 - [ ] Closing via overlay click works correctly
 
-## Current dialog inventory
+## Dialog examples per layer
 
-All dialogs use Radix UI Dialog and conform to the z-index hierarchy design.
+Representative examples of the z-index hierarchy in practice (non-exhaustive —
+see `packages/vscode/src/webview/src/components/dialogs/` for the full set;
+every new dialog must follow the checklist above).
 
-| Dialog | z-index | Role | Status |
-|--------|---------|------|--------|
-| ConfirmDialog | 10001 | Confirmation dialog | ✅ |
-| DiffPreviewDialog | 10001 | Confirmation dialog (AI editing) | ✅ |
-| DiffPreviewDialog's Overview preview | 10002 | Full-size preview from a confirmation dialog | ✅ |
-| SkillCreationDialog | 10000 | Child dialog | ✅ |
-| SlackManualTokenDialog | 10000 | Child dialog | ✅ |
-| SkillBrowserDialog | 9999 | Parent dialog | ✅ |
-| McpNodeDialog | 9999 | Standalone | ✅ |
-| SubAgentFlowDialog | 9999 | Parent dialog | ✅ |
-| SlackShareDialog | 9999 | Parent dialog | ✅ |
-| SlackConnectionRequiredDialog | 9999 | Standalone | ✅ |
-| McpNodeEditDialog | 9999 | Standalone | ✅ |
+| Dialog | z-index | Role |
+|--------|---------|------|
+| ConfirmDialog | 10001 | Confirmation dialog |
+| DiffPreviewDialog | 10001 | Confirmation dialog (AI editing) |
+| DiffPreviewDialog's Overview preview | 10002 | Full-size preview from a confirmation dialog |
+| SkillCreationDialog | 10000 | Child dialog |
+| SlackManualTokenDialog | 10000 | Child dialog |
+| SkillBrowserDialog | 9999 | Parent dialog |
+| McpNodeDialog | 9999 | Standalone |
+| SubAgentFlowDialog | 9999 | Parent dialog |
+| SlackShareDialog | 9999 | Parent dialog |
+| SlackConnectionRequiredDialog | 9999 | Standalone |
+| McpNodeEditDialog | 9999 | Standalone |
