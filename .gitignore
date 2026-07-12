@@ -28,9 +28,10 @@ npm-debug.log*
 .env
 .env.local
 
-# Claude Code (track skills only)
+# Claude Code (track skills and rules only)
 .claude/*
 !.claude/skills/
+!.claude/rules/
 .vscode/workflows/
 
 # POC files
