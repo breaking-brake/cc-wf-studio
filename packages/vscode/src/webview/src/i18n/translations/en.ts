@@ -1096,7 +1096,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'executionSession.aborted': 'Cancelled',
   'executionSession.failed': 'Failed',
   'executionSession.codexTerminal': 'Interactive Codex terminal',
-  'executionSession.focusTerminal': 'Focus the Codex terminal',
 
   // Sample Workflows
   'toolbar.sampleWorkflows': 'Sample Workflows',

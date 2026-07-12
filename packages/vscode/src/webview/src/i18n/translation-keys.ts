@@ -1010,7 +1010,6 @@ export interface WebviewTranslationKeys {
   'executionSession.aborted': string;
   'executionSession.failed': string;
   'executionSession.codexTerminal': string;
-  'executionSession.focusTerminal': string;
 
   // Sample Workflows
   'toolbar.sampleWorkflows': string;

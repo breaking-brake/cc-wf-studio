@@ -1090,7 +1090,6 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'executionSession.aborted': '中止',
   'executionSession.failed': '失敗',
   'executionSession.codexTerminal': 'Codex対話ターミナル',
-  'executionSession.focusTerminal': 'Codexターミナルへフォーカス',
 
   // Sample Workflows
   'toolbar.sampleWorkflows': 'サンプルワークフロー',

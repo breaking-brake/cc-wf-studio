@@ -1051,7 +1051,6 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'executionSession.aborted': '已取消',
   'executionSession.failed': '失敗',
   'executionSession.codexTerminal': 'Codex 互動式終端機',
-  'executionSession.focusTerminal': '聚焦 Codex 終端機',
 
   // Sample Workflows
   'toolbar.sampleWorkflows': '範例工作流程',

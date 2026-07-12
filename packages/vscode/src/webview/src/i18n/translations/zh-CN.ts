@@ -1048,7 +1048,6 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'executionSession.aborted': '已取消',
   'executionSession.failed': '失败',
   'executionSession.codexTerminal': 'Codex 交互终端',
-  'executionSession.focusTerminal': '聚焦 Codex 终端',
 
   // Sample Workflows
   'toolbar.sampleWorkflows': '示例工作流',

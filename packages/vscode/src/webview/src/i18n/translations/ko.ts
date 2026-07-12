@@ -1081,7 +1081,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'executionSession.aborted': '취소됨',
   'executionSession.failed': '실패',
   'executionSession.codexTerminal': 'Codex 대화형 터미널',
-  'executionSession.focusTerminal': 'Codex 터미널에 포커스',
 
   // Sample Workflows
   'toolbar.sampleWorkflows': '샘플 워크플로우',
