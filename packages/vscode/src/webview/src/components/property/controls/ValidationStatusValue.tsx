@@ -22,7 +22,10 @@ export const ValidationStatusValue: React.FC<ControlProps> = ({ value }) => {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-      <span style={{ fontSize: '16px', color: COLORS[status], fontWeight: 'bold' }}>
+      <span
+        aria-hidden="true"
+        style={{ fontSize: '16px', color: COLORS[status], fontWeight: 'bold' }}
+      >
         {ICONS[status]}
       </span>
       <span style={{ color: 'var(--vscode-foreground)' }}>

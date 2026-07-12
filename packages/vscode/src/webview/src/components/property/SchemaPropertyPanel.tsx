@@ -25,7 +25,7 @@ import type { NodePanelConfig } from './types';
 interface SchemaPropertyPanelProps {
   node: Node<Record<string, unknown>>;
   config: NodePanelConfig;
-  updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
+  updateNodeData: (nodeId: string, data: Record<string, unknown>) => void;
 }
 
 type RenderItem =
