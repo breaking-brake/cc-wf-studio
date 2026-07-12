@@ -58,7 +58,12 @@ export class ExecutionSessionManager {
       500,
       (status, timestamp) => {
         if (!this.session || this.session.status === 'ended') return;
-        this.session = { ...this.session, status, updatedAt: timestamp };
+        this.session = {
+          ...this.session,
+          status,
+          updatedAt: timestamp,
+          ...(status === 'running' ? { lastActivity: undefined } : {}),
+        };
         this.postUpdate();
       }
     );

@@ -185,6 +185,9 @@ export class CodexTerminalSessionManager {
         if (payload.type === 'task_started') this.updateStatus('running');
         else if (payload.type === 'task_complete') this.updateStatus('waiting');
         else if (payload.type === 'turn_aborted') this.updateStatus('aborted');
+        else if (payload.type === 'agent_message' && typeof payload.message === 'string') {
+          this.updateLastActivity(payload.message);
+        }
       } catch {
         // Ignore unknown transcript entries.
       }
@@ -193,7 +196,24 @@ export class CodexTerminalSessionManager {
 
   private updateStatus(status: ExecutionSessionPayload['status']): void {
     if (!this.state) return;
-    this.state = { ...this.state, status, updatedAt: new Date().toISOString() };
+    this.state = {
+      ...this.state,
+      status,
+      updatedAt: new Date().toISOString(),
+      ...(status === 'running' ? { lastActivity: undefined } : {}),
+    };
+    this.postUpdate();
+  }
+
+  private updateLastActivity(message: string): void {
+    if (!this.state) return;
+    const summary = message.replace(/\s+/g, ' ').trim().slice(0, 160);
+    if (!summary) return;
+    this.state = {
+      ...this.state,
+      updatedAt: new Date().toISOString(),
+      lastActivity: { type: 'assistant', summary },
+    };
     this.postUpdate();
   }
 
