@@ -298,6 +298,14 @@ export function registerOpenEditorCommand(
             return vscode.workspace.getConfiguration('cc-wf-studio').get<number>('mcp.port', 6282);
           }
 
+          // Helper: toast shown when the preferred MCP port was taken and the
+          // server auto-fell back to an OS-assigned free port.
+          function notifyMcpPortFallback(preferredPort: number, actualPort: number): void {
+            vscode.window.showInformationMessage(
+              `cc-wf-studio: Port ${preferredPort} is in use (possibly by another window), so the MCP server started on port ${actualPort} instead.`
+            );
+          }
+
           // Helper: ensure MCP server is running and config written for Run operations
           async function ensureMcpServerForRun(
             provider: AiEditingProvider,
@@ -311,7 +319,11 @@ export function registerOpenEditorCommand(
             const previousPort = mcpManager.getPort();
             let serverPort = previousPort;
             if (!mcpManager.isRunning()) {
-              serverPort = await mcpManager.start(context.extensionPath, getConfiguredMcpPort());
+              serverPort = await mcpManager.start(
+                context.extensionPath,
+                getConfiguredMcpPort(),
+                notifyMcpPortFallback
+              );
             }
             const serverUrl = `http://127.0.0.1:${serverPort}/mcp`;
 
@@ -1720,7 +1732,8 @@ export function registerOpenEditorCommand(
 
                 const port = await startManager.start(
                   context.extensionPath,
-                  getConfiguredMcpPort()
+                  getConfiguredMcpPort(),
+                  notifyMcpPortFallback
                 );
                 const serverUrl = `http://127.0.0.1:${port}/mcp`;
 
@@ -1899,7 +1912,8 @@ export function registerOpenEditorCommand(
                 if (!launchManager.isRunning()) {
                   serverPort = await launchManager.start(
                     context.extensionPath,
-                    getConfiguredMcpPort()
+                    getConfiguredMcpPort(),
+                    notifyMcpPortFallback
                   );
                 }
                 const serverUrl = `http://127.0.0.1:${serverPort}/mcp`;
@@ -2027,7 +2041,8 @@ export function registerOpenEditorCommand(
                 if (!importManager.isRunning()) {
                   serverPort = await importManager.start(
                     context.extensionPath,
-                    getConfiguredMcpPort()
+                    getConfiguredMcpPort(),
+                    notifyMcpPortFallback
                   );
                 }
                 const serverUrl = `http://127.0.0.1:${serverPort}/mcp`;
@@ -2157,7 +2172,8 @@ export function registerOpenEditorCommand(
                 if (!tourManager.isRunning()) {
                   serverPort = await tourManager.start(
                     context.extensionPath,
-                    getConfiguredMcpPort()
+                    getConfiguredMcpPort(),
+                    notifyMcpPortFallback
                   );
                 }
                 const serverUrl = `http://127.0.0.1:${serverPort}/mcp`;
