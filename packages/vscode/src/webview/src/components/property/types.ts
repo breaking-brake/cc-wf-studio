@@ -30,7 +30,7 @@ export interface ControlProps {
 /** Props passed to a panel's Header/Footer slot components. */
 export interface PanelSlotProps {
   node: Node<Record<string, unknown>>;
-  updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
+  updateNodeData: (nodeId: string, data: Record<string, unknown>) => void;
 }
 
 /** Per-node-type configuration consumed by SchemaPropertyPanel. */
