@@ -7,7 +7,8 @@
  */
 
 import { z } from 'zod';
-import { field, type PropertyField, toZodObject } from '../field.js';
+import type { BranchSessionNodeData } from '../../types/workflow-definition.js';
+import { type AssertAssignable, field, type PropertyField, toZodObject } from '../field.js';
 
 export const branchSessionPropertySchema = {
   label: field(z.string(), {
@@ -30,3 +31,9 @@ export type BranchSessionPropertySchema = typeof branchSessionPropertySchema;
 
 /** zod object validator derived from {@link branchSessionPropertySchema}. */
 export const branchSessionZodObject = toZodObject(branchSessionPropertySchema);
+
+// Compile-time drift guards: schema field names must exist on BranchSessionNodeData and
+// declared value types must stay assignable to the interface (optionality may
+// be looser in the schema; see each field's comment).
+export type BranchSessionSchemaFieldNamesGuard = AssertAssignable<keyof z.infer<typeof branchSessionZodObject>, keyof BranchSessionNodeData>;
+export type BranchSessionSchemaValueTypesGuard = AssertAssignable<z.infer<typeof branchSessionZodObject>, Partial<BranchSessionNodeData>>;

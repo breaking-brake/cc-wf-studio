@@ -10,7 +10,8 @@
  */
 
 import { z } from 'zod';
-import { field, type PropertyField, toZodObject } from '../field.js';
+import type { SkillNodeData } from '../../types/workflow-definition.js';
+import { type AssertAssignable, field, type PropertyField, toZodObject } from '../field.js';
 
 export const skillPropertySchema = {
   name: field(z.string(), {
@@ -72,3 +73,9 @@ export type SkillPropertySchema = typeof skillPropertySchema;
 
 /** zod object validator derived from {@link skillPropertySchema}. */
 export const skillZodObject = toZodObject(skillPropertySchema);
+
+// Compile-time drift guards: schema field names must exist on SkillNodeData and
+// declared value types must stay assignable to the interface (optionality may
+// be looser in the schema; see each field's comment).
+export type SkillSchemaFieldNamesGuard = AssertAssignable<keyof z.infer<typeof skillZodObject>, keyof SkillNodeData>;
+export type SkillSchemaValueTypesGuard = AssertAssignable<z.infer<typeof skillZodObject>, Partial<SkillNodeData>>;

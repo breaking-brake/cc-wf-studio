@@ -101,6 +101,14 @@ export function appliesToTarget(meta: FieldMeta, target: ExportTarget): boolean 
 }
 
 /**
+ * Compile-time assertion that `T` is assignable to `U`. Each node schema
+ * declares drift guards with this so a schema whose field names or value
+ * types diverge from the node's public interface fails `tsc` instead of
+ * surfacing at runtime (e.g. a mistyped enum value).
+ */
+export type AssertAssignable<T extends U, U> = T;
+
+/**
  * Min/max item counts of a zod array type, read from its checks so the UI
  * never duplicates bounds the validator already declares. `length(n)` yields
  * `min === max === n` (the UI hides add/remove entirely).

@@ -5,7 +5,7 @@
  * Based on: /specs/001-ai-workflow-generation/research.md Q3
  */
 
-import { SUB_AGENT_MODEL_VALUES } from '../schema/nodes/sub-agent-schema.js';
+import { NODE_PROPERTY_SCHEMAS } from '../schema/node-schema-registry.js';
 import {
   type Connection,
   type HookType,
@@ -222,6 +222,57 @@ function validateSubAgentFlowReferences(workflow: Workflow): ValidationError[] {
 }
 
 /**
+ * Validate a node's data fields against its registered property schema.
+ *
+ * Semantics (deliberately conservative — this pass prevents drift, it does
+ * not add new required-field rules):
+ * - Only fields PRESENT on the data are validated (`undefined` is skipped),
+ *   matching the legacy `if (x !== undefined)` enum checks and keeping old
+ *   workflow files loadable. Presence requirements stay with the hand-written
+ *   checks below.
+ * - Fields whose `visibleWhen` predicate fails are skipped as inactive: their
+ *   values are not consumed in the node's current state. This is also the
+ *   resolution of the AskUserQuestion tension (see ask-user-question-schema):
+ *   `options` bounds (min 2 / max 4) apply in manual mode only; AI-suggestions
+ *   mode legitimately keeps an empty array. `outputPorts` is not schema-
+ *   validated at all — the legacy-tolerated `outputPorts: 0` transient state
+ *   remains accepted.
+ */
+function validateNodeSchemaFields(node: WorkflowNode): ValidationError[] {
+  const schema = NODE_PROPERTY_SCHEMAS[node.type];
+  if (!schema) {
+    return [];
+  }
+  const data = node.data as unknown as Record<string, unknown>;
+  const errors: ValidationError[] = [];
+
+  for (const [name, propertyField] of Object.entries(schema)) {
+    const value = data[name];
+    if (value === undefined) {
+      continue;
+    }
+    if (propertyField.meta.visibleWhen && !propertyField.meta.visibleWhen(data)) {
+      continue;
+    }
+    const result = propertyField.zod.safeParse(value);
+    if (!result.success) {
+      const detail = result.error.issues
+        .map((issue) =>
+          issue.path.length > 0 ? `${issue.message} (at ${issue.path.join('.')})` : issue.message,
+        )
+        .join('; ');
+      errors.push({
+        code: 'NODE_SCHEMA_VIOLATION',
+        message: `${node.type} node field "${name}" is invalid: ${detail}`,
+        field: `nodes[${node.id}].data.${name}`,
+      });
+    }
+  }
+
+  return errors;
+}
+
+/**
  * Validate all nodes in the workflow
  */
 function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
@@ -271,6 +322,23 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
         field: `nodes[${node.id}].position`,
       });
     }
+
+    // Every check below reads node.data properties; corrupted input (null,
+    // missing, or non-object data) must become a structured error, not a
+    // TypeError out of the validator.
+    if (typeof node.data !== 'object' || node.data === null || Array.isArray(node.data)) {
+      errors.push({
+        code: 'INVALID_NODE_DATA',
+        message: `Node "${node.id}" data must be an object`,
+        field: `nodes[${node.id}].data`,
+      });
+      continue;
+    }
+
+    // Structural field validation from the node property schema registry —
+    // the same zod definitions the property panel renders from, so the UI
+    // and this validator cannot drift apart.
+    errors.push(...validateNodeSchemaFields(node));
 
     // Validate Skill nodes (T026)
     if (node.type === NodeType.Skill) {
@@ -327,25 +395,16 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
     }
 
     // Validate SubAgent fields (Feature: 540-persistent-memory, 636-reference-model, 684-built-in-presets)
+    // builtInType/model/memory enum membership is covered by the schema pass
+    // (validateNodeSchemaFields); only checks the schema does not model remain.
     if (node.type === NodeType.SubAgent) {
       const subAgentData = node.data as {
-        model?: string;
-        memory?: string;
         commandFilePath?: string;
         commandScope?: string;
         builtInType?: string;
       };
-      // builtInType enum validation
+      // builtInType and commandFilePath/commandScope are mutually exclusive
       if (subAgentData.builtInType !== undefined) {
-        const validBuiltInTypes = ['general-purpose', 'explore', 'plan'];
-        if (!validBuiltInTypes.includes(subAgentData.builtInType)) {
-          errors.push({
-            code: 'SUBAGENT_INVALID_BUILT_IN_TYPE',
-            message: `SubAgent builtInType must be one of: ${validBuiltInTypes.join(', ')}`,
-            field: `nodes[${node.id}].data.builtInType`,
-          });
-        }
-        // builtInType and commandFilePath/commandScope are mutually exclusive
         if (subAgentData.commandFilePath) {
           errors.push({
             code: 'SUBAGENT_BUILTIN_COMMAND_FILE_CONFLICT',
@@ -361,27 +420,7 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
           });
         }
       }
-      if (
-        subAgentData.model !== undefined &&
-        !(SUB_AGENT_MODEL_VALUES as readonly string[]).includes(subAgentData.model)
-      ) {
-        errors.push({
-          code: 'SUBAGENT_INVALID_MODEL',
-          message: `SubAgent model must be one of: ${SUB_AGENT_MODEL_VALUES.join(', ')}`,
-          field: `nodes[${node.id}].data.model`,
-        });
-      }
-      if (subAgentData.memory !== undefined) {
-        const validMemoryScopes = ['user', 'project', 'local'];
-        if (!validMemoryScopes.includes(subAgentData.memory)) {
-          errors.push({
-            code: 'SUBAGENT_INVALID_MEMORY',
-            message: `SubAgent memory must be one of: ${validMemoryScopes.join(', ')}`,
-            field: `nodes[${node.id}].data.memory`,
-          });
-        }
-      }
-      // commandScope enum validation
+      // commandScope enum validation (commandScope is not in the property schema)
       if (subAgentData.commandScope !== undefined) {
         const validScopes = ['user', 'project'];
         if (!validScopes.includes(subAgentData.commandScope)) {
@@ -481,17 +520,7 @@ function validateSubAgentFlowNode(node: WorkflowNode): ValidationError[] {
     });
   }
 
-  // Memory enum validation
-  if (refData.memory !== undefined) {
-    const validMemoryScopes = ['user', 'project', 'local'];
-    if (!validMemoryScopes.includes(refData.memory)) {
-      errors.push({
-        code: 'SUBAGENTFLOW_INVALID_MEMORY',
-        message: `SubAgentFlow memory must be one of: ${validMemoryScopes.join(', ')}`,
-        field: `nodes[${node.id}].data.memory`,
-      });
-    }
-  }
+  // memory/model enum membership is covered by the schema pass.
 
   return errors;
 }
@@ -664,17 +693,7 @@ function validateSkillNode(node: WorkflowNode): ValidationError[] {
     });
   }
 
-  // Execution mode validation
-  if (skillData.executionMode !== undefined) {
-    const validModes = ['load', 'execute'];
-    if (!validModes.includes(skillData.executionMode)) {
-      errors.push({
-        code: 'SKILL_INVALID_EXECUTION_MODE',
-        message: `Skill executionMode must be one of: ${validModes.join(', ')}`,
-        field: `nodes[${node.id}].data.executionMode`,
-      });
-    }
-  }
+  // executionMode enum membership is covered by the schema pass.
 
   // Execution prompt length validation
   if (skillData.executionPrompt) {
@@ -796,17 +815,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
     }
   }
 
-  // Validation status check
-  if (mcpData.validationStatus) {
-    const validStatuses = ['valid', 'missing', 'invalid'];
-    if (!validStatuses.includes(mcpData.validationStatus)) {
-      errors.push({
-        code: 'MCP_INVALID_STATUS',
-        message: `MCP validationStatus must be one of: ${validStatuses.join(', ')}`,
-        field: `nodes[${node.id}].data.validationStatus`,
-      });
-    }
-  }
+  // validationStatus enum membership is covered by the schema pass.
 
   // Output ports validation
   if (mcpData.outputPorts !== VALIDATION_RULES.MCP.OUTPUT_PORTS) {
@@ -924,12 +933,9 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
       break;
 
     default:
-      // Unknown mode
-      errors.push({
-        code: 'MCP_INVALID_MODE',
-        message: `Invalid MCP mode: ${mode}. Must be one of: manualParameterConfig, aiParameterConfig, aiToolSelection`,
-        field: `nodes[${node.id}].data.mode`,
-      });
+      // Unknown mode: reported by the schema pass (mode enum); the
+      // mode-specific config checks above simply don't apply.
+      break;
   }
 
   return errors;

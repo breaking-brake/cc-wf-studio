@@ -265,7 +265,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.nodeName.placeholder': 'Enter node name',
   'property.nodeName.help': 'Used for exported file name (e.g., "data-analysis")',
   'property.select.custom': 'Custom...',
-  'property.prompt': 'Prompt',
 
   // Start/End node descriptions
   'property.startNodeDescription':
@@ -302,7 +301,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'property.multiSelect.disabled': 'User selects one option (branches to corresponding node)',
   'property.aiSuggestions.enabled': 'AI will dynamically generate options based on context',
   'property.aiSuggestions.disabled': 'Manually define options below',
-  'property.options': 'Options',
   'property.remove': 'Remove',
   'property.optionLabel.placeholder': 'Label',
   'property.optionDescription.placeholder': 'Description',
@@ -314,7 +312,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Branch properties
   'property.branchType.conditional.help': '2 branches (True/False)',
   'property.branchType.switch.help': 'Multiple branches (2-N way)',
-  'property.branches': 'Branches',
   'property.branchLabel': 'Label',
   'property.branchLabel.placeholder': 'e.g., Success, Error',
   'property.branchCondition': 'Condition (natural language)',
@@ -661,19 +658,13 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // MCP Property Panel
   'property.mcp.serverId': 'Server',
   'property.mcp.toolName': 'Tool Name',
-  'property.mcp.toolDescription': 'Description',
-  'property.mcp.parameters': 'Parameters',
-  'property.mcp.parameterValues': 'Parameter Values',
   'property.mcp.parameterCount': 'Parameter Count',
-  'property.mcp.editParameters': 'Edit Parameters',
   'property.mcp.edit.manualParameterConfig': 'Edit Parameters',
   'property.mcp.edit.aiParameterConfig': 'Edit Parameter Content',
   'property.mcp.edit.aiToolSelection': 'Edit Task Content',
   'property.mcp.taskDescription': 'Task Content',
   'property.mcp.parameterDescription': 'Parameter Content',
   'property.mcp.configuredValues': 'Configured Values',
-  'property.mcp.infoNote':
-    'MCP tool properties are loaded from the server. Click "Edit Parameters" to configure parameter values.',
 
   // MCP Parameter Form
   'mcp.parameter.formTitle': 'Tool Parameters',
@@ -944,9 +935,6 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Sub-Agent Form Dialog (Create New)
   'subAgent.form.title': 'Create New Sub-Agent',
   'subAgent.form.description': 'Define a new Sub-Agent node with custom settings.',
-  'subAgent.form.agentTypeLabel': 'Agent Type',
-  'subAgent.form.agentType.claudeCode': 'Claude Code',
-  'subAgent.form.agentType.other': 'Other',
   'skill.field.name': 'Name',
   'skill.field.description': 'Description',
   'skill.field.skillPath': 'Skill Path',

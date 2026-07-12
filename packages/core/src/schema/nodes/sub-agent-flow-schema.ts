@@ -8,7 +8,8 @@
  */
 
 import { z } from 'zod';
-import { field, type PropertyField, toZodObject } from '../field.js';
+import type { SubAgentFlowNodeData } from '../../types/workflow-definition.js';
+import { type AssertAssignable, field, type PropertyField, toZodObject } from '../field.js';
 import { SUB_AGENT_MODEL_VALUES } from './sub-agent-schema.js';
 
 export const subAgentFlowPropertySchema = {
@@ -57,3 +58,9 @@ export type SubAgentFlowPropertySchema = typeof subAgentFlowPropertySchema;
 
 /** zod object validator derived from {@link subAgentFlowPropertySchema}. */
 export const subAgentFlowZodObject = toZodObject(subAgentFlowPropertySchema);
+
+// Compile-time drift guards: schema field names must exist on SubAgentFlowNodeData and
+// declared value types must stay assignable to the interface (optionality may
+// be looser in the schema; see each field's comment).
+export type SubAgentFlowSchemaFieldNamesGuard = AssertAssignable<keyof z.infer<typeof subAgentFlowZodObject>, keyof SubAgentFlowNodeData>;
+export type SubAgentFlowSchemaValueTypesGuard = AssertAssignable<z.infer<typeof subAgentFlowZodObject>, Partial<SubAgentFlowNodeData>>;

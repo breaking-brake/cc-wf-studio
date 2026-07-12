@@ -9,7 +9,8 @@
  */
 
 import { z } from 'zod';
-import { field, type PropertyField, toZodObject } from '../field.js';
+import type { SwitchNodeData } from '../../types/workflow-definition.js';
+import { type AssertAssignable, field, type PropertyField, toZodObject } from '../field.js';
 
 const switchConditionZod = z.object({
   id: z.string().optional(),
@@ -71,3 +72,9 @@ export function deriveSwitchUpdate(
   }
   return patch;
 }
+
+// Compile-time drift guards: schema field names must exist on SwitchNodeData and
+// declared value types must stay assignable to the interface (optionality may
+// be looser in the schema; see each field's comment).
+export type SwitchSchemaFieldNamesGuard = AssertAssignable<keyof z.infer<typeof switchZodObject>, keyof SwitchNodeData>;
+export type SwitchSchemaValueTypesGuard = AssertAssignable<z.infer<typeof switchZodObject>, Partial<SwitchNodeData>>;
