@@ -1,3 +1,8 @@
+---
+paths:
+  - "packages/vscode/src/webview/src/components/dialogs/**"
+---
+
 # Dialog Component Design Guidelines
 
 ## Library choice

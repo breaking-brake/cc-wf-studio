@@ -1,3 +1,10 @@
+---
+paths:
+  - "packages/core/src/schema/**"
+  - "packages/vscode/src/webview/src/components/property/**"
+  - "packages/core/src/utils/validate-workflow.ts"
+---
+
 # Schema-Driven Node Property Panels
 
 All 12 node types render their property panels from zod-based schemas in

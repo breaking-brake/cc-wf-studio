@@ -1,3 +1,8 @@
+---
+paths:
+  - "packages/vscode/src/webview/**"
+---
+
 # Webview Implementation Patterns
 
 ## External Link Implementation Pattern

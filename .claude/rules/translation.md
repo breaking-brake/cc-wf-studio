@@ -1,3 +1,9 @@
+---
+paths:
+  - "packages/vscode/src/webview/src/i18n/**"
+  - "packages/core/src/schema/nodes/**"
+---
+
 # Translation Rules (webview i18n)
 
 Rules for editing `packages/vscode/src/webview/src/i18n/translations/{en,ja,ko,zh-CN,zh-TW}.ts`.
