@@ -26,7 +26,7 @@
     "lucide-react": "^0.562.0",
     "mermaid": "^11.14.0",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3",
+    "react-dom": "^19.2.7",
     "react-markdown": "^10.1.0",
     "reactflow": "^11.10.0",
     "remark-gfm": "^4.0.1",
