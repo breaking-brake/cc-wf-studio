@@ -16,6 +16,21 @@ routine as well as invoked manually). In remote/unattended sessions the `gh`
 CLI may be absent — use the GitHub MCP tools instead (create PR, enable
 auto-merge, merge, list/create issues); commands below name `gh` for brevity.
 
+## 0. Serialization guard — one in-flight task at a time
+
+The loop may fire every 30 minutes, so iterations can overlap. **The queue is
+GitHub Issues; execution is serial with capacity 1.** Before anything else,
+check for an open agent PR: `gh pr list --base auto-dev --state open`.
+
+- **If one exists, do NOT start a new task.** Become its steward instead:
+  squash-merge it if CI is green; fix and re-push if red (counting toward its
+  3-attempt limit); re-arm a ~15 min `send_later` check-in if CI is still
+  running. Then end the iteration — advancing the in-flight PR IS this
+  round's contribution.
+- If none exists, proceed to a normal iteration below. Always branch from
+  freshly fetched `origin/auto-dev` so each task builds on everything
+  already merged.
+
 ## 1. Orient (run in parallel)
 
 - `IMPLEMENTATION_PLAN.md` — North Star, current priorities, Not Doing list

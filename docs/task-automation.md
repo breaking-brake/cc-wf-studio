@@ -116,10 +116,15 @@ still PR straight to `main` as before.
 - **Replenish**: run `/backlog-scan` when the backlog is thin (or let the
   weekly automations feed it).
 - **Advance**: run `/next-task` for one autonomous iteration; run it
-  repeatedly for a Ralph-style loop. For hands-off cadence, schedule a
-  Claude Code session (e.g. a Claude Code Remote routine) that invokes
-  `/next-task` — the auto-dev buffer plus the human promotion gate keeps
-  this safe.
+  repeatedly for a Ralph-style loop. For hands-off cadence, Claude Code
+  Remote routines fire a fresh session every 30 minutes (two hourly
+  routines offset at :15 and :45) — the auto-dev buffer plus the human
+  promotion gate keeps this safe.
+- **Concurrency model**: the idea queue is GitHub Issues; execution is
+  serial with capacity 1. Every iteration first checks for an open PR with
+  base `auto-dev` — if one exists it stewards that PR (merge on green /
+  fix on red) instead of starting new work, so overlapping firings never
+  develop in parallel and merge conflicts are structurally avoided.
 - **Promote**: when `auto-dev` has accumulated enough,
   `gh pr create --base main --head auto-dev`, review the whole diff, merge.
   If something in the batch is bad, revert that squash commit on `auto-dev`
