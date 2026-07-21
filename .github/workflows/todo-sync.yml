@@ -1,0 +1,30 @@
+name: TODO Sync
+
+# Syncs TODO/FIXME/HACK code comments to GitHub Issues (label: todo-comment).
+# New comments become issues; removed comments auto-close their issues.
+# Mechanical discovery only — triage/prioritization happens elsewhere
+# (see docs/task-automation.md).
+
+on:
+  schedule:
+    # Weekly, Monday 13:00 JST (04:00 UTC) — after the security scan window
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  todo-sync:
+    name: Sync TODO comments to Issues
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Sync TODO comments
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: bash .github/scripts/todo-sync.sh

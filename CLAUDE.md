@@ -11,6 +11,21 @@ sequence diagrams, `docs/release-flow.md`).
 - GitHub Issues and Pull Requests (titles, bodies, and comments) MUST be written in English.
 - This applies regardless of the conversation language used with Claude.
 
+## Automated Task Pipeline
+
+Task discovery and execution are partially automated — see
+`docs/task-automation.md` for the responsibility matrix and safety
+boundaries. Key points for agents:
+
+- Backlog = **GitHub Issues** (no TODO.md). Direction = `IMPLEMENTATION_PLAN.md`
+  (human-edited; agents read it, never edit it). Loop memory =
+  `docs/progress-log.md` (append-only).
+- Skills: `backlog-scan` (find + file issues), `next-task` (pick + execute
+  one task per iteration). Mechanical discovery (TODO comments, dependency
+  updates, CI failures) is handled by GitHub Actions — don't duplicate it.
+- Automation may file issues and open PRs; **merging to `main` and anything
+  release-related is always human-only**.
+
 ## Project Structure
 
 pnpm monorepo. Four packages under `packages/`:
