@@ -1,14 +1,16 @@
 name: CI
 
 # Runs the repo's required quality gates (pnpm check + pnpm build) on every PR
-# targeting main and on pushes to main. This is the validation gate for both
-# human-authored and agent-authored PRs — see docs/task-automation.md.
+# targeting main or auto-dev, and on pushes to those branches. This is the
+# validation gate for both human-authored and agent-authored PRs — on auto-dev
+# it is the ONLY gate before an agent PR auto-merges, so it must stay strict.
+# See docs/task-automation.md.
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, auto-dev]
   push:
-    branches: [main]
+    branches: [main, auto-dev]
   workflow_dispatch:
 
 permissions:

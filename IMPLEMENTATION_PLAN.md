@@ -43,3 +43,6 @@ never edit directly). See `docs/task-automation.md` for the full pipeline.
   findings; humans file anything.
 - Execution: run the `next-task` skill (manually, or via a scheduled Claude
   session). Each iteration appends to `docs/progress-log.md`.
+- Landing: agent PRs auto-merge into the `auto-dev` integration branch on
+  green CI; a human promotes `auto-dev` → `main` via a promotion PR
+  (see `docs/task-automation.md`).

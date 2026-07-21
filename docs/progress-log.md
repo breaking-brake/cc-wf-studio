@@ -21,7 +21,9 @@ Entry format:
 - **Chosen because**: initial setup requested by the repository owner.
 - **Issue/PR**: (this setup PR)
 - **Outcome**: done — CI + todo-sync + failure-reporting workflows, Dependabot
-  fix, `backlog-scan` / `next-task` skills, steering docs.
+  fix, `backlog-scan` / `next-task` skills, steering docs, and the
+  `auto-dev` two-stage branch flow (agent auto-merge on green CI; human
+  promotes to `main`).
 - **Next candidates**:
   - Run `backlog-scan` once to seed the backlog.
   - Triage the existing TODO comments once `todo-sync` files them.

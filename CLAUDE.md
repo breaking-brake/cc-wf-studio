@@ -23,8 +23,11 @@ boundaries. Key points for agents:
 - Skills: `backlog-scan` (find + file issues), `next-task` (pick + execute
   one task per iteration). Mechanical discovery (TODO comments, dependency
   updates, CI failures) is handled by GitHub Actions — don't duplicate it.
-- Automation may file issues and open PRs; **merging to `main` and anything
-  release-related is always human-only**.
+- Two-stage branch flow: agent task PRs target the **`auto-dev`** integration
+  branch and may auto-merge there on green CI. **`main` is human-only** —
+  agents never open or merge PRs based on `main`; a human promotes
+  `auto-dev` → `main` via a promotion PR. Release actions are always
+  human-only.
 
 ## Project Structure
 

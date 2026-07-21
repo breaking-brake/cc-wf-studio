@@ -50,14 +50,28 @@ executing.
 
 ## 3. Execute
 
-1. Branch from latest main: `git fetch origin main && git checkout -b claude/<slug> origin/main`
-2. Implement the single selected task — resist scope creep; adjacent findings
+Agent work flows through the **`auto-dev` integration branch**, never straight
+at `main` (two-stage flow — see `docs/task-automation.md`):
+
+1. **Sync the integration branch**: `git fetch origin main auto-dev`. If
+   `auto-dev` is behind `main`, merge `origin/main` into it and push — a
+   rotten integration branch produces unmergeable promotion PRs. If the sync
+   merge conflicts, stop and ask a human.
+2. Branch from it: `git checkout -b claude/<slug> origin/auto-dev`
+3. Implement the single selected task — resist scope creep; adjacent findings
    become new issues (one `gh issue create` each), not extra commits
-3. Quality gates from the repo root: `pnpm check && pnpm build`
-4. Changeset per CLAUDE.md (`pnpm changeset`, or `add --empty` for
+4. Quality gates from the repo root: `pnpm check && pnpm build`
+5. Changeset per CLAUDE.md (`pnpm changeset`, or `add --empty` for
    CI/docs-only), commit per the commit-message guidelines
-5. Open the PR with the **pr-to-main** skill; reference the issue with
-   `Closes #NN` when one exists
+6. Open the PR **with base `auto-dev`** (`gh pr create --base auto-dev`).
+   Follow the pr-to-main skill's title/body conventions (`<type>(<scope>):`
+   title, English, changeset noted) — but do NOT let it target `main`.
+   Reference the issue with `Closes #NN` when one exists.
+7. **Auto-merge on green CI only**:
+   `gh pr merge <num> --squash --auto` — this merges into `auto-dev`
+   automatically once CI passes, and never merges a red PR. If CI fails,
+   fix and re-push; after 3 failed attempts, leave the PR open, label it
+   `needs-triage`, and log the blockage instead of forcing it.
 
 ## 4. Record
 
@@ -68,8 +82,10 @@ iteration that doesn't log didn't happen.
 
 ## Boundaries
 
-- One task per invocation. No pushes to `main`. All code changes go through
-  a PR; a human merges.
+- One task per invocation. **Never push to `main`, never open or merge a PR
+  whose base is `main`.** Agent merges are allowed only into `auto-dev`, only
+  via a PR, and only with CI green. Promotion of `auto-dev` into `main` is a
+  human-only action.
 - Never perform release actions (Release PR, publish dispatch) — human-only
   per CLAUDE.md.
 - Don't modify the North Star / priorities in `IMPLEMENTATION_PLAN.md`;
