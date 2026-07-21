@@ -39,9 +39,12 @@ claude/<task> ──PR──▶ auto-dev ──promotion PR──▶ main
   also works (Changesets versioning reads `.changeset/*.md` files, not
   commit messages, so releases are unaffected either way).
 - **Blast radius**: a catastrophic agent mistake lands in `auto-dev` at
-  worst. Recovery is cheap and never touches `main`:
-  `git push origin origin/main:auto-dev --force` resets the branch (any
-  unpromoted work is discarded — check the diff first).
+  worst. Recovery is cheap and never touches `main` — a **human** either
+  reverts the offending squash commit(s) on `auto-dev` (history-preserving,
+  preferred) or, as a last resort, resets the branch with
+  `git push origin origin/main:auto-dev --force` (discards ALL unpromoted
+  work — check the diff first). **Resetting or force-pushing `auto-dev` is a
+  human-only action; agents never force-push anything.**
 - **Freshness**: the `next-task` skill syncs `auto-dev` from `main` at the
   start of every iteration, so promotion PRs stay mergeable.
 - **Recommended repo settings** (one-time, human): protect `main` (require

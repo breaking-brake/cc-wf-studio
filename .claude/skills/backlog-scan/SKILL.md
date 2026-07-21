@@ -10,6 +10,10 @@ them as GitHub Issues. This skill is the **judgment layer** of the task
 pipeline described in `docs/task-automation.md` — read that file's
 responsibility matrix if unsure whether something belongs here.
 
+In remote/unattended sessions the `gh` CLI may be absent — use the GitHub MCP
+tools instead (list issues, create issues, labels); commands below name `gh`
+for brevity.
+
 **Do not re-discover what the mechanical layer already covers:**
 
 - TODO/FIXME/HACK comments → `todo-sync.yml` workflow (label `todo-comment`)

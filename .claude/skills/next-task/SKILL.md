@@ -110,7 +110,8 @@ at `main` (two-stage flow — see `docs/task-automation.md`):
 2. Branch from it: `git checkout -b claude/<slug> origin/auto-dev`
 3. Implement the single selected task — resist scope creep; adjacent findings
    become new issues (one `gh issue create` each), not extra commits
-4. Quality gates from the repo root: `pnpm check && pnpm build`
+4. Quality gates from the repo root: `pnpm build && pnpm check` (build first —
+   `packages/mcp`'s type-check needs core's built dist on a fresh checkout)
 5. Changeset per CLAUDE.md (`pnpm changeset`, or `add --empty` for
    CI/docs-only), commit per the commit-message guidelines
 6. Open the PR **with base `auto-dev`** (`gh pr create --base auto-dev`).
