@@ -36,8 +36,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check (lint + type-check)
-        run: pnpm check
-
+      # Build first: packages/mcp's type-check resolves @cc-wf-studio/core
+      # from core's built dist/, so a fresh checkout must compile before
+      # `pnpm check` can pass.
       - name: Build all packages
         run: pnpm build
+
+      - name: Check (lint + type-check)
+        run: pnpm check
