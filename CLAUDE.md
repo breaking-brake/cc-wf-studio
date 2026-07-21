@@ -11,6 +11,26 @@ sequence diagrams, `docs/release-flow.md`).
 - GitHub Issues and Pull Requests (titles, bodies, and comments) MUST be written in English.
 - This applies regardless of the conversation language used with Claude.
 
+## Autonomous Value-Creation Loop
+
+Development is partially autonomous — see `docs/task-automation.md` for the
+loop architecture and safety rails. Key points for agents:
+
+- The loop's job is **inventing user-facing value** (canvas UX, AI-editing
+  quality, CLI experience — see `IMPLEMENTATION_PLAN.md`, human-edited;
+  agents read it, never edit it). Housekeeping (dependency bumps, TODO
+  cleanup, docs-for-docs'-sake, no-user-effect refactors) is out of scope
+  for agents. Maintenance is interrupt-only: red CI, security, human-reported
+  bugs.
+- One skill drives it: `next-task` (one invention or interrupt-fix per
+  iteration). Idea queue = GitHub Issues labeled `idea`. Loop memory =
+  `docs/progress-log.md` (append-only).
+- Two-stage branch flow: agent task PRs target the **`auto-dev`** integration
+  branch and may auto-merge there on green CI. **`main` is human-only** —
+  agents never open or merge PRs based on `main`; a human promotes
+  `auto-dev` → `main` via a promotion PR. Release actions are always
+  human-only.
+
 ## Project Structure
 
 pnpm monorepo. Four packages under `packages/`:

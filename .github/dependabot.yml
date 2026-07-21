@@ -1,10 +1,20 @@
 version: 2
 updates:
+  # pnpm workspace — the root pnpm-lock.yaml covers every packages/* workspace
+  # member, so a single root entry scans the whole monorepo.
+  # (The previous "/src/webview" entry predated the monorepo layout and
+  # pointed at a directory that no longer exists.)
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
-  - package-ecosystem: "npm"
-    directory: "/src/webview"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: "weekly"
