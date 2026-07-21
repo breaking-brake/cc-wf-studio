@@ -5,7 +5,7 @@
  * Based on: /specs/001-cc-wf-studio/plan.md
  */
 
-import type { BuiltInSubAgentType, SubAgentFlow, SubAgentModel } from '@cc-wf-studio/core';
+import type { BuiltInSubAgentType, SubAgentFlow } from '@cc-wf-studio/core';
 import {
   BUILT_IN_SUB_AGENTS,
   generateBranchId,
@@ -34,7 +34,6 @@ import { useTranslation } from '../i18n/i18n-context';
 import { createSubAgent } from '../services/command-browser-service';
 import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
-import { parseAgentFrontmatter } from '../utils/agent-frontmatter';
 import { BetaBadge } from './common/BetaBadge';
 import { CodexNodeDialog } from './dialogs/CodexNodeDialog';
 import { McpNodeDialog } from './dialogs/McpNodeDialog';
@@ -203,9 +202,6 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
   const handleSelectCommand = (command: CommandReference, formData: SubAgentFormData) => {
     const position = calculateNonOverlappingPosition(250, 100);
 
-    // Parse YAML frontmatter from command content
-    const { frontmatter } = parseAgentFrontmatter(command.promptContent);
-
     const newNode = {
       id: `agent-${Date.now()}`,
       type: 'subAgent' as const,
@@ -214,9 +210,10 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
         description: formData.description,
         agentDefinition: formData.agentDefinition,
         prompt: formData.prompt,
-        model: (frontmatter.model as SubAgentModel) || 'sonnet',
-        tools: frontmatter.tools,
-        memory: frontmatter.memory as 'user' | 'project' | 'local' | undefined,
+        model: formData.model,
+        tools: formData.tools || undefined,
+        memory: formData.memory || undefined,
+        color: formData.color,
         outputPorts: 1,
         commandFilePath: command.commandPath,
         commandScope: command.scope,
