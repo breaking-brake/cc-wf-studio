@@ -25,6 +25,7 @@ pnpm add -D @cc-wf-studio/cli
 | `ccwf run <file>` | `ccwf export` + a "next step" hint. `--launch` additionally spawns Claude Code when available. |
 | `ccwf preview <file>` | Open a read-only viewer (Mermaid + per-node Markdown panes) in a local browser. Auto-reloads when the file changes. |
 | `ccwf canvas <file>` | (Experimental) Open the **full editable** cc-wf-studio canvas in a local browser. Saves write back to the same file. |
+| `ccwf samples list` / `ccwf samples copy <id>` | Discover the bundled example workflows and copy one locally to preview, export, or run. |
 | `ccwf install-skills` | Copy the bundled Claude Code Skill into `~/.claude/skills/` (or `./.claude/skills/` with `--project`) so AI agents learn when to use ccwf. |
 | `ccwf uninstall-skills` | Remove the bundled Claude Code Skill from `~/.claude/skills/` (or `./.claude/skills/` with `--project`). Idempotent. |
 
@@ -142,6 +143,17 @@ ccwf canvas ./my-workflow.json --port 51234   # pin to a port
 **Reachability**: the server binds to the IPv4 loopback (`127.0.0.1`) by default — only this machine can reach the server. The printed URL says `localhost` and both addresses resolve to the same listener. The entry URL and WebSocket use a per-session UUID path prefix (`http://localhost:<port>/<uuid>/`, `ws://localhost:<port>/<uuid>/ws`) so two concurrent sessions don't collide; requests without the prefix get a 403. Pass `--host` (e.g. `0.0.0.0`) only when you intentionally want other machines on the network to reach the canvas — the banner prints an explicit non-loopback notice when that happens.
 
 The bundled webview's VSCode message protocol is emulated by a small polyfill (`bootstrap.js`) injected into `index.html`. The webview source is **unchanged** — `window.acquireVsCodeApi` returns a WebSocket-backed transport that talks to this CLI process.
+
+### `ccwf samples`
+
+```sh
+ccwf samples list                                      # what examples ship with the CLI
+ccwf samples copy daily-dev-with-branch-sample         # → ./daily-dev-with-branch-sample.json (en)
+ccwf samples copy daily-dev-with-branch-sample -l ja   # Japanese variant
+ccwf samples copy github-issue-planning-sample -o ./wf/planning.json
+```
+
+The CLI bundles the same example workflows that ship with the VSCode extension. `list` shows each sample's id, difficulty, node count, tags, and available locales; `copy` writes one to a local file (default `./<id>.json`, refusing to overwrite an existing file unless `--overwrite` is passed) and prints the natural next steps (`ccwf preview` / `ccwf run`). Samples use the `{meta, workflow}` wrapper shape, which every `<file>` subcommand accepts directly.
 
 ### `ccwf install-skills` / `ccwf uninstall-skills`
 
