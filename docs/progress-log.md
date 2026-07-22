@@ -17,6 +17,24 @@ Entry format:
 
 ---
 
+## 2026-07-22 — Ignored-field warnings in `ccwf export` / `ccwf run`
+- **User value**: exporting a workflow to a non-Claude agent now warns exactly
+  which configured node fields (e.g. Sub-Agent model/tools/memory) the target
+  ignores, instead of silently dropping them.
+- **Issue/PR**: #803 (schema layer, previously unwired) / PR from
+  `claude/blissful-lamport-8ijgoh`
+- **Outcome**: done — wired `collectIgnoredFieldWarnings` (built in #803 but
+  never called by any exporter) into the CLI's shared `runExport`, so both
+  `ccwf export` and `ccwf run` emit per-field `warning:` lines on stderr
+  before writing files; verified E2E for codex/gemini (warns) and
+  claude-code (silent).
+- **Next proposals**:
+  - Surface the same ignored-field warnings in the VSCode extension's export
+    flow (filed as an `idea` issue) — the sub-agent panel comment already
+    promises "reported as ignored by other targets at export time".
+  - `ccwf validate --agent <target>` preflight target-compatibility check
+    (filed as an `idea` issue).
+
 ## 2026-07-22 — `ccwf run --launch` supports codex/copilot/gemini, not just claude-code
 - **User value**: a user running `ccwf run <file> --agent codex --launch` (or
   `copilot` / `gemini`) now gets that agent's CLI launched interactively,
