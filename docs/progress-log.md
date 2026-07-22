@@ -17,6 +17,29 @@ Entry format:
 
 ---
 
+## 2026-07-22 — `ccwf run --launch` supports codex/copilot/gemini, not just claude-code
+- **User value**: a user running `ccwf run <file> --agent codex --launch` (or
+  `copilot` / `gemini`) now gets that agent's CLI launched interactively,
+  instead of a warning saying `--launch` only works with claude-code.
+- **Issue/PR**: (opened this iteration)
+- **Outcome**: done — extracted the agent bin/label map `ccwf tour` already
+  had (`LAUNCHERS`) into a shared `packages/cli/src/utils/agent-launchers.ts`
+  (`LAUNCHABLE_AGENTS`), and had `run.ts`'s `--launch` path use it instead of
+  a hardcoded `agent !== 'claude-code'` bail-out. `tour.ts` now composes the
+  shared map with its own prompt-args builder, so the two commands can't
+  drift apart on which agents are launchable again.
+- **Next proposals**:
+  - CLI commands (`validate`, `render`, `export`, `canvas`, `preview`, `tour`)
+    surface raw `JSON.parse` errors (byte offset, not line/col) on malformed
+    workflow JSON via `load-workflow.ts` — a shared line/col translator there
+    would fix this for every command at once.
+  - `ccwf export`'s "Claude Code-only node" warning is a single aggregate
+    line; it never names which node ids are affected, so a user targeting
+    `--agent cursor` can't tell what will silently break without opening the
+    JSON.
+  - Canvas: no way to duplicate a configured node (subAgent/prompt) — cloning
+    one currently means manually recreating every field by hand.
+
 ## 2026-07-22 — Validate `ccwf tour` output before declaring success
 - **User value**: a user running `ccwf tour` no longer gets a false "success"
   when the launched AI agent writes a malformed `tour` field or references

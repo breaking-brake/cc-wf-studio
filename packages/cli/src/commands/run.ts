@@ -12,6 +12,7 @@
 import { spawn } from 'node:child_process';
 import * as path from 'node:path';
 import { Command } from 'commander';
+import { LAUNCHABLE_AGENTS } from '../utils/agent-launchers.js';
 import { findBinaryInPath } from '../utils/find-binary.js';
 import { WorkflowLoadError } from '../utils/load-workflow.js';
 import { asSupportedAgent, runExport } from './export.js';
@@ -71,7 +72,7 @@ export function registerRunCommand(program: Command): void {
     )
     .option(
       '--launch',
-      'After writing files, also spawn the agent CLI (best-effort, claude-code only for now).',
+      `After writing files, also spawn the agent CLI interactively (best-effort; supported for ${Object.keys(LAUNCHABLE_AGENTS).join(', ')}).`,
       false
     )
     .action(async (file: string, options: CommanderRunOptions) => {
@@ -94,21 +95,22 @@ export function registerRunCommand(program: Command): void {
         process.stdout.write(`\nNext: in ${result.rootDir}, ${hint}\n`);
 
         if (options.launch) {
-          if (agent !== 'claude-code') {
+          const launcher = LAUNCHABLE_AGENTS[agent];
+          if (!launcher) {
             process.stderr.write(
-              `warn: --launch is currently only supported for --agent claude-code. Skipping launch.\n`
+              `warn: --launch is not supported for --agent ${agent} (no headless CLI). Skipping launch.\n`
             );
             return;
           }
-          const claudeBin = await findBinaryInPath('claude');
-          if (!claudeBin) {
+          const bin = await findBinaryInPath(launcher.bin);
+          if (!bin) {
             process.stderr.write(
-              `warn: --launch requested but \`claude\` was not found on PATH. Files were written; please launch Claude Code manually and run /${result.slashName}.\n`
+              `warn: --launch requested but \`${launcher.bin}\` was not found on PATH. Files were written; please launch ${launcher.label} manually and run /${result.slashName}.\n`
             );
             return;
           }
-          process.stdout.write(`\nLaunching: ${claudeBin} (cwd ${result.rootDir})\n`);
-          const child = spawn(claudeBin, [], {
+          process.stdout.write(`\nLaunching: ${bin} (cwd ${result.rootDir})\n`);
+          const child = spawn(bin, [], {
             cwd: result.rootDir,
             stdio: 'inherit',
             shell: false,
@@ -121,7 +123,7 @@ export function registerRunCommand(program: Command): void {
               resolve();
             });
             child.on('error', (error) => {
-              process.stderr.write(`error: failed to launch claude: ${error.message}\n`);
+              process.stderr.write(`error: failed to launch ${launcher.bin}: ${error.message}\n`);
               process.exitCode = 1;
               resolve();
             });
