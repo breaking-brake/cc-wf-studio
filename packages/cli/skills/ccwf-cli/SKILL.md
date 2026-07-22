@@ -96,8 +96,10 @@ Materialise the workflow as **Agent Skill files** for a target agent. Pure file 
 ccwf export ./my-workflow.json                                 # --agent claude-code (default)
 ccwf export ./my-workflow.json --agent cursor                  # cursor
 ccwf export ./my-workflow.json --agent codex --cwd /tmp/proj   # codex, custom output root
-ccwf export ./my-workflow.json --overwrite                     # replace existing files
+ccwf export ./my-workflow.json --overwrite                     # replace files whose content changed
 ```
+
+Re-running an export is idempotent: existing files whose content already matches are skipped as up to date; only files with different content require `--overwrite`.
 
 Output by `--agent`:
 

@@ -53,6 +53,8 @@ export interface ExportRunOptions {
 export interface ExportRunResult {
   /** Absolute paths of every file written. */
   writtenPaths: string[];
+  /** Absolute paths of planned files skipped because their on-disk content already matched. */
+  unchangedPaths: string[];
   /** Slash command name (used for the `run` follow-up hint). */
   slashName: string;
   /** Project root used. */
@@ -128,17 +130,22 @@ export async function runExport(options: ExportRunOptions): Promise<ExportRunRes
       ? planWorkflowExportFiles(workflow)
       : planAgentSkillFiles(workflow, options.agent as AgentSkillProvider);
 
+  const unchangedPaths: string[] = [];
   if (!options.overwrite) {
     const conflicts: string[] = [];
     for (const planned of plan) {
       const absPath = resolvePlanned(rootDir, planned);
       if (await pathExists(absPath)) {
-        conflicts.push(absPath);
+        if (await matchesPlannedContents(absPath, planned.contents)) {
+          unchangedPaths.push(absPath);
+        } else {
+          conflicts.push(absPath);
+        }
       }
     }
     if (conflicts.length > 0) {
       process.stderr.write(
-        `error: ${conflicts.length} file(s) already exist. Pass --overwrite to replace them:\n`
+        `error: ${conflicts.length} file(s) already exist with different content. Pass --overwrite to replace them:\n`
       );
       for (const absPath of conflicts) {
         process.stderr.write(`  - ${absPath}\n`);
@@ -147,10 +154,12 @@ export async function runExport(options: ExportRunOptions): Promise<ExportRunRes
     }
   }
 
+  const unchanged = new Set(unchangedPaths);
   const writtenPaths: string[] = [];
   const ensuredDirs = new Set<string>();
   for (const planned of plan) {
     const absPath = resolvePlanned(rootDir, planned);
+    if (unchanged.has(absPath)) continue;
     const dir = path.dirname(absPath);
     if (!ensuredDirs.has(dir)) {
       await fs.mkdir(dir, { recursive: true });
@@ -162,9 +171,43 @@ export async function runExport(options: ExportRunOptions): Promise<ExportRunRes
 
   return {
     writtenPaths,
+    unchangedPaths,
     slashName: nodeNameToFileName(workflow.name),
     rootDir,
   };
+}
+
+/**
+ * Whether the file at `absPath` already holds exactly `contents`. Any read
+ * failure (directory in the way, permissions, ...) counts as "not matching"
+ * so it is reported as a conflict rather than crashing or silently skipping.
+ */
+async function matchesPlannedContents(absPath: string, contents: string): Promise<boolean> {
+  try {
+    return (await fs.readFile(absPath, 'utf-8')) === contents;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Print the written/up-to-date summary for a completed `runExport`. Shared by
+ * `ccwf export` and `ccwf run` so their output cannot drift.
+ */
+export function reportExportOutcome(result: ExportRunResult): void {
+  if (result.writtenPaths.length > 0 || result.unchangedPaths.length === 0) {
+    process.stdout.write(`✓ Wrote ${result.writtenPaths.length} file(s):\n`);
+    for (const writtenPath of result.writtenPaths) {
+      process.stdout.write(`  - ${path.relative(result.rootDir, writtenPath)}\n`);
+    }
+    if (result.unchangedPaths.length > 0) {
+      process.stdout.write(`  (${result.unchangedPaths.length} file(s) already up to date)\n`);
+    }
+  } else {
+    process.stdout.write(
+      `✓ All ${result.unchangedPaths.length} file(s) already up to date; nothing to write.\n`
+    );
+  }
 }
 
 /** Resolve an option spec into a `SupportedAgent`, throwing if unknown. */
@@ -205,10 +248,7 @@ export function registerExportCommand(program: Command): void {
           cwd: options.cwd,
         });
 
-        process.stdout.write(`✓ Wrote ${result.writtenPaths.length} file(s):\n`);
-        for (const writtenPath of result.writtenPaths) {
-          process.stdout.write(`  - ${path.relative(result.rootDir, writtenPath)}\n`);
-        }
+        reportExportOutcome(result);
       } catch (error) {
         if (error instanceof WorkflowLoadError) {
           process.stderr.write(`error: ${error.message}\n`);
