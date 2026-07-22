@@ -25,9 +25,10 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "pnpm run sync:webview && pnpm run sync:skills && tsc && chmod +x dist/cli.js",
+    "build": "pnpm run sync:webview && pnpm run sync:skills && pnpm run sync:samples && tsc && chmod +x dist/cli.js",
     "sync:webview": "rm -rf dist/webview && mkdir -p dist/webview && cp -R ../vscode/src/webview/dist/. dist/webview/",
     "sync:skills": "rm -rf dist/skills && mkdir -p dist/skills && cp -R skills/. dist/skills/",
+    "sync:samples": "rm -rf dist/samples && mkdir -p dist/samples && cp -R ../vscode/resources/samples/. dist/samples/",
     "check": "tsc --noEmit",
     "lint": "echo 'cli: no lint config yet'",
     "format": "echo 'cli: no format config yet'",

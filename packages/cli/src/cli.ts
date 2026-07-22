@@ -20,6 +20,7 @@ import { registerMcpCommand } from './commands/mcp.js';
 import { registerPreviewCommand } from './commands/preview.js';
 import { registerRenderCommand } from './commands/render.js';
 import { registerRunCommand } from './commands/run.js';
+import { registerSamplesCommand } from './commands/samples.js';
 import { registerTourCommand } from './commands/tour.js';
 import { registerUninstallSkillsCommand } from './commands/uninstall-skills.js';
 import { registerValidateCommand } from './commands/validate.js';
@@ -47,6 +48,7 @@ registerRunCommand(program);
 registerPreviewCommand(program);
 registerCanvasCommand(program);
 registerTourCommand(program);
+registerSamplesCommand(program);
 registerInstallSkillsCommand(program);
 registerUninstallSkillsCommand(program);
 

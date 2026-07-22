@@ -152,6 +152,18 @@ Typical `.mcp.json` snippet for Claude Code:
 
 The MCP server exposes 6 tools: `get_workflow_schema`, `get_current_workflow`, `apply_workflow`, `update_nodes`, `list_available_agents`, `highlight_group_node`. Use these when the user wants AI-driven editing of the workflow itself (not just rendering / running it).
 
+### `ccwf samples list` / `ccwf samples copy <id>`
+
+Discover and scaffold the bundled example workflows.
+
+```bash
+ccwf samples list                                    # id, difficulty, node count, tags, locales
+ccwf samples copy daily-dev-with-branch-sample       # → ./daily-dev-with-branch-sample.json (en)
+ccwf samples copy <id> -l ja -o ./wf/example.json    # pick locale and destination
+```
+
+Use this when the user has no workflow yet and asks for an example, a template, or "how do I start?". `copy` refuses to overwrite an existing destination unless `--overwrite` is passed, and the copied file works directly with every `<file>` subcommand (`preview`, `render`, `validate`, `export`, `run`).
+
 ### `ccwf install-skills` / `ccwf uninstall-skills`
 
 Copy this Skill bundle into a discoverable location, or remove it again.
@@ -189,6 +201,7 @@ Use this as a lookup when the user describes intent in natural language. If the 
 | "Run this workflow", "動かして", "実行して"                                          | `ccwf run <file> --launch`                   |
 | "Edit the canvas without VSCode", "editor を browser で開いて"                       | `ccwf canvas <file>` (mention experimental)  |
 | "Let an MCP client edit this workflow"                                              | `ccwf mcp --file <file>` and configure `.mcp.json` |
+| "Show me an example workflow", "サンプルある?", "how do I start?"                    | `ccwf samples list` → `ccwf samples copy <id>` |
 | "Install the ccwf skill / teach Claude about ccwf"                                  | `ccwf install-skills [--project]`            |
 | "Update / refresh the ccwf skill"                                                   | `ccwf uninstall-skills && ccwf install-skills` |
 | "Remove the ccwf skill / cleanup"                                                   | `ccwf uninstall-skills [--project]`          |

@@ -17,6 +17,33 @@ Entry format:
 
 ---
 
+## 2026-07-22 — `ccwf samples` — discover and scaffold bundled example workflows
+- **User value**: a user who installs `@cc-wf-studio/cli` from npm can now run
+  `ccwf samples list` to see the bundled example workflows (id, difficulty,
+  node count, tags, locales) and `ccwf samples copy <id> [--locale] [--output]`
+  to scaffold one locally for `preview`/`run` — previously the CLI shipped
+  zero examples (the samples only existed inside the VSCode extension), which
+  is exactly the gap open question #448 asks about.
+- **Issue/PR**: #870 / PR from `claude/sleepy-curie-wjt035`
+- **Outcome**: done — new `sync:samples` build step copies
+  `packages/vscode/resources/samples/` into the CLI's `dist/samples/`
+  (same precedent as `sync:webview`/`sync:skills`, shipped automatically via
+  `files: ["dist"]`); new `samples` command groups locale variants
+  (`<id>.<locale>.json`) under one id, defaults to `en`, refuses to overwrite
+  an existing destination without `--overwrite`, and prints next-step hints.
+  README + ccwf-cli SKILL.md updated. Also filed #871 (group duplication with
+  children, the #861 follow-up) as the runner-up idea. Rejected this round:
+  file-mode sub-agent auto-creation (contradicts the deliberate "apply never
+  writes files" safety design — canvas mode also returns `[]`) and arrow-key
+  node nudge (React Flow v11's built-in keyboard a11y likely already covers
+  it; needs live-webview verification first).
+- **Next proposals**:
+  - #871: duplicate a group node including its children.
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow a11y); if not, add grid-step nudging.
+  - `ccwf samples` could back a canvas empty-state "start from an example"
+    action in `ccwf canvas` / preview.
+
 ## 2026-07-22 — Ctrl/Cmd+D keyboard shortcut to duplicate the selected node
 - **User value**: a user who prefers the keyboard can now clone the selected
   canvas node with Ctrl+D (Cmd+D on macOS) — same exclusions (Start/End/Group),
