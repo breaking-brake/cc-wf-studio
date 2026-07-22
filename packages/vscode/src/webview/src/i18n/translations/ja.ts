@@ -1093,12 +1093,18 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'executionSession.codexTerminal': 'Codex対話ターミナル',
 
   // Sample Workflows
+  'startMenu.new': '新規作成',
+  'startMenu.load': '読み込み',
+  'startMenu.recent': '最近使用',
+  'startMenu.sampleWorkflow': 'サンプルワークフロー',
   'toolbar.sampleWorkflows': 'サンプルワークフロー',
   'sample.dialog.title': 'サンプルワークフロー',
   'sample.dialog.description':
     'サンプルワークフローを読み込んで、どんなものが作れるか体験しましょう。',
   'sample.dialog.nodeCount': '{{count}} ノード',
   'sample.dialog.loadButton': '読み込む',
+  'sample.dialog.previewButton': 'プレビュー',
+  'sample.dialog.empty': '利用できるサンプルがありません。',
   'sample.githubIssuePlanning.name': 'GitHub Issue プランニング',
   'sample.githubIssuePlanning.description':
     'GitHub Issueに対するプランニングワークフロー：Issue取得、現状コード分析、修正の検証確認、振り返り。',

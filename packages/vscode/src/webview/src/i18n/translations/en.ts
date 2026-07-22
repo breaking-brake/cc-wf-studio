@@ -1099,11 +1099,17 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'executionSession.codexTerminal': 'Interactive Codex terminal',
 
   // Sample Workflows
+  'startMenu.new': 'New',
+  'startMenu.load': 'Load',
+  'startMenu.recent': 'Recent',
+  'startMenu.sampleWorkflow': 'Sample Workflow',
   'toolbar.sampleWorkflows': 'Sample Workflows',
   'sample.dialog.title': 'Sample Workflows',
   'sample.dialog.description': 'Load a sample workflow to explore what you can build.',
   'sample.dialog.nodeCount': '{{count}} nodes',
   'sample.dialog.loadButton': 'Load',
+  'sample.dialog.previewButton': 'Preview',
+  'sample.dialog.empty': 'No samples available.',
   'sample.githubIssuePlanning.name': 'GitHub Issue Planning',
   'sample.githubIssuePlanning.description':
     'A planning workflow for GitHub issues: fetch issue, analyze current code, verify fixes, and retrospective.',

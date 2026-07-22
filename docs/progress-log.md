@@ -17,6 +17,34 @@ Entry format:
 
 ---
 
+## 2026-07-22 — Localize the canvas start menu and sample gallery strings
+- **User value**: a user running VSCode in Japanese, Korean, or Chinese now
+  sees the first screen of the canvas — the empty-state start menu ("New",
+  "Load", "Recent", "Sample Workflow") — and the sample gallery's remaining
+  strings ("Loading...", "No samples available.", "Preview") in their display
+  language, instead of hardcoded English mixed into an otherwise fully
+  localized UI.
+- **Issue/PR**: #877 / PR from `claude/sleepy-curie-x5ftgw`
+- **Outcome**: done — `StartMenu.tsx` was the only first-run surface bypassing
+  i18n entirely; new `startMenu.*` keys plus `sample.dialog.previewButton` /
+  `sample.dialog.empty` added to `translation-keys.ts` and all 5 locale files
+  (wording reused from the established `toolbar.load` / `toolbar.loading` /
+  `dialog.diffPreview.previewOverview` translations); `WhatsNewDialog`'s
+  hardcoded "Loading..." now reuses the existing generic `loading` key
+  (`{t('loading')}...`, same pattern as `SlackShareDialog`). Product name
+  "CC Workflow Studio" intentionally stays English per the translation rules.
+  Also this round: verified #875 (empty-state "start from an example") against
+  the code and closed it as premise-false — `StartMenu` + `SampleWorkflowDialog`
+  already provide exactly that affordance.
+- **Next proposals**:
+  - `CommentaryOptionsDropdown` has no i18n at all (section labels, error
+    strings, "Loading..." all hardcoded) — localize the whole component as
+    its own scoped task.
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow a11y); if not, add grid-step nudging.
+  - Sample gallery could show each sample's `difficulty` badge (metadata
+    already ships in `SampleWorkflowMeta`; `ccwf samples list` shows it).
+
 ## 2026-07-22 — Name the offending node in workflow validation errors
 - **User value**: a user running `ccwf validate` (and an AI agent getting
   `apply_workflow`/`update_workflow` errors back, and the extension's export

@@ -1051,11 +1051,17 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'executionSession.codexTerminal': 'Codex 交互终端',
 
   // Sample Workflows
+  'startMenu.new': '新建',
+  'startMenu.load': '加载',
+  'startMenu.recent': '最近使用',
+  'startMenu.sampleWorkflow': '示例工作流',
   'toolbar.sampleWorkflows': '示例工作流',
   'sample.dialog.title': '示例工作流',
   'sample.dialog.description': '加载示例工作流，了解您可以构建什么。',
   'sample.dialog.nodeCount': '{{count}} 个节点',
   'sample.dialog.loadButton': '加载',
+  'sample.dialog.previewButton': '预览',
+  'sample.dialog.empty': '没有可用的示例。',
   'sample.githubIssuePlanning.name': 'GitHub Issue 规划',
   'sample.githubIssuePlanning.description':
     'GitHub Issue 规划工作流：获取 Issue、分析现有代码、验证修复、回顾总结。',

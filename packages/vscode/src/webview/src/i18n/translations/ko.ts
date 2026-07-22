@@ -1084,11 +1084,17 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'executionSession.codexTerminal': 'Codex 대화형 터미널',
 
   // Sample Workflows
+  'startMenu.new': '새로 만들기',
+  'startMenu.load': '불러오기',
+  'startMenu.recent': '최근 사용',
+  'startMenu.sampleWorkflow': '샘플 워크플로우',
   'toolbar.sampleWorkflows': '샘플 워크플로우',
   'sample.dialog.title': '샘플 워크플로우',
   'sample.dialog.description': '샘플 워크플로우를 불러와 어떤 것을 만들 수 있는지 체험해 보세요.',
   'sample.dialog.nodeCount': '{{count}}개 노드',
   'sample.dialog.loadButton': '불러오기',
+  'sample.dialog.previewButton': '미리보기',
+  'sample.dialog.empty': '사용 가능한 샘플이 없습니다.',
   'sample.githubIssuePlanning.name': 'GitHub Issue 플래닝',
   'sample.githubIssuePlanning.description':
     'GitHub Issue 플래닝 워크플로우: Issue 조회, 현재 코드 분석, 수정 검증 확인, 회고.',

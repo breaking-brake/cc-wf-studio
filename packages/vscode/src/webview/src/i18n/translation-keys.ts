@@ -1012,12 +1012,20 @@ export interface WebviewTranslationKeys {
   'executionSession.failed': string;
   'executionSession.codexTerminal': string;
 
+  // Start menu (empty-canvas quick actions)
+  'startMenu.new': string;
+  'startMenu.load': string;
+  'startMenu.recent': string;
+  'startMenu.sampleWorkflow': string;
+
   // Sample Workflows
   'toolbar.sampleWorkflows': string;
   'sample.dialog.title': string;
   'sample.dialog.description': string;
   'sample.dialog.nodeCount': string;
   'sample.dialog.loadButton': string;
+  'sample.dialog.previewButton': string;
+  'sample.dialog.empty': string;
   'sample.githubIssuePlanning.name': string;
   'sample.githubIssuePlanning.description': string;
   'sample.dailyDevFlowWithWorktree.name': string;
