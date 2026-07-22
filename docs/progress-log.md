@@ -17,6 +17,27 @@ Entry format:
 
 ---
 
+## 2026-07-22 — Ctrl/Cmd+D keyboard shortcut to duplicate the selected node
+- **User value**: a user who prefers the keyboard can now clone the selected
+  canvas node with Ctrl+D (Cmd+D on macOS) — same exclusions (Start/End/Group),
+  same single-undo-entry behavior as the Duplicate button from #863 — instead
+  of reaching for the mouse; the Duplicate button's tooltip now advertises the
+  shortcut.
+- **Issue/PR**: #865 / PR from `claude/duplicate-node-shortcut`
+- **Outcome**: done — extended the existing global keydown handler in
+  `WorkflowEditor.tsx` (the one owning Ctrl/Cmd+Z/Y undo/redo, sharing its
+  input/textarea/contenteditable guard) with a Ctrl/Cmd+D branch that calls
+  the `duplicateNode` store action when exactly one duplicatable node is
+  selected (`selectedNodeId` is non-null only for single selection) and
+  prevents the browser/webview default for the chord only when it acts.
+  Tooltip hint follows the `UndoRedoControls` isMac pattern.
+- **Next proposals**:
+  - Group duplication including children (deferred follow-up of #861).
+  - File mode returns `plannedFiles: []` silently — sub-agent auto-creation
+    in `FileWorkflowAdapter` for canvas/file parity.
+  - Arrow-key nudge of the selected node (move by grid step, Shift for
+    larger steps) to complete keyboard-first canvas editing.
+
 ## 2026-07-22 — Accept `{meta, workflow}` wrapper files in `ccwf`
 - **User value**: a user who points `ccwf render/export/run/preview/validate`
   at one of the bundled sample workflows (all of `resources/samples/*.json`
