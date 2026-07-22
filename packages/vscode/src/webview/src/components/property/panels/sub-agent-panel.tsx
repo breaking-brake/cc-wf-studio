@@ -131,6 +131,15 @@ const SubAgentHeader: React.FC<PanelSlotProps> = ({ node, updateNodeData }) => {
           builtInType: data.builtInType,
         }}
         onSubmit={async (formData) => {
+          // Write the agent file first so node state is only committed when
+          // the write succeeds; on failure the dialog stays open with an error.
+          if (data.commandFilePath) {
+            await createSubAgent({
+              ...formData,
+              commandFilePath: data.commandFilePath,
+            });
+          }
+
           updateNodeData(node.id, {
             description: formData.description,
             agentDefinition: formData.agentDefinition,
@@ -144,13 +153,6 @@ const SubAgentHeader: React.FC<PanelSlotProps> = ({ node, updateNodeData }) => {
             memory: formData.memory || undefined,
             color: formData.color,
           });
-
-          if (data.commandFilePath) {
-            await createSubAgent({
-              ...formData,
-              commandFilePath: data.commandFilePath,
-            });
-          }
 
           setIsEditDialogOpen(false);
         }}

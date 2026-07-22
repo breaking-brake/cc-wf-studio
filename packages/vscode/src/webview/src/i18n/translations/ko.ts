@@ -1042,6 +1042,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.error.descriptionRequired': '설명은 필수입니다.',
   'subAgent.form.error.agentDefinitionRequired': '에이전트 정의는 필수입니다.',
   'subAgent.form.error.promptRequired': '프롬프트는 필수입니다.',
+  'subAgent.form.error.saveFailed': '에이전트 파일 저장에 실패했습니다.',
 
   // Sub-Agent Built-in Presets
   'subAgent.dialog.builtInTab': '내장',

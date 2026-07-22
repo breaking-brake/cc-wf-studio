@@ -97,6 +97,8 @@ export function SubAgentFormDialog({
     memory: '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditingAgentDefinition, setIsEditingAgentDefinition] = useState(false);
   const [isEditingPrompt, setIsEditingPrompt] = useState(false);
 
@@ -121,6 +123,8 @@ export function SubAgentFormDialog({
         });
       }
       setErrors({});
+      setSubmitError(null);
+      setIsSubmitting(false);
     }
   }, [isOpen, initialData]);
 
@@ -128,7 +132,9 @@ export function SubAgentFormDialog({
     onClose();
   }, [onClose]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
+    if (isSubmitting) return;
+
     const validationErrors: FormErrors = {};
 
     if (!formData.description.trim()) {
@@ -147,8 +153,17 @@ export function SubAgentFormDialog({
     }
 
     setErrors({});
-    onSubmit({ ...formData, agentType });
-  }, [formData, agentType, onSubmit, t]);
+    setSubmitError(null);
+    setIsSubmitting(true);
+    try {
+      await onSubmit({ ...formData, agentType });
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      setSubmitError(`${t('subAgent.form.error.saveFailed')} ${detail}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [formData, agentType, onSubmit, t, isSubmitting]);
 
   const handleFieldChange = (field: keyof SubAgentFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -735,6 +750,24 @@ export function SubAgentFormDialog({
               </CollapsibleSection>
             </div>
 
+            {/* Submit error */}
+            {submitError && (
+              <div
+                style={{
+                  marginTop: '16px',
+                  padding: '8px 10px',
+                  fontSize: '12px',
+                  color: 'var(--vscode-errorForeground)',
+                  backgroundColor: 'var(--vscode-inputValidation-errorBackground)',
+                  border: '1px solid var(--vscode-inputValidation-errorBorder)',
+                  borderRadius: '4px',
+                  wordBreak: 'break-word',
+                }}
+              >
+                {submitError}
+              </div>
+            )}
+
             {/* Actions */}
             <div
               style={{
@@ -762,6 +795,7 @@ export function SubAgentFormDialog({
               <button
                 type="button"
                 onClick={handleSubmit}
+                disabled={isSubmitting}
                 style={{
                   padding: '8px 16px',
                   fontSize: '13px',
@@ -769,8 +803,9 @@ export function SubAgentFormDialog({
                   borderRadius: '4px',
                   backgroundColor: 'var(--vscode-button-background)',
                   color: 'var(--vscode-button-foreground)',
-                  cursor: 'pointer',
+                  cursor: isSubmitting ? 'default' : 'pointer',
                   fontWeight: 600,
+                  opacity: isSubmitting ? 0.6 : 1,
                 }}
               >
                 {isEditMode ? t('subAgent.form.saveButton') : t('subAgent.form.createButton')}

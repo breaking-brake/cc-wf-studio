@@ -1010,6 +1010,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.error.descriptionRequired': '描述为必填项。',
   'subAgent.form.error.agentDefinitionRequired': '代理定义为必填项。',
   'subAgent.form.error.promptRequired': '提示词为必填项。',
+  'subAgent.form.error.saveFailed': '保存代理文件失败。',
 
   // Sub-Agent Built-in Presets
   'subAgent.dialog.builtInTab': '内置',
