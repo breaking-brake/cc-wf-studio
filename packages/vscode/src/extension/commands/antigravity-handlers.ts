@@ -20,6 +20,7 @@ import {
   checkExistingAntigravitySkill,
   exportWorkflowAsAntigravitySkill,
 } from '../services/antigravity-skill-export-service';
+import { notifyTargetCompatibilityWarnings } from '../services/export-warning-service';
 import type { FileService } from '../services/file-service';
 import {
   hasNonStandardSkills,
@@ -80,6 +81,8 @@ export async function handleExportForAntigravity(
       });
       return;
     }
+
+    notifyTargetCompatibilityWarnings(workflow, 'antigravity', 'Antigravity');
 
     // Send success response
     const successPayload: ExportForAntigravitySuccessPayload = {
@@ -192,6 +195,8 @@ export async function handleRunForAntigravity(
       });
       return { status: 'failed' };
     }
+
+    notifyTargetCompatibilityWarnings(workflow, 'antigravity', 'Antigravity');
 
     // If skipCascadeLaunch is set, stop after export (MCP refresh dialog will handle launch)
     if (options?.skipCascadeLaunch) {

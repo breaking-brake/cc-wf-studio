@@ -14,6 +14,7 @@ import type {
   RunForGeminiCliSuccessPayload,
 } from '../../shared/types/messages';
 import { extractMcpServerIdsFromWorkflow } from '../services/copilot-export-service';
+import { notifyTargetCompatibilityWarnings } from '../services/export-warning-service';
 import type { FileService } from '../services/file-service';
 import {
   checkGeminiAgentsEnabled,
@@ -108,6 +109,8 @@ export async function handleExportForGeminiCli(
       });
       return;
     }
+
+    notifyTargetCompatibilityWarnings(workflow, 'gemini', 'Gemini CLI');
 
     // Send success response
     const successPayload: ExportForGeminiCliSuccessPayload = {
@@ -260,6 +263,8 @@ export async function handleRunForGeminiCli(
       });
       return;
     }
+
+    notifyTargetCompatibilityWarnings(workflow, 'gemini', 'Gemini CLI');
 
     // Step 4: Sync MCP servers to ~/.gemini/settings.json if confirmed
     let syncedMcpServers: string[] = [];
