@@ -37,6 +37,10 @@ Entry format:
   the code and closed it as premise-false — `StartMenu` + `SampleWorkflowDialog`
   already provide exactly that affordance.
 - **Next proposals**:
+  - **Interrupt candidate for next round**: at push time GitHub reported
+    3 Dependabot vulnerabilities on the default branch (2 high, 1 low) —
+    check https://github.com/breaking-brake/cc-wf-studio/security/dependabot
+    and fix if actionable (security interrupts outrank invention).
   - `CommentaryOptionsDropdown` has no i18n at all (section labels, error
     strings, "Loading..." all hardcoded) — localize the whole component as
     its own scoped task.
