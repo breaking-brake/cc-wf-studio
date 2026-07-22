@@ -7,6 +7,7 @@
  */
 
 import { NodeType, type Workflow, type WorkflowNode } from '../types/workflow-definition.js';
+import { getNodeDisplayName } from '../utils/node-display-name.js';
 
 /** Node types that only execute on Claude Code (no equivalent on other targets). */
 export const CLAUDE_CODE_ONLY_NODE_TYPES: ReadonlySet<NodeType> = new Set([
@@ -30,11 +31,7 @@ export function workflowContainsClaudeCodeOnlyNodes(workflow: Workflow): boolean
  * UIs to name the exact nodes in target-compatibility warnings.
  */
 export function describeClaudeCodeOnlyNodes(workflow: Workflow): string[] {
-  return getClaudeCodeOnlyNodes(workflow.nodes).map((node) => {
-    const label = (node.data as { label?: unknown }).label;
-    const display =
-      [label, node.name].find((v): v is string => typeof v === 'string' && v.trim().length > 0) ??
-      node.id;
-    return `"${display.trim()}" (${node.type})`;
-  });
+  return getClaudeCodeOnlyNodes(workflow.nodes).map(
+    (node) => `"${getNodeDisplayName(node)}" (${node.type})`
+  );
 }
