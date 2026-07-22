@@ -14,6 +14,7 @@ import { spawn } from 'node:child_process';
 import * as readline from 'node:readline';
 import { Command } from 'commander';
 import { validateAIGeneratedWorkflow } from '@cc-wf-studio/core';
+import { LAUNCHABLE_AGENTS } from '../utils/agent-launchers.js';
 import { findBinaryInPath } from '../utils/find-binary.js';
 import { loadWorkflowFromFile, WorkflowLoadError } from '../utils/load-workflow.js';
 
@@ -27,18 +28,25 @@ interface Launcher {
   args: (prompt: string) => string[];
 }
 
-/**
- * Agents that can be launched from a terminal with an inline prompt. IDE-only
- * agents (antigravity / cursor / roo-code) have no headless CLI and are not
- * supported here. Order matters: it is the picker order and the
- * non-interactive preference order (Claude Code first).
- */
-const LAUNCHERS: Record<string, Launcher> = {
-  'claude-code': { label: 'Claude Code', bin: 'claude', args: (p) => [p] },
-  codex: { label: 'Codex CLI', bin: 'codex', args: (p) => [p] },
-  copilot: { label: 'Copilot CLI', bin: 'copilot', args: (p) => ['-i', p, '--allow-all-tools'] },
-  gemini: { label: 'Gemini CLI', bin: 'gemini', args: (p) => ['-i', p] },
+/** Per-agent argv builder for the inline tour prompt. */
+const TOUR_ARGS: Record<string, (prompt: string) => string[]> = {
+  'claude-code': (p) => [p],
+  codex: (p) => [p],
+  copilot: (p) => ['-i', p, '--allow-all-tools'],
+  gemini: (p) => ['-i', p],
 };
+
+/**
+ * Agents that can be launched from a terminal with an inline prompt. Order
+ * matters: it is the picker order and the non-interactive preference order
+ * (Claude Code first) — mirrors `LAUNCHABLE_AGENTS` insertion order.
+ */
+const LAUNCHERS: Record<string, Launcher> = Object.fromEntries(
+  Object.entries(LAUNCHABLE_AGENTS).map(([key, agent]) => [
+    key,
+    { ...agent, args: TOUR_ARGS[key] },
+  ])
+);
 
 const SUPPORTED = Object.keys(LAUNCHERS).join(' | ');
 
