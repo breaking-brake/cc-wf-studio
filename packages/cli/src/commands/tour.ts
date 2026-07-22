@@ -13,6 +13,7 @@
 import { spawn } from 'node:child_process';
 import * as readline from 'node:readline';
 import { Command } from 'commander';
+import { validateAIGeneratedWorkflow } from '@cc-wf-studio/core';
 import { findBinaryInPath } from '../utils/find-binary.js';
 import { loadWorkflowFromFile, WorkflowLoadError } from '../utils/load-workflow.js';
 
@@ -120,6 +121,50 @@ async function resolveAgent(explicit: string | undefined): Promise<string> {
   return promptAgent(installed);
 }
 
+/**
+ * Re-load the file the launched agent just wrote and check the result is
+ * actually usable, rather than trusting the agent's own exit code / report.
+ * Returns the process exit code to use (0 = pass).
+ */
+async function verifyTour(absolutePath: string): Promise<number> {
+  let workflow: Awaited<ReturnType<typeof loadWorkflowFromFile>>['workflow'];
+  try {
+    ({ workflow } = await loadWorkflowFromFile(absolutePath));
+  } catch (error) {
+    const message = error instanceof WorkflowLoadError ? error.message : String(error);
+    process.stderr.write(`✗ ${absolutePath} is no longer a valid workflow file after the tour agent ran: ${message}\n`);
+    return 1;
+  }
+
+  const validation = validateAIGeneratedWorkflow(workflow);
+  if (!validation.valid) {
+    process.stderr.write(`✗ ${absolutePath} failed validation after the tour agent ran:\n`);
+    for (const err of validation.errors) {
+      process.stderr.write(`  - [${err.code}] ${err.message}${err.field ? ` (field: ${err.field})` : ''}\n`);
+    }
+    return 1;
+  }
+
+  if (!workflow.tour || workflow.tour.length === 0) {
+    process.stderr.write(`✗ ${absolutePath} has no "tour" field — the agent did not add one.\n`);
+    return 1;
+  }
+
+  const nodeIds = new Set(workflow.nodes.map((n) => n.id));
+  const badRefs = workflow.tour.flatMap((step) => step.nodeIds.filter((id) => !nodeIds.has(id)));
+  if (badRefs.length > 0) {
+    process.stderr.write(
+      `✗ ${absolutePath}'s tour references node ids that don't exist: ${[...new Set(badRefs)].join(', ')}\n`
+    );
+    return 1;
+  }
+
+  process.stdout.write(
+    `\n✓ Tour with ${workflow.tour.length} step(s) added to ${absolutePath}. Play it with:  ccwf preview "${absolutePath}"\n`
+  );
+  return 0;
+}
+
 export function registerTourCommand(program: Command): void {
   program
     .command('tour')
@@ -148,19 +193,22 @@ export function registerTourCommand(program: Command): void {
         process.stdout.write(`\nLaunching ${launcher.label} to generate a tour for ${absolutePath}\n\n`);
 
         const child = spawn(bin, launcher.args(prompt), { stdio: 'inherit', shell: false });
-        await new Promise<void>((resolve) => {
-          child.on('exit', (code) => {
-            if (typeof code === 'number' && code !== 0) {
-              process.exitCode = code;
-            }
-            resolve();
-          });
+        const exitCode = await new Promise<number | null>((resolve) => {
+          child.on('exit', (code) => resolve(code));
           child.on('error', (error) => {
             process.stderr.write(`error: failed to launch ${launcher.bin}: ${error.message}\n`);
-            process.exitCode = 1;
-            resolve();
+            resolve(1);
           });
         });
+
+        if (typeof exitCode === 'number' && exitCode !== 0) {
+          process.exitCode = exitCode;
+          return;
+        }
+
+        // The launched agent reported success, but it edited the file with its own
+        // tools — verify the result before telling the user the tour is ready.
+        process.exitCode = await verifyTour(absolutePath);
       } catch (error) {
         if (error instanceof WorkflowLoadError) {
           process.stderr.write(`error: ${error.message}\n`);

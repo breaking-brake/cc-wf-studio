@@ -17,6 +17,29 @@ Entry format:
 
 ---
 
+## 2026-07-22 — Validate `ccwf tour` output before declaring success
+- **User value**: a user running `ccwf tour` no longer gets a false "success"
+  when the launched AI agent writes a malformed `tour` field or references
+  node ids that don't exist — the command now re-validates the file and
+  reports the failure immediately instead of leaving it to surface later as
+  a confusing `ccwf preview` break.
+- **Issue/PR**: (opened this iteration)
+- **Outcome**: done — `verifyTour()` re-loads the file after the launched
+  agent exits 0, runs `validateAIGeneratedWorkflow`, checks the `tour` field
+  is present and non-empty, and checks every `tour[].nodeIds` entry resolves
+  to a real node id, printing a clear pass/fail with a nonzero exit on
+  failure.
+- **Next proposals**:
+  - MCP tool descriptions/error text (`packages/mcp/src/tools.ts`) hard-code
+    VSCode-canvas language ("open the workflow in CC Workflow Studio",
+    "review mode" diff preview) even when served by `FileWorkflowAdapter`
+    (`ccwf mcp --file`), which has no review/diff concept — misleads
+    AI agents driving the CLI MCP server.
+  - `ccwf export`/`ccwf run` treat any pre-existing output file as a hard
+    conflict requiring `--overwrite`, even when its content is already
+    byte-identical to what would be written — false-positive conflicts on
+    every no-op re-run.
+
 ## 2026-07-22 — Sub-Agent Flow property panel surfaces broken links
 - **User value**: a user who opens the property panel for a Sub-Agent Flow
   reference node whose linked flow no longer exists (e.g. after opening an
