@@ -75,8 +75,10 @@ Example `.mcp.json`:
 ccwf export ./my-workflow.json                                # --agent claude-code (default)
 ccwf export ./my-workflow.json --agent cursor                  # cursor
 ccwf export ./my-workflow.json --agent codex --cwd /tmp/proj   # codex into a different root
-ccwf export ./my-workflow.json --overwrite                     # replace existing files
+ccwf export ./my-workflow.json --overwrite                     # replace files whose content changed
 ```
+
+Re-running an export is idempotent: existing files whose content already matches are reported as up to date and skipped. Only files with *different* content are conflicts that require `--overwrite`.
 
 Output layout by target agent:
 

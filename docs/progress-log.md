@@ -17,6 +17,29 @@ Entry format:
 
 ---
 
+## 2026-07-22 — Idempotent `ccwf export` / `ccwf run` re-runs
+- **User value**: a user re-running `ccwf export` / `ccwf run` on an unchanged
+  workflow no longer gets a false `error: N file(s) already exist. Pass
+  --overwrite` — files whose on-disk content is byte-identical to the plan are
+  reported as up to date and skipped (exit 0); only files with *different*
+  content are conflicts that still require `--overwrite`.
+- **Issue/PR**: #864 / PR from `claude/sleepy-curie-5fdbib`
+- **Outcome**: done — `runExport` compares existing files' content against the
+  planned contents (read failures count as conflicts, never crashes), returns
+  a new `unchangedPaths` alongside `writtenPaths`, and a shared
+  `reportExportOutcome` keeps `export`/`run` stdout in sync ("N file(s)
+  already up to date" / "All N file(s) already up to date"). `--overwrite`
+  unchanged. E2E-verified: fresh export, no-op re-run (both commands),
+  drifted-file conflict (exit 1, message now says "with different content"),
+  `--overwrite` rewrite, and a mixed 3-written/1-up-to-date cursor export.
+  Also filed #865 (Ctrl/Cmd+D duplicate shortcut) as the runner-up idea.
+- **Next proposals**:
+  - `ccwf` crashes with a raw `TypeError ... reading 'filter'` when given a
+    `{meta, workflow}` wrapper file (the shape of `resources/samples/*.json`)
+    — `load-workflow.ts` should unwrap or reject it with a clear message.
+  - #865: Ctrl/Cmd+D keyboard shortcut for the node Duplicate action.
+  - Group duplication including children (deferred follow-up of #861).
+
 ## 2026-07-22 — Duplicate button for configured canvas nodes
 - **User value**: a user who has carefully configured a node (Sub-Agent with
   model/tools, a long Prompt, an MCP node, ...) can now clone it with one

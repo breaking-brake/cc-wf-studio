@@ -10,12 +10,11 @@
  */
 
 import { spawn } from 'node:child_process';
-import * as path from 'node:path';
 import { Command } from 'commander';
 import { LAUNCHABLE_AGENTS } from '../utils/agent-launchers.js';
 import { findBinaryInPath } from '../utils/find-binary.js';
 import { WorkflowLoadError } from '../utils/load-workflow.js';
-import { asSupportedAgent, runExport } from './export.js';
+import { asSupportedAgent, reportExportOutcome, runExport } from './export.js';
 
 interface CommanderRunOptions {
   agent: string;
@@ -85,10 +84,7 @@ export function registerRunCommand(program: Command): void {
           cwd: options.cwd,
         });
 
-        process.stdout.write(`✓ Wrote ${result.writtenPaths.length} file(s):\n`);
-        for (const writtenPath of result.writtenPaths) {
-          process.stdout.write(`  - ${path.relative(result.rootDir, writtenPath)}\n`);
-        }
+        reportExportOutcome(result);
 
         const hint = NEXT_STEP_HINTS[agent](result.slashName);
         // Each hint ends in its own period; no trailing dot here.
