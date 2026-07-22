@@ -17,6 +17,7 @@ import type {
 } from '../../shared/types/messages';
 import { extractMcpServerIdsFromWorkflow } from '../services/copilot-export-service';
 import { nodeNameToFileName } from '../services/export-service';
+import { notifyTargetCompatibilityWarnings } from '../services/export-warning-service';
 import type { FileService } from '../services/file-service';
 import {
   getInstalledRooCodeFlavor,
@@ -109,6 +110,8 @@ export async function handleExportForRooCode(
       });
       return;
     }
+
+    notifyTargetCompatibilityWarnings(workflow, 'roo-code', 'Zoo Code');
 
     // Send success response
     const successPayload: ExportForRooCodeSuccessPayload = {
@@ -256,6 +259,8 @@ export async function handleRunForRooCode(
       });
       return;
     }
+
+    notifyTargetCompatibilityWarnings(workflow, 'roo-code', 'Zoo Code');
 
     // Step 4: Sync MCP servers to .roo/mcp.json if confirmed
     let syncedMcpServers: string[] = [];

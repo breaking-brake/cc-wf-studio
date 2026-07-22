@@ -25,6 +25,7 @@ import {
 } from '../services/codex-skill-export-service';
 import { codexTerminalSessionManager } from '../services/codex-terminal-session-manager';
 import { extractMcpServerIdsFromWorkflow } from '../services/copilot-export-service';
+import { notifyTargetCompatibilityWarnings } from '../services/export-warning-service';
 import type { FileService } from '../services/file-service';
 import {
   hasNonStandardSkills,
@@ -109,6 +110,8 @@ export async function handleExportForCodexCli(
       });
       return;
     }
+
+    notifyTargetCompatibilityWarnings(workflow, 'codex', 'Codex CLI');
 
     // Send success response
     const successPayload: ExportForCodexCliSuccessPayload = {
@@ -263,6 +266,8 @@ export async function handleRunForCodexCli(
       });
       return;
     }
+
+    notifyTargetCompatibilityWarnings(workflow, 'codex', 'Codex CLI');
 
     // Step 4: Sync MCP servers to $HOME/.codex/config.toml if confirmed
     let syncedMcpServers: string[] = [];

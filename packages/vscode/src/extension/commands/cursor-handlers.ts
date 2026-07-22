@@ -17,6 +17,7 @@ import {
   checkExistingCursorSkill,
   exportWorkflowAsCursorSkill,
 } from '../services/cursor-skill-export-service';
+import { notifyTargetCompatibilityWarnings } from '../services/export-warning-service';
 import type { FileService } from '../services/file-service';
 import {
   hasNonStandardSkills,
@@ -77,6 +78,8 @@ export async function handleExportForCursor(
       });
       return;
     }
+
+    notifyTargetCompatibilityWarnings(workflow, 'cursor', 'Cursor');
 
     // Send success response
     const successPayload: ExportForCursorSuccessPayload = {
@@ -185,6 +188,8 @@ export async function handleRunForCursor(
       });
       return;
     }
+
+    notifyTargetCompatibilityWarnings(workflow, 'cursor', 'Cursor');
 
     // Step 3: Check if Cursor is installed
     if (!isCursorInstalled()) {

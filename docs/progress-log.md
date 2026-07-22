@@ -17,6 +17,26 @@ Entry format:
 
 ---
 
+## 2026-07-22 — Target-compatibility warnings in the VSCode export/run flows
+- **User value**: exporting or running a workflow for Codex / Copilot /
+  Gemini / Cursor / Zoo Code / Antigravity from the canvas now shows a
+  warning notification naming how many configured settings that agent
+  ignores, with a "Show Details" button listing every dropped field —
+  instead of the extension silently writing a lossy export.
+- **Issue/PR**: #852 / PR from `claude/sleepy-curie-rd0zcn`
+- **Outcome**: done — new `export-warning-service.ts` mirrors the CLI's
+  compatibility report (Claude Code-only nodes + `collectIgnoredFieldWarnings`)
+  and is called from all 14 non-Claude export/run handler paths. UX decision:
+  non-modal notification + output channel (matches the CLI's warn-but-proceed
+  behavior); no i18n needed since extension-side notifications are uniformly
+  English (the webview i18n rules don't apply to `vscode.window` messages).
+- **Next proposals**:
+  - `load-workflow.ts` still surfaces raw `JSON.parse` errors (byte offset,
+    no line/col) for every CLI command — a shared line/col translator would
+    fix all commands at once.
+  - The CLI's "Claude Code-only node" warning is aggregate-only; naming the
+    affected node ids would tell users what exactly breaks on export.
+
 ## 2026-07-22 — `ccwf validate --agent <target>` preflight compatibility check
 - **User value**: a user can now answer "will this workflow survive export to
   codex/gemini/... intact?" before writing any files — `ccwf validate

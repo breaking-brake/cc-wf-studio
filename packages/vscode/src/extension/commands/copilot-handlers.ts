@@ -33,6 +33,7 @@ import {
   exportWorkflowAsSkill,
 } from '../services/copilot-skill-export-service';
 import { nodeNameToFileName } from '../services/export-service';
+import { notifyTargetCompatibilityWarnings } from '../services/export-warning-service';
 import type { FileService } from '../services/file-service';
 import {
   hasNonStandardSkills,
@@ -115,6 +116,8 @@ export async function handleExportForCopilot(
       });
       return;
     }
+
+    notifyTargetCompatibilityWarnings(workflow, 'copilot', 'GitHub Copilot');
 
     // Execute MCP sync if user confirmed
     let syncedMcpServers: string[] = [];
@@ -231,6 +234,8 @@ export async function handleRunForCopilot(
       });
       return;
     }
+
+    notifyTargetCompatibilityWarnings(workflow, 'copilot', 'GitHub Copilot');
 
     // Execute MCP sync if user confirmed
     if (mcpSyncConfirmed) {
@@ -407,6 +412,8 @@ export async function handleRunForCopilotCli(
       return;
     }
 
+    notifyTargetCompatibilityWarnings(workflow, 'copilot', 'Copilot CLI');
+
     // Step 4: Sync MCP servers to $HOME/.copilot/mcp-config.json if confirmed
     let syncedMcpServers: string[] = [];
     if (mcpSyncConfirmed) {
@@ -508,6 +515,8 @@ export async function handleExportForCopilotCli(
       });
       return;
     }
+
+    notifyTargetCompatibilityWarnings(workflow, 'copilot', 'Copilot CLI');
 
     // Send success response
     const successPayload: ExportForCopilotCliSuccessPayload = {
