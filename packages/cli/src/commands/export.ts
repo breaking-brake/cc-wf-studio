@@ -19,10 +19,10 @@ import {
   type Workflow,
   agentSkillProviderToTarget,
   collectIgnoredFieldWarnings,
+  describeClaudeCodeOnlyNodes,
   nodeNameToFileName,
   planAgentSkillFiles,
   planWorkflowExportFiles,
-  workflowContainsClaudeCodeOnlyNodes,
 } from '@cc-wf-studio/core';
 import { Command, InvalidArgumentError } from 'commander';
 import { WorkflowLoadError, loadWorkflowFromFile } from '../utils/load-workflow.js';
@@ -94,9 +94,10 @@ export function collectAgentCompatibilityWarnings(
   agent: SupportedAgent
 ): string[] {
   const warnings: string[] = [];
-  if (agent !== CLAUDE_CODE_AGENT && workflowContainsClaudeCodeOnlyNodes(workflow)) {
+  const claudeOnlyNodes = describeClaudeCodeOnlyNodes(workflow);
+  if (agent !== CLAUDE_CODE_AGENT && claudeOnlyNodes.length > 0) {
     warnings.push(
-      `this workflow contains Claude Code-only node(s) (e.g. branchSession); ${agent} cannot execute those steps.`
+      `this workflow contains Claude Code-only node(s) that ${agent} cannot execute: ${claudeOnlyNodes.join(', ')}.`
     );
   }
   const target: ExportTarget =

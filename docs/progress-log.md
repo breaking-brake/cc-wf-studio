@@ -17,6 +17,36 @@ Entry format:
 
 ---
 
+## 2026-07-22 — Name the affected nodes in Claude Code-only warnings
+- **User value**: a user exporting, running, or preflighting a workflow for a
+  non-Claude agent now sees exactly which nodes that agent cannot execute —
+  `"Branch Session Work" (branchSession)` — instead of the vague
+  `(e.g. branchSession)` hint, in `ccwf export/run/validate --agent` and the
+  VSCode export-warning notification alike.
+- **Issue/PR**: #857 / PR from `claude/sleepy-curie-6j9vke`
+- **Outcome**: done — new core helper `describeClaudeCodeOnlyNodes` (prefers
+  the node's canvas `data.label`, then `name`, then id) replaces the
+  hard-coded phrasing in both the CLI's `collectAgentCompatibilityWarnings`
+  and the extension's `collectTargetCompatibilityWarnings`, so the two
+  surfaces cannot drift. E2E-verified: codex/gemini warn with the node
+  label, claude-code stays silent, `validate --json` carries the richer
+  string. Also judged-and-dropped this round: the thrice-proposed JSON
+  line/col translator for `load-workflow.ts` — Node 22+ already appends
+  `(line N column M)` to `JSON.parse` errors, so the value is marginal on
+  supported runtimes. Note: the loop could not lock issue #857 (no `gh`
+  CLI, no MCP lock tool, direct GitHub API blocked by the session proxy) —
+  flagged in the issue body instead.
+- **Next proposals**:
+  - MCP tool descriptions/error text (`packages/mcp/src/tools.ts`) hard-code
+    VSCode-canvas language ("open the workflow in CC Workflow Studio",
+    "review mode" diff preview) even when served by `FileWorkflowAdapter`
+    (`ccwf mcp --file`) — misleads AI agents driving the CLI MCP server.
+  - Canvas: no way to duplicate a configured node (subAgent/prompt) —
+    cloning one means recreating every field by hand.
+  - Give the loop a supported way to lock its idea issues (e.g. an MCP lock
+    tool or `gh` in the session image) — currently the lock step of
+    `next-task` cannot be honored.
+
 ## 2026-07-22 — Target-compatibility warnings in the VSCode export/run flows
 - **User value**: exporting or running a workflow for Codex / Copilot /
   Gemini / Cursor / Zoo Code / Antigravity from the canvas now shows a
