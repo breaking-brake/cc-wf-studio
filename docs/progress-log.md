@@ -17,6 +17,33 @@ Entry format:
 
 ---
 
+## 2026-07-22 — Name the offending node in workflow validation errors
+- **User value**: a user running `ccwf validate` (and an AI agent getting
+  `apply_workflow`/`update_workflow` errors back, and the extension's export
+  dialog) now sees *which* node each validation error refers to by its canvas
+  name — e.g. `Switch node "Check status" must have branches array` — instead
+  of anonymous messages or opaque `node-…` ids buried in field paths.
+- **Issue/PR**: #874 / PR from `claude/sleepy-curie-2g0zwe`
+- **Outcome**: done — new core helper `getNodeDisplayName(node)`
+  (`data.label` → `name` → `id`, safe on corrupted `data`), reused by
+  `describeClaudeCodeOnlyNodes` (was an inline copy of the same logic);
+  every node-scoped message in `validate-workflow.ts` (schema pass, Switch,
+  Skill, MCP incl. mode-config, SubAgent, SubAgentFlow node, Group,
+  name/type/position/parentId/data, self/Start/End/Group connection rules)
+  now embeds the display name. Error codes and `field` paths unchanged, so
+  `--json` consumers and code keyed on codes are unaffected. E2E-verified on
+  the built CLI: broken workflow shows named errors with id fallback for an
+  unlabeled group; bundled sample still validates clean. Also filed #875
+  (canvas empty-state "start from an example") as the runner-up idea.
+- **Next proposals**:
+  - #875: canvas empty-state "start from an example" backed by the bundled
+    samples.
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow a11y); if not, add grid-step nudging.
+  - MCP `apply_workflow` could also return target-compatibility warnings
+    (reuse `collectAgentCompatibilityWarnings`) so agents learn about
+    Claude Code-only nodes at edit time, not at export time.
+
 ## 2026-07-22 — Duplicate a group node including its child nodes
 - **User value**: a user who built a phase group containing several configured
   nodes can now duplicate the whole structure — group, child nodes, and the

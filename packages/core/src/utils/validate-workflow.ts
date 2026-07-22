@@ -20,6 +20,7 @@ import {
   type WorkflowHooks,
   type WorkflowNode,
 } from '../types/workflow-definition.js';
+import { getNodeDisplayName } from './node-display-name.js';
 
 export interface ValidationError {
   code: string;
@@ -206,7 +207,7 @@ function validateSubAgentFlowReferences(workflow: Workflow): ValidationError[] {
     if (!subAgentFlowIds.has(refData.subAgentFlowId)) {
       errors.push({
         code: 'SUBAGENTFLOW_MISSING_DEFINITION',
-        message: `SubAgentFlow node "${node.id}" references non-existent SubAgentFlow "${refData.subAgentFlowId}"`,
+        message: `SubAgentFlow node "${getNodeDisplayName(node)}" references non-existent SubAgentFlow "${refData.subAgentFlowId}"`,
         field: `nodes[${node.id}].data.subAgentFlowId`,
       });
     }
@@ -245,6 +246,7 @@ function validateNodeSchemaFields(node: WorkflowNode): ValidationError[] {
   }
   const data = node.data as unknown as Record<string, unknown>;
   const errors: ValidationError[] = [];
+  const displayName = getNodeDisplayName(node);
 
   for (const [name, propertyField] of Object.entries(schema)) {
     const value = data[name];
@@ -263,7 +265,7 @@ function validateNodeSchemaFields(node: WorkflowNode): ValidationError[] {
         .join('; ');
       errors.push({
         code: 'NODE_SCHEMA_VIOLATION',
-        message: `${node.type} node field "${name}" is invalid: ${detail}`,
+        message: `${node.type} node "${displayName}" field "${name}" is invalid: ${detail}`,
         field: `nodes[${node.id}].data.${name}`,
       });
     }
@@ -280,6 +282,8 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
   const nodeIds = new Set<string>();
 
   for (const node of nodes) {
+    const displayName = getNodeDisplayName(node);
+
     // Check for duplicate IDs
     if (nodeIds.has(node.id)) {
       errors.push({
@@ -295,7 +299,7 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
       if (!node.name || !VALIDATION_RULES.NODE.NAME_PATTERN.test(node.name)) {
         errors.push({
           code: 'INVALID_NODE_NAME',
-          message: `Node name must match pattern ${VALIDATION_RULES.NODE.NAME_PATTERN}`,
+          message: `Node "${displayName}" name must match pattern ${VALIDATION_RULES.NODE.NAME_PATTERN}`,
           field: `nodes[${node.id}].name`,
         });
       }
@@ -305,7 +309,7 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
     if (!Object.values(NodeType).includes(node.type)) {
       errors.push({
         code: 'INVALID_NODE_TYPE',
-        message: `Invalid node type: ${node.type}`,
+        message: `Node "${displayName}" has invalid node type: ${node.type}`,
         field: `nodes[${node.id}].type`,
       });
     }
@@ -318,7 +322,7 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
     ) {
       errors.push({
         code: 'INVALID_POSITION',
-        message: 'Node must have valid position with x and y coordinates',
+        message: `Node "${displayName}" must have valid position with x and y coordinates`,
         field: `nodes[${node.id}].position`,
       });
     }
@@ -329,7 +333,7 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
     if (typeof node.data !== 'object' || node.data === null || Array.isArray(node.data)) {
       errors.push({
         code: 'INVALID_NODE_DATA',
-        message: `Node "${node.id}" data must be an object`,
+        message: `Node "${displayName}" data must be an object`,
         field: `nodes[${node.id}].data`,
       });
       continue;
@@ -370,7 +374,7 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
       if (!groupData.label || typeof groupData.label !== 'string') {
         errors.push({
           code: 'GROUP_MISSING_LABEL',
-          message: 'Group node must have a label',
+          message: `Group node "${displayName}" must have a label`,
           field: `nodes[${node.id}].data.label`,
         });
       }
@@ -382,13 +386,13 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
       if (!parentNode) {
         errors.push({
           code: 'INVALID_PARENT_ID',
-          message: `Node "${node.id}" references non-existent parent node: ${node.parentId}`,
+          message: `Node "${displayName}" references non-existent parent node: ${node.parentId}`,
           field: `nodes[${node.id}].parentId`,
         });
       } else if (parentNode.type !== NodeType.Group) {
         errors.push({
           code: 'INVALID_PARENT_TYPE',
-          message: `Node "${node.id}" parentId must reference a group node, but "${node.parentId}" is type "${parentNode.type}"`,
+          message: `Node "${displayName}" parentId must reference a group node, but "${node.parentId}" is type "${parentNode.type}"`,
           field: `nodes[${node.id}].parentId`,
         });
       }
@@ -408,14 +412,14 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
         if (subAgentData.commandFilePath) {
           errors.push({
             code: 'SUBAGENT_BUILTIN_COMMAND_FILE_CONFLICT',
-            message: 'SubAgent builtInType cannot be used with commandFilePath',
+            message: `SubAgent "${displayName}" builtInType cannot be used with commandFilePath`,
             field: `nodes[${node.id}].data.commandFilePath`,
           });
         }
         if (subAgentData.commandScope) {
           errors.push({
             code: 'SUBAGENT_BUILTIN_COMMAND_SCOPE_CONFLICT',
-            message: 'SubAgent builtInType cannot be used with commandScope',
+            message: `SubAgent "${displayName}" builtInType cannot be used with commandScope`,
             field: `nodes[${node.id}].data.commandScope`,
           });
         }
@@ -426,7 +430,7 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
         if (!validScopes.includes(subAgentData.commandScope)) {
           errors.push({
             code: 'SUBAGENT_INVALID_COMMAND_SCOPE',
-            message: `SubAgent commandScope must be one of: ${validScopes.join(', ')}`,
+            message: `SubAgent "${displayName}" commandScope must be one of: ${validScopes.join(', ')}`,
             field: `nodes[${node.id}].data.commandScope`,
           });
         }
@@ -446,11 +450,12 @@ function validateNodes(nodes: WorkflowNode[]): ValidationError[] {
 function validateSwitchNode(node: WorkflowNode): ValidationError[] {
   const errors: ValidationError[] = [];
   const switchData = node.data as Partial<SwitchNodeData>;
+  const displayName = getNodeDisplayName(node);
 
   if (!switchData.branches || !Array.isArray(switchData.branches)) {
     errors.push({
       code: 'SWITCH_MISSING_BRANCHES',
-      message: 'Switch node must have branches array',
+      message: `Switch node "${displayName}" must have branches array`,
       field: `nodes[${node.id}].data.branches`,
     });
     return errors;
@@ -461,7 +466,7 @@ function validateSwitchNode(node: WorkflowNode): ValidationError[] {
   if (defaultBranches.length > 1) {
     errors.push({
       code: 'SWITCH_MULTIPLE_DEFAULT',
-      message: 'Switch node can only have one default branch',
+      message: `Switch node "${displayName}" can only have one default branch`,
       field: `nodes[${node.id}].data.branches`,
     });
   }
@@ -472,7 +477,7 @@ function validateSwitchNode(node: WorkflowNode): ValidationError[] {
     if (!lastBranch?.isDefault) {
       errors.push({
         code: 'SWITCH_DEFAULT_NOT_LAST',
-        message: 'Default branch must be the last branch in Switch node',
+        message: `Default branch must be the last branch in Switch node "${displayName}"`,
         field: `nodes[${node.id}].data.branches`,
       });
     }
@@ -492,12 +497,13 @@ function validateSwitchNode(node: WorkflowNode): ValidationError[] {
 function validateSubAgentFlowNode(node: WorkflowNode): ValidationError[] {
   const errors: ValidationError[] = [];
   const refData = node.data as Partial<SubAgentFlowNodeData>;
+  const displayName = getNodeDisplayName(node);
 
   // Required field: subAgentFlowId
   if (!refData.subAgentFlowId || typeof refData.subAgentFlowId !== 'string') {
     errors.push({
       code: 'SUBAGENTFLOW_MISSING_REF_ID',
-      message: 'SubAgentFlow node must have a subAgentFlowId',
+      message: `SubAgentFlow node "${displayName}" must have a subAgentFlowId`,
       field: `nodes[${node.id}].data.subAgentFlowId`,
     });
   }
@@ -506,7 +512,7 @@ function validateSubAgentFlowNode(node: WorkflowNode): ValidationError[] {
   if (!refData.label || typeof refData.label !== 'string') {
     errors.push({
       code: 'SUBAGENTFLOW_MISSING_LABEL',
-      message: 'SubAgentFlow node must have a label',
+      message: `SubAgentFlow node "${displayName}" must have a label`,
       field: `nodes[${node.id}].data.label`,
     });
   }
@@ -515,7 +521,7 @@ function validateSubAgentFlowNode(node: WorkflowNode): ValidationError[] {
   if (refData.outputPorts !== VALIDATION_RULES.SUB_AGENT_FLOW.OUTPUT_PORTS) {
     errors.push({
       code: 'SUBAGENTFLOW_INVALID_PORTS',
-      message: 'SubAgentFlow outputPorts must equal 1',
+      message: `SubAgentFlow node "${displayName}" outputPorts must equal 1`,
       field: `nodes[${node.id}].data.outputPorts`,
     });
   }
@@ -623,6 +629,7 @@ export function validateSubAgentFlow(subAgentFlow: SubAgentFlow): ValidationErro
 function validateSkillNode(node: WorkflowNode): ValidationError[] {
   const errors: ValidationError[] = [];
   const skillData = node.data as Partial<SkillNodeData>;
+  const displayName = getNodeDisplayName(node);
 
   // Required fields check
   // Note: skillPath is optional when validationStatus is 'missing' (skill not found)
@@ -638,7 +645,7 @@ function validateSkillNode(node: WorkflowNode): ValidationError[] {
     if (!skillData[field]) {
       errors.push({
         code: 'SKILL_MISSING_FIELD',
-        message: `Skill node missing required field: ${field}`,
+        message: `Skill node "${displayName}" missing required field: ${field}`,
         field: `nodes[${node.id}].data.${field}`,
       });
     }
@@ -648,7 +655,7 @@ function validateSkillNode(node: WorkflowNode): ValidationError[] {
   if (skillData.validationStatus !== 'missing' && !skillData.skillPath) {
     errors.push({
       code: 'SKILL_MISSING_FIELD',
-      message: 'Skill node missing required field: skillPath',
+      message: `Skill node "${displayName}" missing required field: skillPath`,
       field: `nodes[${node.id}].data.skillPath`,
     });
   }
@@ -658,7 +665,7 @@ function validateSkillNode(node: WorkflowNode): ValidationError[] {
     if (!VALIDATION_RULES.SKILL.NAME_PATTERN.test(skillData.name)) {
       errors.push({
         code: 'SKILL_INVALID_NAME',
-        message: 'Skill name must be lowercase with hyphens only',
+        message: `Skill node "${displayName}" name must be lowercase with hyphens only`,
         field: `nodes[${node.id}].data.name`,
       });
     }
@@ -666,7 +673,7 @@ function validateSkillNode(node: WorkflowNode): ValidationError[] {
     if (skillData.name.length > VALIDATION_RULES.SKILL.NAME_MAX_LENGTH) {
       errors.push({
         code: 'SKILL_NAME_TOO_LONG',
-        message: `Skill name exceeds ${VALIDATION_RULES.SKILL.NAME_MAX_LENGTH} characters`,
+        message: `Skill node "${displayName}" name exceeds ${VALIDATION_RULES.SKILL.NAME_MAX_LENGTH} characters`,
         field: `nodes[${node.id}].data.name`,
       });
     }
@@ -677,7 +684,7 @@ function validateSkillNode(node: WorkflowNode): ValidationError[] {
     if (skillData.description.length > VALIDATION_RULES.SKILL.DESCRIPTION_MAX_LENGTH) {
       errors.push({
         code: 'SKILL_DESC_TOO_LONG',
-        message: `Skill description exceeds ${VALIDATION_RULES.SKILL.DESCRIPTION_MAX_LENGTH} characters`,
+        message: `Skill node "${displayName}" description exceeds ${VALIDATION_RULES.SKILL.DESCRIPTION_MAX_LENGTH} characters`,
         field: `nodes[${node.id}].data.description`,
       });
     }
@@ -687,8 +694,7 @@ function validateSkillNode(node: WorkflowNode): ValidationError[] {
   if (skillData.outputPorts !== VALIDATION_RULES.SKILL.OUTPUT_PORTS) {
     errors.push({
       code: 'SKILL_INVALID_PORTS',
-      message:
-        'Skill outputPorts must equal 1. For branching, use ifElse or switch nodes after the Skill node.',
+      message: `Skill node "${displayName}" outputPorts must equal 1. For branching, use ifElse or switch nodes after the Skill node.`,
       field: `nodes[${node.id}].data.outputPorts`,
     });
   }
@@ -700,7 +706,7 @@ function validateSkillNode(node: WorkflowNode): ValidationError[] {
     if (skillData.executionPrompt.length > VALIDATION_RULES.SKILL.EXECUTION_PROMPT_MAX_LENGTH) {
       errors.push({
         code: 'SKILL_EXECUTION_PROMPT_TOO_LONG',
-        message: `Skill executionPrompt exceeds ${VALIDATION_RULES.SKILL.EXECUTION_PROMPT_MAX_LENGTH} characters`,
+        message: `Skill node "${displayName}" executionPrompt exceeds ${VALIDATION_RULES.SKILL.EXECUTION_PROMPT_MAX_LENGTH} characters`,
         field: `nodes[${node.id}].data.executionPrompt`,
       });
     }
@@ -720,6 +726,7 @@ function validateSkillNode(node: WorkflowNode): ValidationError[] {
 function validateMcpNode(node: WorkflowNode): ValidationError[] {
   const errors: ValidationError[] = [];
   const mcpData = node.data as Partial<McpNodeData>;
+  const displayName = getNodeDisplayName(node);
 
   // Common required fields (all modes)
   const commonRequiredFields: (keyof McpNodeData)[] = [
@@ -733,7 +740,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
     if (value === undefined || value === null || value === '') {
       errors.push({
         code: 'MCP_MISSING_FIELD',
-        message: `MCP node missing required field: ${field}`,
+        message: `MCP node "${displayName}" missing required field: ${field}`,
         field: `nodes[${node.id}].data.${field}`,
       });
     }
@@ -744,7 +751,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
     if (mcpData.serverId.length < VALIDATION_RULES.MCP.SERVER_ID_MIN_LENGTH) {
       errors.push({
         code: 'MCP_INVALID_SERVER_ID',
-        message: `MCP server ID too short (min ${VALIDATION_RULES.MCP.SERVER_ID_MIN_LENGTH} characters)`,
+        message: `MCP node "${displayName}" server ID too short (min ${VALIDATION_RULES.MCP.SERVER_ID_MIN_LENGTH} characters)`,
         field: `nodes[${node.id}].data.serverId`,
       });
     }
@@ -752,7 +759,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
     if (mcpData.serverId.length > VALIDATION_RULES.MCP.SERVER_ID_MAX_LENGTH) {
       errors.push({
         code: 'MCP_SERVER_ID_TOO_LONG',
-        message: `MCP server ID exceeds ${VALIDATION_RULES.MCP.SERVER_ID_MAX_LENGTH} characters`,
+        message: `MCP node "${displayName}" server ID exceeds ${VALIDATION_RULES.MCP.SERVER_ID_MAX_LENGTH} characters`,
         field: `nodes[${node.id}].data.serverId`,
       });
     }
@@ -763,7 +770,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
     if (mcpData.toolName.length < VALIDATION_RULES.MCP.TOOL_NAME_MIN_LENGTH) {
       errors.push({
         code: 'MCP_INVALID_TOOL_NAME',
-        message: `MCP tool name too short (min ${VALIDATION_RULES.MCP.TOOL_NAME_MIN_LENGTH} characters)`,
+        message: `MCP node "${displayName}" tool name too short (min ${VALIDATION_RULES.MCP.TOOL_NAME_MIN_LENGTH} characters)`,
         field: `nodes[${node.id}].data.toolName`,
       });
     }
@@ -771,7 +778,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
     if (mcpData.toolName.length > VALIDATION_RULES.MCP.TOOL_NAME_MAX_LENGTH) {
       errors.push({
         code: 'MCP_TOOL_NAME_TOO_LONG',
-        message: `MCP tool name exceeds ${VALIDATION_RULES.MCP.TOOL_NAME_MAX_LENGTH} characters`,
+        message: `MCP node "${displayName}" tool name exceeds ${VALIDATION_RULES.MCP.TOOL_NAME_MAX_LENGTH} characters`,
         field: `nodes[${node.id}].data.toolName`,
       });
     }
@@ -784,7 +791,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
   ) {
     errors.push({
       code: 'MCP_TOOL_DESC_TOO_LONG',
-      message: `MCP tool description exceeds ${VALIDATION_RULES.MCP.TOOL_DESCRIPTION_MAX_LENGTH} characters`,
+      message: `MCP node "${displayName}" tool description exceeds ${VALIDATION_RULES.MCP.TOOL_DESCRIPTION_MAX_LENGTH} characters`,
       field: `nodes[${node.id}].data.toolDescription`,
     });
   }
@@ -794,7 +801,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
     if (!Array.isArray(mcpData.parameters)) {
       errors.push({
         code: 'MCP_INVALID_PARAMETERS',
-        message: 'MCP parameters must be an array',
+        message: `MCP node "${displayName}" parameters must be an array`,
         field: `nodes[${node.id}].data.parameters`,
       });
     }
@@ -809,7 +816,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
     ) {
       errors.push({
         code: 'MCP_INVALID_PARAMETER_VALUES',
-        message: 'MCP parameterValues must be an object',
+        message: `MCP node "${displayName}" parameterValues must be an object`,
         field: `nodes[${node.id}].data.parameterValues`,
       });
     }
@@ -821,8 +828,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
   if (mcpData.outputPorts !== VALIDATION_RULES.MCP.OUTPUT_PORTS) {
     errors.push({
       code: 'MCP_INVALID_PORTS',
-      message:
-        'MCP outputPorts must equal 1. For branching, use ifElse or switch nodes after the MCP node.',
+      message: `MCP node "${displayName}" outputPorts must equal 1. For branching, use ifElse or switch nodes after the MCP node.`,
       field: `nodes[${node.id}].data.outputPorts`,
     });
   }
@@ -836,14 +842,14 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
       if (!mcpData.toolName || mcpData.toolName.trim().length === 0) {
         errors.push({
           code: 'MCP_MODE_CONFIG_MISMATCH',
-          message: 'Manual parameter config mode requires toolName to be set',
+          message: `MCP node "${displayName}": Manual parameter config mode requires toolName to be set`,
           field: `nodes[${node.id}].data.toolName`,
         });
       }
       if (!mcpData.toolDescription || mcpData.toolDescription.trim().length === 0) {
         errors.push({
           code: 'MCP_MODE_CONFIG_MISMATCH',
-          message: 'Manual parameter config mode requires toolDescription to be set',
+          message: `MCP node "${displayName}": Manual parameter config mode requires toolDescription to be set`,
           field: `nodes[${node.id}].data.toolDescription`,
         });
       }
@@ -851,7 +857,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
       if (!mcpData.parameters) {
         errors.push({
           code: 'MCP_MODE_CONFIG_MISMATCH',
-          message: 'Manual parameter config mode requires parameters array to be set',
+          message: `MCP node "${displayName}": Manual parameter config mode requires parameters array to be set`,
           field: `nodes[${node.id}].data.parameters`,
         });
       }
@@ -860,7 +866,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
         if (!mcpData.parameterValues || Object.keys(mcpData.parameterValues).length === 0) {
           errors.push({
             code: 'MCP_MODE_CONFIG_MISMATCH',
-            message: 'Manual parameter config mode requires parameterValues to be configured',
+            message: `MCP node "${displayName}": Manual parameter config mode requires parameterValues to be configured`,
             field: `nodes[${node.id}].data.parameterValues`,
           });
         }
@@ -872,28 +878,28 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
       if (!mcpData.toolName || mcpData.toolName.trim().length === 0) {
         errors.push({
           code: 'MCP_MODE_CONFIG_MISMATCH',
-          message: 'AI parameter config mode requires toolName to be set',
+          message: `MCP node "${displayName}": AI parameter config mode requires toolName to be set`,
           field: `nodes[${node.id}].data.toolName`,
         });
       }
       if (!mcpData.toolDescription || mcpData.toolDescription.trim().length === 0) {
         errors.push({
           code: 'MCP_MODE_CONFIG_MISMATCH',
-          message: 'AI parameter config mode requires toolDescription to be set',
+          message: `MCP node "${displayName}": AI parameter config mode requires toolDescription to be set`,
           field: `nodes[${node.id}].data.toolDescription`,
         });
       }
       if (!mcpData.parameters || mcpData.parameters.length === 0) {
         errors.push({
           code: 'MCP_MODE_CONFIG_MISMATCH',
-          message: 'AI parameter config mode requires parameters array to be set',
+          message: `MCP node "${displayName}": AI parameter config mode requires parameters array to be set`,
           field: `nodes[${node.id}].data.parameters`,
         });
       }
       if (!mcpData.aiParameterConfig) {
         errors.push({
           code: 'MCP_MODE_CONFIG_MISMATCH',
-          message: 'AI parameter config mode requires aiParameterConfig to be set',
+          message: `MCP node "${displayName}": AI parameter config mode requires aiParameterConfig to be set`,
           field: `nodes[${node.id}].data.aiParameterConfig`,
         });
       } else if (
@@ -902,8 +908,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
       ) {
         errors.push({
           code: 'MCP_MODE_CONFIG_MISMATCH',
-          message:
-            'AI parameter config mode requires aiParameterConfig.description to be non-empty',
+          message: `MCP node "${displayName}": AI parameter config mode requires aiParameterConfig.description to be non-empty`,
           field: `nodes[${node.id}].data.aiParameterConfig.description`,
         });
       }
@@ -915,7 +920,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
       if (!mcpData.aiToolSelectionConfig) {
         errors.push({
           code: 'MCP_MODE_CONFIG_MISMATCH',
-          message: 'AI tool selection mode requires aiToolSelectionConfig to be set',
+          message: `MCP node "${displayName}": AI tool selection mode requires aiToolSelectionConfig to be set`,
           field: `nodes[${node.id}].data.aiToolSelectionConfig`,
         });
       } else if (
@@ -924,8 +929,7 @@ function validateMcpNode(node: WorkflowNode): ValidationError[] {
       ) {
         errors.push({
           code: 'MCP_MODE_CONFIG_MISMATCH',
-          message:
-            'AI tool selection mode requires aiToolSelectionConfig.taskDescription to be non-empty',
+          message: `MCP node "${displayName}": AI tool selection mode requires aiToolSelectionConfig.taskDescription to be non-empty`,
           field: `nodes[${node.id}].data.aiToolSelectionConfig.taskDescription`,
         });
       }
@@ -977,23 +981,23 @@ function validateConnections(connections: Connection[], nodes: WorkflowNode[]): 
       });
     }
 
+    const fromNode = nodes.find((n) => n.id === conn.from);
+    const toNode = nodes.find((n) => n.id === conn.to);
+
     // Validate no self-connections
     if (conn.from === conn.to) {
       errors.push({
         code: 'SELF_CONNECTION',
-        message: 'Node cannot connect to itself',
+        message: `Node "${fromNode ? getNodeDisplayName(fromNode) : conn.from}" cannot connect to itself`,
         field: `connections[${conn.id}]`,
       });
     }
 
     // Validate Start/End node connection rules
-    const fromNode = nodes.find((n) => n.id === conn.from);
-    const toNode = nodes.find((n) => n.id === conn.to);
-
     if (toNode?.type === NodeType.Start) {
       errors.push({
         code: 'INVALID_CONNECTION',
-        message: 'Start node cannot have input connections',
+        message: `Start node "${getNodeDisplayName(toNode)}" cannot have input connections`,
         field: `connections[${conn.id}]`,
       });
     }
@@ -1001,7 +1005,7 @@ function validateConnections(connections: Connection[], nodes: WorkflowNode[]): 
     if (fromNode?.type === NodeType.End) {
       errors.push({
         code: 'INVALID_CONNECTION',
-        message: 'End node cannot have output connections',
+        message: `End node "${getNodeDisplayName(fromNode)}" cannot have output connections`,
         field: `connections[${conn.id}]`,
       });
     }
@@ -1010,7 +1014,7 @@ function validateConnections(connections: Connection[], nodes: WorkflowNode[]): 
     if (fromNode?.type === NodeType.Group) {
       errors.push({
         code: 'INVALID_CONNECTION',
-        message: 'Group node cannot have output connections',
+        message: `Group node "${getNodeDisplayName(fromNode)}" cannot have output connections`,
         field: `connections[${conn.id}]`,
       });
     }
@@ -1018,7 +1022,7 @@ function validateConnections(connections: Connection[], nodes: WorkflowNode[]): 
     if (toNode?.type === NodeType.Group) {
       errors.push({
         code: 'INVALID_CONNECTION',
-        message: 'Group node cannot have input connections',
+        message: `Group node "${getNodeDisplayName(toNode)}" cannot have input connections`,
         field: `connections[${conn.id}]`,
       });
     }

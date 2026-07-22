@@ -31,6 +31,7 @@ export * from './utils/validate-workflow.js';
 export * from './utils/migrate-workflow.js';
 export * from './utils/schema-parser.js';
 export * from './utils/node-data-normalize.js';
+export * from './utils/node-display-name.js';
 
 // Slack workflow validator — its `ValidationResult` collides with the AI
 // validator's identical name, so re-export it under a distinct alias.
