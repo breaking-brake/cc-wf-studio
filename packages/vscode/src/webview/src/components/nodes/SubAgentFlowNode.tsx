@@ -16,6 +16,7 @@ import { Handle, type NodeProps, Position } from 'reactflow';
 import { useTranslation } from '../../i18n/i18n-context';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { DeleteButton } from './DeleteButton';
+import { DuplicateButton } from './DuplicateButton';
 
 /**
  * SubAgentFlowNode Component
@@ -47,6 +48,7 @@ export const SubAgentFlowNodeComponent: React.FC<NodeProps<SubAgentFlowNodeData>
       >
         {/* Delete Button */}
         <DeleteButton nodeId={id} selected={selected} />
+        <DuplicateButton nodeId={id} selected={selected} />
 
         {/* Node Header */}
         <div

@@ -16,6 +16,7 @@ import { useTranslation } from '../../../i18n/i18n-context';
 import { AIProviderBadge, type AIProviderType } from '../../common/AIProviderBadge';
 import { ModeIndicatorBadge } from '../../mode-selection/ModeIndicatorBadge';
 import { DeleteButton } from '../DeleteButton';
+import { DuplicateButton } from '../DuplicateButton';
 
 /**
  * Get validation status icon
@@ -117,6 +118,7 @@ export const McpNodeComponent: React.FC<NodeProps<McpNodeData>> = React.memo(
 
         {/* Delete Button */}
         <DeleteButton nodeId={id} selected={selected} />
+        <DuplicateButton nodeId={id} selected={selected} />
 
         {/* Node Header */}
         <div

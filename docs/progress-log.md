@@ -17,6 +17,28 @@ Entry format:
 
 ---
 
+## 2026-07-22 — Duplicate button for configured canvas nodes
+- **User value**: a user who has carefully configured a node (Sub-Agent with
+  model/tools, a long Prompt, an MCP node, ...) can now clone it with one
+  click — a Duplicate button next to the delete button creates a copy with a
+  fresh id, +40/+40 offset, same parent group, and all data fields intact —
+  instead of recreating every field by hand.
+- **Issue/PR**: #861 / PR from `claude/sleepy-curie-emspxx`
+- **Outcome**: done — new `duplicateNode` store action (deep-copies `data`,
+  keeps the palette's `<prefix>-<timestamp>` id convention, moves React Flow's
+  visual selection to the copy, sets `lastAddedNodeId` so the canvas
+  auto-centers on it; single `set` = single undo entry) plus a
+  `DuplicateButton` component rendered in the 11 duplicatable node components.
+  Start/End/Group excluded (group-with-children duplication left as a
+  follow-up per the issue). Edges are not copied.
+- **Next proposals**:
+  - Group duplication including children (the follow-up #861 explicitly
+    deferred).
+  - File mode returns `plannedFiles: []` silently — implement sub-agent
+    auto-creation in `FileWorkflowAdapter` for canvas/file parity.
+  - Keyboard shortcut (Ctrl/Cmd+D) for duplicating the selected node, wired
+    to the same store action.
+
 ## 2026-07-22 — Mode-aware MCP tool text for file mode
 - **User value**: an AI agent editing a workflow through `ccwf mcp --file` or
   the `ccwf-mcp` stdio bin is no longer told to "open a workflow in CC
