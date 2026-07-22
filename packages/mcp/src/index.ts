@@ -18,7 +18,11 @@ export type {
   WorkflowIoAdapter,
 } from './types.js';
 
-export { registerWorkflowTools } from './tools.js';
+export {
+  registerWorkflowTools,
+  type RegisterWorkflowToolsOptions,
+  type WorkflowMcpMode,
+} from './tools.js';
 export {
   createWorkflowMcpServer,
   type CreateWorkflowMcpServerOptions,

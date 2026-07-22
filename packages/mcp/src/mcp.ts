@@ -67,7 +67,7 @@ async function main(): Promise<void> {
     projectRoot: typeof projectRoot === 'string' ? projectRoot : undefined,
   });
 
-  const server = createWorkflowMcpServer(adapter);
+  const server = createWorkflowMcpServer(adapter, { mode: 'file' });
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }

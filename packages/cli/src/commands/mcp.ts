@@ -30,7 +30,7 @@ export function registerMcpCommand(program: Command): void {
         filePath: options.file,
         projectRoot: options.projectRoot,
       });
-      const server = createWorkflowMcpServer(adapter);
+      const server = createWorkflowMcpServer(adapter, { mode: 'file' });
       const transport = new StdioServerTransport();
       await server.connect(transport);
     });

@@ -1,10 +1,13 @@
 /**
  * Tool registrations for the cc-wf-studio MCP server.
  *
- * Each tool delegates IO to the supplied `WorkflowIoAdapter`. The MCP request
- * shape (name, description, zod schema, response envelope) is preserved
- * byte-for-byte from the previous in-process VSCode implementation so AI
- * clients connected via the existing skill continue to work.
+ * Each tool delegates IO to the supplied `WorkflowIoAdapter`. In `canvas`
+ * mode the MCP request shape (name, description, zod schema, response
+ * envelope) is preserved byte-for-byte from the previous in-process VSCode
+ * implementation so AI clients connected via the existing skill continue to
+ * work. In `file` mode the descriptions and error strings describe the
+ * workflow file being edited instead of the canvas — there is no editor to
+ * open, no review dialog, and no sub-agent auto-creation.
  */
 
 import {
@@ -35,22 +38,93 @@ const fail = (payload: unknown, isError = true): ToolReply => ({
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-export function registerWorkflowTools(
-  server: McpServer,
-  adapter: WorkflowIoAdapter
-): void {
-  registerGetCurrentWorkflow(server, adapter);
-  registerGetWorkflowSchema(server, adapter);
-  registerApplyWorkflow(server, adapter);
-  registerListAvailableAgents(server, adapter);
-  registerUpdateNodes(server, adapter);
-  registerHighlightGroupNode(server, adapter);
+/**
+ * Which surface the server edits. Selects the tool description/error text:
+ *   - `canvas` — the live CC Workflow Studio webview (VSCode in-process server)
+ *   - `file`   — a workflow JSON file (`ccwf mcp --file` / `ccwf-mcp` stdio bin)
+ */
+export type WorkflowMcpMode = 'canvas' | 'file';
+
+export interface RegisterWorkflowToolsOptions {
+  /** Defaults to `'canvas'`, which preserves the historical tool text exactly. */
+  mode?: WorkflowMcpMode;
 }
 
-function registerGetCurrentWorkflow(server: McpServer, adapter: WorkflowIoAdapter): void {
+interface ToolText {
+  getCurrentWorkflowDescription: string;
+  noActiveWorkflowError: string;
+  applyWorkflowDescription: string;
+  applyWorkflowParamDescription: string;
+  applyChangeDescriptionParam: string;
+  applyRevisionParamDescription: string;
+  updateNodesDescription: string;
+  updateNodesChangeDescriptionParam: string;
+  highlightGroupNodeDescription: string;
+}
+
+const TOOL_TEXT: Record<WorkflowMcpMode, ToolText> = {
+  canvas: {
+    getCurrentWorkflowDescription:
+      'Get the currently active workflow from CC Workflow Studio canvas. Returns the workflow JSON and whether it is stale (from cache when the editor is closed).',
+    noActiveWorkflowError:
+      'No active workflow. Please open a workflow in CC Workflow Studio first.',
+    applyWorkflowDescription:
+      'Apply a workflow to the CC Workflow Studio canvas. The workflow is validated before being applied. If the user has review mode enabled, they will see a diff preview and must accept changes before they are applied. If rejected, an error with message "User rejected the changes" is returned. The editor must be open. SubAgent nodes without commandFilePath will have .md files auto-created in .claude/agents/.',
+    applyWorkflowParamDescription: 'The workflow JSON string to apply to the canvas',
+    applyChangeDescriptionParam:
+      'A brief description of the changes being made (e.g., "Added error handling step after API call"). Shown to the user in the review dialog.',
+    applyRevisionParamDescription:
+      'Workflow revision from get_current_workflow for conflict detection. If provided and the workflow has been modified since, the apply will be rejected or a warning shown.',
+    updateNodesDescription:
+      'Update specific nodes in the current workflow by ID. More efficient than apply_workflow for partial changes. Fetches the current workflow, merges the specified node changes, validates the result, and applies to the canvas. Only updates existing nodes — use apply_workflow to add or remove nodes.',
+    updateNodesChangeDescriptionParam:
+      'A brief description of the changes being made. Shown to the user in the review dialog.',
+    highlightGroupNodeDescription:
+      'Highlight a group node on the CC Workflow Studio canvas to indicate it is currently being executed. Call this before executing nodes within a group to visually track progress.',
+  },
+  file: {
+    getCurrentWorkflowDescription:
+      'Get the current workflow from the target workflow JSON file. Returns the workflow JSON and a revision hash (sha256 of the file contents) for conflict detection.',
+    noActiveWorkflowError:
+      'No workflow found: the target workflow file does not exist yet. Use apply_workflow to create it.',
+    applyWorkflowDescription:
+      'Write a workflow to the target workflow JSON file. The workflow is validated before being written; the write is atomic and is rejected with a revision-conflict error if the file changed since the provided revision was read. File mode does NOT auto-create sub-agent .md files — set commandFilePath to an existing file on each SubAgent node.',
+    applyWorkflowParamDescription: 'The workflow JSON string to write to the workflow file',
+    applyChangeDescriptionParam:
+      'A brief description of the changes being made (e.g., "Added error handling step after API call"). Not displayed in file mode; safe to omit.',
+    applyRevisionParamDescription:
+      'Workflow revision from get_current_workflow for conflict detection. If provided and the file has changed since it was read, the write is rejected with a revision-conflict error.',
+    updateNodesDescription:
+      'Update specific nodes in the current workflow by ID. More efficient than apply_workflow for partial changes. Fetches the current workflow, merges the specified node changes, validates the result, and writes it back to the workflow file. Only updates existing nodes — use apply_workflow to add or remove nodes.',
+    updateNodesChangeDescriptionParam:
+      'A brief description of the changes being made. Not displayed in file mode; safe to omit.',
+    highlightGroupNodeDescription:
+      'Highlight a group node to indicate it is currently being executed. In file mode this is a no-op kept for compatibility — highlighting is only visible on the CC Workflow Studio canvas.',
+  },
+};
+
+export function registerWorkflowTools(
+  server: McpServer,
+  adapter: WorkflowIoAdapter,
+  options: RegisterWorkflowToolsOptions = {}
+): void {
+  const text = TOOL_TEXT[options.mode ?? 'canvas'];
+  registerGetCurrentWorkflow(server, adapter, text);
+  registerGetWorkflowSchema(server, adapter);
+  registerApplyWorkflow(server, adapter, text);
+  registerListAvailableAgents(server, adapter);
+  registerUpdateNodes(server, adapter, text);
+  registerHighlightGroupNode(server, adapter, text);
+}
+
+function registerGetCurrentWorkflow(
+  server: McpServer,
+  adapter: WorkflowIoAdapter,
+  text: ToolText
+): void {
   server.tool(
     'get_current_workflow',
-    'Get the currently active workflow from CC Workflow Studio canvas. Returns the workflow JSON and whether it is stale (from cache when the editor is closed).',
+    text.getCurrentWorkflowDescription,
     {},
     async () => {
       try {
@@ -59,8 +133,7 @@ function registerGetCurrentWorkflow(server: McpServer, adapter: WorkflowIoAdapte
           return fail(
             {
               success: false,
-              error:
-                'No active workflow. Please open a workflow in CC Workflow Studio first.',
+              error: text.noActiveWorkflowError,
             },
             false
           );
@@ -99,24 +172,18 @@ function registerGetWorkflowSchema(server: McpServer, adapter: WorkflowIoAdapter
   );
 }
 
-function registerApplyWorkflow(server: McpServer, adapter: WorkflowIoAdapter): void {
+function registerApplyWorkflow(
+  server: McpServer,
+  adapter: WorkflowIoAdapter,
+  text: ToolText
+): void {
   server.tool(
     'apply_workflow',
-    'Apply a workflow to the CC Workflow Studio canvas. The workflow is validated before being applied. If the user has review mode enabled, they will see a diff preview and must accept changes before they are applied. If rejected, an error with message "User rejected the changes" is returned. The editor must be open. SubAgent nodes without commandFilePath will have .md files auto-created in .claude/agents/.',
+    text.applyWorkflowDescription,
     {
-      workflow: z.string().describe('The workflow JSON string to apply to the canvas'),
-      description: z
-        .string()
-        .optional()
-        .describe(
-          'A brief description of the changes being made (e.g., "Added error handling step after API call"). Shown to the user in the review dialog.'
-        ),
-      revision: z
-        .string()
-        .optional()
-        .describe(
-          'Workflow revision from get_current_workflow for conflict detection. If provided and the workflow has been modified since, the apply will be rejected or a warning shown.'
-        ),
+      workflow: z.string().describe(text.applyWorkflowParamDescription),
+      description: z.string().optional().describe(text.applyChangeDescriptionParam),
+      revision: z.string().optional().describe(text.applyRevisionParamDescription),
     },
     async ({ workflow: workflowJson, description, revision }) => {
       try {
@@ -208,10 +275,14 @@ function registerListAvailableAgents(
   );
 }
 
-function registerUpdateNodes(server: McpServer, adapter: WorkflowIoAdapter): void {
+function registerUpdateNodes(
+  server: McpServer,
+  adapter: WorkflowIoAdapter,
+  text: ToolText
+): void {
   server.tool(
     'update_nodes',
-    'Update specific nodes in the current workflow by ID. More efficient than apply_workflow for partial changes. Fetches the current workflow, merges the specified node changes, validates the result, and applies to the canvas. Only updates existing nodes — use apply_workflow to add or remove nodes.',
+    text.updateNodesDescription,
     {
       nodes: z
         .array(
@@ -251,12 +322,7 @@ function registerUpdateNodes(server: McpServer, adapter: WorkflowIoAdapter): voi
         .describe(
           'Array of node updates. Each must include an id and at least one of: name, position, data, type, parentId, or style.'
         ),
-      description: z
-        .string()
-        .optional()
-        .describe(
-          'A brief description of the changes being made. Shown to the user in the review dialog.'
-        ),
+      description: z.string().optional().describe(text.updateNodesChangeDescriptionParam),
       revision: z
         .string()
         .optional()
@@ -270,8 +336,7 @@ function registerUpdateNodes(server: McpServer, adapter: WorkflowIoAdapter): voi
         if (!current.workflow) {
           return fail({
             success: false,
-            error:
-              'No active workflow. Please open a workflow in CC Workflow Studio first.',
+            error: text.noActiveWorkflowError,
           });
         }
 
@@ -366,11 +431,12 @@ function registerUpdateNodes(server: McpServer, adapter: WorkflowIoAdapter): voi
 
 function registerHighlightGroupNode(
   server: McpServer,
-  adapter: WorkflowIoAdapter
+  adapter: WorkflowIoAdapter,
+  text: ToolText
 ): void {
   server.tool(
     'highlight_group_node',
-    'Highlight a group node on the CC Workflow Studio canvas to indicate it is currently being executed. Call this before executing nodes within a group to visually track progress.',
+    text.highlightGroupNodeDescription,
     {
       groupNodeId: z
         .string()

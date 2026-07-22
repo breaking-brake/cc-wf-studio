@@ -17,6 +17,33 @@ Entry format:
 
 ---
 
+## 2026-07-22 — Mode-aware MCP tool text for file mode
+- **User value**: an AI agent editing a workflow through `ccwf mcp --file` or
+  the `ccwf-mcp` stdio bin is no longer told to "open a workflow in CC
+  Workflow Studio first" or promised a review-dialog diff preview and
+  auto-created sub-agent `.md` files that don't exist in file mode — tool
+  descriptions and errors now describe the workflow file, sha256-revision
+  conflict detection, and the "set commandFilePath yourself" rule, so agents
+  stop giving users wrong advice.
+- **Issue/PR**: #860 / PR from `claude/sleepy-curie-ralz5b`
+- **Outcome**: done — `registerWorkflowTools`/`createWorkflowMcpServer` gained
+  a `mode: 'canvas' | 'file'` option (default `'canvas'`); a per-mode text
+  table in `tools.ts` keeps the canvas strings byte-for-byte identical
+  (verified against the built dist) while both file-mode entry points
+  (`ccwf mcp`, `ccwf-mcp`) pass `mode: 'file'`. E2E-verified over stdio:
+  tools/list shows file-oriented descriptions and a missing file now says
+  "Use apply_workflow to create it". Also filed #861 (duplicate-node canvas
+  action) as the runner-up idea. Locking #860/#861 remains impossible in
+  this session (no `gh` CLI, no MCP lock tool) — noted in the issue bodies.
+- **Next proposals**:
+  - #861: Duplicate button for configured canvas nodes (store action +
+    button next to DeleteButton; skip start/end/group initially).
+  - File mode returns `plannedFiles: []` silently — consider implementing
+    sub-agent auto-creation in `FileWorkflowAdapter` so file-mode parity
+    with the canvas grows instead of being documented away.
+  - Give the loop a supported way to lock its idea issues (e.g. `gh` in the
+    session image or an MCP lock tool).
+
 ## 2026-07-22 — Name the affected nodes in Claude Code-only warnings
 - **User value**: a user exporting, running, or preflighting a workflow for a
   non-Claude agent now sees exactly which nodes that agent cannot execute —
