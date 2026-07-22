@@ -17,6 +17,29 @@ Entry format:
 
 ---
 
+## 2026-07-22 — Accept `{meta, workflow}` wrapper files in `ccwf`
+- **User value**: a user who points `ccwf render/export/run/preview/validate`
+  at one of the bundled sample workflows (all of `resources/samples/*.json`
+  ship as `{meta, workflow}` wrappers) no longer gets a raw
+  `TypeError: Cannot read properties of undefined (reading 'filter')` — the
+  CLI unwraps the wrapper automatically, and any other non-workflow JSON
+  fails with a clear `error: ... does not look like a workflow file` (exit 2)
+  instead of a stack trace.
+- **Issue/PR**: #867 / PR from `claude/sleepy-curie-pc87jz`
+- **Outcome**: done — `loadWorkflowFromFile` now shape-checks the parsed JSON
+  (`nodes` array = workflow; `{ workflow: {...nodes...} }` = wrapper,
+  unwrapped; anything else = `WorkflowLoadError`). All seven `<file>`
+  commands share the loader, so one change covers them all; `ccwf validate`
+  on a wrapper now validates the inner workflow instead of reporting
+  misleading `MISSING_FIELD` errors. E2E-verified on the built CLI: wrapper
+  sample renders + validates, bare workflow unchanged, `{"foo":1}` and
+  `[1,2,3]` produce the clear error.
+- **Next proposals**:
+  - #865: Ctrl/Cmd+D keyboard shortcut for the node Duplicate action.
+  - Group duplication including children (deferred follow-up of #861).
+  - File mode returns `plannedFiles: []` silently — sub-agent auto-creation
+    in `FileWorkflowAdapter` for canvas/file parity.
+
 ## 2026-07-22 — Idempotent `ccwf export` / `ccwf run` re-runs
 - **User value**: a user re-running `ccwf export` / `ccwf run` on an unchanged
   workflow no longer gets a false `error: N file(s) already exist. Pass
