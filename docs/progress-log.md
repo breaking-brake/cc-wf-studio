@@ -17,6 +17,35 @@ Entry format:
 
 ---
 
+## 2026-07-22 — Sub-Agent Flow property panel surfaces broken links
+- **User value**: a user who opens the property panel for a Sub-Agent Flow
+  reference node whose linked flow no longer exists (e.g. after opening an
+  externally edited or hand-crafted workflow file — `validateWorkflowFile`
+  does not check `subAgentFlowId` references, only `validateAIGeneratedWorkflow`
+  does) now sees a "Sub-Agent Flow not found" message in the panel instead of
+  a header that silently renders nothing (no description, no edit button, no
+  explanation) while the rest of the panel's fields still edit normally.
+- **Issue/PR**: (opened this iteration)
+- **Outcome**: done — `sub-agent-flow-panel.tsx`'s `SubAgentFlowHeader` now
+  renders the existing `node.subAgentFlow.subAgentFlowNotFound` i18n string
+  (already used by the canvas node's own warning badge, so no new
+  translations needed) when `subAgentFlowId` is set but unresolved.
+- **Next proposals**:
+  - `apply_workflow`'s MCP tool description says SubAgent `.md` files are
+    "auto-created" during apply; both adapters return `[]` at apply time and
+    actually materialise the file later at export/run. The claim is
+    functionally accurate but the timing is unclear from the description —
+    low priority, reconsider only if an agent is observed acting on the
+    apply-time assumption.
+  - `ccwf validate`: several error messages embed `node.id` (e.g.
+    `Node "${node.id}" ...`) but node ids are often opaque
+    (`group-<timestamp>` etc.) with no shared "display name" accessor across
+    node types in core — before adding a label, first design a
+    `getNodeDisplayName(node)` helper (data shape differs per node type:
+    `label` for Group, `name` for Skill, etc.).
+  - Walk the canvas → export → share flow as a user and propose the top
+    friction fix (still not done despite being proposed 3 times).
+
 ## 2026-07-22 — Friendly error when `ccwf canvas`/`ccwf preview` port is taken
 - **User value**: a user who runs `ccwf canvas --port <n>` or `ccwf preview
   --port <n>` against a port already in use now gets "port <n> is already in

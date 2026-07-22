@@ -23,7 +23,14 @@ const SubAgentFlowHeader: React.FC<PanelSlotProps> = ({ node }) => {
   const linkedSubAgentFlow = subAgentFlows.find((sf) => sf.id === subAgentFlowId);
 
   if (!linkedSubAgentFlow) {
-    return null;
+    // subAgentFlowId is set but no matching flow exists (e.g. an externally
+    // edited or corrupted workflow file) — the canvas node already shows a
+    // warning badge; mirror it here so the panel isn't silently empty.
+    return subAgentFlowId ? (
+      <div style={{ fontSize: '11px', color: 'var(--vscode-editorWarning-foreground)' }}>
+        {t('node.subAgentFlow.subAgentFlowNotFound')}
+      </div>
+    ) : null;
   }
 
   return (
