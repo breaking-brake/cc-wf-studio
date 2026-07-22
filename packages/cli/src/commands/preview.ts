@@ -21,6 +21,7 @@ import { startPreviewServer } from '../preview/server.js';
 import { watchWorkflowFile } from '../preview/watcher.js';
 import { reachabilityNote } from '../utils/host-warning.js';
 import { WorkflowLoadError, loadWorkflowFromFile } from '../utils/load-workflow.js';
+import { formatServerStartError } from '../utils/server-start-error.js';
 
 interface PreviewOptions {
   port?: string;
@@ -98,12 +99,13 @@ export function registerPreviewCommand(program: Command): void {
       false
     )
     .action(async (file: string, options: PreviewOptions) => {
+      let portOption = 0;
       try {
         const workflowAbsPath = path.resolve(file);
         const initialWorkflow = await readMigratedWorkflow(workflowAbsPath);
 
         const webviewDistDir = await resolveWebviewDistDir();
-        const portOption = options.port ? Number(options.port) : 0;
+        portOption = options.port ? Number(options.port) : 0;
         if (Number.isNaN(portOption)) {
           process.stderr.write(`error: --port must be a number, got '${options.port}'\n`);
           process.exit(2);
@@ -200,7 +202,7 @@ export function registerPreviewCommand(program: Command): void {
           process.stderr.write(`error: ${error.message}\n`);
           process.exit(error.exitCode);
         }
-        process.stderr.write(`error: ${error instanceof Error ? error.message : String(error)}\n`);
+        process.stderr.write(`${formatServerStartError(error, portOption)}\n`);
         process.exit(1);
       }
     });

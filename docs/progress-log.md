@@ -17,6 +17,32 @@ Entry format:
 
 ---
 
+## 2026-07-22 — Friendly error when `ccwf canvas`/`ccwf preview` port is taken
+- **User value**: a user who runs `ccwf canvas --port <n>` or `ccwf preview
+  --port <n>` against a port already in use now gets "port <n> is already in
+  use ... Try a different --port, or omit --port to bind an ephemeral one"
+  instead of a raw Node `EADDRINUSE` stack-shaped message with no next step.
+- **Issue/PR**: (opened this iteration)
+- **Outcome**: done — new `packages/cli/src/utils/server-start-error.ts`
+  (`formatServerStartError`) used by both commands' catch blocks; verified
+  manually by occupying a port and running each command against it, and that
+  the pre-existing invalid `--port` (`NaN`) message is unchanged.
+- **Next proposals**:
+  - `apply_workflow`'s MCP tool description claims SubAgent `.md` files are
+    "auto-created" during apply, but both adapters
+    (`packages/mcp/src/file-adapter.ts:128`,
+    `packages/vscode/.../mcp-server-service.ts:438`) always return `[]` by
+    design — clarify the tool description so AI agents don't expect
+    `autoCreatedFiles` in the apply response.
+  - `ccwf validate`: include the node label alongside the node id in error
+    output so users can find the offending node on the canvas faster
+    (verify what `ValidationError` carries first).
+  - Note: closed stale GitHub issues #816 and #826 this iteration — both were
+    already fixed on `auto-dev` in prior iterations, but merging into
+    `auto-dev` (not `main`) means `Closes #NN` never auto-closed them. Worth
+    remembering this loop's PRs should double-check issue state manually
+    rather than trusting auto-close until `auto-dev` is promoted.
+
 ## 2026-07-22 — Add `-o/--output` to `ccwf render`
 - **User value**: a user running `ccwf render` can now write the Mermaid/Markdown
   output directly to a file (`-o <path>`) instead of manually redirecting stdout,
