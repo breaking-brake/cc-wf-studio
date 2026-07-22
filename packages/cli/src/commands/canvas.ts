@@ -27,6 +27,7 @@ import { createCanvasHandlers } from '../canvas/handlers.js';
 import { startCanvasServer } from '../canvas/server.js';
 import { reachabilityNote } from '../utils/host-warning.js';
 import { WorkflowLoadError, loadWorkflowFromFile } from '../utils/load-workflow.js';
+import { formatServerStartError } from '../utils/server-start-error.js';
 
 interface CanvasOptions {
   port?: string;
@@ -99,6 +100,7 @@ export function registerCanvasCommand(program: Command): void {
     .option('--port <number>', 'Preferred port (default: ephemeral / 0).')
     .option('--host <address>', 'Bind host. Default 127.0.0.1; do not change for public networks.')
     .action(async (file: string, options: CanvasOptions) => {
+      let portOption = 0;
       try {
         // Validate the file is parseable JSON up-front so the user gets a clear
         // error instead of a confused empty canvas in the browser.
@@ -106,7 +108,7 @@ export function registerCanvasCommand(program: Command): void {
 
         const webviewDistDir = await resolveWebviewDistDir();
         const handlers = createCanvasHandlers({ workflowPath: file });
-        const portOption = options.port ? Number(options.port) : 0;
+        portOption = options.port ? Number(options.port) : 0;
         if (Number.isNaN(portOption)) {
           process.stderr.write(`error: --port must be a number, got '${options.port}'\n`);
           process.exit(2);
@@ -167,7 +169,7 @@ export function registerCanvasCommand(program: Command): void {
           process.stderr.write(`error: ${error.message}\n`);
           process.exit(error.exitCode);
         }
-        process.stderr.write(`error: ${error instanceof Error ? error.message : String(error)}\n`);
+        process.stderr.write(`${formatServerStartError(error, portOption)}\n`);
         process.exit(1);
       }
     });
