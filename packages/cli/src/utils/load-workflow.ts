@@ -20,6 +20,17 @@ export class WorkflowLoadError extends Error {
   }
 }
 
+/**
+ * Minimal shape check — every workflow carries a `nodes` array. Full
+ * validation stays in `ccwf validate`; this only exists so downstream
+ * generators never dereference `undefined`.
+ */
+function looksLikeWorkflow(value: unknown): value is Workflow {
+  return (
+    typeof value === 'object' && value !== null && Array.isArray((value as Partial<Workflow>).nodes)
+  );
+}
+
 export async function loadWorkflowFromFile(filePath: string): Promise<{
   workflow: Workflow;
   absolutePath: string;
@@ -45,5 +56,18 @@ export async function loadWorkflowFromFile(filePath: string): Promise<{
       `Invalid JSON in ${absolutePath}: ${error instanceof Error ? error.message : String(error)}`
     );
   }
-  return { workflow: parsed as Workflow, absolutePath };
+  if (looksLikeWorkflow(parsed)) {
+    return { workflow: parsed, absolutePath };
+  }
+  // Sample/share files wrap the workflow: { meta: {...}, workflow: {...} }
+  const wrapped =
+    typeof parsed === 'object' && parsed !== null
+      ? (parsed as { workflow?: unknown }).workflow
+      : undefined;
+  if (looksLikeWorkflow(wrapped)) {
+    return { workflow: wrapped, absolutePath };
+  }
+  throw new WorkflowLoadError(
+    `${absolutePath} does not look like a workflow file: expected a top-level "nodes" array or a { meta, workflow } wrapper`
+  );
 }
