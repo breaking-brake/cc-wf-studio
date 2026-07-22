@@ -17,6 +17,7 @@ import { Handle, type NodeProps, Position } from 'reactflow';
 import type { PromptNodeData } from '../../types/node-types';
 import { extractVariables } from '../../utils/template-utils';
 import { DeleteButton } from './DeleteButton';
+import { DuplicateButton } from './DuplicateButton';
 
 /**
  * PromptNodeコンポーネント
@@ -50,6 +51,7 @@ export const PromptNode: React.FC<NodeProps<PromptNodeData>> = React.memo(
       >
         {/* Delete Button */}
         <DeleteButton nodeId={id} selected={selected} />
+        <DuplicateButton nodeId={id} selected={selected} />
         {/* Node Header */}
         <div
           style={{

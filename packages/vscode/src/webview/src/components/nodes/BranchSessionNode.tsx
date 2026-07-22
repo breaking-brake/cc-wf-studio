@@ -14,6 +14,7 @@ import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import type { BranchSessionNodeData } from '../../types/node-types';
 import { DeleteButton } from './DeleteButton';
+import { DuplicateButton } from './DuplicateButton';
 
 /**
  * BranchSessionNodeコンポーネント
@@ -45,6 +46,7 @@ export const BranchSessionNode: React.FC<NodeProps<BranchSessionNodeData>> = Rea
       >
         {/* Delete Button */}
         <DeleteButton nodeId={id} selected={selected} />
+        <DuplicateButton nodeId={id} selected={selected} />
         {/* Node Header */}
         <div
           style={{

@@ -14,6 +14,7 @@ import { Handle, type NodeProps, Position } from 'reactflow';
 import { useTranslation } from '../../i18n/i18n-context';
 import { AIProviderBadge, type AIProviderType } from '../common/AIProviderBadge';
 import { DeleteButton } from './DeleteButton';
+import { DuplicateButton } from './DuplicateButton';
 
 /**
  * Get validation status icon
@@ -77,6 +78,7 @@ export const SkillNodeComponent: React.FC<NodeProps<SkillNodeData>> = React.memo
       >
         {/* Delete Button */}
         <DeleteButton nodeId={id} selected={selected} />
+        <DuplicateButton nodeId={id} selected={selected} />
 
         {/* Node Header */}
         <div

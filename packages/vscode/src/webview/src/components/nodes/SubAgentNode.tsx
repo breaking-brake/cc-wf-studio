@@ -12,6 +12,7 @@ import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import { AIProviderBadge } from '../common/AIProviderBadge';
 import { DeleteButton } from './DeleteButton';
+import { DuplicateButton } from './DuplicateButton';
 
 /**
  * SubAgentNode Component
@@ -36,6 +37,7 @@ export const SubAgentNodeComponent: React.FC<NodeProps<SubAgentData>> = React.me
       >
         {/* Delete Button */}
         <DeleteButton nodeId={id} selected={selected} />
+        <DuplicateButton nodeId={id} selected={selected} />
         {/* Node Header */}
         <div
           style={{

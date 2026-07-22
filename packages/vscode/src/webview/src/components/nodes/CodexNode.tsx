@@ -13,6 +13,7 @@ import React from 'react';
 import { Handle, type NodeProps, Position } from 'reactflow';
 import { useTranslation } from '../../i18n/i18n-context';
 import { DeleteButton } from './DeleteButton';
+import { DuplicateButton } from './DuplicateButton';
 
 /**
  * Truncate text with ellipsis
@@ -122,6 +123,7 @@ export const CodexNodeComponent: React.FC<NodeProps<CodexNodeData>> = React.memo
 
         {/* Delete Button */}
         <DeleteButton nodeId={id} selected={selected} />
+        <DuplicateButton nodeId={id} selected={selected} />
 
         {/* Node Header */}
         <div

@@ -141,6 +141,9 @@ interface WorkflowStore {
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
   addNode: (node: Node) => void;
+  /** Duplicate a configured node (fresh id, +40/+40 offset, same parent group,
+   *  deep-copied data; edges are not copied). Start/End/Group nodes are excluded. */
+  duplicateNode: (nodeId: string) => void;
   clearLastAddedNodeId: () => void;
   /** Request the canvas to pan to a specific node (e.g. when jumping in from
    *  Overview mode). The canvas-side hook clears it after centring. */
@@ -687,6 +690,44 @@ export const useWorkflowStore = create<WorkflowStore>()(
 
       clearLastAddedNodeId: () => {
         set({ lastAddedNodeId: null });
+      },
+
+      duplicateNode: (nodeId: string) => {
+        const source = get().nodes.find((node) => node.id === nodeId);
+        if (!source) return;
+        // Start/End are structural; group duplication (with children) is out of scope
+        if (source.type === 'start' || source.type === 'end' || source.type === 'group') {
+          console.warn(`Cannot duplicate node of type "${source.type}"`);
+          return;
+        }
+
+        // Keep the palette's `<prefix>-<timestamp>` id convention: strip a
+        // trailing timestamp from the source id, then append a fresh one
+        const baseId = nodeId.replace(/[-_]\d+$/, '');
+        let newId = `${baseId}-${Date.now()}`;
+        while (get().nodes.some((node) => node.id === newId)) {
+          newId = `${baseId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+        }
+
+        const copy: Node = {
+          ...source,
+          id: newId,
+          // Deep copy so later edits to the copy never mutate the original
+          data: JSON.parse(JSON.stringify(source.data ?? {})),
+          position: { x: source.position.x + 40, y: source.position.y + 40 },
+          selected: true,
+        };
+
+        // Move React Flow's visual selection from the source to the copy
+        const deselected = get().nodes.map((node) =>
+          node.selected ? { ...node, selected: false } : node
+        );
+
+        set({
+          nodes: [...deselected, copy],
+          lastAddedNodeId: newId,
+          selectedNodeId: newId,
+        });
       },
 
       requestFocusNode: (nodeId: string) => {

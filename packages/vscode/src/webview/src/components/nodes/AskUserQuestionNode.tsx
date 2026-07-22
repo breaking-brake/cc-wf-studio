@@ -10,6 +10,7 @@ import { ShieldQuestion } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { Handle, type NodeProps, Position, useUpdateNodeInternals } from 'reactflow';
 import { DeleteButton } from './DeleteButton';
+import { DuplicateButton } from './DuplicateButton';
 
 /**
  * AskUserQuestionNode Component
@@ -38,6 +39,7 @@ export const AskUserQuestionNodeComponent: React.FC<NodeProps<AskUserQuestionDat
       >
         {/* Delete Button */}
         <DeleteButton nodeId={id} selected={selected} />
+        <DuplicateButton nodeId={id} selected={selected} />
         {/* Node Header */}
         <div
           style={{
