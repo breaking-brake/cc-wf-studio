@@ -14,7 +14,10 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import {
   type AgentSkillProvider,
+  type ExportTarget,
   type PlannedExportFile,
+  agentSkillProviderToTarget,
+  collectIgnoredFieldWarnings,
   nodeNameToFileName,
   planAgentSkillFiles,
   planWorkflowExportFiles,
@@ -93,6 +96,14 @@ export async function runExport(options: ExportRunOptions): Promise<ExportRunRes
     process.stderr.write(
       `warning: this workflow contains Claude Code-only node(s) (e.g. branchSession); ${options.agent} cannot execute those steps.\n`
     );
+  }
+
+  const target: ExportTarget =
+    options.agent === CLAUDE_CODE_AGENT
+      ? 'claudeCode'
+      : agentSkillProviderToTarget(options.agent as AgentSkillProvider);
+  for (const warning of collectIgnoredFieldWarnings(workflow, target)) {
+    process.stderr.write(`warning: ${warning}\n`);
   }
 
   const plan =
