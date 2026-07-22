@@ -18,7 +18,7 @@ pnpm add -D @cc-wf-studio/cli
 
 | Command | Description |
 |---|---|
-| `ccwf render <file>` | Print a Mermaid + execution-instructions Markdown bundle to stdout. |
+| `ccwf render <file>` | Print a Mermaid + execution-instructions Markdown bundle to stdout (or a file with `-o <path>`). |
 | `ccwf validate <file>` | Schema-check the workflow JSON. Exit 0/1. `--json` for machine-readable output. |
 | `ccwf mcp --file <file>` | Run the cc-wf-studio stdio MCP server in-process against `<file>`. |
 | `ccwf export <file>` | Materialise the workflow as agent-skill files for a target agent (`--agent <name>`, default `claude-code`). |
@@ -33,6 +33,7 @@ pnpm add -D @cc-wf-studio/cli
 ```sh
 ccwf render ./.vscode/workflows/my-workflow.json            # Markdown (default)
 ccwf render ./.vscode/workflows/my-workflow.json -f mermaid # ```mermaid block only
+ccwf render ./.vscode/workflows/my-workflow.json -o out.md  # write to a file instead of stdout
 ```
 
 ### `ccwf validate`

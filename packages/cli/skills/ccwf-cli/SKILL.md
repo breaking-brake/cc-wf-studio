@@ -40,11 +40,12 @@ If a step fails, stop and surface the exact error to the user before moving on.
 
 ### `ccwf render <file>`
 
-Print a Markdown bundle (Mermaid flowchart + per-node execution instructions) to stdout. Use when piping to another tool or pasting into a PR / chat message.
+Print a Markdown bundle (Mermaid flowchart + per-node execution instructions) to stdout, or write it to a file with `-o`. Use when piping to another tool or pasting into a PR / chat message.
 
 ```bash
 ccwf render ./.vscode/workflows/my-workflow.json             # Markdown (default)
 ccwf render ./.vscode/workflows/my-workflow.json -f mermaid  # ```mermaid block only
+ccwf render ./.vscode/workflows/my-workflow.json -o out.md   # write to a file instead of stdout
 ```
 
 Output is the same content `ccwf preview` shows in the right pane.
