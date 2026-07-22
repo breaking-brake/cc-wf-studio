@@ -1049,6 +1049,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.error.descriptionRequired': '説明は必須です。',
   'subAgent.form.error.agentDefinitionRequired': 'エージェント定義は必須です。',
   'subAgent.form.error.promptRequired': 'プロンプトは必須です。',
+  'subAgent.form.error.saveFailed': 'エージェントファイルの保存に失敗しました。',
 
   // Sub-Agent Built-in Presets
   'subAgent.dialog.builtInTab': 'ビルトイン',

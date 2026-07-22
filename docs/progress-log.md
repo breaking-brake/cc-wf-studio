@@ -17,6 +17,24 @@ Entry format:
 
 ---
 
+## 2026-07-22 — SubAgent edit no longer desyncs node from agent file on failed write
+- **User value**: a user editing a command-linked SubAgent whose agent-file
+  write fails no longer gets a canvas node silently out of sync with the
+  file — the edit dialog stays open with a visible error, and the node only
+  updates once the write succeeds.
+- **Issue/PR**: Closes #826
+- **Outcome**: done — `sub-agent-panel.tsx` now awaits `createSubAgent`
+  before `updateNodeData`; `SubAgentFormDialog` awaits `onSubmit`, shows a
+  submit error (new `subAgent.form.error.saveFailed` i18n key, all 5
+  locales), and guards against double-submit. The creation path gets the
+  same error feedback through the shared dialog.
+- **Next proposals**:
+  - Walk the canvas → export → share flow as a user and propose the top
+    friction fix.
+  - `ccwf validate`: include the node label alongside the node id in error
+    output so users can find the offending node on the canvas faster
+    (verify what `ValidationError` carries first).
+
 ## 2026-07-21 — Fix SubAgent creation from existing agent discarding form edits
 - **User value**: a user editing Color/Model/Tools/Memory in the SubAgent
   form before adding an existing agent to the canvas no longer has those

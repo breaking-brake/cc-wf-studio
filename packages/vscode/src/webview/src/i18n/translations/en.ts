@@ -1055,6 +1055,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.form.error.descriptionRequired': 'Description is required.',
   'subAgent.form.error.agentDefinitionRequired': 'Agent Definition is required.',
   'subAgent.form.error.promptRequired': 'Prompt is required.',
+  'subAgent.form.error.saveFailed': 'Failed to save the agent file.',
 
   // Sub-Agent Built-in Presets
   'subAgent.dialog.builtInTab': 'Built-in',

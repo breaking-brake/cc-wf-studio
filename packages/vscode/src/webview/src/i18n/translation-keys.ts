@@ -979,6 +979,7 @@ export interface WebviewTranslationKeys {
   'subAgent.form.error.descriptionRequired': string;
   'subAgent.form.error.agentDefinitionRequired': string;
   'subAgent.form.error.promptRequired': string;
+  'subAgent.form.error.saveFailed': string;
 
   // Sub-Agent Built-in Presets
   'subAgent.dialog.builtInTab': string;
