@@ -17,6 +17,31 @@ Entry format:
 
 ---
 
+## 2026-07-22 — Duplicate a group node including its child nodes
+- **User value**: a user who built a phase group containing several configured
+  nodes can now duplicate the whole structure — group, child nodes, and the
+  connections between them — with the Duplicate button or Ctrl/Cmd+D, instead
+  of recreating it node by node (group duplication was explicitly excluded in
+  #861/#869 as a deferred follow-up, filed as #871).
+- **Issue/PR**: Closes #871 / PR from `claude/sleepy-curie-jfe161`
+- **Outcome**: done — `duplicateNode` in `workflow-store.ts` now handles
+  groups: collects direct children by `parentId` (groups never nest, per
+  `onNodeDragStop`), deep-copies group + children through an id-remap table,
+  re-links copied `parentId`s, copies only edges whose source AND target are
+  both inside the group (boundary-crossing edges are dropped — same policy as
+  single-node duplication, which copies no edges), offsets the group copy
+  +40/+40 while children keep group-relative positions, selects the new group,
+  and commits everything in one `set()` → one undo entry. `GroupNode` now
+  renders `DuplicateButton`, and the Ctrl/Cmd+D branch in `WorkflowEditor.tsx`
+  lifts the group exclusion.
+- **Next proposals**:
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow a11y); if not, add grid-step nudging.
+  - `ccwf samples` could back a canvas empty-state "start from an example"
+    action in `ccwf canvas` / preview.
+  - `ccwf validate`: design a `getNodeDisplayName(node)` core helper so error
+    messages can show a human label alongside opaque node ids.
+
 ## 2026-07-22 — `ccwf samples` — discover and scaffold bundled example workflows
 - **User value**: a user who installs `@cc-wf-studio/cli` from npm can now run
   `ccwf samples list` to see the bundled example workflows (id, difficulty,
