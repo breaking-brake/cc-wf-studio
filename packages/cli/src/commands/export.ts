@@ -16,6 +16,7 @@ import {
   type AgentSkillProvider,
   type ExportTarget,
   type PlannedExportFile,
+  type Workflow,
   agentSkillProviderToTarget,
   collectIgnoredFieldWarnings,
   nodeNameToFileName,
@@ -27,7 +28,7 @@ import { Command, InvalidArgumentError } from 'commander';
 import { WorkflowLoadError, loadWorkflowFromFile } from '../utils/load-workflow.js';
 
 const CLAUDE_CODE_AGENT = 'claude-code' as const;
-const SUPPORTED_AGENTS = [
+export const SUPPORTED_AGENTS = [
   CLAUDE_CODE_AGENT,
   'antigravity',
   'codex',
@@ -36,7 +37,7 @@ const SUPPORTED_AGENTS = [
   'gemini',
   'roo-code',
 ] as const;
-type SupportedAgent = (typeof SUPPORTED_AGENTS)[number];
+export type SupportedAgent = (typeof SUPPORTED_AGENTS)[number];
 
 export interface ExportRunOptions {
   /** Path to the workflow JSON. */
@@ -82,6 +83,31 @@ async function pathExists(target: string): Promise<boolean> {
 }
 
 /**
+ * Target-compatibility warnings for exporting `workflow` to `agent`:
+ * Claude Code-only nodes the agent cannot execute, plus every configured
+ * node field the target ignores. Shared by `ccwf export` / `ccwf run`
+ * (printed before writing files) and `ccwf validate --agent` (preflight,
+ * no files written).
+ */
+export function collectAgentCompatibilityWarnings(
+  workflow: Workflow,
+  agent: SupportedAgent
+): string[] {
+  const warnings: string[] = [];
+  if (agent !== CLAUDE_CODE_AGENT && workflowContainsClaudeCodeOnlyNodes(workflow)) {
+    warnings.push(
+      `this workflow contains Claude Code-only node(s) (e.g. branchSession); ${agent} cannot execute those steps.`
+    );
+  }
+  const target: ExportTarget =
+    agent === CLAUDE_CODE_AGENT
+      ? 'claudeCode'
+      : agentSkillProviderToTarget(agent as AgentSkillProvider);
+  warnings.push(...collectIgnoredFieldWarnings(workflow, target));
+  return warnings;
+}
+
+/**
  * Shared implementation invoked by both `ccwf export` and `ccwf run`.
  *
  * Throws `WorkflowLoadError` for `<file>` issues. Calls `process.exit(1)` on
@@ -92,17 +118,7 @@ export async function runExport(options: ExportRunOptions): Promise<ExportRunRes
   const { workflow } = await loadWorkflowFromFile(options.file);
   const rootDir = path.resolve(options.cwd ?? process.cwd());
 
-  if (options.agent !== CLAUDE_CODE_AGENT && workflowContainsClaudeCodeOnlyNodes(workflow)) {
-    process.stderr.write(
-      `warning: this workflow contains Claude Code-only node(s) (e.g. branchSession); ${options.agent} cannot execute those steps.\n`
-    );
-  }
-
-  const target: ExportTarget =
-    options.agent === CLAUDE_CODE_AGENT
-      ? 'claudeCode'
-      : agentSkillProviderToTarget(options.agent as AgentSkillProvider);
-  for (const warning of collectIgnoredFieldWarnings(workflow, target)) {
+  for (const warning of collectAgentCompatibilityWarnings(workflow, options.agent)) {
     process.stderr.write(`warning: ${warning}\n`);
   }
 

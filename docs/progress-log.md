@@ -17,6 +17,28 @@ Entry format:
 
 ---
 
+## 2026-07-22 — `ccwf validate --agent <target>` preflight compatibility check
+- **User value**: a user can now answer "will this workflow survive export to
+  codex/gemini/... intact?" before writing any files — `ccwf validate
+  --agent <name>` reports Claude Code-only nodes and every configured field
+  that target ignores; with `--json` the report lands in a `warnings` array.
+- **Issue/PR**: #853 / PR from `claude/sleepy-curie-3vbc9v`
+- **Outcome**: done — extracted the warning block `runExport` printed
+  (Claude Code-only check + `collectIgnoredFieldWarnings`) into a shared
+  `collectAgentCompatibilityWarnings` in `export.ts`, so `export`/`run`
+  and `validate --agent` can never drift; warnings never affect
+  `validate`'s exit code (a `--strict` promotion stays an open question on
+  #853). Compatibility is only checked when the workflow is schema-valid.
+- **Next proposals**:
+  - #852 (surface ignored-field warnings in the VSCode export flow) is still
+    open — needs a UX decision (notification vs. dialog) + i18n.
+  - `load-workflow.ts` surfaces raw `JSON.parse` errors (byte offset, no
+    line/col) for every command — a shared line/col translator would fix all
+    commands at once.
+  - GitHub reports Dependabot alerts on the default branch (2 high, 1 low at
+    push time); this loop has no alert-read access (no `gh`, no MCP tool) —
+    needs a human to review the Dependabot tab.
+
 ## 2026-07-22 — Ignored-field warnings in `ccwf export` / `ccwf run`
 - **User value**: exporting a workflow to a non-Claude agent now warns exactly
   which configured node fields (e.g. Sub-Agent model/tools/memory) the target
