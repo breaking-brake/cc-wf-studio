@@ -6,7 +6,7 @@
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { registerWorkflowTools } from './tools.js';
+import { registerWorkflowTools, type WorkflowMcpMode } from './tools.js';
 import type { WorkflowIoAdapter } from './types.js';
 
 export interface CreateWorkflowMcpServerOptions {
@@ -16,6 +16,13 @@ export interface CreateWorkflowMcpServerOptions {
    */
   name?: string;
   version?: string;
+  /**
+   * Which surface the adapter edits — selects the tool description/error
+   * text. `'canvas'` (default) keeps the historical canvas-oriented wording;
+   * `'file'` describes the workflow file instead (no editor, no review
+   * dialog, no sub-agent auto-creation).
+   */
+  mode?: WorkflowMcpMode;
 }
 
 const DEFAULT_SERVER_NAME = 'cc-workflow-studio';
@@ -43,6 +50,6 @@ export function createWorkflowMcpServer(
     }
   );
 
-  registerWorkflowTools(server, adapter);
+  registerWorkflowTools(server, adapter, { mode: options.mode });
   return server;
 }
