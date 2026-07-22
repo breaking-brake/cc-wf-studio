@@ -319,7 +319,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         setIsModifierKeyPressed(true);
       }
 
-      // Undo/Redo shortcuts — skip when focus is in editable elements
+      // Undo/Redo/Duplicate shortcuts — skip when focus is in editable elements
       const mod = event.metaKey || event.ctrlKey;
       if (mod) {
         const target = event.target as HTMLElement | null;
@@ -339,6 +339,26 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           event.preventDefault();
           const { redo, futureStates } = useWorkflowStore.temporal.getState();
           if (futureStates.length > 0) redo();
+        }
+        if (key === 'd' && !event.shiftKey) {
+          const {
+            selectedNodeId: currentSelectedId,
+            nodes: currentNodes,
+            duplicateNode,
+          } = useWorkflowStore.getState();
+          // selectedNodeId is set only when exactly one node is selected
+          if (currentSelectedId) {
+            const selectedNode = currentNodes.find((n) => n.id === currentSelectedId);
+            if (
+              selectedNode &&
+              selectedNode.type !== 'start' &&
+              selectedNode.type !== 'end' &&
+              selectedNode.type !== 'group'
+            ) {
+              event.preventDefault();
+              duplicateNode(currentSelectedId);
+            }
+          }
         }
       }
     };

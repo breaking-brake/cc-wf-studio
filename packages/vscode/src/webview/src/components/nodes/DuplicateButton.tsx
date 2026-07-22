@@ -8,6 +8,9 @@
 import type React from 'react';
 import { useWorkflowStore } from '../../stores/workflow-store';
 
+const isMac = typeof navigator !== 'undefined' && /Macintosh|Mac OS X/.test(navigator.userAgent);
+const duplicateShortcut = isMac ? 'Cmd+D' : 'Ctrl+D';
+
 interface DuplicateButtonProps {
   nodeId: string;
   selected: boolean;
@@ -59,7 +62,7 @@ export const DuplicateButton: React.FC<DuplicateButtonProps> = ({ nodeId, select
       onMouseLeave={(e) => {
         e.currentTarget.style.opacity = '1';
       }}
-      title="Duplicate node"
+      title={`Duplicate node (${duplicateShortcut})`}
     >
       <svg
         width="10"
