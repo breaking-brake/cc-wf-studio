@@ -13,9 +13,9 @@
 
 import {
   collectIgnoredFieldWarnings,
+  describeClaudeCodeOnlyNodes,
   type ExportTarget,
   type Workflow,
-  workflowContainsClaudeCodeOnlyNodes,
 } from '@cc-wf-studio/core';
 import * as vscode from 'vscode';
 
@@ -39,9 +39,10 @@ export function collectTargetCompatibilityWarnings(
   agentLabel: string
 ): string[] {
   const warnings: string[] = [];
-  if (target !== 'claudeCode' && workflowContainsClaudeCodeOnlyNodes(workflow)) {
+  const claudeOnlyNodes = describeClaudeCodeOnlyNodes(workflow);
+  if (target !== 'claudeCode' && claudeOnlyNodes.length > 0) {
     warnings.push(
-      `This workflow contains Claude Code-only node(s) (e.g. branchSession); ${agentLabel} cannot execute those steps.`
+      `This workflow contains Claude Code-only node(s) that ${agentLabel} cannot execute: ${claudeOnlyNodes.join(', ')}.`
     );
   }
   warnings.push(...collectIgnoredFieldWarnings(workflow, target));

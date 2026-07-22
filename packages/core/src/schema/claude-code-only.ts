@@ -22,3 +22,19 @@ export function getClaudeCodeOnlyNodes(nodes: readonly WorkflowNode[]): Workflow
 export function workflowContainsClaudeCodeOnlyNodes(workflow: Workflow): boolean {
   return getClaudeCodeOnlyNodes(workflow.nodes).length > 0;
 }
+
+/**
+ * Human-readable descriptions of the Claude Code-only nodes in a workflow,
+ * e.g. `"Checkpoint A" (branchSession)`. Prefers the node's canvas display
+ * label (`data.label`), then its name, then its id. Used by exporters and
+ * UIs to name the exact nodes in target-compatibility warnings.
+ */
+export function describeClaudeCodeOnlyNodes(workflow: Workflow): string[] {
+  return getClaudeCodeOnlyNodes(workflow.nodes).map((node) => {
+    const label = (node.data as { label?: unknown }).label;
+    const display =
+      [label, node.name].find((v): v is string => typeof v === 'string' && v.trim().length > 0) ??
+      node.id;
+    return `"${display.trim()}" (${node.type})`;
+  });
+}
