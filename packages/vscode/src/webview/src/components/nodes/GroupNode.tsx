@@ -10,6 +10,7 @@ import type React from 'react';
 import { type NodeProps, NodeResizer } from 'reactflow';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { DeleteButton } from './DeleteButton';
+import { DuplicateButton } from './DuplicateButton';
 
 export interface GroupNodeData {
   label: string;
@@ -84,6 +85,7 @@ export const GroupNodeComponent: React.FC<NodeProps<GroupNodeData>> = ({ id, dat
           }}
         >
           <span>{label}</span>
+          <DuplicateButton nodeId={id} selected={selected} />
           <DeleteButton nodeId={id} selected={selected} />
         </div>
       </div>

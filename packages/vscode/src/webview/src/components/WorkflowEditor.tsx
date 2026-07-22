@@ -349,12 +349,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           // selectedNodeId is set only when exactly one node is selected
           if (currentSelectedId) {
             const selectedNode = currentNodes.find((n) => n.id === currentSelectedId);
-            if (
-              selectedNode &&
-              selectedNode.type !== 'start' &&
-              selectedNode.type !== 'end' &&
-              selectedNode.type !== 'group'
-            ) {
+            if (selectedNode && selectedNode.type !== 'start' && selectedNode.type !== 'end') {
               event.preventDefault();
               duplicateNode(currentSelectedId);
             }
