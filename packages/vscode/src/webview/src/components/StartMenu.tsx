@@ -9,6 +9,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { FileDown, FolderOpen, Plus } from 'lucide-react';
 import type React from 'react';
+import { useTranslation } from '../i18n/i18n-context';
 
 interface StartMenuProps {
   isOpen: boolean;
@@ -47,6 +48,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
   onLoadRecent,
   onVersionClick,
 }) => {
+  const { t } = useTranslation();
   const hasRecent = recentWorkflows && recentWorkflows.length > 0;
 
   return (
@@ -119,7 +121,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
                   style={buttonStyle}
                 >
                   <Plus size={16} style={{ flexShrink: 0 }} />
-                  New
+                  {t('startMenu.new')}
                 </button>
 
                 <button
@@ -134,7 +136,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
                   style={buttonStyle}
                 >
                   <FileDown size={16} style={{ flexShrink: 0 }} />
-                  Load
+                  {t('startMenu.load')}
                 </button>
               </div>
 
@@ -159,7 +161,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
                       flexShrink: 0,
                     }}
                   >
-                    Recent
+                    {t('startMenu.recent')}
                   </div>
                   <div
                     style={{
@@ -235,7 +237,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
                 }}
               >
                 <FolderOpen size={12} />
-                Sample Workflow
+                {t('startMenu.sampleWorkflow')}
               </button>
               {extensionVersion && (
                 <span

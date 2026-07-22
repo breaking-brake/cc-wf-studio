@@ -1054,11 +1054,17 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'executionSession.codexTerminal': 'Codex 互動式終端機',
 
   // Sample Workflows
+  'startMenu.new': '新增',
+  'startMenu.load': '載入',
+  'startMenu.recent': '最近使用',
+  'startMenu.sampleWorkflow': '範例工作流程',
   'toolbar.sampleWorkflows': '範例工作流程',
   'sample.dialog.title': '範例工作流程',
   'sample.dialog.description': '載入範例工作流程，了解您可以建構什麼。',
   'sample.dialog.nodeCount': '{{count}} 個節點',
   'sample.dialog.loadButton': '載入',
+  'sample.dialog.previewButton': '預覽',
+  'sample.dialog.empty': '沒有可用的範例。',
   'sample.githubIssuePlanning.name': 'GitHub Issue 規劃',
   'sample.githubIssuePlanning.description':
     'GitHub Issue 規劃工作流程：取得 Issue、分析現有程式碼、驗證修復、回顧總結。',

@@ -164,7 +164,7 @@ export const SampleWorkflowDialog: React.FC<SampleWorkflowDialogProps> = ({
                     fontSize: '13px',
                   }}
                 >
-                  Loading...
+                  {t('loading')}...
                 </div>
               ) : samples.length === 0 ? (
                 <div
@@ -175,7 +175,7 @@ export const SampleWorkflowDialog: React.FC<SampleWorkflowDialogProps> = ({
                     fontSize: '13px',
                   }}
                 >
-                  No samples available.
+                  {t('sample.dialog.empty')}
                 </div>
               ) : (
                 samples.map((sample) => {
@@ -290,7 +290,7 @@ export const SampleWorkflowDialog: React.FC<SampleWorkflowDialogProps> = ({
                               'var(--vscode-button-secondaryBackground)';
                           }}
                         >
-                          Preview
+                          {t('sample.dialog.previewButton')}
                         </button>
                         <button
                           type="button"

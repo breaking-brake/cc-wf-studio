@@ -177,7 +177,7 @@ export function WhatsNewDialog({
               }}
             >
               {loading && (
-                <p style={{ color: 'var(--vscode-descriptionForeground)' }}>Loading...</p>
+                <p style={{ color: 'var(--vscode-descriptionForeground)' }}>{t('loading')}...</p>
               )}
               {!loading && entries.length === 0 && (
                 <p style={{ color: 'var(--vscode-descriptionForeground)' }}>
