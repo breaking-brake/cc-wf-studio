@@ -17,6 +17,27 @@ Entry format:
 
 ---
 
+## 2026-07-22 — Add `-o/--output` to `ccwf render`
+- **User value**: a user running `ccwf render` can now write the Mermaid/Markdown
+  output directly to a file (`-o <path>`) instead of manually redirecting stdout,
+  matching the file-write pattern `ccwf export` already uses.
+- **Issue/PR**: (opened this iteration)
+- **Outcome**: done
+- **Next proposals**:
+  - `ccwf canvas --port`/`ccwf preview --port` surface a raw `EADDRINUSE` Node
+    error with no hint to try a different port or omit `--port` for an
+    ephemeral one (`packages/cli/src/commands/canvas.ts`, `preview.ts`).
+  - `apply_workflow`'s MCP tool description claims SubAgent `.md` files are
+    "auto-created" during apply, but both adapters
+    (`packages/mcp/src/file-adapter.ts:128`,
+    `packages/vscode/.../mcp-server-service.ts:438`) always return `[]` —
+    creation actually happens later at export/run time. Worth clarifying the
+    tool description so AI agents don't expect `autoCreatedFiles` in the
+    apply response.
+  - `sub-agent-flow-panel.tsx` renders an empty panel with no indicator when
+    a SubAgentFlow node's `linkedSubAgentFlow` can't be found (e.g. the
+    referenced flow was deleted) — no broken-link feedback for the user.
+
 ## 2026-07-22 — SubAgent edit no longer desyncs node from agent file on failed write
 - **User value**: a user editing a command-linked SubAgent whose agent-file
   write fails no longer gets a canvas node silently out of sync with the

@@ -7,6 +7,7 @@
  * `mermaid-cli` or similar.
  */
 
+import * as fs from 'node:fs/promises';
 import { Command, InvalidArgumentError } from 'commander';
 import {
   generateExecutionInstructions,
@@ -18,6 +19,7 @@ type RenderFormat = 'mermaid' | 'md';
 
 interface RenderOptions {
   format: RenderFormat;
+  output?: string;
 }
 
 export function registerRenderCommand(program: Command): void {
@@ -36,23 +38,31 @@ export function registerRenderCommand(program: Command): void {
       },
       'md'
     )
+    .option('-o, --output <file>', 'Write output to this file instead of stdout.')
     .action(async (file: string, options: RenderOptions) => {
       try {
         const { workflow } = await loadWorkflowFromFile(file);
         // generateMermaidFlowchart already returns a fenced ```mermaid block.
         const mermaidBlock = generateMermaidFlowchart(workflow);
 
+        let rendered: string;
         if (options.format === 'mermaid') {
-          process.stdout.write(`${mermaidBlock}\n`);
-          return;
+          rendered = `${mermaidBlock}\n`;
+        } else {
+          const execution = generateExecutionInstructions(workflow, {
+            provider: 'claude-code',
+          });
+          const title = `# ${workflow.name || 'Workflow'}`;
+          const descriptionBlock = workflow.description ? `\n${workflow.description}\n` : '\n';
+          rendered = `${title}\n${descriptionBlock}\n${mermaidBlock}\n\n${execution}\n`;
         }
 
-        const execution = generateExecutionInstructions(workflow, {
-          provider: 'claude-code',
-        });
-        const title = `# ${workflow.name || 'Workflow'}`;
-        const descriptionBlock = workflow.description ? `\n${workflow.description}\n` : '\n';
-        process.stdout.write(`${title}\n${descriptionBlock}\n${mermaidBlock}\n\n${execution}\n`);
+        if (options.output) {
+          await fs.writeFile(options.output, rendered, 'utf-8');
+          process.stdout.write(`✓ Wrote render output to ${options.output}\n`);
+        } else {
+          process.stdout.write(rendered);
+        }
       } catch (error) {
         if (error instanceof WorkflowLoadError) {
           process.stderr.write(`error: ${error.message}\n`);
