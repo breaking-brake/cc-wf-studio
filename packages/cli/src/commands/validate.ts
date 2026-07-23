@@ -28,12 +28,13 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { type ValidationError, validateAIGeneratedWorkflow } from '@cc-wf-studio/core';
-import { Command, InvalidArgumentError } from 'commander';
+import { Command } from 'commander';
 import { WorkflowLoadError, loadWorkflowFromFile } from '../utils/load-workflow.js';
 import {
   SUPPORTED_AGENTS,
   type SupportedAgent,
   collectAgentCompatibilityWarnings,
+  collectAgentListOption,
 } from './export.js';
 
 interface ValidateOptions {
@@ -57,27 +58,6 @@ type FileReport =
       valid: false;
       loadError: string;
     };
-
-/**
- * Repeatable `--agent` accumulator: each occurrence appends one agent, `all`
- * appends every supported target. De-duped, first-mention order preserved.
- */
-function parseValidateAgent(
-  value: string,
-  previous: SupportedAgent[] | undefined
-): SupportedAgent[] {
-  if (value !== 'all' && !(SUPPORTED_AGENTS as readonly string[]).includes(value)) {
-    throw new InvalidArgumentError(`Expected one of: ${SUPPORTED_AGENTS.join(', ')}, all.`);
-  }
-  const parsed = value === 'all' ? SUPPORTED_AGENTS : [value as SupportedAgent];
-  const next = previous ? [...previous] : [];
-  for (const agent of parsed) {
-    if (!next.includes(agent)) {
-      next.push(agent);
-    }
-  }
-  return next;
-}
 
 function formatError(err: ValidationError): string {
   const fieldSuffix = err.field ? ` (field: ${err.field})` : '';
@@ -203,7 +183,7 @@ export function registerValidateCommand(program: Command): void {
     .option<SupportedAgent[]>(
       '--agent <name>',
       `Also preflight target compatibility for one or more agents (repeatable; one of: ${SUPPORTED_AGENTS.join(', ')}, or 'all' for every target): report which configured fields each target ignores, without writing files. Warnings do not affect the exit code unless --strict is passed.`,
-      parseValidateAgent
+      collectAgentListOption
     )
     .option(
       '--strict',
