@@ -398,18 +398,14 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           if (futureStates.length > 0) redo();
         }
         if (key === 'd' && !event.shiftKey) {
-          const {
-            selectedNodeId: currentSelectedId,
-            nodes: currentNodes,
-            duplicateNode,
-          } = useWorkflowStore.getState();
-          // selectedNodeId is set only when exactly one node is selected
-          if (currentSelectedId) {
-            const selectedNode = currentNodes.find((n) => n.id === currentSelectedId);
-            if (selectedNode && selectedNode.type !== 'start' && selectedNode.type !== 'end') {
-              event.preventDefault();
-              duplicateNode(currentSelectedId);
-            }
+          const { nodes: currentNodes, duplicateSelection } = useWorkflowStore.getState();
+          // Duplicate the whole selection (Start/End are structural and skipped)
+          const selectedIds = currentNodes
+            .filter((n) => n.selected && n.type !== 'start' && n.type !== 'end')
+            .map((n) => n.id);
+          if (selectedIds.length > 0) {
+            event.preventDefault();
+            duplicateSelection(selectedIds);
           }
         }
       }

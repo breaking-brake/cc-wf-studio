@@ -17,6 +17,35 @@ Entry format:
 
 ---
 
+## 2026-07-23 — Duplicate a multi-node selection with Ctrl/Cmd+D
+- **User value**: a user can now select several nodes (Ctrl/Cmd+A,
+  rubber-band, or shift-click) and press Ctrl/Cmd+D to duplicate the whole
+  sub-flow at once — the copies keep the edges between each other.
+  Previously the shortcut was gated on `selectedNodeId` (set only when
+  exactly one node is selected), so duplicate on a multi-selection silently
+  did nothing.
+- **Issue/PR**: #891 / PR from `claude/multi-select-duplicate`
+- **Outcome**: done — generalized `duplicateNode` into a new
+  `duplicateSelection(nodeIds)` store action (`duplicateNode` now delegates
+  to it): same id-remapping convention, deep-copied `data`, single `set()`
+  → one undo entry. Start/End filtered out; a selected group brings its
+  children even if unselected (existing policy); a selected child whose
+  group is outside the set stays in its original group with the +40/+40
+  offset applied to its group-relative position. Edges with both endpoints
+  copied are duplicated and remapped; boundary-crossing edges are not
+  (matches group duplication). Selection moves wholly to the copies
+  (original nodes AND edges deselected); `selectedNodeId`/auto-focus pan
+  follow the exactly-one rule so multi-copies keep the viewport still. The
+  `mod+D` handler now reads the `selected` flags instead of
+  `selectedNodeId`. Guard step this round closed #889 (merged as #890).
+- **Next proposals**:
+  - Localization mini-sweep: `Toolbar.tsx` "Stop MCP Server" tooltip and
+    WhatsNewDialog "View changes on GitHub" are still hardcoded English.
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow a11y); if not, add grid-step nudging.
+  - Clipboard copy/paste (Ctrl+C/V) of selections — would enable pasting
+    across workflows; needs a serialization format + paste-position design.
+
 ## 2026-07-23 — Add Ctrl/Cmd+A select-all to the workflow canvas
 - **User value**: a user can now press Ctrl/Cmd+A on the canvas to select
   every node and edge at once — then move the whole workflow, or delete it

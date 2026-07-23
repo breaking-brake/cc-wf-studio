@@ -147,6 +147,11 @@ interface WorkflowStore {
    *  deep-copied data; edges are not copied). Duplicating a group also copies
    *  its child nodes and the edges fully inside the group. Start/End excluded. */
   duplicateNode: (nodeId: string) => void;
+  /** Duplicate every node in the selection at once (fresh ids, +40/+40 offset,
+   *  deep-copied data). Selected groups bring their children along; edges with
+   *  both endpoints in the duplicated set are copied too. Start/End excluded.
+   *  The copies become the new selection. */
+  duplicateSelection: (nodeIds: string[]) => void;
   clearLastAddedNodeId: () => void;
   /** Request the canvas to pan to a specific node (e.g. when jumping in from
    *  Overview mode). The canvas-side hook clears it after centring. */
@@ -699,19 +704,31 @@ export const useWorkflowStore = create<WorkflowStore>()(
       },
 
       duplicateNode: (nodeId: string) => {
-        const allNodes = get().nodes;
-        const source = allNodes.find((node) => node.id === nodeId);
+        const source = get().nodes.find((node) => node.id === nodeId);
         if (!source) return;
         // Start/End are structural and must stay unique
         if (source.type === 'start' || source.type === 'end') {
           console.warn(`Cannot duplicate node of type "${source.type}"`);
           return;
         }
+        get().duplicateSelection([nodeId]);
+      },
+
+      duplicateSelection: (nodeIds: string[]) => {
+        const allNodes = get().nodes;
+        const requested = new Set(nodeIds);
+        // Start/End are structural and must stay unique
+        const sources = allNodes.filter(
+          (node) => requested.has(node.id) && node.type !== 'start' && node.type !== 'end'
+        );
+        if (sources.length === 0) return;
+        const sourceIds = new Set(sources.map((node) => node.id));
 
         // A group is duplicated together with its child nodes (groups never
         // nest — see onNodeDragStop — so direct children are all of them)
-        const children =
-          source.type === 'group' ? allNodes.filter((node) => node.parentId === nodeId) : [];
+        const children = allNodes.filter(
+          (node) => node.parentId && sourceIds.has(node.parentId) && !sourceIds.has(node.id)
+        );
 
         // Keep the palette's `<prefix>-<timestamp>` id convention: strip a
         // trailing timestamp from the source id, then append a fresh one.
@@ -728,11 +745,9 @@ export const useWorkflowStore = create<WorkflowStore>()(
         };
 
         const idMap = new Map<string, string>();
-        idMap.set(source.id, makeNodeId(source.id));
-        for (const child of children) {
-          idMap.set(child.id, makeNodeId(child.id));
+        for (const node of [...sources, ...children]) {
+          idMap.set(node.id, makeNodeId(node.id));
         }
-        const newSourceId = idMap.get(source.id) as string;
 
         const copyNode = (node: Node): Node => ({
           ...node,
@@ -740,24 +755,28 @@ export const useWorkflowStore = create<WorkflowStore>()(
           // Deep copy so later edits to the copy never mutate the original
           data: JSON.parse(JSON.stringify(node.data ?? {})),
           ...(node.style && { style: { ...node.style } }),
-          // Children keep their group-relative position; only the root moves
+          // Children of a copied group keep their group-relative position;
+          // every other copy shifts +40/+40 (a copied child whose group is
+          // not part of the selection stays inside its original group)
           position:
-            node.id === source.id
-              ? { x: node.position.x + 40, y: node.position.y + 40 }
-              : { ...node.position },
+            node.parentId && idMap.has(node.parentId)
+              ? { ...node.position }
+              : { x: node.position.x + 40, y: node.position.y + 40 },
           // Re-link copied children to the copied group
           ...(node.parentId && idMap.has(node.parentId)
             ? { parentId: idMap.get(node.parentId) as string }
             : {}),
-          selected: node.id === source.id,
+          // The copies become the new selection; group children ride along
+          // unselected unless they were explicitly selected themselves
+          selected: sourceIds.has(node.id),
         });
 
-        // Root copy first so React Flow sees the parent before its children
-        const copies = [copyNode(source), ...children.map(copyNode)];
+        // Parent copies first so React Flow sees a group before its children
+        const copies = sortNodesParentFirst([...sources, ...children].map(copyNode));
 
         // Copy edges fully inside the duplicated set (both endpoints copied);
-        // edges crossing the group boundary are not copied — same policy as
-        // single-node duplication, which copies no edges
+        // edges crossing the selection boundary are not copied — same policy
+        // as single-node duplication, which copies no edges
         const currentEdges = get().edges;
         const usedEdgeIds = new Set(currentEdges.map((edge) => edge.id));
         const edgeCopies = currentEdges
@@ -779,17 +798,25 @@ export const useWorkflowStore = create<WorkflowStore>()(
             };
           });
 
-        // Move React Flow's visual selection from the source to the copy
+        // Move React Flow's visual selection from the sources to the copies
         const deselected = allNodes.map((node) =>
           node.selected ? { ...node, selected: false } : node
         );
+        const edgesDeselected = currentEdges.map((edge) =>
+          edge.selected ? { ...edge, selected: false } : edge
+        );
+        const edgesChanged = edgeCopies.length > 0 || currentEdges.some((edge) => edge.selected);
+
+        // Same rule as handleNodesChange: exactly one selected node syncs its
+        // id (and gets the auto-focus pan); a multi-copy keeps the view still
+        const newSelectedId = sources.length === 1 ? (idMap.get(sources[0].id) as string) : null;
 
         // Single set() call → single undo/redo history entry
         set({
           nodes: [...deselected, ...copies],
-          ...(edgeCopies.length > 0 && { edges: [...currentEdges, ...edgeCopies] }),
-          lastAddedNodeId: newSourceId,
-          selectedNodeId: newSourceId,
+          ...(edgesChanged && { edges: [...edgesDeselected, ...edgeCopies] }),
+          ...(newSelectedId && { lastAddedNodeId: newSelectedId }),
+          selectedNodeId: newSelectedId,
         });
       },
 
