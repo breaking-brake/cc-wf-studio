@@ -17,6 +17,33 @@ Entry format:
 
 ---
 
+## 2026-07-23 — Security interrupt: patch vulnerable transitive dependencies
+- **User value**: a user no longer installs/bundles known-vulnerable code —
+  the 3 high-severity advisories (`brace-expansion` DoS, `fast-uri` host
+  confusion ×2) and 2 low ones (`body-parser` DoS, `dompurify` sanitize
+  bypass — the latter shipping inside the extension/CLI webview bundle via
+  mermaid) are gone from the lockfile.
+- **Issue/PR**: #879 / PR from `claude/fix-vulnerable-transitive-deps`
+- **Outcome**: done — interrupt round (security outranks invention; flagged
+  by the previous iteration's push). Verified with `pnpm audit`: 7 advisories
+  before, 1 after. Fix is lockfile-only in-range bumps via
+  `pnpm update --recursive --depth Infinity brace-expansion fast-uri
+  dompurify body-parser`. The remaining moderate advisory
+  (`@hono/node-server` <2.0.5, Windows-only path traversal in serve-static)
+  is NOT fixable in-range: latest `@modelcontextprotocol/sdk` 1.29.0 still
+  declares `^1.19.9` and the patch exists only in 2.x — tracked in #879,
+  do not burn iterations re-checking until the SDK moves. Changeset: patch
+  for `cc-wf-studio` + `@cc-wf-studio/cli` (their built bundles embed
+  dompurify via mermaid). Guard step also closed #877 (merged as #878).
+- **Next proposals**:
+  - `CommentaryOptionsDropdown` has no i18n at all (section labels, error
+    strings, "Loading..." all hardcoded) — localize the whole component as
+    its own scoped task.
+  - Sample gallery could show each sample's `difficulty` badge (metadata
+    already ships in `SampleWorkflowMeta`; `ccwf samples list` shows it).
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow a11y); if not, add grid-step nudging.
+
 ## 2026-07-22 — Localize the canvas start menu and sample gallery strings
 - **User value**: a user running VSCode in Japanese, Korean, or Chinese now
   sees the first screen of the canvas — the empty-state start menu ("New",
