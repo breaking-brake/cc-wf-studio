@@ -14,7 +14,13 @@ import { Command } from 'commander';
 import { LAUNCHABLE_AGENTS } from '../utils/agent-launchers.js';
 import { findBinaryInPath } from '../utils/find-binary.js';
 import { WorkflowLoadError } from '../utils/load-workflow.js';
-import { asSupportedAgent, reportExportOutcome, runExport } from './export.js';
+import {
+  ExportConflictError,
+  asSupportedAgent,
+  reportExportConflict,
+  reportExportOutcome,
+  runExport,
+} from './export.js';
 
 interface CommanderRunOptions {
   agent: string;
@@ -126,6 +132,9 @@ export function registerRunCommand(program: Command): void {
           });
         }
       } catch (error) {
+        if (error instanceof ExportConflictError) {
+          reportExportConflict(error);
+        }
         if (error instanceof WorkflowLoadError) {
           process.stderr.write(`error: ${error.message}\n`);
           process.exit(error.exitCode);

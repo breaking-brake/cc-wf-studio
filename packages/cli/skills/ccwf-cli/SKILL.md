@@ -106,11 +106,15 @@ ccwf export ./my-workflow.json --agent cursor                  # cursor
 ccwf export ./my-workflow.json --agent codex --cwd /tmp/proj   # codex, custom output root
 ccwf export ./my-workflow.json --overwrite                     # replace files whose content changed
 ccwf export ./my-workflow.json --dry-run                       # preview the plan, write nothing
+ccwf export ./my-workflow.json --json                          # machine-readable result on stdout
+ccwf export ./my-workflow.json --dry-run --json                # machine-readable plan preview
 ```
 
 Re-running an export is idempotent: existing files whose content already matches are skipped as up to date; only files with different content require `--overwrite`.
 
 `--dry-run` lists every planned file with its status — `new`, `up to date`, or `conflict: exists with different content` (`would overwrite` when combined with `--overwrite`) — and writes nothing. The exit code mirrors a real run: 0 means the export would succeed, 1 means it would stop on conflicts. Use it to check what an export touches before running it for real.
+
+`--json` prints a machine-readable result to stdout (exit codes unchanged; warnings move into the payload instead of stderr; paths relative to `root`): a real run prints `{ ok: true, root, agent, written, upToDate, slashName, warnings }` on success or `{ ok: false, root, agent, conflicts, warnings }` with exit 1 on conflict; `--dry-run --json` prints `{ ok, dryRun: true, root, agent, files: [{ path, status }], warnings }` where `status` is `new` / `up-to-date` / `conflict` (raw classification — `ok` reflects whether the export would succeed, honouring `--overwrite`). Prefer it when scripting exports.
 
 Output by `--agent`:
 

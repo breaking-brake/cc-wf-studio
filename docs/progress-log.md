@@ -17,6 +17,41 @@ Entry format:
 
 ---
 
+## 2026-07-23 — `ccwf export --json` for machine-readable export results
+- **User value**: a user can now script `ccwf export` in CI or wrapper
+  tooling by parsing stable JSON — which files were written / already up to
+  date / in conflict, the slash-command name, and target-compatibility
+  warnings — instead of scraping human-formatted text; parity with
+  `ccwf validate --json`.
+- **Issue/PR**: #917 / PR from `claude/sleepy-curie-8gdi3g`
+- **Outcome**: done — `--json` works in both modes: a real run prints
+  `{ok: true, root, agent, written, upToDate, slashName, warnings}` (exit 0)
+  or `{ok: false, …, conflicts, warnings}` (exit 1) on conflict without
+  `--overwrite`; `--dry-run --json` prints `{ok, dryRun: true, root, agent,
+  files: [{path, status}], warnings}` where `status` is the raw
+  new/up-to-date/conflict classification and `ok` mirrors the exit code
+  (honouring `--overwrite`). Paths are root-relative. In JSON mode warnings
+  move into the payload instead of stderr (validate's convention); human
+  mode is byte-identical, including `ccwf run` — internally the conflict
+  `process.exit` in `runExport` became a typed `ExportConflictError` that
+  export (human/JSON) and run render via a shared `reportExportConflict`.
+  Load errors keep their stderr + exit-code contract in `--json` mode.
+  Docs: cli README (subcommand table + export section) and ccwf-cli
+  SKILL.md. E2E: 14 cases against the built CLI (fresh/idempotent JSON
+  runs, conflict JSON exit 1 with clean stderr, human conflict text
+  unchanged, dry-run JSON with/without `--overwrite`, warnings in payload
+  with 0 stderr bytes + parity diff against human warning lines, codex
+  real-run JSON, `--overwrite` repair, missing-file exit 2, human
+  export/run success output unchanged). Issue #917 could not be locked
+  (no `gh`, no MCP lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - `ccwf export --agent all` (or repeatable `--agent`) to materialise a
+    workflow for several agents in one run — per-agent conflict/summary
+    design needed; JSON shape now has a natural per-agent extension.
+  - Manual E2E queue (carried): align/distribute + context menu +
+    copy/cut/paste in real webviews; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector in both modes.
+
 ## 2026-07-23 — `ccwf export --dry-run` previews the plan without writing
 - **User value**: a user can now see exactly which files `ccwf export` would
   create or overwrite — and whether the export would fail on conflicts —
