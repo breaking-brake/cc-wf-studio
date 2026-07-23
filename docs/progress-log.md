@@ -17,6 +17,41 @@ Entry format:
 
 ---
 
+## 2026-07-23 — Add a validate_workflow MCP tool (side-effect-free draft check)
+- **User value**: an AI agent editing a workflow through the MCP server can
+  now check a draft — schema validity plus, with the new optional `agent`
+  param, the same target-compatibility warnings `ccwf validate --agent`
+  prints — without touching the user's canvas or workflow file; previously
+  the only way to discover validation errors was attempting `apply_workflow`,
+  which in canvas mode auto-creates sub-agent `.md` files *before*
+  validation runs, so a failed apply could leave stray files behind.
+- **Issue/PR**: #905 / PR from `claude/sleepy-curie-1zwq4u`
+- **Outcome**: done — new `validate_workflow` tool in
+  `packages/mcp/src/tools.ts` (registered in both canvas and file modes with
+  mode-specific descriptions; pure function, no adapter IO). Invalid drafts
+  return a normal `{valid: false, validationErrors}` result (not `isError`)
+  so agents iterate cheaply. The warning logic moved to core as
+  `collectAgentCompatibilityWarnings` + `WORKFLOW_TARGET_AGENTS`
+  (`schema/warnings.ts`); `ccwf export/run/validate --agent` now consume the
+  shared helper (CLI re-exports it, byte-identical warnings). Discoverability:
+  `cc-workflow-ai-editor` skill template gained a validate-before-apply step,
+  `ccwf-cli` SKILL.md and the mcp README tool lists updated to 7 tools.
+  Supersedes the parked "apply_workflow compat warnings" proposal — that was
+  judged too thin because `apply_workflow` has no target parameter; the
+  explicit `agent` param here is what makes ignored-field warnings usable.
+  Issue #905 could not be locked (no `gh`, no MCP lock tool — known
+  limitation, noted in the issue).
+- **Next proposals**:
+  - `ccwf validate` accepting multiple files / a directory (per-file report,
+    single exit code) so CI can validate a workflows folder without a shell
+    loop.
+  - Manual E2E queue (carried): align/distribute + context menu +
+    copy/cut/paste in real webviews; localized Claude API dialog in ja/ko/zh;
+    now also `validate_workflow` via MCP Inspector in both modes.
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow v11 keyboard a11y); only add grid-step nudging if
+    actually missing.
+
 ## 2026-07-23 — Align and distribute selected nodes from the context menu
 - **User value**: a user can now tidy a messy workflow layout in one click —
   align the selected nodes to an edge or center (left / horizontal centers /

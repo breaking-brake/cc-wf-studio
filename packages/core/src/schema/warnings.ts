@@ -13,10 +13,55 @@
  * `agentSkillProviderToTarget`.
  */
 
+import type { AgentSkillProvider } from '../services/agent-skill-export.js';
 import { NodeType, type Workflow } from '../types/workflow-definition.js';
+import { describeClaudeCodeOnlyNodes } from './claude-code-only.js';
 import { NODE_PROPERTY_SCHEMAS } from './node-schema-registry.js';
 import { getIgnoredFields } from './queries.js';
-import type { ExportTarget } from './targets.js';
+import { type ExportTarget, agentSkillProviderToTarget } from './targets.js';
+
+/**
+ * Agent names a workflow can be preflighted/exported for: Claude Code plus
+ * every {@link AgentSkillProvider}. This is the user-facing vocabulary used
+ * by `ccwf export --agent` / `ccwf validate --agent` and the MCP
+ * `validate_workflow` tool.
+ */
+export const WORKFLOW_TARGET_AGENTS = [
+  'claude-code',
+  'antigravity',
+  'codex',
+  'copilot',
+  'cursor',
+  'gemini',
+  'roo-code',
+] as const;
+
+export type WorkflowTargetAgent = (typeof WORKFLOW_TARGET_AGENTS)[number];
+
+/**
+ * Target-compatibility warnings for exporting `workflow` to `agent`:
+ * Claude Code-only nodes the agent cannot execute, plus every configured
+ * node field the target ignores. Callers should only pass schema-valid
+ * workflows — malformed node data would produce garbage reports.
+ */
+export function collectAgentCompatibilityWarnings(
+  workflow: Workflow,
+  agent: WorkflowTargetAgent
+): string[] {
+  const warnings: string[] = [];
+  const claudeOnlyNodes = describeClaudeCodeOnlyNodes(workflow);
+  if (agent !== 'claude-code' && claudeOnlyNodes.length > 0) {
+    warnings.push(
+      `this workflow contains Claude Code-only node(s) that ${agent} cannot execute: ${claudeOnlyNodes.join(', ')}.`
+    );
+  }
+  const target: ExportTarget =
+    agent === 'claude-code'
+      ? 'claudeCode'
+      : agentSkillProviderToTarget(agent satisfies AgentSkillProvider);
+  warnings.push(...collectIgnoredFieldWarnings(workflow, target));
+  return warnings;
+}
 
 /** One human-readable warning per set-but-ignored field of every node whose
  *  type has a registered property schema. */
