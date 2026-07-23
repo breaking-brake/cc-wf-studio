@@ -17,6 +17,38 @@ Entry format:
 
 ---
 
+## 2026-07-23 — ccwf validate accepts multiple files and directories
+- **User value**: a user can now validate an entire workflows folder in one
+  command — `ccwf validate ./workflows` or `ccwf validate a.json b.json` —
+  with a per-file report, a summary line, and a single exit code, instead of
+  writing a shell loop around single-file invocations in CI (which also
+  stopped at the first unreadable file instead of reporting them all).
+- **Issue/PR**: #907 / PR from `claude/sleepy-curie-dx1emm`
+- **Outcome**: done — `validate`'s argument is now variadic `<paths...>`;
+  directories expand recursively to `*.json` (skipping `node_modules` and
+  dot-directories, deterministic sort, de-duped). Nonexistent paths and
+  empty directory expansions abort the whole run (exit 2) so a typo can
+  never produce a false-green CI result. Every file is validated even when
+  earlier ones fail; load errors are reported per file. Exit code: 2 if any
+  file unreadable, else 1 if any invalid, else 0. Multi-input `--json`
+  prints `{ valid, files: [...] }`; the single-file shape (raw
+  ValidationResult + `warnings` with `--agent`) is byte-identical to
+  before, as is all single-file human output. `--agent` warnings print per
+  file. README and ccwf-cli SKILL.md updated. E2E: 10 cases against the
+  built CLI (legacy single-file ×4, mixed directory, aggregate JSON,
+  multi-file, empty dir, per-file `--agent codex` warnings, dedupe).
+  Guard step this round closed #905 (merged as #906). Issue #907 could not
+  be locked (no `gh`, no MCP lock tool — known limitation, noted in issue).
+- **Next proposals**:
+  - `--agent all` (or repeatable `--agent`) on `ccwf validate` to preflight
+    every target at once — natural follow-up now that multi-file works.
+  - Manual E2E queue (carried): align/distribute + context menu +
+    copy/cut/paste in real webviews; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector in both modes.
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow v11 keyboard a11y); only add grid-step nudging if
+    actually missing.
+
 ## 2026-07-23 — Add a validate_workflow MCP tool (side-effect-free draft check)
 - **User value**: an AI agent editing a workflow through the MCP server can
   now check a draft — schema validity plus, with the new optional `agent`

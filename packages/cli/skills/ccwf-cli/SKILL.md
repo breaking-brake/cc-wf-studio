@@ -50,14 +50,17 @@ ccwf render ./.vscode/workflows/my-workflow.json -o out.md   # write to a file i
 
 Output is the same content `ccwf preview` shows in the right pane.
 
-### `ccwf validate <file>`
+### `ccwf validate <paths...>`
 
-Schema-check the workflow JSON.
+Schema-check workflow JSON files — any mix of files and directories (directories are searched recursively for `*.json`, skipping `node_modules` and dot-directories).
 
 ```bash
 ccwf validate ./.vscode/workflows/my-workflow.json           # exit 0/1, human-readable errors on stderr
 ccwf validate ./.vscode/workflows/my-workflow.json --json    # prints { valid, errors[] }
+ccwf validate ./.vscode/workflows                            # every *.json under the dir, per-file report + summary
 ```
+
+Exit 0 only if every file passes; 1 = schema errors, 2 = an unreadable/unparseable file or path. With `--json` and multiple inputs the output is `{ valid, files: [...] }` (a single file keeps the plain `{ valid, errors[] }` shape).
 
 Use this:
 - Before `ccwf run` / `ccwf export` if the file is hand-edited or AI-generated
