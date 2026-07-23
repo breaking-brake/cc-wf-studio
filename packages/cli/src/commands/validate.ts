@@ -17,7 +17,12 @@
  * to expand to every supported target; with more than one agent, human
  * warning lines are prefixed `[agent]` and the JSON report carries
  * `warningsByAgent` instead of `warnings`. Warnings never affect the exit
- * code — only schema validity does.
+ * code — only schema validity does — unless `--strict` is passed, which
+ * turns any target-compatibility warning into exit 1 so CI can gate on
+ * them. `--strict` requires `--agent` (warnings are only collected for a
+ * target agent, so `--strict` alone would be a silent no-op — that's a
+ * usage error, exit 2). JSON output shapes are unchanged by `--strict`;
+ * the exit code carries the verdict.
  */
 
 import * as fs from 'node:fs/promises';
@@ -34,6 +39,7 @@ import {
 interface ValidateOptions {
   json?: boolean;
   agent?: SupportedAgent[];
+  strict?: boolean;
 }
 
 type FileReport =
@@ -196,10 +202,24 @@ export function registerValidateCommand(program: Command): void {
     .option('--json', 'Print the machine-readable result JSON to stdout.', false)
     .option<SupportedAgent[]>(
       '--agent <name>',
-      `Also preflight target compatibility for one or more agents (repeatable; one of: ${SUPPORTED_AGENTS.join(', ')}, or 'all' for every target): report which configured fields each target ignores, without writing files. Warnings do not affect the exit code.`,
+      `Also preflight target compatibility for one or more agents (repeatable; one of: ${SUPPORTED_AGENTS.join(', ')}, or 'all' for every target): report which configured fields each target ignores, without writing files. Warnings do not affect the exit code unless --strict is passed.`,
       parseValidateAgent
     )
+    .option(
+      '--strict',
+      'Exit 1 when any target-compatibility warning is reported (requires --agent). Lets CI gate on warnings, not just schema validity.',
+      false
+    )
     .action(async (paths: string[], options: ValidateOptions) => {
+      // --strict without --agent would collect no warnings and silently pass —
+      // abort instead, so a forgotten flag can never green-light a CI gate.
+      if (options.strict && !options.agent?.length) {
+        process.stderr.write(
+          'error: --strict requires --agent (target-compatibility warnings are only collected for a target agent).\n'
+        );
+        process.exit(2);
+      }
+
       let files: string[];
       try {
         files = await expandPaths(paths);
@@ -220,7 +240,22 @@ export function registerValidateCommand(program: Command): void {
       const unreadable = reports.filter((r) => 'loadError' in r).length;
       const failed = reports.filter((r) => !('loadError' in r) && !r.valid).length;
       const passed = reports.length - unreadable - failed;
-      const exitCode = unreadable > 0 ? 2 : failed > 0 ? 1 : 0;
+      const warningCount = reports.reduce((sum, report) => {
+        if ('loadError' in report) {
+          return sum;
+        }
+        const perFile =
+          report.warnings?.length ??
+          Object.values(report.warningsByAgent ?? {}).reduce((s, w) => s + w.length, 0);
+        return sum + perFile;
+      }, 0);
+      const strictFailed = Boolean(options.strict) && warningCount > 0;
+      const exitCode = unreadable > 0 ? 2 : failed > 0 || strictFailed ? 1 : 0;
+      // Explains the nonzero exit in both human and --json mode (stderr, so
+      // the stdout JSON contract is untouched).
+      const strictNotice = strictFailed
+        ? `error: ${warningCount} target-compatibility warning(s) treated as errors (--strict).\n`
+        : '';
 
       if (options.json) {
         if (files.length === 1) {
@@ -237,6 +272,7 @@ export function registerValidateCommand(program: Command): void {
           const payload = { valid: exitCode === 0, files: reports };
           process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
         }
+        process.stderr.write(strictNotice);
         process.exit(exitCode);
       }
 
@@ -251,6 +287,7 @@ export function registerValidateCommand(program: Command): void {
         const summary = `${parts.join(', ')} (${files.length} files checked).\n`;
         (exitCode === 0 ? process.stdout : process.stderr).write(summary);
       }
+      process.stderr.write(strictNotice);
       process.exit(exitCode);
     });
 }

@@ -60,9 +60,10 @@ ccwf validate ./.vscode/workflows/my-workflow.json --json    # prints { valid, e
 ccwf validate ./.vscode/workflows                            # every *.json under the dir, per-file report + summary
 ccwf validate ./my-workflow.json --agent codex               # + target-compatibility warnings for codex
 ccwf validate ./my-workflow.json --agent all                 # + warnings for every supported target at once
+ccwf validate ./workflows --agent all --strict               # CI gate: warnings become exit 1
 ```
 
-Exit 0 only if every file passes; 1 = schema errors, 2 = an unreadable/unparseable file or path. With `--json` and multiple inputs the output is `{ valid, files: [...] }` (a single file keeps the plain `{ valid, errors[] }` shape).
+Exit 0 only if every file passes; 1 = schema errors, 2 = an unreadable/unparseable file or path. With `--json` and multiple inputs the output is `{ valid, files: [...] }` (a single file keeps the plain `{ valid, errors[] }` shape). Target-compatibility warnings from `--agent` never affect the exit code unless `--strict` is passed, which turns any warning into exit 1 (`--strict` requires `--agent`; alone it is a usage error, exit 2). `--strict` never changes the `--json` output shape — the exit code carries the verdict.
 
 `--agent <name>` additionally reports which configured fields that target would ignore on export (same warnings as `ccwf export`), without writing files. It is repeatable (`--agent codex --agent gemini`) and accepts `all` for every supported target; with several agents, warning lines are prefixed `[agent]` and `--json` reports carry `warningsByAgent: { <agent>: [...] }` instead of `warnings`. Warnings never change the exit code.
 
