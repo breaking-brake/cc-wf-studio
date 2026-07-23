@@ -17,6 +17,39 @@ Entry format:
 
 ---
 
+## 2026-07-23 — Localize the Claude API upload dialog
+- **User value**: a user running VSCode in Japanese, Korean, or Chinese no
+  longer sees the entire Claude API skill upload & test flow in English —
+  the API-key screens, skill list, upload confirmation (MCP/dependent-skill
+  warnings), success/error screens, MCP auth guidance, and the API Test
+  chat panel are now fully localized. Bonus for English users: the "MCP
+  server URL or token is missing" validation message was hardcoded
+  Japanese and now renders in the UI language.
+- **Issue/PR**: #901 / PR from `claude/sleepy-curie-j8pdhh`
+- **Outcome**: done — 88 new `claudeApi.*` keys added to
+  `translation-keys.ts` and all 5 locale files (en/ja/ko/zh-CN/zh-TW) per
+  `.claude/rules/translation.md`; `ClaudeApiUploadDialog.tsx` (incl. the
+  `AuthCodeSnippet` / `McpServerUrlForm` sub-components and both
+  `ConfirmDialog`s) switched from hardcoded strings to `t(...)`, reusing
+  `common.cancel`/`common.close`. Sentences with inline links/`<code>`
+  markup use `.before`/`.after` key pairs so translators control word
+  order. Product terms kept English everywhere: Claude API, Claude
+  Platform, MCP, MCP Inspector, PulseMCP, OAuth, Bearer, `access_token`,
+  `sk-ant-...`, model names, curl/Python/TypeScript. Error-message
+  fallbacks (`Failed to load skills`, `Upload failed`, …) localized too.
+  No behavior or schema changes. Issue #901 could not be locked (no `gh`,
+  no MCP lock tool, API proxied — known limitation, noted in the issue).
+- **Next proposals**:
+  - Manual E2E queue (carried): verify copy/cut/paste DOM events + the
+    canvas context menu, and now the localized Claude API dialog in ja/ko/zh.
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow v11 keyboard a11y); only add grid-step nudging if
+    actually missing.
+  - The model list in the API Test dialog (Haiku 4.5 … Opus 4.6) is
+    hardcoded in two `<select>`s in `ClaudeApiUploadDialog.tsx` — extract
+    to a single constant (and consider sourcing from the shared model
+    catalog) so new models appear in both tabs consistently.
+
 ## 2026-07-23 — Right-click context menu on the canvas
 - **User value**: a user can now right-click a node, a multi-selection, or
   the empty canvas to Copy, Cut, Paste, Duplicate, or Delete (plus Select
