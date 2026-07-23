@@ -21,7 +21,7 @@ pnpm add -D @cc-wf-studio/cli
 | `ccwf render <file>` | Print a Mermaid + execution-instructions Markdown bundle to stdout (or a file with `-o <path>`). |
 | `ccwf validate <paths...>` | Schema-check workflow JSON files — any mix of files and directories (searched recursively for `*.json`). Exit 0/1 (2 on unreadable files). `--json` for machine-readable output. `--agent <name>` (repeatable, or `all`) also preflights target compatibility; add `--strict` to turn those warnings into exit 1 for CI. |
 | `ccwf mcp --file <file>` | Run the cc-wf-studio stdio MCP server in-process against `<file>`. |
-| `ccwf export <file>` | Materialise the workflow as agent-skill files for a target agent (`--agent <name>`, default `claude-code`). |
+| `ccwf export <file>` | Materialise the workflow as agent-skill files for a target agent (`--agent <name>`, default `claude-code`). `--dry-run` previews the planned files without writing. |
 | `ccwf run <file>` | `ccwf export` + a "next step" hint. `--launch` additionally spawns Claude Code when available. |
 | `ccwf preview <file>` | Open a read-only viewer (Mermaid + per-node Markdown panes) in a local browser. Auto-reloads when the file changes. |
 | `ccwf canvas <file>` | (Experimental) Open the **full editable** cc-wf-studio canvas in a local browser. Saves write back to the same file. |
@@ -90,9 +90,12 @@ ccwf export ./my-workflow.json                                # --agent claude-c
 ccwf export ./my-workflow.json --agent cursor                  # cursor
 ccwf export ./my-workflow.json --agent codex --cwd /tmp/proj   # codex into a different root
 ccwf export ./my-workflow.json --overwrite                     # replace files whose content changed
+ccwf export ./my-workflow.json --dry-run                       # preview the plan, write nothing
 ```
 
 Re-running an export is idempotent: existing files whose content already matches are reported as up to date and skipped. Only files with *different* content are conflicts that require `--overwrite`.
+
+`--dry-run` prints every planned file with its status — `new`, `up to date`, or `conflict: exists with different content` (shown as `would overwrite` when combined with `--overwrite`) — and writes nothing. The exit code mirrors what a real run would do: 0 means the export would succeed, 1 means it would stop on conflicts.
 
 Output layout by target agent:
 

@@ -52,6 +52,22 @@ export interface ExportRunResult {
   rootDir: string;
 }
 
+/** On-disk classification of a single planned export file. */
+export type PlannedFileStatus = 'new' | 'conflict' | 'up-to-date';
+
+export interface ClassifiedPlanEntry {
+  /** Absolute path the file would be written to. */
+  absPath: string;
+  status: PlannedFileStatus;
+}
+
+export interface ExportPreviewResult {
+  /** Every planned file in plan order with its on-disk classification. */
+  entries: ClassifiedPlanEntry[];
+  /** Project root used. */
+  rootDir: string;
+}
+
 function parseAgentOption(value: string): SupportedAgent {
   if ((SUPPORTED_AGENTS as readonly string[]).includes(value)) {
     return value as SupportedAgent;
@@ -72,6 +88,83 @@ async function pathExists(target: string): Promise<boolean> {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
     throw error;
+  }
+}
+
+/**
+ * Sort every planned file into new / conflicting / already up to date,
+ * without writing anything. Shared by `runExport`'s conflict check and
+ * `--dry-run`'s preview so the two can never disagree.
+ */
+async function classifyPlan(
+  rootDir: string,
+  plan: PlannedExportFile[]
+): Promise<ClassifiedPlanEntry[]> {
+  const entries: ClassifiedPlanEntry[] = [];
+  for (const planned of plan) {
+    const absPath = resolvePlanned(rootDir, planned);
+    if (!(await pathExists(absPath))) {
+      entries.push({ absPath, status: 'new' });
+    } else if (await matchesPlannedContents(absPath, planned.contents)) {
+      entries.push({ absPath, status: 'up-to-date' });
+    } else {
+      entries.push({ absPath, status: 'conflict' });
+    }
+  }
+  return entries;
+}
+
+/**
+ * `--dry-run` implementation: load the workflow, emit the same
+ * target-compatibility warnings as a real export, and classify the planned
+ * files against the disk — but never write.
+ *
+ * Throws `WorkflowLoadError` for `<file>` issues, like `runExport`.
+ */
+export async function previewExport(
+  options: Omit<ExportRunOptions, 'overwrite'>
+): Promise<ExportPreviewResult> {
+  const { workflow } = await loadWorkflowFromFile(options.file);
+  const rootDir = path.resolve(options.cwd ?? process.cwd());
+
+  for (const warning of collectAgentCompatibilityWarnings(workflow, options.agent)) {
+    process.stderr.write(`warning: ${warning}\n`);
+  }
+
+  const plan =
+    options.agent === CLAUDE_CODE_AGENT
+      ? planWorkflowExportFiles(workflow)
+      : planAgentSkillFiles(workflow, options.agent as AgentSkillProvider);
+
+  return { entries: await classifyPlan(rootDir, plan), rootDir };
+}
+
+/**
+ * Print the `--dry-run` report. The exit code mirrors what a real run would
+ * do: exits 1 when the export would stop on conflicts (i.e. conflicting
+ * files present and no `--overwrite`), so exit 0 always means "the export
+ * would succeed".
+ */
+export function reportExportPreview(preview: ExportPreviewResult, overwrite: boolean): void {
+  const conflictCount = preview.entries.filter((e) => e.status === 'conflict').length;
+  process.stdout.write('Dry run — no files were written.\n');
+  process.stdout.write(`Would export ${preview.entries.length} file(s) into ${preview.rootDir}:\n`);
+  for (const entry of preview.entries) {
+    const note =
+      entry.status === 'new'
+        ? 'new'
+        : entry.status === 'up-to-date'
+          ? 'up to date'
+          : overwrite
+            ? 'would overwrite'
+            : 'conflict: exists with different content';
+    process.stdout.write(`  - ${path.relative(preview.rootDir, entry.absPath)} (${note})\n`);
+  }
+  if (conflictCount > 0 && !overwrite) {
+    process.stderr.write(
+      `error: export would fail: ${conflictCount} file(s) already exist with different content. Pass --overwrite to replace them.\n`
+    );
+    process.exit(1);
   }
 }
 
@@ -97,17 +190,11 @@ export async function runExport(options: ExportRunOptions): Promise<ExportRunRes
 
   const unchangedPaths: string[] = [];
   if (!options.overwrite) {
-    const conflicts: string[] = [];
-    for (const planned of plan) {
-      const absPath = resolvePlanned(rootDir, planned);
-      if (await pathExists(absPath)) {
-        if (await matchesPlannedContents(absPath, planned.contents)) {
-          unchangedPaths.push(absPath);
-        } else {
-          conflicts.push(absPath);
-        }
-      }
-    }
+    const classified = await classifyPlan(rootDir, plan);
+    const conflicts = classified.filter((e) => e.status === 'conflict').map((e) => e.absPath);
+    unchangedPaths.push(
+      ...classified.filter((e) => e.status === 'up-to-date').map((e) => e.absPath)
+    );
     if (conflicts.length > 0) {
       process.stderr.write(
         `error: ${conflicts.length} file(s) already exist with different content. Pass --overwrite to replace them:\n`
@@ -183,6 +270,7 @@ export function asSupportedAgent(value: string): SupportedAgent {
 interface CommanderExportOptions {
   agent: SupportedAgent;
   overwrite: boolean;
+  dryRun: boolean;
   cwd?: string;
 }
 
@@ -201,11 +289,26 @@ export function registerExportCommand(program: Command): void {
     )
     .option('--overwrite', 'Overwrite existing files instead of erroring.', false)
     .option(
+      '--dry-run',
+      'Preview every planned file (new / up to date / conflict) without writing anything. Exit 1 if the export would fail on conflicts.',
+      false
+    )
+    .option(
       '--cwd <dir>',
       'Output root. Defaults to process.cwd(). Useful for tests / scripted runs.'
     )
     .action(async (file: string, options: CommanderExportOptions) => {
       try {
+        if (options.dryRun) {
+          const preview = await previewExport({
+            file,
+            agent: options.agent,
+            cwd: options.cwd,
+          });
+          reportExportPreview(preview, options.overwrite);
+          return;
+        }
+
         const result = await runExport({
           file,
           agent: options.agent,
