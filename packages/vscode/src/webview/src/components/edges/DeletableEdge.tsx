@@ -14,6 +14,7 @@ import {
   getBezierPath,
   useReactFlow,
 } from 'reactflow';
+import { useTranslation } from '../../i18n/i18n-context';
 
 /**
  * Deletable edge component
@@ -32,6 +33,7 @@ export const DeletableEdge: React.FC<EdgeProps> = ({
   style,
   markerEnd,
 }) => {
+  const { t } = useTranslation();
   const { setEdges } = useReactFlow();
 
   // Calculate bezier curve path and center coordinates
@@ -84,7 +86,7 @@ export const DeletableEdge: React.FC<EdgeProps> = ({
             onMouseLeave={(e) => {
               e.currentTarget.style.opacity = '1';
             }}
-            title="Delete connection"
+            title={t('canvas.deleteEdge.tooltip')}
           >
             <X size={12} strokeWidth={2.5} />
           </button>

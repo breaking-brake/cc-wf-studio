@@ -23,6 +23,17 @@ export interface WebviewTranslationKeys {
   'overview.emptyState.title': string;
   'overview.emptyState.description': string;
 
+  // Overview diagram controls (zoom / layout / splitter)
+  'overview.zoomIn': string;
+  'overview.zoomOut': string;
+  'overview.fitView': string;
+  'overview.followActive.on': string;
+  'overview.followActive.off': string;
+  'overview.layout.td': string;
+  'overview.layout.lr': string;
+  'overview.resizePanels': string;
+  'overview.editNodeLink': string;
+
   // Toolbar
   'toolbar.workflowNamePlaceholder': string;
   'toolbar.save': string;
@@ -340,6 +351,34 @@ export interface WebviewTranslationKeys {
   'tour.button.skip': string;
   'tour.button.minimize': string;
   'tour.button.resume': string;
+
+  // Workflow Tour (canvas tour player + generation popover)
+  'workflowTour.title': string;
+  'workflowTour.start': string;
+  'workflowTour.start.tooltip': string;
+  'workflowTour.generate': string;
+  'workflowTour.generate.tooltip': string;
+  'workflowTour.noTour': string;
+  'workflowTour.noTourLabel': string;
+  'workflowTour.prev': string;
+  'workflowTour.end': string;
+  'workflowTour.regenerate': string;
+  'workflowTour.regenerate.tooltip': string;
+  'workflowTour.regenerate.aria': string;
+  'workflowTour.popover.agent': string;
+  'workflowTour.popover.emptyHeading': string;
+  'workflowTour.popover.emptyDescription': string;
+  'workflowTour.popover.generating': string;
+  'workflowTour.popover.regenerateHeading': string;
+  'workflowTour.popover.regenerateDescription': string;
+  'workflowTour.popover.regenerateButton': string;
+  'workflowTour.popover.regenerating': string;
+
+  // Canvas action tooltips / a11y labels
+  'canvas.deleteNode.tooltip': string;
+  'canvas.deleteEdge.tooltip': string;
+  'canvas.resizeSidebar': string;
+  'announcement.dismiss': string;
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': string;

@@ -10,6 +10,7 @@
 import type { AiEditingProvider, TourStep } from '@shared/types/messages';
 import { ChevronLeft, ChevronRight, GraduationCap, RefreshCw, X } from 'lucide-react';
 import type { CSSProperties } from 'react';
+import { useTranslation } from '../i18n/i18n-context';
 import { GenerateTourPopover } from './GenerateTourPopover';
 
 interface TourStepCardProps {
@@ -45,6 +46,7 @@ export function TourStepCard({
   variant = 'floating',
   onRegenerate,
 }: TourStepCardProps) {
+  const { t } = useTranslation();
   const isFirst = index === 0;
   const isLast = index === total - 1;
 
@@ -84,15 +86,15 @@ export function TourStepCard({
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
         <GraduationCap size={14} />
         <span style={{ fontSize: '11px', opacity: 0.8, fontWeight: 600 }}>
-          {`Workflow Tour · ${index + 1} / ${total}`}
+          {`${t('workflowTour.title')} · ${index + 1} / ${total}`}
         </span>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px' }}>
           {onRegenerate && (
             <GenerateTourPopover mode="regenerate" onGenerate={onRegenerate}>
               <button
                 type="button"
-                title="Regenerate this tour with an AI agent"
-                aria-label="Regenerate workflow tour"
+                title={t('workflowTour.regenerate.tooltip')}
+                aria-label={t('workflowTour.regenerate.aria')}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -107,15 +109,15 @@ export function TourStepCard({
                 }}
               >
                 <RefreshCw size={12} />
-                Regenerate
+                {t('workflowTour.regenerate')}
               </button>
             </GenerateTourPopover>
           )}
           <button
             type="button"
             onClick={onClose}
-            title="End workflow tour"
-            aria-label="End workflow tour"
+            title={t('workflowTour.end')}
+            aria-label={t('workflowTour.end')}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -195,7 +197,7 @@ export function TourStepCard({
           }}
         >
           <ChevronLeft size={12} />
-          Prev
+          {t('workflowTour.prev')}
         </button>
         <span style={{ marginLeft: 'auto' }} />
         {isLast ? (
@@ -212,7 +214,7 @@ export function TourStepCard({
               cursor: 'pointer',
             }}
           >
-            Finish
+            {t('tour.button.finish')}
           </button>
         ) : (
           <button
@@ -231,7 +233,7 @@ export function TourStepCard({
               cursor: 'pointer',
             }}
           >
-            Next
+            {t('tour.button.next')}
             <ChevronRight size={12} />
           </button>
         )}

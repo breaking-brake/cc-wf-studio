@@ -7,6 +7,7 @@
 
 import { Terminal, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from '../../i18n/i18n-context';
 
 const DISMISSED_KEY_PREFIX = 'cc-wf-studio:feature-dismissed:';
 
@@ -53,6 +54,7 @@ export function FeatureAnnouncementBanner({
   description,
   onDismiss,
 }: FeatureAnnouncementBannerProps) {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -83,7 +85,7 @@ export function FeatureAnnouncementBanner({
         type="button"
         onClick={handleDismiss}
         style={styles.closeButton}
-        aria-label="Dismiss announcement"
+        aria-label={t('announcement.dismiss')}
       >
         <X size={16} />
       </button>

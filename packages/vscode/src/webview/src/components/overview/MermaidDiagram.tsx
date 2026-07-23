@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from '../../i18n/i18n-context';
 
 interface MermaidDiagramProps {
   workflow: Workflow;
@@ -123,6 +124,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
   onNodeClick,
   activeSanitizedNodeId,
 }) => {
+  const { t } = useTranslation();
   // The viewport is the visible area; the stage holds the rendered SVG and is
   // translated/scaled by the transform state.
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -533,28 +535,24 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
           zIndex: 1,
         }}
       >
-        <ZoomButton title="Zoom in" onClick={() => zoomBy(1.2)}>
+        <ZoomButton title={t('overview.zoomIn')} onClick={() => zoomBy(1.2)}>
           <Plus size={14} />
         </ZoomButton>
-        <ZoomButton title="Zoom out" onClick={() => zoomBy(1 / 1.2)}>
+        <ZoomButton title={t('overview.zoomOut')} onClick={() => zoomBy(1 / 1.2)}>
           <Minus size={14} />
         </ZoomButton>
-        <ZoomButton title="Fit to view" onClick={fitToViewport}>
+        <ZoomButton title={t('overview.fitView')} onClick={fitToViewport}>
           <Maximize2 size={14} />
         </ZoomButton>
         <ZoomButton
-          title={followActive ? 'Follow active node: on' : 'Follow active node: off'}
+          title={followActive ? t('overview.followActive.on') : t('overview.followActive.off')}
           onClick={() => setFollowActive((v) => !v)}
           active={followActive}
         >
           {followActive ? <Locate size={14} /> : <LocateOff size={14} />}
         </ZoomButton>
         <ZoomButton
-          title={
-            direction === 'TD'
-              ? 'Layout: top-down (click to switch to left-to-right)'
-              : 'Layout: left-to-right (click to switch to top-down)'
-          }
+          title={direction === 'TD' ? t('overview.layout.td') : t('overview.layout.lr')}
           onClick={() => setDirection((d) => (d === 'TD' ? 'LR' : 'TD'))}
         >
           {direction === 'TD' ? <MoveVertical size={14} /> : <MoveHorizontal size={14} />}

@@ -12,6 +12,7 @@
 
 import { GraduationCap } from 'lucide-react';
 import type React from 'react';
+import { useTranslation } from '../i18n/i18n-context';
 import { generateTour } from '../services/vscode-bridge';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { StyledTooltipItem, StyledTooltipProvider } from './common/StyledTooltip';
@@ -32,6 +33,7 @@ const ROUND_BUTTON_STYLE: React.CSSProperties = {
 };
 
 export const StartTourButton: React.FC = () => {
+  const { t } = useTranslation();
   const hasWorkflow = useWorkflowStore((s) => !!s.activeWorkflow);
   const tourLength = useWorkflowStore((s) => s.activeWorkflow?.tour?.length ?? 0);
   const isTourActive = useWorkflowStore((s) => s.isTourActive);
@@ -44,7 +46,7 @@ export const StartTourButton: React.FC = () => {
   if (tourLength > 0) {
     return (
       <StyledTooltipProvider>
-        <StyledTooltipItem content={`Start workflow tour (${tourLength} steps)`}>
+        <StyledTooltipItem content={t('workflowTour.start.tooltip', { count: tourLength })}>
           <div
             onClick={() => startTour()}
             onKeyDown={(e) => {
@@ -55,7 +57,7 @@ export const StartTourButton: React.FC = () => {
             }}
             role="button"
             tabIndex={0}
-            aria-label="Start workflow tour"
+            aria-label={t('workflowTour.start')}
             style={ROUND_BUTTON_STYLE}
           >
             <GraduationCap size={14} style={{ color: 'var(--vscode-foreground)' }} />
@@ -70,8 +72,8 @@ export const StartTourButton: React.FC = () => {
     <GenerateTourPopover onGenerate={(provider) => generateTour(provider)}>
       <button
         type="button"
-        aria-label="Generate a workflow tour"
-        title="Generate a workflow tour"
+        aria-label={t('workflowTour.generate.tooltip')}
+        title={t('workflowTour.generate.tooltip')}
         style={{ ...ROUND_BUTTON_STYLE, padding: 0, opacity: 0.7 }}
       >
         <GraduationCap size={14} style={{ color: 'var(--vscode-foreground)' }} />

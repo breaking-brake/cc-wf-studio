@@ -17,6 +17,40 @@ Entry format:
 
 ---
 
+## 2026-07-23 — Localize the Workflow Tour UI, Overview zoom controls, and remaining canvas tooltips
+- **User value**: a user running VSCode in Japanese, Korean, or Chinese now
+  sees the Workflow Tour feature (Start/Generate pills and popover,
+  Prev/Next/Finish controls, regenerate/end tooltips), the Overview's zoom
+  controls (Zoom in/out, Fit to view, Follow active node, Layout toggle),
+  and the node/edge delete tooltips in their display language — previously
+  all hardcoded English inside an otherwise fully localized canvas.
+- **Issue/PR**: #887 / PR from `claude/sleepy-curie-5qv0ox`
+- **Outcome**: done — verified `GenerateTourPopover`, `StartTourButton`,
+  `TourPanel`, `TourStepCard`, `MermaidDiagram`, `InstructionsPanel`,
+  `DeleteButton`, `DeletableEdge`, `FeatureAnnouncementBanner`, and
+  `ResizeHandle` had zero `useTranslation` usage. Added `workflowTour.*`,
+  `overview.*` (zoom/layout/splitter), and canvas-tooltip/a11y keys to
+  `translation-keys.ts` and all 5 locales; reused existing keys where
+  wording matched (`tour.button.next`/`.finish` for the tour nav,
+  `dialog.deleteNode.confirm` for the delete icon title). Tour step
+  content (AI-generated titles/descriptions) is workflow data and stays
+  untouched. Out of scope: discontinued chat-UI components and
+  `ClaudeApiUploadDialog` (its own large surface). Guard step this round
+  also closed #885 (merged as #886, the previous iteration's close call
+  didn't stick).
+- **Next proposals**:
+  - **Interrupt candidate for next round**: at push time GitHub reported
+    3 Dependabot vulnerabilities on the default branch (2 high, 1 low) —
+    check https://github.com/breaking-brake/cc-wf-studio/security/dependabot
+    (the 2026-07-23 security round left only 1 known moderate advisory, so
+    these may be new).
+  - `Toolbar.tsx` still has a hardcoded "Stop MCP Server" tooltip and
+    `WhatsNewDialog` a "View changes on GitHub" one — small follow-up sweep.
+  - Ctrl+A select-all on the canvas (pairs naturally with the new
+    multi-delete confirm flow from #885).
+  - Multi-node copy/paste or multi-select duplicate — needs its own design
+    pass (id remapping + group handling).
+
 ## 2026-07-23 — Fix canvas keyboard deletion (Delete key + edge loss on cancel)
 - **User value**: a user can now delete the selected nodes/edges with the
   Delete key (previously only Backspace was bound — the standard delete key

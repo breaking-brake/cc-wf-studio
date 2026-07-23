@@ -14,6 +14,7 @@
 import { ChevronLeft, ChevronRight, GraduationCap, RefreshCw, X } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTourKeyboardNav } from '../hooks/useTourKeyboardNav';
+import { useTranslation } from '../i18n/i18n-context';
 import { generateTour } from '../services/vscode-bridge';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { GenerateTourPopover } from './GenerateTourPopover';
@@ -21,6 +22,7 @@ import { GenerateTourPopover } from './GenerateTourPopover';
 const PANEL_WIDTH = 320;
 
 export function TourPanel() {
+  const { t } = useTranslation();
   const isTourActive = useWorkflowStore((s) => s.isTourActive);
   const tourStepIndex = useWorkflowStore((s) => s.tourStepIndex);
   const tour = useWorkflowStore((s) => s.activeWorkflow?.tour);
@@ -95,7 +97,7 @@ export function TourPanel() {
               whiteSpace: 'nowrap',
             }}
           >
-            Workflow Tour
+            {t('workflowTour.title')}
           </h2>
           <span style={{ fontSize: '11px', opacity: 0.7, flexShrink: 0 }}>
             {`${tourStepIndex + 1} / ${total}`}
@@ -106,8 +108,8 @@ export function TourPanel() {
           <GenerateTourPopover mode="regenerate" onGenerate={(provider) => generateTour(provider)}>
             <button
               type="button"
-              title="Regenerate this tour with an AI agent"
-              aria-label="Regenerate workflow tour"
+              title={t('workflowTour.regenerate.tooltip')}
+              aria-label={t('workflowTour.regenerate.aria')}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -122,14 +124,14 @@ export function TourPanel() {
               }}
             >
               <RefreshCw size={12} />
-              Regenerate
+              {t('workflowTour.regenerate')}
             </button>
           </GenerateTourPopover>
           <button
             type="button"
             onClick={handleClose}
-            title="End workflow tour"
-            aria-label="End workflow tour"
+            title={t('workflowTour.end')}
+            aria-label={t('workflowTour.end')}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -231,7 +233,7 @@ export function TourPanel() {
           }}
         >
           <ChevronLeft size={14} />
-          Prev
+          {t('workflowTour.prev')}
         </button>
         <span style={{ marginLeft: 'auto' }} />
         {isLast ? (
@@ -248,7 +250,7 @@ export function TourPanel() {
               cursor: 'pointer',
             }}
           >
-            Finish
+            {t('tour.button.finish')}
           </button>
         ) : (
           <button
@@ -267,7 +269,7 @@ export function TourPanel() {
               cursor: 'pointer',
             }}
           >
-            Next
+            {t('tour.button.next')}
             <ChevronRight size={14} />
           </button>
         )}
