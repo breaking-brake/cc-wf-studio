@@ -8,6 +8,7 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import type { CommentaryProvider, CopilotModel, CopilotModelInfo } from '@shared/types/messages';
 import { Check, ChevronDown } from 'lucide-react';
+import { useTranslation } from '../../i18n/i18n-context';
 
 const FONT_SIZES = {
   small: 11,
@@ -63,6 +64,7 @@ export function CommentaryOptionsDropdown({
   language,
   onLanguageChange,
 }: CommentaryOptionsDropdownProps) {
+  const { t } = useTranslation();
   return (
     <DropdownMenu.Root
       onOpenChange={(open) => {
@@ -79,8 +81,8 @@ export function CommentaryOptionsDropdown({
       <DropdownMenu.Trigger asChild>
         <button
           type="button"
-          aria-label="Commentary options"
-          title="Commentary options"
+          aria-label={t('commentary.options.title')}
+          title={t('commentary.options.title')}
           style={{
             padding: '3px 4px',
             backgroundColor: 'transparent',
@@ -115,7 +117,9 @@ export function CommentaryOptionsDropdown({
           }}
         >
           {/* Provider Section */}
-          <DropdownMenu.Label style={labelStyle}>Provider</DropdownMenu.Label>
+          <DropdownMenu.Label style={labelStyle}>
+            {t('commentary.options.provider')}
+          </DropdownMenu.Label>
           <DropdownMenu.RadioGroup
             value={provider}
             onValueChange={(value) => onProviderChange(value as CommentaryProvider)}
@@ -140,7 +144,9 @@ export function CommentaryOptionsDropdown({
 
           {/* Language Section */}
           <DropdownMenu.Separator style={separatorStyle} />
-          <DropdownMenu.Label style={labelStyle}>Language</DropdownMenu.Label>
+          <DropdownMenu.Label style={labelStyle}>
+            {t('commentary.options.language')}
+          </DropdownMenu.Label>
           <div style={{ padding: '4px 12px 8px' }}>
             <input
               type="text"
@@ -164,7 +170,9 @@ export function CommentaryOptionsDropdown({
           {provider === 'copilot' && (
             <>
               <DropdownMenu.Separator style={separatorStyle} />
-              <DropdownMenu.Label style={labelStyle}>Model</DropdownMenu.Label>
+              <DropdownMenu.Label style={labelStyle}>
+                {t('commentary.options.model')}
+              </DropdownMenu.Label>
               {isFetchingModels ? (
                 <div
                   style={{
@@ -173,7 +181,7 @@ export function CommentaryOptionsDropdown({
                     color: 'var(--vscode-descriptionForeground)',
                   }}
                 >
-                  Loading...
+                  {t('loading')}...
                 </div>
               ) : modelsError ? (
                 <div
@@ -193,7 +201,7 @@ export function CommentaryOptionsDropdown({
                     color: 'var(--vscode-descriptionForeground)',
                   }}
                 >
-                  No models available
+                  {t('commentary.options.noModels')}
                 </div>
               ) : (
                 <DropdownMenu.RadioGroup

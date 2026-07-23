@@ -1003,6 +1003,11 @@ export interface WebviewTranslationKeys {
   'commentary.waiting': string;
   'commentary.inactive': string;
   'commentary.providerSelect': string;
+  'commentary.options.title': string;
+  'commentary.options.provider': string;
+  'commentary.options.language': string;
+  'commentary.options.model': string;
+  'commentary.options.noModels': string;
   'executionSession.running': string;
   'executionSession.ended': string;
   'executionSession.waiting': string;

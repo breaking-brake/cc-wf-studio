@@ -17,6 +17,34 @@ Entry format:
 
 ---
 
+## 2026-07-23 — Localize the Commentary options dropdown
+- **User value**: a user running VSCode in Japanese, Korean, or Chinese no
+  longer sees hardcoded English chrome ("Commentary options", "Provider",
+  "Language", "Model", "Loading...", "No models available") inside the
+  Commentary AI settings dropdown — the last toolbar surface bypassing i18n
+  entirely in an otherwise fully localized UI.
+- **Issue/PR**: #881 / PR from `claude/sleepy-curie-9no943`
+- **Outcome**: done — `CommentaryOptionsDropdown.tsx` had zero
+  `useTranslation` usage; added `commentary.options.*` keys (title,
+  provider, language, model, noModels) to `translation-keys.ts` and all 5
+  locale files, wording aligned with the established conventions
+  (プロバイダー/프로바이더/提供商, モデル/모델/模型); loading state reuses the
+  generic `loading` key (`{t('loading')}...`, same as `SampleWorkflowDialog`).
+  Kept untranslated by design: product names ("Claude Code", "Copilot"),
+  model names, and the language input's `English` placeholder (it documents
+  the literal default `language || 'English'` fed to the commentary prompt
+  in `commentary-ai-service.ts`). Out of scope: `modelsError` prop text and
+  the discontinued chat-UI `SettingsDropdown` (maintain-only).
+- **Next proposals**:
+  - Sample gallery could show each sample's `difficulty` badge (metadata
+    already ships in `SampleWorkflowMeta`; `ccwf samples list` shows it,
+    the canvas dialog does not — verified this round).
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow a11y); if not, add grid-step nudging.
+  - MCP `apply_workflow` compat warnings judged too thin this round (only
+    `branchSession` is Claude-Code-only and ignored-field warnings need a
+    target agent) — revisit if more Claude-Code-only node types land.
+
 ## 2026-07-23 — Security interrupt: patch vulnerable transitive dependencies
 - **User value**: a user no longer installs/bundles known-vulnerable code —
   the 3 high-severity advisories (`brace-expansion` DoS, `fast-uri` host
