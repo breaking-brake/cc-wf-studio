@@ -105,9 +105,12 @@ ccwf export ./my-workflow.json                                 # --agent claude-
 ccwf export ./my-workflow.json --agent cursor                  # cursor
 ccwf export ./my-workflow.json --agent codex --cwd /tmp/proj   # codex, custom output root
 ccwf export ./my-workflow.json --overwrite                     # replace files whose content changed
+ccwf export ./my-workflow.json --dry-run                       # preview the plan, write nothing
 ```
 
 Re-running an export is idempotent: existing files whose content already matches are skipped as up to date; only files with different content require `--overwrite`.
+
+`--dry-run` lists every planned file with its status — `new`, `up to date`, or `conflict: exists with different content` (`would overwrite` when combined with `--overwrite`) — and writes nothing. The exit code mirrors a real run: 0 means the export would succeed, 1 means it would stop on conflicts. Use it to check what an export touches before running it for real.
 
 Output by `--agent`:
 

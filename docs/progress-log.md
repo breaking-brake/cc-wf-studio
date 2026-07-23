@@ -17,6 +17,41 @@ Entry format:
 
 ---
 
+## 2026-07-23 — `ccwf export --dry-run` previews the plan without writing
+- **User value**: a user can now see exactly which files `ccwf export` would
+  create or overwrite — and whether the export would fail on conflicts —
+  before anything touches disk, instead of discovering conflicts by running
+  the export and hitting the error.
+- **Issue/PR**: #915 / PR from `claude/sleepy-curie-lq5l6o`
+- **Outcome**: done — `--dry-run` lists every planned file in plan order with
+  its status: `new`, `up to date`, or `conflict: exists with different
+  content` (`would overwrite` when combined with `--overwrite`). Exit code
+  mirrors a real run: 0 = export would succeed, 1 = it would stop on
+  conflicts (stderr `error: export would fail: …`); load errors keep their
+  usual exit codes. Target-compatibility warnings still print to stderr.
+  Internally the real run's conflict check and the preview share one
+  `classifyPlan` helper so they can never disagree; `ccwf run` is untouched.
+  Docs: cli README (subcommand table + export section) and ccwf-cli
+  SKILL.md. E2E: 9 cases against the built CLI (fresh-dir all-new with
+  zero files written, idempotent up-to-date, conflict exit 1 with disk
+  untouched, `--overwrite` preview exit 0, codex agent path + warnings
+  parity, bad agent name, missing file exit 2, real export still repairs
+  with `--overwrite`, 7-file cursor plan mixing new/conflict/up-to-date in
+  one listing). Also verified this round: canvas arrow-key node movement
+  already ships via React Flow v11 keyboard a11y (no `disableKeyboardA11y`
+  anywhere) — the carried nudge proposal is dropped as already-present.
+  Issue #915 could not be locked (no `gh`, no MCP lock tool — known
+  limitation, noted in the issue).
+- **Next proposals**:
+  - `ccwf export --agent all` (or repeatable `--agent`) to materialise a
+    workflow for several agents in one run — needs a per-agent
+    conflict/summary design now that dry-run exists.
+  - `--json` on `ccwf export` (incl. `--dry-run`) for scripting parity with
+    `ccwf validate --json`.
+  - Manual E2E queue (carried): align/distribute + context menu +
+    copy/cut/paste in real webviews; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector in both modes.
+
 ## 2026-07-23 — MCP `validate_workflow` preflights several agents at once
 - **User value**: an AI agent editing a workflow via the MCP server can now
   preflight target compatibility for every export target in a single
