@@ -46,9 +46,12 @@ Print a Markdown bundle (Mermaid flowchart + per-node execution instructions) to
 ccwf render ./.vscode/workflows/my-workflow.json             # Markdown (default)
 ccwf render ./.vscode/workflows/my-workflow.json -f mermaid  # ```mermaid block only
 ccwf render ./.vscode/workflows/my-workflow.json -o out.md   # write to a file instead of stdout
+ccwf render ./.vscode/workflows/my-workflow.json --agent codex # instructions phrased for Codex
 ```
 
 Output is the same content `ccwf preview` shows in the right pane.
+
+`--agent <name>` (one of `claude-code`, `antigravity`, `codex`, `copilot`, `cursor`, `gemini`, `roo-code`; default `claude-code`) phrases the execution instructions for that agent — the same wording `ccwf export --agent <name>` puts in the agent's `SKILL.md` — and prints that agent's target-compatibility warnings to stderr (exit code unaffected). `-f mermaid` output is agent-agnostic.
 
 ### `ccwf validate <paths...>`
 
@@ -214,6 +217,7 @@ Use this as a lookup when the user describes intent in natural language. If the 
 |------------------------------------------------------------------------------------|----------------------------------------------|
 | "Show me / preview this workflow", "見せて", "可視化して"                          | `ccwf preview <file>`                        |
 | "Render this as Markdown", "Mermaid 図にして"                                       | `ccwf render <file>`                         |
+| "Show the instructions as Cursor / Codex would see them"                            | `ccwf render <file> --agent <name>`          |
 | "Is this workflow valid?", "壊れてない?", "schema 確認して"                          | `ccwf validate <file>`                       |
 | "Export as a Claude Skill / agent file", "skills 化して"                            | `ccwf export <file>` (default agent)         |
 | "Convert for Cursor / Codex / Gemini …"                                            | `ccwf export <file> --agent <name>`          |

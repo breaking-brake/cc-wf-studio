@@ -18,7 +18,7 @@ pnpm add -D @cc-wf-studio/cli
 
 | Command | Description |
 |---|---|
-| `ccwf render <file>` | Print a Mermaid + execution-instructions Markdown bundle to stdout (or a file with `-o <path>`). |
+| `ccwf render <file>` | Print a Mermaid + execution-instructions Markdown bundle to stdout (or a file with `-o <path>`). `--agent <name>` phrases the execution instructions for that target agent and reports its target-compatibility warnings. |
 | `ccwf validate <paths...>` | Schema-check workflow JSON files — any mix of files and directories (searched recursively for `*.json`). Exit 0/1 (2 on unreadable files). `--json` for machine-readable output. `--agent <name>` (repeatable, or `all`) also preflights target compatibility; add `--strict` to turn those warnings into exit 1 for CI. |
 | `ccwf mcp --file <file>` | Run the cc-wf-studio stdio MCP server in-process against `<file>`. |
 | `ccwf export <file>` | Materialise the workflow as agent-skill files for one or more target agents (`--agent <name>`, repeatable, or `--agent all`; default `claude-code`). Multi-agent runs are atomic: any conflict aborts before anything is written. `--dry-run` previews the planned files without writing. `--json` for machine-readable output (works with `--dry-run` too). |
@@ -35,7 +35,10 @@ pnpm add -D @cc-wf-studio/cli
 ccwf render ./.vscode/workflows/my-workflow.json            # Markdown (default)
 ccwf render ./.vscode/workflows/my-workflow.json -f mermaid # ```mermaid block only
 ccwf render ./.vscode/workflows/my-workflow.json -o out.md  # write to a file instead of stdout
+ccwf render ./.vscode/workflows/my-workflow.json --agent codex # instructions phrased for Codex
 ```
+
+`--agent <name>` (one of `claude-code`, `antigravity`, `codex`, `copilot`, `cursor`, `gemini`, `roo-code`; default `claude-code`) phrases the execution-instructions section for that agent's tools — the same wording `ccwf export --agent <name>` writes into the agent's `SKILL.md`. When the flag is passed it also prints the target-compatibility warnings `ccwf validate --agent <name>` would report (stderr only; never affects the exit code or the rendered stdout). The Mermaid diagram is agent-agnostic, so `-f mermaid` output is unchanged by `--agent`.
 
 ### `ccwf validate`
 

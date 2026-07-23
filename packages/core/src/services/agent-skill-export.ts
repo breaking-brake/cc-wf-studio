@@ -83,6 +83,26 @@ function defaultSkillDescription(workflow: Workflow): string {
 }
 
 /**
+ * Generate the execution-instructions Markdown for a given non-Claude agent,
+ * phrased for that agent's tools — exactly the instructions section that
+ * `generateAgentSkillContent` embeds in the exported SKILL.md.
+ */
+export function generateAgentExecutionInstructions(
+  workflow: Workflow,
+  agent: AgentSkillProvider,
+  options?: AgentSkillExportOptions
+): string {
+  const spec = AGENT_SKILL_SPECS[agent];
+  return generateExecutionInstructions(workflow, {
+    provider: spec.exportProvider,
+    highlightEnabled: options?.highlightEnabled,
+    ...(spec.passSubAgentFlowsToInstructions
+      ? { parentWorkflowName: nodeNameToFileName(workflow.name), subAgentFlows: workflow.subAgentFlows }
+      : {}),
+  });
+}
+
+/**
  * Generate the `SKILL.md` body for a given non-Claude agent.
  *
  * Identical structure across providers (YAML frontmatter + Mermaid +
@@ -94,7 +114,6 @@ export function generateAgentSkillContent(
   agent: AgentSkillProvider,
   options?: AgentSkillExportOptions
 ): string {
-  const spec = AGENT_SKILL_SPECS[agent];
   const skillName = nodeNameToFileName(workflow.name);
   const description = workflow.metadata?.description || defaultSkillDescription(workflow);
 
@@ -108,13 +127,7 @@ description: ${description}
     connections: workflow.connections,
   });
 
-  const instructions = generateExecutionInstructions(workflow, {
-    provider: spec.exportProvider,
-    highlightEnabled: options?.highlightEnabled,
-    ...(spec.passSubAgentFlowsToInstructions
-      ? { parentWorkflowName: skillName, subAgentFlows: workflow.subAgentFlows }
-      : {}),
-  });
+  const instructions = generateAgentExecutionInstructions(workflow, agent, options);
 
   const body = `# ${workflow.name}
 
