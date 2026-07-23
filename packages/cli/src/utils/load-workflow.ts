@@ -1,5 +1,5 @@
 /**
- * Read a workflow JSON file from disk and parse it.
+ * Read a workflow JSON file from disk (or stdin) and parse it.
  *
  * Used by every subcommand that takes a `<file>` argument. Errors are wrapped
  * so commander can surface a stable exit code (2) with a friendly stderr line
@@ -31,6 +31,31 @@ function looksLikeWorkflow(value: unknown): value is Workflow {
   );
 }
 
+function parseWorkflowSource(raw: string, sourceLabel: string): Workflow {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    throw new WorkflowLoadError(
+      `Invalid JSON in ${sourceLabel}: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+  if (looksLikeWorkflow(parsed)) {
+    return parsed;
+  }
+  // Sample/share files wrap the workflow: { meta: {...}, workflow: {...} }
+  const wrapped =
+    typeof parsed === 'object' && parsed !== null
+      ? (parsed as { workflow?: unknown }).workflow
+      : undefined;
+  if (looksLikeWorkflow(wrapped)) {
+    return wrapped;
+  }
+  throw new WorkflowLoadError(
+    `${sourceLabel} does not look like a workflow file: expected a top-level "nodes" array or a { meta, workflow } wrapper`
+  );
+}
+
 export async function loadWorkflowFromFile(filePath: string): Promise<{
   workflow: Workflow;
   absolutePath: string;
@@ -48,26 +73,40 @@ export async function loadWorkflowFromFile(filePath: string): Promise<{
       `Failed to read ${absolutePath}: ${error instanceof Error ? error.message : String(error)}`
     );
   }
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch (error) {
+  return { workflow: parseWorkflowSource(raw, absolutePath), absolutePath };
+}
+
+/** Label used wherever a file path would appear in reports and error messages. */
+export const STDIN_LABEL = '<stdin>';
+
+/**
+ * Read a workflow JSON document from stdin (the `-` argument convention).
+ *
+ * Refuses to read from an interactive terminal — a bare `ccwf validate -`
+ * with nothing piped in would otherwise hang waiting for input forever.
+ */
+export async function loadWorkflowFromStdin(): Promise<{
+  workflow: Workflow;
+  absolutePath: string;
+}> {
+  if (process.stdin.isTTY) {
     throw new WorkflowLoadError(
-      `Invalid JSON in ${absolutePath}: ${error instanceof Error ? error.message : String(error)}`
+      `No input on stdin: '-' expects workflow JSON piped in (e.g. \`cat wf.json | ccwf validate -\`).`
     );
   }
-  if (looksLikeWorkflow(parsed)) {
-    return { workflow: parsed, absolutePath };
+  const chunks: Buffer[] = [];
+  try {
+    for await (const chunk of process.stdin) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+  } catch (error) {
+    throw new WorkflowLoadError(
+      `Failed to read stdin: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
-  // Sample/share files wrap the workflow: { meta: {...}, workflow: {...} }
-  const wrapped =
-    typeof parsed === 'object' && parsed !== null
-      ? (parsed as { workflow?: unknown }).workflow
-      : undefined;
-  if (looksLikeWorkflow(wrapped)) {
-    return { workflow: wrapped, absolutePath };
+  const raw = Buffer.concat(chunks).toString('utf-8');
+  if (raw.trim() === '') {
+    throw new WorkflowLoadError('No input on stdin: received an empty stream.');
   }
-  throw new WorkflowLoadError(
-    `${absolutePath} does not look like a workflow file: expected a top-level "nodes" array or a { meta, workflow } wrapper`
-  );
+  return { workflow: parseWorkflowSource(raw, STDIN_LABEL), absolutePath: STDIN_LABEL };
 }

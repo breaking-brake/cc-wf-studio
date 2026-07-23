@@ -3,6 +3,9 @@
  *
  * Accepts any mix of files and directories; a directory expands to every
  * `*.json` under it (recursive, skipping `node_modules` and dot-directories).
+ * `-` reads a single workflow JSON document from stdin (reported as
+ * `<stdin>`), so generators can pipe output straight in without a temp file;
+ * repeated `-` arguments collapse to one stdin read.
  * Default output is a per-file report (errors on stderr) plus a summary line
  * when more than one file is checked; exit 0 when every file passes, 1 on
  * validation failure, 2 when a file cannot be read/parsed. `--json` prints a
@@ -29,7 +32,12 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { type ValidationError, validateAIGeneratedWorkflow } from '@cc-wf-studio/core';
 import { Command } from 'commander';
-import { WorkflowLoadError, loadWorkflowFromFile } from '../utils/load-workflow.js';
+import {
+  STDIN_LABEL,
+  WorkflowLoadError,
+  loadWorkflowFromFile,
+  loadWorkflowFromStdin,
+} from '../utils/load-workflow.js';
 import {
   SUPPORTED_AGENTS,
   type SupportedAgent,
@@ -94,6 +102,12 @@ async function collectJsonFiles(dir: string, out: string[]): Promise<void> {
 async function expandPaths(inputs: string[]): Promise<string[]> {
   const files: string[] = [];
   for (const input of inputs) {
+    // '-' is stdin, not a filesystem path; keep it verbatim (the final
+    // de-dup collapses repeated '-' so stdin is only consumed once).
+    if (input === '-') {
+      files.push(input);
+      continue;
+    }
     const absolute = path.resolve(input);
     let stats: Awaited<ReturnType<typeof fs.stat>>;
     try {
@@ -117,11 +131,12 @@ async function expandPaths(inputs: string[]): Promise<string[]> {
 
 async function validateFile(file: string, agents: SupportedAgent[]): Promise<FileReport> {
   let workflow: Awaited<ReturnType<typeof loadWorkflowFromFile>>['workflow'];
+  const label = file === '-' ? STDIN_LABEL : file;
   try {
-    ({ workflow } = await loadWorkflowFromFile(file));
+    ({ workflow } = file === '-' ? await loadWorkflowFromStdin() : await loadWorkflowFromFile(file));
   } catch (error) {
     if (error instanceof WorkflowLoadError) {
-      return { file, valid: false, loadError: error.message };
+      return { file: label, valid: false, loadError: error.message };
     }
     throw error;
   }
@@ -131,7 +146,7 @@ async function validateFile(file: string, agents: SupportedAgent[]): Promise<Fil
   const collect = (agent: SupportedAgent): string[] =>
     result.valid ? collectAgentCompatibilityWarnings(workflow, agent) : [];
   return {
-    file,
+    file: label,
     valid: result.valid,
     errors: result.errors,
     // Exactly one agent keeps the stable single-agent `warnings` shape;
@@ -176,9 +191,12 @@ export function registerValidateCommand(program: Command): void {
   program
     .command('validate')
     .description(
-      'Validate workflow JSON files against the cc-wf-studio schema. Accepts files and/or directories (directories are searched recursively for *.json).'
+      "Validate workflow JSON files against the cc-wf-studio schema. Accepts files and/or directories (directories are searched recursively for *.json); '-' reads workflow JSON from stdin."
     )
-    .argument('<paths...>', 'Workflow JSON files and/or directories containing them.')
+    .argument(
+      '<paths...>',
+      "Workflow JSON files and/or directories containing them; '-' reads from stdin."
+    )
     .option('--json', 'Print the machine-readable result JSON to stdout.', false)
     .option<SupportedAgent[]>(
       '--agent <name>',
