@@ -14,12 +14,10 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import {
   type AgentSkillProvider,
-  type ExportTarget,
   type PlannedExportFile,
-  type Workflow,
-  agentSkillProviderToTarget,
-  collectIgnoredFieldWarnings,
-  describeClaudeCodeOnlyNodes,
+  WORKFLOW_TARGET_AGENTS,
+  type WorkflowTargetAgent,
+  collectAgentCompatibilityWarnings,
   nodeNameToFileName,
   planAgentSkillFiles,
   planWorkflowExportFiles,
@@ -28,16 +26,9 @@ import { Command, InvalidArgumentError } from 'commander';
 import { WorkflowLoadError, loadWorkflowFromFile } from '../utils/load-workflow.js';
 
 const CLAUDE_CODE_AGENT = 'claude-code' as const;
-export const SUPPORTED_AGENTS = [
-  CLAUDE_CODE_AGENT,
-  'antigravity',
-  'codex',
-  'copilot',
-  'cursor',
-  'gemini',
-  'roo-code',
-] as const;
-export type SupportedAgent = (typeof SUPPORTED_AGENTS)[number];
+export const SUPPORTED_AGENTS = WORKFLOW_TARGET_AGENTS;
+export type SupportedAgent = WorkflowTargetAgent;
+export { collectAgentCompatibilityWarnings };
 
 export interface ExportRunOptions {
   /** Path to the workflow JSON. */
@@ -82,32 +73,6 @@ async function pathExists(target: string): Promise<boolean> {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
     throw error;
   }
-}
-
-/**
- * Target-compatibility warnings for exporting `workflow` to `agent`:
- * Claude Code-only nodes the agent cannot execute, plus every configured
- * node field the target ignores. Shared by `ccwf export` / `ccwf run`
- * (printed before writing files) and `ccwf validate --agent` (preflight,
- * no files written).
- */
-export function collectAgentCompatibilityWarnings(
-  workflow: Workflow,
-  agent: SupportedAgent
-): string[] {
-  const warnings: string[] = [];
-  const claudeOnlyNodes = describeClaudeCodeOnlyNodes(workflow);
-  if (agent !== CLAUDE_CODE_AGENT && claudeOnlyNodes.length > 0) {
-    warnings.push(
-      `this workflow contains Claude Code-only node(s) that ${agent} cannot execute: ${claudeOnlyNodes.join(', ')}.`
-    );
-  }
-  const target: ExportTarget =
-    agent === CLAUDE_CODE_AGENT
-      ? 'claudeCode'
-      : agentSkillProviderToTarget(agent as AgentSkillProvider);
-  warnings.push(...collectIgnoredFieldWarnings(workflow, target));
-  return warnings;
 }
 
 /**

@@ -4,7 +4,7 @@ MCP (Model Context Protocol) server toolkit for [cc-wf-studio](https://github.co
 
 > One of the three interfaces sharing a workflow file: this MCP server, the [`@cc-wf-studio/cli`](https://www.npmjs.com/package/@cc-wf-studio/cli), and the [`cc-wf-studio` VSCode extension](https://marketplace.visualstudio.com/items?itemName=breaking-brake.cc-wf-studio). See the [monorepo README](https://github.com/breaking-brake/cc-wf-studio#readme) for the bigger picture.
 
-The package is the deduplicated home of the 6 cc-wf-studio MCP tools. Both the VSCode extension (canvas mode, HTTP transport) and the standalone bin (file mode, stdio transport) configure the same tool registrations through a shared factory.
+The package is the deduplicated home of the 7 cc-wf-studio MCP tools. Both the VSCode extension (canvas mode, HTTP transport) and the standalone bin (file mode, stdio transport) configure the same tool registrations through a shared factory.
 
 ## Install
 
@@ -50,6 +50,7 @@ The bin speaks stdio MCP â€” point an MCP client (Claude Code, MCP Inspector, â€
 |---|---|
 | `get_workflow_schema` | Return the workflow schema in TOON format. |
 | `get_current_workflow` | Return the current workflow + revision. |
+| `validate_workflow` | Validate a workflow draft without persisting anything; optional `agent` adds target-compatibility warnings. |
 | `apply_workflow` | Validate + persist a workflow. Honours `expectedRevision` for optimistic locking. |
 | `update_nodes` | Partial node updates (more token-efficient than `apply_workflow`). |
 | `list_available_agents` | Enumerate `~/.claude/agents/*.md` (user) and `<project>/.claude/agents/*.md` (project). |

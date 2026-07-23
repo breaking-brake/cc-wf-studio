@@ -13,6 +13,8 @@
 import {
   type BaseNode,
   NodeType,
+  WORKFLOW_TARGET_AGENTS,
+  collectAgentCompatibilityWarnings,
   validateAIGeneratedWorkflow,
   type Workflow,
   type WorkflowNode,
@@ -57,6 +59,7 @@ interface ToolText {
   applyWorkflowParamDescription: string;
   applyChangeDescriptionParam: string;
   applyRevisionParamDescription: string;
+  validateWorkflowDescription: string;
   updateNodesDescription: string;
   updateNodesChangeDescriptionParam: string;
   highlightGroupNodeDescription: string;
@@ -75,6 +78,8 @@ const TOOL_TEXT: Record<WorkflowMcpMode, ToolText> = {
       'A brief description of the changes being made (e.g., "Added error handling step after API call"). Shown to the user in the review dialog.',
     applyRevisionParamDescription:
       'Workflow revision from get_current_workflow for conflict detection. If provided and the workflow has been modified since, the apply will be rejected or a warning shown.',
+    validateWorkflowDescription:
+      'Validate a workflow JSON draft WITHOUT applying it to the canvas. Checks schema validity and, when "agent" is provided, also reports target-compatibility warnings (Claude Code-only nodes the agent cannot execute, configured fields that target ignores). No side effects: nothing is applied, no review dialog is shown, and no sub-agent files are created. Use this to check a draft before apply_workflow.',
     updateNodesDescription:
       'Update specific nodes in the current workflow by ID. More efficient than apply_workflow for partial changes. Fetches the current workflow, merges the specified node changes, validates the result, and applies to the canvas. Only updates existing nodes — use apply_workflow to add or remove nodes.',
     updateNodesChangeDescriptionParam:
@@ -94,6 +99,8 @@ const TOOL_TEXT: Record<WorkflowMcpMode, ToolText> = {
       'A brief description of the changes being made (e.g., "Added error handling step after API call"). Not displayed in file mode; safe to omit.',
     applyRevisionParamDescription:
       'Workflow revision from get_current_workflow for conflict detection. If provided and the file has changed since it was read, the write is rejected with a revision-conflict error.',
+    validateWorkflowDescription:
+      'Validate a workflow JSON draft WITHOUT writing the workflow file. Checks schema validity and, when "agent" is provided, also reports target-compatibility warnings (Claude Code-only nodes the agent cannot execute, configured fields that target ignores). No side effects: the file is not touched. Use this to check a draft before apply_workflow.',
     updateNodesDescription:
       'Update specific nodes in the current workflow by ID. More efficient than apply_workflow for partial changes. Fetches the current workflow, merges the specified node changes, validates the result, and writes it back to the workflow file. Only updates existing nodes — use apply_workflow to add or remove nodes.',
     updateNodesChangeDescriptionParam:
@@ -112,6 +119,7 @@ export function registerWorkflowTools(
   registerGetCurrentWorkflow(server, adapter, text);
   registerGetWorkflowSchema(server, adapter);
   registerApplyWorkflow(server, adapter, text);
+  registerValidateWorkflow(server, text);
   registerListAvailableAgents(server, adapter);
   registerUpdateNodes(server, adapter, text);
   registerHighlightGroupNode(server, adapter, text);
@@ -225,6 +233,54 @@ function registerApplyWorkflow(
           ...(plannedFiles.length > 0
             ? { autoCreatedFiles: plannedFiles.map((f) => f.filePath) }
             : {}),
+        });
+      } catch (error) {
+        return fail({ success: false, error: errorMessage(error) });
+      }
+    }
+  );
+}
+
+function registerValidateWorkflow(server: McpServer, text: ToolText): void {
+  server.tool(
+    'validate_workflow',
+    text.validateWorkflowDescription,
+    {
+      workflow: z.string().describe('The workflow JSON string to validate'),
+      agent: z
+        .enum(WORKFLOW_TARGET_AGENTS)
+        .optional()
+        .describe(
+          'Optional target agent to preflight compatibility for. When set (and the workflow is schema-valid), the result includes the same warnings `ccwf validate --agent` reports: Claude Code-only nodes the agent cannot execute, plus configured node fields that target ignores. Warnings never make the workflow invalid.'
+        ),
+    },
+    async ({ workflow: workflowJson, agent }) => {
+      try {
+        let parsedWorkflow: unknown;
+        try {
+          parsedWorkflow = JSON.parse(workflowJson);
+        } catch {
+          return fail({
+            success: false,
+            error: 'Invalid JSON: Failed to parse workflow string',
+          });
+        }
+
+        const validation = validateAIGeneratedWorkflow(parsedWorkflow);
+        // Compatibility warnings only for a schema-valid workflow —
+        // malformed node data would produce garbage reports.
+        const warnings =
+          agent && validation.valid
+            ? collectAgentCompatibilityWarnings(parsedWorkflow as Workflow, agent)
+            : undefined;
+
+        // An invalid draft is still a successful validation run: return a
+        // normal result so the agent can read the errors and iterate.
+        return ok({
+          success: true,
+          valid: validation.valid,
+          ...(validation.valid ? {} : { validationErrors: validation.errors }),
+          ...(warnings ? { warnings } : {}),
         });
       } catch (error) {
         return fail({ success: false, error: errorMessage(error) });
