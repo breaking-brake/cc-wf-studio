@@ -17,6 +17,38 @@ Entry format:
 
 ---
 
+## 2026-07-23 — Localize remaining hardcoded English strings in active UI
+- **User value**: a user running VSCode in Japanese, Korean, or Chinese no
+  longer hits stray English strings in otherwise-localized surfaces: the
+  toolbar's "Stop MCP Server" tooltip, the What's New "View changes on
+  GitHub" tooltip, the Codex dialog "Open documentation" tooltip, the four
+  canvas toggle switch aria-labels, the shared tag-input "Required" lock
+  label, wizard step navigation, the Sub-Agent Flow editor dialog label,
+  and the Claude API upload dialog's tooltips/placeholders — screen-reader
+  users get these in their UI language too.
+- **Issue/PR**: #897 / PR from `claude/localize-active-ui-sweep`
+- **Outcome**: done — 18 new keys added to `translation-keys.ts` and all 5
+  locale files (en/ja/ko/zh-CN/zh-TW) per `.claude/rules/translation.md`
+  (product terms MCP / PulseMCP / Claude Platform / Sub-Agent Flow /
+  access_token kept English); 11 components switched from hardcoded
+  attributes to `t(...)`. Guard step this round closed #895 (merged as
+  #896). Deliberately out of scope: `McpServerSection.tsx` (discontinued
+  chat panel, maintain-only), `SkillCreationDialog`'s tool-name example
+  placeholder and `CommentaryOptionsDropdown`'s `placeholder="English"`
+  (both are literal example values), and the full localization of
+  `ClaudeApiUploadDialog` — discovered this round to be almost entirely
+  unlocalized visible text (~3600 lines, one `t()` call); only its
+  attribute-level strings were covered here.
+- **Next proposals**:
+  - Full localization of `ClaudeApiUploadDialog` visible text (headings,
+    buttons, confirm dialogs, status messages) — big but mechanical;
+    the `claudeApi.*` namespace started this round is the landing zone.
+  - Right-click context menu on canvas nodes/pane exposing the now-complete
+    clipboard verbs (Copy/Cut/Paste/Duplicate/Delete) — discoverability for
+    mouse-first users; React Flow `onNodeContextMenu`/`onPaneContextMenu`.
+  - Manual E2E still queued: verify `copy`/`cut`/`paste` DOM events fire in
+    webviews on all three OSes.
+
 ## 2026-07-23 — Cut the canvas selection with Ctrl/Cmd+X
 - **User value**: a user can now cut the selected nodes (with the edges
   between them) and paste them elsewhere — including into a different

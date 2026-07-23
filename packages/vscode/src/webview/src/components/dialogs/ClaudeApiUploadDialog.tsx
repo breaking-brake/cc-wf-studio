@@ -547,6 +547,7 @@ const McpServerUrlForm: React.FC<{
   onTokenChange?: (id: string, token: string) => void;
   serverOwners?: Record<string, string[]>;
 }> = ({ serverIds, urls, onUrlChange, tokens, onTokenChange, serverOwners }) => {
+  const { t } = useTranslation();
   const [authOpen, setAuthOpen] = useState(false);
   const [copiedCmd, setCopiedCmd] = useState(false);
   const hasAnyToken = tokens && Object.values(tokens).some((t) => t.trim());
@@ -611,9 +612,10 @@ const McpServerUrlForm: React.FC<{
               color: 'var(--vscode-textLink-foreground)',
               textDecoration: 'underline',
             }}
-            title="Search MCP server URLs on PulseMCP"
+            title={t('claudeApi.searchOnPulseMcp.tooltip')}
           >
-            Search on PulseMCP <ExternalLink size={10} style={{ verticalAlign: 'middle' }} />
+            {t('claudeApi.searchOnPulseMcp')}{' '}
+            <ExternalLink size={10} style={{ verticalAlign: 'middle' }} />
           </span>
         </div>
       </div>
@@ -794,7 +796,7 @@ const McpServerUrlForm: React.FC<{
                       <input
                         id={`mcp-bearer-${id}`}
                         type="password"
-                        placeholder="Paste token here"
+                        placeholder={t('claudeApi.pasteTokenPlaceholder')}
                         value={tokens?.[id] || ''}
                         onChange={(e) => {
                           const val = e.target.value.replace(/^Bearer\s+/i, '');
@@ -959,7 +961,7 @@ const McpServerUrlForm: React.FC<{
                     <input
                       id={`mcp-token-${id}`}
                       type="password"
-                      placeholder="Paste access_token here"
+                      placeholder={t('claudeApi.pasteAccessTokenPlaceholder')}
                       value={tokens?.[id] || ''}
                       onChange={(e) => onTokenChange(id, e.target.value)}
                       style={{
@@ -2110,7 +2112,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                           color: 'var(--vscode-textLink-foreground)',
                           fontSize: '11px',
                         }}
-                        title="Open in Claude Platform"
+                        title={t('claudeApi.openInClaudePlatform')}
                       >
                         platform.claude.com
                         <ExternalLink size={11} />
@@ -2873,7 +2875,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                     .map((s) => ({ value: s.id, label: s.displayTitle }))}
                                   selectedValues={additionalSkillIds}
                                   onChange={handleAdditionalSkillsChange}
-                                  placeholder="Select uploaded skills..."
+                                  placeholder={t('claudeApi.selectUploadedSkills')}
                                   lockedValues={requiredSkillIds}
                                 />
                                 {missingDependentSkillNames.length > 0 && (
@@ -3165,7 +3167,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                     .map((s) => ({ value: s.id, label: s.displayTitle }))}
                                   selectedValues={additionalSkillIds}
                                   onChange={handleAdditionalSkillsChange}
-                                  placeholder="Select uploaded skills..."
+                                  placeholder={t('claudeApi.selectUploadedSkills')}
                                   lockedValues={requiredSkillIds}
                                 />
                                 {missingDependentSkillNames.length > 0 && (
@@ -3380,7 +3382,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                   }
                                 }
                               }}
-                              placeholder="Enter your test prompt..."
+                              placeholder={t('claudeApi.testPromptPlaceholder')}
                               rows={2}
                               style={{
                                 width: '100%',
@@ -3428,9 +3430,9 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                       fontSize: '11px',
                                       whiteSpace: 'nowrap',
                                     }}
-                                    title="Reset conversation"
+                                    title={t('claudeApi.resetConversation')}
                                   >
-                                    Reset Conversation
+                                    {t('claudeApi.resetConversation')}
                                   </button>
                                 )}
                               </div>

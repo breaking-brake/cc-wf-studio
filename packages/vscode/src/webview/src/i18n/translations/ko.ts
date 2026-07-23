@@ -11,6 +11,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   optional: '선택 사항',
   cancel: '취소',
   'common.close': '닫기',
+  'common.required': '필수',
+  'common.wizardSteps': '마법사 단계',
   'common.cancel': '취소',
   'loading.importWorkflow': '워크플로 가져오는 중...',
   'loading.openWorkflow': '워크플로 여는 중...',
@@ -59,8 +61,10 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.switchToSelection': '선택 모드로 전환',
   'toolbar.edgeAnimation.enable': '엣지 애니메이션 활성화',
   'toolbar.edgeAnimation.disable': '엣지 애니메이션 비활성화',
+  'toolbar.edgeAnimation.label': '엣지 애니메이션',
   'toolbar.highlight.enable': '그룹 노드 하이라이트 활성화',
   'toolbar.highlight.disable': '그룹 노드 하이라이트 비활성화',
+  'toolbar.highlight.label': '그룹 노드 하이라이트',
   'toolbar.highlight.confirmDisable.title': '그룹 노드 하이라이트 비활성화',
   'toolbar.highlight.confirmDisable.message':
     '현재 그룹 노드가 하이라이트되어 있습니다. 하이라이트를 비활성화하시겠습니까?',
@@ -70,6 +74,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.redo': '다시 실행',
   'toolbar.scrollMode.switchToClassic': 'Classic 모드로 전환 (스크롤 = 줌)',
   'toolbar.scrollMode.switchToFreehand': 'Freehand 모드로 전환 (스크롤 = 팬)',
+  'toolbar.scrollMode.label': '캔버스 스크롤 모드',
+  'toolbar.interactionMode.label': '캔버스 조작 모드',
+  'toolbar.stopMcpServer': 'MCP 서버 중지',
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.hidden': '숨김',
@@ -123,6 +130,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.whatsNew': '새 소식',
   'whatsNew.title': '새 소식',
   'whatsNew.viewAllReleases': '모든 업데이트 보기',
+  'whatsNew.viewChangesOnGitHub': 'GitHub에서 변경 사항 보기',
   'whatsNew.showBadge': '읽지 않은 배지',
 
   // Copilot Execution Mode
@@ -220,6 +228,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'codex.error.promptTooLong': '프롬프트는 10,000자 이내로 입력하세요',
   'codex.error.modelRequired': '모델 이름이 필요합니다',
   'codex.nameHelp': '영숫자, 하이픈, 밑줄만 사용 가능',
+  'codex.openDocumentation': '문서 열기',
 
   // SubAgentFlow Node (Feature: 089-subworkflow)
   'node.subAgentFlow.title': 'Sub-Agent Flow',
@@ -244,6 +253,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'subAgentFlow.dialog.close': '닫고 메인 워크플로우로 돌아가기',
   'subAgentFlow.dialog.submit': '확정하고 워크플로우에 추가',
   'subAgentFlow.dialog.cancel': '취소하고 변경 사항 삭제',
+  'subAgentFlow.dialog.ariaLabel': 'Sub-Agent Flow 편집기',
   'subAgentFlow.generateNameWithAI': 'AI로 이름 생성',
 
   // SubAgentFlow AI Edit
@@ -1099,6 +1109,14 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.builtIn.plan.defaultPrompt': '다음 요구사항에 대한 구현 계획을 설계하세요:',
 
   // Claude API Upload Dialog
+  'claudeApi.searchOnPulseMcp': 'PulseMCP에서 검색',
+  'claudeApi.searchOnPulseMcp.tooltip': 'PulseMCP에서 MCP 서버 URL 검색',
+  'claudeApi.pasteTokenPlaceholder': '여기에 토큰 붙여넣기',
+  'claudeApi.pasteAccessTokenPlaceholder': '여기에 access_token 붙여넣기',
+  'claudeApi.openInClaudePlatform': 'Claude Platform에서 열기',
+  'claudeApi.selectUploadedSkills': '업로드된 스킬 선택...',
+  'claudeApi.testPromptPlaceholder': '테스트 프롬프트 입력...',
+  'claudeApi.resetConversation': '대화 재설정',
   'claudeApi.description':
     '워크플로우를 Agent Skills로 Claude API에 업로드하고 Messages API를 통해 실행할 수 있습니다.\nMCP 서버, 코드 실행, 기타 스킬과 결합하여 문서 처리, 데이터 분석, 고객 지원 등 전문 AI 에이전트를 API로 공개할 수 있습니다.',
 

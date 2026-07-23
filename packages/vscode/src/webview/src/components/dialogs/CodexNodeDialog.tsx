@@ -572,7 +572,7 @@ export function CodexNodeDialog({ isOpen, onClose }: CodexNodeDialogProps) {
                         cursor: 'pointer',
                         color: 'var(--vscode-textLink-foreground)',
                       }}
-                      title="Open documentation"
+                      title={t('codex.openDocumentation')}
                     >
                       <ExternalLink size={12} />
                     </button>

@@ -11,6 +11,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   optional: '選填',
   cancel: '取消',
   'common.close': '關閉',
+  'common.required': '必填',
+  'common.wizardSteps': '精靈步驟',
   'common.cancel': '取消',
   'loading.importWorkflow': '正在匯入工作流程...',
   'loading.openWorkflow': '正在開啟工作流程...',
@@ -59,8 +61,10 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.switchToSelection': '切換到選擇模式',
   'toolbar.edgeAnimation.enable': '啟用邊動畫',
   'toolbar.edgeAnimation.disable': '停用邊動畫',
+  'toolbar.edgeAnimation.label': '邊動畫',
   'toolbar.highlight.enable': '啟用群組節點高亮',
   'toolbar.highlight.disable': '停用群組節點高亮',
+  'toolbar.highlight.label': '群組節點高亮',
   'toolbar.highlight.confirmDisable.title': '停用群組節點高亮',
   'toolbar.highlight.confirmDisable.message': '目前有群組節點正在高亮顯示。確定要停用高亮嗎？',
   'toolbar.highlight.confirmDisable.confirm': '停用',
@@ -69,6 +73,9 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.redo': '重做',
   'toolbar.scrollMode.switchToClassic': '切換到Classic模式（滾動=縮放）',
   'toolbar.scrollMode.switchToFreehand': '切換到Freehand模式（滾動=平移）',
+  'toolbar.scrollMode.label': '畫布捲動模式',
+  'toolbar.interactionMode.label': '畫布互動模式',
+  'toolbar.stopMcpServer': '停止MCP伺服器',
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.hidden': '隱藏',
@@ -120,6 +127,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.whatsNew': '更新內容',
   'whatsNew.title': '更新內容',
   'whatsNew.viewAllReleases': '查看所有更新內容',
+  'whatsNew.viewChangesOnGitHub': '在GitHub上檢視變更',
   'whatsNew.showBadge': '未讀徽章',
 
   // Copilot Execution Mode
@@ -215,6 +223,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'codex.error.promptTooLong': '提示詞不能超過10,000個字元',
   'codex.error.modelRequired': '模型名稱為必填',
   'codex.nameHelp': '只能使用字母、數字、連字符和底線',
+  'codex.openDocumentation': '開啟文件',
 
   // SubAgentFlow Node (Feature: 089-subworkflow)
   'node.subAgentFlow.title': 'Sub-Agent Flow',
@@ -239,6 +248,7 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'subAgentFlow.dialog.close': '關閉並返回主工作流程',
   'subAgentFlow.dialog.submit': '確認並新增到工作流程',
   'subAgentFlow.dialog.cancel': '取消並捨棄變更',
+  'subAgentFlow.dialog.ariaLabel': 'Sub-Agent Flow編輯器',
   'subAgentFlow.generateNameWithAI': '使用 AI 生成名稱',
 
   // SubAgentFlow AI Edit
@@ -1069,6 +1079,14 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.builtIn.plan.defaultPrompt': '為以下需求設計實作計畫：',
 
   // Claude API Upload Dialog
+  'claudeApi.searchOnPulseMcp': '在PulseMCP上搜尋',
+  'claudeApi.searchOnPulseMcp.tooltip': '在PulseMCP上搜尋MCP伺服器URL',
+  'claudeApi.pasteTokenPlaceholder': '在此貼上權杖',
+  'claudeApi.pasteAccessTokenPlaceholder': '在此貼上access_token',
+  'claudeApi.openInClaudePlatform': '在Claude Platform中開啟',
+  'claudeApi.selectUploadedSkills': '選擇已上傳的技能...',
+  'claudeApi.testPromptPlaceholder': '輸入測試提示詞...',
+  'claudeApi.resetConversation': '重設對話',
   'claudeApi.description':
     '將工作流程作為 Agent Skills 上傳到 Claude API，並透過 Messages API 執行。\n結合 MCP 伺服器、程式碼執行和其他技能，您可以將專業 AI 代理作為 API 發佈，用於文件處理、資料分析、客戶支援等場景。',
 

@@ -1370,7 +1370,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           type="button"
           onClick={() => vscode.postMessage({ type: 'STOP_MCP_SERVER' })}
-          title="Stop MCP Server"
+          title={t('toolbar.stopMcpServer')}
           style={{
             display: 'inline-flex',
             alignItems: 'center',

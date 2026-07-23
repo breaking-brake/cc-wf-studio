@@ -163,7 +163,7 @@ export const HighlightToggle: React.FC = () => {
                     checked={isHighlightEnabled}
                     onCheckedChange={() => handleDisableHighlight()}
                     onClick={(e) => e.stopPropagation()}
-                    aria-label="Group node highlight"
+                    aria-label={t('toolbar.highlight.label')}
                     style={{
                       all: 'unset',
                       width: '32px',

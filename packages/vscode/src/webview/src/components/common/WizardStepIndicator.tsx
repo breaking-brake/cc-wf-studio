@@ -10,12 +10,15 @@
  * Accessibility: Properly structured with <nav>, <ol role="list">, and aria-current="step"
  */
 
+import { useTranslation } from '../../i18n/i18n-context';
+
 interface WizardStepIndicatorProps {
   currentStep: number;
   totalSteps: number;
 }
 
 export function WizardStepIndicator({ currentStep, totalSteps }: WizardStepIndicatorProps) {
+  const { t } = useTranslation();
   const steps = Array.from({ length: totalSteps }, (_, i) => i + 1);
 
   return (
@@ -23,7 +26,7 @@ export function WizardStepIndicator({ currentStep, totalSteps }: WizardStepIndic
       style={{
         marginBottom: '20px',
       }}
-      aria-label="Wizard steps"
+      aria-label={t('common.wizardSteps')}
     >
       <ol
         style={{
