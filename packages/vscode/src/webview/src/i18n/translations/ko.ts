@@ -405,6 +405,14 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'canvas.deleteNode.tooltip': '노드 삭제',
   'canvas.deleteEdge.tooltip': '연결 삭제',
   'canvas.resizeSidebar': '사이드바 크기 조절',
+
+  // Canvas context menu
+  'contextMenu.copy': '복사',
+  'contextMenu.cut': '잘라내기',
+  'contextMenu.paste': '붙여넣기',
+  'contextMenu.duplicate': '복제',
+  'contextMenu.delete': '삭제',
+  'contextMenu.selectAll': '모두 선택',
   'announcement.dismiss': '공지 닫기',
 
   // Delete Confirmation Dialog

@@ -408,6 +408,14 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'canvas.deleteNode.tooltip': 'Delete node',
   'canvas.deleteEdge.tooltip': 'Delete connection',
   'canvas.resizeSidebar': 'Resize sidebar',
+
+  // Canvas context menu
+  'contextMenu.copy': 'Copy',
+  'contextMenu.cut': 'Cut',
+  'contextMenu.paste': 'Paste',
+  'contextMenu.duplicate': 'Duplicate',
+  'contextMenu.delete': 'Delete',
+  'contextMenu.selectAll': 'Select All',
   'announcement.dismiss': 'Dismiss announcement',
 
   // Delete Confirmation Dialog
