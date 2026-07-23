@@ -406,6 +406,7 @@ const AuthCodeSnippet: React.FC<{
   mcpServers: Array<{ id: string; url: string }>;
   lang: SampleCodeLang;
 }> = ({ mcpServers, lang }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [copiedCmd, setCopiedCmd] = useState(false);
   const code = generateAuthSampleCode(lang, mcpServers);
@@ -441,7 +442,7 @@ const AuthCodeSnippet: React.FC<{
         >
           ▶
         </span>
-        Need authentication?
+        {t('claudeApi.needAuthentication')}
       </button>
       {open && (
         <div>
@@ -453,7 +454,7 @@ const AuthCodeSnippet: React.FC<{
               lineHeight: '1.5',
             }}
           >
-            For MCP servers requiring OAuth, obtain an access_token via{' '}
+            {t('claudeApi.authIntro.before')}{' '}
             <span
               role="button"
               tabIndex={0}
@@ -473,7 +474,7 @@ const AuthCodeSnippet: React.FC<{
             >
               MCP Inspector <ExternalLink size={10} style={{ verticalAlign: 'middle' }} />
             </span>
-            :
+            {t('claudeApi.authIntro.after')}
           </div>
           <ol
             style={{
@@ -485,7 +486,8 @@ const AuthCodeSnippet: React.FC<{
             }}
           >
             <li style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-              Run: <code style={{ fontSize: '10px' }}>npx @modelcontextprotocol/inspector</code>
+              {t('claudeApi.authStep.run')}{' '}
+              <code style={{ fontSize: '10px' }}>npx @modelcontextprotocol/inspector</code>
               <span
                 role="button"
                 tabIndex={0}
@@ -508,19 +510,17 @@ const AuthCodeSnippet: React.FC<{
                     : 'var(--vscode-descriptionForeground)',
                   display: 'inline-flex',
                 }}
-                title={copiedCmd ? 'Copied!' : 'Copy to clipboard'}
+                title={copiedCmd ? t('claudeApi.copied') : t('claudeApi.copyToClipboard')}
               >
                 {copiedCmd ? <Check size={10} /> : <Copy size={10} />}
               </span>
             </li>
+            <li>{t('claudeApi.authStep.sidebar')}</li>
+            <li>{t('claudeApi.authStep.mainArea')}</li>
             <li>
-              In the sidebar: select transport type, enter the server URL, and click "Connect"
-            </li>
-            <li>In the main area: click "Open Auth Settings" → "Quick OAuth Flow"</li>
-            <li>
-              Complete authorization, expand "Access Token" at the bottom of OAuth Flow Progress,
-              and copy the <code style={{ fontSize: '10px' }}>access_token</code> value from the
-              JSON
+              {t('claudeApi.authStep.copyToken.before')}{' '}
+              <code style={{ fontSize: '10px' }}>access_token</code>{' '}
+              {t('claudeApi.authStep.copyToken.after')}
             </li>
           </ol>
           <CodeBlock
@@ -572,7 +572,7 @@ const McpServerUrlForm: React.FC<{
           gap: '6px',
         }}
       >
-        MCP Server URLs
+        {t('claudeApi.mcpServerUrls')}
         <span
           style={{
             fontSize: '10px',
@@ -584,7 +584,7 @@ const McpServerUrlForm: React.FC<{
             fontWeight: 400,
           }}
         >
-          required
+          {t('claudeApi.requiredBadge')}
         </span>
       </div>
       <div
@@ -595,9 +595,9 @@ const McpServerUrlForm: React.FC<{
           lineHeight: '1.4',
         }}
       >
-        Claude API supports remote HTTP MCP servers only (type: url).
+        {t('claudeApi.remoteMcpOnly')}
         <div style={{ marginTop: '4px', paddingLeft: '8px' }}>
-          ・Don't know the URL?{' '}
+          ・{t('claudeApi.dontKnowUrl')}{' '}
           <span
             role="button"
             tabIndex={0}
@@ -716,7 +716,7 @@ const McpServerUrlForm: React.FC<{
             >
               ▶
             </span>
-            Need authentication?
+            {t('claudeApi.needAuthentication')}
             {hasAnyToken && (
               <span
                 style={{
@@ -757,7 +757,7 @@ const McpServerUrlForm: React.FC<{
                     marginBottom: '4px',
                   }}
                 >
-                  Enter Bearer Token
+                  {t('claudeApi.enterBearerToken')}
                 </div>
                 <div
                   style={{
@@ -766,7 +766,7 @@ const McpServerUrlForm: React.FC<{
                     marginBottom: '8px',
                   }}
                 >
-                  Paste a PAT or API key.
+                  {t('claudeApi.pastePatOrApiKey')}
                 </div>
                 {serverIds.map((id) => (
                   <div key={`bearer-${id}`} style={{ marginBottom: '6px' }}>
@@ -841,7 +841,7 @@ const McpServerUrlForm: React.FC<{
                     color: 'var(--vscode-descriptionForeground)',
                   }}
                 >
-                  or
+                  {t('claudeApi.or')}
                 </span>
                 <div
                   style={{
@@ -869,10 +869,10 @@ const McpServerUrlForm: React.FC<{
                     marginBottom: '4px',
                   }}
                 >
-                  Obtain Token via OAuth
+                  {t('claudeApi.obtainTokenViaOauth')}
                 </div>
                 <div style={{ fontSize: '10px', marginBottom: '8px' }}>
-                  Use{' '}
+                  {t('claudeApi.useInspector.before')}{' '}
                   <span
                     role="button"
                     tabIndex={0}
@@ -892,7 +892,7 @@ const McpServerUrlForm: React.FC<{
                   >
                     MCP Inspector <ExternalLink size={10} style={{ verticalAlign: 'middle' }} />
                   </span>{' '}
-                  to complete OAuth flow:
+                  {t('claudeApi.useInspector.after')}
                 </div>
                 <ol
                   style={{
@@ -905,7 +905,7 @@ const McpServerUrlForm: React.FC<{
                   <li
                     style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}
                   >
-                    Run:{' '}
+                    {t('claudeApi.authStep.run')}{' '}
                     <code style={{ fontSize: '10px' }}>npx @modelcontextprotocol/inspector</code>
                     <span
                       role="button"
@@ -929,19 +929,17 @@ const McpServerUrlForm: React.FC<{
                           : 'var(--vscode-descriptionForeground)',
                         display: 'inline-flex',
                       }}
-                      title={copiedCmd ? 'Copied!' : 'Copy to clipboard'}
+                      title={copiedCmd ? t('claudeApi.copied') : t('claudeApi.copyToClipboard')}
                     >
                       {copiedCmd ? <Check size={10} /> : <Copy size={10} />}
                     </span>
                   </li>
+                  <li>{t('claudeApi.authStep.sidebar')}</li>
+                  <li>{t('claudeApi.authStep.mainArea')}</li>
                   <li>
-                    In the sidebar: select transport type, enter the server URL, and click "Connect"
-                  </li>
-                  <li>In the main area: click "Open Auth Settings" → "Quick OAuth Flow"</li>
-                  <li>
-                    Complete authorization, expand "Access Token" at the bottom of OAuth Flow
-                    Progress, and copy the <code style={{ fontSize: '10px' }}>access_token</code>{' '}
-                    value from the JSON
+                    {t('claudeApi.authStep.copyToken.before')}{' '}
+                    <code style={{ fontSize: '10px' }}>access_token</code>{' '}
+                    {t('claudeApi.authStep.copyToken.after')}
                   </li>
                 </ol>
                 {serverIds.map((id) => (
@@ -1365,10 +1363,10 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
       setSkills(result.skills);
       setState('skill-list');
     } catch (err) {
-      setSkillListError(err instanceof Error ? err.message : 'Failed to load skills');
+      setSkillListError(err instanceof Error ? err.message : t('claudeApi.loadSkillsFailed'));
       setState('skill-list');
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -1469,7 +1467,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
 
   const handleSaveApiKey = async () => {
     if (!apiKeyInput.startsWith('sk-ant-')) {
-      setApiKeyError('API key must start with "sk-ant-"');
+      setApiKeyError(t('claudeApi.apiKeyInvalidPrefix'));
       return;
     }
     try {
@@ -1478,7 +1476,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
       setApiKeyError(null);
       loadSkillList();
     } catch (err) {
-      setApiKeyError(err instanceof Error ? err.message : 'Failed to save API key');
+      setApiKeyError(err instanceof Error ? err.message : t('claudeApi.apiKeySaveFailed'));
     }
   };
 
@@ -1499,7 +1497,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
       setUploadingSkills((prev) => ({ ...prev, [skillName]: 'error' }));
       setUploadSkillErrors((prev) => ({
         ...prev,
-        [skillName]: err instanceof Error ? err.message : 'Upload failed',
+        [skillName]: err instanceof Error ? err.message : t('claudeApi.uploadFailed'),
       }));
     }
   };
@@ -1548,7 +1546,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
 
       setState('success');
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : 'Upload failed');
+      setUploadError(err instanceof Error ? err.message : t('claudeApi.uploadFailed'));
       setState('error');
     }
   };
@@ -1567,14 +1565,14 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
 
   const handleDeleteApiKey = () => {
     setConfirmAction({
-      title: 'Delete API Key',
-      message: 'Delete API key? You will need to enter a new key to continue.',
-      confirmLabel: 'Delete',
+      title: t('claudeApi.deleteApiKey'),
+      message: t('claudeApi.deleteApiKeyConfirm'),
+      confirmLabel: t('claudeApi.delete'),
       onConfirm: async () => {
         await clearAnthropicApiKey();
         setApiKeyInput('');
         setSkills([]);
-        setApiKeyError('API key has been deleted.');
+        setApiKeyError(t('claudeApi.apiKeyDeleted'));
         setConfirmAction(null);
       },
     });
@@ -1598,7 +1596,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
       setChatMessages([]);
       setActiveContainerId(null);
     }
-    setChatInput(title ? `/${title}` : 'Please execute the workflow.');
+    setChatInput(title ? `/${title}` : t('claudeApi.defaultTestPrompt'));
     setState('sample-code');
 
     // After upload, skill is always from studio
@@ -1662,7 +1660,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
     const title = displayTitle || selectedSkillDisplayTitle;
     setChatMessages([]);
     setActiveContainerId(null);
-    setChatInput(title ? `/${title}` : 'Please execute the workflow.');
+    setChatInput(title ? `/${title}` : t('claudeApi.defaultTestPrompt'));
     setIsExecuting(false);
     setState('sample-code');
     setSampleCodeTab('test');
@@ -1753,7 +1751,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
     setChatMessages([]);
     setActiveContainerId(null);
     const title = selectedSkillDisplayTitle;
-    setChatInput(title ? `/${title}` : 'Please execute the workflow.');
+    setChatInput(title ? `/${title}` : t('claudeApi.defaultTestPrompt'));
   };
 
   const handleSendMessage = async () => {
@@ -1824,7 +1822,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
         const lastIdx = updated.length - 1;
         updated[lastIdx] = {
           role: 'assistant',
-          content: err instanceof Error ? err.message : 'Execution failed',
+          content: err instanceof Error ? err.message : t('claudeApi.executionFailed'),
           isStreaming: false,
           isError: true,
         };
@@ -1844,12 +1842,8 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
   };
 
   const getTitle = (): string => {
-    if (state === 'sample-code') return 'API Test';
-    if (state === 'skill-list' || state === 'skill-list-loading') return 'Claude API';
-    if (state === 'confirm-upload' || state === 'uploading') return 'Claude API';
-    if (state === 'success') return 'Claude API';
-    if (state === 'error') return 'Claude API';
-    if (state === 'enter-api-key') return 'API Key Required';
+    if (state === 'sample-code') return t('claudeApi.title.apiTest');
+    if (state === 'enter-api-key') return t('claudeApi.title.apiKeyRequired');
     return 'Claude API';
   };
 
@@ -1910,7 +1904,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                     }}
                   >
                     <Spinner />
-                    Checking API key...
+                    {t('claudeApi.checkingApiKey')}
                   </div>
                 )}
 
@@ -1925,8 +1919,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                         margin: 0,
                       }}
                     >
-                      Enter your Anthropic API key to deploy and manage skills. The key will be
-                      stored securely in VS Code's secret storage. You can create an API key{' '}
+                      {t('claudeApi.enterApiKeyIntro')}{' '}
                       <span
                         role="button"
                         tabIndex={0}
@@ -1944,9 +1937,9 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                           gap: '2px',
                         }}
                       >
-                        here <ExternalLink size={11} />
+                        {t('claudeApi.enterApiKeyIntro.linkLabel')} <ExternalLink size={11} />
                       </span>
-                      .
+                      {t('claudeApi.enterApiKeyIntro.after')}
                     </Dialog.Description>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -1958,7 +1951,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                           fontWeight: 500,
                         }}
                       >
-                        API Key
+                        {t('claudeApi.apiKeyLabel')}
                       </label>
                       <input
                         id="anthropic-api-key"
@@ -2009,7 +2002,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                             marginRight: 'auto',
                           }}
                         >
-                          Delete API Key
+                          {t('claudeApi.deleteApiKey')}
                         </button>
                       )}
                       <button
@@ -2017,7 +2010,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                         onClick={skills.length > 0 ? handleBackToList : handleClose}
                         style={btnSecondary}
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </button>
                       <button
                         type="button"
@@ -2034,7 +2027,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                               }),
                         }}
                       >
-                        Save & Continue
+                        {t('claudeApi.saveAndContinue')}
                       </button>
                     </div>
                   </div>
@@ -2053,7 +2046,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                     }}
                   >
                     <Spinner />
-                    Loading skills...
+                    {t('claudeApi.loadingSkills')}
                   </div>
                 )}
 
@@ -2089,7 +2082,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                           color: 'var(--vscode-foreground)',
                         }}
                       >
-                        Uploaded Skills
+                        {t('claudeApi.uploadedSkills')}
                       </div>
                       <span
                         role="button"
@@ -2144,7 +2137,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                           fontSize: '13px',
                         }}
                       >
-                        No custom skills found. Upload your first workflow!
+                        {t('claudeApi.noSkillsFound')}
                       </div>
                     )}
 
@@ -2214,7 +2207,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                 whiteSpace: 'nowrap',
                               }}
                             >
-                              API Test
+                              {t('claudeApi.title.apiTest')}
                             </button>
                             <button
                               type="button"
@@ -2235,7 +2228,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                 whiteSpace: 'nowrap',
                               }}
                             >
-                              Delete
+                              {t('claudeApi.delete')}
                             </button>
                           </div>
                         ))}
@@ -2257,17 +2250,17 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                           marginRight: 'auto',
                         }}
                       >
-                        Change API Key
+                        {t('claudeApi.changeApiKey')}
                       </button>
                       <button type="button" onClick={handleClose} style={btnSecondary}>
-                        Close
+                        {t('common.close')}
                       </button>
                       <button
                         type="button"
                         onClick={() => setState('confirm-upload')}
                         style={btnPrimary}
                       >
-                        Upload New
+                        {t('claudeApi.uploadNew')}
                       </button>
                     </div>
                   </div>
@@ -2291,7 +2284,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                           marginBottom: '8px',
                         }}
                       >
-                        Workflow to upload:
+                        {t('claudeApi.workflowToUpload')}
                       </div>
                       <div
                         style={{
@@ -2301,7 +2294,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                           marginBottom: '4px',
                         }}
                       >
-                        {workflowName || 'Untitled'}
+                        {workflowName || t('claudeApi.untitled')}
                       </div>
                       {workflowDescription && (
                         <div
@@ -2331,13 +2324,11 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                         }}
                       >
                         <div style={{ fontWeight: 600, marginBottom: '4px' }}>
-                          This workflow contains MCP Tool nodes
+                          {t('claudeApi.mcpNodesWarning.title')}
                         </div>
                         <div style={{ marginBottom: '4px' }}>{canvasMcpServerIds.join(', ')}</div>
                         <div style={{ color: 'var(--vscode-descriptionForeground)' }}>
-                          Claude API only supports remote HTTP MCP servers (type: url). Local stdio
-                          servers cannot be used. You will need to set the server URLs in the Sample
-                          Code / Test screen after uploading.
+                          {t('claudeApi.mcpNodesWarning.body')}
                         </div>
                       </div>
                     )}
@@ -2365,7 +2356,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                         }}
                       >
                         <div style={{ fontWeight: 600, marginBottom: '4px' }}>
-                          This workflow depends on other skills
+                          {t('claudeApi.dependentSkills.title')}
                         </div>
                         {canvasDependentSkills.map((skill) => {
                           const isUploaded = skills.some((s) => s.displayTitle === skill.name);
@@ -2413,7 +2404,9 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                       cursor: 'pointer',
                                     }}
                                   >
-                                    {uploadState === 'error' ? 'Retry' : 'Upload'}
+                                    {uploadState === 'error'
+                                      ? t('claudeApi.retry')
+                                      : t('claudeApi.upload')}
                                   </button>
                                 )}
                               {uploadState === 'uploading' && (
@@ -2474,7 +2467,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                   : 1,
                               }}
                             >
-                              Upload All Missing
+                              {t('claudeApi.uploadAllMissing')}
                             </button>
                           </div>
                         )}
@@ -2488,8 +2481,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                 color: 'var(--vscode-descriptionForeground)',
                               }}
                             >
-                              Dependent skills must be uploaded before this skill can work
-                              correctly. You can still upload now and add dependencies later.
+                              {t('claudeApi.dependentSkills.note')}
                             </div>
                           )}
                       </div>
@@ -2503,15 +2495,15 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                         margin: 0,
                       }}
                     >
-                      If a skill with the same name already exists, a new version will be created.
+                      {t('claudeApi.sameNameNote')}
                     </Dialog.Description>
 
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                       <button type="button" onClick={handleBackToList} style={btnSecondary}>
-                        Back
+                        {t('claudeApi.back')}
                       </button>
                       <button type="button" onClick={handleUpload} style={btnPrimary}>
-                        Upload
+                        {t('claudeApi.upload')}
                       </button>
                     </div>
                   </div>
@@ -2530,7 +2522,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                     }}
                   >
                     <Spinner />
-                    Uploading to Claude API...
+                    {t('claudeApi.uploadingToApi')}
                   </div>
                 )}
 
@@ -2550,15 +2542,15 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                     >
                       <div style={{ fontSize: '13px', color: 'var(--vscode-foreground)' }}>
                         {result.isNewVersion
-                          ? 'New version created successfully!'
-                          : 'Skill uploaded successfully!'}
+                          ? t('claudeApi.newVersionCreated')
+                          : t('claudeApi.skillUploaded')}
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         <div
                           style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)' }}
                         >
-                          Skill ID:
+                          {t('claudeApi.skillIdLabel')}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <code
@@ -2588,7 +2580,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                               whiteSpace: 'nowrap',
                             }}
                           >
-                            {copied ? 'Copied!' : 'Copy'}
+                            {copied ? t('claudeApi.copied') : t('claudeApi.copy')}
                           </button>
                         </div>
                       </div>
@@ -2596,7 +2588,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                       <div
                         style={{ fontSize: '12px', color: 'var(--vscode-descriptionForeground)' }}
                       >
-                        Version: {result.version}
+                        {t('claudeApi.versionLabel', { version: result.version })}
                       </div>
 
                       {canvasDependentSkillNames.length > 0 && (
@@ -2608,7 +2600,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                               marginBottom: '4px',
                             }}
                           >
-                            Dependent Skills:
+                            {t('claudeApi.dependentSkillsLabel')}
                           </div>
                           {canvasDependentSkillNames.map((name) => {
                             const isUploaded = skills.some((s) => s.displayTitle === name);
@@ -2625,7 +2617,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                 }}
                               >
                                 {isUploaded ? '\u2705' : '\u274C'} {name}
-                                {!isUploaded && ' (not uploaded)'}
+                                {!isUploaded && ` ${t('claudeApi.notUploadedSuffix')}`}
                               </div>
                             );
                           })}
@@ -2635,21 +2627,21 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
 
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                       <button type="button" onClick={handleBackToList} style={btnSecondary}>
-                        Back to List
+                        {t('claudeApi.backToList')}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleShowSampleCode(result?.skillId, workflowName)}
                         style={btnSecondary}
                       >
-                        API Test
+                        {t('claudeApi.title.apiTest')}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleStartTest(undefined, workflowName)}
                         style={btnPrimary}
                       >
-                        Test
+                        {t('claudeApi.test')}
                       </button>
                     </div>
                   </div>
@@ -2668,7 +2660,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                         gap: '6px',
                       }}
                     >
-                      Skill: {selectedSkillId || result?.skillId}
+                      {t('claudeApi.skillLabel')} {selectedSkillId || result?.skillId}
                       {isFromStudio && (
                         <span
                           style={{
@@ -2678,7 +2670,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                             opacity: 0.7,
                           }}
                         >
-                          (uploaded by cc-wf-studio)
+                          {t('claudeApi.uploadedByStudio')}
                         </span>
                       )}
                     </div>
@@ -2694,15 +2686,15 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                         }}
                       >
                         <span className="codicon codicon-loading codicon-modifier-spin" />
-                        Loading skill details...
+                        {t('claudeApi.loadingSkillDetails')}
                       </div>
                     )}
 
                     {/* Tabs: Test / Code */}
                     <TabBar
                       tabs={[
-                        { id: 'test', label: 'Test' },
-                        { id: 'code', label: 'Code' },
+                        { id: 'test', label: t('claudeApi.test') },
+                        { id: 'code', label: t('claudeApi.tab.code') },
                       ]}
                       activeTab={sampleCodeTab}
                       onTabChange={(tab) => setSampleCodeTab(tab as 'test' | 'code')}
@@ -2740,7 +2732,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                 marginBottom: '6px',
                               }}
                             >
-                              Model
+                              {t('claudeApi.model')}
                             </div>
                             <select
                               value={testModel}
@@ -2772,14 +2764,14 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                 marginBottom: '4px',
                               }}
                             >
-                              Language
+                              {t('claudeApi.language')}
                             </div>
                             <input
                               type="text"
                               value={responseLanguage}
                               onChange={(e) => setResponseLanguage(e.target.value)}
                               onBlur={(e) => saveResponseLanguage(e.target.value)}
-                              placeholder="e.g. Japanese, English"
+                              placeholder={t('claudeApi.languagePlaceholder')}
                               style={{
                                 width: '100%',
                                 padding: '4px 8px',
@@ -2832,7 +2824,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                               >
                                 ▶
                               </span>
-                              Additional Skills
+                              {t('claudeApi.additionalSkills')}
                               {additionalSkillIds.length > 0 && (
                                 <span
                                   style={{
@@ -2861,7 +2853,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                     fontWeight: 400,
                                   }}
                                 >
-                                  required
+                                  {t('claudeApi.requiredBadge')}
                                 </span>
                               )}
                             </button>
@@ -2891,7 +2883,10 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                       color: '#3d3d00',
                                     }}
                                   >
-                                    ⚠ Not yet uploaded: {missingDependentSkillNames.join(', ')}
+                                    ⚠{' '}
+                                    {t('claudeApi.notYetUploaded', {
+                                      names: missingDependentSkillNames.join(', '),
+                                    })}
                                   </div>
                                 )}
                               </div>
@@ -3028,7 +3023,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                 marginBottom: '6px',
                               }}
                             >
-                              Model
+                              {t('claudeApi.model')}
                             </div>
                             <select
                               value={testModel}
@@ -3062,7 +3057,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                 marginBottom: '4px',
                               }}
                             >
-                              Language
+                              {t('claudeApi.language')}
                             </div>
                             <input
                               type="text"
@@ -3070,7 +3065,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                               onChange={(e) => setResponseLanguage(e.target.value)}
                               onBlur={(e) => saveResponseLanguage(e.target.value)}
                               disabled={isExecuting}
-                              placeholder="e.g. Japanese, English"
+                              placeholder={t('claudeApi.languagePlaceholder')}
                               style={{
                                 width: '100%',
                                 padding: '4px 8px',
@@ -3124,7 +3119,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                               >
                                 ▶
                               </span>
-                              Additional Skills
+                              {t('claudeApi.additionalSkills')}
                               {additionalSkillIds.length > 0 && (
                                 <span
                                   style={{
@@ -3153,7 +3148,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                     fontWeight: 400,
                                   }}
                                 >
-                                  required
+                                  {t('claudeApi.requiredBadge')}
                                 </span>
                               )}
                             </button>
@@ -3183,7 +3178,10 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                       color: '#3d3d00',
                                     }}
                                   >
-                                    ⚠ Not yet uploaded: {missingDependentSkillNames.join(', ')}
+                                    ⚠{' '}
+                                    {t('claudeApi.notYetUploaded', {
+                                      names: missingDependentSkillNames.join(', '),
+                                    })}
                                   </div>
                                 )}
                               </div>
@@ -3252,7 +3250,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                   padding: '24px 0',
                                 }}
                               >
-                                Send a message to test the skill.
+                                {t('claudeApi.sendMessageToTest')}
                               </div>
                             )}
 
@@ -3332,8 +3330,8 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                               }}
                             >
                               {missingDependentSkillNames.length > 0
-                                ? `⚠ Upload the following skills first: ${missingDependentSkillNames.join(', ')}`
-                                : '⚠ Required additional skills are not selected'}
+                                ? `⚠ ${t('claudeApi.uploadSkillsFirst', { names: missingDependentSkillNames.join(', ') })}`
+                                : `⚠ ${t('claudeApi.requiredSkillsNotSelected')}`}
                             </div>
                           )}
 
@@ -3348,12 +3346,15 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                 gap: '4px',
                               }}
                             >
-                              ⚠ MCP Server の URL または Token が未入力です:{' '}
-                              {effectiveMcpServerIds
-                                .filter(
-                                  (id) => !mcpServerUrls[id]?.trim() && !mcpServerTokens[id]?.trim()
-                                )
-                                .join(', ')}
+                              ⚠{' '}
+                              {t('claudeApi.mcpUrlsMissing', {
+                                names: effectiveMcpServerIds
+                                  .filter(
+                                    (id) =>
+                                      !mcpServerUrls[id]?.trim() && !mcpServerTokens[id]?.trim()
+                                  )
+                                  .join(', '),
+                              })}
                             </div>
                           )}
 
@@ -3411,9 +3412,9 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                     type="button"
                                     onClick={() => {
                                       setConfirmAction({
-                                        title: 'Reset Conversation',
-                                        message: 'Chat history will be cleared. Continue?',
-                                        confirmLabel: 'Reset',
+                                        title: t('claudeApi.resetConversation'),
+                                        message: t('claudeApi.resetConversationMessage'),
+                                        confirmLabel: t('claudeApi.reset'),
                                         onConfirm: () => {
                                           handleNewConversation();
                                           setConfirmAction(null);
@@ -3444,9 +3445,14 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                       color: 'var(--vscode-descriptionForeground)',
                                       whiteSpace: 'nowrap',
                                     }}
-                                    title={`Total: ${(totalUsage.input_tokens + totalUsage.output_tokens).toLocaleString()} tokens`}
+                                    title={t('claudeApi.totalTokensTooltip', {
+                                      total: (
+                                        totalUsage.input_tokens + totalUsage.output_tokens
+                                      ).toLocaleString(),
+                                    })}
                                   >
-                                    Total Usage: {totalUsage.input_tokens.toLocaleString()} in /{' '}
+                                    {t('claudeApi.totalUsage')}{' '}
+                                    {totalUsage.input_tokens.toLocaleString()} in /{' '}
                                     {totalUsage.output_tokens.toLocaleString()} out
                                   </span>
                                 )}
@@ -3466,10 +3472,10 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
                                   }}
                                   title={
                                     isRequiredSkillsMissing
-                                      ? 'Required additional skills are missing'
+                                      ? t('claudeApi.requiredSkillsMissingTooltip')
                                       : isMcpUrlsMissing
-                                        ? 'Enter MCP server URLs first'
-                                        : 'Send message'
+                                        ? t('claudeApi.enterMcpUrlsFirst')
+                                        : t('claudeApi.sendMessage')
                                   }
                                   style={{
                                     display: 'flex',
@@ -3512,7 +3518,7 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
 
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                       <button type="button" onClick={handleBackToList} style={btnSecondary}>
-                        Back to List
+                        {t('claudeApi.backToList')}
                       </button>
                     </div>
                   </div>
@@ -3538,14 +3544,14 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
 
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                       <button type="button" onClick={handleBackToList} style={btnSecondary}>
-                        Back to List
+                        {t('claudeApi.backToList')}
                       </button>
                       <button
                         type="button"
                         onClick={() => setState('confirm-upload')}
                         style={btnPrimary}
                       >
-                        Retry
+                        {t('claudeApi.retry')}
                       </button>
                     </div>
                   </div>
@@ -3561,17 +3567,17 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
         title={confirmAction?.title ?? ''}
         message={confirmAction?.message ?? ''}
         confirmLabel={confirmAction?.confirmLabel ?? 'OK'}
-        cancelLabel="Cancel"
+        cancelLabel={t('common.cancel')}
         onConfirm={() => confirmAction?.onConfirm()}
         onCancel={() => setConfirmAction(null)}
       />
 
       <ConfirmDialog
         isOpen={deleteTarget !== null}
-        title="Delete Skill"
-        message={`Are you sure you want to delete "${deleteTarget?.title ?? ''}"? This action cannot be undone.`}
-        confirmLabel={isDeleting ? 'Deleting...' : 'Delete'}
-        cancelLabel="Cancel"
+        title={t('claudeApi.deleteSkill.title')}
+        message={t('claudeApi.deleteSkill.message', { title: deleteTarget?.title ?? '' })}
+        confirmLabel={isDeleting ? t('claudeApi.deleting') : t('claudeApi.delete')}
+        cancelLabel={t('common.cancel')}
         onConfirm={async () => {
           if (!deleteTarget || isDeleting) return;
           setIsDeleting(true);
@@ -3580,7 +3586,9 @@ export const ClaudeApiUploadDialog: React.FC<ClaudeApiUploadDialogProps> = ({
             setDeleteTarget(null);
             loadSkillList();
           } catch (err) {
-            setSkillListError(err instanceof Error ? err.message : 'Failed to delete skill');
+            setSkillListError(
+              err instanceof Error ? err.message : t('claudeApi.deleteSkillFailed')
+            );
             setDeleteTarget(null);
           } finally {
             setIsDeleting(false);
