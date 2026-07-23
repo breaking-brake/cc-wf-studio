@@ -8,6 +8,13 @@
  * copilot / cursor / gemini / roo-code) use `planAgentSkillFiles`, which
  * emits the provider's own `<root>/skills/<workflow>/SKILL.md` (plus
  * `.cursor/agents/*.md` for Cursor).
+ *
+ * `--agent` is repeatable and accepts `all` (every supported target). With
+ * exactly one agent, all output — human, `--json`, `--dry-run` — is
+ * byte-identical to the historical single-agent behaviour. With several,
+ * the run is atomic across agents (any conflict without `--overwrite`
+ * aborts before anything is written), human lines are `[agent]`-prefixed,
+ * and JSON payloads carry `resultsByAgent` instead of the single-agent keys.
  */
 
 import * as fs from 'node:fs/promises';
@@ -119,6 +126,28 @@ function parseAgentOption(value: string): SupportedAgent {
   throw new InvalidArgumentError(`Expected one of: ${SUPPORTED_AGENTS.join(', ')}.`);
 }
 
+/**
+ * Repeatable `--agent` accumulator shared by `ccwf export` and `ccwf
+ * validate`: each occurrence appends one agent, `all` appends every
+ * supported target. De-duped, first-mention order preserved.
+ */
+export function collectAgentListOption(
+  value: string,
+  previous: SupportedAgent[] | undefined
+): SupportedAgent[] {
+  if (value !== 'all' && !(SUPPORTED_AGENTS as readonly string[]).includes(value)) {
+    throw new InvalidArgumentError(`Expected one of: ${SUPPORTED_AGENTS.join(', ')}, all.`);
+  }
+  const parsed = value === 'all' ? SUPPORTED_AGENTS : [value as SupportedAgent];
+  const next = previous ? [...previous] : [];
+  for (const agent of parsed) {
+    if (!next.includes(agent)) {
+      next.push(agent);
+    }
+  }
+  return next;
+}
+
 function resolvePlanned(rootDir: string, file: PlannedExportFile): string {
   return path.join(rootDir, ...file.relativePath.split('/'));
 }
@@ -196,15 +225,9 @@ export function reportExportPreview(preview: ExportPreviewResult, overwrite: boo
   process.stdout.write('Dry run — no files were written.\n');
   process.stdout.write(`Would export ${preview.entries.length} file(s) into ${preview.rootDir}:\n`);
   for (const entry of preview.entries) {
-    const note =
-      entry.status === 'new'
-        ? 'new'
-        : entry.status === 'up-to-date'
-          ? 'up to date'
-          : overwrite
-            ? 'would overwrite'
-            : 'conflict: exists with different content';
-    process.stdout.write(`  - ${path.relative(preview.rootDir, entry.absPath)} (${note})\n`);
+    process.stdout.write(
+      `  - ${path.relative(preview.rootDir, entry.absPath)} (${previewNote(entry.status, overwrite)})\n`
+    );
   }
   if (conflictCount > 0 && !overwrite) {
     process.stderr.write(
@@ -212,6 +235,17 @@ export function reportExportPreview(preview: ExportPreviewResult, overwrite: boo
     );
     process.exit(1);
   }
+}
+
+/** Human annotation for one planned file in a `--dry-run` listing. */
+function previewNote(status: PlannedFileStatus, overwrite: boolean): string {
+  return status === 'new'
+    ? 'new'
+    : status === 'up-to-date'
+      ? 'up to date'
+      : overwrite
+        ? 'would overwrite'
+        : 'conflict: exists with different content';
 }
 
 /**
@@ -315,8 +349,252 @@ export function asSupportedAgent(value: string): SupportedAgent {
   return parseAgentOption(value);
 }
 
-interface CommanderExportOptions {
+/** One agent's slice of a multi-agent export: its warnings and planned files. */
+interface AgentPlanBundle {
   agent: SupportedAgent;
+  warnings: string[];
+  plan: PlannedExportFile[];
+}
+
+/**
+ * Load the workflow once and plan every requested agent's file set.
+ * Cross-agent path collisions cannot occur: each provider plans under its
+ * own root (`.claude/`, `.codex/`, `.github/skills/`, `.cursor/`,
+ * `.gemini/`, `.roo/`, `.agent/`).
+ */
+async function planForAgents(
+  file: string,
+  agents: SupportedAgent[],
+  cwd: string | undefined,
+  emitWarnings: boolean
+): Promise<{ slashName: string; rootDir: string; bundles: AgentPlanBundle[] }> {
+  const { workflow } = await loadWorkflowFromFile(file);
+  const rootDir = path.resolve(cwd ?? process.cwd());
+  const bundles: AgentPlanBundle[] = agents.map((agent) => ({
+    agent,
+    warnings: collectAgentCompatibilityWarnings(workflow, agent),
+    plan:
+      agent === CLAUDE_CODE_AGENT
+        ? planWorkflowExportFiles(workflow)
+        : planAgentSkillFiles(workflow, agent as AgentSkillProvider),
+  }));
+  if (emitWarnings) {
+    for (const bundle of bundles) {
+      for (const warning of bundle.warnings) {
+        process.stderr.write(`warning: [${bundle.agent}] ${warning}\n`);
+      }
+    }
+  }
+  return { slashName: nodeNameToFileName(workflow.name), rootDir, bundles };
+}
+
+/**
+ * `--dry-run` with several agents: per-agent file listing (human) or a
+ * per-agent `resultsByAgent` payload (`--json`). Exit code mirrors a real
+ * run, exactly like the single-agent preview.
+ */
+async function previewMultiExport(
+  file: string,
+  agents: SupportedAgent[],
+  options: CommanderExportOptions
+): Promise<void> {
+  const { rootDir, bundles } = await planForAgents(file, agents, options.cwd, !options.json);
+  const classified: { bundle: AgentPlanBundle; entries: ClassifiedPlanEntry[] }[] = [];
+  for (const bundle of bundles) {
+    classified.push({ bundle, entries: await classifyPlan(rootDir, bundle.plan) });
+  }
+  const conflictCount = classified.reduce(
+    (sum, c) => sum + c.entries.filter((e) => e.status === 'conflict').length,
+    0
+  );
+  const ok = conflictCount === 0 || options.overwrite;
+
+  if (options.json) {
+    printJson({
+      ok,
+      dryRun: true,
+      root: rootDir,
+      agents,
+      resultsByAgent: Object.fromEntries(
+        classified.map((c) => [
+          c.bundle.agent,
+          {
+            files: c.entries.map((entry) => ({
+              path: path.relative(rootDir, entry.absPath),
+              status: entry.status,
+            })),
+            warnings: c.bundle.warnings,
+          },
+        ])
+      ),
+    });
+    if (!ok) {
+      process.exit(1);
+    }
+    return;
+  }
+
+  const totalFiles = classified.reduce((sum, c) => sum + c.entries.length, 0);
+  process.stdout.write('Dry run — no files were written.\n');
+  process.stdout.write(
+    `Would export ${totalFiles} file(s) for ${agents.length} agent(s) into ${rootDir}:\n`
+  );
+  for (const c of classified) {
+    process.stdout.write(`[${c.bundle.agent}]\n`);
+    for (const entry of c.entries) {
+      process.stdout.write(
+        `  - ${path.relative(rootDir, entry.absPath)} (${previewNote(entry.status, options.overwrite)})\n`
+      );
+    }
+  }
+  if (!ok) {
+    process.stderr.write(
+      `error: export would fail: ${conflictCount} file(s) already exist with different content. Pass --overwrite to replace them.\n`
+    );
+    process.exit(1);
+  }
+}
+
+/**
+ * Real export for several agents. Atomic across agents: every agent's plan
+ * is classified before anything is written, so a conflict in any target
+ * (without `--overwrite`) aborts the whole run with zero files touched.
+ */
+async function runMultiExport(
+  file: string,
+  agents: SupportedAgent[],
+  options: CommanderExportOptions
+): Promise<void> {
+  const { slashName, rootDir, bundles } = await planForAgents(
+    file,
+    agents,
+    options.cwd,
+    !options.json
+  );
+
+  // Same contract as the single-agent run: --overwrite skips classification
+  // entirely and rewrites every planned file.
+  const unchangedByAgent = new Map<SupportedAgent, Set<string>>();
+  if (!options.overwrite) {
+    const conflicts: { agent: SupportedAgent; absPath: string }[] = [];
+    for (const bundle of bundles) {
+      const classified = await classifyPlan(rootDir, bundle.plan);
+      unchangedByAgent.set(
+        bundle.agent,
+        new Set(classified.filter((e) => e.status === 'up-to-date').map((e) => e.absPath))
+      );
+      for (const entry of classified) {
+        if (entry.status === 'conflict') {
+          conflicts.push({ agent: bundle.agent, absPath: entry.absPath });
+        }
+      }
+    }
+    if (conflicts.length > 0) {
+      if (options.json) {
+        printJson({
+          ok: false,
+          root: rootDir,
+          agents,
+          resultsByAgent: Object.fromEntries(
+            bundles.map((bundle) => [
+              bundle.agent,
+              {
+                conflicts: conflicts
+                  .filter((c) => c.agent === bundle.agent)
+                  .map((c) => path.relative(rootDir, c.absPath)),
+                warnings: bundle.warnings,
+              },
+            ])
+          ),
+        });
+        process.exit(1);
+      }
+      process.stderr.write(
+        `error: ${conflicts.length} file(s) already exist with different content. Pass --overwrite to replace them:\n`
+      );
+      for (const conflict of conflicts) {
+        process.stderr.write(`  - [${conflict.agent}] ${conflict.absPath}\n`);
+      }
+      process.exit(1);
+    }
+  }
+
+  const ensuredDirs = new Set<string>();
+  const perAgent: {
+    agent: SupportedAgent;
+    written: string[];
+    upToDate: string[];
+    warnings: string[];
+  }[] = [];
+  for (const bundle of bundles) {
+    const unchanged = unchangedByAgent.get(bundle.agent) ?? new Set<string>();
+    const written: string[] = [];
+    for (const planned of bundle.plan) {
+      const absPath = resolvePlanned(rootDir, planned);
+      if (unchanged.has(absPath)) continue;
+      const dir = path.dirname(absPath);
+      if (!ensuredDirs.has(dir)) {
+        await fs.mkdir(dir, { recursive: true });
+        ensuredDirs.add(dir);
+      }
+      await fs.writeFile(absPath, planned.contents, 'utf-8');
+      written.push(absPath);
+    }
+    perAgent.push({
+      agent: bundle.agent,
+      written,
+      upToDate: [...unchanged],
+      warnings: bundle.warnings,
+    });
+  }
+
+  if (options.json) {
+    printJson({
+      ok: true,
+      root: rootDir,
+      agents,
+      resultsByAgent: Object.fromEntries(
+        perAgent.map((result) => [
+          result.agent,
+          {
+            written: toRootRelative(rootDir, result.written),
+            upToDate: toRootRelative(rootDir, result.upToDate),
+            warnings: result.warnings,
+          },
+        ])
+      ),
+      slashName,
+    });
+    return;
+  }
+
+  let totalWritten = 0;
+  let totalUpToDate = 0;
+  for (const result of perAgent) {
+    totalWritten += result.written.length;
+    totalUpToDate += result.upToDate.length;
+    if (result.written.length > 0 || result.upToDate.length === 0) {
+      process.stdout.write(`[${result.agent}] ✓ Wrote ${result.written.length} file(s):\n`);
+      for (const writtenPath of result.written) {
+        process.stdout.write(`  - ${path.relative(rootDir, writtenPath)}\n`);
+      }
+      if (result.upToDate.length > 0) {
+        process.stdout.write(`  (${result.upToDate.length} file(s) already up to date)\n`);
+      }
+    } else {
+      process.stdout.write(
+        `[${result.agent}] ✓ All ${result.upToDate.length} file(s) already up to date; nothing to write.\n`
+      );
+    }
+  }
+  const upToDateSuffix = totalUpToDate > 0 ? `, ${totalUpToDate} already up to date` : '';
+  process.stdout.write(
+    `✓ Exported for ${agents.length} agent(s) into ${rootDir}: ${totalWritten} file(s) written${upToDateSuffix}.\n`
+  );
+}
+
+interface CommanderExportOptions {
+  agent?: SupportedAgent[];
   overwrite: boolean;
   dryRun: boolean;
   json: boolean;
@@ -366,11 +644,10 @@ export function registerExportCommand(program: Command): void {
       'Materialise a workflow as agent-skill files (.claude/agents + .claude/skills for Claude Code, <root>/skills for other agents).'
     )
     .argument('<file>', 'Path to a workflow JSON file.')
-    .option<SupportedAgent>(
+    .option<SupportedAgent[]>(
       '--agent <name>',
-      `Target agent. One of: ${SUPPORTED_AGENTS.join(', ')}. roo-code targets Zoo Code, the maintained fork of the sunset Roo Code.`,
-      parseAgentOption,
-      CLAUDE_CODE_AGENT
+      `Target agent(s) (repeatable; one of: ${SUPPORTED_AGENTS.join(', ')}, or 'all' for every target). Defaults to claude-code. roo-code targets Zoo Code, the maintained fork of the sunset Roo Code.`,
+      collectAgentListOption
     )
     .option('--overwrite', 'Overwrite existing files instead of erroring.', false)
     .option(
@@ -388,18 +665,31 @@ export function registerExportCommand(program: Command): void {
       'Output root. Defaults to process.cwd(). Useful for tests / scripted runs.'
     )
     .action(async (file: string, options: CommanderExportOptions) => {
+      const agents = options.agent ?? [CLAUDE_CODE_AGENT];
+      const singleAgent = agents.length === 1 ? agents[0] : undefined;
       try {
+        // More than one agent: dedicated per-agent reporting. Exactly one
+        // agent keeps the historical single-agent output, byte-identical.
+        if (singleAgent === undefined) {
+          if (options.dryRun) {
+            await previewMultiExport(file, agents, options);
+          } else {
+            await runMultiExport(file, agents, options);
+          }
+          return;
+        }
+
         if (options.dryRun) {
           const preview = await previewExport(
             {
               file,
-              agent: options.agent,
+              agent: singleAgent,
               cwd: options.cwd,
             },
             !options.json
           );
           if (options.json) {
-            reportExportPreviewJson(preview, options.agent, options.overwrite);
+            reportExportPreviewJson(preview, singleAgent, options.overwrite);
           } else {
             reportExportPreview(preview, options.overwrite);
           }
@@ -409,7 +699,7 @@ export function registerExportCommand(program: Command): void {
         const result = await runExport(
           {
             file,
-            agent: options.agent,
+            agent: singleAgent,
             overwrite: options.overwrite,
             cwd: options.cwd,
           },
@@ -420,7 +710,7 @@ export function registerExportCommand(program: Command): void {
           printJson({
             ok: true,
             root: result.rootDir,
-            agent: options.agent,
+            agent: singleAgent,
             written: toRootRelative(result.rootDir, result.writtenPaths),
             upToDate: toRootRelative(result.rootDir, result.unchangedPaths),
             slashName: result.slashName,
@@ -436,7 +726,7 @@ export function registerExportCommand(program: Command): void {
             printJson({
               ok: false,
               root: error.rootDir,
-              agent: options.agent,
+              agent: singleAgent,
               conflicts: toRootRelative(error.rootDir, error.conflictPaths),
               warnings: error.warnings,
             });

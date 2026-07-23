@@ -17,6 +17,45 @@ Entry format:
 
 ---
 
+## 2026-07-23 — `ccwf export` materialises several agents in one run
+- **User value**: a user exporting a workflow to several AI agents can now
+  materialise files for all of them in one command — `ccwf export wf.json
+  --agent all` (or `--agent codex --agent gemini`) — with a single atomic
+  conflict check, instead of re-running export once per target.
+- **Issue/PR**: #919 / PR from `claude/sleepy-curie-805uax`
+- **Outcome**: done — `--agent` is now the same repeatable/`all` accumulator
+  as `ccwf validate` (de-duped, first-mention order; parser moved to
+  `export.ts` and shared, behavior byte-identical). With exactly one agent
+  every output — human, `--json`, `--dry-run` — is unchanged. With several:
+  the run is atomic (every agent's plan is classified before any write, so
+  a conflict without `--overwrite` aborts with zero files touched — verified:
+  conflicting gemini blocked codex from being written), human output uses
+  `[agent]` prefixes (warnings follow validate's `warning: [agent] …`
+  convention) plus a total summary line, and JSON payloads replace the
+  single-agent keys with `agents` + `resultsByAgent: { <agent>: {written,
+  upToDate, warnings} }` (`conflicts` per agent on failure with every
+  requested agent present, `files: [{path, status}]` per agent with
+  `--dry-run`; `ok` mirrors the exit code, stderr stays at 0 bytes in JSON
+  mode). Cross-agent collisions impossible — each provider plans under its
+  own root. `ccwf run` keeps its single-agent contract. Docs: cli README
+  (subcommand table, export section, JSON shapes) + ccwf-cli SKILL.md
+  (incl. phrasing table row for "export for all my agents"). E2E: 17 cases
+  against the built CLI (single-agent human/JSON parity, multi fresh /
+  idempotent rerun, `--agent all` writing all 7 targets incl. cursor's 3
+  files, atomic conflict human+JSON, dry-run mixed statuses human/JSON with
+  disk untouched, `--dry-run --overwrite` exit 0, `--overwrite` repair,
+  dedupe `codex codex all` order, bad agent name exit 1, default-agent JSON
+  keeps `agent` key, `ccwf run` regression, missing file exit 2, validate
+  regression after the shared-parser refactor). Issue #919 could not be
+  locked (no `gh`, no MCP lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - A multi-agent-aware follow-up for `ccwf run`: after export, print
+    per-agent next-step hints (run itself stays single-launch) — judge value
+    first.
+  - Manual E2E queue (carried): align/distribute + context menu +
+    copy/cut/paste in real webviews; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector in both modes.
+
 ## 2026-07-23 — `ccwf export --json` for machine-readable export results
 - **User value**: a user can now script `ccwf export` in CI or wrapper
   tooling by parsing stable JSON — which files were written / already up to

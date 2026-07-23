@@ -104,6 +104,8 @@ Materialise the workflow as **Agent Skill files** for a target agent. Pure file 
 ccwf export ./my-workflow.json                                 # --agent claude-code (default)
 ccwf export ./my-workflow.json --agent cursor                  # cursor
 ccwf export ./my-workflow.json --agent codex --cwd /tmp/proj   # codex, custom output root
+ccwf export ./my-workflow.json --agent codex --agent gemini    # several agents in one run
+ccwf export ./my-workflow.json --agent all                     # every supported target at once
 ccwf export ./my-workflow.json --overwrite                     # replace files whose content changed
 ccwf export ./my-workflow.json --dry-run                       # preview the plan, write nothing
 ccwf export ./my-workflow.json --json                          # machine-readable result on stdout
@@ -111,6 +113,8 @@ ccwf export ./my-workflow.json --dry-run --json                # machine-readabl
 ```
 
 Re-running an export is idempotent: existing files whose content already matches are skipped as up to date; only files with different content require `--overwrite`.
+
+`--agent` is repeatable (de-duped) and accepts `all` for every supported target. Multi-agent runs are atomic: every agent's plan is preflighted first and any conflict (without `--overwrite`) aborts before anything is written; human output uses `[agent]` prefixes and `--json` payloads replace the single-agent keys with `agents` + `resultsByAgent: { <agent>: { written, upToDate, warnings } }` (`conflicts` per agent on failure, `files` per agent with `--dry-run`). One agent keeps the exact single-agent output.
 
 `--dry-run` lists every planned file with its status — `new`, `up to date`, or `conflict: exists with different content` (`would overwrite` when combined with `--overwrite`) — and writes nothing. The exit code mirrors a real run: 0 means the export would succeed, 1 means it would stop on conflicts. Use it to check what an export touches before running it for real.
 
@@ -213,6 +217,7 @@ Use this as a lookup when the user describes intent in natural language. If the 
 | "Is this workflow valid?", "壊れてない?", "schema 確認して"                          | `ccwf validate <file>`                       |
 | "Export as a Claude Skill / agent file", "skills 化して"                            | `ccwf export <file>` (default agent)         |
 | "Convert for Cursor / Codex / Gemini …"                                            | `ccwf export <file> --agent <name>`          |
+| "Export for all my agents / every target at once"                                   | `ccwf export <file> --agent all`             |
 | "Run this workflow", "動かして", "実行して"                                          | `ccwf run <file> --launch`                   |
 | "Edit the canvas without VSCode", "editor を browser で開いて"                       | `ccwf canvas <file>` (mention experimental)  |
 | "Let an MCP client edit this workflow"                                              | `ccwf mcp --file <file>` and configure `.mcp.json` |

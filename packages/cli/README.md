@@ -21,7 +21,7 @@ pnpm add -D @cc-wf-studio/cli
 | `ccwf render <file>` | Print a Mermaid + execution-instructions Markdown bundle to stdout (or a file with `-o <path>`). |
 | `ccwf validate <paths...>` | Schema-check workflow JSON files — any mix of files and directories (searched recursively for `*.json`). Exit 0/1 (2 on unreadable files). `--json` for machine-readable output. `--agent <name>` (repeatable, or `all`) also preflights target compatibility; add `--strict` to turn those warnings into exit 1 for CI. |
 | `ccwf mcp --file <file>` | Run the cc-wf-studio stdio MCP server in-process against `<file>`. |
-| `ccwf export <file>` | Materialise the workflow as agent-skill files for a target agent (`--agent <name>`, default `claude-code`). `--dry-run` previews the planned files without writing. `--json` for machine-readable output (works with `--dry-run` too). |
+| `ccwf export <file>` | Materialise the workflow as agent-skill files for one or more target agents (`--agent <name>`, repeatable, or `--agent all`; default `claude-code`). Multi-agent runs are atomic: any conflict aborts before anything is written. `--dry-run` previews the planned files without writing. `--json` for machine-readable output (works with `--dry-run` too). |
 | `ccwf run <file>` | `ccwf export` + a "next step" hint. `--launch` additionally spawns Claude Code when available. |
 | `ccwf preview <file>` | Open a read-only viewer (Mermaid + per-node Markdown panes) in a local browser. Auto-reloads when the file changes. |
 | `ccwf canvas <file>` | (Experimental) Open the **full editable** cc-wf-studio canvas in a local browser. Saves write back to the same file. |
@@ -89,6 +89,8 @@ Example `.mcp.json`:
 ccwf export ./my-workflow.json                                # --agent claude-code (default)
 ccwf export ./my-workflow.json --agent cursor                  # cursor
 ccwf export ./my-workflow.json --agent codex --cwd /tmp/proj   # codex into a different root
+ccwf export ./my-workflow.json --agent codex --agent gemini    # several agents in one run
+ccwf export ./my-workflow.json --agent all                     # every supported target at once
 ccwf export ./my-workflow.json --overwrite                     # replace files whose content changed
 ccwf export ./my-workflow.json --dry-run                       # preview the plan, write nothing
 ccwf export ./my-workflow.json --json                          # machine-readable result on stdout
@@ -97,6 +99,8 @@ ccwf export ./my-workflow.json --dry-run --json                # machine-readabl
 
 Re-running an export is idempotent: existing files whose content already matches are reported as up to date and skipped. Only files with *different* content are conflicts that require `--overwrite`.
 
+`--agent` is repeatable (de-duped, first-mention order) and accepts `all` to expand to every supported target. With more than one agent the run is **atomic**: every agent's plan is checked against the disk first, and any conflict (without `--overwrite`) aborts the whole export before a single file is written (conflict lines are prefixed `[agent]`). Per-agent summaries are `[agent]`-prefixed, followed by a total line; target-compatibility warnings print as `warning: [agent] …`. With exactly one agent, all output is identical to earlier single-agent versions.
+
 `--dry-run` prints every planned file with its status — `new`, `up to date`, or `conflict: exists with different content` (shown as `would overwrite` when combined with `--overwrite`) — and writes nothing. The exit code mirrors what a real run would do: 0 means the export would succeed, 1 means it would stop on conflicts.
 
 `--json` prints a machine-readable result to stdout for CI scripting (exit codes unchanged; target-compatibility warnings move into the payload instead of stderr; file paths are relative to `root`):
@@ -104,6 +108,12 @@ Re-running an export is idempotent: existing files whose content already matches
 - Real run, success (exit 0): `{ "ok": true, "root", "agent", "written": [...], "upToDate": [...], "slashName", "warnings": [...] }`
 - Real run, conflict without `--overwrite` (exit 1): `{ "ok": false, "root", "agent", "conflicts": [...], "warnings": [...] }`
 - With `--dry-run`: `{ "ok", "dryRun": true, "root", "agent", "files": [{ "path", "status": "new" | "up-to-date" | "conflict" }], "warnings": [...] }` — statuses are the raw classification (a `conflict` stays `conflict` even with `--overwrite`); `ok` mirrors the exit code, i.e. whether a real run would succeed.
+
+With more than one agent, the single-agent keys are replaced by an `agents` array plus a `resultsByAgent` map (same exit-code rules):
+
+- Real run, success: `{ "ok": true, "root", "agents": [...], "resultsByAgent": { "<agent>": { "written", "upToDate", "warnings" } }, "slashName" }`
+- Real run, conflict: `{ "ok": false, "root", "agents": [...], "resultsByAgent": { "<agent>": { "conflicts", "warnings" } } }` — every requested agent appears, non-conflicting ones with an empty `conflicts` array.
+- With `--dry-run`: `{ "ok", "dryRun": true, "root", "agents": [...], "resultsByAgent": { "<agent>": { "files": [{ "path", "status" }], "warnings" } } }`
 
 Load errors (missing/unparseable `<file>`) keep their usual stderr message and exit codes in `--json` mode.
 
