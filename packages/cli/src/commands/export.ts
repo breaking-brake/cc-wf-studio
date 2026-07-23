@@ -50,6 +50,46 @@ export interface ExportRunResult {
   slashName: string;
   /** Project root used. */
   rootDir: string;
+  /** Target-compatibility warnings collected for the requested agent. */
+  warnings: string[];
+}
+
+/**
+ * Thrown by `runExport` when planned files already exist with different
+ * content and `--overwrite` was not passed. Carries everything a caller
+ * needs to render the failure (human or JSON) and exit 1.
+ */
+export class ExportConflictError extends Error {
+  /** Absolute paths of the conflicting files, in plan order. */
+  readonly conflictPaths: string[];
+  /** Project root used. */
+  readonly rootDir: string;
+  /** Target-compatibility warnings collected before the conflict check. */
+  readonly warnings: string[];
+
+  constructor(conflictPaths: string[], rootDir: string, warnings: string[]) {
+    super(
+      `${conflictPaths.length} file(s) already exist with different content. Pass --overwrite to replace them.`
+    );
+    this.name = 'ExportConflictError';
+    this.conflictPaths = conflictPaths;
+    this.rootDir = rootDir;
+    this.warnings = warnings;
+  }
+}
+
+/**
+ * Print `runExport`'s conflict failure exactly as it has always appeared on
+ * stderr, then exit 1. Shared by `ccwf export` and `ccwf run`.
+ */
+export function reportExportConflict(error: ExportConflictError): never {
+  process.stderr.write(
+    `error: ${error.conflictPaths.length} file(s) already exist with different content. Pass --overwrite to replace them:\n`
+  );
+  for (const absPath of error.conflictPaths) {
+    process.stderr.write(`  - ${absPath}\n`);
+  }
+  process.exit(1);
 }
 
 /** On-disk classification of a single planned export file. */
@@ -66,6 +106,8 @@ export interface ExportPreviewResult {
   entries: ClassifiedPlanEntry[];
   /** Project root used. */
   rootDir: string;
+  /** Target-compatibility warnings collected for the requested agent. */
+  warnings: string[];
 }
 
 function parseAgentOption(value: string): SupportedAgent {
@@ -122,13 +164,17 @@ async function classifyPlan(
  * Throws `WorkflowLoadError` for `<file>` issues, like `runExport`.
  */
 export async function previewExport(
-  options: Omit<ExportRunOptions, 'overwrite'>
+  options: Omit<ExportRunOptions, 'overwrite'>,
+  emitWarnings = true
 ): Promise<ExportPreviewResult> {
   const { workflow } = await loadWorkflowFromFile(options.file);
   const rootDir = path.resolve(options.cwd ?? process.cwd());
 
-  for (const warning of collectAgentCompatibilityWarnings(workflow, options.agent)) {
-    process.stderr.write(`warning: ${warning}\n`);
+  const warnings = collectAgentCompatibilityWarnings(workflow, options.agent);
+  if (emitWarnings) {
+    for (const warning of warnings) {
+      process.stderr.write(`warning: ${warning}\n`);
+    }
   }
 
   const plan =
@@ -136,7 +182,7 @@ export async function previewExport(
       ? planWorkflowExportFiles(workflow)
       : planAgentSkillFiles(workflow, options.agent as AgentSkillProvider);
 
-  return { entries: await classifyPlan(rootDir, plan), rootDir };
+  return { entries: await classifyPlan(rootDir, plan), rootDir, warnings };
 }
 
 /**
@@ -171,16 +217,23 @@ export function reportExportPreview(preview: ExportPreviewResult, overwrite: boo
 /**
  * Shared implementation invoked by both `ccwf export` and `ccwf run`.
  *
- * Throws `WorkflowLoadError` for `<file>` issues. Calls `process.exit(1)` on
- * a write conflict (without `--overwrite`) — the caller doesn't need to
- * handle either case explicitly.
+ * Throws `WorkflowLoadError` for `<file>` issues and `ExportConflictError`
+ * on a write conflict (without `--overwrite`) — callers render those via
+ * their usual error paths (`reportExportConflict` for the historical
+ * stderr + exit 1 behaviour).
  */
-export async function runExport(options: ExportRunOptions): Promise<ExportRunResult> {
+export async function runExport(
+  options: ExportRunOptions,
+  emitWarnings = true
+): Promise<ExportRunResult> {
   const { workflow } = await loadWorkflowFromFile(options.file);
   const rootDir = path.resolve(options.cwd ?? process.cwd());
 
-  for (const warning of collectAgentCompatibilityWarnings(workflow, options.agent)) {
-    process.stderr.write(`warning: ${warning}\n`);
+  const warnings = collectAgentCompatibilityWarnings(workflow, options.agent);
+  if (emitWarnings) {
+    for (const warning of warnings) {
+      process.stderr.write(`warning: ${warning}\n`);
+    }
   }
 
   const plan =
@@ -196,13 +249,7 @@ export async function runExport(options: ExportRunOptions): Promise<ExportRunRes
       ...classified.filter((e) => e.status === 'up-to-date').map((e) => e.absPath)
     );
     if (conflicts.length > 0) {
-      process.stderr.write(
-        `error: ${conflicts.length} file(s) already exist with different content. Pass --overwrite to replace them:\n`
-      );
-      for (const absPath of conflicts) {
-        process.stderr.write(`  - ${absPath}\n`);
-      }
-      process.exit(1);
+      throw new ExportConflictError(conflicts, rootDir, warnings);
     }
   }
 
@@ -226,6 +273,7 @@ export async function runExport(options: ExportRunOptions): Promise<ExportRunRes
     unchangedPaths,
     slashName: nodeNameToFileName(workflow.name),
     rootDir,
+    warnings,
   };
 }
 
@@ -271,7 +319,44 @@ interface CommanderExportOptions {
   agent: SupportedAgent;
   overwrite: boolean;
   dryRun: boolean;
+  json: boolean;
   cwd?: string;
+}
+
+function toRootRelative(rootDir: string, absPaths: string[]): string[] {
+  return absPaths.map((absPath) => path.relative(rootDir, absPath));
+}
+
+function printJson(payload: unknown): void {
+  process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
+}
+
+/**
+ * `--dry-run --json` report. Statuses are the raw classification
+ * (`conflict` stays `conflict` even with `--overwrite`); `ok` mirrors the
+ * exit code, i.e. whether a real export would succeed.
+ */
+function reportExportPreviewJson(
+  preview: ExportPreviewResult,
+  agent: SupportedAgent,
+  overwrite: boolean
+): void {
+  const conflictCount = preview.entries.filter((e) => e.status === 'conflict').length;
+  const ok = conflictCount === 0 || overwrite;
+  printJson({
+    ok,
+    dryRun: true,
+    root: preview.rootDir,
+    agent,
+    files: preview.entries.map((entry) => ({
+      path: path.relative(preview.rootDir, entry.absPath),
+      status: entry.status,
+    })),
+    warnings: preview.warnings,
+  });
+  if (!ok) {
+    process.exit(1);
+  }
 }
 
 export function registerExportCommand(program: Command): void {
@@ -294,30 +379,71 @@ export function registerExportCommand(program: Command): void {
       false
     )
     .option(
+      '--json',
+      'Print the machine-readable result JSON to stdout (works with --dry-run too). Warnings move into the payload instead of stderr.',
+      false
+    )
+    .option(
       '--cwd <dir>',
       'Output root. Defaults to process.cwd(). Useful for tests / scripted runs.'
     )
     .action(async (file: string, options: CommanderExportOptions) => {
       try {
         if (options.dryRun) {
-          const preview = await previewExport({
-            file,
-            agent: options.agent,
-            cwd: options.cwd,
-          });
-          reportExportPreview(preview, options.overwrite);
+          const preview = await previewExport(
+            {
+              file,
+              agent: options.agent,
+              cwd: options.cwd,
+            },
+            !options.json
+          );
+          if (options.json) {
+            reportExportPreviewJson(preview, options.agent, options.overwrite);
+          } else {
+            reportExportPreview(preview, options.overwrite);
+          }
           return;
         }
 
-        const result = await runExport({
-          file,
-          agent: options.agent,
-          overwrite: options.overwrite,
-          cwd: options.cwd,
-        });
+        const result = await runExport(
+          {
+            file,
+            agent: options.agent,
+            overwrite: options.overwrite,
+            cwd: options.cwd,
+          },
+          !options.json
+        );
+
+        if (options.json) {
+          printJson({
+            ok: true,
+            root: result.rootDir,
+            agent: options.agent,
+            written: toRootRelative(result.rootDir, result.writtenPaths),
+            upToDate: toRootRelative(result.rootDir, result.unchangedPaths),
+            slashName: result.slashName,
+            warnings: result.warnings,
+          });
+          return;
+        }
 
         reportExportOutcome(result);
       } catch (error) {
+        if (error instanceof ExportConflictError) {
+          if (options.json) {
+            printJson({
+              ok: false,
+              root: error.rootDir,
+              agent: options.agent,
+              conflicts: toRootRelative(error.rootDir, error.conflictPaths),
+              warnings: error.warnings,
+            });
+            process.exit(1);
+          }
+          reportExportConflict(error);
+        }
         if (error instanceof WorkflowLoadError) {
           process.stderr.write(`error: ${error.message}\n`);
           process.exit(error.exitCode);
