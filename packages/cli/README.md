@@ -19,7 +19,7 @@ pnpm add -D @cc-wf-studio/cli
 | Command | Description |
 |---|---|
 | `ccwf render <file>` | Print a Mermaid + execution-instructions Markdown bundle to stdout (or a file with `-o <path>`). |
-| `ccwf validate <file>` | Schema-check the workflow JSON. Exit 0/1. `--json` for machine-readable output. `--agent <name>` also preflights target compatibility. |
+| `ccwf validate <paths...>` | Schema-check workflow JSON files — any mix of files and directories (searched recursively for `*.json`). Exit 0/1 (2 on unreadable files). `--json` for machine-readable output. `--agent <name>` also preflights target compatibility. |
 | `ccwf mcp --file <file>` | Run the cc-wf-studio stdio MCP server in-process against `<file>`. |
 | `ccwf export <file>` | Materialise the workflow as agent-skill files for a target agent (`--agent <name>`, default `claude-code`). |
 | `ccwf run <file>` | `ccwf export` + a "next step" hint. `--launch` additionally spawns Claude Code when available. |
@@ -42,6 +42,11 @@ ccwf render ./.vscode/workflows/my-workflow.json -o out.md  # write to a file in
 ```sh
 ccwf validate ./.vscode/workflows/my-workflow.json          # exit 0/1
 ccwf validate ./.vscode/workflows/my-workflow.json --json   # prints { valid, errors[] }
+ccwf validate ./.vscode/workflows                           # every *.json under the directory
+# ^ per-file report + summary line; also accepts several files/dirs at once.
+#   Exit 0 only if every file passes (1 = schema errors, 2 = unreadable file);
+#   with --json, multiple inputs print { valid, files: [...] } (one file keeps
+#   the plain { valid, errors[] } shape)
 ccwf validate ./.vscode/workflows/my-workflow.json --agent codex
 # ^ also reports which configured fields codex would ignore on export,
 #   without writing any files (warnings don't affect the exit code;
