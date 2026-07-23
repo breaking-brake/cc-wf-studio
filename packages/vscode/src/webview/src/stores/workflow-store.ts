@@ -59,6 +59,8 @@ interface WorkflowStore {
   edges: Edge[];
   selectedNodeId: string | null;
   pendingDeleteNodeIds: string[];
+  /** Explicitly selected edges deleted together with pendingDeleteNodeIds on confirm */
+  pendingDeleteEdgeIds: string[];
   activeWorkflow: Workflow | null;
   interactionMode: InteractionMode;
   scrollMode: ScrollMode;
@@ -164,6 +166,8 @@ interface WorkflowStore {
   prevTourStep: () => void;
   removeNode: (nodeId: string) => void;
   requestDeleteNode: (nodeId: string) => void;
+  /** Request deletion of a multi-selection (nodes via confirm dialog, edges deferred with them) */
+  requestDeleteSelection: (nodeIds: string[], edgeIds: string[]) => void;
   confirmDeleteNodes: () => void;
   cancelDeleteNodes: () => void;
   clearWorkflow: () => void;
@@ -340,6 +344,7 @@ export const useWorkflowStore = create<WorkflowStore>()(
       edges: [],
       selectedNodeId: null,
       pendingDeleteNodeIds: [],
+      pendingDeleteEdgeIds: [],
       activeWorkflow: null,
       interactionMode: 'pan', // Default: pan mode
       scrollMode: (() => {
@@ -407,7 +412,7 @@ export const useWorkflowStore = create<WorkflowStore>()(
 
           // If there are nodes to delete, show confirmation dialog
           if (nodeIdsToDelete.length > 0) {
-            set({ pendingDeleteNodeIds: nodeIdsToDelete });
+            set({ pendingDeleteNodeIds: nodeIdsToDelete, pendingDeleteEdgeIds: [] });
             // Don't apply remove changes yet - wait for confirmation
           }
         }
@@ -886,11 +891,25 @@ export const useWorkflowStore = create<WorkflowStore>()(
         }
 
         // 確認ダイアログを表示するために pendingDeleteNodeIds にセット
-        set({ pendingDeleteNodeIds: [nodeId] });
+        set({ pendingDeleteNodeIds: [nodeId], pendingDeleteEdgeIds: [] });
+      },
+
+      requestDeleteSelection: (nodeIds: string[], edgeIds: string[]) => {
+        // Delete/Backspaceキーからの削除要求（複数選択対応）
+        // Start nodeは削除不可
+        const deletableIds = nodeIds.filter((nodeId) => {
+          const nodeToRemove = get().nodes.find((node) => node.id === nodeId);
+          return nodeToRemove !== undefined && nodeToRemove.type !== 'start';
+        });
+        if (deletableIds.length === 0) return;
+
+        // 確認ダイアログを表示。エッジも確認までは削除しない
+        set({ pendingDeleteNodeIds: deletableIds, pendingDeleteEdgeIds: edgeIds });
       },
 
       confirmDeleteNodes: () => {
         const nodeIds = get().pendingDeleteNodeIds;
+        const edgeIds = get().pendingDeleteEdgeIds;
         if (nodeIds.length === 0) return;
 
         // Clear selection if the deleted node is currently selected
@@ -920,19 +939,23 @@ export const useWorkflowStore = create<WorkflowStore>()(
           }
         }
 
-        // Delete all pending nodes
+        // Delete all pending nodes (and any explicitly selected edges)
         set({
           nodes: updatedNodes.filter((node) => !nodeIds.includes(node.id)),
           edges: get().edges.filter(
-            (edge) => !nodeIds.includes(edge.source) && !nodeIds.includes(edge.target)
+            (edge) =>
+              !nodeIds.includes(edge.source) &&
+              !nodeIds.includes(edge.target) &&
+              !edgeIds.includes(edge.id)
           ),
           pendingDeleteNodeIds: [],
+          pendingDeleteEdgeIds: [],
           ...(shouldClearSelection && { selectedNodeId: null }),
         });
       },
 
       cancelDeleteNodes: () => {
-        set({ pendingDeleteNodeIds: [] });
+        set({ pendingDeleteNodeIds: [], pendingDeleteEdgeIds: [] });
       },
 
       clearWorkflow: () => {

@@ -17,6 +17,35 @@ Entry format:
 
 ---
 
+## 2026-07-23 — Fix canvas keyboard deletion (Delete key + edge loss on cancel)
+- **User value**: a user can now delete the selected nodes/edges with the
+  Delete key (previously only Backspace was bound — the standard delete key
+  on Windows/Linux did nothing), and canceling the delete-confirmation
+  dialog no longer silently removes the node's connected edges.
+- **Issue/PR**: #885 / PR from `claude/sleepy-curie-e5jbnc`
+- **Outcome**: done — verified React Flow v11's `deleteElements` emits
+  connected-edge remove-changes *before* node remove-changes; the store
+  applied edge removals unconditionally while node removal waited behind
+  the confirm dialog, so cancel stranded the node without its edges.
+  Replaced the built-in handler (`deleteKeyCode={null}`) with explicit
+  Delete/Backspace handling in `WorkflowEditor`'s existing keydown handler
+  (skips inputs/contentEditable and modifier combos): selected non-start
+  nodes go through the confirm flow with a new `requestDeleteSelection`
+  action (`pendingDeleteEdgeIds` defers explicitly selected edges with
+  them); edge-only selections delete immediately (parity with the edge ✕
+  button). Side effect: keyboard-deleting a group now releases its children
+  (matches the group's ✕ button) instead of React Flow's delete-children
+  behavior. No new i18n strings. Guard step this round also closed #883
+  (merged as #884).
+- **Next proposals**:
+  - Localize the hardcoded node/edge action tooltips (`"Delete node"` in
+    `DeleteButton.tsx`, `"Delete connection"` in `DeletableEdge.tsx`).
+  - Multi-node copy/paste (or multi-select duplicate) — only single-node
+    Ctrl+D duplicate exists today; needs id remapping + group handling,
+    likely its own design pass.
+  - MCP `apply_workflow` compat warnings — still parked until more
+    Claude-Code-only node types land.
+
 ## 2026-07-23 — Show difficulty and tags on sample gallery cards
 - **User value**: a user browsing the canvas sample gallery can now see each
   sample's difficulty level (localized badge) and topic tags (slug chips)
