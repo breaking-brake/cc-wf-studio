@@ -319,8 +319,47 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         setIsModifierKeyPressed(true);
       }
 
-      // Undo/Redo/Duplicate shortcuts — skip when focus is in editable elements
       const mod = event.metaKey || event.ctrlKey;
+
+      // Delete/Backspace — deletion is routed through the store so node
+      // removal waits for the confirmation dialog. React Flow's built-in
+      // handler is disabled (deleteKeyCode={null}): it removes connected
+      // edges immediately, before the dialog can be answered.
+      if ((event.key === 'Delete' || event.key === 'Backspace') && !mod && !event.altKey) {
+        const target = event.target as HTMLElement | null;
+        if (
+          target &&
+          (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+        ) {
+          return;
+        }
+        const {
+          nodes: currentNodes,
+          edges: currentEdges,
+          pendingDeleteNodeIds,
+          requestDeleteSelection,
+          setEdges,
+        } = useWorkflowStore.getState();
+        // Ignore repeats while the confirmation dialog is open
+        if (pendingDeleteNodeIds.length > 0) return;
+
+        const selectedNodeIds = currentNodes
+          .filter((n) => n.selected && n.type !== 'start')
+          .map((n) => n.id);
+        const selectedEdgeIds = currentEdges.filter((e) => e.selected).map((e) => e.id);
+
+        if (selectedNodeIds.length > 0) {
+          event.preventDefault();
+          requestDeleteSelection(selectedNodeIds, selectedEdgeIds);
+        } else if (selectedEdgeIds.length > 0) {
+          // Edge-only selection: delete immediately (parity with the edge ✕ button)
+          event.preventDefault();
+          setEdges(currentEdges.filter((e) => !e.selected));
+        }
+        return;
+      }
+
+      // Undo/Redo/Duplicate shortcuts — skip when focus is in editable elements
       if (mod) {
         const target = event.target as HTMLElement | null;
         if (
@@ -444,6 +483,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           edgeTypes={edgeTypes}
           defaultEdgeOptions={defaultEdgeOptions}
           isValidConnection={isValidConnection}
+          deleteKeyCode={null}
           snapToGrid={true}
           snapGrid={snapGrid}
           panOnDrag={panOnDrag}
