@@ -17,6 +17,42 @@ Entry format:
 
 ---
 
+## 2026-07-23 — `ccwf render --agent` phrases instructions per target agent
+- **User value**: a user rendering a workflow bundle for a non-Claude agent
+  (codex, cursor, gemini, copilot, antigravity, roo-code) now gets execution
+  instructions phrased for that agent's tools — identical to the instructions
+  section of the SKILL.md `ccwf export --agent <name>` would write — plus the
+  same target-compatibility warnings, instead of always Claude Code wording.
+- **Issue/PR**: #921 / PR from `claude/render-agent-instructions`
+- **Outcome**: done — `--agent <name>` (single value, same vocabulary as
+  validate/export, default `claude-code`) selects the provider for the md
+  format's execution-instructions section. Core gained
+  `generateAgentExecutionInstructions(workflow, agent, options)` — the
+  provider/options selection extracted from `generateAgentSkillContent`
+  (which now calls it; SKILL.md output byte-identical, cursor's
+  sub-agent-flow options preserved). When the flag is passed explicitly
+  (`getOptionValueSource === 'cli'`), the same warnings `ccwf validate
+  --agent` reports print to stderr in any format (never affecting exit code
+  or stdout); a plain `ccwf render` stays byte-identical on both streams.
+  `-f mermaid` stdout is agent-agnostic and unchanged by `--agent`. Docs:
+  cli README (subcommand table + render section) and ccwf-cli SKILL.md
+  (render section + phrasing-table row). E2E: 12 cases against the built
+  CLI (default stderr-empty, `--agent claude-code` stdout identical to
+  default, codex output differs with `spawn_agent`/`ask_user_question`
+  wording, codex + cursor instruction parity vs exported SKILL.md sections,
+  warnings byte-parity with `ccwf validate --agent codex`, mermaid stdout
+  identical with/without `--agent`, bad agent name clean exit 1, `-o` with
+  `--agent`, missing file exit 2). Issue #921 could not be locked (no `gh`,
+  no MCP lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - `-` / stdin input for `ccwf validate` and `ccwf render` so generators can
+    pipe workflow JSON without temp files.
+  - MCP `export_workflow` tool for file-mode servers (design needed: write
+    safety, root resolution) — parity with `ccwf export`.
+  - Manual E2E queue (carried): align/distribute + context menu +
+    copy/cut/paste in real webviews; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector in both modes.
+
 ## 2026-07-23 — `ccwf export` materialises several agents in one run
 - **User value**: a user exporting a workflow to several AI agents can now
   materialise files for all of them in one command — `ccwf export wf.json
