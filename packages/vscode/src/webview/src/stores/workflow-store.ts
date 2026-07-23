@@ -238,8 +238,10 @@ interface WorkflowStore {
   serializeSelection: (nodeIds: string[]) => SelectionClipboardPayload | null;
   /** Insert a clipboard payload as new nodes/edges: fresh ids, +40/+40
    *  offset, deep-copied data, one undo entry. The pasted nodes become the
-   *  new selection. Works with payloads copied from another workflow. */
-  pasteSelection: (payload: SelectionClipboardPayload) => void;
+   *  new selection. Works with payloads copied from another workflow.
+   *  When `position` is given (context-menu paste), the payload's top-left
+   *  corner lands there instead of the +40/+40 offset. */
+  pasteSelection: (payload: SelectionClipboardPayload, position?: { x: number; y: number }) => void;
   /** Cut a selection: serialize it (same policy as serializeSelection),
    *  then remove the serialized nodes plus every edge touching them in a
    *  single undo entry. No confirmation dialog — cut is undoable and the
@@ -980,7 +982,7 @@ export const useWorkflowStore = create<WorkflowStore>()(
         };
       },
 
-      pasteSelection: (payload: SelectionClipboardPayload) => {
+      pasteSelection: (payload: SelectionClipboardPayload, position?: { x: number; y: number }) => {
         const allNodes = get().nodes;
         // Defense in depth — serializeSelection never emits these, but the
         // clipboard is user-editable text
@@ -995,17 +997,29 @@ export const useWorkflowStore = create<WorkflowStore>()(
           idMap.set(node.id, makeUniqueNodeId(usedIds, node.id));
         }
 
+        // Top-level payload nodes (children of a pasted group keep their
+        // group-relative position and follow their parent instead)
+        const isTopLevel = (node: SelectionClipboardNode) =>
+          !(node.parentId && idMap.has(node.parentId));
+
+        // Default: +40/+40 (same offset as duplication). With a target
+        // position, translate so the payload's top-left corner lands there.
+        let offset = { x: 40, y: 40 };
+        if (position) {
+          const topLevel = incoming.filter(isTopLevel);
+          const minX = Math.min(...topLevel.map((node) => node.position.x));
+          const minY = Math.min(...topLevel.map((node) => node.position.y));
+          offset = { x: position.x - minX, y: position.y - minY };
+        }
+
         const copies: Node[] = incoming.map((node) => ({
           id: idMap.get(node.id) as string,
           type: node.type,
           // Deep copy so pasting twice never shares data between the copies
           data: JSON.parse(JSON.stringify(node.data ?? {})),
-          // Children of a pasted group keep their group-relative position;
-          // every other node shifts +40/+40 (same offset as duplication)
-          position:
-            node.parentId && idMap.has(node.parentId)
-              ? { ...node.position }
-              : { x: node.position.x + 40, y: node.position.y + 40 },
+          position: isTopLevel(node)
+            ? { x: node.position.x + offset.x, y: node.position.y + offset.y }
+            : { ...node.position },
           ...(node.parentId && idMap.has(node.parentId)
             ? { parentId: idMap.get(node.parentId) as string }
             : {}),

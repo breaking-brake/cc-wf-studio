@@ -388,6 +388,14 @@ export interface WebviewTranslationKeys {
   'canvas.deleteNode.tooltip': string;
   'canvas.deleteEdge.tooltip': string;
   'canvas.resizeSidebar': string;
+
+  // Canvas context menu
+  'contextMenu.copy': string;
+  'contextMenu.cut': string;
+  'contextMenu.paste': string;
+  'contextMenu.duplicate': string;
+  'contextMenu.delete': string;
+  'contextMenu.selectAll': string;
   'announcement.dismiss': string;
 
   // Delete Confirmation Dialog

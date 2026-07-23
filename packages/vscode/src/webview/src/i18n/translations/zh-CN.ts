@@ -392,6 +392,14 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'canvas.deleteNode.tooltip': '删除节点',
   'canvas.deleteEdge.tooltip': '删除连接',
   'canvas.resizeSidebar': '调整侧边栏大小',
+
+  // Canvas context menu
+  'contextMenu.copy': '复制',
+  'contextMenu.cut': '剪切',
+  'contextMenu.paste': '粘贴',
+  'contextMenu.duplicate': '创建副本',
+  'contextMenu.delete': '删除',
+  'contextMenu.selectAll': '全选',
   'announcement.dismiss': '关闭公告',
 
   // Delete Confirmation Dialog

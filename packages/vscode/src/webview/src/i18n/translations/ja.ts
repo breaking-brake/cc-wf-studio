@@ -406,6 +406,14 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'canvas.deleteNode.tooltip': 'ノードを削除',
   'canvas.deleteEdge.tooltip': '接続を削除',
   'canvas.resizeSidebar': 'サイドバーのサイズを変更',
+
+  // Canvas context menu
+  'contextMenu.copy': 'コピー',
+  'contextMenu.cut': '切り取り',
+  'contextMenu.paste': '貼り付け',
+  'contextMenu.duplicate': '複製',
+  'contextMenu.delete': '削除',
+  'contextMenu.selectAll': 'すべて選択',
   'announcement.dismiss': 'お知らせを閉じる',
 
   // Delete Confirmation Dialog

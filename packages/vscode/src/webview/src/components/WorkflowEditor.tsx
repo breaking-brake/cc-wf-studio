@@ -5,7 +5,15 @@
  * Based on: /specs/001-cc-wf-studio/research.md section 3.4
  */
 
-import { PanelLeftOpen } from 'lucide-react';
+import {
+  ClipboardPaste,
+  Copy,
+  CopyPlus,
+  PanelLeftOpen,
+  Scissors,
+  SquareDashedMousePointer,
+  Trash2,
+} from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactFlow, {
@@ -20,12 +28,18 @@ import ReactFlow, {
   type NodeTypes,
   Panel,
   PanOnScrollMode,
+  type ReactFlowInstance,
 } from 'reactflow';
 import { CURRENT_ANNOUNCEMENT, cleanupDismissedAnnouncements } from '../constants/announcements';
 import { useAutoFocusNode } from '../hooks/useAutoFocusNode';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useTranslation } from '../i18n/i18n-context';
-import { parseSelectionClipboardPayload, useWorkflowStore } from '../stores/workflow-store';
+import {
+  parseSelectionClipboardPayload,
+  type SelectionClipboardPayload,
+  useWorkflowStore,
+} from '../stores/workflow-store';
+import { CanvasContextMenu, type CanvasContextMenuEntry } from './CanvasContextMenu';
 import { CanvasToolbar } from './CanvasToolbar';
 import { FeatureAnnouncementBanner } from './common/FeatureAnnouncementBanner';
 import { DescriptionPanel } from './DescriptionPanel';
@@ -86,6 +100,37 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
  */
 const edgeTypes: EdgeTypes = {
   default: DeletableEdge,
+};
+
+/** In-window mirror of the last copied/cut selection. The context menu's
+ *  Paste falls back to it when the webview denies clipboard read (the DOM
+ *  paste event path is unaffected — Ctrl/Cmd+V still reads the system
+ *  clipboard). */
+let selectionClipboardMirror: SelectionClipboardPayload | null = null;
+
+/** Mirror the payload and best-effort write it to the system clipboard
+ *  (context-menu clicks are user gestures, but webviews may still deny). */
+const writeSelectionToClipboard = (payload: SelectionClipboardPayload) => {
+  selectionClipboardMirror = payload;
+  navigator.clipboard?.writeText(JSON.stringify(payload, null, 2)).catch(() => {});
+};
+
+/** Select every node and edge. Selection state is excluded from undo
+ *  history and canvas-revision tracking, so this never dirties the
+ *  workflow or pollutes undo. */
+const selectAllOnCanvas = () => {
+  const {
+    nodes: currentNodes,
+    edges: currentEdges,
+    setNodes,
+    setEdges,
+    syncSelectedNodeId,
+  } = useWorkflowStore.getState();
+  if (currentNodes.length === 0 && currentEdges.length === 0) return;
+  setNodes(currentNodes.map((n) => (n.selected ? n : { ...n, selected: true })));
+  setEdges(currentEdges.map((e) => (e.selected ? e : { ...e, selected: true })));
+  // Same rule as handleNodesChange: exactly one selected node syncs its id
+  syncSelectedNodeId(currentNodes.length === 1 ? currentNodes[0].id : null);
 };
 
 /**
@@ -306,6 +351,134 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     syncSelectedNodeId(null);
   }, [syncSelectedNodeId]);
 
+  // ---------------------------------------------------------------------
+  // Canvas context menu (right-click): Copy/Cut/Paste/Duplicate/Delete
+  // ---------------------------------------------------------------------
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
+  const reactFlowInstanceRef = useRef<ReactFlowInstance | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    flowPosition: { x: number; y: number } | null;
+    target: 'node' | 'pane';
+  } | null>(null);
+
+  const openContextMenu = useCallback(
+    (event: React.MouseEvent | MouseEvent, target: 'node' | 'pane') => {
+      // Suppress the webview's native context menu
+      event.preventDefault();
+      const container = canvasContainerRef.current;
+      if (!container) return;
+      const bounds = container.getBoundingClientRect();
+      const x = event.clientX - bounds.left;
+      const y = event.clientY - bounds.top;
+      // Flow coordinates of the click, so Paste can land the nodes there
+      const flowPosition = reactFlowInstanceRef.current?.project({ x, y }) ?? null;
+      setContextMenu({ x, y, flowPosition, target });
+    },
+    []
+  );
+
+  const handleNodeContextMenu = useCallback(
+    (event: React.MouseEvent, node: Node) => {
+      const {
+        nodes: currentNodes,
+        edges: currentEdges,
+        setNodes,
+        setEdges,
+        syncSelectedNodeId: syncId,
+      } = useWorkflowStore.getState();
+      // Right-clicking an unselected node selects it exclusively (standard
+      // editor behavior); a right-click inside a multi-selection keeps it
+      const clicked = currentNodes.find((n) => n.id === node.id);
+      if (clicked && !clicked.selected) {
+        setNodes(
+          currentNodes.map((n) =>
+            n.id === node.id ? { ...n, selected: true } : n.selected ? { ...n, selected: false } : n
+          )
+        );
+        if (currentEdges.some((e) => e.selected)) {
+          setEdges(currentEdges.map((e) => (e.selected ? { ...e, selected: false } : e)));
+        }
+        syncId(node.id);
+      }
+      openContextMenu(event, 'node');
+    },
+    [openContextMenu]
+  );
+
+  const handleSelectionContextMenu = useCallback(
+    (event: React.MouseEvent) => openContextMenu(event, 'node'),
+    [openContextMenu]
+  );
+
+  const handlePaneContextMenu = useCallback(
+    (event: React.MouseEvent | MouseEvent) => openContextMenu(event, 'pane'),
+    [openContextMenu]
+  );
+
+  const closeContextMenu = useCallback(() => setContextMenu(null), []);
+
+  const copySelectionFromMenu = useCallback(() => {
+    const { nodes: currentNodes, serializeSelection } = useWorkflowStore.getState();
+    const selectedIds = currentNodes.filter((n) => n.selected).map((n) => n.id);
+    if (selectedIds.length === 0) return;
+    const payload = serializeSelection(selectedIds);
+    if (payload) writeSelectionToClipboard(payload);
+  }, []);
+
+  const cutSelectionFromMenu = useCallback(() => {
+    const { nodes: currentNodes, pendingDeleteNodeIds, cutSelection } = useWorkflowStore.getState();
+    // Don't race the delete-confirmation dialog over the same selection
+    if (pendingDeleteNodeIds.length > 0) return;
+    const selectedIds = currentNodes.filter((n) => n.selected).map((n) => n.id);
+    if (selectedIds.length === 0) return;
+    const payload = cutSelection(selectedIds);
+    if (payload) writeSelectionToClipboard(payload);
+  }, []);
+
+  const pasteFromMenu = useCallback(async (position: { x: number; y: number } | null) => {
+    let payload: SelectionClipboardPayload | null = null;
+    try {
+      const text = await navigator.clipboard.readText();
+      payload = parseSelectionClipboardPayload(text);
+    } catch {
+      // Webview denied clipboard read — fall back to the in-window mirror
+      payload = selectionClipboardMirror;
+    }
+    if (payload) useWorkflowStore.getState().pasteSelection(payload, position ?? undefined);
+  }, []);
+
+  const duplicateSelectionFromMenu = useCallback(() => {
+    const { nodes: currentNodes, duplicateSelection } = useWorkflowStore.getState();
+    const selectedIds = currentNodes
+      .filter((n) => n.selected && n.type !== 'start' && n.type !== 'end')
+      .map((n) => n.id);
+    if (selectedIds.length > 0) duplicateSelection(selectedIds);
+  }, []);
+
+  const deleteSelectionFromMenu = useCallback(() => {
+    const {
+      nodes: currentNodes,
+      edges: currentEdges,
+      pendingDeleteNodeIds,
+      requestDeleteSelection,
+      setEdges,
+    } = useWorkflowStore.getState();
+    if (pendingDeleteNodeIds.length > 0) return;
+    const selectedNodeIds = currentNodes
+      .filter((n) => n.selected && n.type !== 'start')
+      .map((n) => n.id);
+    const selectedEdgeIds = currentEdges.filter((e) => e.selected).map((e) => e.id);
+    if (selectedNodeIds.length > 0) {
+      // Same confirm flow as the Delete key
+      requestDeleteSelection(selectedNodeIds, selectedEdgeIds);
+    } else if (selectedEdgeIds.length > 0) {
+      // Edge-only selection: delete immediately (parity with the edge ✕ button)
+      setEdges(currentEdges.filter((e) => !e.selected));
+    }
+  }, []);
+
   // Memoize snap grid
   const snapGrid = useMemo<[number, number]>(() => [15, 15], []);
 
@@ -370,22 +543,8 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         }
         const key = event.key.toLowerCase();
         if (key === 'a' && !event.shiftKey && !event.altKey) {
-          // Select all nodes and edges. Selection state is excluded from undo
-          // history and canvas-revision tracking, so this never dirties the
-          // workflow or pollutes undo.
           event.preventDefault();
-          const {
-            nodes: currentNodes,
-            edges: currentEdges,
-            setNodes,
-            setEdges,
-            syncSelectedNodeId,
-          } = useWorkflowStore.getState();
-          if (currentNodes.length === 0 && currentEdges.length === 0) return;
-          setNodes(currentNodes.map((n) => (n.selected ? n : { ...n, selected: true })));
-          setEdges(currentEdges.map((e) => (e.selected ? e : { ...e, selected: true })));
-          // Same rule as handleNodesChange: exactly one selected node syncs its id
-          syncSelectedNodeId(currentNodes.length === 1 ? currentNodes[0].id : null);
+          selectAllOnCanvas();
         }
         if (key === 'z' && !event.shiftKey) {
           event.preventDefault();
@@ -441,6 +600,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       if (selectedIds.length === 0) return;
       const payload = serializeSelection(selectedIds);
       if (!payload || !event.clipboardData) return;
+      selectionClipboardMirror = payload;
       event.preventDefault();
       event.clipboardData.setData('text/plain', JSON.stringify(payload, null, 2));
     };
@@ -465,6 +625,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       // lives on in the clipboard payload — standard editor semantics
       const payload = cutSelection(selectedIds);
       if (!payload) return;
+      selectionClipboardMirror = payload;
       event.preventDefault();
       event.clipboardData.setData('text/plain', JSON.stringify(payload, null, 2));
     };
@@ -499,6 +660,8 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   const minimapHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleMoveStart = useCallback(() => {
+    // Pan/zoom invalidates the menu's position — dismiss it
+    setContextMenu(null);
     if (minimapDisplayMode !== 'auto') return;
     if (minimapHideTimerRef.current) {
       clearTimeout(minimapHideTimerRef.current);
@@ -536,6 +699,86 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   const panOnDrag = effectiveMode === 'pan';
   const selectionOnDrag = effectiveMode === 'selection';
 
+  // Context-menu entries (built at render so disabled states track the
+  // live selection; Start/End follow the store's exclusion policies)
+  const contextMenuEntries = useMemo<CanvasContextMenuEntry[]>(() => {
+    if (!contextMenu) return [];
+    const isMac = navigator.platform.toUpperCase().includes('MAC');
+    const mod = isMac ? '⌘' : 'Ctrl+';
+    const pasteEntry: CanvasContextMenuEntry = {
+      key: 'paste',
+      label: t('contextMenu.paste'),
+      icon: <ClipboardPaste size={14} />,
+      shortcut: `${mod}V`,
+      onSelect: () => void pasteFromMenu(contextMenu.flowPosition),
+    };
+    if (contextMenu.target === 'pane') {
+      return [
+        pasteEntry,
+        'separator',
+        {
+          key: 'selectAll',
+          label: t('contextMenu.selectAll'),
+          icon: <SquareDashedMousePointer size={14} />,
+          shortcut: `${mod}A`,
+          disabled: nodes.length === 0 && edges.length === 0,
+          onSelect: selectAllOnCanvas,
+        },
+      ];
+    }
+    const hasCopyableSelection = nodes.some(
+      (n) => n.selected && n.type !== 'start' && n.type !== 'end'
+    );
+    const hasDeletableSelection =
+      nodes.some((n) => n.selected && n.type !== 'start') || edges.some((e) => e.selected);
+    return [
+      {
+        key: 'copy',
+        label: t('contextMenu.copy'),
+        icon: <Copy size={14} />,
+        shortcut: `${mod}C`,
+        disabled: !hasCopyableSelection,
+        onSelect: copySelectionFromMenu,
+      },
+      {
+        key: 'cut',
+        label: t('contextMenu.cut'),
+        icon: <Scissors size={14} />,
+        shortcut: `${mod}X`,
+        disabled: !hasCopyableSelection,
+        onSelect: cutSelectionFromMenu,
+      },
+      pasteEntry,
+      {
+        key: 'duplicate',
+        label: t('contextMenu.duplicate'),
+        icon: <CopyPlus size={14} />,
+        shortcut: `${mod}D`,
+        disabled: !hasCopyableSelection,
+        onSelect: duplicateSelectionFromMenu,
+      },
+      'separator',
+      {
+        key: 'delete',
+        label: t('contextMenu.delete'),
+        icon: <Trash2 size={14} />,
+        shortcut: 'Del',
+        disabled: !hasDeletableSelection,
+        onSelect: deleteSelectionFromMenu,
+      },
+    ];
+  }, [
+    contextMenu,
+    nodes,
+    edges,
+    t,
+    pasteFromMenu,
+    copySelectionFromMenu,
+    cutSelectionFromMenu,
+    duplicateSelectionFromMenu,
+    deleteSelectionFromMenu,
+  ]);
+
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Feature Announcement Banner - displayed when CURRENT_ANNOUNCEMENT is set */}
@@ -550,10 +793,13 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       )}
 
       {/* Canvas area */}
-      <div style={{ flex: 1, position: 'relative' }}>
+      <div ref={canvasContainerRef} style={{ flex: 1, position: 'relative' }}>
         <ReactFlow
           nodes={nodes}
           edges={animatedEdges}
+          onInit={(instance) => {
+            reactFlowInstanceRef.current = instance;
+          }}
           onNodesChange={handleNodesChange}
           onEdgesChange={handleEdgesChange}
           onConnect={handleConnect}
@@ -562,6 +808,9 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           onNodeClick={handleNodeClick}
           onEdgeClick={() => syncSelectedNodeId(null)}
           onPaneClick={handlePaneClick}
+          onNodeContextMenu={handleNodeContextMenu}
+          onSelectionContextMenu={handleSelectionContextMenu}
+          onPaneContextMenu={handlePaneContextMenu}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           defaultEdgeOptions={defaultEdgeOptions}
@@ -683,6 +932,14 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
             </Panel>
           )}
         </ReactFlow>
+        {contextMenu && (
+          <CanvasContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            entries={contextMenuEntries}
+            onClose={closeContextMenu}
+          />
+        )}
         {onOpenSample && onDismissEmptyState && onLoadWorkflow && (
           <StartMenu
             isOpen={showEmptyState}

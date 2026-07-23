@@ -17,6 +17,41 @@ Entry format:
 
 ---
 
+## 2026-07-23 — Right-click context menu on the canvas
+- **User value**: a user can now right-click a node, a multi-selection, or
+  the empty canvas to Copy, Cut, Paste, Duplicate, or Delete (plus Select
+  All) — the clipboard verbs shipped in #890–#896 were keyboard-only and
+  invisible to mouse-first users; pasting via the canvas menu now lands the
+  nodes at the click point instead of the fixed +40/+40 offset.
+- **Issue/PR**: #899 / PR from `claude/canvas-context-menu`
+- **Outcome**: done — new `CanvasContextMenu` component (VSCode dropdown
+  tokens, lucide icons, platform-aware shortcut hints, edge clamping,
+  closes on outside click/Escape/pan/zoom); `WorkflowEditor` wires React
+  Flow's `onNodeContextMenu`/`onSelectionContextMenu`/`onPaneContextMenu`
+  (right-click selects an unselected node exclusively, keeps a
+  multi-selection). Menu actions reuse the existing store verbs and
+  policies (Start/End exclusions, delete-confirm flow, pendingDelete
+  guard). Paste tries `navigator.clipboard.readText()` (menu click is a
+  user gesture) and falls back to an in-window mirror of the last
+  copied/cut payload — set by both keyboard and menu copy/cut — so
+  same-window right-click paste works even where webview clipboard read is
+  denied; system-clipboard non-payload text correctly no-ops. Ctrl+A logic
+  extracted to a shared `selectAllOnCanvas`. `pasteSelection` gained an
+  optional target position (top-left of the payload's bounding box lands
+  at the cursor). 6 new `contextMenu.*` keys in all 5 locales. Issue #899
+  could not be locked (no `gh`, no MCP lock tool, API proxied — known
+  limitation, noted in the issue body).
+- **Next proposals**:
+  - Full localization of `ClaudeApiUploadDialog` visible text — biggest
+    remaining unlocalized surface (~3600 lines, one `t()` call); the
+    `claudeApi.*` namespace from #897 is the landing zone.
+  - Manual E2E queue: verify copy/cut/paste DOM events and the new
+    context menu (incl. clipboard-read fallback path) in real webviews on
+    all three OSes.
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow v11 keyboard a11y); only add grid-step nudging if
+    actually missing.
+
 ## 2026-07-23 — Localize remaining hardcoded English strings in active UI
 - **User value**: a user running VSCode in Japanese, Korean, or Chinese no
   longer hits stray English strings in otherwise-localized surfaces: the
