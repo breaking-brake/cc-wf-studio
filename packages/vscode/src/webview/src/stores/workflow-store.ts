@@ -42,6 +42,86 @@ export type InteractionMode = 'pan' | 'selection';
  */
 export type ScrollMode = 'classic' | 'freehand';
 
+// ============================================================================
+// Selection Clipboard (Ctrl/Cmd+C / Ctrl/Cmd+V)
+// ============================================================================
+
+/** Marker distinguishing a cc-wf-studio selection payload from ordinary text */
+export const SELECTION_CLIPBOARD_TYPE = 'cc-wf-studio/selection';
+
+/** A node serialized for the clipboard — self-contained (a child copied
+ *  without its group carries its absolute position and no parentId). */
+export interface SelectionClipboardNode {
+  id: string;
+  type: string;
+  position: { x: number; y: number };
+  data: Record<string, unknown>;
+  parentId?: string;
+  style?: Record<string, unknown>;
+}
+
+/** An edge serialized for the clipboard (both endpoints are payload nodes) */
+export interface SelectionClipboardEdge {
+  id: string;
+  source: string;
+  target: string;
+  [key: string]: unknown;
+}
+
+/** Versioned clipboard payload written as plain text — the system clipboard
+ *  carries it across canvas windows, so paste works between workflows. */
+export interface SelectionClipboardPayload {
+  type: typeof SELECTION_CLIPBOARD_TYPE;
+  version: 1;
+  nodes: SelectionClipboardNode[];
+  edges: SelectionClipboardEdge[];
+}
+
+/**
+ * Parse clipboard text into a selection payload, or null if it is anything
+ * else (ordinary text pastes must never be hijacked). Shape-checks every
+ * node and edge so a malformed payload cannot corrupt the canvas.
+ */
+export function parseSelectionClipboardPayload(text: string): SelectionClipboardPayload | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return null;
+  }
+  if (!parsed || typeof parsed !== 'object') return null;
+  const payload = parsed as Record<string, unknown>;
+  if (payload.type !== SELECTION_CLIPBOARD_TYPE || payload.version !== 1) return null;
+  if (!Array.isArray(payload.nodes) || !Array.isArray(payload.edges)) return null;
+
+  const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === 'object' && value !== null && !Array.isArray(value);
+  const isValidNode = (value: unknown): boolean => {
+    if (!isRecord(value)) return false;
+    const position = value.position;
+    return (
+      typeof value.id === 'string' &&
+      typeof value.type === 'string' &&
+      value.type.length > 0 &&
+      isRecord(position) &&
+      typeof position.x === 'number' &&
+      Number.isFinite(position.x) &&
+      typeof position.y === 'number' &&
+      Number.isFinite(position.y) &&
+      isRecord(value.data) &&
+      (value.parentId === undefined || typeof value.parentId === 'string')
+    );
+  };
+  const isValidEdge = (value: unknown): boolean =>
+    isRecord(value) &&
+    typeof value.id === 'string' &&
+    typeof value.source === 'string' &&
+    typeof value.target === 'string';
+
+  if (!payload.nodes.every(isValidNode) || !payload.edges.every(isValidEdge)) return null;
+  return parsed as SelectionClipboardPayload;
+}
+
 /**
  * Snapshot of main workflow state for restoration after Sub-Agent Flow editing
  */
@@ -152,6 +232,14 @@ interface WorkflowStore {
    *  both endpoints in the duplicated set are copied too. Start/End excluded.
    *  The copies become the new selection. */
   duplicateSelection: (nodeIds: string[]) => void;
+  /** Serialize a selection into a clipboard payload (Start/End excluded;
+   *  selected groups bring their children; edges with both endpoints in the
+   *  set ride along). Returns null when nothing serializable is selected. */
+  serializeSelection: (nodeIds: string[]) => SelectionClipboardPayload | null;
+  /** Insert a clipboard payload as new nodes/edges: fresh ids, +40/+40
+   *  offset, deep-copied data, one undo entry. The pasted nodes become the
+   *  new selection. Works with payloads copied from another workflow. */
+  pasteSelection: (payload: SelectionClipboardPayload) => void;
   clearLastAddedNodeId: () => void;
   /** Request the canvas to pan to a specific node (e.g. when jumping in from
    *  Overview mode). The canvas-side hook clears it after centring. */
@@ -204,6 +292,32 @@ function sortNodesParentFirst(nodes: Node[]): Node[] {
   const parents = nodes.filter((n) => parentIds.has(n.id));
   const others = nodes.filter((n) => !parentIds.has(n.id));
   return [...parents, ...others];
+}
+
+/**
+ * Keep the palette's `<prefix>-<timestamp>` id convention: strip a trailing
+ * timestamp from the original id, then append a fresh one. `usedIds` tracks
+ * ids already taken so same-millisecond copies stay unique (the new id is
+ * added to the set).
+ */
+function makeUniqueNodeId(usedIds: Set<string>, originalId: string): string {
+  const baseId = originalId.replace(/[-_]\d+$/, '');
+  let newId = `${baseId}-${Date.now()}`;
+  while (usedIds.has(newId)) {
+    newId = `${baseId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+  }
+  usedIds.add(newId);
+  return newId;
+}
+
+/** Same uniqueness contract as makeUniqueNodeId, for `edge-<src>-<tgt>` ids. */
+function makeUniqueEdgeId(usedIds: Set<string>, source: string, target: string): string {
+  let newEdgeId = `edge-${source}-${target}`;
+  while (usedIds.has(newEdgeId)) {
+    newEdgeId = `edge-${source}-${target}-${Math.random().toString(36).slice(2, 6)}`;
+  }
+  usedIds.add(newEdgeId);
+  return newEdgeId;
 }
 
 /**
@@ -730,23 +844,10 @@ export const useWorkflowStore = create<WorkflowStore>()(
           (node) => node.parentId && sourceIds.has(node.parentId) && !sourceIds.has(node.id)
         );
 
-        // Keep the palette's `<prefix>-<timestamp>` id convention: strip a
-        // trailing timestamp from the source id, then append a fresh one.
-        // Track used ids so same-millisecond copies stay unique.
         const usedIds = new Set(allNodes.map((node) => node.id));
-        const makeNodeId = (originalId: string) => {
-          const baseId = originalId.replace(/[-_]\d+$/, '');
-          let newId = `${baseId}-${Date.now()}`;
-          while (usedIds.has(newId)) {
-            newId = `${baseId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-          }
-          usedIds.add(newId);
-          return newId;
-        };
-
         const idMap = new Map<string, string>();
         for (const node of [...sources, ...children]) {
-          idMap.set(node.id, makeNodeId(node.id));
+          idMap.set(node.id, makeUniqueNodeId(usedIds, node.id));
         }
 
         const copyNode = (node: Node): Node => ({
@@ -784,14 +885,9 @@ export const useWorkflowStore = create<WorkflowStore>()(
           .map((edge) => {
             const newSource = idMap.get(edge.source) as string;
             const newTarget = idMap.get(edge.target) as string;
-            let newEdgeId = `edge-${newSource}-${newTarget}`;
-            while (usedEdgeIds.has(newEdgeId)) {
-              newEdgeId = `edge-${newSource}-${newTarget}-${Math.random().toString(36).slice(2, 6)}`;
-            }
-            usedEdgeIds.add(newEdgeId);
             return {
               ...edge,
-              id: newEdgeId,
+              id: makeUniqueEdgeId(usedEdgeIds, newSource, newTarget),
               source: newSource,
               target: newTarget,
               selected: false,
@@ -815,6 +911,143 @@ export const useWorkflowStore = create<WorkflowStore>()(
         set({
           nodes: [...deselected, ...copies],
           ...(edgesChanged && { edges: [...edgesDeselected, ...edgeCopies] }),
+          ...(newSelectedId && { lastAddedNodeId: newSelectedId }),
+          selectedNodeId: newSelectedId,
+        });
+      },
+
+      serializeSelection: (nodeIds: string[]) => {
+        const allNodes = get().nodes;
+        const requested = new Set(nodeIds);
+        // Start/End are structural and must stay unique — never copied
+        const sources = allNodes.filter(
+          (node) => requested.has(node.id) && node.type !== 'start' && node.type !== 'end'
+        );
+        if (sources.length === 0) return null;
+        const sourceIds = new Set(sources.map((node) => node.id));
+
+        // Same policy as duplicateSelection: a group brings its children
+        const children = allNodes.filter(
+          (node) => node.parentId && sourceIds.has(node.parentId) && !sourceIds.has(node.id)
+        );
+        const included = [...sources, ...children];
+        const includedIds = new Set(included.map((node) => node.id));
+
+        const toClipboardNode = (node: Node): SelectionClipboardNode => {
+          // A child copied without its group must be self-contained: drop the
+          // parentId and convert its group-relative position to absolute
+          // (groups never nest, so parent position + offset is enough)
+          let position = { ...node.position };
+          let parentId = node.parentId;
+          if (parentId && !includedIds.has(parentId)) {
+            const parent = allNodes.find((n) => n.id === parentId);
+            if (parent) {
+              position = {
+                x: parent.position.x + node.position.x,
+                y: parent.position.y + node.position.y,
+              };
+            }
+            parentId = undefined;
+          }
+          return {
+            id: node.id,
+            type: node.type ?? 'default',
+            position,
+            data: JSON.parse(JSON.stringify(node.data ?? {})),
+            ...(parentId ? { parentId } : {}),
+            ...(node.style ? { style: { ...node.style } } : {}),
+          };
+        };
+
+        const edges = get()
+          .edges.filter((edge) => includedIds.has(edge.source) && includedIds.has(edge.target))
+          .map((edge) => {
+            const { selected: _selected, ...rest } = edge;
+            return JSON.parse(JSON.stringify(rest)) as SelectionClipboardEdge;
+          });
+
+        return {
+          type: SELECTION_CLIPBOARD_TYPE,
+          version: 1,
+          nodes: included.map(toClipboardNode),
+          edges,
+        };
+      },
+
+      pasteSelection: (payload: SelectionClipboardPayload) => {
+        const allNodes = get().nodes;
+        // Defense in depth — serializeSelection never emits these, but the
+        // clipboard is user-editable text
+        const incoming = payload.nodes.filter(
+          (node) => node.type !== 'start' && node.type !== 'end'
+        );
+        if (incoming.length === 0) return;
+
+        const usedIds = new Set(allNodes.map((node) => node.id));
+        const idMap = new Map<string, string>();
+        for (const node of incoming) {
+          idMap.set(node.id, makeUniqueNodeId(usedIds, node.id));
+        }
+
+        const copies: Node[] = incoming.map((node) => ({
+          id: idMap.get(node.id) as string,
+          type: node.type,
+          // Deep copy so pasting twice never shares data between the copies
+          data: JSON.parse(JSON.stringify(node.data ?? {})),
+          // Children of a pasted group keep their group-relative position;
+          // every other node shifts +40/+40 (same offset as duplication)
+          position:
+            node.parentId && idMap.has(node.parentId)
+              ? { ...node.position }
+              : { x: node.position.x + 40, y: node.position.y + 40 },
+          ...(node.parentId && idMap.has(node.parentId)
+            ? { parentId: idMap.get(node.parentId) as string }
+            : {}),
+          ...(node.style ? { style: { ...node.style } } : {}),
+          // The pasted content becomes the new selection
+          selected: true,
+        }));
+
+        const currentEdges = get().edges;
+        const usedEdgeIds = new Set(currentEdges.map((edge) => edge.id));
+        const edgeCopies: Edge[] = payload.edges
+          .filter((edge) => idMap.has(edge.source) && idMap.has(edge.target))
+          .map((edge) => {
+            const newSource = idMap.get(edge.source) as string;
+            const newTarget = idMap.get(edge.target) as string;
+            const {
+              id: _id,
+              source: _source,
+              target: _target,
+              selected: _selected,
+              ...rest
+            } = edge;
+            return {
+              ...(JSON.parse(JSON.stringify(rest)) as Record<string, unknown>),
+              id: makeUniqueEdgeId(usedEdgeIds, newSource, newTarget),
+              source: newSource,
+              target: newTarget,
+              selected: false,
+            } as Edge;
+          });
+
+        // Move the visual selection from whatever was selected to the copies
+        const deselectedNodes = allNodes.map((node) =>
+          node.selected ? { ...node, selected: false } : node
+        );
+        const deselectedEdges = currentEdges.map((edge) =>
+          edge.selected ? { ...edge, selected: false } : edge
+        );
+
+        // Same rule as handleNodesChange: exactly one selected node syncs its
+        // id (and gets the auto-focus pan); a multi-paste keeps the view still
+        const newSelectedId = copies.length === 1 ? copies[0].id : null;
+
+        // Parent copies first so React Flow sees a group before its children.
+        // Single set() call → single undo/redo history entry
+        set({
+          nodes: [...deselectedNodes, ...sortNodesParentFirst(copies)],
+          edges: [...deselectedEdges, ...edgeCopies],
           ...(newSelectedId && { lastAddedNodeId: newSelectedId }),
           selectedNodeId: newSelectedId,
         });
