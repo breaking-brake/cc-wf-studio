@@ -1115,6 +1115,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'sample.dialog.loadButton': 'Load',
   'sample.dialog.previewButton': 'Preview',
   'sample.dialog.empty': 'No samples available.',
+  'sample.difficulty.beginner': 'Beginner',
+  'sample.difficulty.intermediate': 'Intermediate',
+  'sample.difficulty.advanced': 'Advanced',
   'sample.githubIssuePlanning.name': 'GitHub Issue Planning',
   'sample.githubIssuePlanning.description':
     'A planning workflow for GitHub issues: fetch issue, analyze current code, verify fixes, and retrospective.',

@@ -1100,6 +1100,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'sample.dialog.loadButton': '불러오기',
   'sample.dialog.previewButton': '미리보기',
   'sample.dialog.empty': '사용 가능한 샘플이 없습니다.',
+  'sample.difficulty.beginner': '초급',
+  'sample.difficulty.intermediate': '중급',
+  'sample.difficulty.advanced': '고급',
   'sample.githubIssuePlanning.name': 'GitHub Issue 플래닝',
   'sample.githubIssuePlanning.description':
     'GitHub Issue 플래닝 워크플로우: Issue 조회, 현재 코드 분석, 수정 검증 확인, 회고.',

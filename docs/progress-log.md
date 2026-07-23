@@ -17,6 +17,30 @@ Entry format:
 
 ---
 
+## 2026-07-23 — Show difficulty and tags on sample gallery cards
+- **User value**: a user browsing the canvas sample gallery can now see each
+  sample's difficulty level (localized badge) and topic tags (slug chips)
+  before loading it, instead of judging a sample only by its name and node
+  count — parity with `ccwf samples list`, which already prints
+  `difficulty · nodes · tags` for the same bundled files.
+- **Issue/PR**: #883 / PR from `claude/sleepy-curie-7ziuc1`
+- **Outcome**: done — `SampleWorkflowMeta` always shipped `difficulty` and
+  `tags` and `listSampleWorkflows` already posts the full meta to the
+  webview; `SampleWorkflowDialog.tsx` simply dropped both. Added a
+  BetaBadge-styled difficulty badge next to the sample name (new
+  `sample.difficulty.beginner/intermediate/advanced` keys in all 5 locales:
+  初級/中級/上級, 초급/중급/고급, 初级/中级/高级, 初級/中級/高級) with raw-string
+  fallback for unknown values, and untranslated tag chips (slug identifiers,
+  same presentation policy as the CLI). Guard step this round also closed
+  #881 (merged as #882). Rejected this round: confirm-before-replacing-canvas
+  on sample load (premise false — `handleLoadSample` already routes through
+  the unsaved-changes confirm at `App.tsx:304`).
+- **Next proposals**:
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow a11y); if not, add grid-step nudging.
+  - MCP `apply_workflow` compat warnings — still parked until more
+    Claude-Code-only node types land.
+
 ## 2026-07-23 — Localize the Commentary options dropdown
 - **User value**: a user running VSCode in Japanese, Korean, or Chinese no
   longer sees hardcoded English chrome ("Commentary options", "Provider",
