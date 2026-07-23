@@ -18,6 +18,7 @@ import {
   validateAIGeneratedWorkflow,
   type Workflow,
   type WorkflowNode,
+  type WorkflowTargetAgent,
 } from '@cc-wf-studio/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
@@ -79,7 +80,7 @@ const TOOL_TEXT: Record<WorkflowMcpMode, ToolText> = {
     applyRevisionParamDescription:
       'Workflow revision from get_current_workflow for conflict detection. If provided and the workflow has been modified since, the apply will be rejected or a warning shown.',
     validateWorkflowDescription:
-      'Validate a workflow JSON draft WITHOUT applying it to the canvas. Checks schema validity and, when "agent" is provided, also reports target-compatibility warnings (Claude Code-only nodes the agent cannot execute, configured fields that target ignores). No side effects: nothing is applied, no review dialog is shown, and no sub-agent files are created. Use this to check a draft before apply_workflow.',
+      'Validate a workflow JSON draft WITHOUT applying it to the canvas. Checks schema validity and, when "agent" is provided, also reports target-compatibility warnings (Claude Code-only nodes the agent cannot execute, configured fields that target ignores) — pass "all" or an array of agents to preflight several targets in one call. No side effects: nothing is applied, no review dialog is shown, and no sub-agent files are created. Use this to check a draft before apply_workflow.',
     updateNodesDescription:
       'Update specific nodes in the current workflow by ID. More efficient than apply_workflow for partial changes. Fetches the current workflow, merges the specified node changes, validates the result, and applies to the canvas. Only updates existing nodes — use apply_workflow to add or remove nodes.',
     updateNodesChangeDescriptionParam:
@@ -100,7 +101,7 @@ const TOOL_TEXT: Record<WorkflowMcpMode, ToolText> = {
     applyRevisionParamDescription:
       'Workflow revision from get_current_workflow for conflict detection. If provided and the file has changed since it was read, the write is rejected with a revision-conflict error.',
     validateWorkflowDescription:
-      'Validate a workflow JSON draft WITHOUT writing the workflow file. Checks schema validity and, when "agent" is provided, also reports target-compatibility warnings (Claude Code-only nodes the agent cannot execute, configured fields that target ignores). No side effects: the file is not touched. Use this to check a draft before apply_workflow.',
+      'Validate a workflow JSON draft WITHOUT writing the workflow file. Checks schema validity and, when "agent" is provided, also reports target-compatibility warnings (Claude Code-only nodes the agent cannot execute, configured fields that target ignores) — pass "all" or an array of agents to preflight several targets in one call. No side effects: the file is not touched. Use this to check a draft before apply_workflow.',
     updateNodesDescription:
       'Update specific nodes in the current workflow by ID. More efficient than apply_workflow for partial changes. Fetches the current workflow, merges the specified node changes, validates the result, and writes it back to the workflow file. Only updates existing nodes — use apply_workflow to add or remove nodes.',
     updateNodesChangeDescriptionParam:
@@ -241,6 +242,28 @@ function registerApplyWorkflow(
   );
 }
 
+/**
+ * Normalize the `agent` param to a de-duped list in first-mention order:
+ * a single agent name stays a one-element list, `'all'` expands to every
+ * supported target, and an array is de-duped. Mirrors the CLI's repeatable
+ * `--agent` accumulator so both surfaces agree on semantics.
+ */
+function resolveRequestedAgents(
+  agent: WorkflowTargetAgent | 'all' | WorkflowTargetAgent[] | undefined
+): WorkflowTargetAgent[] {
+  if (agent === undefined) {
+    return [];
+  }
+  const requested = agent === 'all' ? WORKFLOW_TARGET_AGENTS : Array.isArray(agent) ? agent : [agent];
+  const deduped: WorkflowTargetAgent[] = [];
+  for (const name of requested) {
+    if (!deduped.includes(name)) {
+      deduped.push(name);
+    }
+  }
+  return deduped;
+}
+
 function registerValidateWorkflow(server: McpServer, text: ToolText): void {
   server.tool(
     'validate_workflow',
@@ -248,10 +271,13 @@ function registerValidateWorkflow(server: McpServer, text: ToolText): void {
     {
       workflow: z.string().describe('The workflow JSON string to validate'),
       agent: z
-        .enum(WORKFLOW_TARGET_AGENTS)
+        .union([
+          z.enum([...WORKFLOW_TARGET_AGENTS, 'all'] as const),
+          z.array(z.enum(WORKFLOW_TARGET_AGENTS)).min(1),
+        ])
         .optional()
         .describe(
-          'Optional target agent to preflight compatibility for. When set (and the workflow is schema-valid), the result includes the same warnings `ccwf validate --agent` reports: Claude Code-only nodes the agent cannot execute, plus configured node fields that target ignores. Warnings never make the workflow invalid.'
+          'Optional target agent(s) to preflight compatibility for: a single agent name, an array of agent names, or "all" for every supported target. When set (and the workflow is schema-valid), the result includes the same warnings `ccwf validate --agent` reports: Claude Code-only nodes the agent cannot execute, plus configured node fields that target ignores. With exactly one agent the result carries `warnings: string[]`; with several it carries `warningsByAgent: { <agent>: string[] }`. Warnings never make the workflow invalid.'
         ),
     },
     async ({ workflow: workflowJson, agent }) => {
@@ -269,18 +295,26 @@ function registerValidateWorkflow(server: McpServer, text: ToolText): void {
         const validation = validateAIGeneratedWorkflow(parsedWorkflow);
         // Compatibility warnings only for a schema-valid workflow —
         // malformed node data would produce garbage reports.
-        const warnings =
-          agent && validation.valid
-            ? collectAgentCompatibilityWarnings(parsedWorkflow as Workflow, agent)
-            : undefined;
+        const agents = validation.valid ? resolveRequestedAgents(agent) : [];
+        const collect = (target: WorkflowTargetAgent): string[] =>
+          collectAgentCompatibilityWarnings(parsedWorkflow as Workflow, target);
 
         // An invalid draft is still a successful validation run: return a
         // normal result so the agent can read the errors and iterate.
+        // Exactly one agent keeps the stable single-agent `warnings` shape;
+        // several agents get a per-agent map instead (same split as the CLI).
         return ok({
           success: true,
           valid: validation.valid,
           ...(validation.valid ? {} : { validationErrors: validation.errors }),
-          ...(warnings ? { warnings } : {}),
+          ...(agents.length === 1 ? { warnings: collect(agents[0]) } : {}),
+          ...(agents.length > 1
+            ? {
+                warningsByAgent: Object.fromEntries(
+                  agents.map((target) => [target, collect(target)])
+                ),
+              }
+            : {}),
         });
       } catch (error) {
         return fail({ success: false, error: errorMessage(error) });
