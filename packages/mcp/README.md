@@ -50,7 +50,7 @@ The bin speaks stdio MCP — point an MCP client (Claude Code, MCP Inspector, �
 |---|---|
 | `get_workflow_schema` | Return the workflow schema in TOON format. |
 | `get_current_workflow` | Return the current workflow + revision. |
-| `validate_workflow` | Validate a workflow draft without persisting anything; optional `agent` adds target-compatibility warnings. |
+| `validate_workflow` | Validate a workflow draft without persisting anything; optional `agent` (a name, an array of names, or `"all"`) adds target-compatibility warnings — one agent returns `warnings`, several return `warningsByAgent`. |
 | `apply_workflow` | Validate + persist a workflow. Honours `expectedRevision` for optimistic locking. |
 | `update_nodes` | Partial node updates (more token-efficient than `apply_workflow`). |
 | `list_available_agents` | Enumerate `~/.claude/agents/*.md` (user) and `<project>/.claude/agents/*.md` (project). |

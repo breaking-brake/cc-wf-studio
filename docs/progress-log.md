@@ -17,6 +17,38 @@ Entry format:
 
 ---
 
+## 2026-07-23 — MCP `validate_workflow` preflights several agents at once
+- **User value**: an AI agent editing a workflow via the MCP server can now
+  preflight target compatibility for every export target in a single
+  `validate_workflow` call — `agent: "all"` or `agent: ["codex", "gemini"]` —
+  matching `ccwf validate --agent all`, instead of one tool call per target.
+- **Issue/PR**: #913 / PR from `claude/sleepy-curie-x5rcx9`
+- **Outcome**: done — the `agent` param is now a union: single agent name
+  (result byte-identical to before, stable `warnings: string[]` shape),
+  `"all"` (expands to `WORKFLOW_TARGET_AGENTS`), or a non-empty array
+  (de-duped, first-mention order; a one-element array collapses to the
+  single-agent shape, same rule as the CLI). Several agents return
+  `warningsByAgent: { <agent>: string[] }`, the CLI's multi-agent JSON key.
+  Warnings still only collected for schema-valid drafts; invalid drafts
+  return `validationErrors` with no warning keys. Tool description text
+  updated in both canvas and file modes; docs: mcp README tool table,
+  ccwf-cli SKILL.md, ai-editing-skill-template.md. E2E: 11 cases through
+  the real MCP SDK stdio client against the built `ccwf-mcp` server
+  (baseline no-agent, legacy string, one-element array parity, duplicate
+  array dedupe + key order, `"all"` with all 7 targets, claude-code
+  self-check empty, invalid draft suppression, bad name / bad name in
+  array / empty array all rejected at the schema layer), plus CLI-parity
+  check that MCP and `ccwf validate --agent codex --json` emit identical
+  warning strings. Issue #913 could not be locked (no `gh`, no MCP lock
+  tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - Manual E2E queue (carried): align/distribute + context menu +
+    copy/cut/paste in real webviews; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector in both modes.
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow v11 keyboard a11y); only add grid-step nudging if
+    actually missing.
+
 ## 2026-07-23 — `ccwf validate --strict` gates CI on compatibility warnings
 - **User value**: a user can now make CI fail when a workflow carries
   target-compatibility warnings — `ccwf validate ./workflows --agent all

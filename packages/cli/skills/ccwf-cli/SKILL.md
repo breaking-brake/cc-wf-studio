@@ -158,7 +158,7 @@ Typical `.mcp.json` snippet for Claude Code:
 }
 ```
 
-The MCP server exposes 7 tools: `get_workflow_schema`, `get_current_workflow`, `validate_workflow`, `apply_workflow`, `update_nodes`, `list_available_agents`, `highlight_group_node`. Use these when the user wants AI-driven editing of the workflow itself (not just rendering / running it). `validate_workflow` checks a draft (schema validity + optional `--agent`-style target-compatibility warnings) without writing the file — prefer it before `apply_workflow`.
+The MCP server exposes 7 tools: `get_workflow_schema`, `get_current_workflow`, `validate_workflow`, `apply_workflow`, `update_nodes`, `list_available_agents`, `highlight_group_node`. Use these when the user wants AI-driven editing of the workflow itself (not just rendering / running it). `validate_workflow` checks a draft (schema validity + optional `--agent`-style target-compatibility warnings) without writing the file — prefer it before `apply_workflow`. Its `agent` param accepts a single agent name, an array of names, or `"all"`, mirroring `ccwf validate --agent all`: one agent returns `warnings`, several return `warningsByAgent: { <agent>: string[] }`.
 
 ### `ccwf samples list` / `ccwf samples copy <id>`
 

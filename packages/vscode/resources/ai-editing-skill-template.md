@@ -8,7 +8,7 @@ description: AI workflow editor for CC Workflow Studio. Create and edit visual A
 3. Ask the user what to create or modify
 4. Generate workflow JSON: choose each node type based on its role description in the schema. When a `subAgent` is the right choice, use a built-in `builtInType` (explore/plan/general-purpose). Only call `list_available_agents` when the user explicitly asks to use an existing custom sub-agent.
 5. Apply changes via `cc-workflow-studio` MCP server:
-   - **Check the draft first**: call `validate_workflow` with the workflow JSON — it validates without touching the canvas or creating any files. Fix reported errors and re-validate before applying. If the user plans to export/run the workflow on a non-Claude agent (codex, copilot, cursor, gemini, antigravity, roo-code), pass `agent` to also get target-compatibility warnings and mention them to the user.
+   - **Check the draft first**: call `validate_workflow` with the workflow JSON — it validates without touching the canvas or creating any files. Fix reported errors and re-validate before applying. If the user plans to export/run the workflow on a non-Claude agent (codex, copilot, cursor, gemini, antigravity, roo-code), pass `agent` to also get target-compatibility warnings and mention them to the user — `agent` accepts a single name, an array of names, or `"all"` to preflight every target at once (one agent returns `warnings`, several return `warningsByAgent`).
    - **New workflow or structural changes** (add/remove nodes/connections): use `apply_workflow`
    - **Partial updates to existing nodes** (change name, position, or data): use `update_nodes` (more token-efficient)
    - Fix errors if any
