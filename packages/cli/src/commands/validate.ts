@@ -13,24 +13,27 @@
  * `--agent <name>` additionally preflights target compatibility: it reports
  * the same warnings `ccwf export --agent <name>` would print (Claude
  * Code-only nodes, fields the target ignores) without writing any files.
- * Warnings never affect the exit code — only schema validity does.
+ * The flag is repeatable (`--agent codex --agent gemini`) and accepts `all`
+ * to expand to every supported target; with more than one agent, human
+ * warning lines are prefixed `[agent]` and the JSON report carries
+ * `warningsByAgent` instead of `warnings`. Warnings never affect the exit
+ * code — only schema validity does.
  */
 
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { type ValidationError, validateAIGeneratedWorkflow } from '@cc-wf-studio/core';
-import { Command } from 'commander';
+import { Command, InvalidArgumentError } from 'commander';
 import { WorkflowLoadError, loadWorkflowFromFile } from '../utils/load-workflow.js';
 import {
   SUPPORTED_AGENTS,
   type SupportedAgent,
-  asSupportedAgent,
   collectAgentCompatibilityWarnings,
 } from './export.js';
 
 interface ValidateOptions {
   json?: boolean;
-  agent?: SupportedAgent;
+  agent?: SupportedAgent[];
 }
 
 type FileReport =
@@ -38,13 +41,37 @@ type FileReport =
       file: string;
       valid: boolean;
       errors: ValidationError[];
+      /** Present when exactly one agent was requested (stable single-agent shape). */
       warnings?: string[];
+      /** Present when more than one agent was requested. */
+      warningsByAgent?: Record<string, string[]>;
     }
   | {
       file: string;
       valid: false;
       loadError: string;
     };
+
+/**
+ * Repeatable `--agent` accumulator: each occurrence appends one agent, `all`
+ * appends every supported target. De-duped, first-mention order preserved.
+ */
+function parseValidateAgent(
+  value: string,
+  previous: SupportedAgent[] | undefined
+): SupportedAgent[] {
+  if (value !== 'all' && !(SUPPORTED_AGENTS as readonly string[]).includes(value)) {
+    throw new InvalidArgumentError(`Expected one of: ${SUPPORTED_AGENTS.join(', ')}, all.`);
+  }
+  const parsed = value === 'all' ? SUPPORTED_AGENTS : [value as SupportedAgent];
+  const next = previous ? [...previous] : [];
+  for (const agent of parsed) {
+    if (!next.includes(agent)) {
+      next.push(agent);
+    }
+  }
+  return next;
+}
 
 function formatError(err: ValidationError): string {
   const fieldSuffix = err.field ? ` (field: ${err.field})` : '';
@@ -102,7 +129,7 @@ async function expandPaths(inputs: string[]): Promise<string[]> {
   return [...new Set(files)];
 }
 
-async function validateFile(file: string, agent: SupportedAgent | undefined): Promise<FileReport> {
+async function validateFile(file: string, agents: SupportedAgent[]): Promise<FileReport> {
   let workflow: Awaited<ReturnType<typeof loadWorkflowFromFile>>['workflow'];
   try {
     ({ workflow } = await loadWorkflowFromFile(file));
@@ -115,30 +142,39 @@ async function validateFile(file: string, agent: SupportedAgent | undefined): Pr
   const result = validateAIGeneratedWorkflow(workflow);
   // Compatibility warnings only for a schema-valid workflow —
   // malformed node data would produce garbage reports.
-  const warnings =
-    agent && result.valid ? collectAgentCompatibilityWarnings(workflow, agent) : undefined;
+  const collect = (agent: SupportedAgent): string[] =>
+    result.valid ? collectAgentCompatibilityWarnings(workflow, agent) : [];
   return {
     file,
     valid: result.valid,
     errors: result.errors,
-    ...(agent ? { warnings: warnings ?? [] } : {}),
+    // Exactly one agent keeps the stable single-agent `warnings` shape;
+    // several agents get a per-agent map instead.
+    ...(agents.length === 1 ? { warnings: collect(agents[0]) } : {}),
+    ...(agents.length > 1
+      ? { warningsByAgent: Object.fromEntries(agents.map((agent) => [agent, collect(agent)])) }
+      : {}),
   };
 }
 
-function printHumanReport(report: FileReport, agent: SupportedAgent | undefined): void {
+function printHumanReport(report: FileReport, agents: SupportedAgent[]): void {
   if ('loadError' in report) {
     process.stderr.write(`error: ${report.loadError}\n`);
     return;
   }
   if (report.valid) {
     process.stdout.write(`✓ ${report.file} is valid.\n`);
-    if (agent) {
-      const warnings = report.warnings ?? [];
+    for (const agent of agents) {
+      // Single-agent lines are the historical format; with several agents
+      // each warning is prefixed so the target stays identifiable.
+      const warnings =
+        (agents.length === 1 ? report.warnings : report.warningsByAgent?.[agent]) ?? [];
       if (warnings.length === 0) {
         process.stdout.write(`✓ No target-compatibility warnings for ${agent}.\n`);
       } else {
+        const prefix = agents.length > 1 ? `[${agent}] ` : '';
         for (const warning of warnings) {
-          process.stderr.write(`warning: ${warning}\n`);
+          process.stderr.write(`warning: ${prefix}${warning}\n`);
         }
       }
     }
@@ -158,10 +194,10 @@ export function registerValidateCommand(program: Command): void {
     )
     .argument('<paths...>', 'Workflow JSON files and/or directories containing them.')
     .option('--json', 'Print the machine-readable result JSON to stdout.', false)
-    .option<SupportedAgent>(
+    .option<SupportedAgent[]>(
       '--agent <name>',
-      `Also preflight target compatibility for an agent (one of: ${SUPPORTED_AGENTS.join(', ')}): report which configured fields that target ignores, without writing files. Warnings do not affect the exit code.`,
-      (value) => asSupportedAgent(value)
+      `Also preflight target compatibility for one or more agents (repeatable; one of: ${SUPPORTED_AGENTS.join(', ')}, or 'all' for every target): report which configured fields each target ignores, without writing files. Warnings do not affect the exit code.`,
+      parseValidateAgent
     )
     .action(async (paths: string[], options: ValidateOptions) => {
       let files: string[];
@@ -175,9 +211,10 @@ export function registerValidateCommand(program: Command): void {
         throw error;
       }
 
+      const agents = options.agent ?? [];
       const reports: FileReport[] = [];
       for (const file of files) {
-        reports.push(await validateFile(file, options.agent));
+        reports.push(await validateFile(file, agents));
       }
 
       const unreadable = reports.filter((r) => 'loadError' in r).length;
@@ -204,7 +241,7 @@ export function registerValidateCommand(program: Command): void {
       }
 
       for (const report of reports) {
-        printHumanReport(report, options.agent);
+        printHumanReport(report, agents);
       }
       if (files.length > 1) {
         const parts = [`${passed} passed`, `${failed} failed`];

@@ -58,9 +58,13 @@ Schema-check workflow JSON files — any mix of files and directories (directori
 ccwf validate ./.vscode/workflows/my-workflow.json           # exit 0/1, human-readable errors on stderr
 ccwf validate ./.vscode/workflows/my-workflow.json --json    # prints { valid, errors[] }
 ccwf validate ./.vscode/workflows                            # every *.json under the dir, per-file report + summary
+ccwf validate ./my-workflow.json --agent codex               # + target-compatibility warnings for codex
+ccwf validate ./my-workflow.json --agent all                 # + warnings for every supported target at once
 ```
 
 Exit 0 only if every file passes; 1 = schema errors, 2 = an unreadable/unparseable file or path. With `--json` and multiple inputs the output is `{ valid, files: [...] }` (a single file keeps the plain `{ valid, errors[] }` shape).
+
+`--agent <name>` additionally reports which configured fields that target would ignore on export (same warnings as `ccwf export`), without writing files. It is repeatable (`--agent codex --agent gemini`) and accepts `all` for every supported target; with several agents, warning lines are prefixed `[agent]` and `--json` reports carry `warningsByAgent: { <agent>: [...] }` instead of `warnings`. Warnings never change the exit code.
 
 Use this:
 - Before `ccwf run` / `ccwf export` if the file is hand-edited or AI-generated

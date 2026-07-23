@@ -19,7 +19,7 @@ pnpm add -D @cc-wf-studio/cli
 | Command | Description |
 |---|---|
 | `ccwf render <file>` | Print a Mermaid + execution-instructions Markdown bundle to stdout (or a file with `-o <path>`). |
-| `ccwf validate <paths...>` | Schema-check workflow JSON files — any mix of files and directories (searched recursively for `*.json`). Exit 0/1 (2 on unreadable files). `--json` for machine-readable output. `--agent <name>` also preflights target compatibility. |
+| `ccwf validate <paths...>` | Schema-check workflow JSON files — any mix of files and directories (searched recursively for `*.json`). Exit 0/1 (2 on unreadable files). `--json` for machine-readable output. `--agent <name>` (repeatable, or `all`) also preflights target compatibility. |
 | `ccwf mcp --file <file>` | Run the cc-wf-studio stdio MCP server in-process against `<file>`. |
 | `ccwf export <file>` | Materialise the workflow as agent-skill files for a target agent (`--agent <name>`, default `claude-code`). |
 | `ccwf run <file>` | `ccwf export` + a "next step" hint. `--launch` additionally spawns Claude Code when available. |
@@ -51,6 +51,10 @@ ccwf validate ./.vscode/workflows/my-workflow.json --agent codex
 # ^ also reports which configured fields codex would ignore on export,
 #   without writing any files (warnings don't affect the exit code;
 #   with --json they land in a `warnings` array)
+ccwf validate ./.vscode/workflows/my-workflow.json --agent all
+# ^ preflight every supported target in one run; --agent is also repeatable
+#   (--agent codex --agent gemini). With several agents, warning lines are
+#   prefixed [agent] and --json reports warningsByAgent: { <agent>: [...] }
 ```
 
 ### `ccwf mcp`
