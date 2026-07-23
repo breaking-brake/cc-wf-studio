@@ -22,7 +22,7 @@ import {
 } from '@cc-wf-studio/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import type { WorkflowIoAdapter } from './types.js';
+import type { ExportAgentOutcome, WorkflowIoAdapter } from './types.js';
 
 type ToolReply = {
   content: { type: 'text'; text: string }[];
@@ -64,6 +64,7 @@ interface ToolText {
   updateNodesDescription: string;
   updateNodesChangeDescriptionParam: string;
   highlightGroupNodeDescription: string;
+  exportWorkflowDescription: string;
 }
 
 const TOOL_TEXT: Record<WorkflowMcpMode, ToolText> = {
@@ -87,6 +88,8 @@ const TOOL_TEXT: Record<WorkflowMcpMode, ToolText> = {
       'A brief description of the changes being made. Shown to the user in the review dialog.',
     highlightGroupNodeDescription:
       'Highlight a group node on the CC Workflow Studio canvas to indicate it is currently being executed. Call this before executing nodes within a group to visually track progress.',
+    exportWorkflowDescription:
+      'Export the current workflow as agent-skill files under the workspace root — the same files `ccwf export` writes. For claude-code (the default): Sub-Agent files under .claude/agents/ plus the workflow entry at .claude/skills/<workflow>/SKILL.md. For other agents (antigravity, codex, copilot, cursor, gemini, roo-code): the provider\'s own skills/<workflow>/SKILL.md layout. Pass "agent" as a single name, an array, or "all" to export several targets in one atomic run — any existing file with different content aborts the whole export with nothing written unless overwrite is true. Set dryRun to preview every planned file\'s status (new / up-to-date / conflict) without writing. The workflow is schema-validated first; an invalid workflow is refused with validationErrors.',
   },
   file: {
     getCurrentWorkflowDescription:
@@ -108,6 +111,8 @@ const TOOL_TEXT: Record<WorkflowMcpMode, ToolText> = {
       'A brief description of the changes being made. Not displayed in file mode; safe to omit.',
     highlightGroupNodeDescription:
       'Highlight a group node to indicate it is currently being executed. In file mode this is a no-op kept for compatibility — highlighting is only visible on the CC Workflow Studio canvas.',
+    exportWorkflowDescription:
+      'Export the current workflow (read from the target workflow file) as agent-skill files under the project root — the same files `ccwf export` writes. For claude-code (the default): Sub-Agent files under .claude/agents/ plus the workflow entry at .claude/skills/<workflow>/SKILL.md. For other agents (antigravity, codex, copilot, cursor, gemini, roo-code): the provider\'s own skills/<workflow>/SKILL.md layout. Pass "agent" as a single name, an array, or "all" to export several targets in one atomic run — any existing file with different content aborts the whole export with nothing written unless overwrite is true. Set dryRun to preview every planned file\'s status (new / up-to-date / conflict) without writing. The workflow is schema-validated first; an invalid workflow is refused with validationErrors.',
   },
 };
 
@@ -124,6 +129,7 @@ export function registerWorkflowTools(
   registerListAvailableAgents(server, adapter);
   registerUpdateNodes(server, adapter, text);
   registerHighlightGroupNode(server, adapter, text);
+  registerExportWorkflow(server, adapter, text);
 }
 
 function registerGetCurrentWorkflow(
@@ -511,6 +517,132 @@ function registerUpdateNodes(
           ...(plannedFiles.length > 0
             ? { autoCreatedFiles: plannedFiles.map((f) => f.filePath) }
             : {}),
+        });
+      } catch (error) {
+        return fail({ success: false, error: errorMessage(error) });
+      }
+    }
+  );
+}
+
+/**
+ * `export_workflow` — registered only when the adapter implements the
+ * optional `exportWorkflow` capability (today: file mode). Payload shapes
+ * mirror `ccwf export --json`: exactly one agent keeps flat single-agent
+ * keys, several agents get `agents` + `resultsByAgent` (same split as
+ * `validate_workflow`'s warnings).
+ */
+function registerExportWorkflow(
+  server: McpServer,
+  adapter: WorkflowIoAdapter,
+  text: ToolText
+): void {
+  const exportImpl = adapter.exportWorkflow?.bind(adapter);
+  if (!exportImpl) return;
+
+  server.tool(
+    'export_workflow',
+    text.exportWorkflowDescription,
+    {
+      agent: z
+        .union([
+          z.enum([...WORKFLOW_TARGET_AGENTS, 'all'] as const),
+          z.array(z.enum(WORKFLOW_TARGET_AGENTS)).min(1),
+        ])
+        .optional()
+        .describe(
+          'Target agent(s) to export for: a single agent name, an array of agent names, or "all" for every supported target. Default: claude-code. With exactly one agent the result carries flat written/upToDate/warnings keys (files with dryRun); with several it carries agents + resultsByAgent.'
+        ),
+      overwrite: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          'Replace files that already exist with different content. Default: false — any conflict aborts the export with nothing written.'
+        ),
+      dryRun: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          'Classify every planned file (new / up-to-date / conflict) without writing anything. success reports whether a real run would succeed, honouring overwrite.'
+        ),
+    },
+    async ({ agent, overwrite, dryRun }) => {
+      try {
+        const current = await adapter.getCurrentWorkflow();
+        if (!current.workflow) {
+          return fail({ success: false, error: text.noActiveWorkflowError });
+        }
+
+        const validation = validateAIGeneratedWorkflow(current.workflow);
+        if (!validation.valid) {
+          return fail({
+            success: false,
+            error: 'Validation failed: fix the workflow before exporting.',
+            validationErrors: validation.errors,
+          });
+        }
+
+        const requested = resolveRequestedAgents(agent);
+        const agents = requested.length > 0 ? requested : (['claude-code'] as WorkflowTargetAgent[]);
+        const effectiveOverwrite = overwrite ?? false;
+        const result = await exportImpl(current.workflow, {
+          agents,
+          overwrite: effectiveOverwrite,
+          dryRun: dryRun ?? false,
+        });
+
+        // Derive written/up-to-date/conflict views from the raw statuses so
+        // the payload can never disagree with what hit the disk.
+        const written = (o: ExportAgentOutcome): string[] =>
+          o.files
+            .filter((f) => f.status === 'new' || (f.status === 'conflict' && effectiveOverwrite))
+            .map((f) => f.path);
+        const upToDate = (o: ExportAgentOutcome): string[] =>
+          o.files.filter((f) => f.status === 'up-to-date').map((f) => f.path);
+        const conflicts = (o: ExportAgentOutcome): string[] =>
+          o.files.filter((f) => f.status === 'conflict').map((f) => f.path);
+
+        const single = agents.length === 1;
+        const base = {
+          success: result.success,
+          ...(result.error ? { error: result.error } : {}),
+          root: result.root,
+          ...(dryRun ? { dryRun: true } : {}),
+          slashName: result.slashName,
+        };
+
+        if (single) {
+          const outcome = result.outcomes[0];
+          return ok({
+            ...base,
+            agent: outcome.agent,
+            ...(dryRun
+              ? { files: outcome.files }
+              : result.success
+                ? { written: written(outcome), upToDate: upToDate(outcome) }
+                : { conflicts: conflicts(outcome) }),
+            warnings: outcome.warnings,
+          });
+        }
+
+        return ok({
+          ...base,
+          agents,
+          resultsByAgent: Object.fromEntries(
+            result.outcomes.map((outcome) => [
+              outcome.agent,
+              {
+                ...(dryRun
+                  ? { files: outcome.files }
+                  : result.success
+                    ? { written: written(outcome), upToDate: upToDate(outcome) }
+                    : { conflicts: conflicts(outcome) }),
+                warnings: outcome.warnings,
+              },
+            ])
+          ),
         });
       } catch (error) {
         return fail({ success: false, error: errorMessage(error) });

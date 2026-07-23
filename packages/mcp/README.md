@@ -55,6 +55,7 @@ The bin speaks stdio MCP — point an MCP client (Claude Code, MCP Inspector, �
 | `update_nodes` | Partial node updates (more token-efficient than `apply_workflow`). |
 | `list_available_agents` | Enumerate `~/.claude/agents/*.md` (user) and `<project>/.claude/agents/*.md` (project). |
 | `highlight_group_node` | Canvas-only (no-op in file mode; returns a diagnostic note). |
+| `export_workflow` | File mode only — materialise the workflow as agent-skill files under the project root, exactly like `ccwf export`: `agent` (a name, an array, or `"all"`, default `claude-code`), `overwrite`, and `dryRun` inputs; atomic across the whole request (any conflict without `overwrite` aborts with nothing written). Registered only when the adapter implements the optional `exportWorkflow` capability. |
 
 ## Library usage (custom adapters)
 
@@ -77,6 +78,7 @@ The `FileWorkflowAdapter` and the VSCode extension's `McpServerManager` are the 
 - `revision` is `sha256:<hex>` of the file contents (UTF-8). `apply_workflow` refuses the write when `expectedRevision` doesn't match the current hash.
 - Writes are atomic (temp file + rename).
 - `planAndPersistSubAgentFiles` returns `[]`. AI clients should supply complete `commandFilePath` on `subAgent` nodes when targeting the file mode — auto-creation of `.claude/agents/*.md` is intentionally left to canvas mode for now.
+- `export_workflow` writes under `--project-root` (default: the server's working directory) and reports the absolute `root` plus root-relative paths in every result. Single-agent results carry flat `written`/`upToDate`/`slashName`/`warnings` keys (`files: [{path, status}]` with `dryRun`, `conflicts` on a blocked run); multi-agent results carry `agents` + `resultsByAgent` — the same shapes as `ccwf export --json`.
 
 ## License
 

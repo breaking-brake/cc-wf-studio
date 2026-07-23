@@ -17,6 +17,44 @@ Entry format:
 
 ---
 
+## 2026-07-23 — MCP `export_workflow` tool for the file-mode server
+- **User value**: an AI agent editing a workflow via `ccwf mcp --file` /
+  `ccwf-mcp` can now export the workflow's slash-command and agent-skill
+  files itself — with a dry-run preview and the same conflict safety as
+  `ccwf export` — completing the generate → validate → export loop without
+  telling the user to switch to the CLI.
+- **Issue/PR**: #925 / PR from `claude/sleepy-curie-5q69m9`
+- **Outcome**: done — new optional `exportWorkflow` capability on
+  `WorkflowIoAdapter`, implemented by `FileWorkflowAdapter` (plans via
+  core's pure `planWorkflowExportFiles` / `planAgentSkillFiles`, classifies
+  every planned file against `projectRoot` as new / up-to-date / conflict,
+  writes atomically across the whole request — any conflict without
+  `overwrite` aborts with zero files touched). The `export_workflow` tool
+  registers only when the adapter implements the capability, so the canvas
+  server keeps its exact 7 tools. Inputs mirror `validate_workflow`'s
+  `agent` union (single / array / `"all"`, default claude-code) plus
+  `overwrite` and `dryRun`; payloads mirror `ccwf export --json` (flat
+  single-agent keys, `agents` + `resultsByAgent` for several, per-file
+  `{path, status}` with `dryRun`, `conflicts` on a blocked run) with
+  root-relative paths and absolute `root`. The workflow is schema-validated
+  first and refused with `validationErrors` when invalid. Docs: mcp README
+  (tool table + file-mode notes) and ccwf-cli SKILL.md. E2E: stdio MCP
+  client against the built `dist/mcp.js` (tool present in file mode +
+  absent from a capability-less adapter, dry-run, fresh export claude-code
+  + codex, idempotent rerun, conflict block with disk untouched, overwrite
+  repair, `--agent all` atomicity, invalid-workflow refusal, parity of
+  written files vs `ccwf export`). Issue #925 could not be locked (no
+  `gh`, no MCP lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - Canvas-mode `exportWorkflow` capability (VSCode adapter) so canvas
+    agents can trigger the same export with the review-dialog safety —
+    judge value vs the existing export UI first.
+  - `ccwf export -` / `ccwf run -` stdin input for symmetry, if piped
+    generate-then-materialise proves to be a real flow — judge value first.
+  - Manual E2E queue (carried): align/distribute + context menu +
+    copy/cut/paste in real webviews; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector in both modes.
+
 ## 2026-07-23 — stdin input (`-`) for `ccwf validate` and `ccwf render`
 - **User value**: a user — or a script/AI agent that just generated workflow
   JSON — can now pipe it straight into `ccwf validate -` / `ccwf render -`

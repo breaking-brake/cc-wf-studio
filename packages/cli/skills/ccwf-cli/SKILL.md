@@ -154,7 +154,7 @@ Use `run`:
 
 ### `ccwf mcp --file <file>`
 
-Run the cc-wf-studio stdio MCP server in-process against `<file>`. Equivalent to the standalone `ccwf-mcp` bin. Use this to point an MCP client (Claude Code, MCP Inspector, …) at a workflow so the agent can read and edit it through MCP tools.
+Run the cc-wf-studio stdio MCP server in-process against `<file>`. Equivalent to the standalone `ccwf-mcp` bin. Use this to point an MCP client (Claude Code, MCP Inspector, …) at a workflow so the agent can read and edit it through MCP tools — including `export_workflow`, which materialises the workflow's agent-skill files under the project root with the same conflict safety (and `dryRun` preview) as `ccwf export`, so the connected agent can finish the generate → validate → export loop without leaving MCP.
 
 ```bash
 ccwf mcp --file ./.vscode/workflows/my-workflow.json
