@@ -1070,6 +1070,9 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'sample.dialog.loadButton': '載入',
   'sample.dialog.previewButton': '預覽',
   'sample.dialog.empty': '沒有可用的範例。',
+  'sample.difficulty.beginner': '初級',
+  'sample.difficulty.intermediate': '中級',
+  'sample.difficulty.advanced': '高級',
   'sample.githubIssuePlanning.name': 'GitHub Issue 規劃',
   'sample.githubIssuePlanning.description':
     'GitHub Issue 規劃工作流程：取得 Issue、分析現有程式碼、驗證修復、回顧總結。',

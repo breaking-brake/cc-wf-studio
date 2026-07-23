@@ -1067,6 +1067,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'sample.dialog.loadButton': '加载',
   'sample.dialog.previewButton': '预览',
   'sample.dialog.empty': '没有可用的示例。',
+  'sample.difficulty.beginner': '初级',
+  'sample.difficulty.intermediate': '中级',
+  'sample.difficulty.advanced': '高级',
   'sample.githubIssuePlanning.name': 'GitHub Issue 规划',
   'sample.githubIssuePlanning.description':
     'GitHub Issue 规划工作流：获取 Issue、分析现有代码、验证修复、回顾总结。',

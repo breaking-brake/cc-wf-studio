@@ -22,6 +22,12 @@ interface SampleWorkflowDialogProps {
   onLoadSample: (sampleId: string) => void;
 }
 
+const DIFFICULTY_KEYS: Record<SampleWorkflowMeta['difficulty'], keyof WebviewTranslationKeys> = {
+  beginner: 'sample.difficulty.beginner',
+  intermediate: 'sample.difficulty.intermediate',
+  advanced: 'sample.difficulty.advanced',
+};
+
 /**
  * SampleWorkflowDialog component
  */
@@ -229,12 +235,37 @@ export const SampleWorkflowDialog: React.FC<SampleWorkflowDialogProps> = ({
                       >
                         <span
                           style={{
-                            fontSize: '13px',
-                            fontWeight: 600,
-                            color: 'var(--vscode-foreground)',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            minWidth: 0,
                           }}
                         >
-                          {t(sample.nameKey as keyof WebviewTranslationKeys)}
+                          <span
+                            style={{
+                              fontSize: '13px',
+                              fontWeight: 600,
+                              color: 'var(--vscode-foreground)',
+                            }}
+                          >
+                            {t(sample.nameKey as keyof WebviewTranslationKeys)}
+                          </span>
+                          {sample.difficulty && (
+                            <span
+                              style={{
+                                fontSize: '9px',
+                                padding: '1px 4px',
+                                backgroundColor: 'var(--vscode-badge-background)',
+                                color: 'var(--vscode-badge-foreground)',
+                                borderRadius: '2px',
+                                flexShrink: 0,
+                              }}
+                            >
+                              {DIFFICULTY_KEYS[sample.difficulty]
+                                ? t(DIFFICULTY_KEYS[sample.difficulty])
+                                : sample.difficulty}
+                            </span>
+                          )}
                         </span>
                         {/* Node count */}
                         <span
@@ -259,6 +290,32 @@ export const SampleWorkflowDialog: React.FC<SampleWorkflowDialogProps> = ({
                       >
                         {t(sample.descriptionKey as keyof WebviewTranslationKeys)}
                       </p>
+
+                      {/* Tags (untranslated slug identifiers, same as `ccwf samples list`) */}
+                      {Array.isArray(sample.tags) && sample.tags.length > 0 && (
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '4px',
+                          }}
+                        >
+                          {sample.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              style={{
+                                fontSize: '10px',
+                                padding: '1px 6px',
+                                color: 'var(--vscode-descriptionForeground)',
+                                border: '1px solid var(--vscode-panel-border)',
+                                borderRadius: '8px',
+                              }}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
 
                       {/* Preview + Load buttons */}
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>

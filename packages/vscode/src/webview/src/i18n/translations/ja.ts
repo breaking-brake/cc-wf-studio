@@ -1110,6 +1110,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'sample.dialog.loadButton': '読み込む',
   'sample.dialog.previewButton': 'プレビュー',
   'sample.dialog.empty': '利用できるサンプルがありません。',
+  'sample.difficulty.beginner': '初級',
+  'sample.difficulty.intermediate': '中級',
+  'sample.difficulty.advanced': '上級',
   'sample.githubIssuePlanning.name': 'GitHub Issue プランニング',
   'sample.githubIssuePlanning.description':
     'GitHub Issueに対するプランニングワークフロー：Issue取得、現状コード分析、修正の検証確認、振り返り。',
