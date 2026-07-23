@@ -31,8 +31,10 @@ const DEFAULT_SERVER_VERSION = '1.0.0';
 /**
  * Build a configured `McpServer` for the given IO adapter.
  *
- * The returned instance has all 6 workflow tools registered. It is not
- * connected to a transport yet — call `server.connect(transport)` separately.
+ * The returned instance has all workflow tools registered (tools backed by
+ * optional adapter capabilities — `export_workflow` — appear only when the
+ * adapter implements them). It is not connected to a transport yet — call
+ * `server.connect(transport)` separately.
  */
 export function createWorkflowMcpServer(
   adapter: WorkflowIoAdapter,

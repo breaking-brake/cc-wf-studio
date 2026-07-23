@@ -14,6 +14,9 @@
  *     auto-create `.claude/agents/*.md` files in this initial release.
  *   - `listAvailableAgents` walks `process.cwd()/.claude/agents` and
  *     `~/.claude/agents`, treating each `.md` as a single sub-agent.
+ *   - `exportWorkflow` materialises agent-skill files under `projectRoot`
+ *     with `ccwf export` semantics: atomic across the whole request, any
+ *     conflict without `overwrite` aborts before anything is written.
  */
 
 import { createHash } from 'node:crypto';
@@ -21,11 +24,22 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { Workflow } from '@cc-wf-studio/core';
+import {
+  type AgentSkillProvider,
+  type Workflow,
+  collectAgentCompatibilityWarnings,
+  nodeNameToFileName,
+  planAgentSkillFiles,
+  planWorkflowExportFiles,
+} from '@cc-wf-studio/core';
 import type {
   AgentCommandInfo,
   ApplyWorkflowOptions,
   ApplyWorkflowResult,
+  ExportAgentOutcome,
+  ExportPlannedFileStatus,
+  ExportWorkflowRequest,
+  ExportWorkflowResult,
   GetCurrentWorkflowResult,
   GetWorkflowSchemaResult,
   HighlightResult,
@@ -131,6 +145,67 @@ export class FileWorkflowAdapter implements WorkflowIoAdapter {
     return [];
   }
 
+  async exportWorkflow(
+    workflow: Workflow,
+    request: ExportWorkflowRequest
+  ): Promise<ExportWorkflowResult> {
+    const root = path.resolve(this.projectRoot);
+    const slashName = nodeNameToFileName(workflow.name);
+
+    // Plan + classify every agent's files before writing anything so a
+    // conflict anywhere aborts the whole request with zero files touched
+    // (same atomicity contract as `ccwf export`). Cross-agent path
+    // collisions cannot occur — each provider plans under its own root.
+    const outcomes: ExportAgentOutcome[] = [];
+    const pendingWrites: { absPath: string; contents: string }[] = [];
+    let conflictCount = 0;
+    for (const agent of request.agents) {
+      const plan =
+        agent === 'claude-code'
+          ? planWorkflowExportFiles(workflow)
+          : planAgentSkillFiles(workflow, agent as AgentSkillProvider);
+      const warnings = collectAgentCompatibilityWarnings(workflow, agent);
+      const files: ExportAgentOutcome['files'] = [];
+      for (const planned of plan) {
+        const absPath = path.join(root, ...planned.relativePath.split('/'));
+        const status = await classifyPlannedFile(absPath, planned.contents);
+        files.push({ path: planned.relativePath, status });
+        if (status === 'conflict') conflictCount++;
+        if (status !== 'up-to-date') {
+          pendingWrites.push({ absPath, contents: planned.contents });
+        }
+      }
+      outcomes.push({ agent, files, warnings });
+    }
+
+    const blocked = conflictCount > 0 && !request.overwrite;
+    if (request.dryRun || blocked) {
+      return {
+        success: !blocked,
+        root,
+        slashName,
+        outcomes,
+        ...(blocked
+          ? {
+              error: `${conflictCount} file(s) already exist with different content. Pass overwrite: true to replace them.`,
+            }
+          : {}),
+      };
+    }
+
+    const ensuredDirs = new Set<string>();
+    for (const { absPath, contents } of pendingWrites) {
+      const dir = path.dirname(absPath);
+      if (!ensuredDirs.has(dir)) {
+        await fs.mkdir(dir, { recursive: true });
+        ensuredDirs.add(dir);
+      }
+      await fs.writeFile(absPath, contents, 'utf-8');
+    }
+
+    return { success: true, root, slashName, outcomes };
+  }
+
   // ---------------------------------------------------------------------
 
   private async safeRead(): Promise<string | null> {
@@ -153,6 +228,26 @@ export class FileWorkflowAdapter implements WorkflowIoAdapter {
 
 function computeRevision(content: string): string {
   return `sha256:${createHash('sha256').update(content).digest('hex')}`;
+}
+
+/**
+ * Classify one planned export file against the disk. Any read failure other
+ * than "does not exist" (directory in the way, permissions, ...) counts as a
+ * conflict rather than crashing or silently overwriting — mirroring the
+ * CLI's classification.
+ */
+async function classifyPlannedFile(
+  absPath: string,
+  contents: string
+): Promise<ExportPlannedFileStatus> {
+  let existing: string;
+  try {
+    existing = await fs.readFile(absPath, 'utf-8');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return 'new';
+    return 'conflict';
+  }
+  return existing === contents ? 'up-to-date' : 'conflict';
 }
 
 async function scanAgentDir(

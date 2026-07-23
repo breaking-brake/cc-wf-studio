@@ -1,9 +1,11 @@
 /**
  * Types and adapter interface for the transport-agnostic MCP server core.
  *
- * The factory in `./factory.ts` registers the 6 cc-wf-studio MCP tools on
+ * The factory in `./factory.ts` registers the cc-wf-studio MCP tools on
  * an `McpServer` instance, delegating all side-effects (read/write workflow,
- * highlight, list agents, etc.) to a `WorkflowIoAdapter` implementation.
+ * highlight, list agents, export, etc.) to a `WorkflowIoAdapter`
+ * implementation. Optional adapter capabilities (currently `exportWorkflow`)
+ * gate the registration of their tool.
  *
  * Two adapters live downstream of this package:
  *   - `CanvasWorkflowAdapter` in packages/vscode — drives the live webview via
@@ -12,7 +14,7 @@
  *     workflow file. Backs the `ccwf-mcp` stdio bin.
  */
 
-import type { Workflow } from '@cc-wf-studio/core';
+import type { Workflow, WorkflowTargetAgent } from '@cc-wf-studio/core';
 
 /**
  * Information about a discovered sub-agent definition file (`.claude/agents/*.md`
@@ -87,6 +89,46 @@ export interface ListAvailableAgentsResult {
   project: AgentCommandInfo[];
 }
 
+/** On-disk classification of one planned export file (before any write). */
+export type ExportPlannedFileStatus = 'new' | 'up-to-date' | 'conflict';
+
+export interface ExportWorkflowRequest {
+  /** De-duped target agents in first-mention order. Never empty. */
+  agents: WorkflowTargetAgent[];
+  /** Replace files whose on-disk content differs from the plan. */
+  overwrite: boolean;
+  /** Classify the plan only — never write anything. */
+  dryRun: boolean;
+}
+
+/** Planned files + compatibility warnings for one requested agent. */
+export interface ExportAgentOutcome {
+  agent: WorkflowTargetAgent;
+  /**
+   * Every planned file in plan order. Paths are root-relative with forward
+   * slashes; `status` is the on-disk classification before any write.
+   */
+  files: { path: string; status: ExportPlannedFileStatus }[];
+  /** Target-compatibility warnings for this agent. */
+  warnings: string[];
+}
+
+export interface ExportWorkflowResult {
+  /**
+   * False when conflicts blocked the run (real run: nothing was written;
+   * dry run: a real run would fail the same way).
+   */
+  success: boolean;
+  /** Absolute export root every `files[].path` is relative to. */
+  root: string;
+  /** Slash-command name derived from the workflow name. */
+  slashName: string;
+  /** One entry per requested agent, in request order. */
+  outcomes: ExportAgentOutcome[];
+  /** Populated when `success` is false. */
+  error?: string;
+}
+
 /**
  * Surface contract the factory needs to drive the MCP tools.
  *
@@ -124,4 +166,19 @@ export interface WorkflowIoAdapter {
    * auto-creation entirely.
    */
   planAndPersistSubAgentFiles(workflow: Workflow): Promise<PlannedSubAgentFile[]>;
+
+  /**
+   * Optional capability: materialise the workflow as agent-skill files under
+   * the adapter's project root — the same plan `ccwf export` writes. The run
+   * must be atomic across the whole request: any conflict without
+   * `overwrite` aborts before anything is written.
+   *
+   * Adapters that cannot export server-side (e.g. the canvas adapter, where
+   * export lives in the extension UI) leave this undefined; the
+   * `export_workflow` tool is registered only when it is implemented.
+   */
+  exportWorkflow?(
+    workflow: Workflow,
+    request: ExportWorkflowRequest
+  ): Promise<ExportWorkflowResult>;
 }
