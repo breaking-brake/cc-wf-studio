@@ -17,6 +17,7 @@ import { GraduationCap } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useEnabledAiProviders } from '../hooks/useEnabledAiProviders';
+import { useTranslation } from '../i18n/i18n-context';
 
 interface GenerateTourPopoverProps {
   /** Launch tour generation with the chosen agent. Resolves when launched. */
@@ -27,28 +28,27 @@ interface GenerateTourPopoverProps {
   mode?: 'create' | 'regenerate';
 }
 
-const COPY = {
-  create: {
-    heading: 'No workflow tour yet',
-    description: 'Generate a step-by-step tour of this workflow with an AI agent.',
-    button: 'Generate Workflow Tour',
-    running: 'Generating…',
-  },
-  regenerate: {
-    heading: 'Regenerate workflow tour',
-    description: 'Replace the current tour with a freshly generated one.',
-    button: 'Regenerate Tour',
-    running: 'Regenerating…',
-  },
-} as const;
-
 export function GenerateTourPopover({
   onGenerate,
   children,
   mode = 'create',
 }: GenerateTourPopoverProps) {
   const providers = useEnabledAiProviders();
-  const copy = COPY[mode];
+  const { t } = useTranslation();
+  const copy =
+    mode === 'regenerate'
+      ? {
+          heading: t('workflowTour.popover.regenerateHeading'),
+          description: t('workflowTour.popover.regenerateDescription'),
+          button: t('workflowTour.popover.regenerateButton'),
+          running: t('workflowTour.popover.regenerating'),
+        }
+      : {
+          heading: t('workflowTour.popover.emptyHeading'),
+          description: t('workflowTour.popover.emptyDescription'),
+          button: t('workflowTour.generate'),
+          running: t('workflowTour.popover.generating'),
+        };
   const [open, setOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<AiEditingProvider>('claude-code');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -120,7 +120,7 @@ export function GenerateTourPopover({
                 letterSpacing: '0.5px',
               }}
             >
-              Agent
+              {t('workflowTour.popover.agent')}
             </span>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
               {providers.map((p) => {

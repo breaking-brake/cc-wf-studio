@@ -25,6 +25,15 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'overview.emptyState.title': 'No instructions to display',
   'overview.emptyState.description':
     'This workflow has no instructional nodes yet. Switch to Edit mode and add nodes such as Sub-Agent, Prompt, or Skill to populate the overview.',
+  'overview.zoomIn': 'Zoom in',
+  'overview.zoomOut': 'Zoom out',
+  'overview.fitView': 'Fit to view',
+  'overview.followActive.on': 'Follow active node: on',
+  'overview.followActive.off': 'Follow active node: off',
+  'overview.layout.td': 'Layout: top-down (click to switch to left-to-right)',
+  'overview.layout.lr': 'Layout: left-to-right (click to switch to top-down)',
+  'overview.resizePanels': 'Resize Overview panels',
+  'overview.editNodeLink': 'Switch to Edit mode and pan the canvas to this node',
 
   // Toolbar
   'toolbar.workflowNamePlaceholder': 'Workflow name',
@@ -364,6 +373,32 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'tour.button.skip': 'Skip',
   'tour.button.minimize': 'Minimize',
   'tour.button.resume': 'Resume Tour',
+  'workflowTour.title': 'Workflow Tour',
+  'workflowTour.start': 'Start Workflow Tour',
+  'workflowTour.start.tooltip': 'Start workflow tour ({count} steps)',
+  'workflowTour.generate': 'Generate Workflow Tour',
+  'workflowTour.generate.tooltip': 'Generate a workflow tour',
+  'workflowTour.noTour': 'This workflow has no guided tour.',
+  'workflowTour.noTourLabel': 'No workflow tour',
+  'workflowTour.prev': 'Prev',
+  'workflowTour.end': 'End workflow tour',
+  'workflowTour.regenerate': 'Regenerate',
+  'workflowTour.regenerate.tooltip': 'Regenerate this tour with an AI agent',
+  'workflowTour.regenerate.aria': 'Regenerate workflow tour',
+  'workflowTour.popover.agent': 'Agent',
+  'workflowTour.popover.emptyHeading': 'No workflow tour yet',
+  'workflowTour.popover.emptyDescription':
+    'Generate a step-by-step tour of this workflow with an AI agent.',
+  'workflowTour.popover.generating': 'Generating…',
+  'workflowTour.popover.regenerateHeading': 'Regenerate workflow tour',
+  'workflowTour.popover.regenerateDescription':
+    'Replace the current tour with a freshly generated one.',
+  'workflowTour.popover.regenerateButton': 'Regenerate Tour',
+  'workflowTour.popover.regenerating': 'Regenerating…',
+  'canvas.deleteNode.tooltip': 'Delete node',
+  'canvas.deleteEdge.tooltip': 'Delete connection',
+  'canvas.resizeSidebar': 'Resize sidebar',
+  'announcement.dismiss': 'Dismiss announcement',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'Delete Node',

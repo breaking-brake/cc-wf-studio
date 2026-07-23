@@ -23,6 +23,7 @@ import {
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { NODE_TYPE_ICONS } from '../../constants/node-type-icons';
+import { useTranslation } from '../../i18n/i18n-context';
 import { openExternalUrl } from '../../services/vscode-bridge';
 
 const SECTION_ANCHOR_PREFIX = '#overview-section-';
@@ -66,6 +67,7 @@ function passThroughUrl(url: string): string {
 
 export const InstructionsPanel = forwardRef<InstructionsPanelHandle, InstructionsPanelProps>(
   ({ workflow, onActiveSectionChange, onEditNode }, ref) => {
+    const { t } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const [highlightedSanitizedId, setHighlightedSanitizedId] = useState<string | null>(null);
     const highlightTimerRef = useRef<number | null>(null);
@@ -334,7 +336,7 @@ export const InstructionsPanel = forwardRef<InstructionsPanelHandle, Instruction
                 e.preventDefault();
                 onEditNode(target.id);
               }}
-              title="Switch to Edit mode and pan the canvas to this node"
+              title={t('overview.editNodeLink')}
               style={{
                 display: 'inline-block',
                 fontSize: '11px',

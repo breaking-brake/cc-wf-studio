@@ -334,7 +334,7 @@ export const WorkflowOverview: React.FC<WorkflowOverviewProps> = ({
         <div
           role="slider"
           aria-orientation="horizontal"
-          aria-label="Resize Overview panels"
+          aria-label={t('overview.resizePanels')}
           aria-valuemin={Math.round(MIN_RATIO * 100)}
           aria-valuemax={Math.round(MAX_RATIO * 100)}
           aria-valuenow={Math.round(ratio * 100)}
@@ -397,24 +397,28 @@ export const WorkflowOverview: React.FC<WorkflowOverviewProps> = ({
               setTourStepIndex(0);
               setIsTourActive(true);
             }}
-            title={`Start workflow tour (${tour.length} steps)`}
+            title={t('workflowTour.start.tooltip', { count: tour.length })}
             style={FLOATING_PILL_STYLE}
           >
             <GraduationCap size={14} />
-            Start Workflow Tour
+            {t('workflowTour.start')}
           </button>
         ) : onGenerateTour ? (
           <GenerateTourPopover onGenerate={onGenerateTour}>
-            <button type="button" title="Generate a workflow tour" style={FLOATING_PILL_STYLE}>
+            <button
+              type="button"
+              title={t('workflowTour.generate.tooltip')}
+              style={FLOATING_PILL_STYLE}
+            >
               <GraduationCap size={14} />
-              Generate Workflow Tour
+              {t('workflowTour.generate')}
             </button>
           </GenerateTourPopover>
         ) : (
           // Read-only context (e.g. ccwf preview): generation isn't available
           // here — passive hint only.
           <div
-            title="This workflow has no guided tour."
+            title={t('workflowTour.noTour')}
             style={{
               ...FLOATING_PILL_STYLE,
               backgroundColor: 'var(--vscode-badge-background)',
@@ -425,7 +429,7 @@ export const WorkflowOverview: React.FC<WorkflowOverviewProps> = ({
             }}
           >
             <GraduationCap size={14} />
-            No workflow tour
+            {t('workflowTour.noTourLabel')}
           </div>
         ))}
     </div>

@@ -7,6 +7,7 @@
 
 import type React from 'react';
 import { useState } from 'react';
+import { useTranslation } from '../../i18n/i18n-context';
 
 interface ResizeHandleProps {
   onMouseDown: (e: React.MouseEvent) => void;
@@ -19,6 +20,7 @@ interface ResizeHandleProps {
  * Provides visual feedback on hover and during drag operations.
  */
 export function ResizeHandle({ onMouseDown }: ResizeHandleProps) {
+  const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -38,7 +40,7 @@ export function ResizeHandle({ onMouseDown }: ResizeHandleProps) {
         transition: 'background-color 0.2s ease',
         zIndex: 10,
       }}
-      aria-label="Resize sidebar"
+      aria-label={t('canvas.resizeSidebar')}
       role="separator"
       aria-orientation="vertical"
       aria-valuenow={0}

@@ -6,6 +6,7 @@
  */
 
 import type React from 'react';
+import { useTranslation } from '../../i18n/i18n-context';
 import { useWorkflowStore } from '../../stores/workflow-store';
 
 interface DeleteButtonProps {
@@ -20,6 +21,7 @@ interface DeleteButtonProps {
  * @param selected - ノードが選択されているかどうか
  */
 export const DeleteButton: React.FC<DeleteButtonProps> = ({ nodeId, selected }) => {
+  const { t } = useTranslation();
   const { requestDeleteNode } = useWorkflowStore();
 
   if (!selected) {
@@ -62,7 +64,7 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({ nodeId, selected }) 
       onMouseLeave={(e) => {
         e.currentTarget.style.opacity = '1';
       }}
-      title="Delete node"
+      title={t('canvas.deleteNode.tooltip')}
     >
       <svg
         width="8"
@@ -73,7 +75,7 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({ nodeId, selected }) 
         style={{ display: 'block' }}
         aria-labelledby="delete-icon-title"
       >
-        <title id="delete-icon-title">Delete</title>
+        <title id="delete-icon-title">{t('dialog.deleteNode.confirm')}</title>
         <path d="M1 1L7 7M7 1L1 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
     </button>
