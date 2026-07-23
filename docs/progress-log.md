@@ -17,6 +17,38 @@ Entry format:
 
 ---
 
+## 2026-07-23 — Copy/paste the canvas selection with Ctrl/Cmd+C / Ctrl/Cmd+V
+- **User value**: a user can now copy the selected nodes (with the edges
+  between them) and paste them — including into a **different workflow's
+  canvas** in another editor window — instead of rebuilding sub-flows by
+  hand. Completes the selection story queued by the last two iterations
+  (select-all #889, multi-duplicate #891); previously Ctrl+C/V did nothing.
+- **Issue/PR**: #893 / PR from `claude/sleepy-curie-7t2atg`
+- **Outcome**: done — implemented via DOM `copy`/`paste` events
+  (permission-free in VSCode webviews, unlike `navigator.clipboard.readText`)
+  with the existing editable-target guard; a non-collapsed text selection
+  keeps the native copy, and paste only intercepts text that parses as a
+  versioned `cc-wf-studio/selection` JSON payload. `serializeSelection`
+  reuses the duplicateSelection inclusion policy (Start/End excluded,
+  groups bring children, edges with both endpoints inside); children copied
+  without their group are made self-contained (parentId dropped, position
+  made absolute). `pasteSelection` inserts with fresh ids (shared
+  `makeUniqueNodeId`/`makeUniqueEdgeId` helpers extracted from
+  duplicateSelection), +40/+40 offset, deep-copied data, pasted nodes
+  become the selection, single `set()` → one undo entry. Malformed payloads
+  are shape-checked and rejected. No new i18n strings, no schema changes.
+- **Next proposals**:
+  - Localization mini-sweep: `Toolbar.tsx` "Stop MCP Server",
+    `McpServerSection.tsx` "Open documentation"/"Stop MCP Server (Port …)",
+    `WhatsNewDialog` "View changes on GitHub", `CodexNodeDialog` "Open
+    documentation" are still hardcoded English (verified this round).
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow v11 keyboard a11y is enabled — `disableKeyboardA11y`
+    is not set); only add grid-step nudging if it's actually missing.
+  - Manual E2E: confirm webview `copy`/`paste` events fire on all three
+    OSes (Linux webviews historically quirky) — if paste is unreliable,
+    fall back to Ctrl+V keydown + `navigator.clipboard.readText()`.
+
 ## 2026-07-23 — Duplicate a multi-node selection with Ctrl/Cmd+D
 - **User value**: a user can now select several nodes (Ctrl/Cmd+A,
   rubber-band, or shift-click) and press Ctrl/Cmd+D to duplicate the whole

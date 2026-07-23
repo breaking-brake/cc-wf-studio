@@ -25,7 +25,7 @@ import { CURRENT_ANNOUNCEMENT, cleanupDismissedAnnouncements } from '../constant
 import { useAutoFocusNode } from '../hooks/useAutoFocusNode';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useTranslation } from '../i18n/i18n-context';
-import { useWorkflowStore } from '../stores/workflow-store';
+import { parseSelectionClipboardPayload, useWorkflowStore } from '../stores/workflow-store';
 import { CanvasToolbar } from './CanvasToolbar';
 import { FeatureAnnouncementBanner } from './common/FeatureAnnouncementBanner';
 import { DescriptionPanel } from './DescriptionPanel';
@@ -417,12 +417,55 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       }
     };
 
+    const isEditableTarget = (target: EventTarget | null): boolean => {
+      const element = target as HTMLElement | null;
+      return Boolean(
+        element &&
+          (element.tagName === 'INPUT' ||
+            element.tagName === 'TEXTAREA' ||
+            element.isContentEditable)
+      );
+    };
+
+    // Copy/paste the canvas selection via the DOM clipboard events —
+    // permission-free in VSCode webviews (navigator.clipboard.readText is
+    // not), and the system clipboard carries the payload across canvas
+    // windows, so paste works into a different workflow too.
+    const handleCopy = (event: ClipboardEvent) => {
+      if (isEditableTarget(event.target)) return;
+      // A real text selection (e.g. inside a panel) keeps the native copy
+      const textSelection = window.getSelection();
+      if (textSelection && !textSelection.isCollapsed) return;
+      const { nodes: currentNodes, serializeSelection } = useWorkflowStore.getState();
+      const selectedIds = currentNodes.filter((n) => n.selected).map((n) => n.id);
+      if (selectedIds.length === 0) return;
+      const payload = serializeSelection(selectedIds);
+      if (!payload || !event.clipboardData) return;
+      event.preventDefault();
+      event.clipboardData.setData('text/plain', JSON.stringify(payload, null, 2));
+    };
+
+    const handlePaste = (event: ClipboardEvent) => {
+      if (isEditableTarget(event.target)) return;
+      const text = event.clipboardData?.getData('text/plain');
+      if (!text) return;
+      const payload = parseSelectionClipboardPayload(text);
+      // Anything that isn't a cc-wf-studio selection keeps the native paste
+      if (!payload) return;
+      event.preventDefault();
+      useWorkflowStore.getState().pasteSelection(payload);
+    };
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('copy', handleCopy);
+    document.addEventListener('paste', handlePaste);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('copy', handleCopy);
+      document.removeEventListener('paste', handlePaste);
     };
   }, []);
 
