@@ -9,6 +9,7 @@
 import * as Popover from '@radix-ui/react-popover';
 import { Check, Lock, X } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
+import { useTranslation } from '../../i18n/i18n-context';
 
 interface SelectOption {
   value: string;
@@ -39,6 +40,7 @@ export function SelectTagInput({
     options: options.map((o) => ({ value: o.value, label: o.label })),
   });
 
+  const { t } = useTranslation();
   const [inputValue, setInputValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -222,7 +224,7 @@ export function SelectTagInput({
                   <Lock
                     size={10}
                     style={{ marginLeft: '2px', opacity: 0.6 }}
-                    aria-label="Required"
+                    aria-label={t('common.required')}
                   />
                 )}
               </span>

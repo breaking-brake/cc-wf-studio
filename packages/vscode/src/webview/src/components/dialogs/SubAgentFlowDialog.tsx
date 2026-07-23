@@ -537,7 +537,7 @@ const SubAgentFlowDialogContent: React.FC<SubAgentFlowDialogProps> = ({ isOpen, 
         >
           <Dialog.Content
             ref={dialogRef}
-            aria-label="Sub-Agent Flow Editor"
+            aria-label={t('subAgentFlow.dialog.ariaLabel')}
             aria-describedby={undefined}
             onEscapeKeyDown={(e) => {
               // Only close when not focused on input

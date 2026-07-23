@@ -163,7 +163,7 @@ export const EdgeAnimationToggle: React.FC<EdgeAnimationToggleProps> = ({
                   checked={isEnabled}
                   onCheckedChange={() => onToggle()}
                   onClick={(e) => e.stopPropagation()}
-                  aria-label="Edge animation"
+                  aria-label={t('toolbar.edgeAnimation.label')}
                   style={{
                     all: 'unset',
                     width: '32px',

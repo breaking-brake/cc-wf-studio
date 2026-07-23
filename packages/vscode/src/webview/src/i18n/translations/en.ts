@@ -11,6 +11,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   optional: 'Optional',
   cancel: 'Cancel',
   'common.close': 'Close',
+  'common.required': 'Required',
+  'common.wizardSteps': 'Wizard steps',
   'common.cancel': 'Cancel',
   'loading.importWorkflow': 'Importing workflow...',
   'loading.openWorkflow': 'Opening workflow...',
@@ -59,8 +61,10 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.switchToSelection': 'Switch to Selection mode',
   'toolbar.edgeAnimation.enable': 'Enable edge animation',
   'toolbar.edgeAnimation.disable': 'Disable edge animation',
+  'toolbar.edgeAnimation.label': 'Edge animation',
   'toolbar.highlight.enable': 'Enable group node highlight',
   'toolbar.highlight.disable': 'Disable group node highlight',
+  'toolbar.highlight.label': 'Group node highlight',
   'toolbar.highlight.confirmDisable.title': 'Disable Group Node Highlight',
   'toolbar.highlight.confirmDisable.message':
     'A group node is currently highlighted. Are you sure you want to disable the highlight?',
@@ -70,6 +74,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.redo': 'Redo',
   'toolbar.scrollMode.switchToClassic': 'Switch to Classic mode (scroll = zoom)',
   'toolbar.scrollMode.switchToFreehand': 'Switch to Freehand mode (scroll = pan)',
+  'toolbar.scrollMode.label': 'Canvas scroll mode',
+  'toolbar.interactionMode.label': 'Canvas interaction mode',
+  'toolbar.stopMcpServer': 'Stop MCP Server',
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.hidden': 'Hidden',
@@ -124,6 +131,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.whatsNew': "What's New",
   'whatsNew.title': "What's New",
   'whatsNew.viewAllReleases': 'View all releases',
+  'whatsNew.viewChangesOnGitHub': 'View changes on GitHub',
   'whatsNew.showBadge': 'Unread badge',
 
   // Copilot Execution Mode
@@ -222,6 +230,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'codex.error.promptTooLong': 'Prompt must be 10,000 characters or less',
   'codex.error.modelRequired': 'Model name is required',
   'codex.nameHelp': 'Alphanumeric characters, hyphens, and underscores only',
+  'codex.openDocumentation': 'Open documentation',
 
   // SubAgentFlow Node (Feature: 089-subworkflow)
   'node.subAgentFlow.title': 'Sub-Agent Flow',
@@ -246,6 +255,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'subAgentFlow.dialog.close': 'Close and return to main workflow',
   'subAgentFlow.dialog.submit': 'Submit and add to workflow',
   'subAgentFlow.dialog.cancel': 'Cancel and discard changes',
+  'subAgentFlow.dialog.ariaLabel': 'Sub-Agent Flow Editor',
   'subAgentFlow.generateNameWithAI': 'Generate name with AI',
 
   // SubAgentFlow AI Edit
@@ -1116,6 +1126,14 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Design an implementation plan for the following requirement:',
 
   // Claude API Upload Dialog
+  'claudeApi.searchOnPulseMcp': 'Search on PulseMCP',
+  'claudeApi.searchOnPulseMcp.tooltip': 'Search MCP server URLs on PulseMCP',
+  'claudeApi.pasteTokenPlaceholder': 'Paste token here',
+  'claudeApi.pasteAccessTokenPlaceholder': 'Paste access_token here',
+  'claudeApi.openInClaudePlatform': 'Open in Claude Platform',
+  'claudeApi.selectUploadedSkills': 'Select uploaded skills...',
+  'claudeApi.testPromptPlaceholder': 'Enter your test prompt...',
+  'claudeApi.resetConversation': 'Reset Conversation',
   'claudeApi.description':
     'Upload workflows as Agent Skills to Claude API and run them via the Messages API.\nCombined with MCP servers, code execution, and other skills, you can publish specialized AI agents as APIs for document processing, data analysis, customer support, and more.',
 

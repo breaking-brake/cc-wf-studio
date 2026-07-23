@@ -9,6 +9,8 @@ export interface WebviewTranslationKeys {
   optional: string;
   cancel: string;
   'common.close': string;
+  'common.required': string;
+  'common.wizardSteps': string;
   'common.cancel': string;
   'loading.importWorkflow': string;
   'loading.openWorkflow': string;
@@ -58,8 +60,10 @@ export interface WebviewTranslationKeys {
   'toolbar.interactionMode.switchToSelection': string;
   'toolbar.edgeAnimation.enable': string;
   'toolbar.edgeAnimation.disable': string;
+  'toolbar.edgeAnimation.label': string;
   'toolbar.highlight.enable': string;
   'toolbar.highlight.disable': string;
+  'toolbar.highlight.label': string;
   'toolbar.highlight.confirmDisable.title': string;
   'toolbar.highlight.confirmDisable.message': string;
   'toolbar.highlight.confirmDisable.confirm': string;
@@ -68,6 +72,9 @@ export interface WebviewTranslationKeys {
   'toolbar.redo': string;
   'toolbar.scrollMode.switchToClassic': string;
   'toolbar.scrollMode.switchToFreehand': string;
+  'toolbar.scrollMode.label': string;
+  'toolbar.interactionMode.label': string;
+  'toolbar.stopMcpServer': string;
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.hidden': string;
@@ -120,6 +127,7 @@ export interface WebviewTranslationKeys {
   // What's New dialog
   'whatsNew.title': string;
   'whatsNew.viewAllReleases': string;
+  'whatsNew.viewChangesOnGitHub': string;
   'whatsNew.showBadge': string;
 
   // Copilot Execution Mode
@@ -212,6 +220,7 @@ export interface WebviewTranslationKeys {
   'codex.error.promptTooLong': string;
   'codex.error.modelRequired': string;
   'codex.nameHelp': string;
+  'codex.openDocumentation': string;
 
   // SubAgentFlow Node (Feature: 089-subworkflow)
   'node.subAgentFlow.title': string;
@@ -236,6 +245,7 @@ export interface WebviewTranslationKeys {
   'subAgentFlow.dialog.close': string;
   'subAgentFlow.dialog.submit': string;
   'subAgentFlow.dialog.cancel': string;
+  'subAgentFlow.dialog.ariaLabel': string;
   'subAgentFlow.generateNameWithAI': string;
 
   // SubAgentFlow AI Edit
@@ -1036,6 +1046,14 @@ export interface WebviewTranslationKeys {
 
   // Claude API Upload Dialog
   'claudeApi.description': string;
+  'claudeApi.searchOnPulseMcp': string;
+  'claudeApi.searchOnPulseMcp.tooltip': string;
+  'claudeApi.pasteTokenPlaceholder': string;
+  'claudeApi.pasteAccessTokenPlaceholder': string;
+  'claudeApi.openInClaudePlatform': string;
+  'claudeApi.selectUploadedSkills': string;
+  'claudeApi.testPromptPlaceholder': string;
+  'claudeApi.resetConversation': string;
 
   // Commentary AI
   'commentary.toggle': string;

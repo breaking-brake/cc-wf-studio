@@ -11,6 +11,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   optional: '任意',
   cancel: 'キャンセル',
   'common.close': '閉じる',
+  'common.required': '必須',
+  'common.wizardSteps': 'ウィザードステップ',
   'common.cancel': 'キャンセル',
   'loading.importWorkflow': 'ワークフローをインポート中...',
   'loading.openWorkflow': 'ワークフローを開いています...',
@@ -59,8 +61,10 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.interactionMode.switchToSelection': '範囲選択モードに切り替え',
   'toolbar.edgeAnimation.enable': 'エッジアニメーションを有効化',
   'toolbar.edgeAnimation.disable': 'エッジアニメーションを無効化',
+  'toolbar.edgeAnimation.label': 'エッジアニメーション',
   'toolbar.highlight.enable': 'グループノードハイライトを有効化',
   'toolbar.highlight.disable': 'グループノードハイライトを無効化',
+  'toolbar.highlight.label': 'グループノードハイライト',
   'toolbar.highlight.confirmDisable.title': 'グループノードハイライトを無効化',
   'toolbar.highlight.confirmDisable.message':
     '現在グループノードがハイライトされています。ハイライトを無効化しますか？',
@@ -70,6 +74,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.redo': 'やり直し',
   'toolbar.scrollMode.switchToClassic': 'Classicモードに切り替え（スクロール=ズーム）',
   'toolbar.scrollMode.switchToFreehand': 'Freehandモードに切り替え（スクロール=パン）',
+  'toolbar.scrollMode.label': 'キャンバススクロールモード',
+  'toolbar.interactionMode.label': 'キャンバス操作モード',
+  'toolbar.stopMcpServer': 'MCPサーバーを停止',
 
   // Toolbar minimap toggle
   'toolbar.minimapToggle.hidden': '非表示',
@@ -124,6 +131,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.whatsNew': '更新情報',
   'whatsNew.title': '更新情報',
   'whatsNew.viewAllReleases': 'すべての更新情報を見る',
+  'whatsNew.viewChangesOnGitHub': 'GitHubで変更内容を表示',
   'whatsNew.showBadge': '未読バッジ',
 
   // Copilot Execution Mode
@@ -220,6 +228,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'codex.error.promptTooLong': 'プロンプトは10,000文字以内で入力してください',
   'codex.error.modelRequired': 'モデル名は必須です',
   'codex.nameHelp': '英数字、ハイフン、アンダースコアのみ使用可能',
+  'codex.openDocumentation': 'ドキュメントを開く',
 
   // SubAgentFlow Node (Feature: 089-subworkflow)
   'node.subAgentFlow.title': 'Sub-Agent Flow',
@@ -244,6 +253,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'subAgentFlow.dialog.close': '閉じてメインワークフローに戻る',
   'subAgentFlow.dialog.submit': '確定してワークフローに追加',
   'subAgentFlow.dialog.cancel': 'キャンセルして変更を破棄',
+  'subAgentFlow.dialog.ariaLabel': 'Sub-Agent Flowエディター',
   'subAgentFlow.generateNameWithAI': 'AIで名前を生成',
 
   // SubAgentFlow AI Edit
@@ -1108,6 +1118,14 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'subAgent.builtIn.plan.defaultPrompt': '以下の要件に対する実装計画を設計してください：',
 
   // Claude API Upload Dialog
+  'claudeApi.searchOnPulseMcp': 'PulseMCPで検索',
+  'claudeApi.searchOnPulseMcp.tooltip': 'PulseMCPでMCPサーバーURLを検索',
+  'claudeApi.pasteTokenPlaceholder': 'ここにトークンを貼り付け',
+  'claudeApi.pasteAccessTokenPlaceholder': 'ここにaccess_tokenを貼り付け',
+  'claudeApi.openInClaudePlatform': 'Claude Platformで開く',
+  'claudeApi.selectUploadedSkills': 'アップロード済みのSkillを選択...',
+  'claudeApi.testPromptPlaceholder': 'テストプロンプトを入力...',
+  'claudeApi.resetConversation': '会話をリセット',
   'claudeApi.description':
     'ワークフローを Agent Skills として Claude API にアップロードし、Messages API 経由で実行できます。\nMCP サーバー、コード実行、他のスキルと組み合わせることで、ドキュメント処理・データ分析・カスタマーサポートなど、専門的な AI エージェントを API として公開できます。',
 

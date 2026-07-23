@@ -234,7 +234,7 @@ export function WhatsNewDialog({
                             cursor: 'pointer',
                             color: 'var(--vscode-textLink-foreground)',
                           }}
-                          title="View changes on GitHub"
+                          title={t('whatsNew.viewChangesOnGitHub')}
                         >
                           <ExternalLink size={11} />
                         </span>

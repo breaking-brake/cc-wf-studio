@@ -140,7 +140,7 @@ export const ScrollModeToggle: React.FC = () => {
                   checked={scrollMode === 'freehand'}
                   onCheckedChange={() => toggleScrollMode()}
                   onClick={(e) => e.stopPropagation()}
-                  aria-label="Canvas scroll mode"
+                  aria-label={t('toolbar.scrollMode.label')}
                   style={{
                     all: 'unset',
                     width: '32px',

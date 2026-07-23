@@ -142,7 +142,7 @@ export const InteractionModeToggle: React.FC = () => {
                   checked={interactionMode === 'selection'}
                   onCheckedChange={() => toggleInteractionMode()}
                   onClick={(e) => e.stopPropagation()}
-                  aria-label="Canvas interaction mode"
+                  aria-label={t('toolbar.interactionMode.label')}
                   style={{
                     all: 'unset',
                     width: '32px',
