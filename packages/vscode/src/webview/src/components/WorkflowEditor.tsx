@@ -369,6 +369,24 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           return;
         }
         const key = event.key.toLowerCase();
+        if (key === 'a' && !event.shiftKey && !event.altKey) {
+          // Select all nodes and edges. Selection state is excluded from undo
+          // history and canvas-revision tracking, so this never dirties the
+          // workflow or pollutes undo.
+          event.preventDefault();
+          const {
+            nodes: currentNodes,
+            edges: currentEdges,
+            setNodes,
+            setEdges,
+            syncSelectedNodeId,
+          } = useWorkflowStore.getState();
+          if (currentNodes.length === 0 && currentEdges.length === 0) return;
+          setNodes(currentNodes.map((n) => (n.selected ? n : { ...n, selected: true })));
+          setEdges(currentEdges.map((e) => (e.selected ? e : { ...e, selected: true })));
+          // Same rule as handleNodesChange: exactly one selected node syncs its id
+          syncSelectedNodeId(currentNodes.length === 1 ? currentNodes[0].id : null);
+        }
         if (key === 'z' && !event.shiftKey) {
           event.preventDefault();
           const { undo, pastStates } = useWorkflowStore.temporal.getState();

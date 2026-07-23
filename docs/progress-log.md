@@ -17,6 +17,34 @@ Entry format:
 
 ---
 
+## 2026-07-23 — Add Ctrl/Cmd+A select-all to the workflow canvas
+- **User value**: a user can now press Ctrl/Cmd+A on the canvas to select
+  every node and edge at once — then move the whole workflow, or delete it
+  through the existing multi-delete confirmation flow. Previously the only
+  multi-select was the rubber-band drag in selection mode; there was no
+  keyboard path at all.
+- **Issue/PR**: #889 / PR from `claude/sleepy-curie-2ldj9j`
+- **Outcome**: done — added a `mod+A` branch to `WorkflowEditor`'s existing
+  keydown handler (same editable-target guard as Ctrl+Z/Y/D), marking all
+  nodes/edges `selected: true` via `setNodes`/`setEdges` and syncing
+  `selectedNodeId` with `handleNodesChange`'s rule (exactly one node → its
+  id, else null). Verified selection state is excluded from undo history
+  (`partialize`) and canvas-revision tracking, so select-all neither
+  dirties the workflow nor pollutes undo. Security-interrupt check this
+  round: the previous iteration's flagged Dependabot alerts did not
+  reproduce — `pnpm audit` shows only the known unfixable moderate
+  `@hono/node-server` advisory tracked in #879. Rejected this round:
+  Escape-to-deselect (would clear a selection the user still wants when
+  dismissing dialogs, e.g. canceling the delete confirm).
+- **Next proposals**:
+  - Multi-node copy/paste or multi-select Ctrl+D duplicate — now more
+    valuable with select-all in place; needs id remapping + group handling
+    design pass.
+  - Toolbar.tsx "Stop MCP Server" tooltip and WhatsNewDialog "View changes
+    on GitHub" are still hardcoded English — small localization sweep.
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow a11y); if not, add grid-step nudging.
+
 ## 2026-07-23 — Localize the Workflow Tour UI, Overview zoom controls, and remaining canvas tooltips
 - **User value**: a user running VSCode in Japanese, Korean, or Chinese now
   sees the Workflow Tour feature (Start/Generate pills and popover,
