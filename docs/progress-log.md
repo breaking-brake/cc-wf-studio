@@ -17,6 +17,38 @@ Entry format:
 
 ---
 
+## 2026-07-23 — `ccwf validate --agent` repeatable + `--agent all`
+- **User value**: a user exporting a workflow to several AI agents can now
+  preflight target compatibility for all of them in one command —
+  `ccwf validate wf.json --agent all` (or `--agent codex --agent gemini`) —
+  instead of re-running validate once per target.
+- **Issue/PR**: #909 / PR from `claude/sleepy-curie-mgigph`
+- **Outcome**: done — `--agent` uses a commander accumulator: repeatable,
+  de-duped, first-mention order; `all` expands to `WORKFLOW_TARGET_AGENTS`
+  (7 targets). With exactly one agent every output — human lines and the
+  single-file `--json` `warnings` array — is byte-identical to before.
+  With several agents, warning lines gain a `[agent]` prefix, each clean
+  target still prints `✓ No target-compatibility warnings for <agent>.`,
+  and `--json` reports carry `warningsByAgent: { <agent>: string[] }`
+  instead of `warnings`. Warnings still never affect the exit code; invalid
+  workflows suppress warning collection (empty arrays per agent). Bad agent
+  names get a clean commander error listing the vocabulary plus `all`.
+  Docs: cli README + ccwf-cli SKILL.md (which had never documented
+  `validate --agent`). E2E: 11 cases against the built CLI (legacy
+  single-agent human/JSON, `all`, repeat+dedupe, no-agent, bad name,
+  directory batch with unreadable file, multi-agent JSON, invalid-schema
+  suppression, exit codes 0/1/2). Issue #909 could not be locked (no `gh`,
+  no MCP lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - `ccwf validate --strict` (or `--fail-on-warnings`) so CI can gate on
+    target-compatibility warnings, not just schema validity.
+  - Manual E2E queue (carried): align/distribute + context menu +
+    copy/cut/paste in real webviews; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector in both modes.
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow v11 keyboard a11y); only add grid-step nudging if
+    actually missing.
+
 ## 2026-07-23 — ccwf validate accepts multiple files and directories
 - **User value**: a user can now validate an entire workflows folder in one
   command — `ccwf validate ./workflows` or `ccwf validate a.json b.json` —
