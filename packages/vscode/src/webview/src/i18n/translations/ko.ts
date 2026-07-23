@@ -413,6 +413,14 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'contextMenu.duplicate': '복제',
   'contextMenu.delete': '삭제',
   'contextMenu.selectAll': '모두 선택',
+  'contextMenu.alignLeft': '왼쪽 정렬',
+  'contextMenu.alignCenterHorizontal': '가로 가운데 정렬',
+  'contextMenu.alignRight': '오른쪽 정렬',
+  'contextMenu.alignTop': '위쪽 정렬',
+  'contextMenu.alignMiddle': '세로 가운데 정렬',
+  'contextMenu.alignBottom': '아래쪽 정렬',
+  'contextMenu.distributeHorizontal': '가로 균등 배치',
+  'contextMenu.distributeVertical': '세로 균등 배치',
   'announcement.dismiss': '공지 닫기',
 
   // Delete Confirmation Dialog

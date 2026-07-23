@@ -400,6 +400,14 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'contextMenu.duplicate': '创建副本',
   'contextMenu.delete': '删除',
   'contextMenu.selectAll': '全选',
+  'contextMenu.alignLeft': '左对齐',
+  'contextMenu.alignCenterHorizontal': '水平居中对齐',
+  'contextMenu.alignRight': '右对齐',
+  'contextMenu.alignTop': '顶部对齐',
+  'contextMenu.alignMiddle': '垂直居中对齐',
+  'contextMenu.alignBottom': '底部对齐',
+  'contextMenu.distributeHorizontal': '水平均匀分布',
+  'contextMenu.distributeVertical': '垂直均匀分布',
   'announcement.dismiss': '关闭公告',
 
   // Delete Confirmation Dialog

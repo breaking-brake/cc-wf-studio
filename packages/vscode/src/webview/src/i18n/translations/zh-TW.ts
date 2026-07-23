@@ -402,6 +402,14 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'contextMenu.duplicate': '建立複本',
   'contextMenu.delete': '刪除',
   'contextMenu.selectAll': '全選',
+  'contextMenu.alignLeft': '靠左對齊',
+  'contextMenu.alignCenterHorizontal': '水平置中對齊',
+  'contextMenu.alignRight': '靠右對齊',
+  'contextMenu.alignTop': '靠上對齊',
+  'contextMenu.alignMiddle': '垂直置中對齊',
+  'contextMenu.alignBottom': '靠下對齊',
+  'contextMenu.distributeHorizontal': '水平均分',
+  'contextMenu.distributeVertical': '垂直均分',
   'announcement.dismiss': '關閉公告',
 
   // Delete Confirmation Dialog

@@ -416,6 +416,14 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'contextMenu.duplicate': 'Duplicate',
   'contextMenu.delete': 'Delete',
   'contextMenu.selectAll': 'Select All',
+  'contextMenu.alignLeft': 'Align left',
+  'contextMenu.alignCenterHorizontal': 'Align horizontal centers',
+  'contextMenu.alignRight': 'Align right',
+  'contextMenu.alignTop': 'Align top',
+  'contextMenu.alignMiddle': 'Align vertical centers',
+  'contextMenu.alignBottom': 'Align bottom',
+  'contextMenu.distributeHorizontal': 'Distribute horizontally',
+  'contextMenu.distributeVertical': 'Distribute vertically',
   'announcement.dismiss': 'Dismiss announcement',
 
   // Delete Confirmation Dialog

@@ -396,6 +396,14 @@ export interface WebviewTranslationKeys {
   'contextMenu.duplicate': string;
   'contextMenu.delete': string;
   'contextMenu.selectAll': string;
+  'contextMenu.alignLeft': string;
+  'contextMenu.alignCenterHorizontal': string;
+  'contextMenu.alignRight': string;
+  'contextMenu.alignTop': string;
+  'contextMenu.alignMiddle': string;
+  'contextMenu.alignBottom': string;
+  'contextMenu.distributeHorizontal': string;
+  'contextMenu.distributeVertical': string;
   'announcement.dismiss': string;
 
   // Delete Confirmation Dialog

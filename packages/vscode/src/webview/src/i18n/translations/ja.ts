@@ -414,6 +414,14 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'contextMenu.duplicate': '複製',
   'contextMenu.delete': '削除',
   'contextMenu.selectAll': 'すべて選択',
+  'contextMenu.alignLeft': '左揃え',
+  'contextMenu.alignCenterHorizontal': '左右中央揃え',
+  'contextMenu.alignRight': '右揃え',
+  'contextMenu.alignTop': '上揃え',
+  'contextMenu.alignMiddle': '上下中央揃え',
+  'contextMenu.alignBottom': '下揃え',
+  'contextMenu.distributeHorizontal': '左右に等間隔配置',
+  'contextMenu.distributeVertical': '上下に等間隔配置',
   'announcement.dismiss': 'お知らせを閉じる',
 
   // Delete Confirmation Dialog

@@ -20,7 +20,24 @@ export interface CanvasContextMenuItem {
   onSelect: () => void;
 }
 
-export type CanvasContextMenuEntry = CanvasContextMenuItem | 'separator';
+/** Icon-only action in a compact row (e.g. the align/distribute buttons) */
+export interface CanvasContextMenuIconItem {
+  key: string;
+  /** Tooltip and accessible name — the button renders only the icon */
+  label: string;
+  icon: React.ReactNode;
+  disabled?: boolean;
+  onSelect: () => void;
+}
+
+/** A horizontal row of icon-only buttons rendered as one menu line */
+export interface CanvasContextMenuIconRow {
+  kind: 'iconRow';
+  key: string;
+  items: CanvasContextMenuIconItem[];
+}
+
+export type CanvasContextMenuEntry = CanvasContextMenuItem | CanvasContextMenuIconRow | 'separator';
 
 interface CanvasContextMenuProps {
   /** Position relative to the canvas container (the menu's offset parent) */
@@ -102,6 +119,52 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({ x, y, entr
               margin: '4px 0',
             }}
           />
+        ) : 'kind' in entry ? (
+          <div
+            key={entry.key}
+            role="group"
+            style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '2px 8px' }}
+          >
+            {entry.items.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                role="menuitem"
+                title={item.label}
+                aria-label={item.label}
+                disabled={item.disabled}
+                onClick={() => {
+                  if (item.disabled) return;
+                  onClose();
+                  item.onSelect();
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '26px',
+                  height: '24px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  borderRadius: '2px',
+                  color: 'var(--vscode-foreground)',
+                  cursor: item.disabled ? 'default' : 'pointer',
+                  opacity: item.disabled ? 0.45 : 1,
+                }}
+                onMouseEnter={(event) => {
+                  if (!item.disabled) {
+                    event.currentTarget.style.backgroundColor =
+                      'var(--vscode-list-hoverBackground)';
+                  }
+                }}
+                onMouseLeave={(event) => {
+                  event.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                {item.icon}
+              </button>
+            ))}
+          </div>
         ) : (
           <button
             key={entry.key}
