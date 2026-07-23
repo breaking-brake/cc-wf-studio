@@ -17,6 +17,38 @@ Entry format:
 
 ---
 
+## 2026-07-23 — Cut the canvas selection with Ctrl/Cmd+X
+- **User value**: a user can now cut the selected nodes (with the edges
+  between them) and paste them elsewhere — including into a different
+  workflow's canvas — moving a sub-flow in two keystrokes instead of
+  copy → delete → confirmation dialog. Completes the clipboard triad
+  (copy/paste shipped in #893/#894); previously Ctrl+X silently did nothing.
+- **Issue/PR**: #895 / PR from `claude/sleepy-curie-zj2g8c`
+- **Outcome**: done — new `cutSelection(nodeIds)` store action delegates to
+  `serializeSelection` (same inclusion policy: Start/End excluded, groups
+  bring children, internal edges in the payload), then removes exactly the
+  serialized node set plus every edge touching it (boundary edges must not
+  dangle) in a single `set()` → one undo entry; selected edges between two
+  surviving nodes are kept (cut only removes what the clipboard holds).
+  DOM `cut` handler sits beside the existing `copy`/`paste` handlers with
+  the same editable-target and text-selection guards; it checks
+  `event.clipboardData` **before** mutating (never delete without a
+  clipboard to write to) and skips while the delete-confirmation dialog is
+  open. No confirmation dialog by design: cut is undoable and the content
+  lives on the clipboard — Delete/Backspace keeps its confirm flow. No new
+  i18n strings, no schema changes.
+- **Next proposals**:
+  - Localization mini-sweep (re-verified this round): `Toolbar.tsx`
+    "Stop MCP Server" tooltip, `WhatsNewDialog` "View changes on GitHub",
+    `CodexNodeDialog` "Open documentation" are hardcoded English in active
+    UI (the `McpServerSection.tsx` occurrences are discontinued-chat-panel
+    only — maintain-only, skip them).
+  - Manual E2E: verify the `cut` event fires in webviews on all three OSes
+    alongside the queued copy/paste check.
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow v11 keyboard a11y); only add grid-step nudging if
+    actually missing.
+
 ## 2026-07-23 — Copy/paste the canvas selection with Ctrl/Cmd+C / Ctrl/Cmd+V
 - **User value**: a user can now copy the selected nodes (with the edges
   between them) and paste them — including into a **different workflow's

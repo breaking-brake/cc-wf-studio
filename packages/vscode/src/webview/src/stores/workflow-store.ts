@@ -240,6 +240,12 @@ interface WorkflowStore {
    *  offset, deep-copied data, one undo entry. The pasted nodes become the
    *  new selection. Works with payloads copied from another workflow. */
   pasteSelection: (payload: SelectionClipboardPayload) => void;
+  /** Cut a selection: serialize it (same policy as serializeSelection),
+   *  then remove the serialized nodes plus every edge touching them in a
+   *  single undo entry. No confirmation dialog — cut is undoable and the
+   *  content lives on in the returned clipboard payload. Returns null (and
+   *  removes nothing) when nothing serializable is selected. */
+  cutSelection: (nodeIds: string[]) => SelectionClipboardPayload | null;
   clearLastAddedNodeId: () => void;
   /** Request the canvas to pan to a specific node (e.g. when jumping in from
    *  Overview mode). The canvas-side hook clears it after centring. */
@@ -1051,6 +1057,38 @@ export const useWorkflowStore = create<WorkflowStore>()(
           ...(newSelectedId && { lastAddedNodeId: newSelectedId }),
           selectedNodeId: newSelectedId,
         });
+      },
+
+      cutSelection: (nodeIds: string[]) => {
+        const payload = get().serializeSelection(nodeIds);
+        if (!payload) return null;
+
+        // Remove exactly the serialized set — Start/End are already
+        // excluded, and a cut group takes its children with it (they are
+        // part of the payload, so nothing the user keeps is lost)
+        const removedIds = new Set(payload.nodes.map((node) => node.id));
+
+        // Boundary-crossing edges are not in the payload, but leaving them
+        // dangling would corrupt the canvas — drop every touching edge.
+        // Selected edges between two surviving nodes are kept: cut only
+        // removes what the clipboard now holds.
+        const remainingNodes = get().nodes.filter((node) => !removedIds.has(node.id));
+        const remainingEdges = get().edges.filter(
+          (edge) => !removedIds.has(edge.source) && !removedIds.has(edge.target)
+        );
+
+        const currentSelectedNodeId = get().selectedNodeId;
+
+        // Single set() call → single undo/redo history entry
+        set({
+          nodes: remainingNodes,
+          edges: remainingEdges,
+          ...(currentSelectedNodeId && removedIds.has(currentSelectedNodeId)
+            ? { selectedNodeId: null }
+            : {}),
+        });
+
+        return payload;
       },
 
       requestFocusNode: (nodeId: string) => {

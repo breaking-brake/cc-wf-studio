@@ -427,7 +427,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       );
     };
 
-    // Copy/paste the canvas selection via the DOM clipboard events —
+    // Copy/cut/paste the canvas selection via the DOM clipboard events —
     // permission-free in VSCode webviews (navigator.clipboard.readText is
     // not), and the system clipboard carries the payload across canvas
     // windows, so paste works into a different workflow too.
@@ -441,6 +441,30 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       if (selectedIds.length === 0) return;
       const payload = serializeSelection(selectedIds);
       if (!payload || !event.clipboardData) return;
+      event.preventDefault();
+      event.clipboardData.setData('text/plain', JSON.stringify(payload, null, 2));
+    };
+
+    const handleCut = (event: ClipboardEvent) => {
+      if (isEditableTarget(event.target)) return;
+      // A real text selection (e.g. inside a panel) keeps the native cut
+      const textSelection = window.getSelection();
+      if (textSelection && !textSelection.isCollapsed) return;
+      // Nowhere to put the payload → don't remove anything
+      if (!event.clipboardData) return;
+      const {
+        nodes: currentNodes,
+        pendingDeleteNodeIds,
+        cutSelection,
+      } = useWorkflowStore.getState();
+      // Don't race the delete-confirmation dialog over the same selection
+      if (pendingDeleteNodeIds.length > 0) return;
+      const selectedIds = currentNodes.filter((n) => n.selected).map((n) => n.id);
+      if (selectedIds.length === 0) return;
+      // No confirmation dialog: cut is undoable (Ctrl+Z) and the content
+      // lives on in the clipboard payload — standard editor semantics
+      const payload = cutSelection(selectedIds);
+      if (!payload) return;
       event.preventDefault();
       event.clipboardData.setData('text/plain', JSON.stringify(payload, null, 2));
     };
@@ -459,12 +483,14 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     document.addEventListener('copy', handleCopy);
+    document.addEventListener('cut', handleCut);
     document.addEventListener('paste', handlePaste);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
       document.removeEventListener('copy', handleCopy);
+      document.removeEventListener('cut', handleCut);
       document.removeEventListener('paste', handlePaste);
     };
   }, []);
