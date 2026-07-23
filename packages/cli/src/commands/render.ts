@@ -4,7 +4,8 @@
  * Default format is `md` (Markdown bundle: title + Mermaid block + execution
  * guide), suitable for pasting into a PR description or README. `--format=mermaid`
  * outputs only the Mermaid `flowchart` source, intended for piping into
- * `mermaid-cli` or similar.
+ * `mermaid-cli` or similar. `<file>` may be `-` to read the workflow JSON
+ * from stdin (errors are then labelled `<stdin>`; exit codes unchanged).
  *
  * `--agent <name>` phrases the execution instructions for that target agent —
  * the same wording `ccwf export --agent <name>` writes into the agent's
@@ -22,7 +23,11 @@ import {
   generateExecutionInstructions,
   generateMermaidFlowchart,
 } from '@cc-wf-studio/core';
-import { WorkflowLoadError, loadWorkflowFromFile } from '../utils/load-workflow.js';
+import {
+  WorkflowLoadError,
+  loadWorkflowFromFile,
+  loadWorkflowFromStdin,
+} from '../utils/load-workflow.js';
 import {
   SUPPORTED_AGENTS,
   type SupportedAgent,
@@ -41,8 +46,10 @@ interface RenderOptions {
 export function registerRenderCommand(program: Command): void {
   program
     .command('render')
-    .description('Render a workflow JSON as Mermaid + execution Markdown to stdout.')
-    .argument('<file>', 'Path to a workflow JSON file.')
+    .description(
+      "Render a workflow JSON as Mermaid + execution Markdown to stdout. '-' reads the workflow from stdin."
+    )
+    .argument('<file>', "Path to a workflow JSON file, or '-' to read from stdin.")
     .option<RenderFormat>(
       '-f, --format <format>',
       'Output format: "md" (default) or "mermaid".',
@@ -63,7 +70,8 @@ export function registerRenderCommand(program: Command): void {
     .option('-o, --output <file>', 'Write output to this file instead of stdout.')
     .action(async (file: string, options: RenderOptions, command: Command) => {
       try {
-        const { workflow } = await loadWorkflowFromFile(file);
+        const { workflow } =
+          file === '-' ? await loadWorkflowFromStdin() : await loadWorkflowFromFile(file);
         const agent = options.agent;
 
         // Warnings only when --agent was passed explicitly: a plain

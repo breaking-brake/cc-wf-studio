@@ -17,6 +17,39 @@ Entry format:
 
 ---
 
+## 2026-07-23 — stdin input (`-`) for `ccwf validate` and `ccwf render`
+- **User value**: a user — or a script/AI agent that just generated workflow
+  JSON — can now pipe it straight into `ccwf validate -` / `ccwf render -`
+  (standard Unix `-` convention) instead of writing a temp file first.
+- **Issue/PR**: #923 / PR from `claude/sleepy-curie-vli55d`
+- **Outcome**: done — `-` reads one workflow JSON document from stdin,
+  reported as `<stdin>` everywhere a path would appear; the `{ meta,
+  workflow }` wrapper is honoured, exit codes are unchanged (2 on invalid
+  JSON / empty stream / not-a-workflow, 1 on schema errors), and an
+  interactive TTY fails fast with a friendly error instead of hanging.
+  `validate` accepts `-` mixed with files/dirs (repeated `-` de-dupes to a
+  single stdin read) and composes with `--json` / `--agent` / `--strict`;
+  `render` composes with `-f mermaid`, `--agent`, `-o`. Loader logic shared
+  via `parseWorkflowSource` + `loadWorkflowFromStdin` in
+  `packages/cli/src/utils/load-workflow.ts` — file behavior byte-identical.
+  Docs: cli README (subcommand table + render/validate sections) and
+  ccwf-cli SKILL.md (sections + phrasing-table row). E2E: 14 cases against
+  the built CLI (stdin/file parity for validate `--json` and render md,
+  invalid/empty/non-workflow stdin, wrapper unwrap, mixed `- file -`
+  dedupe, `--agent codex` and `--agent all --strict`, mermaid + `-o`
+  variants, schema-invalid exit 1, missing-file regressions). `ccwf
+  export` / `run` intentionally out of scope (they write files). Issue #923
+  could not be locked (no `gh`, no MCP lock tool — known limitation, noted
+  in the issue).
+- **Next proposals**:
+  - MCP `export_workflow` tool for file-mode servers (design needed: write
+    safety, root resolution) — parity with `ccwf export`.
+  - `ccwf export -` / `ccwf run -` stdin input for symmetry, if piped
+    generate-then-materialise proves to be a real flow — judge value first.
+  - Manual E2E queue (carried): align/distribute + context menu +
+    copy/cut/paste in real webviews; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector in both modes.
+
 ## 2026-07-23 — `ccwf render --agent` phrases instructions per target agent
 - **User value**: a user rendering a workflow bundle for a non-Claude agent
   (codex, cursor, gemini, copilot, antigravity, roo-code) now gets execution

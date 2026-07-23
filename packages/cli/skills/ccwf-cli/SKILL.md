@@ -47,19 +47,21 @@ ccwf render ./.vscode/workflows/my-workflow.json             # Markdown (default
 ccwf render ./.vscode/workflows/my-workflow.json -f mermaid  # ```mermaid block only
 ccwf render ./.vscode/workflows/my-workflow.json -o out.md   # write to a file instead of stdout
 ccwf render ./.vscode/workflows/my-workflow.json --agent codex # instructions phrased for Codex
+cat my-workflow.json | ccwf render -                         # read the workflow from stdin
 ```
 
-Output is the same content `ccwf preview` shows in the right pane.
+Output is the same content `ccwf preview` shows in the right pane. `<file>` may be `-` to read the workflow JSON from stdin — useful when generating a workflow and rendering it in one pipe, no temp file needed (errors are reported against `<stdin>`).
 
 `--agent <name>` (one of `claude-code`, `antigravity`, `codex`, `copilot`, `cursor`, `gemini`, `roo-code`; default `claude-code`) phrases the execution instructions for that agent — the same wording `ccwf export --agent <name>` puts in the agent's `SKILL.md` — and prints that agent's target-compatibility warnings to stderr (exit code unaffected). `-f mermaid` output is agent-agnostic.
 
 ### `ccwf validate <paths...>`
 
-Schema-check workflow JSON files — any mix of files and directories (directories are searched recursively for `*.json`, skipping `node_modules` and dot-directories).
+Schema-check workflow JSON files — any mix of files and directories (directories are searched recursively for `*.json`, skipping `node_modules` and dot-directories). `-` reads a single workflow JSON document from stdin (reported as `<stdin>`), so a freshly generated workflow can be checked without writing a temp file.
 
 ```bash
 ccwf validate ./.vscode/workflows/my-workflow.json           # exit 0/1, human-readable errors on stderr
 ccwf validate ./.vscode/workflows/my-workflow.json --json    # prints { valid, errors[] }
+cat my-workflow.json | ccwf validate -                       # read workflow JSON from stdin
 ccwf validate ./.vscode/workflows                            # every *.json under the dir, per-file report + summary
 ccwf validate ./my-workflow.json --agent codex               # + target-compatibility warnings for codex
 ccwf validate ./my-workflow.json --agent all                 # + warnings for every supported target at once
@@ -219,6 +221,7 @@ Use this as a lookup when the user describes intent in natural language. If the 
 | "Render this as Markdown", "Mermaid 図にして"                                       | `ccwf render <file>`                         |
 | "Show the instructions as Cursor / Codex would see them"                            | `ccwf render <file> --agent <name>`          |
 | "Is this workflow valid?", "壊れてない?", "schema 確認して"                          | `ccwf validate <file>`                       |
+| "Check / render this workflow I just generated" (no file yet)                       | pipe the JSON: `... \| ccwf validate -` / `... \| ccwf render -` |
 | "Export as a Claude Skill / agent file", "skills 化して"                            | `ccwf export <file>` (default agent)         |
 | "Convert for Cursor / Codex / Gemini …"                                            | `ccwf export <file> --agent <name>`          |
 | "Export for all my agents / every target at once"                                   | `ccwf export <file> --agent all`             |
