@@ -17,6 +17,39 @@ Entry format:
 
 ---
 
+## 2026-07-23 — `ccwf validate --strict` gates CI on compatibility warnings
+- **User value**: a user can now make CI fail when a workflow carries
+  target-compatibility warnings — `ccwf validate ./workflows --agent all
+  --strict` — instead of warnings scrolling past with exit 0 and only
+  schema validity gating the pipeline.
+- **Issue/PR**: #911 / PR from `claude/sleepy-curie-q7n03u`
+- **Outcome**: done — `--strict` turns any collected warning into exit 1
+  (schema-invalid still 1, unreadable files still win with 2). `--strict`
+  without `--agent` would collect no warnings and silently pass, so it
+  aborts with a usage error (exit 2), matching validate's "a typo can
+  never produce a false-green CI" philosophy. A final
+  `error: N target-compatibility warning(s) treated as errors (--strict).`
+  stderr line explains the nonzero exit in both human and `--json` mode;
+  JSON stdout shapes (single-file stable contract, multi-file
+  `{valid, files}`) are byte-identical — the multi-file top-level `valid`
+  already mirrors the exit code, so it reflects strict failures
+  automatically. Docs: cli README + ccwf-cli SKILL.md. E2E: 12 cases
+  against the built CLI (baseline no-strict exit 0, strict-without-agent
+  usage error, warning/clean single agent, `--agent all`, JSON shape +
+  stderr notice, schema-invalid suppression (empty warnings, no notice),
+  directory batch human/JSON, unreadable-beats-strict exit 2). Issue #911
+  could not be locked (no `gh`, no MCP lock tool — known limitation,
+  noted in the issue).
+- **Next proposals**:
+  - MCP `validate_workflow` parity: accept `agent: "all"` (or an array)
+    so AI agents can preflight every target in one call like the CLI.
+  - Manual E2E queue (carried): align/distribute + context menu +
+    copy/cut/paste in real webviews; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector in both modes.
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow v11 keyboard a11y); only add grid-step nudging if
+    actually missing.
+
 ## 2026-07-23 — `ccwf validate --agent` repeatable + `--agent all`
 - **User value**: a user exporting a workflow to several AI agents can now
   preflight target compatibility for all of them in one command —
