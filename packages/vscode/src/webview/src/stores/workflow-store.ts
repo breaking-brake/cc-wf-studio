@@ -122,6 +122,16 @@ export function parseSelectionClipboardPayload(text: string): SelectionClipboard
   return parsed as SelectionClipboardPayload;
 }
 
+// ============================================================================
+// Selection Alignment (context menu: align / distribute)
+// ============================================================================
+
+/** Edge or center line the selection is aligned to */
+export type AlignMode = 'left' | 'centerH' | 'right' | 'top' | 'middle' | 'bottom';
+
+/** Axis along which the selection is evenly spaced */
+export type DistributeAxis = 'horizontal' | 'vertical';
+
 /**
  * Snapshot of main workflow state for restoration after Sub-Agent Flow editing
  */
@@ -248,6 +258,16 @@ interface WorkflowStore {
    *  content lives on in the returned clipboard payload. Returns null (and
    *  removes nothing) when nothing serializable is selected. */
   cutSelection: (nodeIds: string[]) => SelectionClipboardPayload | null;
+  /** Align the selection to an edge or center line of its bounding box.
+   *  Children whose group is also selected ride along with the group and are
+   *  skipped; geometry is compared in absolute coordinates (groups never
+   *  nest). No-op with fewer than two alignable nodes. Single undo entry. */
+  alignSelection: (nodeIds: string[], mode: AlignMode) => void;
+  /** Space the selection evenly along one axis: the outermost nodes stay
+   *  fixed and the gaps between node edges are equalized. Same ride-along
+   *  policy as alignSelection. No-op with fewer than three alignable nodes.
+   *  Single undo entry. */
+  distributeSelection: (nodeIds: string[], axis: DistributeAxis) => void;
   clearLastAddedNodeId: () => void;
   /** Request the canvas to pan to a specific node (e.g. when jumping in from
    *  Overview mode). The canvas-side hook clears it after centring. */
@@ -300,6 +320,26 @@ function sortNodesParentFirst(nodes: Node[]): Node[] {
   const parents = nodes.filter((n) => parentIds.has(n.id));
   const others = nodes.filter((n) => !parentIds.has(n.id));
   return [...parents, ...others];
+}
+
+/** Absolute canvas position of a node (groups never nest — one parent hop). */
+function absoluteNodePosition(node: Node, allNodes: Node[]): { x: number; y: number } {
+  if (!node.parentId) return { x: node.position.x, y: node.position.y };
+  const parent = allNodes.find((n) => n.id === node.parentId);
+  return parent
+    ? { x: node.position.x + parent.position.x, y: node.position.y + parent.position.y }
+    : { x: node.position.x, y: node.position.y };
+}
+
+/** Rendered node size: explicit style size (groups) over React Flow's
+ *  measured size, with fallbacks for nodes not yet measured. */
+function nodeBoxSize(node: Node): { width: number; height: number } {
+  const styleWidth = typeof node.style?.width === 'number' ? node.style.width : undefined;
+  const styleHeight = typeof node.style?.height === 'number' ? node.style.height : undefined;
+  return {
+    width: styleWidth ?? node.width ?? (node.type === 'group' ? 400 : 200),
+    height: styleHeight ?? node.height ?? (node.type === 'group' ? 300 : 80),
+  };
 }
 
 /**
@@ -1103,6 +1143,125 @@ export const useWorkflowStore = create<WorkflowStore>()(
         });
 
         return payload;
+      },
+
+      alignSelection: (nodeIds: string[], mode: AlignMode) => {
+        const allNodes = get().nodes;
+        const requested = new Set(nodeIds);
+        // Children whose group is also selected ride along with the group
+        const targets = allNodes.filter(
+          (node) => requested.has(node.id) && !(node.parentId && requested.has(node.parentId))
+        );
+        if (targets.length < 2) return;
+
+        const boxes = targets.map((node) => {
+          const { x, y } = absoluteNodePosition(node, allNodes);
+          const { width, height } = nodeBoxSize(node);
+          return { id: node.id, left: x, top: y, width, height };
+        });
+        const minLeft = Math.min(...boxes.map((box) => box.left));
+        const maxRight = Math.max(...boxes.map((box) => box.left + box.width));
+        const minTop = Math.min(...boxes.map((box) => box.top));
+        const maxBottom = Math.max(...boxes.map((box) => box.top + box.height));
+
+        // Deltas are identical in absolute and group-relative coordinates
+        // (a target's parent never moves), so they apply to position directly
+        const deltas = new Map<string, { dx: number; dy: number }>();
+        for (const box of boxes) {
+          let dx = 0;
+          let dy = 0;
+          switch (mode) {
+            case 'left':
+              dx = minLeft - box.left;
+              break;
+            case 'centerH':
+              dx = (minLeft + maxRight) / 2 - (box.left + box.width / 2);
+              break;
+            case 'right':
+              dx = maxRight - (box.left + box.width);
+              break;
+            case 'top':
+              dy = minTop - box.top;
+              break;
+            case 'middle':
+              dy = (minTop + maxBottom) / 2 - (box.top + box.height / 2);
+              break;
+            case 'bottom':
+              dy = maxBottom - (box.top + box.height);
+              break;
+          }
+          if (dx !== 0 || dy !== 0) deltas.set(box.id, { dx, dy });
+        }
+        if (deltas.size === 0) return;
+
+        // Single set() call → single undo/redo history entry
+        set({
+          nodes: allNodes.map((node) => {
+            const delta = deltas.get(node.id);
+            return delta
+              ? {
+                  ...node,
+                  position: { x: node.position.x + delta.dx, y: node.position.y + delta.dy },
+                }
+              : node;
+          }),
+        });
+      },
+
+      distributeSelection: (nodeIds: string[], axis: DistributeAxis) => {
+        const allNodes = get().nodes;
+        const requested = new Set(nodeIds);
+        // Same ride-along policy as alignSelection
+        const targets = allNodes.filter(
+          (node) => requested.has(node.id) && !(node.parentId && requested.has(node.parentId))
+        );
+        if (targets.length < 3) return;
+
+        const horizontal = axis === 'horizontal';
+        const boxes = targets
+          .map((node) => {
+            const position = absoluteNodePosition(node, allNodes);
+            const size = nodeBoxSize(node);
+            return {
+              id: node.id,
+              start: horizontal ? position.x : position.y,
+              extent: horizontal ? size.width : size.height,
+            };
+          })
+          .sort((a, b) => a.start - b.start || a.id.localeCompare(b.id));
+
+        // The outermost nodes stay fixed; the gaps between node edges in
+        // between are equalized (negative gaps mean overlapping nodes and
+        // distribute evenly all the same)
+        const first = boxes[0];
+        const last = boxes[boxes.length - 1];
+        const span = last.start + last.extent - first.start;
+        const totalExtent = boxes.reduce((sum, box) => sum + box.extent, 0);
+        const gap = (span - totalExtent) / (boxes.length - 1);
+
+        const deltas = new Map<string, number>();
+        let cursor = first.start;
+        for (const box of boxes) {
+          const delta = cursor - box.start;
+          if (delta !== 0) deltas.set(box.id, delta);
+          cursor += box.extent + gap;
+        }
+        if (deltas.size === 0) return;
+
+        // Single set() call → single undo/redo history entry
+        set({
+          nodes: allNodes.map((node) => {
+            const delta = deltas.get(node.id);
+            return delta !== undefined
+              ? {
+                  ...node,
+                  position: horizontal
+                    ? { x: node.position.x + delta, y: node.position.y }
+                    : { x: node.position.x, y: node.position.y + delta },
+                }
+              : node;
+          }),
+        });
       },
 
       requestFocusNode: (nodeId: string) => {

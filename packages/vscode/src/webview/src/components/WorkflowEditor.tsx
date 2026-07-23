@@ -6,6 +6,14 @@
  */
 
 import {
+  AlignCenterHorizontal,
+  AlignCenterVertical,
+  AlignEndHorizontal,
+  AlignEndVertical,
+  AlignHorizontalDistributeCenter,
+  AlignStartHorizontal,
+  AlignStartVertical,
+  AlignVerticalDistributeCenter,
   ClipboardPaste,
   Copy,
   CopyPlus,
@@ -35,6 +43,8 @@ import { useAutoFocusNode } from '../hooks/useAutoFocusNode';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useTranslation } from '../i18n/i18n-context';
 import {
+  type AlignMode,
+  type DistributeAxis,
   parseSelectionClipboardPayload,
   type SelectionClipboardPayload,
   useWorkflowStore,
@@ -457,6 +467,18 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     if (selectedIds.length > 0) duplicateSelection(selectedIds);
   }, []);
 
+  const alignSelectionFromMenu = useCallback((mode: AlignMode) => {
+    const { nodes: currentNodes, alignSelection } = useWorkflowStore.getState();
+    const selectedIds = currentNodes.filter((n) => n.selected).map((n) => n.id);
+    if (selectedIds.length > 0) alignSelection(selectedIds, mode);
+  }, []);
+
+  const distributeSelectionFromMenu = useCallback((axis: DistributeAxis) => {
+    const { nodes: currentNodes, distributeSelection } = useWorkflowStore.getState();
+    const selectedIds = currentNodes.filter((n) => n.selected).map((n) => n.id);
+    if (selectedIds.length > 0) distributeSelection(selectedIds, axis);
+  }, []);
+
   const deleteSelectionFromMenu = useCallback(() => {
     const {
       nodes: currentNodes,
@@ -731,6 +753,12 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     );
     const hasDeletableSelection =
       nodes.some((n) => n.selected && n.type !== 'start') || edges.some((e) => e.selected);
+    // Same ride-along policy as the store's alignSelection: children whose
+    // group is also selected move with the group and don't count
+    const selectedIds = new Set(nodes.filter((n) => n.selected).map((n) => n.id));
+    const alignableCount = nodes.filter(
+      (n) => n.selected && !(n.parentId && selectedIds.has(n.parentId))
+    ).length;
     return [
       {
         key: 'copy',
@@ -757,6 +785,73 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         disabled: !hasCopyableSelection,
         onSelect: duplicateSelectionFromMenu,
       },
+      ...(alignableCount >= 2
+        ? ([
+            'separator',
+            {
+              kind: 'iconRow',
+              key: 'align',
+              items: [
+                {
+                  key: 'alignLeft',
+                  label: t('contextMenu.alignLeft'),
+                  icon: <AlignStartVertical size={14} />,
+                  onSelect: () => alignSelectionFromMenu('left'),
+                },
+                {
+                  key: 'alignCenterH',
+                  label: t('contextMenu.alignCenterHorizontal'),
+                  icon: <AlignCenterVertical size={14} />,
+                  onSelect: () => alignSelectionFromMenu('centerH'),
+                },
+                {
+                  key: 'alignRight',
+                  label: t('contextMenu.alignRight'),
+                  icon: <AlignEndVertical size={14} />,
+                  onSelect: () => alignSelectionFromMenu('right'),
+                },
+                {
+                  key: 'alignTop',
+                  label: t('contextMenu.alignTop'),
+                  icon: <AlignStartHorizontal size={14} />,
+                  onSelect: () => alignSelectionFromMenu('top'),
+                },
+                {
+                  key: 'alignMiddle',
+                  label: t('contextMenu.alignMiddle'),
+                  icon: <AlignCenterHorizontal size={14} />,
+                  onSelect: () => alignSelectionFromMenu('middle'),
+                },
+                {
+                  key: 'alignBottom',
+                  label: t('contextMenu.alignBottom'),
+                  icon: <AlignEndHorizontal size={14} />,
+                  onSelect: () => alignSelectionFromMenu('bottom'),
+                },
+              ],
+            },
+            {
+              kind: 'iconRow',
+              key: 'distribute',
+              items: [
+                {
+                  key: 'distributeH',
+                  label: t('contextMenu.distributeHorizontal'),
+                  icon: <AlignHorizontalDistributeCenter size={14} />,
+                  disabled: alignableCount < 3,
+                  onSelect: () => distributeSelectionFromMenu('horizontal'),
+                },
+                {
+                  key: 'distributeV',
+                  label: t('contextMenu.distributeVertical'),
+                  icon: <AlignVerticalDistributeCenter size={14} />,
+                  disabled: alignableCount < 3,
+                  onSelect: () => distributeSelectionFromMenu('vertical'),
+                },
+              ],
+            },
+          ] satisfies CanvasContextMenuEntry[])
+        : []),
       'separator',
       {
         key: 'delete',
@@ -776,6 +871,8 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     copySelectionFromMenu,
     cutSelectionFromMenu,
     duplicateSelectionFromMenu,
+    alignSelectionFromMenu,
+    distributeSelectionFromMenu,
     deleteSelectionFromMenu,
   ]);
 

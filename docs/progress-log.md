@@ -17,6 +17,41 @@ Entry format:
 
 ---
 
+## 2026-07-23 — Align and distribute selected nodes from the context menu
+- **User value**: a user can now tidy a messy workflow layout in one click —
+  align the selected nodes to an edge or center (left / horizontal centers /
+  right / top / vertical centers / bottom) or space 3+ nodes out evenly —
+  instead of pixel-dragging each node into line. The canvas previously had
+  no alignment or layout tooling at all.
+- **Issue/PR**: #903 / PR from `claude/sleepy-curie-j6xhnc`
+- **Outcome**: done — two new store actions (`alignSelection` with 6 modes,
+  `distributeSelection` with 2 axes), each a single `set()` → one undo
+  entry. Geometry runs in absolute coordinates (groups never nest, one
+  parent hop); deltas apply to `position` directly since a target's parent
+  never moves, so group-relative children stay correct. Children whose
+  selected group is also selected ride along and are excluded from the
+  math; sizes come from explicit `style` (groups) or React Flow's measured
+  `width`/`height` with fallbacks. Distribute keeps the outermost nodes
+  fixed and equalizes edge-to-edge gaps (ties broken by node id for a
+  deterministic order). Surface: `CanvasContextMenu` gained a generic
+  icon-row entry kind (icon-only buttons with tooltip + aria-label);
+  `WorkflowEditor` shows an align row (6 lucide icons) and a distribute
+  row (2 icons, disabled below 3 nodes) when ≥2 alignable nodes are
+  selected. 8 new `contextMenu.*` keys in all 5 locales. Guard step this
+  round closed #901 (merged as #902). Issue #903 could not be locked (no
+  `gh`, no MCP lock tool, API proxied — known limitation, noted in issue).
+- **Next proposals**:
+  - Manual E2E queue (carried): copy/cut/paste DOM events, canvas context
+    menu, localized Claude API dialog in ja/ko/zh — and now align/distribute
+    on mixed selections (incl. a group + loose nodes).
+  - Verify in a live webview whether arrow keys already move the focused
+    node (React Flow v11 keyboard a11y); only add grid-step nudging if
+    actually missing.
+  - The model list in the API Test dialog is hardcoded in two `<select>`s
+    in `ClaudeApiUploadDialog.tsx` — extract to a single constant (and
+    consider sourcing from the shared model catalog) so new models appear
+    in both tabs consistently.
+
 ## 2026-07-23 — Localize the Claude API upload dialog
 - **User value**: a user running VSCode in Japanese, Korean, or Chinese no
   longer sees the entire Claude API skill upload & test flow in English —
