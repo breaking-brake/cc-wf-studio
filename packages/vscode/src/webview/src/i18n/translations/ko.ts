@@ -431,6 +431,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'canvasSearch.next': '다음 일치 항목',
   'canvasSearch.close': '검색 닫기',
 
+  // Auto Layout (canvas toolbar)
+  'autoLayout.tooltip': '자동 레이아웃(모든 노드 정렬)',
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '노드 삭제',
   'dialog.deleteNode.message': '이 노드를 삭제하시겠습니까?',

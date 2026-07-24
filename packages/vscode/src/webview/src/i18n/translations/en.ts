@@ -434,6 +434,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'canvasSearch.next': 'Next match',
   'canvasSearch.close': 'Close search',
 
+  // Auto Layout (canvas toolbar)
+  'autoLayout.tooltip': 'Auto layout (arrange all nodes)',
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'Delete Node',
   'dialog.deleteNode.message': 'Are you sure you want to delete this node?',
