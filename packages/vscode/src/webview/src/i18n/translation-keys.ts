@@ -448,6 +448,8 @@ export interface WebviewTranslationKeys {
   'shortcuts.delete': string;
   'shortcuts.selectAll': string;
   'shortcuts.search': string;
+  'shortcuts.nextProblem': string;
+  'shortcuts.prevProblem': string;
   'shortcuts.openCheatSheet': string;
   'shortcuts.contextMenu': string;
   'shortcuts.edgeDrop': string;

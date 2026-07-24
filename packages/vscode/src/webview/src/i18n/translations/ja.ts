@@ -466,6 +466,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'shortcuts.delete': '選択範囲を削除',
   'shortcuts.selectAll': 'すべてのノードを選択',
   'shortcuts.search': 'ノードを検索',
+  'shortcuts.nextProblem': '次の問題へ移動',
+  'shortcuts.prevProblem': '前の問題へ移動',
   'shortcuts.openCheatSheet': 'このチートシートを表示',
   'shortcuts.contextMenu': 'コンテキストメニューを開く',
   'shortcuts.edgeDrop': '接続済みノードを作成',

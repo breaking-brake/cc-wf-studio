@@ -17,6 +17,39 @@ Entry format:
 
 ---
 
+## 2026-07-24 — Keyboard problem cycling (F8 / Shift+F8)
+- **User value**: a user can now step through every validation problem on
+  the canvas from the keyboard — F8 selects and centers the next node with
+  a problem, Shift+F8 the previous one (VSCode's own F8 convention) — and
+  no longer has to open the problems panel and click each entry with the
+  mouse (top carried proposal from the previous iteration).
+- **Issue/PR**: #957
+- **Outcome**: done — F8 block in WorkflowEditor's existing global keydown
+  handler: ignored in inputs/textareas/contentEditable and while a
+  sub-agent flow is being edited; computes issues on demand with
+  `collectWorkflowIssues` from live store state (the memoized list is
+  empty while the panel is closed), opens the problems panel so the list
+  and red node markers explain the jump, dedupes to distinct problem-node
+  ids in issue order, and cycles relative to the currently selected node
+  (wrap-around; Shift reverses) via the existing `jumpToNode` helper —
+  navigation-only, selection is excluded from undo history. Cheat-sheet
+  rows for F8 / Shift+F8, "(F8)" hint on the Problems toolbar button
+  tooltip, 2 new strings in all 5 locales. No schema change. Issue #957
+  could not be locked (no `gh`, no MCP lock tool — known limitation,
+  noted in the issue).
+- **Next proposals**:
+  - Mirror the shortcut cheat sheet in the README/docs (carried).
+  - Esc closes the problems panel / search panel from the canvas (check
+    current behavior first).
+  - Manual E2E queue (carried): F8/Shift+F8 problem cycling (wrap-around,
+    panel auto-open, sub-agent flow ignored); inline group rename;
+    Ungroup; Group selection; Save as Image from the VSCode extension
+    host; Copy as Markdown; `render_workflow` via MCP Inspector; problems
+    badge; shortcut cheat sheet; problem-node markers; problems panel
+    click-to-jump; auto layout; node search cycling; align/distribute +
+    context menu + copy/cut/paste; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — Inline group rename (double-click the group header)
 - **User value**: a user can now rename a group by double-clicking its
   header and typing — Enter or clicking away commits, Esc cancels —

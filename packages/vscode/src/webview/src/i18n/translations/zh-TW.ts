@@ -454,6 +454,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'shortcuts.delete': '刪除所選內容',
   'shortcuts.selectAll': '選取所有節點',
   'shortcuts.search': '搜尋節點',
+  'shortcuts.nextProblem': '跳至下一個問題',
+  'shortcuts.prevProblem': '跳至上一個問題',
   'shortcuts.openCheatSheet': '顯示此快捷鍵列表',
   'shortcuts.contextMenu': '開啟操作選單',
   'shortcuts.edgeDrop': '建立已連接的節點',

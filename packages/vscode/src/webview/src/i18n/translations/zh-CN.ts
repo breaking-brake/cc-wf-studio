@@ -452,6 +452,8 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'shortcuts.delete': '删除所选内容',
   'shortcuts.selectAll': '选择所有节点',
   'shortcuts.search': '搜索节点',
+  'shortcuts.nextProblem': '跳转到下一个问题',
+  'shortcuts.prevProblem': '跳转到上一个问题',
   'shortcuts.openCheatSheet': '显示此快捷键列表',
   'shortcuts.contextMenu': '打开上下文菜单',
   'shortcuts.edgeDrop': '创建已连接的节点',
