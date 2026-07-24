@@ -423,6 +423,14 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'contextMenu.distributeVertical': '세로 균등 배치',
   'announcement.dismiss': '공지 닫기',
 
+  // Canvas node search (Ctrl/Cmd+F)
+  'canvasSearch.tooltip': '노드 검색',
+  'canvasSearch.placeholder': '노드 검색…',
+  'canvasSearch.noResults': '일치 항목 없음',
+  'canvasSearch.previous': '이전 일치 항목',
+  'canvasSearch.next': '다음 일치 항목',
+  'canvasSearch.close': '검색 닫기',
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '노드 삭제',
   'dialog.deleteNode.message': '이 노드를 삭제하시겠습니까?',

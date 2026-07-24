@@ -426,6 +426,14 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'contextMenu.distributeVertical': 'Distribute vertically',
   'announcement.dismiss': 'Dismiss announcement',
 
+  // Canvas node search (Ctrl/Cmd+F)
+  'canvasSearch.tooltip': 'Search nodes',
+  'canvasSearch.placeholder': 'Search nodes…',
+  'canvasSearch.noResults': 'No results',
+  'canvasSearch.previous': 'Previous match',
+  'canvasSearch.next': 'Next match',
+  'canvasSearch.close': 'Close search',
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'Delete Node',
   'dialog.deleteNode.message': 'Are you sure you want to delete this node?',

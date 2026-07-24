@@ -406,6 +406,14 @@ export interface WebviewTranslationKeys {
   'contextMenu.distributeVertical': string;
   'announcement.dismiss': string;
 
+  // Canvas node search (Ctrl/Cmd+F)
+  'canvasSearch.tooltip': string;
+  'canvasSearch.placeholder': string;
+  'canvasSearch.noResults': string;
+  'canvasSearch.previous': string;
+  'canvasSearch.next': string;
+  'canvasSearch.close': string;
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': string;
   'dialog.deleteNode.message': string;

@@ -17,6 +17,40 @@ Entry format:
 
 ---
 
+## 2026-07-24 — In-canvas node search (Ctrl/Cmd+F)
+- **User value**: a user editing a large workflow can now press Ctrl/Cmd+F
+  (or click the toolbar Search button), type part of a node's name, and jump
+  straight to it — the viewport centers on the match and selects it, with
+  Enter/↑↓ cycling matches and a clickable result list — instead of panning
+  across a big graph to find one node.
+- **Issue/PR**: #929 / PR from `claude/sleepy-curie-evbv0a`
+- **Outcome**: done — new `NodeSearchPanel` (top-center React Flow `Panel`)
+  + `SearchNodesButton` in `CanvasToolbar` (button hidden in the sub-agent
+  flow dialog, which shares the toolbar but has no search). Matching is
+  case-insensitive over display-name fields (`label`, `name`,
+  `questionText`, `toolName`, `description`), free text (`prompt`,
+  `executionPrompt`), and the node type; the result row shows the same
+  display name the node header renders. Jump selects only the match
+  (selection is excluded from undo/canvas-revision, so search never dirties
+  the workflow, verified in store partialize), syncs `selectedNodeId`
+  without force-opening the property overlay, and `setCenter`s on
+  `positionAbsolute` so group children land correctly. Ctrl/Cmd+F re-focuses
+  the open widget via a nonce; Esc closes; Delete/Backspace in the input is
+  safe (global handler skips editable targets, verified). i18n keys
+  (`canvasSearch.*`) added to all 5 locales per translation rules.
+  `pnpm build` + `pnpm check` green. Manual E2E not possible in this
+  unattended session — queued below. Issue #929 could not be locked (no
+  `gh`, no MCP lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - `ccwf export -` / `ccwf run -` stdin input for symmetry, if piped
+    generate-then-materialise proves to be a real flow — judge value first.
+  - Node search in the sub-agent flow dialog if users ask for it (same
+    panel, dialog-scoped ReactFlow instance).
+  - Manual E2E queue (carried): node search (Ctrl/Cmd+F, cycling, group
+    children centering) in a real webview; align/distribute + context menu
+    + copy/cut/paste; localized Claude API dialog in ja/ko/zh;
+    `validate_workflow` via MCP Inspector in both modes.
+
 ## 2026-07-24 — MCP `patch_workflow` tool for structural edits
 - **User value**: an AI agent editing a workflow via MCP (canvas or file
   mode) can now add or remove individual nodes and connections in one small
