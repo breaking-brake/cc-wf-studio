@@ -597,6 +597,14 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     setSearchFocusNonce((nonce) => nonce + 1);
   }, []);
 
+  // Live mirror of transient-UI state for the global Esc handler — the
+  // keydown effect's deps are stable, so it cannot close over this state
+  const escTargetsRef = useRef({ isSearchOpen: false, isMenuOpen: false });
+  escTargetsRef.current = {
+    isSearchOpen,
+    isMenuOpen: contextMenu !== null || edgeDropMenu !== null,
+  };
+
   // Auto layout — tidy the whole canvas, then re-fit the view so the
   // freshly arranged graph is fully visible
   const autoLayoutCanvas = useCallback(() => {
@@ -873,6 +881,35 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
             ? 0
             : currentIndex + 1;
         jumpToNode(instance, problemNodeIds[nextIndex]);
+        return;
+      }
+
+      // Esc — dismiss the search panel, then the problems panel (topmost
+      // transient UI first, VSCode's layered Esc). Editable targets keep
+      // their own Esc (search input, inline group rename); open dialogs
+      // and context menus own their dismissal and are skipped here.
+      if (event.key === 'Escape' && !mod && !event.altKey && !event.shiftKey) {
+        const target = event.target as HTMLElement | null;
+        if (
+          target &&
+          (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+        ) {
+          return;
+        }
+        if (escTargetsRef.current.isMenuOpen) return;
+        if (document.querySelector('[role="dialog"]')) return;
+        if (escTargetsRef.current.isSearchOpen) {
+          event.preventDefault();
+          setIsSearchOpen(false);
+          return;
+        }
+        const state = useWorkflowStore.getState();
+        // Only when the panel is actually visible — while a sub-agent flow
+        // is being edited the open flag may be set but the panel is hidden
+        if (state.isProblemsPanelOpen && state.activeSubAgentFlowId === null) {
+          event.preventDefault();
+          state.closeProblemsPanel();
+        }
         return;
       }
 

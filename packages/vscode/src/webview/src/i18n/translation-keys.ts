@@ -450,6 +450,7 @@ export interface WebviewTranslationKeys {
   'shortcuts.search': string;
   'shortcuts.nextProblem': string;
   'shortcuts.prevProblem': string;
+  'shortcuts.closePanel': string;
   'shortcuts.openCheatSheet': string;
   'shortcuts.contextMenu': string;
   'shortcuts.edgeDrop': string;

@@ -468,6 +468,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'shortcuts.search': 'ノードを検索',
   'shortcuts.nextProblem': '次の問題へ移動',
   'shortcuts.prevProblem': '前の問題へ移動',
+  'shortcuts.closePanel': '検索／問題パネルを閉じる',
   'shortcuts.openCheatSheet': 'このチートシートを表示',
   'shortcuts.contextMenu': 'コンテキストメニューを開く',
   'shortcuts.edgeDrop': '接続済みノードを作成',

@@ -467,6 +467,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'shortcuts.search': '노드 검색',
   'shortcuts.nextProblem': '다음 문제로 이동',
   'shortcuts.prevProblem': '이전 문제로 이동',
+  'shortcuts.closePanel': '검색/문제 패널 닫기',
   'shortcuts.openCheatSheet': '이 치트 시트 표시',
   'shortcuts.contextMenu': '컨텍스트 메뉴 열기',
   'shortcuts.edgeDrop': '연결된 노드 만들기',

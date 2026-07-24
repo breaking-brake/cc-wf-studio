@@ -17,6 +17,40 @@ Entry format:
 
 ---
 
+## 2026-07-24 — Esc dismisses the search / problems panel
+- **User value**: a user can now close the canvas search panel and the
+  workflow problems panel by pressing Esc from anywhere on the canvas —
+  completing the keyboard flow those panels start from the keyboard
+  (Ctrl/Cmd+F, F8) — and no longer has to reach for the mouse to click
+  the panel's ✕ button (the search panel previously honored Esc only
+  while its input still had focus; the problems panel not at all).
+- **Issue/PR**: #959
+- **Outcome**: done — Escape branch in WorkflowEditor's existing global
+  keydown handler, layered like VSCode's Esc: editable targets are
+  skipped (the search input and inline group rename own their Esc), open
+  Radix dialogs (`[role="dialog"]`) and canvas context menus are skipped
+  (they own their dismissal), then the search panel closes first, else
+  the problems panel (only when actually visible — not while a sub-agent
+  flow is being edited). Local panel/menu state reaches the stable
+  handler via a render-synced ref. New "Close search / problems panel"
+  cheat-sheet row (Esc), 1 new string in all 5 locales. UI-only — no
+  schema or persistence change. Issue #959 could not be locked (no `gh`,
+  no MCP lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - Arrow-key nudge for selected nodes (needs an undo-coalescing design
+    first — every tracked change is one history entry today; file the
+    design as part of the idea).
+  - Mirror the shortcut cheat sheet in the README/docs (carried).
+  - Manual E2E queue (carried): Esc panel dismissal (search unfocused,
+    problems panel, dialog/context-menu non-interference); F8/Shift+F8
+    problem cycling; inline group rename; Ungroup; Group selection; Save
+    as Image from the VSCode extension host; Copy as Markdown;
+    `render_workflow` via MCP Inspector; problems badge; shortcut cheat
+    sheet; problem-node markers; problems panel click-to-jump; auto
+    layout; node search cycling; align/distribute + context menu +
+    copy/cut/paste; localized Claude API dialog in ja/ko/zh;
+    `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — Keyboard problem cycling (F8 / Shift+F8)
 - **User value**: a user can now step through every validation problem on
   the canvas from the keyboard — F8 selects and centers the next node with
