@@ -394,6 +394,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'workflowTour.popover.regenerating': '重新生成中…',
   'canvas.deleteNode.tooltip': '删除节点',
   'canvas.deleteEdge.tooltip': '删除连接',
+  'canvas.insertNodeOnEdge.tooltip': '在此连接中插入节点',
   'canvas.groupRename.tooltip': '双击重命名',
   'canvas.groupRename.inputAria': '编组名称',
   'canvas.resizeSidebar': '调整侧边栏大小',

@@ -64,7 +64,7 @@ import {
   useWorkflowStore,
 } from '../stores/workflow-store';
 import { jumpToNode } from '../utils/canvas-navigation';
-import { createDefaultNode, type SimpleNodeType } from '../utils/node-defaults';
+import { createDefaultNode, type SimpleNodeType, type TranslateFn } from '../utils/node-defaults';
 import { collectWorkflowIssues } from '../utils/workflow-issues';
 import { CanvasContextMenu, type CanvasContextMenuEntry } from './CanvasContextMenu';
 import { CanvasToolbar } from './CanvasToolbar';
@@ -130,6 +130,108 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
  */
 const edgeTypes: EdgeTypes = {
   default: DeletableEdge,
+};
+
+/**
+ * Picker entries shared by the edge-drop create and edge-insert menus:
+ * dialog-free node types are created directly (`pick`); dialog-based types
+ * (Sub-Agent, Skill, MCP, Codex) go through `pickDialog`, which stashes the
+ * pending connection in the store and asks NodePalette to open the matching
+ * creation dialog. Gating mirrors the palette: interactive/session and
+ * Sub-Agent types are hidden while editing a sub-agent flow, Codex requires
+ * the beta toggle. End is only offered where the new node needs no output
+ * (edge-drop create) — a node spliced into an edge must re-wire to the
+ * original target.
+ */
+const buildNodePickerEntries = (opts: {
+  t: TranslateFn;
+  activeSubAgentFlowId: string | null;
+  isCodexEnabled: boolean;
+  includeEnd: boolean;
+  pick: (type: SimpleNodeType) => () => void;
+  pickDialog: (dialog: 'subAgent' | 'skill' | 'mcp' | 'codex') => () => void;
+}): CanvasContextMenuEntry[] => {
+  const { t, activeSubAgentFlowId, isCodexEnabled, includeEnd, pick, pickDialog } = opts;
+  return [
+    {
+      key: 'prompt',
+      label: t('node.prompt.title'),
+      icon: <MessageSquare size={14} />,
+      onSelect: pick('prompt'),
+    },
+    ...(activeSubAgentFlowId === null
+      ? ([
+          {
+            key: 'subAgent',
+            label: t('node.subAgent.title'),
+            icon: <Bot size={14} />,
+            onSelect: pickDialog('subAgent'),
+          },
+        ] satisfies CanvasContextMenuEntry[])
+      : []),
+    {
+      key: 'skill',
+      label: t('node.skill.title'),
+      icon: <Zap size={14} />,
+      onSelect: pickDialog('skill'),
+    },
+    {
+      key: 'mcp',
+      label: t('node.mcp.title'),
+      icon: <Plug size={14} />,
+      onSelect: pickDialog('mcp'),
+    },
+    ...(isCodexEnabled
+      ? ([
+          {
+            key: 'codex',
+            label: t('node.codex.title'),
+            icon: <Terminal size={14} />,
+            onSelect: pickDialog('codex'),
+          },
+        ] satisfies CanvasContextMenuEntry[])
+      : []),
+    'separator',
+    {
+      key: 'ifElse',
+      label: t('node.ifElse.title'),
+      icon: <GitBranch size={14} />,
+      onSelect: pick('ifElse'),
+    },
+    {
+      key: 'switch',
+      label: t('node.switch.title'),
+      icon: <GitFork size={14} />,
+      onSelect: pick('switch'),
+    },
+    ...(activeSubAgentFlowId === null
+      ? ([
+          {
+            key: 'askUserQuestion',
+            label: t('node.askUserQuestion.title'),
+            icon: <ShieldQuestion size={14} />,
+            onSelect: pick('askUserQuestion'),
+          },
+          {
+            key: 'branchSession',
+            label: t('node.branchSession.title'),
+            icon: <GitBranchPlus size={14} />,
+            onSelect: pick('branchSession'),
+          },
+        ] satisfies CanvasContextMenuEntry[])
+      : []),
+    ...(includeEnd
+      ? ([
+          'separator',
+          {
+            key: 'end',
+            label: t('node.end.title'),
+            icon: <Square size={14} />,
+            onSelect: pick('end'),
+          },
+        ] satisfies CanvasContextMenuEntry[])
+      : []),
+  ];
 };
 
 /** In-window mirror of the last copied/cut selection. The context menu's
@@ -612,6 +714,17 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
   const closeEdgeDropMenu = useCallback(() => setEdgeDropMenu(null), []);
 
+  // Edge insert picker (⊕ button on a selected edge) — request consumed and
+  // entries built below, after the edge-drop entries they share a builder with
+  const [edgeInsertMenu, setEdgeInsertMenu] = useState<{
+    x: number;
+    y: number;
+    flowPosition: { x: number; y: number };
+    edgeId: string;
+  } | null>(null);
+
+  const closeEdgeInsertMenu = useCallback(() => setEdgeInsertMenu(null), []);
+
   // Memoize snap grid
   const snapGrid = useMemo<[number, number]>(() => [15, 15], []);
 
@@ -635,7 +748,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   const escTargetsRef = useRef({ isSearchOpen: false, isMenuOpen: false });
   escTargetsRef.current = {
     isSearchOpen,
-    isMenuOpen: contextMenu !== null || edgeDropMenu !== null,
+    isMenuOpen: contextMenu !== null || edgeDropMenu !== null || edgeInsertMenu !== null,
   };
 
   // Auto layout — tidy the whole canvas, then re-fit the view so the
@@ -661,111 +774,85 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   }, []);
   const isProblemsPanelVisible = isProblemsPanelOpen && activeSubAgentFlowId === null;
 
-  // Picker entries for the edge-drop menu: dialog-free node types are
-  // created directly; dialog-based types (Sub-Agent, Skill, MCP, Codex)
-  // stash the pending connection in the store and ask NodePalette to open
-  // the matching creation dialog — the created node then lands at the drop
-  // point pre-wired (addNode consumes the pending connection). Gating
-  // mirrors the palette: interactive/session and Sub-Agent types are hidden
-  // while editing a sub-agent flow, Codex requires the beta toggle.
+  // Picker entries for the edge-drop menu — the created node lands at the
+  // drop point pre-wired to the dragged-from source (addNode consumes the
+  // pending connection for the dialog-based types).
   const isCodexEnabled = useRefinementStore((state) => state.isCodexEnabled);
   const edgeDropEntries = useMemo<CanvasContextMenuEntry[]>(() => {
     if (!edgeDropMenu) return [];
-    const pick = (type: SimpleNodeType) => () => {
-      const node = createDefaultNode(type, edgeDropMenu.flowPosition, t);
-      useWorkflowStore.getState().addNodeWithConnection(node, {
-        source: edgeDropMenu.source.nodeId,
-        sourceHandle: edgeDropMenu.source.handleId,
-        target: node.id,
-        targetHandle: null,
-      });
-    };
-    const pickDialog = (dialog: 'subAgent' | 'skill' | 'mcp' | 'codex') => () => {
-      const store = useWorkflowStore.getState();
-      store.setPendingConnection({
-        source: edgeDropMenu.source.nodeId,
-        sourceHandle: edgeDropMenu.source.handleId,
-        position: edgeDropMenu.flowPosition,
-      });
-      store.setPaletteDialogRequest(dialog);
-    };
-    return [
-      {
-        key: 'prompt',
-        label: t('node.prompt.title'),
-        icon: <MessageSquare size={14} />,
-        onSelect: pick('prompt'),
+    return buildNodePickerEntries({
+      t,
+      activeSubAgentFlowId,
+      isCodexEnabled,
+      includeEnd: true,
+      pick: (type) => () => {
+        const node = createDefaultNode(type, edgeDropMenu.flowPosition, t);
+        useWorkflowStore.getState().addNodeWithConnection(node, {
+          source: edgeDropMenu.source.nodeId,
+          sourceHandle: edgeDropMenu.source.handleId,
+          target: node.id,
+          targetHandle: null,
+        });
       },
-      ...(activeSubAgentFlowId === null
-        ? ([
-            {
-              key: 'subAgent',
-              label: t('node.subAgent.title'),
-              icon: <Bot size={14} />,
-              onSelect: pickDialog('subAgent'),
-            },
-          ] satisfies CanvasContextMenuEntry[])
-        : []),
-      {
-        key: 'skill',
-        label: t('node.skill.title'),
-        icon: <Zap size={14} />,
-        onSelect: pickDialog('skill'),
+      pickDialog: (dialog) => () => {
+        const store = useWorkflowStore.getState();
+        store.setPendingConnection({
+          source: edgeDropMenu.source.nodeId,
+          sourceHandle: edgeDropMenu.source.handleId,
+          position: edgeDropMenu.flowPosition,
+        });
+        store.setPaletteDialogRequest(dialog);
       },
-      {
-        key: 'mcp',
-        label: t('node.mcp.title'),
-        icon: <Plug size={14} />,
-        onSelect: pickDialog('mcp'),
-      },
-      ...(isCodexEnabled
-        ? ([
-            {
-              key: 'codex',
-              label: t('node.codex.title'),
-              icon: <Terminal size={14} />,
-              onSelect: pickDialog('codex'),
-            },
-          ] satisfies CanvasContextMenuEntry[])
-        : []),
-      'separator',
-      {
-        key: 'ifElse',
-        label: t('node.ifElse.title'),
-        icon: <GitBranch size={14} />,
-        onSelect: pick('ifElse'),
-      },
-      {
-        key: 'switch',
-        label: t('node.switch.title'),
-        icon: <GitFork size={14} />,
-        onSelect: pick('switch'),
-      },
-      ...(activeSubAgentFlowId === null
-        ? ([
-            {
-              key: 'askUserQuestion',
-              label: t('node.askUserQuestion.title'),
-              icon: <ShieldQuestion size={14} />,
-              onSelect: pick('askUserQuestion'),
-            },
-            {
-              key: 'branchSession',
-              label: t('node.branchSession.title'),
-              icon: <GitBranchPlus size={14} />,
-              onSelect: pick('branchSession'),
-            },
-          ] satisfies CanvasContextMenuEntry[])
-        : []),
-      'separator',
-      {
-        key: 'end',
-        label: t('node.end.title'),
-        icon: <Square size={14} />,
-        onSelect: pick('end'),
-      },
-    ];
+    });
   }, [edgeDropMenu, t, activeSubAgentFlowId, isCodexEnabled]);
+
+  // ---------------------------------------------------------------------
+  // Edge insert: the ⊕ button on a selected edge (DeletableEdge) requests
+  // the picker via the store — convert the click's screen position to
+  // container coordinates and open the same picker menu there. The chosen
+  // node replaces the edge with source→node→target in one undo entry.
+  // ---------------------------------------------------------------------
+  const edgeInsertRequest = useWorkflowStore((state) => state.edgeInsertRequest);
+
+  useEffect(() => {
+    if (!edgeInsertRequest) return;
+    useWorkflowStore.getState().setEdgeInsertRequest(null);
+    const container = canvasContainerRef.current;
+    if (!container) return;
+    const bounds = container.getBoundingClientRect();
+    setEdgeInsertMenu({
+      x: edgeInsertRequest.clientX - bounds.left,
+      y: edgeInsertRequest.clientY - bounds.top,
+      flowPosition: edgeInsertRequest.flowPosition,
+      edgeId: edgeInsertRequest.edgeId,
+    });
+  }, [edgeInsertRequest]);
+
+  const edgeInsertEntries = useMemo<CanvasContextMenuEntry[]>(() => {
+    if (!edgeInsertMenu) return [];
+    return buildNodePickerEntries({
+      t,
+      activeSubAgentFlowId,
+      isCodexEnabled,
+      includeEnd: false,
+      pick: (type) => () => {
+        const node = createDefaultNode(type, edgeInsertMenu.flowPosition, t);
+        useWorkflowStore.getState().insertNodeOnEdge(node, edgeInsertMenu.edgeId);
+      },
+      pickDialog: (dialog) => () => {
+        const store = useWorkflowStore.getState();
+        const edge = store.edges.find((e) => e.id === edgeInsertMenu.edgeId);
+        if (!edge) return;
+        store.setPendingConnection({
+          source: edge.source,
+          sourceHandle: edge.sourceHandle ?? null,
+          position: edgeInsertMenu.flowPosition,
+          splice: { edgeId: edge.id },
+        });
+        store.setPaletteDialogRequest(dialog);
+      },
+    });
+  }, [edgeInsertMenu, t, activeSubAgentFlowId, isCodexEnabled]);
 
   // Validation issues for the problems panel and the on-canvas node markers.
   // Computed here (not in the panel) so a single validation pass feeds both;
@@ -1625,6 +1712,14 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
             y={edgeDropMenu.y}
             entries={edgeDropEntries}
             onClose={closeEdgeDropMenu}
+          />
+        )}
+        {edgeInsertMenu && (
+          <CanvasContextMenu
+            x={edgeInsertMenu.x}
+            y={edgeInsertMenu.y}
+            entries={edgeInsertEntries}
+            onClose={closeEdgeInsertMenu}
           />
         )}
         <KeyboardShortcutsDialog

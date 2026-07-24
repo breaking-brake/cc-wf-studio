@@ -390,6 +390,7 @@ export interface WebviewTranslationKeys {
   // Canvas action tooltips / a11y labels
   'canvas.deleteNode.tooltip': string;
   'canvas.deleteEdge.tooltip': string;
+  'canvas.insertNodeOnEdge.tooltip': string;
   'canvas.groupRename.tooltip': string;
   'canvas.groupRename.inputAria': string;
   'canvas.resizeSidebar': string;
