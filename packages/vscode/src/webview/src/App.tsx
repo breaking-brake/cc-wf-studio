@@ -665,6 +665,18 @@ const App: React.FC = () => {
     handleStartTour,
   ]);
 
+  // Announce readiness only after the message listener above is attached —
+  // mount effects run in declaration order, so this must stay below that
+  // useEffect. A fast host (`ccwf canvas` on localhost) answers WEBVIEW_READY
+  // immediately; posting before the listener exists loses INITIAL_STATE /
+  // LOAD_WORKFLOW and the spinner never resolves. (Issues #396, #939)
+  const hasAnnouncedReadyRef = useRef(false);
+  useEffect(() => {
+    if (hasAnnouncedReadyRef.current) return;
+    hasAnnouncedReadyRef.current = true;
+    vscode.postMessage({ type: 'WEBVIEW_READY' });
+  }, []);
+
   // Render loading state (waiting for mode to be determined)
   // Shows spinner while waiting for INITIAL_STATE or OVERVIEW_MODE_INIT from Extension Host
   if (mode === null) {

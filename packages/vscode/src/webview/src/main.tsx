@@ -67,7 +67,8 @@ root.render(
   </React.StrictMode>
 );
 
-// Notify Extension Host that Webview is ready to receive messages
-// This ensures INITIAL_STATE is sent only after React is fully initialized
-// Fixes: Issue #396 - blank page when Webview loads slowly
-vscode.postMessage({ type: 'WEBVIEW_READY' });
+// WEBVIEW_READY is posted by <App /> after its message listener is attached
+// (see App.tsx). Posting it here — synchronously after root.render() — raced
+// fast hosts: `ccwf canvas` on localhost could answer with INITIAL_STATE /
+// LOAD_WORKFLOW before React committed App's effects, and the dropped boot
+// messages left the spinner up forever. (Issues #396, #939)

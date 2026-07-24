@@ -17,6 +17,37 @@ Entry format:
 
 ---
 
+## 2026-07-24 — Fix `ccwf canvas` boot race (eternal spinner)
+- **User value**: a user opening `ccwf canvas` no longer risks a page stuck
+  on the loading spinner forever — on fast localhost the server could answer
+  `WEBVIEW_READY` with `INITIAL_STATE`/`LOAD_WORKFLOW` before React attached
+  the webview's message listener, silently dropping the boot messages.
+- **Issue/PR**: #939 / PR from `claude/canvas-boot-race`
+- **Outcome**: done — `WEBVIEW_READY` moved from `main.tsx` (posted
+  synchronously right after `root.render()`, i.e. before any effect ran)
+  into an `App` mount effect declared after the message-listener effect;
+  React runs mount effects in declaration order, so the listener now
+  provably exists before the host is invited to reply. Ref-guarded to post
+  exactly once (StrictMode-safe). Same bundle serves the VSCode editor, so
+  the extension's own #396 handshake is hardened by the same change; the
+  overview custom editor ignores unknown message types (verified). **Bug
+  reproduced deterministically**: headless-Chromium E2E against the
+  unfixed build hangs at the spinner (`.react-flow__node` never appears);
+  with the fix, 5/5 fresh page loads boot fully — all 8 sample nodes
+  render, zero page errors. `pnpm build` + `pnpm check` green. Changeset
+  bumps `@cc-wf-studio/cli` + `cc-wf-studio` (patch). Issue #939 could not
+  be locked (no `gh`, no MCP lock tool — known limitation, noted in the
+  issue).
+- **Next proposals**:
+  - Keyboard-shortcut cheat sheet overlay (Ctrl+F/A/D/Z/C/X/V, Delete,
+    context menu, edge-drop…) — discoverability gap keeps growing.
+  - Problems count badge on the toolbar Problems button while the panel is
+    closed — needs judging: costs a validation pass on every edit.
+  - Manual E2E queue (carried): problem-node markers; problems panel
+    click-to-jump; auto layout on a real messy workflow; node search
+    cycling; align/distribute + context menu + copy/cut/paste; localized
+    Claude API dialog in ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — Edge-drop node creation (drag a connection to empty canvas)
 - **User value**: a user extending a workflow can now drag a connection from
   a node's output handle, release it on empty canvas, and pick a node type
