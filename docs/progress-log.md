@@ -17,6 +17,55 @@ Entry format:
 
 ---
 
+## 2026-07-24 — Insert a node into an existing connection (edge splice)
+- **User value**: a user can now insert a node into the middle of an existing
+  connection in two clicks — select the edge, click its new ⊕ button, pick a
+  node type from the same picker the edge-drop create uses — and the edge is
+  replaced by source→new→target as a single undo entry; previously this took
+  delete edge → palette add → drag into place → wire two edges by hand (top
+  carried proposal from the previous iteration, re-verified: the palette is
+  click-to-add, so the "drop a palette node onto an edge" phrasing was
+  re-shaped into an explicit edge affordance).
+- **Issue/PR**: #967
+- **Outcome**: done — DeletableEdge shows ⊕ (insert) beside ✕ (delete) while
+  the edge is selected; ⊕ requests the picker via a new transient
+  `edgeInsertRequest` store field (the `paletteDialogRequest` pattern —
+  DeletableEdge renders in a separate tree). WorkflowEditor consumes it and
+  opens the shared picker (`buildNodePickerEntries`, extracted from the
+  edge-drop menu; same gating, End excluded — a spliced node must re-wire to
+  the original target). New store action `insertNodeOnEdge(node, edgeId)`
+  replaces the edge with source→node and node→target in one `set()` (outer
+  handles preserved, addEdge id generation), selection + property overlay
+  as addNodeWithConnection; falls back to a plain add if the edge vanished.
+  Dialog-based types ride `pendingConnection` extended with
+  `splice: { edgeId }`, consumed by addNode; dialog cancel already clears
+  it. 1 new string in all 5 locales. No schema or persistence change.
+  Browser E2E via `ccwf canvas` + headless Chromium on the 29-node sample:
+  picker entries + gating correct (no End); Esc cancel leaves canvas
+  unchanged; Prompt insert splices (edge count net +1, original edge gone,
+  both new edges correctly wired) and ONE Ctrl+Z restores everything;
+  Skill dialog cancel leaves canvas unchanged; Sub-Agent built-in preset
+  confirm (nested form → Save) splices correctly and single-undo restores;
+  zero page errors. `pnpm build` + `pnpm check` green. Issue #967 could
+  not be locked (no `gh`, no MCP lock tool — known limitation, noted in
+  the issue).
+- **Next proposals**:
+  - Drag an existing (unwired) node onto an edge to splice it in on drop
+    (needs accidental-trigger guard — likely only when the dragged node has
+    no edges on the relevant handles).
+  - Mirror the shortcut cheat sheet in the README/docs (carried).
+  - Manual E2E queue (carried): edge ⊕ insert in the VSCode extension host
+    (simple + dialog types, cancel paths, undo, ja locale tooltip);
+    edge-drop dialog create (all four dialogs, cancel path, collapsed
+    palette auto-expand, sub-agent-flow and Codex-beta gating); palette
+    filter; arrow-key nudge; Esc panel dismissal; F8 / Shift+F8 problem
+    cycling; inline group rename; Ungroup; Group selection; Save as Image
+    from the VSCode extension host; Copy as Markdown; `render_workflow`
+    via MCP Inspector; problems badge; shortcut cheat sheet; problem-node
+    markers; problems panel click-to-jump; auto layout; node search
+    cycling; align/distribute + context menu + copy/cut/paste; localized
+    Claude API dialog in ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — Edge-drop create for dialog-based node types
 - **User value**: a user who drags a connection into empty canvas can now
   finish it with any node type — the picker gained Sub-Agent, Skill, and

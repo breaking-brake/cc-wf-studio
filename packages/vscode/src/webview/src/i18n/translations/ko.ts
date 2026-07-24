@@ -407,6 +407,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'workflowTour.popover.regenerating': '재생성 중…',
   'canvas.deleteNode.tooltip': '노드 삭제',
   'canvas.deleteEdge.tooltip': '연결 삭제',
+  'canvas.insertNodeOnEdge.tooltip': '이 연결에 노드 삽입',
   'canvas.groupRename.tooltip': '더블 클릭으로 이름 변경',
   'canvas.groupRename.inputAria': '그룹 이름',
   'canvas.resizeSidebar': '사이드바 크기 조절',

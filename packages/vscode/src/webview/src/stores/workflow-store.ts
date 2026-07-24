@@ -180,16 +180,32 @@ interface WorkflowStore {
   /** Edge-drop create for dialog-based node types: the connection (and drop
    *  position) to complete when the next node is added. Consumed by addNode;
    *  cleared by the palette dialogs' close handlers when the dialog is
-   *  cancelled instead. Transient UI state — not tracked in undo history. */
+   *  cancelled instead. When `splice` is set the add is an edge insert:
+   *  addNode routes to insertNodeOnEdge with the stored edge id instead of
+   *  appending a plain connection. Transient UI state — not tracked in undo
+   *  history. */
   pendingConnection: {
     source: string;
     sourceHandle: string | null;
     position: { x: number; y: number };
+    splice?: { edgeId: string };
   } | null;
   /** Asks NodePalette to open one of its node-creation dialogs (the
    *  edge-drop picker lives outside the palette, which owns the dialogs).
    *  Cleared by the palette once the dialog opens. */
   paletteDialogRequest: 'subAgent' | 'skill' | 'mcp' | 'codex' | null;
+  /** Asks WorkflowEditor (which owns the picker menu) to open the insert-node
+   *  picker for an edge — set by the edge's ⊕ button, which lives in a
+   *  separate component tree (DeletableEdge). Screen coordinates come from
+   *  the button's click event; flowPosition is the grid-snapped edge midpoint
+   *  where the inserted node will land. Cleared by the editor once the menu
+   *  opens. Transient UI state — not tracked in undo history. */
+  edgeInsertRequest: {
+    edgeId: string;
+    clientX: number;
+    clientY: number;
+    flowPosition: { x: number; y: number };
+  } | null;
 
   // Guided Tour player state (reads steps from activeWorkflow.tour)
   isTourActive: boolean;
@@ -267,13 +283,30 @@ interface WorkflowStore {
       source: string;
       sourceHandle: string | null;
       position: { x: number; y: number };
+      splice?: { edgeId: string };
     } | null
   ) => void;
   setPaletteDialogRequest: (dialog: 'subAgent' | 'skill' | 'mcp' | 'codex' | null) => void;
+  setEdgeInsertRequest: (
+    request: {
+      edgeId: string;
+      clientX: number;
+      clientY: number;
+      flowPosition: { x: number; y: number };
+    } | null
+  ) => void;
   /** Add a node together with the edge that connects it (edge-drop create):
    *  one set() → one undo entry. The new node becomes the selection and the
    *  property overlay opens, same as addNode. */
   addNodeWithConnection: (node: Node, connection: Connection) => void;
+  /** Insert a node into an existing edge (splice): the edge is replaced by
+   *  source→node and node→target — the outer handles of the original edge are
+   *  preserved, the node's own handles resolve to React Flow's first-handle
+   *  default — all in one set() → one undo entry. Selection and property
+   *  overlay behave like addNodeWithConnection. Falls back to a plain add
+   *  when the edge no longer exists (e.g. the canvas changed while a
+   *  creation dialog was open). */
+  insertNodeOnEdge: (node: Node, edgeId: string) => void;
   /** Duplicate a configured node (fresh id, +40/+40 offset, same parent group,
    *  deep-copied data; edges are not copied). Duplicating a group also copies
    *  its child nodes and the edges fully inside the group. Start/End excluded. */
@@ -591,6 +624,7 @@ export const useWorkflowStore = create<WorkflowStore>()(
       requestedFocusNodeId: null,
       pendingConnection: null,
       paletteDialogRequest: null,
+      edgeInsertRequest: null,
       isTourActive: false,
       tourStepIndex: 0,
       highlightedGroupNodeId: null,
@@ -909,6 +943,10 @@ export const useWorkflowStore = create<WorkflowStore>()(
         const pending = get().pendingConnection;
         if (pending) {
           const placed = { ...node, position: pending.position };
+          if (pending.splice) {
+            get().insertNodeOnEdge(placed, pending.splice.edgeId);
+            return;
+          }
           get().addNodeWithConnection(placed, {
             source: pending.source,
             sourceHandle: pending.sourceHandle,
@@ -938,8 +976,47 @@ export const useWorkflowStore = create<WorkflowStore>()(
         });
       },
 
+      insertNodeOnEdge: (node: Node, edgeId: string) => {
+        const edge = get().edges.find((e) => e.id === edgeId);
+        const currentNodes = get().nodes.map((n) => (n.selected ? { ...n, selected: false } : n));
+        const currentEdges = get()
+          .edges.filter((e) => e.id !== edgeId)
+          .map((e) => (e.selected ? { ...e, selected: false } : e));
+        const splicedEdges = edge
+          ? addEdge(
+              {
+                source: node.id,
+                sourceHandle: null,
+                target: edge.target,
+                targetHandle: edge.targetHandle ?? null,
+              },
+              addEdge(
+                {
+                  source: edge.source,
+                  sourceHandle: edge.sourceHandle ?? null,
+                  target: node.id,
+                  targetHandle: null,
+                },
+                currentEdges
+              )
+            )
+          : currentEdges;
+        set({
+          nodes: [...currentNodes, node],
+          edges: splicedEdges,
+          pendingConnection: null,
+          lastAddedNodeId: node.id,
+          selectedNodeId: node.id,
+          isPropertyOverlayOpen: true,
+        });
+      },
+
       setPendingConnection: (pending) => {
         set({ pendingConnection: pending });
+      },
+
+      setEdgeInsertRequest: (request) => {
+        set({ edgeInsertRequest: request });
       },
 
       setPaletteDialogRequest: (dialog) => {
