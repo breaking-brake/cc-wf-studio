@@ -470,6 +470,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'shortcuts.search': 'Search nodes',
   'shortcuts.nextProblem': 'Jump to next problem',
   'shortcuts.prevProblem': 'Jump to previous problem',
+  'shortcuts.closePanel': 'Close search / problems panel',
   'shortcuts.openCheatSheet': 'Show this cheat sheet',
   'shortcuts.contextMenu': 'Open the context menu',
   'shortcuts.edgeDrop': 'Create a connected node',
