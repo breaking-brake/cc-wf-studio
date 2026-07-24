@@ -14,6 +14,7 @@ import {
   AlignStartHorizontal,
   AlignStartVertical,
   AlignVerticalDistributeCenter,
+  Bot,
   ClipboardPaste,
   Copy,
   CopyPlus,
@@ -23,12 +24,15 @@ import {
   Group,
   MessageSquare,
   PanelLeftOpen,
+  Plug,
   Scissors,
   ShieldQuestion,
   Square,
   SquareDashedMousePointer,
+  Terminal,
   Trash2,
   Ungroup,
+  Zap,
 } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -51,6 +55,7 @@ import { CURRENT_ANNOUNCEMENT, cleanupDismissedAnnouncements } from '../constant
 import { useAutoFocusNode } from '../hooks/useAutoFocusNode';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useTranslation } from '../i18n/i18n-context';
+import { useRefinementStore } from '../stores/refinement-store';
 import {
   type AlignMode,
   type DistributeAxis,
@@ -656,9 +661,14 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   }, []);
   const isProblemsPanelVisible = isProblemsPanelOpen && activeSubAgentFlowId === null;
 
-  // Picker entries for the edge-drop menu: the dialog-free node types with
-  // their palette icons and labels. Interactive/session types are hidden
-  // while editing a sub-agent flow, matching the palette's gating.
+  // Picker entries for the edge-drop menu: dialog-free node types are
+  // created directly; dialog-based types (Sub-Agent, Skill, MCP, Codex)
+  // stash the pending connection in the store and ask NodePalette to open
+  // the matching creation dialog — the created node then lands at the drop
+  // point pre-wired (addNode consumes the pending connection). Gating
+  // mirrors the palette: interactive/session and Sub-Agent types are hidden
+  // while editing a sub-agent flow, Codex requires the beta toggle.
+  const isCodexEnabled = useRefinementStore((state) => state.isCodexEnabled);
   const edgeDropEntries = useMemo<CanvasContextMenuEntry[]>(() => {
     if (!edgeDropMenu) return [];
     const pick = (type: SimpleNodeType) => () => {
@@ -670,6 +680,15 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         targetHandle: null,
       });
     };
+    const pickDialog = (dialog: 'subAgent' | 'skill' | 'mcp' | 'codex') => () => {
+      const store = useWorkflowStore.getState();
+      store.setPendingConnection({
+        source: edgeDropMenu.source.nodeId,
+        sourceHandle: edgeDropMenu.source.handleId,
+        position: edgeDropMenu.flowPosition,
+      });
+      store.setPaletteDialogRequest(dialog);
+    };
     return [
       {
         key: 'prompt',
@@ -677,6 +696,39 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         icon: <MessageSquare size={14} />,
         onSelect: pick('prompt'),
       },
+      ...(activeSubAgentFlowId === null
+        ? ([
+            {
+              key: 'subAgent',
+              label: t('node.subAgent.title'),
+              icon: <Bot size={14} />,
+              onSelect: pickDialog('subAgent'),
+            },
+          ] satisfies CanvasContextMenuEntry[])
+        : []),
+      {
+        key: 'skill',
+        label: t('node.skill.title'),
+        icon: <Zap size={14} />,
+        onSelect: pickDialog('skill'),
+      },
+      {
+        key: 'mcp',
+        label: t('node.mcp.title'),
+        icon: <Plug size={14} />,
+        onSelect: pickDialog('mcp'),
+      },
+      ...(isCodexEnabled
+        ? ([
+            {
+              key: 'codex',
+              label: t('node.codex.title'),
+              icon: <Terminal size={14} />,
+              onSelect: pickDialog('codex'),
+            },
+          ] satisfies CanvasContextMenuEntry[])
+        : []),
+      'separator',
       {
         key: 'ifElse',
         label: t('node.ifElse.title'),
@@ -713,7 +765,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         onSelect: pick('end'),
       },
     ];
-  }, [edgeDropMenu, t, activeSubAgentFlowId]);
+  }, [edgeDropMenu, t, activeSubAgentFlowId, isCodexEnabled]);
 
   // Validation issues for the problems panel and the on-canvas node markers.
   // Computed here (not in the panel) so a single validation pass feeds both;

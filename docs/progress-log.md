@@ -17,6 +17,48 @@ Entry format:
 
 ---
 
+## 2026-07-24 — Edge-drop create for dialog-based node types
+- **User value**: a user who drags a connection into empty canvas can now
+  finish it with any node type — the picker gained Sub-Agent, Skill, and
+  MCP entries (plus Codex when the beta is enabled) that open the matching
+  creation dialog and land the configured node at the drop point already
+  connected to the source; previously only the six dialog-free types were
+  offered, so the workflow's most important node types forced cancel →
+  palette → drag into place → wire the edge by hand.
+- **Issue/PR**: #965 / PR from `claude/sleepy-curie-hfaly4`
+- **Outcome**: done — new `pendingConnection` + `paletteDialogRequest`
+  store fields (transient, outside undo tracking): the picker stashes the
+  drop connection and requests a dialog; NodePalette (dialog owner) opens
+  it via an effect, App expands a collapsed palette first (it unmounts
+  while collapsed); `addNode` consumes a pending connection by delegating
+  to `addNodeWithConnection` (one undo entry, drop-point position), so
+  every dialog confirm path works unchanged; dialog `onClose` clears the
+  pending connection on cancel. Gating mirrors the palette (Sub-Agent
+  hidden in sub-agent-flow editing, Codex behind the beta toggle). Reuses
+  existing `node.<type>.title` strings — no new locale strings. Browser
+  E2E via `ccwf canvas` + headless Chromium: picker shows the new
+  entries; Skill dialog opens; Esc cancel leaves no stray edge and a
+  later palette add is unaffected; simple-type edge-drop regression
+  passes; built-in Sub-Agent preset confirm creates the node pre-wired at
+  the drop point (nodes 8→9, edges 8→9, property overlay open); zero page
+  errors. `pnpm build` + `pnpm check` green. Issue #965 could not be
+  locked (no `gh`, no MCP lock tool — known limitation, noted in the
+  issue).
+- **Next proposals**:
+  - Drop a palette node onto an existing edge to splice it in
+    (insert-between: rewire source→new→target in one undo entry).
+  - Mirror the shortcut cheat sheet in the README/docs (carried).
+  - Manual E2E queue (carried): edge-drop dialog create in the VSCode
+    extension host (all four dialogs, cancel path, collapsed palette
+    auto-expand, sub-agent-flow and Codex-beta gating); palette filter;
+    arrow-key nudge; Esc panel dismissal; F8 / Shift+F8 problem cycling;
+    inline group rename; Ungroup; Group selection; Save as Image from the
+    VSCode extension host; Copy as Markdown; `render_workflow` via MCP
+    Inspector; problems badge; shortcut cheat sheet; problem-node
+    markers; problems panel click-to-jump; auto layout; node search
+    cycling; align/distribute + context menu + copy/cut/paste; localized
+    Claude API dialog in ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — Type-to-filter the node palette
 - **User value**: a user can now type in a filter box at the top of the
   Node Palette to instantly narrow the list to matching node types —
