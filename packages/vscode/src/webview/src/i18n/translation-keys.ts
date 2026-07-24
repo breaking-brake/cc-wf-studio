@@ -445,6 +445,8 @@ export interface WebviewTranslationKeys {
   'shortcuts.duplicate': string;
   'shortcuts.group': string;
   'shortcuts.ungroup': string;
+  'shortcuts.nudge': string;
+  'shortcuts.nudgeLarge': string;
   'shortcuts.delete': string;
   'shortcuts.selectAll': string;
   'shortcuts.search': string;
@@ -455,6 +457,7 @@ export interface WebviewTranslationKeys {
   'shortcuts.contextMenu': string;
   'shortcuts.edgeDrop': string;
   'shortcuts.toggleInteraction': string;
+  'shortcuts.gesture.arrowKeys': string;
   'shortcuts.gesture.rightClick': string;
   'shortcuts.gesture.dragToCanvas': string;
   'shortcuts.gesture.drag': string;

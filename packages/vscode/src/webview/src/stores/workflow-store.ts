@@ -297,6 +297,14 @@ interface WorkflowStore {
    *  selection are ignored. No-op when the selection contains no group.
    *  Single undo entry. */
   ungroupSelection: (nodeIds: string[]) => void;
+  /** Move every selected movable node by (dx, dy) canvas pixels, landing on
+   *  the 15px canvas grid (snapToGrid drag behavior). Children whose group
+   *  is also selected ride along with the group (alignSelection's policy)
+   *  and locked (`draggable: false`) nodes stay put. One set() per call —
+   *  coalescing a key-repeat burst into a single undo entry is the caller's
+   *  job (WorkflowEditor pauses temporal tracking). No-op with nothing
+   *  selected. */
+  nudgeSelection: (dx: number, dy: number) => void;
 
   /** Re-arrange the whole canvas into a tidy left-to-right layered layout
    *  (groups laid out internally and resized to fit). One undo entry. */
@@ -1401,6 +1409,28 @@ export const useWorkflowStore = create<WorkflowStore>()(
             (edge) => !groupIds.has(edge.source) && !groupIds.has(edge.target)
           ),
           selectedNodeId: null,
+        });
+      },
+
+      nudgeSelection: (dx, dy) => {
+        const allNodes = get().nodes;
+        const selectedIds = new Set(allNodes.filter((n) => n.selected).map((n) => n.id));
+        if (selectedIds.size === 0) return;
+        // Land on the canvas grid, matching snapToGrid drag behavior (and
+        // React Flow's own focused-node arrow moves, which use the grid as
+        // the step). 15 mirrors the canvas snapGrid.
+        const snap = (value: number) => Math.round(value / 15) * 15;
+        set({
+          nodes: allNodes.map((node) => {
+            if (!node.selected || node.draggable === false) return node;
+            // Children whose group is also selected ride along with the
+            // group — moving both would double the step
+            if (node.parentId && selectedIds.has(node.parentId)) return node;
+            return {
+              ...node,
+              position: { x: snap(node.position.x + dx), y: snap(node.position.y + dy) },
+            };
+          }),
         });
       },
 

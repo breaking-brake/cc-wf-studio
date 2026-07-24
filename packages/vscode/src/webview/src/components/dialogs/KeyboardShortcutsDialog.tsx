@@ -79,6 +79,8 @@ export const KeyboardShortcutsDialog: React.FC<KeyboardShortcutsDialogProps> = (
         { label: t('shortcuts.duplicate'), combos: [[mod, 'D']] },
         { label: t('shortcuts.group'), combos: [[mod, 'G']] },
         { label: t('shortcuts.ungroup'), combos: [[mod, 'Shift', 'G']] },
+        { label: t('shortcuts.nudge'), combos: [[t('shortcuts.gesture.arrowKeys')]] },
+        { label: t('shortcuts.nudgeLarge'), combos: [['Shift', t('shortcuts.gesture.arrowKeys')]] },
         { label: t('shortcuts.delete'), combos: [['Delete'], ['Backspace']] },
       ],
     },
