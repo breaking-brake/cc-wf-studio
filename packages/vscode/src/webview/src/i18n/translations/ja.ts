@@ -435,6 +435,14 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Auto Layout (canvas toolbar)
   'autoLayout.tooltip': '自動レイアウト（全ノードを整列）',
 
+  // Workflow problems panel (canvas toolbar + auto-open on validation failure)
+  'problemsPanel.tooltip': 'ワークフローの問題をチェック',
+  'problemsPanel.title': 'ワークフローの問題',
+  'problemsPanel.noProblems': '問題は見つかりませんでした — このワークフローは検証に合格しています',
+  'problemsPanel.close': '問題パネルを閉じる',
+  'problemsPanel.workflowScope': 'ワークフロー',
+  'problemsPanel.jumpTooltip': 'ノードへ移動',
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'ノードを削除',
   'dialog.deleteNode.message': 'このノードを削除してもよろしいですか？',

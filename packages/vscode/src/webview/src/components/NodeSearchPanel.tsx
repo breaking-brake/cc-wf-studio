@@ -18,27 +18,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { type Node, useReactFlow } from 'reactflow';
 import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
+import { jumpToNode, nodeDisplayName } from '../utils/canvas-navigation';
 
 interface NodeSearchPanelProps {
   /** Re-focus the input when this changes (Ctrl/Cmd+F while already open) */
   focusNonce: number;
   onClose: () => void;
-}
-
-/** Mirror of the node headers' display-name resolution, in priority order */
-function nodeDisplayName(node: Node): string {
-  const data = (node.data ?? {}) as Record<string, unknown>;
-  const str = (value: unknown): string | null =>
-    typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
-  return (
-    str(data.label) ??
-    str(data.name) ??
-    str(data.questionText) ??
-    str(data.toolName) ??
-    str(data.description) ??
-    node.type ??
-    node.id
-  );
 }
 
 /** Free-text fields worth searching beyond the display name */
@@ -102,16 +87,7 @@ export const NodeSearchPanel: React.FC<NodeSearchPanelProps> = ({ focusNonce, on
 
   /** Select the match on the canvas and center the viewport on it */
   const jumpTo = (nodeId: string) => {
-    const { nodes: currentNodes, setNodes, syncSelectedNodeId } = useWorkflowStore.getState();
-    setNodes(currentNodes.map((n) => ({ ...n, selected: n.id === nodeId })));
-    syncSelectedNodeId(nodeId);
-    // getNode returns the internal node: positionAbsolute resolves group
-    // children, width/height are the measured dimensions
-    const internal = reactFlow.getNode(nodeId);
-    if (!internal) return;
-    const x = (internal.positionAbsolute?.x ?? internal.position.x) + (internal.width ?? 200) / 2;
-    const y = (internal.positionAbsolute?.y ?? internal.position.y) + (internal.height ?? 80) / 2;
-    reactFlow.setCenter(x, y, { zoom: Math.max(reactFlow.getZoom(), 0.8), duration: 300 });
+    jumpToNode(reactFlow, nodeId);
   };
 
   const handleQueryChange = (value: string) => {

@@ -417,6 +417,14 @@ export interface WebviewTranslationKeys {
   // Auto Layout (canvas toolbar)
   'autoLayout.tooltip': string;
 
+  // Workflow problems panel (canvas toolbar + auto-open on validation failure)
+  'problemsPanel.tooltip': string;
+  'problemsPanel.title': string;
+  'problemsPanel.noProblems': string;
+  'problemsPanel.close': string;
+  'problemsPanel.workflowScope': string;
+  'problemsPanel.jumpTooltip': string;
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': string;
   'dialog.deleteNode.message': string;
