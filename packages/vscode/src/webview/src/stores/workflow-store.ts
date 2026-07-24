@@ -19,7 +19,7 @@ import { NodeType } from '@cc-wf-studio/core';
 import type { McpNodeData } from '@cc-wf-studio/core/mcp';
 import { normalizeMcpNodeData } from '@cc-wf-studio/core/mcp';
 import type { Workflow } from '@shared/types/messages';
-import type { Edge, Node, OnConnect, OnEdgesChange, OnNodesChange } from 'reactflow';
+import type { Connection, Edge, Node, OnConnect, OnEdgesChange, OnNodesChange } from 'reactflow';
 import { addEdge, applyEdgeChanges, applyNodeChanges } from 'reactflow';
 import { temporal } from 'zundo';
 import { create } from 'zustand';
@@ -240,6 +240,10 @@ interface WorkflowStore {
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
   addNode: (node: Node) => void;
+  /** Add a node together with the edge that connects it (edge-drop create):
+   *  one set() → one undo entry. The new node becomes the selection and the
+   *  property overlay opens, same as addNode. */
+  addNodeWithConnection: (node: Node, connection: Connection) => void;
   /** Duplicate a configured node (fresh id, +40/+40 offset, same parent group,
    *  deep-copied data; edges are not copied). Duplicating a group also copies
    *  its child nodes and the edges fully inside the group. Start/End excluded. */
@@ -851,6 +855,18 @@ export const useWorkflowStore = create<WorkflowStore>()(
       addNode: (node: Node) => {
         set({
           nodes: [...get().nodes, node],
+          lastAddedNodeId: node.id,
+          selectedNodeId: node.id,
+          isPropertyOverlayOpen: true,
+        });
+      },
+
+      addNodeWithConnection: (node: Node, connection: Connection) => {
+        const currentNodes = get().nodes.map((n) => (n.selected ? { ...n, selected: false } : n));
+        const currentEdges = get().edges.map((e) => (e.selected ? { ...e, selected: false } : e));
+        set({
+          nodes: [...currentNodes, node],
+          edges: addEdge(connection, currentEdges),
           lastAddedNodeId: node.id,
           selectedNodeId: node.id,
           isPropertyOverlayOpen: true,
