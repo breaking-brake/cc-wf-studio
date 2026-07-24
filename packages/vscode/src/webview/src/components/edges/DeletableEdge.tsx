@@ -51,6 +51,10 @@ export const DeletableEdge: React.FC<EdgeProps> = ({
   const { t } = useTranslation();
   const { setEdges } = useReactFlow();
 
+  // Highlight this edge while an eligible dragged node hovers over it
+  // (drag an unwired node onto a connection to splice it in)
+  const isSpliceTarget = useWorkflowStore((state) => state.dragSpliceTargetEdgeId === id);
+
   // Calculate bezier curve path and center coordinates
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -86,7 +90,37 @@ export const DeletableEdge: React.FC<EdgeProps> = ({
   return (
     <>
       {/* Base edge */}
-      <BaseEdge path={edgePath} style={style} markerEnd={markerEnd} />
+      <BaseEdge
+        path={edgePath}
+        style={
+          isSpliceTarget ? { ...style, stroke: 'var(--vscode-focusBorder)', strokeWidth: 4 } : style
+        }
+        markerEnd={markerEnd}
+      />
+
+      {/* Drop-target hint: non-interactive ⊕ at the midpoint while an
+          eligible dragged node hovers over this edge */}
+      {isSpliceTarget && (
+        <EdgeLabelRenderer>
+          <div
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+              pointerEvents: 'none',
+              width: '18px',
+              height: '18px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--vscode-focusBorder)',
+              color: 'var(--vscode-button-foreground)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Plus size={12} strokeWidth={3} />
+          </div>
+        </EdgeLabelRenderer>
+      )}
 
       {/* Buttons rendered in HTML layer (outside SVG) to avoid animation flicker */}
       {selected && (
