@@ -407,6 +407,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'workflowTour.popover.regenerating': 'Regenerating…',
   'canvas.deleteNode.tooltip': 'Delete node',
   'canvas.deleteEdge.tooltip': 'Delete connection',
+  'canvas.groupRename.tooltip': 'Double-click to rename',
+  'canvas.groupRename.inputAria': 'Group name',
   'canvas.resizeSidebar': 'Resize sidebar',
 
   // Canvas context menu
