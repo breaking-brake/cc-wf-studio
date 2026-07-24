@@ -62,6 +62,7 @@ import { CanvasContextMenu, type CanvasContextMenuEntry } from './CanvasContextM
 import { CanvasToolbar } from './CanvasToolbar';
 import { FeatureAnnouncementBanner } from './common/FeatureAnnouncementBanner';
 import { DescriptionPanel } from './DescriptionPanel';
+import { KeyboardShortcutsDialog } from './dialogs/KeyboardShortcutsDialog';
 // Custom edge with delete button
 import { DeletableEdge } from './edges/DeletableEdge';
 import { MinimapContainer } from './MinimapContainer';
@@ -569,6 +570,9 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   // Track Ctrl/Cmd key state for temporary mode switching
   const [isModifierKeyPressed, setIsModifierKeyPressed] = useState(false);
 
+  // Keyboard shortcut cheat sheet (`?` key or toolbar button)
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+
   // Node search panel (Ctrl/Cmd+F). The nonce re-focuses the input when
   // the shortcut fires while the panel is already open.
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -754,6 +758,21 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           event.preventDefault();
           setEdges(currentEdges.filter((e) => !e.selected));
         }
+        return;
+      }
+
+      // `?` opens the shortcut cheat sheet (typed as Shift+/ on most
+      // layouts, so only the plain-modifier state is checked)
+      if (event.key === '?' && !mod && !event.altKey) {
+        const target = event.target as HTMLElement | null;
+        if (
+          target &&
+          (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+        ) {
+          return;
+        }
+        event.preventDefault();
+        setIsShortcutsOpen(true);
         return;
       }
 
@@ -1208,6 +1227,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
               onOpenSearch={openSearch}
               onAutoLayout={autoLayoutCanvas}
               onOpenProblems={activeSubAgentFlowId === null ? openProblemsPanel : undefined}
+              onOpenShortcuts={() => setIsShortcutsOpen(true)}
             />
           </Panel>
 
@@ -1274,6 +1294,10 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
             onClose={closeEdgeDropMenu}
           />
         )}
+        <KeyboardShortcutsDialog
+          isOpen={isShortcutsOpen}
+          onClose={() => setIsShortcutsOpen(false)}
+        />
         {onOpenSample && onDismissEmptyState && onLoadWorkflow && (
           <StartMenu
             isOpen={showEmptyState}

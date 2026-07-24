@@ -10,6 +10,7 @@ import { AutoLayoutButton } from './AutoLayoutButton';
 import { EdgeAnimationToggle } from './EdgeAnimationToggle';
 import { HighlightToggle } from './HighlightToggle';
 import { InteractionModeToggle } from './InteractionModeToggle';
+import { KeyboardShortcutsButton } from './KeyboardShortcutsButton';
 import { MinimapToggle } from './MinimapToggle';
 import { ScrollModeToggle } from './ScrollModeToggle';
 import { SearchNodesButton } from './SearchNodesButton';
@@ -29,6 +30,10 @@ interface CanvasToolbarProps {
   /** Opens the workflow problems panel; omitted where validation is
    *  unavailable (e.g. the sub-agent flow dialog), which hides the button. */
   onOpenProblems?: () => void;
+  /** Opens the keyboard shortcut cheat sheet; omitted where the canvas
+   *  shortcuts don't apply (e.g. the sub-agent flow dialog), which hides
+   *  the button. */
+  onOpenShortcuts?: () => void;
 }
 
 export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
@@ -37,6 +42,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   onOpenSearch,
   onAutoLayout,
   onOpenProblems,
+  onOpenShortcuts,
 }) => {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -49,6 +55,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
       {onOpenSearch && <SearchNodesButton onClick={onOpenSearch} />}
       {onAutoLayout && <AutoLayoutButton onClick={onAutoLayout} />}
       {onOpenProblems && <WorkflowProblemsButton onClick={onOpenProblems} />}
+      {onOpenShortcuts && <KeyboardShortcutsButton onClick={onOpenShortcuts} />}
       <StartTourButton />
     </div>
   );

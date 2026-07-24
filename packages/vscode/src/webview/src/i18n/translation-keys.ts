@@ -425,6 +425,30 @@ export interface WebviewTranslationKeys {
   'problemsPanel.workflowScope': string;
   'problemsPanel.jumpTooltip': string;
 
+  // Keyboard shortcut cheat sheet (`?` key + canvas toolbar button)
+  'shortcuts.tooltip': string;
+  'shortcuts.title': string;
+  'shortcuts.close': string;
+  'shortcuts.section.editing': string;
+  'shortcuts.section.canvas': string;
+  'shortcuts.section.mouse': string;
+  'shortcuts.undo': string;
+  'shortcuts.redo': string;
+  'shortcuts.copy': string;
+  'shortcuts.cut': string;
+  'shortcuts.paste': string;
+  'shortcuts.duplicate': string;
+  'shortcuts.delete': string;
+  'shortcuts.selectAll': string;
+  'shortcuts.search': string;
+  'shortcuts.openCheatSheet': string;
+  'shortcuts.contextMenu': string;
+  'shortcuts.edgeDrop': string;
+  'shortcuts.toggleInteraction': string;
+  'shortcuts.gesture.rightClick': string;
+  'shortcuts.gesture.dragToCanvas': string;
+  'shortcuts.gesture.drag': string;
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': string;
   'dialog.deleteNode.message': string;

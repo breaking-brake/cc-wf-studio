@@ -17,6 +17,36 @@ Entry format:
 
 ---
 
+## 2026-07-24 — Keyboard shortcut cheat sheet on the canvas
+- **User value**: a user can now press `?` on the canvas (or click the new
+  keyboard toolbar button) to see every shortcut and mouse gesture the
+  canvas supports — undo/redo, copy/cut/paste, duplicate, delete, select
+  all, search, right-click menu, edge-drop node creation, and the
+  Ctrl/Cmd pan↔box-select inversion — instead of discovering the ~10
+  accumulated shortcuts by accident (carried proposal from two iterations).
+- **Issue/PR**: #941 / PR from `claude/sleepy-curie-xsyhug`
+- **Outcome**: done — new `KeyboardShortcutsDialog` (Radix, standalone
+  z-index 9999 per dialog-design rule) with platform-aware modifier labels
+  (⌘ on macOS, Ctrl elsewhere) and VSCode `keybindingLabel` theme colors
+  for the key chips; new round `KeyboardShortcutsButton` in `CanvasToolbar`
+  via the established optional-prop pattern (wired from `WorkflowEditor`,
+  hidden in the sub-agent flow dialog); `?` opens it from the existing
+  keydown handler (editable-target guarded, Shift-tolerant since `?` is
+  Shift+/ on most layouts). All 22 new strings localized in the 5 locales;
+  key names (Ctrl, Shift, Delete) untranslated per translation rule.
+  `pnpm build` + `pnpm check` green. Issue #941 could not be locked (no
+  `gh`, no MCP lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - Problems count badge on the toolbar Problems button while the panel is
+    closed — needs judging: costs a validation pass on every edit.
+  - List the shortcuts in the README / docs too, mirroring the dialog.
+  - Manual E2E queue (carried): shortcut cheat sheet (open via `?` and via
+    toolbar button, Escape/overlay close, ja locale strings); problem-node
+    markers; problems panel click-to-jump; auto layout on a real messy
+    workflow; node search cycling; align/distribute + context menu +
+    copy/cut/paste; localized Claude API dialog in ja/ko/zh;
+    `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — Fix `ccwf canvas` boot race (eternal spinner)
 - **User value**: a user opening `ccwf canvas` no longer risks a page stuck
   on the loading spinner forever — on fast localhost the server could answer
