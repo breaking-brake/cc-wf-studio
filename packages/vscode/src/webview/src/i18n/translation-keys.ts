@@ -395,6 +395,7 @@ export interface WebviewTranslationKeys {
   'contextMenu.paste': string;
   'contextMenu.duplicate': string;
   'contextMenu.groupSelection': string;
+  'contextMenu.ungroupSelection': string;
   'contextMenu.delete': string;
   'contextMenu.selectAll': string;
   'contextMenu.alignLeft': string;
@@ -441,6 +442,7 @@ export interface WebviewTranslationKeys {
   'shortcuts.paste': string;
   'shortcuts.duplicate': string;
   'shortcuts.group': string;
+  'shortcuts.ungroup': string;
   'shortcuts.delete': string;
   'shortcuts.selectAll': string;
   'shortcuts.search': string;
