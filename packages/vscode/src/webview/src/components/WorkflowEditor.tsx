@@ -161,7 +161,7 @@ const selectAllOnCanvas = () => {
 /** Arrow-key nudge: direction per key. Step = the 15px canvas grid (the
  *  same velocity React Flow's built-in focused-node arrow moves use with
  *  snapToGrid), ×4 with Shift (React Flow's own factor). */
-const NUDGE_ARROW_DIFFS: Record<string, { x: number; y: number }> = {
+const NUDGE_ARROW_DIFFS: Partial<Record<string, { x: number; y: number }>> = {
   ArrowUp: { x: 0, y: -1 },
   ArrowDown: { x: 0, y: 1 },
   ArrowLeft: { x: -1, y: 0 },
@@ -821,7 +821,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       // Modifier keydowns (Shift for the ×4 step, bare Ctrl/Cmd) don't seal.
       if (
         nudgeBurstRef.current.active &&
-        !Object.hasOwn(NUDGE_ARROW_DIFFS, event.key) &&
+        NUDGE_ARROW_DIFFS[event.key] === undefined &&
         event.key !== 'Shift' &&
         event.key !== 'Control' &&
         event.key !== 'Meta' &&
@@ -968,7 +968,8 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       // is coalesced into ONE undo entry: the first press records the
       // pre-burst state, then tracking pauses until the keys go idle (the
       // drag handlers' pause/resume pattern).
-      if (Object.hasOwn(NUDGE_ARROW_DIFFS, event.key) && !mod && !event.altKey) {
+      const nudgeDiff = NUDGE_ARROW_DIFFS[event.key];
+      if (nudgeDiff !== undefined && !mod && !event.altKey) {
         const target = event.target as HTMLElement | null;
         if (
           target &&
@@ -988,9 +989,8 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           target?.closest?.('.react-flow__node, .react-flow__nodesselection-rect')
         );
         if (!builtInHandled) {
-          const diff = NUDGE_ARROW_DIFFS[event.key];
           const step = NUDGE_STEP * (event.shiftKey ? NUDGE_SHIFT_FACTOR : 1);
-          state.nudgeSelection(diff.x * step, diff.y * step);
+          state.nudgeSelection(nudgeDiff.x * step, nudgeDiff.y * step);
         }
         const burst = nudgeBurstRef.current;
         useWorkflowStore.temporal.getState().pause();
