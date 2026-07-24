@@ -13,7 +13,7 @@
 
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { type Workflow, migrateWorkflow } from '@cc-wf-studio/core';
+import { NodeType, type Workflow, migrateWorkflow } from '@cc-wf-studio/core';
 import { parseWorkflowDocument } from '../utils/load-workflow.js';
 import type { CanvasServerHandlers } from './server.js';
 
@@ -61,6 +61,44 @@ interface IncomingMessage {
 export interface CanvasHandlersOptions {
   /** Absolute path to the workflow JSON the user passed to `ccwf canvas`. */
   workflowPath: string;
+  /**
+   * New-file mode: the path did not exist when the command started. Loads
+   * serve a Start→End starter workflow instead of failing, and the first
+   * save creates the file.
+   */
+  allowMissing?: boolean;
+}
+
+/**
+ * Minimal workflow for new-file mode — Start and End nodes only, matching
+ * the webview's own `createEmptyWorkflow` starter shape.
+ */
+function createStarterWorkflow(name: string): Workflow {
+  const now = new Date();
+  return {
+    id: `workflow-${Date.now()}`,
+    name,
+    version: '1.0.0',
+    createdAt: now,
+    updatedAt: now,
+    nodes: [
+      {
+        id: 'start-node-default',
+        name: 'Start',
+        type: NodeType.Start,
+        position: { x: 100, y: 200 },
+        data: { label: 'Start' },
+      },
+      {
+        id: 'end-node-default',
+        name: 'End',
+        type: NodeType.End,
+        position: { x: 600, y: 200 },
+        data: { label: 'End' },
+      },
+    ],
+    connections: [],
+  };
 }
 
 // Heuristic: any message type that starts with one of these prefixes is
@@ -106,8 +144,21 @@ export function createCanvasHandlers(options: CanvasHandlersOptions): CanvasServ
   // so saves write the wrapper back instead of silently discarding it.
   let wrapperMeta: unknown;
 
+  // Cached so browser reloads before the first save keep the same workflow
+  // id instead of minting a fresh starter each time.
+  let starterWorkflow: Workflow | undefined;
+
   async function readWorkflowFromDisk() {
-    const raw = await fs.readFile(workflowAbsPath, 'utf-8');
+    let raw: string;
+    try {
+      raw = await fs.readFile(workflowAbsPath, 'utf-8');
+    } catch (error) {
+      if (options.allowMissing && (error as NodeJS.ErrnoException).code === 'ENOENT') {
+        starterWorkflow ??= createStarterWorkflow(workflowDisplayName);
+        return starterWorkflow;
+      }
+      throw error;
+    }
     const document = parseWorkflowDocument(raw, workflowAbsPath);
     wrapperMeta = document.wrapperMeta;
     return migrateWorkflow(document.workflow);
