@@ -6,12 +6,7 @@
  */
 
 import type { BuiltInSubAgentType, SubAgentFlow } from '@cc-wf-studio/core';
-import {
-  BUILT_IN_SUB_AGENTS,
-  generateBranchId,
-  generateOptionId,
-  NodeType,
-} from '@cc-wf-studio/core';
+import { BUILT_IN_SUB_AGENTS, generateBranchId, NodeType } from '@cc-wf-studio/core';
 import type { CommandReference } from '@shared/types/messages';
 import {
   Bot,
@@ -34,6 +29,7 @@ import { useTranslation } from '../i18n/i18n-context';
 import { createSubAgent } from '../services/command-browser-service';
 import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
+import { createDefaultNode } from '../utils/node-defaults';
 import { BetaBadge } from './common/BetaBadge';
 import { CodexNodeDialog } from './dialogs/CodexNodeDialog';
 import { McpNodeDialog } from './dialogs/McpNodeDialog';
@@ -225,71 +221,22 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
 
   const handleAddAskUserQuestion = () => {
     const position = calculateNonOverlappingPosition(250, 300);
-    const newNode = {
-      id: `question-${Date.now()}`,
-      type: 'askUserQuestion' as const,
-      position,
-      data: {
-        questionText: t('default.newQuestion'),
-        options: [
-          {
-            id: generateOptionId(),
-            label: `${t('default.option')} 1`,
-            description: t('default.firstOption'),
-          },
-          {
-            id: generateOptionId(),
-            label: `${t('default.option')} 2`,
-            description: t('default.secondOption'),
-          },
-        ],
-        outputPorts: 2,
-      },
-    };
-    addNode(newNode);
+    addNode(createDefaultNode('askUserQuestion', position, t));
   };
 
   const handleAddPromptNode = () => {
     const position = calculateNonOverlappingPosition(350, 200);
-    const newNode = {
-      id: `prompt-${Date.now()}`,
-      type: 'prompt' as const,
-      position,
-      data: {
-        label: t('default.newPrompt'),
-        prompt: t('default.prompt'),
-        variables: {},
-      },
-    };
-    addNode(newNode);
+    addNode(createDefaultNode('prompt', position, t));
   };
 
   const handleAddBranchSessionNode = () => {
     const position = calculateNonOverlappingPosition(350, 200);
-    const newNode = {
-      id: `branch-session-${Date.now()}`,
-      type: 'branchSession' as const,
-      position,
-      data: {
-        label: t('default.newBranchSession'),
-        workDescription: '',
-        outputPorts: 1 as const,
-      },
-    };
-    addNode(newNode);
+    addNode(createDefaultNode('branchSession', position, t));
   };
 
   const handleAddEndNode = () => {
     const position = calculateNonOverlappingPosition(600, 200);
-    const newNode = {
-      id: `end_${Date.now()}`,
-      type: 'end' as const,
-      position,
-      data: {
-        label: 'End',
-      },
-    };
-    addNode(newNode);
+    addNode(createDefaultNode('end', position, t));
   };
 
   const handleAddBranch = () => {
@@ -320,62 +267,12 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
 
   const handleAddIfElse = () => {
     const position = calculateNonOverlappingPosition(250, 250);
-    const newNode = {
-      id: `ifelse-${Date.now()}`,
-      type: 'ifElse' as const,
-      position,
-      data: {
-        evaluationTarget: '',
-        branches: [
-          {
-            id: generateBranchId(),
-            label: t('default.branchTrue'),
-            condition: t('default.branchTrueCondition'),
-          },
-          {
-            id: generateBranchId(),
-            label: t('default.branchFalse'),
-            condition: t('default.branchFalseCondition'),
-          },
-        ],
-        outputPorts: 2 as const,
-      },
-    };
-    addNode(newNode);
+    addNode(createDefaultNode('ifElse', position, t));
   };
 
   const handleAddSwitch = () => {
     const position = calculateNonOverlappingPosition(250, 280);
-    const newNode = {
-      id: `switch-${Date.now()}`,
-      type: 'switch' as const,
-      position,
-      data: {
-        evaluationTarget: '',
-        branches: [
-          {
-            id: generateBranchId(),
-            label: t('default.case1'),
-            condition: t('default.case1Condition'),
-            isDefault: false,
-          },
-          {
-            id: generateBranchId(),
-            label: t('default.case2'),
-            condition: t('default.case2Condition'),
-            isDefault: false,
-          },
-          {
-            id: generateBranchId(),
-            label: t('default.defaultBranch'),
-            condition: t('default.defaultBranchCondition'),
-            isDefault: true,
-          },
-        ],
-        outputPorts: 3,
-      },
-    };
-    addNode(newNode);
+    addNode(createDefaultNode('switch', position, t));
   };
 
   // Feature: 089-subworkflow - Create new Sub-Agent Flow and enter edit mode

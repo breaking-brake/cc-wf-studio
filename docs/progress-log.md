@@ -17,6 +17,44 @@ Entry format:
 
 ---
 
+## 2026-07-24 — Edge-drop node creation (drag a connection to empty canvas)
+- **User value**: a user extending a workflow can now drag a connection from
+  a node's output handle, release it on empty canvas, and pick a node type
+  from a small menu — the node is created at the drop point already wired to
+  the source — instead of adding from the palette, dragging into place, and
+  drawing the connection by hand.
+- **Issue/PR**: #937 / PR from `claude/sleepy-curie-av4v0s`
+- **Outcome**: done — `onConnectStart` records the source handle;
+  `onConnectEnd` detects a pane drop (`react-flow__pane` class), projects
+  the point to flow coordinates (snapped to the 15px grid), and opens a
+  picker reusing `CanvasContextMenu` as-is. Picker offers the dialog-free
+  types with their palette icons and existing `node.<type>.title` keys
+  (zero new i18n keys): Prompt, If/Else, Switch, Ask User Question, Branch
+  Session, End — the latter three hidden while editing a sub-agent flow,
+  matching the palette gating. Node defaults extracted from `NodePalette`'s
+  inline handlers into `utils/node-defaults.ts` (palette behavior
+  unchanged); new store action `addNodeWithConnection` adds node + edge in
+  one `set()` → one undo entry, selects the node and opens the property
+  overlay like `addNode`. Forward drags only; connection valid by
+  construction (new node is the target). `pnpm build` + `pnpm check`
+  green. **Browser E2E against the real webview** via `ccwf canvas` +
+  headless Chromium: picker appears with all 6 entries, Prompt pick creates
+  node + edge, single Ctrl+Z removes both, Escape cancels cleanly, dropping
+  on a node does not open the picker — all passed. Issue #937 could not be
+  locked (no `gh`, no MCP lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - Fix the `ccwf canvas` boot race found while E2E-testing: on fast
+    localhost the server answers `WEBVIEW_READY` (sent right after
+    `root.render()`) before React's message listener attaches, leaving an
+    eternal spinner — resend `INITIAL_STATE`/`LOAD_WORKFLOW` on listener
+    attach, or delay the ready signal until after mount effects.
+  - Keyboard-shortcut cheat sheet overlay (many shortcuts now exist:
+    Ctrl+F/A/D/Z/C/X/V, Delete, context menu) — discoverability gap.
+  - Manual E2E queue (carried): problem-node markers; problems panel
+    click-to-jump; auto layout on a real messy workflow; node search
+    cycling; align/distribute + context menu + copy/cut/paste; localized
+    Claude API dialog in ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — On-canvas markers for problem nodes
 - **User value**: a user triaging validation failures can now see every
   offending node marked with a red ring and a ⚠ badge directly on the

@@ -17,8 +17,14 @@ import {
   ClipboardPaste,
   Copy,
   CopyPlus,
+  GitBranch,
+  GitBranchPlus,
+  GitFork,
+  MessageSquare,
   PanelLeftOpen,
   Scissors,
+  ShieldQuestion,
+  Square,
   SquareDashedMousePointer,
   Trash2,
 } from 'lucide-react';
@@ -34,6 +40,7 @@ import ReactFlow, {
   MiniMap,
   type Node,
   type NodeTypes,
+  type OnConnectStartParams,
   Panel,
   PanOnScrollMode,
   type ReactFlowInstance,
@@ -49,6 +56,7 @@ import {
   type SelectionClipboardPayload,
   useWorkflowStore,
 } from '../stores/workflow-store';
+import { createDefaultNode, type SimpleNodeType } from '../utils/node-defaults';
 import { collectWorkflowIssues } from '../utils/workflow-issues';
 import { CanvasContextMenu, type CanvasContextMenuEntry } from './CanvasContextMenu';
 import { CanvasToolbar } from './CanvasToolbar';
@@ -504,6 +512,57 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     }
   }, []);
 
+  // ---------------------------------------------------------------------
+  // Edge-drop create: drag a connection from a source handle, release on
+  // empty canvas → a picker menu creates the chosen node pre-wired there
+  // ---------------------------------------------------------------------
+  const connectStartRef = useRef<OnConnectStartParams | null>(null);
+  const [edgeDropMenu, setEdgeDropMenu] = useState<{
+    x: number;
+    y: number;
+    flowPosition: { x: number; y: number };
+    source: { nodeId: string; handleId: string | null };
+  } | null>(null);
+
+  const handleConnectStart = useCallback(
+    (_event: React.MouseEvent | React.TouchEvent, params: OnConnectStartParams) => {
+      connectStartRef.current = params;
+    },
+    []
+  );
+
+  const handleConnectEnd = useCallback((event: MouseEvent | TouchEvent) => {
+    const start = connectStartRef.current;
+    connectStartRef.current = null;
+    // Forward drags only — from a source handle; a valid drop on a node
+    // fires onConnect instead and the drop target is then not the pane
+    if (!start?.nodeId || start.handleType !== 'source') return;
+    const dropTarget = event.target as Element | null;
+    if (!dropTarget?.classList?.contains('react-flow__pane')) return;
+    const container = canvasContainerRef.current;
+    if (!container) return;
+    const point = 'changedTouches' in event ? event.changedTouches[0] : event;
+    if (!point) return;
+    const bounds = container.getBoundingClientRect();
+    const x = point.clientX - bounds.left;
+    const y = point.clientY - bounds.top;
+    const projected = reactFlowInstanceRef.current?.project({ x, y });
+    if (!projected) return;
+    // Land on the canvas grid, matching snapToGrid drag behavior
+    const flowPosition = {
+      x: Math.round(projected.x / 15) * 15,
+      y: Math.round(projected.y / 15) * 15,
+    };
+    setEdgeDropMenu({
+      x,
+      y,
+      flowPosition,
+      source: { nodeId: start.nodeId, handleId: start.handleId ?? null },
+    });
+  }, []);
+
+  const closeEdgeDropMenu = useCallback(() => setEdgeDropMenu(null), []);
+
   // Memoize snap grid
   const snapGrid = useMemo<[number, number]>(() => [15, 15], []);
 
@@ -541,6 +600,65 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     useWorkflowStore.getState().closeProblemsPanel();
   }, []);
   const isProblemsPanelVisible = isProblemsPanelOpen && activeSubAgentFlowId === null;
+
+  // Picker entries for the edge-drop menu: the dialog-free node types with
+  // their palette icons and labels. Interactive/session types are hidden
+  // while editing a sub-agent flow, matching the palette's gating.
+  const edgeDropEntries = useMemo<CanvasContextMenuEntry[]>(() => {
+    if (!edgeDropMenu) return [];
+    const pick = (type: SimpleNodeType) => () => {
+      const node = createDefaultNode(type, edgeDropMenu.flowPosition, t);
+      useWorkflowStore.getState().addNodeWithConnection(node, {
+        source: edgeDropMenu.source.nodeId,
+        sourceHandle: edgeDropMenu.source.handleId,
+        target: node.id,
+        targetHandle: null,
+      });
+    };
+    return [
+      {
+        key: 'prompt',
+        label: t('node.prompt.title'),
+        icon: <MessageSquare size={14} />,
+        onSelect: pick('prompt'),
+      },
+      {
+        key: 'ifElse',
+        label: t('node.ifElse.title'),
+        icon: <GitBranch size={14} />,
+        onSelect: pick('ifElse'),
+      },
+      {
+        key: 'switch',
+        label: t('node.switch.title'),
+        icon: <GitFork size={14} />,
+        onSelect: pick('switch'),
+      },
+      ...(activeSubAgentFlowId === null
+        ? ([
+            {
+              key: 'askUserQuestion',
+              label: t('node.askUserQuestion.title'),
+              icon: <ShieldQuestion size={14} />,
+              onSelect: pick('askUserQuestion'),
+            },
+            {
+              key: 'branchSession',
+              label: t('node.branchSession.title'),
+              icon: <GitBranchPlus size={14} />,
+              onSelect: pick('branchSession'),
+            },
+          ] satisfies CanvasContextMenuEntry[])
+        : []),
+      'separator',
+      {
+        key: 'end',
+        label: t('node.end.title'),
+        icon: <Square size={14} />,
+        onSelect: pick('end'),
+      },
+    ];
+  }, [edgeDropMenu, t, activeSubAgentFlowId]);
 
   // Validation issues for the problems panel and the on-canvas node markers.
   // Computed here (not in the panel) so a single validation pass feeds both;
@@ -989,6 +1107,8 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           onNodesChange={handleNodesChange}
           onEdgesChange={handleEdgesChange}
           onConnect={handleConnect}
+          onConnectStart={handleConnectStart}
+          onConnectEnd={handleConnectEnd}
           onNodeDragStart={handleNodeDragStart}
           onNodeDragStop={handleNodeDragStop}
           onNodeClick={handleNodeClick}
@@ -1144,6 +1264,14 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
             y={contextMenu.y}
             entries={contextMenuEntries}
             onClose={closeContextMenu}
+          />
+        )}
+        {edgeDropMenu && (
+          <CanvasContextMenu
+            x={edgeDropMenu.x}
+            y={edgeDropMenu.y}
+            entries={edgeDropEntries}
+            onClose={closeEdgeDropMenu}
           />
         )}
         {onOpenSample && onDismissEmptyState && onLoadWorkflow && (
