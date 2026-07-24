@@ -1,6 +1,6 @@
 ---
 name: cc-workflow-ai-editor
-description: AI workflow editor for CC Workflow Studio. Create and edit visual AI agent workflows through interactive conversation using MCP tools (get_workflow_schema, get_current_workflow, validate_workflow, apply_workflow, update_nodes). Use when the user wants to create a new workflow, modify an existing workflow, or edit the workflow canvas in CC Workflow Studio via the built-in MCP server.
+description: AI workflow editor for CC Workflow Studio. Create and edit visual AI agent workflows through interactive conversation using MCP tools (get_workflow_schema, get_current_workflow, validate_workflow, apply_workflow, patch_workflow, update_nodes). Use when the user wants to create a new workflow, modify an existing workflow, or edit the workflow canvas in CC Workflow Studio via the built-in MCP server.
 ---
 
 1. Call `get_workflow_schema` via `cc-workflow-studio` MCP server
@@ -9,7 +9,8 @@ description: AI workflow editor for CC Workflow Studio. Create and edit visual A
 4. Generate workflow JSON: choose each node type based on its role description in the schema. When a `subAgent` is the right choice, use a built-in `builtInType` (explore/plan/general-purpose). Only call `list_available_agents` when the user explicitly asks to use an existing custom sub-agent.
 5. Apply changes via `cc-workflow-studio` MCP server:
    - **Check the draft first**: call `validate_workflow` with the workflow JSON — it validates without touching the canvas or creating any files. Fix reported errors and re-validate before applying. If the user plans to export/run the workflow on a non-Claude agent (codex, copilot, cursor, gemini, antigravity, roo-code), pass `agent` to also get target-compatibility warnings and mention them to the user — `agent` accepts a single name, an array of names, or `"all"` to preflight every target at once (one agent returns `warnings`, several return `warningsByAgent`).
-   - **New workflow or structural changes** (add/remove nodes/connections): use `apply_workflow`
+   - **New workflow or wholesale rewrite**: use `apply_workflow`
+   - **Structural changes to an existing workflow** (add/remove nodes/connections): use `patch_workflow` (more token-efficient — send only the operations, not the whole JSON; removing a node cascades to its connections, removing a group keeps its children in place)
    - **Partial updates to existing nodes** (change name, position, or data): use `update_nodes` (more token-efficient)
    - Fix errors if any
 6. **After creating a new workflow or making substantial structural changes**, briefly offer (one line) to generate a guided tour — e.g. "I can also generate a guided tour of this workflow so others can follow it — want me to?" Offer it only once at a natural stopping point (not on every small edit), and do NOT auto-generate without the user agreeing. If they agree, add a top-level `tour` array (a sibling of `nodes`/`connections`) and apply it with `apply_workflow`. Each entry is `{ "order": 1, "title": "...", "description": "what these nodes do and why", "nodeIds": ["start-1"], "languageLesson": "optional" }`; scale the step count to the workflow size (small → ~one step per node, larger → group related nodes to ~8–15 steps), `order` 1-based, every `nodeIds` entry a real node id, start with an overview and end at completion, in the user's language. The canvas then shows a "Start Workflow Tour" button.
