@@ -17,6 +17,56 @@ Entry format:
 
 ---
 
+## 2026-07-24 — Drag an unwired node onto a connection to splice it in
+- **User value**: a user who click-adds a node from the palette (which lands
+  unwired) can now wire it into the flow by simply dragging it onto an
+  existing connection — the edge highlights with an accent stroke + ⊕ hint
+  while the node hovers over it and is replaced by source→node→target on
+  drop, and ONE Ctrl/Cmd+Z undoes the move + splice together; previously
+  this took delete edge → draw two connections by hand (top carried
+  proposal from the previous iteration, premise re-verified).
+- **Issue/PR**: #969
+- **Outcome**: done — eligibility computed at drag start (single-node drag,
+  not Start/End/Group, zero connected edges — an already-wired node is never
+  re-wired by a stray drag); the rendered edge paths are sampled once at
+  drag start via `getTotalLength`/`getPointAtLength` (flow coords, exact for
+  bezier; edges can't move mid-drag since the dragged node is unwired), and
+  each drag frame hit-tests the cached points against the node rect. Best
+  match rides a new transient `dragSpliceTargetEdgeId` store field (untracked,
+  `edgeInsertRequest` pattern); DeletableEdge highlights itself + shows a
+  non-interactive ⊕ at the midpoint. New store action
+  `spliceNodeIntoEdge(nodeId, edgeId)` replaces the edge with
+  source→node→target in one set() (outer handles preserved, re-checks
+  eligibility). The drag-stop single-undo sealing now captures edges too, so
+  move + splice restore with one undo. No schema/persistence change, no new
+  locale strings (visual affordance only). Browser E2E via `ccwf canvas` +
+  headless Chromium on the 8-node daily-dev sample: 14/14 checks green
+  (highlight during hover, splice on drop with original edge gone and both
+  new edges wired, single-undo restores edge AND pre-drag position, wired
+  node drag never highlights/splices, zero page errors). `pnpm build` +
+  `pnpm check` green. Issue #969 could not be locked (no `gh`, no MCP lock
+  tool — known limitation, noted in the issue). Found adjacent bug while
+  testing: `ccwf canvas` silently shows an empty canvas for `{meta, workflow}`
+  wrapper files (handlers read raw JSON without unwrapping) — filed as a
+  follow-up idea issue.
+- **Next proposals**:
+  - Fix `ccwf canvas` to unwrap `{meta, workflow}` wrapper files (its own
+    up-front validation accepts them, then the webview gets the raw wrapper
+    and falls back to an empty canvas + Start Menu).
+  - Mirror the shortcut cheat sheet in the README/docs (carried).
+  - Manual E2E queue (carried): drag-splice in the VSCode extension host
+    (highlight, drop, undo, wired-node guard, multi-select drag guard);
+    edge ⊕ insert (simple + dialog types, cancel paths, undo, ja locale
+    tooltip); edge-drop dialog create (all four dialogs, cancel path,
+    collapsed palette auto-expand, sub-agent-flow and Codex-beta gating);
+    palette filter; arrow-key nudge; Esc panel dismissal; F8 / Shift+F8
+    problem cycling; inline group rename; Ungroup; Group selection; Save as
+    Image from the VSCode extension host; Copy as Markdown; `render_workflow`
+    via MCP Inspector; problems badge; shortcut cheat sheet; problem-node
+    markers; problems panel click-to-jump; auto layout; node search cycling;
+    align/distribute + context menu + copy/cut/paste; localized Claude API
+    dialog in ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — Insert a node into an existing connection (edge splice)
 - **User value**: a user can now insert a node into the middle of an existing
   connection in two clicks — select the edge, click its new ⊕ button, pick a

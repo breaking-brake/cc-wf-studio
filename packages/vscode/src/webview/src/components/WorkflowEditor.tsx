@@ -42,6 +42,7 @@ import ReactFlow, {
   type Connection,
   Controls,
   type DefaultEdgeOptions,
+  type Edge,
   type EdgeTypes,
   MiniMap,
   type Node,
@@ -232,6 +233,37 @@ const buildNodePickerEntries = (opts: {
         ] satisfies CanvasContextMenuEntry[])
       : []),
   ];
+};
+
+/** Points sampled per edge path for the drag-splice hit test. */
+const SPLICE_PATH_SAMPLES = 24;
+
+/** Sample every rendered edge path in flow coordinates for the drag-splice
+ *  hit test (drag an unwired node onto a connection). The edge SVG lives
+ *  inside the viewport transform, so path-space coordinates ARE flow
+ *  coordinates, and `getPointAtLength` is exact for any edge shape — no
+ *  bezier math re-derivation. Edges cannot move during an eligible drag
+ *  (the dragged node is unwired), so sampling once at drag start is safe. */
+const sampleEdgePathPoints = (
+  edges: Edge[]
+): { id: string; points: { x: number; y: number }[] }[] => {
+  const sampled: { id: string; points: { x: number; y: number }[] }[] = [];
+  for (const edge of edges) {
+    if (edge.id.includes('"')) continue;
+    const path = document.querySelector<SVGPathElement>(
+      `[data-testid="rf__edge-${edge.id}"] .react-flow__edge-path`
+    );
+    if (!path) continue;
+    const total = path.getTotalLength();
+    if (!Number.isFinite(total) || total <= 0) continue;
+    const points: { x: number; y: number }[] = [];
+    for (let i = 0; i <= SPLICE_PATH_SAMPLES; i++) {
+      const p = path.getPointAtLength((total * i) / SPLICE_PATH_SAMPLES);
+      points.push({ x: p.x, y: p.y });
+    }
+    sampled.push({ id: edge.id, points });
+  }
+  return sampled;
 };
 
 /** In-window mirror of the last copied/cut selection. The context menu's
@@ -463,8 +495,18 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     [setSelectedNodeId]
   );
 
-  // Save pre-drag snapshot for undo/redo (ref to avoid re-renders)
+  // Save pre-drag snapshot for undo/redo (ref to avoid re-renders). Edges are
+  // captured too so a drag-splice (edge replaced on drop) seals into the same
+  // single undo entry as the move.
   const preDragNodesRef = useRef<Node[] | null>(null);
+  const preDragEdgesRef = useRef<Edge[] | null>(null);
+
+  // Drag-splice: eligibility + cached edge-path samples for the current drag
+  // (drag an unwired node onto a connection to splice it in)
+  const dragSpliceRef = useRef<{
+    nodeId: string;
+    sampledEdges: { id: string; points: { x: number; y: number }[] }[];
+  } | null>(null);
 
   // Arrow-key nudge bursts pause undo tracking like drags do; the timer
   // seals the burst into a single undo entry once the keys go idle
@@ -474,31 +516,84 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   });
 
   // Pause undo/redo tracking during node drag to record only the final position
-  const handleNodeDragStart = useCallback(() => {
-    // A pending nudge-burst resume must not fire mid-drag and re-enable
-    // tracking — the drag-stop handler resumes for both
-    if (nudgeBurstRef.current.timer !== null) {
-      window.clearTimeout(nudgeBurstRef.current.timer);
-      nudgeBurstRef.current.timer = null;
-      nudgeBurstRef.current.active = false;
+  const handleNodeDragStart = useCallback(
+    (_event: React.MouseEvent, node: Node, draggedNodes: Node[]) => {
+      // A pending nudge-burst resume must not fire mid-drag and re-enable
+      // tracking — the drag-stop handler resumes for both
+      if (nudgeBurstRef.current.timer !== null) {
+        window.clearTimeout(nudgeBurstRef.current.timer);
+        nudgeBurstRef.current.timer = null;
+        nudgeBurstRef.current.active = false;
+      }
+      const { nodes: allNodes, edges: allEdges } = useWorkflowStore.getState();
+      preDragNodesRef.current = allNodes;
+      preDragEdgesRef.current = allEdges;
+      useWorkflowStore.temporal.getState().pause();
+
+      // Drag-splice eligibility: only a single, fully unwired, non-structural
+      // node can be dropped onto a connection — an already-wired node is
+      // never re-wired by a stray drag
+      const isSpliceable =
+        draggedNodes.length === 1 &&
+        node.type !== 'start' &&
+        node.type !== 'end' &&
+        node.type !== 'group' &&
+        !allEdges.some((e) => e.source === node.id || e.target === node.id);
+      dragSpliceRef.current = isSpliceable
+        ? { nodeId: node.id, sampledEdges: sampleEdgePathPoints(allEdges) }
+        : null;
+    },
+    []
+  );
+
+  // While an eligible node is dragged, hit-test its rect against the cached
+  // edge-path samples and mark the closest overlapped edge as the splice
+  // target (transient store field — DeletableEdge highlights itself)
+  const handleNodeDrag = useCallback((_event: React.MouseEvent, node: Node) => {
+    const splice = dragSpliceRef.current;
+    if (!splice || splice.nodeId !== node.id) return;
+    const x = node.positionAbsolute?.x ?? node.position.x;
+    const y = node.positionAbsolute?.y ?? node.position.y;
+    const w = node.width ?? 150;
+    const h = node.height ?? 48;
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+    let best: { id: string; dist: number } | null = null;
+    for (const edge of splice.sampledEdges) {
+      for (const p of edge.points) {
+        if (p.x < x || p.x > x + w || p.y < y || p.y > y + h) continue;
+        const dist = (p.x - cx) ** 2 + (p.y - cy) ** 2;
+        if (!best || dist < best.dist) best = { id: edge.id, dist };
+      }
     }
-    preDragNodesRef.current = useWorkflowStore.getState().nodes;
-    useWorkflowStore.temporal.getState().pause();
+    useWorkflowStore.getState().setDragSpliceTargetEdgeId(best ? best.id : null);
   }, []);
 
-  // Handle node drag stop (group containment logic + record single undo entry)
+  // Handle node drag stop (group containment + drag-splice + record single undo entry)
   const handleNodeDragStop = useCallback(
     (_event: React.MouseEvent, node: Node) => {
+      const spliceTargetEdgeId = useWorkflowStore.getState().dragSpliceTargetEdgeId;
+      const spliceNodeId = dragSpliceRef.current?.nodeId ?? null;
+      dragSpliceRef.current = null;
+      useWorkflowStore.getState().setDragSpliceTargetEdgeId(null);
+
       onNodeDragStop(node);
+      // Dropped onto a connection: replace it with source→node→target while
+      // temporal tracking is still paused, so move + splice seal together
+      if (spliceTargetEdgeId && spliceNodeId === node.id) {
+        useWorkflowStore.getState().spliceNodeIntoEdge(node.id, spliceTargetEdgeId);
+      }
       const preDragNodes = preDragNodesRef.current;
-      if (preDragNodes) {
-        const currentNodes = useWorkflowStore.getState().nodes;
+      const preDragEdges = preDragEdgesRef.current;
+      if (preDragNodes && preDragEdges) {
+        const { nodes: currentNodes, edges: currentEdges } = useWorkflowStore.getState();
         // Temporarily revert to pre-drag state, then resume tracking and apply final state
         // This makes zundo record a single undo entry: pre-drag → post-drag
-        useWorkflowStore.setState({ nodes: preDragNodes });
+        useWorkflowStore.setState({ nodes: preDragNodes, edges: preDragEdges });
         useWorkflowStore.temporal.getState().resume();
-        useWorkflowStore.setState({ nodes: currentNodes });
+        useWorkflowStore.setState({ nodes: currentNodes, edges: currentEdges });
         preDragNodesRef.current = null;
+        preDragEdgesRef.current = null;
       } else {
         useWorkflowStore.temporal.getState().resume();
       }
@@ -1548,6 +1643,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           onConnectStart={handleConnectStart}
           onConnectEnd={handleConnectEnd}
           onNodeDragStart={handleNodeDragStart}
+          onNodeDrag={handleNodeDrag}
           onNodeDragStop={handleNodeDragStop}
           onNodeClick={handleNodeClick}
           onEdgeClick={() => syncSelectedNodeId(null)}

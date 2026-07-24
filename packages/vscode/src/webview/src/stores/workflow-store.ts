@@ -206,6 +206,11 @@ interface WorkflowStore {
     clientY: number;
     flowPosition: { x: number; y: number };
   } | null;
+  /** The edge an eligible dragged node is currently hovering over (drag an
+   *  unwired node onto a connection to splice it in). Set by WorkflowEditor
+   *  during the drag so DeletableEdge can highlight the drop target; cleared
+   *  on drop/cancel. Transient UI state — not tracked in undo history. */
+  dragSpliceTargetEdgeId: string | null;
 
   // Guided Tour player state (reads steps from activeWorkflow.tour)
   isTourActive: boolean;
@@ -307,6 +312,14 @@ interface WorkflowStore {
    *  when the edge no longer exists (e.g. the canvas changed while a
    *  creation dialog was open). */
   insertNodeOnEdge: (node: Node, edgeId: string) => void;
+  setDragSpliceTargetEdgeId: (edgeId: string | null) => void;
+  /** Splice an EXISTING node into an edge (drag an unwired node onto a
+   *  connection): the edge is replaced by source→node and node→target in one
+   *  set() — outer handles preserved, the node's own handles resolve to
+   *  React Flow's first-handle default. No-op unless both the node and the
+   *  edge still exist and the node has no connected edges (the eligibility
+   *  guard — an already-wired node is never re-wired by a stray drag). */
+  spliceNodeIntoEdge: (nodeId: string, edgeId: string) => void;
   /** Duplicate a configured node (fresh id, +40/+40 offset, same parent group,
    *  deep-copied data; edges are not copied). Duplicating a group also copies
    *  its child nodes and the edges fully inside the group. Start/End excluded. */
@@ -625,6 +638,7 @@ export const useWorkflowStore = create<WorkflowStore>()(
       pendingConnection: null,
       paletteDialogRequest: null,
       edgeInsertRequest: null,
+      dragSpliceTargetEdgeId: null,
       isTourActive: false,
       tourStepIndex: 0,
       highlightedGroupNodeId: null,
@@ -1013,6 +1027,41 @@ export const useWorkflowStore = create<WorkflowStore>()(
 
       setPendingConnection: (pending) => {
         set({ pendingConnection: pending });
+      },
+
+      setDragSpliceTargetEdgeId: (edgeId) => {
+        if (get().dragSpliceTargetEdgeId === edgeId) return;
+        set({ dragSpliceTargetEdgeId: edgeId });
+      },
+
+      spliceNodeIntoEdge: (nodeId: string, edgeId: string) => {
+        const node = get().nodes.find((n) => n.id === nodeId);
+        const edge = get().edges.find((e) => e.id === edgeId);
+        if (!node || !edge) return;
+        // Eligibility re-check at splice time: only a fully unwired node may
+        // be spliced, and never into an edge touching itself
+        const hasEdges = get().edges.some((e) => e.source === nodeId || e.target === nodeId);
+        if (hasEdges || edge.source === nodeId || edge.target === nodeId) return;
+        const remainingEdges = get().edges.filter((e) => e.id !== edgeId);
+        set({
+          edges: addEdge(
+            {
+              source: nodeId,
+              sourceHandle: null,
+              target: edge.target,
+              targetHandle: edge.targetHandle ?? null,
+            },
+            addEdge(
+              {
+                source: edge.source,
+                sourceHandle: edge.sourceHandle ?? null,
+                target: nodeId,
+                targetHandle: null,
+              },
+              remainingEdges
+            )
+          ),
+        });
       },
 
       setEdgeInsertRequest: (request) => {
