@@ -56,6 +56,7 @@ import { DescriptionPanel } from './DescriptionPanel';
 // Custom edge with delete button
 import { DeletableEdge } from './edges/DeletableEdge';
 import { MinimapContainer } from './MinimapContainer';
+import { NodeSearchPanel } from './NodeSearchPanel';
 import { AskUserQuestionNodeComponent } from './nodes/AskUserQuestionNode';
 import { BranchNodeComponent } from './nodes/BranchNode';
 import { BranchSessionNode } from './nodes/BranchSessionNode';
@@ -507,6 +508,15 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   // Track Ctrl/Cmd key state for temporary mode switching
   const [isModifierKeyPressed, setIsModifierKeyPressed] = useState(false);
 
+  // Node search panel (Ctrl/Cmd+F). The nonce re-focuses the input when
+  // the shortcut fires while the panel is already open.
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchFocusNonce, setSearchFocusNonce] = useState(0);
+  const openSearch = useCallback(() => {
+    setIsSearchOpen(true);
+    setSearchFocusNonce((nonce) => nonce + 1);
+  }, []);
+
   // Keyboard event handlers for modifier key and undo/redo
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -567,6 +577,10 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         if (key === 'a' && !event.shiftKey && !event.altKey) {
           event.preventDefault();
           selectAllOnCanvas();
+        }
+        if (key === 'f' && !event.shiftKey && !event.altKey) {
+          event.preventDefault();
+          openSearch();
         }
         if (key === 'z' && !event.shiftKey) {
           event.preventDefault();
@@ -676,7 +690,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       document.removeEventListener('cut', handleCut);
       document.removeEventListener('paste', handlePaste);
     };
-  }, []);
+  }, [openSearch]);
 
   // Minimap auto-show on scroll/pan/zoom (only for 'auto' mode)
   const minimapHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -996,8 +1010,19 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
             <CanvasToolbar
               isEdgeAnimationEnabled={isEdgeAnimationEnabled}
               onToggleEdgeAnimation={() => setIsEdgeAnimationEnabled((prev) => !prev)}
+              onOpenSearch={openSearch}
             />
           </Panel>
+
+          {/* Node Search Panel (Ctrl/Cmd+F) */}
+          {isSearchOpen && (
+            <Panel position="top-center">
+              <NodeSearchPanel
+                focusNonce={searchFocusNonce}
+                onClose={() => setIsSearchOpen(false)}
+              />
+            </Panel>
+          )}
 
           {/* Description Panel for workflow description */}
           <Panel position="top-right">

@@ -424,6 +424,14 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'contextMenu.distributeVertical': '上下に等間隔配置',
   'announcement.dismiss': 'お知らせを閉じる',
 
+  // Canvas node search (Ctrl/Cmd+F)
+  'canvasSearch.tooltip': 'ノードを検索',
+  'canvasSearch.placeholder': 'ノードを検索…',
+  'canvasSearch.noResults': '一致なし',
+  'canvasSearch.previous': '前の一致',
+  'canvasSearch.next': '次の一致',
+  'canvasSearch.close': '検索を閉じる',
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'ノードを削除',
   'dialog.deleteNode.message': 'このノードを削除してもよろしいですか？',

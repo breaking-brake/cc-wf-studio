@@ -410,6 +410,14 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'contextMenu.distributeVertical': '垂直均匀分布',
   'announcement.dismiss': '关闭公告',
 
+  // Canvas node search (Ctrl/Cmd+F)
+  'canvasSearch.tooltip': '搜索节点',
+  'canvasSearch.placeholder': '搜索节点…',
+  'canvasSearch.noResults': '无匹配项',
+  'canvasSearch.previous': '上一个匹配项',
+  'canvasSearch.next': '下一个匹配项',
+  'canvasSearch.close': '关闭搜索',
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '删除节点',
   'dialog.deleteNode.message': '确定要删除此节点吗？',
