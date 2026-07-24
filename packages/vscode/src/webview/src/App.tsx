@@ -258,6 +258,16 @@ const App: React.FC = () => {
   } = useCollapsiblePanel();
   const isCompact = useIsCompactMode();
 
+  // Edge-drop create for dialog-based node types: the palette owns the
+  // creation dialogs but unmounts while collapsed — expand it so it can
+  // pick up the pending dialog request from the store.
+  const paletteDialogRequest = useWorkflowStore((state) => state.paletteDialogRequest);
+  useEffect(() => {
+    if (paletteDialogRequest !== null && isNodePaletteCollapsed) {
+      expandNodePalette();
+    }
+  }, [paletteDialogRequest, isNodePaletteCollapsed, expandNodePalette]);
+
   // Reset emptyStateDismissed when a workflow is loaded (so empty state reappears after reset)
   const prevActiveWorkflowRef = useRef(activeWorkflow);
   useEffect(() => {

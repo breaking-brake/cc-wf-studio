@@ -177,6 +177,19 @@ interface WorkflowStore {
   /** When set, the Edit-mode canvas should pan to centre this node and clear the
    *  request. Used by the Overview mode "Edit on canvas" links. */
   requestedFocusNodeId: string | null;
+  /** Edge-drop create for dialog-based node types: the connection (and drop
+   *  position) to complete when the next node is added. Consumed by addNode;
+   *  cleared by the palette dialogs' close handlers when the dialog is
+   *  cancelled instead. Transient UI state — not tracked in undo history. */
+  pendingConnection: {
+    source: string;
+    sourceHandle: string | null;
+    position: { x: number; y: number };
+  } | null;
+  /** Asks NodePalette to open one of its node-creation dialogs (the
+   *  edge-drop picker lives outside the palette, which owns the dialogs).
+   *  Cleared by the palette once the dialog opens. */
+  paletteDialogRequest: 'subAgent' | 'skill' | 'mcp' | 'codex' | null;
 
   // Guided Tour player state (reads steps from activeWorkflow.tour)
   isTourActive: boolean;
@@ -244,7 +257,19 @@ interface WorkflowStore {
 
   // Custom Actions
   updateNodeData: (nodeId: string, data: Partial<unknown>) => void;
+  /** Add a node. When a pendingConnection is set (edge-drop → dialog create),
+   *  the node is placed at the stored drop position and connected to the
+   *  stored source in the same set() — one undo entry, then the pending
+   *  connection is consumed. */
   addNode: (node: Node) => void;
+  setPendingConnection: (
+    pending: {
+      source: string;
+      sourceHandle: string | null;
+      position: { x: number; y: number };
+    } | null
+  ) => void;
+  setPaletteDialogRequest: (dialog: 'subAgent' | 'skill' | 'mcp' | 'codex' | null) => void;
   /** Add a node together with the edge that connects it (edge-drop create):
    *  one set() → one undo entry. The new node becomes the selection and the
    *  property overlay opens, same as addNode. */
@@ -564,6 +589,8 @@ export const useWorkflowStore = create<WorkflowStore>()(
       },
       lastAddedNodeId: null,
       requestedFocusNodeId: null,
+      pendingConnection: null,
+      paletteDialogRequest: null,
       isTourActive: false,
       tourStepIndex: 0,
       highlightedGroupNodeId: null,
@@ -879,6 +906,17 @@ export const useWorkflowStore = create<WorkflowStore>()(
       },
 
       addNode: (node: Node) => {
+        const pending = get().pendingConnection;
+        if (pending) {
+          const placed = { ...node, position: pending.position };
+          get().addNodeWithConnection(placed, {
+            source: pending.source,
+            sourceHandle: pending.sourceHandle,
+            target: placed.id,
+            targetHandle: null,
+          });
+          return;
+        }
         set({
           nodes: [...get().nodes, node],
           lastAddedNodeId: node.id,
@@ -893,10 +931,19 @@ export const useWorkflowStore = create<WorkflowStore>()(
         set({
           nodes: [...currentNodes, node],
           edges: addEdge(connection, currentEdges),
+          pendingConnection: null,
           lastAddedNodeId: node.id,
           selectedNodeId: node.id,
           isPropertyOverlayOpen: true,
         });
+      },
+
+      setPendingConnection: (pending) => {
+        set({ pendingConnection: pending });
+      },
+
+      setPaletteDialogRequest: (dialog) => {
+        set({ paletteDialogRequest: dialog });
       },
 
       clearLastAddedNodeId: () => {

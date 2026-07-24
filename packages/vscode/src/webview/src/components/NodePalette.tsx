@@ -24,7 +24,7 @@ import {
   Zap,
 } from 'lucide-react';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useIsCompactMode } from '../hooks/useWindowWidth';
 import { useTranslation } from '../i18n/i18n-context';
 import type { WebviewTranslationKeys } from '../i18n/translation-keys';
@@ -63,6 +63,9 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
     addSubAgentFlow,
     setActiveSubAgentFlowId,
     activeSubAgentFlowId,
+    paletteDialogRequest,
+    setPaletteDialogRequest,
+    setPendingConnection,
   } = useWorkflowStore();
 
   // サブエージェントフロー編集中はネスト不可のノードを非活性にする
@@ -74,6 +77,29 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
   const [isCodexDialogOpen, setIsCodexDialogOpen] = useState(false);
   const [isSubAgentDialogOpen, setIsSubAgentDialogOpen] = useState(false);
   const [filterText, setFilterText] = useState('');
+
+  // Edge-drop create for dialog-based node types: the canvas picker asks for
+  // a creation dialog through the store (the palette owns the dialogs). The
+  // pending connection stays set — addNode consumes it on confirm; the
+  // dialogs' close handlers clear it on cancel.
+  useEffect(() => {
+    if (!paletteDialogRequest) return;
+    setPaletteDialogRequest(null);
+    switch (paletteDialogRequest) {
+      case 'subAgent':
+        setIsSubAgentDialogOpen(true);
+        break;
+      case 'skill':
+        setIsSkillBrowserOpen(true);
+        break;
+      case 'mcp':
+        setIsMcpDialogOpen(true);
+        break;
+      case 'codex':
+        setIsCodexDialogOpen(true);
+        break;
+    }
+  }, [paletteDialogRequest, setPaletteDialogRequest]);
 
   const paletteFilter = filterText.trim().toLowerCase();
 
@@ -1220,19 +1246,37 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ onCollapse }) => {
       {/* Skill Browser Dialog */}
       <SkillBrowserDialog
         isOpen={isSkillBrowserOpen}
-        onClose={() => setIsSkillBrowserOpen(false)}
+        onClose={() => {
+          setIsSkillBrowserOpen(false);
+          setPendingConnection(null);
+        }}
       />
 
       {/* MCP Node Dialog (Feature: 001-mcp-node) */}
-      <McpNodeDialog isOpen={isMcpDialogOpen} onClose={() => setIsMcpDialogOpen(false)} />
+      <McpNodeDialog
+        isOpen={isMcpDialogOpen}
+        onClose={() => {
+          setIsMcpDialogOpen(false);
+          setPendingConnection(null);
+        }}
+      />
 
       {/* Codex Node Dialog (Feature: 518-codex-agent-node) */}
-      <CodexNodeDialog isOpen={isCodexDialogOpen} onClose={() => setIsCodexDialogOpen(false)} />
+      <CodexNodeDialog
+        isOpen={isCodexDialogOpen}
+        onClose={() => {
+          setIsCodexDialogOpen(false);
+          setPendingConnection(null);
+        }}
+      />
 
       {/* Sub-Agent Creation Dialog (Feature: 636) */}
       <SubAgentCreationDialog
         isOpen={isSubAgentDialogOpen}
-        onClose={() => setIsSubAgentDialogOpen(false)}
+        onClose={() => {
+          setIsSubAgentDialogOpen(false);
+          setPendingConnection(null);
+        }}
         onCreateWithForm={handleCreateNewSubAgent}
         onSelectCommand={handleSelectCommand}
         onSelectBuiltInPreset={handleSelectBuiltInPreset}
