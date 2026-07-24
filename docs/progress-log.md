@@ -17,6 +17,40 @@ Entry format:
 
 ---
 
+## 2026-07-24 — "Ungroup" canvas action (context menu + Ctrl/Cmd+Shift+G)
+- **User value**: a user can now dissolve a selected group in place — its
+  nodes keep their exact canvas positions and edges, only the container
+  disappears — via right-click → "Ungroup" or Ctrl/Cmd+Shift+G, instead of
+  routing through the node-delete confirm dialog (which reads like it will
+  delete the group's contents); completes the group → rearrange → ungroup
+  loop started by #951 (top carried proposal from the previous iteration).
+- **Issue/PR**: #953 / PR from `claude/sleepy-curie-dijisz`
+- **Outcome**: done — new `ungroupSelection` store action releases each
+  selected group's children to absolute coordinates (the conversion
+  `removeNode`/`confirmDeleteNodes` already use), drops the container, and
+  makes the released children the selection, all in one `set()` → one undo
+  entry; no confirm dialog (non-destructive + undoable, cut's rationale).
+  Non-group nodes in a mixed selection are left alone. Context-menu entry
+  after "Group selection" (lucide `Ungroup` icon, mod+Shift+G hint,
+  disabled when the selection has no group), `mod+shift+g` handler beside
+  the existing `mod+g`, new cheat-sheet row, 2 new strings in all 5
+  locales. No schema change (`parentId` removal round-trips through the
+  existing persistence path). `pnpm build` + `pnpm check` green. Issue
+  #953 could not be locked (no `gh`, no MCP lock tool — known limitation,
+  noted in the issue).
+- **Next proposals**:
+  - Double-click a group header to rename it in place (check first whether
+    the property panel already covers this well enough).
+  - Mirror the shortcut cheat sheet in the README/docs (carried).
+  - Manual E2E queue (carried): Ungroup (menu + mod+Shift+G, undo restores
+    parenting, mixed selection); Group selection (menu + mod+G, undo as
+    one step); Save as Image from the VSCode extension host; Copy as
+    Markdown; `render_workflow` via MCP Inspector; problems badge;
+    shortcut cheat sheet; problem-node markers; problems panel
+    click-to-jump; auto layout; node search cycling; align/distribute +
+    context menu + copy/cut/paste; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — "Group selection" canvas action (context menu + Ctrl/Cmd+G)
 - **User value**: a user can now select several nodes and wrap them in a
   new, correctly-sized group in one step — right-click → "Group selection"

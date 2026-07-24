@@ -291,6 +291,12 @@ interface WorkflowStore {
    *  group-relative positions. The new group becomes the selection. No-op
    *  with fewer than two groupable nodes. Single undo entry. */
   groupSelection: (nodeIds: string[]) => void;
+  /** Dissolve the selected group node(s) in place: children keep their
+   *  absolute canvas positions (removeNode's conversion) and become the
+   *  selection; only the group container disappears. Non-group nodes in the
+   *  selection are ignored. No-op when the selection contains no group.
+   *  Single undo entry. */
+  ungroupSelection: (nodeIds: string[]) => void;
 
   /** Re-arrange the whole canvas into a tidy left-to-right layered layout
    *  (groups laid out internally and resized to fit). One undo entry. */
@@ -1357,6 +1363,44 @@ export const useWorkflowStore = create<WorkflowStore>()(
             }),
           ],
           selectedNodeId: groupId,
+        });
+      },
+
+      ungroupSelection: (nodeIds: string[]) => {
+        const allNodes = get().nodes;
+        const requested = new Set(nodeIds);
+        const groups = allNodes.filter((node) => requested.has(node.id) && node.type === 'group');
+        if (groups.length === 0) return;
+
+        const groupIds = new Set(groups.map((node) => node.id));
+        const groupPositions = new Map(groups.map((node) => [node.id, node.position]));
+        // No confirm dialog: unlike delete, dissolving keeps every child, and
+        // the action is undoable (cut's rationale). Released children become
+        // the selection so the group → ungroup round-trip is symmetric.
+        // Single set() call → single undo/redo history entry
+        set({
+          nodes: allNodes
+            .filter((node) => !groupIds.has(node.id))
+            .map((node) => {
+              const groupPos = node.parentId ? groupPositions.get(node.parentId) : undefined;
+              if (groupPos) {
+                return {
+                  ...node,
+                  parentId: undefined,
+                  position: {
+                    x: node.position.x + groupPos.x,
+                    y: node.position.y + groupPos.y,
+                  },
+                  selected: true,
+                };
+              }
+              return node.selected ? { ...node, selected: false } : node;
+            }),
+          // Groups have no edge handles, but stay consistent with removeNode
+          edges: get().edges.filter(
+            (edge) => !groupIds.has(edge.source) && !groupIds.has(edge.target)
+          ),
+          selectedNodeId: null,
         });
       },
 

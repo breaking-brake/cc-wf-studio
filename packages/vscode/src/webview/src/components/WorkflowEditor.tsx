@@ -28,6 +28,7 @@ import {
   Square,
   SquareDashedMousePointer,
   Trash2,
+  Ungroup,
 } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -486,6 +487,12 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     if (selectedIds.length > 0) groupSelection(selectedIds);
   }, []);
 
+  const ungroupSelectionFromMenu = useCallback(() => {
+    const { nodes: currentNodes, ungroupSelection } = useWorkflowStore.getState();
+    const selectedIds = currentNodes.filter((n) => n.selected).map((n) => n.id);
+    if (selectedIds.length > 0) ungroupSelection(selectedIds);
+  }, []);
+
   const alignSelectionFromMenu = useCallback((mode: AlignMode) => {
     const { nodes: currentNodes, alignSelection } = useWorkflowStore.getState();
     const selectedIds = currentNodes.filter((n) => n.selected).map((n) => n.id);
@@ -873,6 +880,15 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
             groupSelection(selectedIds);
           }
         }
+        if (key === 'g' && event.shiftKey && !event.altKey) {
+          const { nodes: currentNodes, ungroupSelection } = useWorkflowStore.getState();
+          const selectedIds = currentNodes.filter((n) => n.selected).map((n) => n.id);
+          if (selectedIds.length > 0) {
+            // Eligibility (selection contains a group) is re-checked by the store
+            event.preventDefault();
+            ungroupSelection(selectedIds);
+          }
+        }
       }
     };
 
@@ -1048,6 +1064,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     const groupableCount = nodes.filter(
       (n) => n.selected && n.type !== 'group' && !(n.parentId && selectedIds.has(n.parentId))
     ).length;
+    const hasSelectedGroup = nodes.some((n) => n.selected && n.type === 'group');
     return [
       {
         key: 'copy',
@@ -1081,6 +1098,14 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         shortcut: `${mod}G`,
         disabled: groupableCount < 2,
         onSelect: groupSelectionFromMenu,
+      },
+      {
+        key: 'ungroupSelection',
+        label: t('contextMenu.ungroupSelection'),
+        icon: <Ungroup size={14} />,
+        shortcut: isMac ? '⌘⇧G' : 'Ctrl+Shift+G',
+        disabled: !hasSelectedGroup,
+        onSelect: ungroupSelectionFromMenu,
       },
       ...(alignableCount >= 2
         ? ([
@@ -1169,6 +1194,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     cutSelectionFromMenu,
     duplicateSelectionFromMenu,
     groupSelectionFromMenu,
+    ungroupSelectionFromMenu,
     alignSelectionFromMenu,
     distributeSelectionFromMenu,
     deleteSelectionFromMenu,
