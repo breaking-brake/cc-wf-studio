@@ -16,6 +16,9 @@ import {
   NodeType,
   WORKFLOW_TARGET_AGENTS,
   collectAgentCompatibilityWarnings,
+  generateAgentExecutionInstructions,
+  generateExecutionInstructions,
+  generateMermaidFlowchart,
   validateAIGeneratedWorkflow,
   type Workflow,
   type WorkflowNode,
@@ -67,6 +70,7 @@ interface ToolText {
   patchWorkflowDescription: string;
   highlightGroupNodeDescription: string;
   exportWorkflowDescription: string;
+  renderWorkflowDescription: string;
 }
 
 const TOOL_TEXT: Record<WorkflowMcpMode, ToolText> = {
@@ -94,6 +98,8 @@ const TOOL_TEXT: Record<WorkflowMcpMode, ToolText> = {
       'Highlight a group node on the CC Workflow Studio canvas to indicate it is currently being executed. Call this before executing nodes within a group to visually track progress.',
     exportWorkflowDescription:
       'Export the current workflow as agent-skill files under the workspace root — the same files `ccwf export` writes. For claude-code (the default): Sub-Agent files under .claude/agents/ plus the workflow entry at .claude/skills/<workflow>/SKILL.md. For other agents (antigravity, codex, copilot, cursor, gemini, roo-code): the provider\'s own skills/<workflow>/SKILL.md layout. Pass "agent" as a single name, an array, or "all" to export several targets in one atomic run — any existing file with different content aborts the whole export with nothing written unless overwrite is true. Set dryRun to preview every planned file\'s status (new / up-to-date / conflict) without writing. The workflow is schema-validated first; an invalid workflow is refused with validationErrors.',
+    renderWorkflowDescription:
+      'Render the currently active workflow from the CC Workflow Studio canvas as human-readable Markdown. Default format "mermaid" returns just the fenced ```mermaid flowchart block — paste it into your reply so the user sees a diagram of the workflow (most chat UIs render Mermaid natively). Format "md" returns the full document `ccwf render` produces: title, description, diagram, and step-by-step execution instructions; optional "agent" phrases those instructions for that target agent (the diagram itself is agent-agnostic). Read-only: nothing is applied or written.',
   },
   file: {
     getCurrentWorkflowDescription:
@@ -119,6 +125,8 @@ const TOOL_TEXT: Record<WorkflowMcpMode, ToolText> = {
       'Highlight a group node to indicate it is currently being executed. In file mode this is a no-op kept for compatibility — highlighting is only visible on the CC Workflow Studio canvas.',
     exportWorkflowDescription:
       'Export the current workflow (read from the target workflow file) as agent-skill files under the project root — the same files `ccwf export` writes. For claude-code (the default): Sub-Agent files under .claude/agents/ plus the workflow entry at .claude/skills/<workflow>/SKILL.md. For other agents (antigravity, codex, copilot, cursor, gemini, roo-code): the provider\'s own skills/<workflow>/SKILL.md layout. Pass "agent" as a single name, an array, or "all" to export several targets in one atomic run — any existing file with different content aborts the whole export with nothing written unless overwrite is true. Set dryRun to preview every planned file\'s status (new / up-to-date / conflict) without writing. The workflow is schema-validated first; an invalid workflow is refused with validationErrors.',
+    renderWorkflowDescription:
+      'Render the current workflow (read from the target workflow file) as human-readable Markdown. Default format "mermaid" returns just the fenced ```mermaid flowchart block — paste it into your reply so the user sees a diagram of the workflow (most chat UIs render Mermaid natively). Format "md" returns the full document `ccwf render` produces: title, description, diagram, and step-by-step execution instructions; optional "agent" phrases those instructions for that target agent (the diagram itself is agent-agnostic). Read-only: the file is not touched.',
   },
 };
 
@@ -137,6 +145,7 @@ export function registerWorkflowTools(
   registerPatchWorkflow(server, adapter, text);
   registerHighlightGroupNode(server, adapter, text);
   registerExportWorkflow(server, adapter, text);
+  registerRenderWorkflow(server, adapter, text);
 }
 
 function registerGetCurrentWorkflow(
@@ -936,6 +945,65 @@ function registerHighlightGroupNode(
           highlightedGroupNodeId: effectiveId,
           ...(result.note ? { note: result.note } : {}),
         });
+      } catch (error) {
+        return fail({ success: false, error: errorMessage(error) });
+      }
+    }
+  );
+}
+
+function registerRenderWorkflow(
+  server: McpServer,
+  adapter: WorkflowIoAdapter,
+  text: ToolText
+): void {
+  server.tool(
+    'render_workflow',
+    text.renderWorkflowDescription,
+    {
+      format: z
+        .enum(['mermaid', 'md'])
+        .optional()
+        .describe(
+          'Output format. "mermaid" (default): only the fenced ```mermaid flowchart block — token-cheap, ideal for showing the user a diagram. "md": the full Markdown document (title, description, diagram, execution instructions), same as `ccwf render`.'
+        ),
+      agent: z
+        .enum(WORKFLOW_TARGET_AGENTS)
+        .optional()
+        .describe(
+          'Only used with format "md": phrase the execution instructions for this target agent, the same wording `ccwf render --agent` uses. Defaults to claude-code. The Mermaid diagram is agent-agnostic.'
+        ),
+    },
+    async ({ format, agent }) => {
+      try {
+        const result = await adapter.getCurrentWorkflow();
+        if (!result.workflow) {
+          return fail({ success: false, error: text.noActiveWorkflowError }, false);
+        }
+        const workflow = result.workflow;
+        // generateMermaidFlowchart already returns a fenced ```mermaid block.
+        const mermaidBlock = generateMermaidFlowchart(workflow);
+        if ((format ?? 'mermaid') === 'mermaid') {
+          // Raw text (like get_workflow_schema) so the agent can paste the
+          // block into a reply without unescaping a JSON envelope.
+          return { content: [{ type: 'text' as const, text: `${mermaidBlock}\n` }] };
+        }
+        // Same Markdown bundle `ccwf render` (format md) prints.
+        const target = agent ?? 'claude-code';
+        const execution =
+          target === 'claude-code'
+            ? generateExecutionInstructions(workflow, { provider: 'claude-code' })
+            : generateAgentExecutionInstructions(workflow, target);
+        const title = `# ${workflow.name || 'Workflow'}`;
+        const descriptionBlock = workflow.description ? `\n${workflow.description}\n` : '\n';
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `${title}\n${descriptionBlock}\n${mermaidBlock}\n\n${execution}\n`,
+            },
+          ],
+        };
       } catch (error) {
         return fail({ success: false, error: errorMessage(error) });
       }

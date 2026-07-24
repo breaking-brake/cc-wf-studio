@@ -1,6 +1,6 @@
 ---
 name: cc-workflow-ai-editor
-description: AI workflow editor for CC Workflow Studio. Create and edit visual AI agent workflows through interactive conversation using MCP tools (get_workflow_schema, get_current_workflow, validate_workflow, apply_workflow, patch_workflow, update_nodes). Use when the user wants to create a new workflow, modify an existing workflow, or edit the workflow canvas in CC Workflow Studio via the built-in MCP server.
+description: AI workflow editor for CC Workflow Studio. Create and edit visual AI agent workflows through interactive conversation using MCP tools (get_workflow_schema, get_current_workflow, validate_workflow, apply_workflow, patch_workflow, update_nodes, render_workflow). Use when the user wants to create a new workflow, modify an existing workflow, or edit the workflow canvas in CC Workflow Studio via the built-in MCP server.
 ---
 
 1. Call `get_workflow_schema` via `cc-workflow-studio` MCP server
@@ -14,7 +14,8 @@ description: AI workflow editor for CC Workflow Studio. Create and edit visual A
    - **Partial updates to existing nodes** (change name, position, or data): use `update_nodes` (more token-efficient)
    - Fix errors if any
 6. **After creating a new workflow or making substantial structural changes**, briefly offer (one line) to generate a guided tour — e.g. "I can also generate a guided tour of this workflow so others can follow it — want me to?" Offer it only once at a natural stopping point (not on every small edit), and do NOT auto-generate without the user agreeing. If they agree, add a top-level `tour` array (a sibling of `nodes`/`connections`) and apply it with `apply_workflow`. Each entry is `{ "order": 1, "title": "...", "description": "what these nodes do and why", "nodeIds": ["start-1"], "languageLesson": "optional" }`; scale the step count to the workflow size (small → ~one step per node, larger → group related nodes to ~8–15 steps), `order` 1-based, every `nodeIds` entry a real node id, start with an overview and end at completion, in the user's language. The canvas then shows a "Start Workflow Tour" button.
-7. Ask for feedback, repeat from step 4
+7. **To show the user what was built**, call `render_workflow` and paste the returned fenced ```mermaid block into your reply — most chat UIs render it as a diagram. Default format is the diagram only; `format: "md"` returns the full document (title, description, diagram, execution instructions). Read-only, never modifies the canvas.
+8. Ask for feedback, repeat from step 4
 
 ## Group Node
 
