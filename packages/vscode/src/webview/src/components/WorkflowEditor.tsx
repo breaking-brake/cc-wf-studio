@@ -58,6 +58,7 @@ import {
   type SelectionClipboardPayload,
   useWorkflowStore,
 } from '../stores/workflow-store';
+import { jumpToNode } from '../utils/canvas-navigation';
 import { createDefaultNode, type SimpleNodeType } from '../utils/node-defaults';
 import { collectWorkflowIssues } from '../utils/workflow-issues';
 import { CanvasContextMenu, type CanvasContextMenuEntry } from './CanvasContextMenu';
@@ -829,6 +830,49 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         }
         event.preventDefault();
         setIsShortcutsOpen(true);
+        return;
+      }
+
+      // F8 / Shift+F8 — jump to the next / previous node with a validation
+      // problem (VSCode's "go to next problem" convention). Opens the
+      // problems panel so the list and node markers explain the jump.
+      if (event.key === 'F8' && !mod && !event.altKey) {
+        const target = event.target as HTMLElement | null;
+        if (
+          target &&
+          (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+        ) {
+          return;
+        }
+        const state = useWorkflowStore.getState();
+        // The panel and its issues describe the main workflow, not the
+        // sub-agent flow currently on the canvas
+        if (state.activeSubAgentFlowId !== null) return;
+        event.preventDefault();
+        if (!state.isProblemsPanelOpen) state.openProblemsPanel();
+        const issues = collectWorkflowIssues(
+          state.nodes,
+          state.edges,
+          state.workflowName,
+          state.workflowDescription || undefined,
+          state.subAgentFlows.length > 0 ? state.subAgentFlows : undefined,
+          state.slashCommandOptions
+        );
+        const problemNodeIds = [
+          ...new Set(issues.flatMap((issue) => (issue.nodeId !== null ? [issue.nodeId] : []))),
+        ].filter((id) => state.nodes.some((n) => n.id === id));
+        const instance = reactFlowInstanceRef.current;
+        if (problemNodeIds.length === 0 || !instance) return;
+        const selectedId = state.nodes.find((n) => n.selected)?.id;
+        const currentIndex = selectedId ? problemNodeIds.indexOf(selectedId) : -1;
+        const nextIndex = event.shiftKey
+          ? currentIndex <= 0
+            ? problemNodeIds.length - 1
+            : currentIndex - 1
+          : currentIndex === -1 || currentIndex === problemNodeIds.length - 1
+            ? 0
+            : currentIndex + 1;
+        jumpToNode(instance, problemNodeIds[nextIndex]);
         return;
       }
 

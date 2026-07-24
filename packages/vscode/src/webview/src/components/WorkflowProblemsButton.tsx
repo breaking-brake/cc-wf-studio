@@ -59,10 +59,11 @@ export const WorkflowProblemsButton: React.FC<WorkflowProblemsButtonProps> = ({
   issueCount = 0,
 }) => {
   const { t } = useTranslation();
-  const tooltip =
+  const tooltip = `${
     issueCount > 0
       ? t('problemsPanel.tooltipWithCount', { count: issueCount })
-      : t('problemsPanel.tooltip');
+      : t('problemsPanel.tooltip')
+  } (F8)`;
 
   return (
     <StyledTooltipProvider>

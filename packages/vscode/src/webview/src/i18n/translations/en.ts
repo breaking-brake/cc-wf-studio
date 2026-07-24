@@ -468,6 +468,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'shortcuts.delete': 'Delete selection',
   'shortcuts.selectAll': 'Select all nodes',
   'shortcuts.search': 'Search nodes',
+  'shortcuts.nextProblem': 'Jump to next problem',
+  'shortcuts.prevProblem': 'Jump to previous problem',
   'shortcuts.openCheatSheet': 'Show this cheat sheet',
   'shortcuts.contextMenu': 'Open the context menu',
   'shortcuts.edgeDrop': 'Create a connected node',

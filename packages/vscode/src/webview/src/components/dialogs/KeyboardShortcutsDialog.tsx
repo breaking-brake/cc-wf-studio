@@ -87,6 +87,8 @@ export const KeyboardShortcutsDialog: React.FC<KeyboardShortcutsDialogProps> = (
       rows: [
         { label: t('shortcuts.selectAll'), combos: [[mod, 'A']] },
         { label: t('shortcuts.search'), combos: [[mod, 'F']] },
+        { label: t('shortcuts.nextProblem'), combos: [['F8']] },
+        { label: t('shortcuts.prevProblem'), combos: [['Shift', 'F8']] },
         { label: t('shortcuts.openCheatSheet'), combos: [['?']] },
       ],
     },
