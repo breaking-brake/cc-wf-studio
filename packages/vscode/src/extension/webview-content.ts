@@ -101,7 +101,7 @@ export function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.
       default-src 'none';
       style-src ${webview.cspSource} 'unsafe-inline';
       script-src 'nonce-${nonce}' 'strict-dynamic';
-      img-src ${webview.cspSource} https:;
+      img-src ${webview.cspSource} https: data:;
       font-src ${webview.cspSource};
     ">
 

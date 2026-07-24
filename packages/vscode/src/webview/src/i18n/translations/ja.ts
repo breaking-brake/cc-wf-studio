@@ -508,6 +508,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.focusMode': '集中モード',
   'toolbar.copyAsMarkdown': 'Markdownとしてコピー',
   'toolbar.copyAsMarkdownCopied': 'コピーしました',
+  'toolbar.saveAsImage': '画像として保存',
+  'toolbar.saveAsImageSaved': '保存しました',
+  'toolbar.saveAsImageFailed': 'キャンバス画像の保存に失敗しました',
   'dialog.resetWorkflow.title': 'ワークフローをリセット',
   'dialog.resetWorkflow.message':
     'ワークフローをリセットしてもよろしいですか？Start と End 以外のすべてのノードが削除されます。',

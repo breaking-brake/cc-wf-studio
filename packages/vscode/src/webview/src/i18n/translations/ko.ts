@@ -506,6 +506,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.focusMode': '집중 모드',
   'toolbar.copyAsMarkdown': 'Markdown으로 복사',
   'toolbar.copyAsMarkdownCopied': '복사했습니다',
+  'toolbar.saveAsImage': '이미지로 저장',
+  'toolbar.saveAsImageSaved': '저장했습니다',
+  'toolbar.saveAsImageFailed': '캔버스 이미지를 저장하지 못했습니다',
   'dialog.resetWorkflow.title': '워크플로우 초기화',
   'dialog.resetWorkflow.message':
     '워크플로우를 초기화하시겠습니까? Start와 End를 제외한 모든 노드가 삭제됩니다.',

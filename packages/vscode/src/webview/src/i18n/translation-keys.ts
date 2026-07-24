@@ -487,6 +487,9 @@ export interface WebviewTranslationKeys {
   'toolbar.focusMode': string;
   'toolbar.copyAsMarkdown': string;
   'toolbar.copyAsMarkdownCopied': string;
+  'toolbar.saveAsImage': string;
+  'toolbar.saveAsImageSaved': string;
+  'toolbar.saveAsImageFailed': string;
   'dialog.resetWorkflow.title': string;
   'dialog.resetWorkflow.message': string;
   'dialog.resetWorkflow.confirm': string;

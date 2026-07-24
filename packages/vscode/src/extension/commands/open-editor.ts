@@ -497,6 +497,61 @@ export function registerOpenEditorCommand(
               }
               break;
 
+            case 'EXPORT_IMAGE': {
+              // Persist a canvas capture (PNG data URL) via a save dialog.
+              const base64 = (message.payload?.dataUrl ?? '').replace(
+                /^data:image\/png;base64,/,
+                ''
+              );
+              if (!base64) {
+                webview.postMessage({
+                  type: 'ERROR',
+                  requestId: message.requestId,
+                  payload: {
+                    code: 'VALIDATION_ERROR',
+                    message: 'EXPORT_IMAGE payload is missing image data',
+                  },
+                });
+                break;
+              }
+              try {
+                const suggestedName = (message.payload?.fileName || 'workflow.png').replace(
+                  /[\\/:*?"<>|]/g,
+                  '_'
+                );
+                const workspaceUri = vscode.workspace.workspaceFolders?.[0]?.uri;
+                const target = await vscode.window.showSaveDialog({
+                  defaultUri: workspaceUri
+                    ? vscode.Uri.joinPath(workspaceUri, suggestedName)
+                    : undefined,
+                  filters: { Images: ['png'] },
+                });
+                if (!target) {
+                  webview.postMessage({
+                    type: 'EXPORT_IMAGE_CANCELLED',
+                    requestId: message.requestId,
+                  });
+                  break;
+                }
+                await vscode.workspace.fs.writeFile(target, Buffer.from(base64, 'base64'));
+                webview.postMessage({
+                  type: 'EXPORT_IMAGE_SUCCESS',
+                  requestId: message.requestId,
+                  payload: { filePath: target.fsPath },
+                });
+              } catch (error) {
+                webview.postMessage({
+                  type: 'ERROR',
+                  requestId: message.requestId,
+                  payload: {
+                    code: 'EXPORT_IMAGE_FAILED',
+                    message: `Failed to save canvas image: ${error instanceof Error ? error.message : String(error)}`,
+                  },
+                });
+              }
+              break;
+            }
+
             case 'RUN_AS_SLASH_COMMAND':
               // Run workflow as slash command in terminal
               if (message.payload?.workflow) {

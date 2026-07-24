@@ -31,6 +31,7 @@ import {
   generateWorkflowName,
 } from '../services/ai-generation-service';
 import {
+  exportCanvasImage,
   exportForAntigravity,
   exportForCodexCli,
   exportForCopilot,
@@ -56,6 +57,7 @@ import {
 import { useCommentaryStore } from '../stores/commentary-store';
 import { useRefinementStore } from '../stores/refinement-store';
 import { useWorkflowStore } from '../stores/workflow-store';
+import { captureCanvasPng } from '../utils/canvas-image';
 import { EditableNameField } from './common/EditableNameField';
 import { ProcessingOverlay } from './common/ProcessingOverlay';
 import { StyledTooltipProvider } from './common/StyledTooltip';
@@ -169,6 +171,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [workflowNameError, setWorkflowNameError] = useState<string | null>(null);
   const [isMarkdownCopied, setIsMarkdownCopied] = useState(false);
   const markdownCopiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isSavingImage, setIsSavingImage] = useState(false);
+  const [isImageSaved, setIsImageSaved] = useState(false);
+  const imageSavedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Copilot Chat integration
   const [isCopilotChatExporting, setIsCopilotChatExporting] = useState(false);
   const [isCopilotChatRunning, setIsCopilotChatRunning] = useState(false);
@@ -367,10 +372,42 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       .catch(() => {});
   }, [nodes, edges, workflowName, activeWorkflow]);
 
+  // Capture the whole graph as a PNG and hand it to the host to persist
+  // (VSCode: save dialog; ccwf canvas: written next to the workflow file).
+  const handleSaveAsImage = useCallback(async () => {
+    if (isSavingImage) {
+      return;
+    }
+    setIsSavingImage(true);
+    try {
+      const dataUrl = await captureCanvasPng(nodes);
+      const fileName = `${workflowName || 'workflow'}.png`;
+      const filePath = await exportCanvasImage(fileName, dataUrl);
+      if (filePath) {
+        setIsImageSaved(true);
+        if (imageSavedTimeoutRef.current) {
+          clearTimeout(imageSavedTimeoutRef.current);
+        }
+        imageSavedTimeoutRef.current = setTimeout(() => setIsImageSaved(false), 2000);
+      }
+    } catch (error) {
+      onError({
+        code: 'EXPORT_IMAGE_FAILED',
+        message: t('toolbar.saveAsImageFailed'),
+        details: error,
+      });
+    } finally {
+      setIsSavingImage(false);
+    }
+  }, [isSavingImage, nodes, workflowName, onError, t]);
+
   useEffect(() => {
     return () => {
       if (markdownCopiedTimeoutRef.current) {
         clearTimeout(markdownCopiedTimeoutRef.current);
+      }
+      if (imageSavedTimeoutRef.current) {
+        clearTimeout(imageSavedTimeoutRef.current);
       }
     };
   }, []);
@@ -2656,6 +2693,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onCopyAsMarkdown={handleCopyAsMarkdown}
               isMarkdownCopied={isMarkdownCopied}
               isCopyAsMarkdownDisabled={nodes.length === 0}
+              onSaveAsImage={handleSaveAsImage}
+              isImageSaved={isImageSaved}
+              isSaveAsImageDisabled={nodes.length === 0 || isSavingImage}
               onResetWorkflow={() => setShowResetConfirm(true)}
               onStartTour={onStartTour}
               isFocusMode={isFocusMode}

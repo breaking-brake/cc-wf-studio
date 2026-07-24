@@ -510,6 +510,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'toolbar.focusMode': 'Focus Mode',
   'toolbar.copyAsMarkdown': 'Copy as Markdown',
   'toolbar.copyAsMarkdownCopied': 'Copied!',
+  'toolbar.saveAsImage': 'Save as Image',
+  'toolbar.saveAsImageSaved': 'Saved!',
+  'toolbar.saveAsImageFailed': 'Failed to save the canvas image',
   'dialog.resetWorkflow.title': 'Reset Workflow',
   'dialog.resetWorkflow.message':
     'Are you sure you want to reset the workflow? All nodes except Start and End will be removed.',

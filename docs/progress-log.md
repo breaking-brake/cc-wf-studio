@@ -17,6 +17,47 @@ Entry format:
 
 ---
 
+## 2026-07-24 — "Save as Image (PNG)" canvas action
+- **User value**: a user can now export a clean PNG of the entire workflow
+  graph — including parts scrolled out of view, at the theme's background,
+  without toolbar/minimap chrome — in one click from the More Actions menu,
+  to paste into issues, docs, slides, or chat, instead of cropping OS
+  screenshots; complements "Copy as Markdown" (a PNG needs no Mermaid
+  renderer and preserves the exact canvas layout).
+- **Issue/PR**: #949 / PR from `claude/sleepy-curie-7xz9ro`
+- **Outcome**: done — new `utils/canvas-image.ts` captures
+  `.react-flow__viewport` with `html-to-image` (bounds from the auto-layout
+  `absoluteNodePosition`/`nodeBoxSize` helpers, so no ReactFlowProvider
+  needed; 48px padding, 4096px dimension cap, pixelRatio 2, background from
+  `--vscode-editor-background`). Delivery via a new `EXPORT_IMAGE` message
+  (requestId pattern, 5-min timeout since the VSCode save dialog waits on
+  the user): the extension host shows `showSaveDialog` and writes the file;
+  the `ccwf canvas` host writes `<workflow-name>.png` next to the workflow
+  file with a non-clobbering `-N` suffix. Webview CSP gained `img-src data:`
+  (html-to-image decodes its composited SVG via a data-URL image — the old
+  CSP would have blocked capture in the VSCode webview). Menu item after
+  Copy as Markdown (ImageDown icon, disabled on empty canvas, transient
+  localized "Saved!"); 3 new strings in all 5 locales. `pnpm build` +
+  `pnpm check` green. **Browser E2E against the real webview** via
+  `ccwf canvas` + headless Chromium: 29-node grouped sample renders, first
+  save produces a valid 7142×1552 PNG (visually verified: full graph,
+  groups + children, dark background, nothing clipped), second save lands
+  in `-2.png`, zero page errors. Changeset: patch `cc-wf-studio` +
+  `@cc-wf-studio/cli`. Issue #949 could not be locked (no `gh`, no MCP lock
+  tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - "Group selection" action (wrap selected nodes in a new group node in
+    one step, single undo entry) — drag-into-group parenting exists, but
+    creating the group + resizing + dragging each node in is still manual.
+  - Mirror the shortcut cheat sheet in the README/docs.
+  - Manual E2E queue (carried): Save as Image from the VSCode extension
+    host (save dialog, CSP `data:` change, light theme background); Copy
+    as Markdown; `render_workflow` via MCP Inspector; problems badge;
+    shortcut cheat sheet; problem-node markers; problems panel
+    click-to-jump; auto layout; node search cycling; align/distribute +
+    context menu + copy/cut/paste; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — "Copy as Markdown" canvas action
 - **User value**: a user who built a workflow on the canvas can now copy a
   paste-ready Markdown document of it — title, description, fenced Mermaid

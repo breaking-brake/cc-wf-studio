@@ -43,6 +43,19 @@ export interface ExportSuccessPayload {
   timestamp: string; // ISO 8601
 }
 
+/** Webview → host: save a captured canvas image (PNG data URL). */
+export interface ExportImagePayload {
+  /** Suggested file name, e.g. `<workflow-name>.png`. */
+  fileName: string;
+  /** `data:image/png;base64,...` produced by the webview capture. */
+  dataUrl: string;
+}
+
+/** Host → webview: the canvas image was written to disk. */
+export interface ExportImageSuccessPayload {
+  filePath: string;
+}
+
 export interface ErrorPayload {
   code: string;
   message: string;
@@ -1167,6 +1180,8 @@ export type ExtensionMessage =
   | Message<OverviewParseErrorPayload, 'OVERVIEW_PARSE_ERROR'>
   | Message<void, 'SAVE_CANCELLED'>
   | Message<void, 'EXPORT_CANCELLED'>
+  | Message<ExportImageSuccessPayload, 'EXPORT_IMAGE_SUCCESS'>
+  | Message<void, 'EXPORT_IMAGE_CANCELLED'>
   | Message<CommandListLoadedPayload, 'COMMAND_LIST_LOADED'>
   | Message<SubAgentCreationSuccessPayload, 'SUB_AGENT_CREATION_SUCCESS'>
   | Message<SkillListLoadedPayload, 'SKILL_LIST_LOADED'>
@@ -2448,6 +2463,7 @@ export interface GetLastSharedChannelSuccessPayload {
 export type WebviewMessage =
   | Message<SaveWorkflowPayload, 'SAVE_WORKFLOW'>
   | Message<ExportWorkflowPayload, 'EXPORT_WORKFLOW'>
+  | Message<ExportImagePayload, 'EXPORT_IMAGE'>
   | Message<ConfirmOverwritePayload, 'CONFIRM_OVERWRITE'>
   | Message<void, 'LOAD_WORKFLOW_LIST'>
   | Message<LoadWorkflowRequestPayload, 'LOAD_WORKFLOW'>

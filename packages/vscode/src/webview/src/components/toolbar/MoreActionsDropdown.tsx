@@ -17,6 +17,7 @@ import {
   Cloud,
   Focus,
   HelpCircle,
+  ImageDown,
   Info,
   MessageSquare,
   MoreHorizontal,
@@ -43,6 +44,12 @@ interface MoreActionsDropdownProps {
   isMarkdownCopied: boolean;
   /** Disables the copy item (e.g. empty canvas — nothing to document). */
   isCopyAsMarkdownDisabled: boolean;
+  /** Captures the whole graph as a PNG and saves it via the host. */
+  onSaveAsImage: () => void;
+  /** Shows the transient "Saved!" confirmation on the image item. */
+  isImageSaved: boolean;
+  /** Disables the image item (empty canvas, or a capture in flight). */
+  isSaveAsImageDisabled: boolean;
   onResetWorkflow: () => void;
   onStartTour: () => void;
   isFocusMode: boolean;
@@ -76,6 +83,9 @@ export function MoreActionsDropdown({
   onCopyAsMarkdown,
   isMarkdownCopied,
   isCopyAsMarkdownDisabled,
+  onSaveAsImage,
+  isImageSaved,
+  isSaveAsImageDisabled,
   onResetWorkflow,
   onStartTour,
   isFocusMode,
@@ -231,6 +241,34 @@ export function MoreActionsDropdown({
               {isMarkdownCopied ? t('toolbar.copyAsMarkdownCopied') : t('toolbar.copyAsMarkdown')}
             </span>
             {isMarkdownCopied && <Check size={14} />}
+          </DropdownMenu.Item>
+
+          {/* Save as Image — keeps the menu open so the "Saved!"
+              confirmation is visible where the user just clicked. */}
+          <DropdownMenu.Item
+            disabled={isSaveAsImageDisabled}
+            onSelect={(event) => {
+              event.preventDefault();
+              onSaveAsImage();
+            }}
+            style={{
+              padding: '8px 12px',
+              fontSize: `${FONT_SIZES.small}px`,
+              color: 'var(--vscode-foreground)',
+              cursor: isSaveAsImageDisabled ? 'default' : 'pointer',
+              opacity: isSaveAsImageDisabled ? 0.5 : 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              outline: 'none',
+              borderRadius: '2px',
+            }}
+          >
+            <ImageDown size={14} />
+            <span style={{ flex: 1 }}>
+              {isImageSaved ? t('toolbar.saveAsImageSaved') : t('toolbar.saveAsImage')}
+            </span>
+            {isImageSaved && <Check size={14} />}
           </DropdownMenu.Item>
 
           {/* Reset Workflow */}
