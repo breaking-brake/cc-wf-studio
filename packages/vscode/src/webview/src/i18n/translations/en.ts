@@ -146,6 +146,9 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'palette.controlFlow': 'Control Flow',
   'palette.layout': 'Layout',
   'palette.quickStart': '💡 Quick Start',
+  'palette.filter.placeholder': 'Filter nodes…',
+  'palette.filter.clear': 'Clear filter',
+  'palette.filter.noResults': 'No matching nodes',
 
   // Node types
   'node.prompt.title': 'Prompt',

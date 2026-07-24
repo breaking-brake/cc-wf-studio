@@ -145,6 +145,9 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'palette.controlFlow': '제어 흐름',
   'palette.layout': '레이아웃',
   'palette.quickStart': '💡 빠른 시작',
+  'palette.filter.placeholder': '노드 필터…',
+  'palette.filter.clear': '필터 지우기',
+  'palette.filter.noResults': '일치하는 노드가 없습니다',
 
   // Node types
   'node.prompt.title': 'Prompt',

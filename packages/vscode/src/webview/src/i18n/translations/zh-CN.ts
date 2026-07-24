@@ -142,6 +142,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'palette.controlFlow': '控制流程',
   'palette.layout': '布局',
   'palette.quickStart': '💡 快速入门',
+  'palette.filter.placeholder': '筛选节点…',
+  'palette.filter.clear': '清除筛选',
+  'palette.filter.noResults': '没有匹配的节点',
 
   // Node types
   'node.prompt.title': 'Prompt',
