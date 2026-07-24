@@ -5,8 +5,9 @@
  * core validator the MCP server and `ccwf validate` use — and lets the user
  * click a node-scoped issue to jump straight to the offending node. Opens
  * automatically when a save/export fails validation, or manually from the
- * canvas toolbar Problems button. The list re-validates live as the
- * workflow is edited, so issues disappear as they are fixed.
+ * canvas toolbar Problems button. The issue list is computed live in
+ * WorkflowEditor (one validation pass shared with the on-canvas node
+ * markers), so issues disappear as they are fixed.
  */
 
 import { CheckCircle2, X, XCircle } from 'lucide-react';
@@ -16,34 +17,20 @@ import { useReactFlow } from 'reactflow';
 import { useTranslation } from '../i18n/i18n-context';
 import { useWorkflowStore } from '../stores/workflow-store';
 import { jumpToNode, nodeDisplayName } from '../utils/canvas-navigation';
-import { collectWorkflowIssues } from '../utils/workflow-issues';
+import type { WorkflowIssue } from '../utils/workflow-issues';
 
 interface WorkflowProblemsPanelProps {
+  issues: WorkflowIssue[];
   onClose: () => void;
 }
 
-export const WorkflowProblemsPanel: React.FC<WorkflowProblemsPanelProps> = ({ onClose }) => {
+export const WorkflowProblemsPanel: React.FC<WorkflowProblemsPanelProps> = ({
+  issues,
+  onClose,
+}) => {
   const { t } = useTranslation();
   const reactFlow = useReactFlow();
   const nodes = useWorkflowStore((s) => s.nodes);
-  const edges = useWorkflowStore((s) => s.edges);
-  const workflowName = useWorkflowStore((s) => s.workflowName);
-  const workflowDescription = useWorkflowStore((s) => s.workflowDescription);
-  const subAgentFlows = useWorkflowStore((s) => s.subAgentFlows);
-  const slashCommandOptions = useWorkflowStore((s) => s.slashCommandOptions);
-
-  const issues = useMemo(
-    () =>
-      collectWorkflowIssues(
-        nodes,
-        edges,
-        workflowName,
-        workflowDescription || undefined,
-        subAgentFlows.length > 0 ? subAgentFlows : undefined,
-        slashCommandOptions
-      ),
-    [nodes, edges, workflowName, workflowDescription, subAgentFlows, slashCommandOptions]
-  );
 
   const nodeById = useMemo(() => new Map(nodes.map((node) => [node.id, node])), [nodes]);
 

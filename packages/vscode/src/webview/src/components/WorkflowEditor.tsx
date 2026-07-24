@@ -49,6 +49,7 @@ import {
   type SelectionClipboardPayload,
   useWorkflowStore,
 } from '../stores/workflow-store';
+import { collectWorkflowIssues } from '../utils/workflow-issues';
 import { CanvasContextMenu, type CanvasContextMenuEntry } from './CanvasContextMenu';
 import { CanvasToolbar } from './CanvasToolbar';
 import { FeatureAnnouncementBanner } from './common/FeatureAnnouncementBanner';
@@ -539,6 +540,57 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   const closeProblemsPanel = useCallback(() => {
     useWorkflowStore.getState().closeProblemsPanel();
   }, []);
+  const isProblemsPanelVisible = isProblemsPanelOpen && activeSubAgentFlowId === null;
+
+  // Validation issues for the problems panel and the on-canvas node markers.
+  // Computed here (not in the panel) so a single validation pass feeds both;
+  // skipped entirely while the panel is closed.
+  const workflowName = useWorkflowStore((state) => state.workflowName);
+  const workflowDescription = useWorkflowStore((state) => state.workflowDescription);
+  const subAgentFlows = useWorkflowStore((state) => state.subAgentFlows);
+  const slashCommandOptions = useWorkflowStore((state) => state.slashCommandOptions);
+  const workflowIssues = useMemo(
+    () =>
+      isProblemsPanelVisible
+        ? collectWorkflowIssues(
+            nodes,
+            edges,
+            workflowName,
+            workflowDescription || undefined,
+            subAgentFlows.length > 0 ? subAgentFlows : undefined,
+            slashCommandOptions
+          )
+        : [],
+    [
+      isProblemsPanelVisible,
+      nodes,
+      edges,
+      workflowName,
+      workflowDescription,
+      subAgentFlows,
+      slashCommandOptions,
+    ]
+  );
+
+  // Mark every node the problems panel points at with a red ring + badge
+  // (styles/nodes.css `.wf-problem-node`), so the user can see all offending
+  // nodes at a glance while the panel is open.
+  const displayNodes = useMemo(() => {
+    const problemNodeIds = new Set(
+      workflowIssues.flatMap((issue) => (issue.nodeId !== null ? [issue.nodeId] : []))
+    );
+    if (problemNodeIds.size === 0) {
+      return nodes;
+    }
+    return nodes.map((node) =>
+      problemNodeIds.has(node.id)
+        ? {
+            ...node,
+            className: node.className ? `${node.className} wf-problem-node` : 'wf-problem-node',
+          }
+        : node
+    );
+  }, [nodes, workflowIssues]);
 
   // Keyboard event handlers for modifier key and undo/redo
   useEffect(() => {
@@ -929,7 +981,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       {/* Canvas area */}
       <div ref={canvasContainerRef} style={{ flex: 1, position: 'relative' }}>
         <ReactFlow
-          nodes={nodes}
+          nodes={displayNodes}
           edges={animatedEdges}
           onInit={(instance) => {
             reactFlowInstanceRef.current = instance;
@@ -1050,9 +1102,9 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           )}
 
           {/* Workflow Problems Panel (all validation issues, click-to-jump) */}
-          {isProblemsPanelOpen && activeSubAgentFlowId === null && (
+          {isProblemsPanelVisible && (
             <Panel position="bottom-center">
-              <WorkflowProblemsPanel onClose={closeProblemsPanel} />
+              <WorkflowProblemsPanel issues={workflowIssues} onClose={closeProblemsPanel} />
             </Panel>
           )}
 
