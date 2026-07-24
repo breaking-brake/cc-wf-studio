@@ -17,6 +17,40 @@ Entry format:
 
 ---
 
+## 2026-07-24 — Type-to-filter the node palette
+- **User value**: a user can now type in a filter box at the top of the
+  Node Palette to instantly narrow the list to matching node types —
+  matching both the (always-English) node titles and the localized
+  descriptions — instead of visually scanning four sections of 11+
+  buttons; empty section headers disappear while filtering and a
+  localized "no matching nodes" state explains an over-narrow query
+  (top carried proposal from the previous iteration).
+- **Issue/PR**: #963
+- **Outcome**: done — filter input styled like the canvas
+  NodeSearchPanel's (VSCode input theme vars, inline clear ✕ button,
+  Esc clears then blurs); per-button visibility flags fold in the
+  existing sub-agent-flow-editing and Codex-beta gates, section headers
+  render only when a member node matches, and the Quick Start block
+  hides while a filter is active. Matching is case-insensitive
+  substring over `node.<type>.title` + `node.<type>.description`.
+  3 new strings in all 5 locales. UI-only — no schema or persistence
+  change. Issue #963 could not be locked (no `gh`, no MCP lock tool —
+  known limitation, noted in the issue).
+- **Next proposals**:
+  - Type-to-filter for the edge-drop add-node menu (reuse the palette's
+    matcher).
+  - Mirror the shortcut cheat sheet in the README/docs (carried).
+  - Manual E2E queue (carried): palette filter (title/description match,
+    section hiding, clear button, Esc, compact mode, Codex-beta and
+    sub-agent-flow gating); arrow-key nudge; Esc panel dismissal; F8 /
+    Shift+F8 problem cycling; inline group rename; Ungroup; Group
+    selection; Save as Image from the VSCode extension host; Copy as
+    Markdown; `render_workflow` via MCP Inspector; problems badge;
+    shortcut cheat sheet; problem-node markers; problems panel
+    click-to-jump; auto layout; node search cycling; align/distribute +
+    context menu + copy/cut/paste; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — Arrow-key nudge with single-undo bursts
 - **User value**: a user can now nudge the selected node(s) with the arrow
   keys — one 15px grid step per press, ×4 with Shift — from anywhere on the

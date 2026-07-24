@@ -142,6 +142,9 @@ export interface WebviewTranslationKeys {
   'palette.controlFlow': string;
   'palette.layout': string;
   'palette.quickStart': string;
+  'palette.filter.placeholder': string;
+  'palette.filter.clear': string;
+  'palette.filter.noResults': string;
 
   // Node types
   'node.prompt.title': string;

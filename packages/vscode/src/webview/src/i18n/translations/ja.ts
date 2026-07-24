@@ -146,6 +146,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'palette.controlFlow': '制御フロー',
   'palette.layout': 'レイアウト',
   'palette.quickStart': '💡 クイックスタート',
+  'palette.filter.placeholder': 'ノードを絞り込み…',
+  'palette.filter.clear': 'フィルターをクリア',
+  'palette.filter.noResults': '一致するノードがありません',
 
   // Node types
   'node.prompt.title': 'Prompt',
