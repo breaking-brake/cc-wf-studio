@@ -12,6 +12,7 @@
 
 import {
   type BaseNode,
+  type Connection,
   NodeType,
   WORKFLOW_TARGET_AGENTS,
   collectAgentCompatibilityWarnings,
@@ -63,6 +64,7 @@ interface ToolText {
   validateWorkflowDescription: string;
   updateNodesDescription: string;
   updateNodesChangeDescriptionParam: string;
+  patchWorkflowDescription: string;
   highlightGroupNodeDescription: string;
   exportWorkflowDescription: string;
 }
@@ -83,9 +85,11 @@ const TOOL_TEXT: Record<WorkflowMcpMode, ToolText> = {
     validateWorkflowDescription:
       'Validate a workflow JSON draft WITHOUT applying it to the canvas. Checks schema validity and, when "agent" is provided, also reports target-compatibility warnings (Claude Code-only nodes the agent cannot execute, configured fields that target ignores) — pass "all" or an array of agents to preflight several targets in one call. No side effects: nothing is applied, no review dialog is shown, and no sub-agent files are created. Use this to check a draft before apply_workflow.',
     updateNodesDescription:
-      'Update specific nodes in the current workflow by ID. More efficient than apply_workflow for partial changes. Fetches the current workflow, merges the specified node changes, validates the result, and applies to the canvas. Only updates existing nodes — use apply_workflow to add or remove nodes.',
+      'Update specific nodes in the current workflow by ID. More efficient than apply_workflow for partial changes. Fetches the current workflow, merges the specified node changes, validates the result, and applies to the canvas. Only updates existing nodes — use patch_workflow to add or remove nodes/connections.',
     updateNodesChangeDescriptionParam:
       'A brief description of the changes being made. Shown to the user in the review dialog.',
+    patchWorkflowDescription:
+      'Add and/or remove nodes and connections in the current workflow WITHOUT resending the whole workflow JSON. More token-efficient than apply_workflow for structural edits to an existing workflow. Fetches the current workflow, applies the operations (removals first, then additions), validates the result, and applies to the canvas. Removing a node also removes every connection touching it (reported as cascadedConnectionIds); removing a group node detaches its children, preserving their visual position (reported as detachedNodeIds). Use update_nodes to change fields of existing nodes; use apply_workflow to create a workflow from scratch or rewrite it wholesale. SubAgent nodes added without commandFilePath will have .md files auto-created in .claude/agents/.',
     highlightGroupNodeDescription:
       'Highlight a group node on the CC Workflow Studio canvas to indicate it is currently being executed. Call this before executing nodes within a group to visually track progress.',
     exportWorkflowDescription:
@@ -106,9 +110,11 @@ const TOOL_TEXT: Record<WorkflowMcpMode, ToolText> = {
     validateWorkflowDescription:
       'Validate a workflow JSON draft WITHOUT writing the workflow file. Checks schema validity and, when "agent" is provided, also reports target-compatibility warnings (Claude Code-only nodes the agent cannot execute, configured fields that target ignores) — pass "all" or an array of agents to preflight several targets in one call. No side effects: the file is not touched. Use this to check a draft before apply_workflow.',
     updateNodesDescription:
-      'Update specific nodes in the current workflow by ID. More efficient than apply_workflow for partial changes. Fetches the current workflow, merges the specified node changes, validates the result, and writes it back to the workflow file. Only updates existing nodes — use apply_workflow to add or remove nodes.',
+      'Update specific nodes in the current workflow by ID. More efficient than apply_workflow for partial changes. Fetches the current workflow, merges the specified node changes, validates the result, and writes it back to the workflow file. Only updates existing nodes — use patch_workflow to add or remove nodes/connections.',
     updateNodesChangeDescriptionParam:
       'A brief description of the changes being made. Not displayed in file mode; safe to omit.',
+    patchWorkflowDescription:
+      'Add and/or remove nodes and connections in the current workflow WITHOUT resending the whole workflow JSON. More token-efficient than apply_workflow for structural edits to an existing workflow. Fetches the current workflow from the target file, applies the operations (removals first, then additions), validates the result, and writes it back atomically. Removing a node also removes every connection touching it (reported as cascadedConnectionIds); removing a group node detaches its children, preserving their visual position (reported as detachedNodeIds). Use update_nodes to change fields of existing nodes; use apply_workflow to create the file or rewrite it wholesale. File mode does NOT auto-create sub-agent .md files — set commandFilePath to an existing file on added SubAgent nodes.',
     highlightGroupNodeDescription:
       'Highlight a group node to indicate it is currently being executed. In file mode this is a no-op kept for compatibility — highlighting is only visible on the CC Workflow Studio canvas.',
     exportWorkflowDescription:
@@ -128,6 +134,7 @@ export function registerWorkflowTools(
   registerValidateWorkflow(server, text);
   registerListAvailableAgents(server, adapter);
   registerUpdateNodes(server, adapter, text);
+  registerPatchWorkflow(server, adapter, text);
   registerHighlightGroupNode(server, adapter, text);
   registerExportWorkflow(server, adapter, text);
 }
@@ -514,6 +521,260 @@ function registerUpdateNodes(
           success: applyResult.success,
           ...(applyResult.revision ? { revision: applyResult.revision } : {}),
           ...(applyResult.error ? { error: applyResult.error } : {}),
+          ...(plannedFiles.length > 0
+            ? { autoCreatedFiles: plannedFiles.map((f) => f.filePath) }
+            : {}),
+        });
+      } catch (error) {
+        return fail({ success: false, error: errorMessage(error) });
+      }
+    }
+  );
+}
+
+/**
+ * `patch_workflow` — structural edits (add/remove nodes and connections)
+ * without resending the whole workflow. Removals apply before additions, so
+ * an add may reuse the ID of a node removed in the same call (replace).
+ * Removing a node cascades to its connections; removing a group re-parents
+ * its children to the group's own parent (or detaches them) with their
+ * position shifted by the group's offset, so they stay visually in place.
+ */
+function registerPatchWorkflow(
+  server: McpServer,
+  adapter: WorkflowIoAdapter,
+  text: ToolText
+): void {
+  server.tool(
+    'patch_workflow',
+    text.patchWorkflowDescription,
+    {
+      addNodes: z
+        .array(
+          z.object({
+            id: z.string().describe('Unique node ID'),
+            type: z.nativeEnum(NodeType).describe('Node type'),
+            name: z.string().describe('Display name for the node'),
+            position: z
+              .object({ x: z.number(), y: z.number() })
+              .describe('Canvas position (relative to the parent group when parentId is set)'),
+            data: z
+              .record(z.string(), z.unknown())
+              .optional()
+              .describe('Node data matching the workflow schema for this node type'),
+            parentId: z.string().optional().describe('Parent group node ID'),
+            style: z
+              .object({ width: z.number().optional(), height: z.number().optional() })
+              .optional()
+              .describe('Node dimensions (mainly for group nodes).'),
+          })
+        )
+        .optional()
+        .describe(
+          'Complete node objects to add. IDs must not collide with existing nodes (removals in the same call apply first, so reusing a removed ID replaces that node).'
+        ),
+      removeNodeIds: z
+        .array(z.string())
+        .optional()
+        .describe(
+          'IDs of nodes to remove. Every connection touching a removed node is removed too; children of a removed group are kept, re-parented to the group\'s parent with their visual position preserved. Unknown IDs are an error.'
+        ),
+      addConnections: z
+        .array(
+          z.object({
+            id: z.string().describe('Unique connection ID'),
+            from: z.string().describe('Source node ID'),
+            to: z.string().describe('Target node ID'),
+            fromPort: z.string().describe('Source handle ID (usually "output")'),
+            toPort: z.string().describe('Target handle ID (usually "input")'),
+            condition: z
+              .string()
+              .optional()
+              .describe('Option label for AskUserQuestion branches'),
+          })
+        )
+        .optional()
+        .describe('Complete connection objects to add.'),
+      removeConnectionIds: z
+        .array(z.string())
+        .optional()
+        .describe('IDs of connections to remove. Unknown IDs are an error.'),
+      description: z.string().optional().describe(text.updateNodesChangeDescriptionParam),
+      revision: z
+        .string()
+        .optional()
+        .describe(
+          'Workflow revision from get_current_workflow for conflict detection. If omitted, the revision from the internal fetch is used.'
+        ),
+    },
+    async ({ addNodes, removeNodeIds, addConnections, removeConnectionIds, description, revision }) => {
+      try {
+        const hasOps =
+          (addNodes?.length ?? 0) > 0 ||
+          (removeNodeIds?.length ?? 0) > 0 ||
+          (addConnections?.length ?? 0) > 0 ||
+          (removeConnectionIds?.length ?? 0) > 0;
+        if (!hasOps) {
+          return fail(
+            {
+              success: false,
+              error:
+                'No operations provided. Pass at least one of: addNodes, removeNodeIds, addConnections, removeConnectionIds.',
+            },
+            false
+          );
+        }
+
+        const current = await adapter.getCurrentWorkflow();
+        if (!current.workflow) {
+          return fail({
+            success: false,
+            error: text.noActiveWorkflowError,
+          });
+        }
+
+        // Validate every removal ID against the CURRENT workflow before
+        // touching anything, so a stale agent view fails loudly.
+        const nodeIdsToRemove = new Set(removeNodeIds ?? []);
+        const connectionIdsToRemove = new Set(removeConnectionIds ?? []);
+        const currentNodeIds = new Set(current.workflow.nodes.map((n) => n.id));
+        const currentConnectionIds = new Set(current.workflow.connections.map((c) => c.id));
+        const missingNodeIds = [...nodeIdsToRemove].filter((id) => !currentNodeIds.has(id));
+        if (missingNodeIds.length > 0) {
+          return fail({
+            success: false,
+            error: `Nodes not found: ${missingNodeIds.join(
+              ', '
+            )}. Use get_current_workflow to see available node IDs.`,
+          });
+        }
+        const missingConnectionIds = [...connectionIdsToRemove].filter(
+          (id) => !currentConnectionIds.has(id)
+        );
+        if (missingConnectionIds.length > 0) {
+          return fail({
+            success: false,
+            error: `Connections not found: ${missingConnectionIds.join(
+              ', '
+            )}. Use get_current_workflow to see available connection IDs.`,
+          });
+        }
+
+        const updatedWorkflow = JSON.parse(JSON.stringify(current.workflow)) as Workflow;
+
+        // Removals first: explicit connections, then nodes (with cascade).
+        updatedWorkflow.connections = updatedWorkflow.connections.filter(
+          (c) => !connectionIdsToRemove.has(c.id)
+        );
+
+        const detachedNodeIds: string[] = [];
+        if (nodeIdsToRemove.size > 0) {
+          // Re-parent children of removed groups, walking up until a
+          // surviving ancestor (or none). Positions are parent-relative, so
+          // each hop adds the removed parent's offset to keep the child in
+          // the same visual place.
+          const nodeById = new Map(updatedWorkflow.nodes.map((n) => [n.id, n]));
+          for (const node of updatedWorkflow.nodes) {
+            if (nodeIdsToRemove.has(node.id)) continue;
+            let moved = false;
+            while (node.parentId && nodeIdsToRemove.has(node.parentId)) {
+              const parent = nodeById.get(node.parentId);
+              if (!parent) break;
+              node.position = {
+                x: node.position.x + parent.position.x,
+                y: node.position.y + parent.position.y,
+              };
+              if (parent.parentId) {
+                node.parentId = parent.parentId;
+              } else {
+                delete node.parentId;
+              }
+              moved = true;
+            }
+            if (moved) {
+              detachedNodeIds.push(node.id);
+            }
+          }
+          updatedWorkflow.nodes = updatedWorkflow.nodes.filter(
+            (n) => !nodeIdsToRemove.has(n.id)
+          );
+        }
+
+        const cascadedConnectionIds = updatedWorkflow.connections
+          .filter((c) => nodeIdsToRemove.has(c.from) || nodeIdsToRemove.has(c.to))
+          .map((c) => c.id);
+        if (cascadedConnectionIds.length > 0) {
+          const cascaded = new Set(cascadedConnectionIds);
+          updatedWorkflow.connections = updatedWorkflow.connections.filter(
+            (c) => !cascaded.has(c.id)
+          );
+        }
+
+        // Additions, checked against the post-removal workflow so a removed
+        // ID may be reused in the same call.
+        if (addNodes && addNodes.length > 0) {
+          const remainingNodeIds = new Set(updatedWorkflow.nodes.map((n) => n.id));
+          const collidingNodeIds: string[] = [];
+          for (const node of addNodes) {
+            if (remainingNodeIds.has(node.id)) {
+              collidingNodeIds.push(node.id);
+            }
+            remainingNodeIds.add(node.id);
+          }
+          if (collidingNodeIds.length > 0) {
+            return fail({
+              success: false,
+              error: `Node IDs already exist: ${collidingNodeIds.join(
+                ', '
+              )}. Use unique IDs, or remove the existing nodes in the same call to replace them.`,
+            });
+          }
+          updatedWorkflow.nodes.push(...(addNodes as unknown as WorkflowNode[]));
+        }
+
+        if (addConnections && addConnections.length > 0) {
+          const remainingConnectionIds = new Set(updatedWorkflow.connections.map((c) => c.id));
+          const collidingConnectionIds: string[] = [];
+          for (const connection of addConnections) {
+            if (remainingConnectionIds.has(connection.id)) {
+              collidingConnectionIds.push(connection.id);
+            }
+            remainingConnectionIds.add(connection.id);
+          }
+          if (collidingConnectionIds.length > 0) {
+            return fail({
+              success: false,
+              error: `Connection IDs already exist: ${collidingConnectionIds.join(
+                ', '
+              )}. Use unique IDs, or remove the existing connections in the same call to replace them.`,
+            });
+          }
+          updatedWorkflow.connections.push(...(addConnections as Connection[]));
+        }
+
+        const plannedFiles = await adapter.planAndPersistSubAgentFiles(updatedWorkflow);
+
+        const validation = validateAIGeneratedWorkflow(updatedWorkflow);
+        if (!validation.valid) {
+          return fail({
+            success: false,
+            error: 'Validation failed',
+            validationErrors: validation.errors,
+          });
+        }
+
+        const applyResult = await adapter.applyWorkflow(updatedWorkflow, {
+          description,
+          plannedFiles,
+          expectedRevision: revision ?? current.revision,
+        });
+
+        return ok({
+          success: applyResult.success,
+          ...(applyResult.revision ? { revision: applyResult.revision } : {}),
+          ...(applyResult.error ? { error: applyResult.error } : {}),
+          ...(cascadedConnectionIds.length > 0 ? { cascadedConnectionIds } : {}),
+          ...(detachedNodeIds.length > 0 ? { detachedNodeIds } : {}),
           ...(plannedFiles.length > 0
             ? { autoCreatedFiles: plannedFiles.map((f) => f.filePath) }
             : {}),

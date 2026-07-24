@@ -17,6 +17,47 @@ Entry format:
 
 ---
 
+## 2026-07-24 — MCP `patch_workflow` tool for structural edits
+- **User value**: an AI agent editing a workflow via MCP (canvas or file
+  mode) can now add or remove individual nodes and connections in one small
+  `patch_workflow` call instead of resending the entire workflow JSON
+  through `apply_workflow` — edits to large workflows get faster, cheaper
+  in tokens, and can no longer corrupt unrelated nodes in the retype.
+- **Issue/PR**: #927 / PR from `claude/sleepy-curie-da52se`
+- **Outcome**: done — new tool in `packages/mcp/src/tools.ts`, registered in
+  both modes (needs only `getCurrentWorkflow` + `applyWorkflow`). Inputs:
+  `addNodes` (full node objects), `removeNodeIds`, `addConnections`,
+  `removeConnectionIds`, plus `description`/`revision` as in `update_nodes`;
+  at least one operation required. Removals validate IDs against the current
+  workflow first (unknown IDs are a hard error), then apply before additions
+  so a removed ID may be reused in the same call (replace). Removing a node
+  cascades to every connection touching it (reported as
+  `cascadedConnectionIds`); removing a group re-parents children to the
+  group's own parent — walking chains of removed ancestors — with positions
+  shifted by the removed group's offset so they stay visually in place
+  (reported as `detachedNodeIds`). Additions reject colliding IDs; the
+  merged workflow is schema-validated before the write, and canvas-mode
+  sub-agent auto-creation runs via the existing
+  `planAndPersistSubAgentFiles` path. `update_nodes` descriptions now point
+  structural edits here. Docs: mcp README tool table, ccwf-cli SKILL.md
+  (8 tools + usage note), ai-editing-skill-template.md step-5 guidance.
+  E2E: 25 checks through the MCP SDK stdio client against the built
+  `dist/mcp.js` (tool listed, no-op rejected, insert-between rewire,
+  stale-revision rejection, cascade + detach with position math, unknown /
+  colliding IDs, same-call replace, invalid patch refused with file
+  untouched, `update_nodes` regression). Issue #927 could not be locked
+  (no `gh`, no MCP lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - `ccwf export -` / `ccwf run -` stdin input for symmetry, if piped
+    generate-then-materialise proves to be a real flow — judge value first.
+  - Refresh the exported skill copies in `.github/skills/` and
+    `.roo/skills/` (stale vs `ai-editing-skill-template.md`: missing
+    validate_workflow/patch_workflow guidance) — verify how they are
+    generated first.
+  - Manual E2E queue (carried): align/distribute + context menu +
+    copy/cut/paste in real webviews; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector in both modes.
+
 ## 2026-07-23 — MCP `export_workflow` tool for the file-mode server
 - **User value**: an AI agent editing a workflow via `ccwf mcp --file` /
   `ccwf-mcp` can now export the workflow's slash-command and agent-skill

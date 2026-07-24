@@ -174,7 +174,7 @@ Typical `.mcp.json` snippet for Claude Code:
 }
 ```
 
-The MCP server exposes 7 tools: `get_workflow_schema`, `get_current_workflow`, `validate_workflow`, `apply_workflow`, `update_nodes`, `list_available_agents`, `highlight_group_node`. Use these when the user wants AI-driven editing of the workflow itself (not just rendering / running it). `validate_workflow` checks a draft (schema validity + optional `--agent`-style target-compatibility warnings) without writing the file — prefer it before `apply_workflow`. Its `agent` param accepts a single agent name, an array of names, or `"all"`, mirroring `ccwf validate --agent all`: one agent returns `warnings`, several return `warningsByAgent: { <agent>: string[] }`.
+The MCP server exposes 8 tools: `get_workflow_schema`, `get_current_workflow`, `validate_workflow`, `apply_workflow`, `update_nodes`, `patch_workflow`, `list_available_agents`, `highlight_group_node`. Use these when the user wants AI-driven editing of the workflow itself (not just rendering / running it). `validate_workflow` checks a draft (schema validity + optional `--agent`-style target-compatibility warnings) without writing the file — prefer it before `apply_workflow`. Its `agent` param accepts a single agent name, an array of names, or `"all"`, mirroring `ccwf validate --agent all`: one agent returns `warnings`, several return `warningsByAgent: { <agent>: string[] }`. For structural edits to an existing workflow (adding/removing nodes or connections), prefer `patch_workflow` over resending the whole JSON through `apply_workflow` — it applies removals first (cascading connections, re-parenting children of removed groups) and validates the merged result before writing.
 
 ### `ccwf samples list` / `ccwf samples copy <id>`
 
