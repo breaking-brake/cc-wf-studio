@@ -17,6 +17,38 @@ Entry format:
 
 ---
 
+## 2026-07-24 — "Copy as Markdown" canvas action
+- **User value**: a user who built a workflow on the canvas can now copy a
+  paste-ready Markdown document of it — title, description, fenced Mermaid
+  diagram (rendered natively by GitHub), and execution instructions, the
+  same bundle `ccwf render` prints — from the More Actions menu, instead of
+  installing the `ccwf` CLI or hand-assembling a doc to describe the
+  workflow in a PR, issue, or README (carried proposal from the
+  `render_workflow` iteration).
+- **Issue/PR**: #947 / PR from `claude/sleepy-curie-63ljp4`
+- **Outcome**: done — new "Copy as Markdown" item in `MoreActionsDropdown`
+  (after Share to Slack, `ClipboardCopy` icon), wired from `Toolbar.tsx`:
+  serializes the current canvas via the established `serializeWorkflow`
+  path and assembles the doc with `generateMermaidFlowchart` +
+  `generateExecutionInstructions` from `@cc-wf-studio/core` (byte-identical
+  to `ccwf render --format=md`'s stdout), then writes it with
+  `navigator.clipboard`. The item preventDefaults so the menu stays open
+  and shows a transient localized "Copied!" + check confirmation (2 s);
+  disabled on an empty canvas. Two new strings in all 5 locales
+  ("Markdown" kept untranslated per the translation rule). Serves both
+  hosts of the shared webview bundle (VSCode editor + `ccwf canvas`).
+  `pnpm build` + `pnpm check` green. Issue #947 could not be locked (no
+  `gh`, no MCP lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - Mirror the shortcut cheat sheet in the README/docs.
+  - Manual E2E queue (carried): Copy as Markdown (menu item feedback,
+    disabled on empty canvas, pasted doc renders on GitHub);
+    `render_workflow` via MCP Inspector (both formats); problems badge;
+    shortcut cheat sheet (`?`, toolbar button, ja locale); problem-node
+    markers; problems panel click-to-jump; auto layout; node search
+    cycling; align/distribute + context menu + copy/cut/paste; localized
+    Claude API dialog in ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — `render_workflow` MCP tool (show the workflow as a diagram)
 - **User value**: a user editing a workflow through an AI agent (canvas skill
   or `ccwf-mcp` file mode) can now ask "show me the workflow" and the agent

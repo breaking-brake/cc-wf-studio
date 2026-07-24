@@ -506,6 +506,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   // Reset Workflow Confirmation Dialog
   'toolbar.resetWorkflow': 'ワークフローをリセット',
   'toolbar.focusMode': '集中モード',
+  'toolbar.copyAsMarkdown': 'Markdownとしてコピー',
+  'toolbar.copyAsMarkdownCopied': 'コピーしました',
   'dialog.resetWorkflow.title': 'ワークフローをリセット',
   'dialog.resetWorkflow.message':
     'ワークフローをリセットしてもよろしいですか？Start と End 以外のすべてのノードが削除されます。',

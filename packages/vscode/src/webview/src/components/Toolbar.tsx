@@ -4,7 +4,12 @@
  * Provides Save and Load functionality for workflows
  */
 
-import { CLAUDE_CODE_ONLY_NODE_TYPES, type NodeType } from '@cc-wf-studio/core';
+import {
+  CLAUDE_CODE_ONLY_NODE_TYPES,
+  generateExecutionInstructions,
+  generateMermaidFlowchart,
+  type NodeType,
+} from '@cc-wf-studio/core';
 import type { Workflow } from '@shared/types/messages';
 import {
   BookOpen,
@@ -162,6 +167,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [isGeneratingName, setIsGeneratingName] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [workflowNameError, setWorkflowNameError] = useState<string | null>(null);
+  const [isMarkdownCopied, setIsMarkdownCopied] = useState(false);
+  const markdownCopiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Copilot Chat integration
   const [isCopilotChatExporting, setIsCopilotChatExporting] = useState(false);
   const [isCopilotChatRunning, setIsCopilotChatRunning] = useState(false);
@@ -326,6 +333,47 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       setIsSaving(false);
     }
   };
+
+  // Copy the current workflow as the same Markdown bundle `ccwf render`
+  // (format md) prints: title + description + Mermaid diagram + execution
+  // instructions — paste-ready for a PR, issue, or README.
+  const handleCopyAsMarkdown = useCallback(() => {
+    const { subAgentFlows, workflowDescription, slashCommandOptions } = useWorkflowStore.getState();
+    const workflow = serializeWorkflow(
+      nodes,
+      edges,
+      workflowName,
+      workflowDescription || undefined,
+      activeWorkflow?.conversationHistory,
+      subAgentFlows,
+      slashCommandOptions,
+      activeWorkflow?.tour
+    );
+    // generateMermaidFlowchart already returns a fenced ```mermaid block.
+    const mermaidBlock = generateMermaidFlowchart(workflow);
+    const execution = generateExecutionInstructions(workflow, { provider: 'claude-code' });
+    const title = `# ${workflow.name || 'Workflow'}`;
+    const descriptionBlock = workflow.description ? `\n${workflow.description}\n` : '\n';
+    const doc = `${title}\n${descriptionBlock}\n${mermaidBlock}\n\n${execution}\n`;
+    navigator.clipboard
+      ?.writeText(doc)
+      .then(() => {
+        setIsMarkdownCopied(true);
+        if (markdownCopiedTimeoutRef.current) {
+          clearTimeout(markdownCopiedTimeoutRef.current);
+        }
+        markdownCopiedTimeoutRef.current = setTimeout(() => setIsMarkdownCopied(false), 2000);
+      })
+      .catch(() => {});
+  }, [nodes, edges, workflowName, activeWorkflow]);
+
+  useEffect(() => {
+    return () => {
+      if (markdownCopiedTimeoutRef.current) {
+        clearTimeout(markdownCopiedTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Listen for messages from Extension
   useEffect(() => {
@@ -2605,6 +2653,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <MoreActionsDropdown
               onOpenClaudeApi={() => setIsClaudeApiUploadDialogOpen(true)}
               onShareToSlack={onShareToSlack}
+              onCopyAsMarkdown={handleCopyAsMarkdown}
+              isMarkdownCopied={isMarkdownCopied}
+              isCopyAsMarkdownDisabled={nodes.length === 0}
               onResetWorkflow={() => setShowResetConfirm(true)}
               onStartTour={onStartTour}
               isFocusMode={isFocusMode}

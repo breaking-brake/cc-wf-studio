@@ -13,6 +13,7 @@ import {
   Bot,
   Check,
   ChevronLeft,
+  ClipboardCopy,
   Cloud,
   Focus,
   HelpCircle,
@@ -35,6 +36,13 @@ const FONT_SIZES = {
 interface MoreActionsDropdownProps {
   onOpenClaudeApi: () => void;
   onShareToSlack: () => void;
+  /** Copies the current workflow as a Markdown doc (title + Mermaid diagram +
+   *  execution instructions) to the clipboard. */
+  onCopyAsMarkdown: () => void;
+  /** Shows the transient "Copied!" confirmation on the copy item. */
+  isMarkdownCopied: boolean;
+  /** Disables the copy item (e.g. empty canvas — nothing to document). */
+  isCopyAsMarkdownDisabled: boolean;
   onResetWorkflow: () => void;
   onStartTour: () => void;
   isFocusMode: boolean;
@@ -65,6 +73,9 @@ interface MoreActionsDropdownProps {
 export function MoreActionsDropdown({
   onOpenClaudeApi,
   onShareToSlack,
+  onCopyAsMarkdown,
+  isMarkdownCopied,
+  isCopyAsMarkdownDisabled,
   onResetWorkflow,
   onStartTour,
   isFocusMode,
@@ -192,6 +203,34 @@ export function MoreActionsDropdown({
           >
             <Share2 size={14} />
             <span>{t('slack.share.title')}</span>
+          </DropdownMenu.Item>
+
+          {/* Copy as Markdown — keeps the menu open so the "Copied!"
+              confirmation is visible where the user just clicked. */}
+          <DropdownMenu.Item
+            disabled={isCopyAsMarkdownDisabled}
+            onSelect={(event) => {
+              event.preventDefault();
+              onCopyAsMarkdown();
+            }}
+            style={{
+              padding: '8px 12px',
+              fontSize: `${FONT_SIZES.small}px`,
+              color: 'var(--vscode-foreground)',
+              cursor: isCopyAsMarkdownDisabled ? 'default' : 'pointer',
+              opacity: isCopyAsMarkdownDisabled ? 0.5 : 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              outline: 'none',
+              borderRadius: '2px',
+            }}
+          >
+            <ClipboardCopy size={14} />
+            <span style={{ flex: 1 }}>
+              {isMarkdownCopied ? t('toolbar.copyAsMarkdownCopied') : t('toolbar.copyAsMarkdown')}
+            </span>
+            {isMarkdownCopied && <Check size={14} />}
           </DropdownMenu.Item>
 
           {/* Reset Workflow */}
