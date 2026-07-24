@@ -204,3 +204,36 @@
   outline: 2px solid var(--vscode-focusBorder);
   outline-offset: 2px;
 }
+
+/* ============================================================================
+   Problem node marker
+   Applied by WorkflowEditor (`wf-problem-node` on the React Flow node
+   wrapper) to every node the Workflow Problems panel points at, while the
+   panel is open. Styled on the wrapper so it works for every node type,
+   including groups, without touching individual node components.
+   ============================================================================ */
+
+.react-flow__node.wf-problem-node {
+  outline: 2px solid var(--vscode-charts-red, #ef4444);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.react-flow__node.wf-problem-node::after {
+  content: "⚠";
+  position: absolute;
+  top: -9px;
+  right: -9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  line-height: 1;
+  border-radius: 50%;
+  background: var(--vscode-charts-red, #ef4444);
+  color: #ffffff;
+  z-index: 10;
+  pointer-events: none;
+}

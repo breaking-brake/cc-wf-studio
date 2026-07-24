@@ -17,6 +17,42 @@ Entry format:
 
 ---
 
+## 2026-07-24 — On-canvas markers for problem nodes
+- **User value**: a user triaging validation failures can now see every
+  offending node marked with a red ring and a ⚠ badge directly on the
+  canvas while the Problems panel is open — instead of discovering broken
+  nodes one at a time by clicking Problems-panel rows; markers clear live
+  as issues are fixed and disappear when the panel closes (no permanent
+  visual noise — this answers the noise caveat the previous iteration
+  attached to this proposal).
+- **Issue/PR**: #935 / PR from `claude/sleepy-curie-aqjyio`
+- **Outcome**: done — the `collectWorkflowIssues` computation moved from
+  `WorkflowProblemsPanel` into `WorkflowEditor` (memoized, skipped entirely
+  while the panel is closed or a sub-agent flow is being edited), and the
+  panel now receives `issues` as a prop — one validation pass feeds both
+  the list and the markers. Nodes whose id appears in the issue list get a
+  `wf-problem-node` className injected into the React Flow node objects
+  (same display-mapping pattern as `animatedEdges`; store nodes carry no
+  className, verified). Marker styled in `styles/nodes.css` on the
+  `.react-flow__node` wrapper (red `--vscode-charts-red` outline + ⚠ badge
+  via `::after`, `pointer-events: none`), so every node type including
+  groups is covered without touching individual node components. No new
+  i18n keys (symbol-only badge). `pnpm build` + `pnpm check` green.
+  Manual E2E in a real webview queued below. Issue #935 could not be
+  locked (no `gh`, no MCP lock tool — known limitation, noted in the
+  issue).
+- **Next proposals**:
+  - Problems count badge on the toolbar Problems button while the panel is
+    closed — needs judging: it would cost a validation pass on every edit.
+  - `ccwf export -` / `ccwf run -` stdin input for symmetry, if piped
+    generate-then-materialise proves to be a real flow — judge value first.
+  - Manual E2E queue (carried): problem-node markers (open panel on failed
+    save → rings/badges on offending nodes incl. group children, live
+    clearing, close panel → markers gone); problems panel click-to-jump;
+    auto layout on a real messy workflow; node search cycling;
+    align/distribute + context menu + copy/cut/paste; localized Claude API
+    dialog in ja/ko/zh; `validate_workflow` via MCP Inspector in both modes.
+
 ## 2026-07-24 — Workflow Problems panel with click-to-jump
 - **User value**: a user whose save/export fails validation can now see
   every problem at once in a Problems panel on the canvas — and click any
