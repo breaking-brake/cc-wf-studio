@@ -31,7 +31,18 @@ function looksLikeWorkflow(value: unknown): value is Workflow {
   );
 }
 
-function parseWorkflowSource(raw: string, sourceLabel: string): Workflow {
+export interface WorkflowDocument {
+  workflow: Workflow;
+  /** Set when the source wraps the workflow as `{ meta, workflow }` and carries a `meta` value. */
+  wrapperMeta?: unknown;
+}
+
+/**
+ * Parse a raw JSON string into a workflow, unwrapping the `{ meta, workflow }`
+ * wrapper that sample/share files use. Callers that write the file back (e.g.
+ * `ccwf canvas` save) can use `wrapperMeta` to preserve the wrapper on save.
+ */
+export function parseWorkflowDocument(raw: string, sourceLabel: string): WorkflowDocument {
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
@@ -41,7 +52,7 @@ function parseWorkflowSource(raw: string, sourceLabel: string): Workflow {
     );
   }
   if (looksLikeWorkflow(parsed)) {
-    return parsed;
+    return { workflow: parsed };
   }
   // Sample/share files wrap the workflow: { meta: {...}, workflow: {...} }
   const wrapped =
@@ -49,11 +60,16 @@ function parseWorkflowSource(raw: string, sourceLabel: string): Workflow {
       ? (parsed as { workflow?: unknown }).workflow
       : undefined;
   if (looksLikeWorkflow(wrapped)) {
-    return wrapped;
+    const meta = (parsed as { meta?: unknown }).meta;
+    return meta === undefined ? { workflow: wrapped } : { workflow: wrapped, wrapperMeta: meta };
   }
   throw new WorkflowLoadError(
     `${sourceLabel} does not look like a workflow file: expected a top-level "nodes" array or a { meta, workflow } wrapper`
   );
+}
+
+function parseWorkflowSource(raw: string, sourceLabel: string): Workflow {
+  return parseWorkflowDocument(raw, sourceLabel).workflow;
 }
 
 export async function loadWorkflowFromFile(filePath: string): Promise<{

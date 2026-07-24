@@ -14,6 +14,7 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { type Workflow, migrateWorkflow } from '@cc-wf-studio/core';
+import { parseWorkflowDocument } from '../utils/load-workflow.js';
 import type { CanvasServerHandlers } from './server.js';
 
 // Local shape declarations for the message envelopes the webview expects.
@@ -100,10 +101,16 @@ export function createCanvasHandlers(options: CanvasHandlersOptions): CanvasServ
   const workflowId = path.basename(workflowAbsPath, '.json');
   const workflowDisplayName = workflowId;
 
+  // When the source file wraps the workflow as `{ meta, workflow }` (the
+  // format `ccwf export` and the bundled samples produce), remember the meta
+  // so saves write the wrapper back instead of silently discarding it.
+  let wrapperMeta: unknown;
+
   async function readWorkflowFromDisk() {
     const raw = await fs.readFile(workflowAbsPath, 'utf-8');
-    const parsed = JSON.parse(raw);
-    return migrateWorkflow(parsed);
+    const document = parseWorkflowDocument(raw, workflowAbsPath);
+    wrapperMeta = document.wrapperMeta;
+    return migrateWorkflow(document.workflow);
   }
 
   return {
@@ -193,7 +200,11 @@ export function createCanvasHandlers(options: CanvasHandlersOptions): CanvasServ
             return;
           }
           try {
-            const contents = `${JSON.stringify(save.workflow, null, 2)}\n`;
+            const document =
+              wrapperMeta === undefined
+                ? save.workflow
+                : { meta: wrapperMeta, workflow: save.workflow };
+            const contents = `${JSON.stringify(document, null, 2)}\n`;
             await fs.writeFile(workflowAbsPath, contents, 'utf-8');
             const payload: SaveSuccessPayload = {
               filePath: workflowAbsPath,
