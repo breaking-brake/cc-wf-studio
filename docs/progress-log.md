@@ -17,6 +17,45 @@ Entry format:
 
 ---
 
+## 2026-07-24 — Fix `ccwf canvas` empty canvas for {meta, workflow} wrapper files
+- **User value**: a user who runs `ccwf canvas` on a `{meta, workflow}`
+  wrapper file (the format `ccwf export` and the bundled samples produce)
+  no longer gets a silently empty canvas with the Start Menu — the workflow
+  loads, and saving writes the wrapper back so `meta` is preserved instead
+  of silently discarded (top carried proposal from the previous iteration,
+  premise re-verified in code: `readWorkflowFromDisk` did raw
+  `JSON.parse` + `migrateWorkflow` with no unwrap while the command's
+  up-front validation accepted the wrapper).
+- **Issue/PR**: #971
+- **Outcome**: done — `parseWorkflowSource` in `load-workflow.ts` refactored
+  into an exported `parseWorkflowDocument` returning `{ workflow,
+  wrapperMeta? }`; canvas handlers now read through it (same unwrap +
+  error messages as every other subcommand) and remember `wrapperMeta` so
+  SAVE_WORKFLOW writes `{ meta, workflow }` back when the source was
+  wrapped, plain files stay plain. A malformed file now surfaces as a
+  LOAD_FAILED error envelope instead of an empty canvas. `ccwf preview`
+  checked: already loads via `loadWorkflowFromFile`, not affected. Browser
+  E2E via `ccwf canvas` + headless Chromium: wrapper sample renders 8/8
+  nodes + 8 edges (previously empty), nudge + Ctrl+S round-trip keeps the
+  wrapper and `meta.id`, plain file still renders and saves without a
+  wrapper being added, zero page errors (10/10 checks). `pnpm build` +
+  `pnpm check` green. Issue #971 could not be locked (no `gh`, no MCP lock
+  tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - Mirror the shortcut cheat sheet in the README/docs (carried).
+  - Manual E2E queue (carried): drag-splice in the VSCode extension host
+    (highlight, drop, undo, wired-node guard, multi-select drag guard);
+    edge ⊕ insert (simple + dialog types, cancel paths, undo, ja locale
+    tooltip); edge-drop dialog create (all four dialogs, cancel path,
+    collapsed palette auto-expand, sub-agent-flow and Codex-beta gating);
+    palette filter; arrow-key nudge; Esc panel dismissal; F8 / Shift+F8
+    problem cycling; inline group rename; Ungroup; Group selection; Save as
+    Image from the VSCode extension host; Copy as Markdown; `render_workflow`
+    via MCP Inspector; problems badge; shortcut cheat sheet; problem-node
+    markers; problems panel click-to-jump; auto layout; node search cycling;
+    align/distribute + context menu + copy/cut/paste; localized Claude API
+    dialog in ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — Drag an unwired node onto a connection to splice it in
 - **User value**: a user who click-adds a node from the palette (which lands
   unwired) can now wire it into the flow by simply dragging it onto an
