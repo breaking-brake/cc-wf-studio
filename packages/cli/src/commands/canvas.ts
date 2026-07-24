@@ -19,6 +19,7 @@
  */
 
 import { spawn } from 'node:child_process';
+import type { Stats } from 'node:fs';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -96,18 +97,53 @@ export function registerCanvasCommand(program: Command): void {
     .description(
       'Open the full editable cc-wf-studio canvas for <file> in a local browser (experimental). Saves write back to the same file.'
     )
-    .argument('<file>', 'Path to a workflow JSON file.')
+    .argument(
+      '<file>',
+      'Path to a workflow JSON file. If it does not exist yet, the canvas opens a new Start→End starter workflow and creates the file on first save.'
+    )
     .option('--port <number>', 'Preferred port (default: ephemeral / 0).')
     .option('--host <address>', 'Bind host. Default 127.0.0.1; do not change for public networks.')
     .action(async (file: string, options: CanvasOptions) => {
       let portOption = 0;
       try {
-        // Validate the file is parseable JSON up-front so the user gets a clear
-        // error instead of a confused empty canvas in the browser.
-        await loadWorkflowFromFile(file);
+        const workflowAbsPath = path.resolve(file);
+        let isNewFile = false;
+        let stat: Stats | undefined;
+        try {
+          stat = await fs.stat(workflowAbsPath);
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+            throw error;
+          }
+          // New-file mode — but a missing parent directory is almost always a
+          // path typo, so keep that a hard error instead of a silent new file.
+          const parentDir = path.dirname(workflowAbsPath);
+          let parentIsDirectory = false;
+          try {
+            parentIsDirectory = (await fs.stat(parentDir)).isDirectory();
+          } catch {
+            // fall through to the error below
+          }
+          if (!parentIsDirectory) {
+            throw new WorkflowLoadError(
+              `Directory not found: ${parentDir}\nCreate it first, or check the path for a typo.`
+            );
+          }
+          isNewFile = true;
+        }
+        if (stat) {
+          if (stat.isDirectory()) {
+            throw new WorkflowLoadError(
+              `${workflowAbsPath} is a directory — pass a workflow JSON file.`
+            );
+          }
+          // Validate the file is parseable JSON up-front so the user gets a
+          // clear error instead of a confused empty canvas in the browser.
+          await loadWorkflowFromFile(file);
+        }
 
         const webviewDistDir = await resolveWebviewDistDir();
-        const handlers = createCanvasHandlers({ workflowPath: file });
+        const handlers = createCanvasHandlers({ workflowPath: file, allowMissing: isNewFile });
         portOption = options.port ? Number(options.port) : 0;
         if (Number.isNaN(portOption)) {
           process.stderr.write(`error: --port must be a number, got '${options.port}'\n`);
@@ -123,7 +159,7 @@ export function registerCanvasCommand(program: Command): void {
 
         const banner = [
           `ccwf canvas server listening at ${server.url}`,
-          `  workflow: ${path.resolve(file)}`,
+          `  workflow: ${workflowAbsPath}${isNewFile ? ' (new file — created on first save)' : ''}`,
           `  bind:     ${server.host}:${server.port}`,
           '',
           'Save buttons in the canvas will write back to the workflow file.',

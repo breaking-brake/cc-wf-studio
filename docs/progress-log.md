@@ -17,6 +17,51 @@ Entry format:
 
 ---
 
+## 2026-07-24 — `ccwf canvas` can start a brand-new workflow file
+- **User value**: a user can now begin a workflow from the terminal with
+  `ccwf canvas new.json` — the canvas opens with a Start→End starter (name
+  derived from the filename) and the file is created on first save;
+  previously the command refused with `error: File not found`, so the only
+  way to start a workflow was the VSCode extension or hand-writing a JSON
+  skeleton.
+- **Issue/PR**: #973
+- **Outcome**: done — `canvas.ts` stats the path first: ENOENT with an
+  existing parent directory enters new-file mode (a missing parent stays a
+  hard error — that's almost always a typo — and a directory path gets its
+  own clear error); existing files keep the up-front parse validation.
+  `createCanvasHandlers` gains `allowMissing`: `readWorkflowFromDisk`
+  returns a cached Start→End starter (same shape as the webview's
+  `createEmptyWorkflow`) on ENOENT, so browser reloads before the first
+  save keep the same workflow id; SAVE_WORKFLOW already created the file
+  via `fs.writeFile`, unchanged. Banner notes "(new file — created on
+  first save)". Browser E2E via `ccwf canvas` + headless Chromium: 12/12
+  checks (starter renders 2 nodes, file absent before save, toolbar Save
+  creates a plain 2-node workflow named after the file, reload after save
+  re-reads from disk, existing-sample regression renders 8 nodes, both
+  error paths exit 2 with friendly messages, zero page errors).
+  `pnpm build` + `pnpm check` green. Issue #973 could not be locked (no
+  `gh`, no MCP lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - Malformed workflow JSON errors surface the raw `JSON.parse` message
+    (byte offset, no line/column) — add a line/col (+ caret snippet)
+    translator in `load-workflow.ts` so every `ccwf` command benefits.
+  - `ccwf canvas` doesn't watch the file: external edits (e.g. an AI agent
+    via `ccwf mcp --file`) go stale in the open canvas and a later save
+    clobbers them — `ccwf preview` already has the watcher pattern.
+  - Mirror the shortcut cheat sheet in the README/docs (carried).
+  - Manual E2E queue (carried): drag-splice in the VSCode extension host
+    (highlight, drop, undo, wired-node guard, multi-select drag guard);
+    edge ⊕ insert (simple + dialog types, cancel paths, undo, ja locale
+    tooltip); edge-drop dialog create (all four dialogs, cancel path,
+    collapsed palette auto-expand, sub-agent-flow and Codex-beta gating);
+    palette filter; arrow-key nudge; Esc panel dismissal; F8 / Shift+F8
+    problem cycling; inline group rename; Ungroup; Group selection; Save as
+    Image from the VSCode extension host; Copy as Markdown; `render_workflow`
+    via MCP Inspector; problems badge; shortcut cheat sheet; problem-node
+    markers; problems panel click-to-jump; auto layout; node search cycling;
+    align/distribute + context menu + copy/cut/paste; localized Claude API
+    dialog in ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — Fix `ccwf canvas` empty canvas for {meta, workflow} wrapper files
 - **User value**: a user who runs `ccwf canvas` on a `{meta, workflow}`
   wrapper file (the format `ccwf export` and the bundled samples produce)
