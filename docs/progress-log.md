@@ -17,6 +17,39 @@ Entry format:
 
 ---
 
+## 2026-07-24 — Inline group rename (double-click the group header)
+- **User value**: a user can now rename a group by double-clicking its
+  header and typing — Enter or clicking away commits, Esc cancels —
+  instead of selecting the group and editing the label in the property
+  panel (top carried proposal from the previous iteration; double-click
+  on the header previously just zoomed the canvas).
+- **Issue/PR**: #955 / PR from `claude/sleepy-curie-km0zc4`
+- **Outcome**: done — `GroupNode.tsx` swaps the header label span for a
+  pre-filled, auto-selected text input on double-click; commit goes
+  through the existing `updateNodeData` (single `set()` → one undo
+  entry), empty input falls back to the previous label, Esc discards.
+  `nodrag nodblclick` classNames keep typing from dragging the node and
+  the double-click from triggering React Flow's canvas zoom; the global
+  shortcut handlers already ignore INPUT targets, and the input resets
+  the header's uppercase text-transform so the real stored value is shown
+  while editing. Tooltip + input aria strings added in all 5 locales. No
+  schema change — the property panel remains an equivalent editor. Issue
+  #955 could not be locked (no `gh`, no MCP lock tool — known limitation,
+  noted in the issue).
+- **Next proposals**:
+  - F8-style "next problem" keyboard cycling for the problems panel
+    (jump through problem nodes without the mouse).
+  - Mirror the shortcut cheat sheet in the README/docs (carried).
+  - Manual E2E queue (carried): inline group rename (double-click,
+    Enter/blur/Esc, undo restores old name); Ungroup (menu +
+    mod+Shift+G, undo restores parenting, mixed selection); Group
+    selection (menu + mod+G, undo as one step); Save as Image from the
+    VSCode extension host; Copy as Markdown; `render_workflow` via MCP
+    Inspector; problems badge; shortcut cheat sheet; problem-node
+    markers; problems panel click-to-jump; auto layout; node search
+    cycling; align/distribute + context menu + copy/cut/paste; localized
+    Claude API dialog in ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — "Ungroup" canvas action (context menu + Ctrl/Cmd+Shift+G)
 - **User value**: a user can now dissolve a selected group in place — its
   nodes keep their exact canvas positions and edges, only the container

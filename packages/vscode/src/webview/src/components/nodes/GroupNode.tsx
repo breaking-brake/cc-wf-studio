@@ -7,7 +7,9 @@
  */
 
 import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { type NodeProps, NodeResizer } from 'reactflow';
+import { useTranslation } from '../../i18n/i18n-context';
 import { useWorkflowStore } from '../../stores/workflow-store';
 import { DeleteButton } from './DeleteButton';
 import { DuplicateButton } from './DuplicateButton';
@@ -18,8 +20,35 @@ export interface GroupNodeData {
 
 export const GroupNodeComponent: React.FC<NodeProps<GroupNodeData>> = ({ id, data, selected }) => {
   const label = data.label || 'Group';
+  const { t } = useTranslation();
   const highlightedGroupNodeId = useWorkflowStore((s) => s.highlightedGroupNodeId);
+  const updateNodeData = useWorkflowStore((s) => s.updateNodeData);
   const isHighlighted = highlightedGroupNodeId === id;
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(label);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isEditing) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [isEditing]);
+
+  const startEditing = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    setDraft(label);
+    setIsEditing(true);
+  };
+
+  const commitEdit = () => {
+    const trimmed = draft.trim();
+    if (trimmed && trimmed !== label) {
+      updateNodeData(id, { label: trimmed });
+    }
+    setIsEditing(false);
+  };
 
   const borderColor = isHighlighted
     ? 'var(--vscode-focusBorder)'
@@ -84,7 +113,47 @@ export const GroupNodeComponent: React.FC<NodeProps<GroupNodeData>> = ({ id, dat
             justifyContent: 'space-between',
           }}
         >
-          <span>{label}</span>
+          {isEditing ? (
+            <input
+              ref={inputRef}
+              className="nodrag nodblclick"
+              value={draft}
+              aria-label={t('canvas.groupRename.inputAria')}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={commitEdit}
+              onKeyDown={(e) => {
+                e.stopPropagation();
+                if (e.key === 'Enter') {
+                  commitEdit();
+                } else if (e.key === 'Escape') {
+                  setIsEditing(false);
+                }
+              }}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                font: 'inherit',
+                fontWeight: 600,
+                textTransform: 'none',
+                letterSpacing: 'inherit',
+                color: 'var(--vscode-input-foreground)',
+                backgroundColor: 'var(--vscode-input-background)',
+                border: '1px solid var(--vscode-focusBorder)',
+                borderRadius: '2px',
+                padding: '0 4px',
+                margin: '-1px 0',
+              }}
+            />
+          ) : (
+            <span
+              className="nodblclick"
+              title={t('canvas.groupRename.tooltip')}
+              onDoubleClick={startEditing}
+              style={{ flex: 1, minWidth: 0 }}
+            >
+              {label}
+            </span>
+          )}
           <DuplicateButton nodeId={id} selected={selected} />
           <DeleteButton nodeId={id} selected={selected} />
         </div>

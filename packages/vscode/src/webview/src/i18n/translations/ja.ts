@@ -405,6 +405,8 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'workflowTour.popover.regenerating': '再生成中…',
   'canvas.deleteNode.tooltip': 'ノードを削除',
   'canvas.deleteEdge.tooltip': '接続を削除',
+  'canvas.groupRename.tooltip': 'ダブルクリックで名前を変更',
+  'canvas.groupRename.inputAria': 'グループ名',
   'canvas.resizeSidebar': 'サイドバーのサイズを変更',
 
   // Canvas context menu
