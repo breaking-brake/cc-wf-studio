@@ -436,6 +436,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
 
   // Workflow problems panel (canvas toolbar + auto-open on validation failure)
   'problemsPanel.tooltip': '워크플로 문제 확인',
+  'problemsPanel.tooltipWithCount': '워크플로 문제 확인 ({count}개)',
   'problemsPanel.title': '워크플로 문제',
   'problemsPanel.noProblems': '문제가 발견되지 않았습니다 — 이 워크플로는 검증을 통과했습니다',
   'problemsPanel.close': '문제 패널 닫기',
