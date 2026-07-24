@@ -17,6 +17,43 @@ Entry format:
 
 ---
 
+## 2026-07-24 — Arrow-key nudge with single-undo bursts
+- **User value**: a user can now nudge the selected node(s) with the arrow
+  keys — one 15px grid step per press, ×4 with Shift — from anywhere on the
+  canvas (including right after an F8 / search jump, when no node has DOM
+  focus), and undo an entire nudge sequence with a single Ctrl+Z; previously
+  arrow movement only worked while the clicked node itself kept keyboard
+  focus (React Flow's built-in a11y handler) and every step became its own
+  undo entry, so undoing a nudge took dozens of Ctrl+Z presses and long
+  nudges silently evicted older history (zundo limit 50).
+- **Issue/PR**: #961
+- **Outcome**: done — arrow branch in WorkflowEditor's global keydown
+  handler: skipped for editable targets, open dialogs/menus, mod/alt
+  chords, and mid-drag; when the event didn't originate inside a React
+  Flow node / selection rect (where the built-in handler already moved the
+  selection), a new `nudgeSelection(dx, dy)` store action moves it (grid-
+  snapped, skips locked nodes and children whose group is also selected).
+  Burst coalescing reuses the drag handlers' temporal pause/resume: the
+  first press records the pre-burst state, tracking pauses, and a 500ms
+  idle debounce — or any non-arrow keypress, or a drag start — seals the
+  burst. Cheat-sheet rows (Arrows / Shift+Arrows), 3 new strings in all 5
+  locales. No schema or persistence change. Issue #961 could not be locked
+  (no `gh`, no MCP lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - Mirror the shortcut cheat sheet in the README/docs (carried).
+  - Snap-search: type-to-filter the node palette / add-node menu from the
+    keyboard (verify current palette behavior first).
+  - Manual E2E queue (carried): arrow-key nudge (focused node vs canvas
+    focus, Shift step, one undo entry per burst, no double-move while a
+    node has focus, menus/dialogs untouched); Esc panel dismissal; F8 /
+    Shift+F8 problem cycling; inline group rename; Ungroup; Group
+    selection; Save as Image from the VSCode extension host; Copy as
+    Markdown; `render_workflow` via MCP Inspector; problems badge;
+    shortcut cheat sheet; problem-node markers; problems panel
+    click-to-jump; auto layout; node search cycling; align/distribute +
+    context menu + copy/cut/paste; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — Esc dismisses the search / problems panel
 - **User value**: a user can now close the canvas search panel and the
   workflow problems panel by pressing Esc from anywhere on the canvas —

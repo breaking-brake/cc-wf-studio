@@ -158,6 +158,20 @@ const selectAllOnCanvas = () => {
   syncSelectedNodeId(currentNodes.length === 1 ? currentNodes[0].id : null);
 };
 
+/** Arrow-key nudge: direction per key. Step = the 15px canvas grid (the
+ *  same velocity React Flow's built-in focused-node arrow moves use with
+ *  snapToGrid), ×4 with Shift (React Flow's own factor). */
+const NUDGE_ARROW_DIFFS: Record<string, { x: number; y: number }> = {
+  ArrowUp: { x: 0, y: -1 },
+  ArrowDown: { x: 0, y: 1 },
+  ArrowLeft: { x: -1, y: 0 },
+  ArrowRight: { x: 1, y: 0 },
+};
+const NUDGE_STEP = 15;
+const NUDGE_SHIFT_FACTOR = 4;
+/** Arrow keys idle this long → the nudge burst's undo entry is sealed. */
+const NUDGE_UNDO_IDLE_MS = 500;
+
 /**
  * WorkflowEditor Component Props
  */
@@ -345,8 +359,22 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   // Save pre-drag snapshot for undo/redo (ref to avoid re-renders)
   const preDragNodesRef = useRef<Node[] | null>(null);
 
+  // Arrow-key nudge bursts pause undo tracking like drags do; the timer
+  // seals the burst into a single undo entry once the keys go idle
+  const nudgeBurstRef = useRef<{ timer: number | null; active: boolean }>({
+    timer: null,
+    active: false,
+  });
+
   // Pause undo/redo tracking during node drag to record only the final position
   const handleNodeDragStart = useCallback(() => {
+    // A pending nudge-burst resume must not fire mid-drag and re-enable
+    // tracking — the drag-stop handler resumes for both
+    if (nudgeBurstRef.current.timer !== null) {
+      window.clearTimeout(nudgeBurstRef.current.timer);
+      nudgeBurstRef.current.timer = null;
+      nudgeBurstRef.current.active = false;
+    }
     preDragNodesRef.current = useWorkflowStore.getState().nodes;
     useWorkflowStore.temporal.getState().pause();
   }, []);
@@ -788,6 +816,24 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
       const mod = event.metaKey || event.ctrlKey;
 
+      // Any non-arrow key seals an active nudge burst right away so a
+      // follow-up edit (or undo) inside the idle window is tracked normally.
+      // Modifier keydowns (Shift for the ×4 step, bare Ctrl/Cmd) don't seal.
+      if (
+        nudgeBurstRef.current.active &&
+        !Object.hasOwn(NUDGE_ARROW_DIFFS, event.key) &&
+        event.key !== 'Shift' &&
+        event.key !== 'Control' &&
+        event.key !== 'Meta' &&
+        event.key !== 'Alt'
+      ) {
+        const burst = nudgeBurstRef.current;
+        if (burst.timer !== null) window.clearTimeout(burst.timer);
+        burst.timer = null;
+        burst.active = false;
+        useWorkflowStore.temporal.getState().resume();
+      }
+
       // Delete/Backspace — deletion is routed through the store so node
       // removal waits for the confirmation dialog. React Flow's built-in
       // handler is disabled (deleteKeyCode={null}): it removes connected
@@ -910,6 +956,51 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           event.preventDefault();
           state.closeProblemsPanel();
         }
+        return;
+      }
+
+      // Arrow keys — nudge the selected node(s) one grid step (Shift: ×4).
+      // While a node (or the multi-selection rect) has DOM focus, React
+      // Flow's built-in a11y handler has already moved the selection by the
+      // time the event bubbles here, so this branch only moves it for every
+      // other focus target — making the nudge work from anywhere on the
+      // canvas (e.g. right after an F8 / search jump). Either way the burst
+      // is coalesced into ONE undo entry: the first press records the
+      // pre-burst state, then tracking pauses until the keys go idle (the
+      // drag handlers' pause/resume pattern).
+      if (Object.hasOwn(NUDGE_ARROW_DIFFS, event.key) && !mod && !event.altKey) {
+        const target = event.target as HTMLElement | null;
+        if (
+          target &&
+          (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+        ) {
+          return;
+        }
+        // Menus and dialogs own their arrow-key navigation
+        if (escTargetsRef.current.isMenuOpen) return;
+        if (document.querySelector('[role="dialog"]')) return;
+        // A mouse drag owns the temporal pause/resume cycle — don't interleave
+        if (preDragNodesRef.current !== null) return;
+        const state = useWorkflowStore.getState();
+        if (!state.nodes.some((n) => n.selected)) return;
+        event.preventDefault();
+        const builtInHandled = Boolean(
+          target?.closest?.('.react-flow__node, .react-flow__nodesselection-rect')
+        );
+        if (!builtInHandled) {
+          const diff = NUDGE_ARROW_DIFFS[event.key];
+          const step = NUDGE_STEP * (event.shiftKey ? NUDGE_SHIFT_FACTOR : 1);
+          state.nudgeSelection(diff.x * step, diff.y * step);
+        }
+        const burst = nudgeBurstRef.current;
+        useWorkflowStore.temporal.getState().pause();
+        burst.active = true;
+        if (burst.timer !== null) window.clearTimeout(burst.timer);
+        burst.timer = window.setTimeout(() => {
+          burst.timer = null;
+          burst.active = false;
+          useWorkflowStore.temporal.getState().resume();
+        }, NUDGE_UNDO_IDLE_MS);
         return;
       }
 
@@ -1051,6 +1142,16 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     document.addEventListener('paste', handlePaste);
 
     return () => {
+      // Seal any open nudge burst — undo tracking must not stay paused
+      // after this handler is gone
+      if (nudgeBurstRef.current.timer !== null) {
+        window.clearTimeout(nudgeBurstRef.current.timer);
+        nudgeBurstRef.current.timer = null;
+      }
+      if (nudgeBurstRef.current.active) {
+        nudgeBurstRef.current.active = false;
+        useWorkflowStore.temporal.getState().resume();
+      }
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
       document.removeEventListener('copy', handleCopy);
