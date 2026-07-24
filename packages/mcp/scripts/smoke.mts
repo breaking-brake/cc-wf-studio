@@ -37,6 +37,7 @@ const EXPECTED_TOOLS = [
   'list_available_agents',
   'update_nodes',
   'highlight_group_node',
+  'render_workflow',
 ];
 
 async function main(): Promise<void> {
@@ -92,6 +93,26 @@ async function main(): Promise<void> {
       );
     }
     console.log(`OK highlight_group_node no-op note: "${highlightParsed.note}"`);
+
+    const render = await client.callTool({
+      name: 'render_workflow',
+      arguments: {},
+    });
+    const renderText = (render.content as { type: string; text: string }[])[0]?.text ?? '';
+    if (!renderText.startsWith('```mermaid') || !renderText.includes('flowchart')) {
+      throw new Error(`render_workflow should return a fenced mermaid block. Got: ${renderText.slice(0, 120)}`);
+    }
+    console.log('OK render_workflow returned a fenced mermaid block');
+
+    const renderMd = await client.callTool({
+      name: 'render_workflow',
+      arguments: { format: 'md' },
+    });
+    const renderMdText = (renderMd.content as { type: string; text: string }[])[0]?.text ?? '';
+    if (!renderMdText.startsWith(`# ${FIXTURE.name}`) || !renderMdText.includes('```mermaid')) {
+      throw new Error(`render_workflow format=md should return title + mermaid. Got: ${renderMdText.slice(0, 120)}`);
+    }
+    console.log('OK render_workflow format=md returned the Markdown bundle');
   } finally {
     await client.close().catch(() => {});
     await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {});

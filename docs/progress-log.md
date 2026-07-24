@@ -17,6 +17,40 @@ Entry format:
 
 ---
 
+## 2026-07-24 — `render_workflow` MCP tool (show the workflow as a diagram)
+- **User value**: a user editing a workflow through an AI agent (canvas skill
+  or `ccwf-mcp` file mode) can now ask "show me the workflow" and the agent
+  can paste the workflow's fenced Mermaid block — rendered as a diagram by
+  most chat UIs — instead of the user switching to the canvas or opening the
+  JSON to see what the agent built (top carried proposal from the previous
+  iteration).
+- **Issue/PR**: #945 / PR from `claude/render-workflow-mcp-tool`
+- **Outcome**: done — new read-only `render_workflow` tool in
+  `packages/mcp/src/tools.ts` (registered for both canvas and file modes via
+  the shared `registerWorkflowTools`): default `format: "mermaid"` returns
+  just the fenced block as raw text (`get_workflow_schema` pattern, no
+  JSON-escaped newlines); `format: "md"` returns the same title +
+  description + diagram + execution-instructions bundle `ccwf render`
+  prints, with optional `agent` phrasing the instructions via
+  `generateAgentExecutionInstructions`. Mode-aware descriptions in the
+  `ToolText` table; docs updated (`packages/mcp/README.md` tool table,
+  `ai-editing-skill-template.md` step 7 + frontmatter, ccwf-cli SKILL.md
+  tool list); smoke script asserts both formats. Changeset: patch for
+  `@cc-wf-studio/mcp` + `cc-wf-studio`. Issue #945 could not be locked (no
+  `gh`, no MCP lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - Mirror the shortcut cheat sheet in the README/docs.
+  - Canvas: surface `render_workflow`'s Markdown bundle as a "Copy as
+    Markdown" action in the canvas toolbar/export menu, for pasting a
+    workflow doc into PRs without the CLI.
+  - Manual E2E queue (carried): `render_workflow` via MCP Inspector (both
+    formats); badge appears/clears while editing with the panel closed and
+    hides on empty canvas; shortcut cheat sheet (`?`, toolbar button, ja
+    locale); problem-node markers; problems panel click-to-jump; auto
+    layout on a messy workflow; node search cycling; align/distribute +
+    context menu + copy/cut/paste; localized Claude API dialog in
+    ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — Problems-count badge on the toolbar Problems button
 - **User value**: a user can now see at a glance — via a red count badge on
   the canvas Problems button — that the workflow currently has N validation
