@@ -694,6 +694,48 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     ]
   );
 
+  // Problems-count badge on the toolbar button. While the panel is open the
+  // live workflowIssues result is reused (same single validation pass);
+  // while it is closed the count is recomputed in a debounced effect so
+  // rapid edits/drags trigger at most one validation pass per pause.
+  // An empty canvas shows no badge — a brand-new workflow isn't nagged.
+  const [idleIssueCount, setIdleIssueCount] = useState(0);
+  useEffect(() => {
+    if (isProblemsPanelVisible) {
+      return undefined;
+    }
+    if (nodes.length === 0) {
+      setIdleIssueCount(0);
+      return undefined;
+    }
+    const timer = setTimeout(() => {
+      setIdleIssueCount(
+        collectWorkflowIssues(
+          nodes,
+          edges,
+          workflowName,
+          workflowDescription || undefined,
+          subAgentFlows.length > 0 ? subAgentFlows : undefined,
+          slashCommandOptions
+        ).length
+      );
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [
+    isProblemsPanelVisible,
+    nodes,
+    edges,
+    workflowName,
+    workflowDescription,
+    subAgentFlows,
+    slashCommandOptions,
+  ]);
+  const problemCount = isProblemsPanelVisible
+    ? workflowIssues.length
+    : nodes.length === 0
+      ? 0
+      : idleIssueCount;
+
   // Mark every node the problems panel points at with a red ring + badge
   // (styles/nodes.css `.wf-problem-node`), so the user can see all offending
   // nodes at a glance while the panel is open.
@@ -1227,6 +1269,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
               onOpenSearch={openSearch}
               onAutoLayout={autoLayoutCanvas}
               onOpenProblems={activeSubAgentFlowId === null ? openProblemsPanel : undefined}
+              problemCount={problemCount}
               onOpenShortcuts={() => setIsShortcutsOpen(true)}
             />
           </Panel>

@@ -17,6 +17,35 @@ Entry format:
 
 ---
 
+## 2026-07-24 — Problems-count badge on the toolbar Problems button
+- **User value**: a user can now see at a glance — via a red count badge on
+  the canvas Problems button — that the workflow currently has N validation
+  problems, instead of only finding out when a save/export fails or after
+  opening the panel by hand (carried proposal from two iterations, judged
+  shippable: the validator is a pure in-memory pass, debounced to ~1 run
+  per editing pause).
+- **Issue/PR**: #943 / PR from `claude/sleepy-curie-33m9bp`
+- **Outcome**: done — `WorkflowProblemsButton` grew an optional `issueCount`
+  prop rendering a top-right `--vscode-charts-red` badge (99+ cap, count-aware
+  localized tooltip/aria-label); `CanvasToolbar` passes it through via the
+  established optional-prop pattern; `WorkflowEditor` reuses the live
+  `workflowIssues` pass while the panel is open and otherwise recomputes the
+  count in a 400 ms-debounced effect, suppressed on an empty canvas so a
+  brand-new workflow isn't nagged. New `problemsPanel.tooltipWithCount`
+  string in all 5 locales. `pnpm build` + `pnpm check` green. Issue #943
+  could not be locked (no `gh`, no MCP lock tool — known limitation, noted
+  in the issue).
+- **Next proposals**:
+  - MCP: a `render_workflow` tool returning the Mermaid diagram of the
+    current workflow, so AI agents can show users what they just built.
+  - Mirror the shortcut cheat sheet in the README/docs.
+  - Manual E2E queue (carried): badge appears/clears while editing with the
+    panel closed and hides on empty canvas; shortcut cheat sheet (`?`,
+    toolbar button, ja locale); problem-node markers; problems panel
+    click-to-jump; auto layout on a messy workflow; node search cycling;
+    align/distribute + context menu + copy/cut/paste; localized Claude API
+    dialog in ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — Keyboard shortcut cheat sheet on the canvas
 - **User value**: a user can now press `?` on the canvas (or click the new
   keyboard toolbar button) to see every shortcut and mouse gesture the

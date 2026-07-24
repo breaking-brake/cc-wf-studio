@@ -439,6 +439,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
 
   // Workflow problems panel (canvas toolbar + auto-open on validation failure)
   'problemsPanel.tooltip': 'Check workflow problems',
+  'problemsPanel.tooltipWithCount': 'Check workflow problems ({count} found)',
   'problemsPanel.title': 'Workflow problems',
   'problemsPanel.noProblems': 'No problems found — this workflow passes validation',
   'problemsPanel.close': 'Close problems panel',

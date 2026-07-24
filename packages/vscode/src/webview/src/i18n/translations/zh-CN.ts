@@ -423,6 +423,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
 
   // Workflow problems panel (canvas toolbar + auto-open on validation failure)
   'problemsPanel.tooltip': '检查工作流问题',
+  'problemsPanel.tooltipWithCount': '检查工作流问题（{count} 个）',
   'problemsPanel.title': '工作流问题',
   'problemsPanel.noProblems': '未发现问题 — 此工作流通过验证',
   'problemsPanel.close': '关闭问题面板',

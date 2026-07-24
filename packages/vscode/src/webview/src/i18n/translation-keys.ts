@@ -419,6 +419,7 @@ export interface WebviewTranslationKeys {
 
   // Workflow problems panel (canvas toolbar + auto-open on validation failure)
   'problemsPanel.tooltip': string;
+  'problemsPanel.tooltipWithCount': string;
   'problemsPanel.title': string;
   'problemsPanel.noProblems': string;
   'problemsPanel.close': string;

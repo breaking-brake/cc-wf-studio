@@ -437,6 +437,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
 
   // Workflow problems panel (canvas toolbar + auto-open on validation failure)
   'problemsPanel.tooltip': 'ワークフローの問題をチェック',
+  'problemsPanel.tooltipWithCount': 'ワークフローの問題をチェック（{count}件）',
   'problemsPanel.title': 'ワークフローの問題',
   'problemsPanel.noProblems': '問題は見つかりませんでした — このワークフローは検証に合格しています',
   'problemsPanel.close': '問題パネルを閉じる',

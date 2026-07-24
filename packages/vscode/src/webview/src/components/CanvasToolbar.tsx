@@ -30,6 +30,9 @@ interface CanvasToolbarProps {
   /** Opens the workflow problems panel; omitted where validation is
    *  unavailable (e.g. the sub-agent flow dialog), which hides the button. */
   onOpenProblems?: () => void;
+  /** Current number of validation issues, shown as a badge on the
+   *  Problems button while > 0. */
+  problemCount?: number;
   /** Opens the keyboard shortcut cheat sheet; omitted where the canvas
    *  shortcuts don't apply (e.g. the sub-agent flow dialog), which hides
    *  the button. */
@@ -42,6 +45,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   onOpenSearch,
   onAutoLayout,
   onOpenProblems,
+  problemCount,
   onOpenShortcuts,
 }) => {
   return (
@@ -54,7 +58,9 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
       <MinimapToggle />
       {onOpenSearch && <SearchNodesButton onClick={onOpenSearch} />}
       {onAutoLayout && <AutoLayoutButton onClick={onAutoLayout} />}
-      {onOpenProblems && <WorkflowProblemsButton onClick={onOpenProblems} />}
+      {onOpenProblems && (
+        <WorkflowProblemsButton onClick={onOpenProblems} issueCount={problemCount} />
+      )}
       {onOpenShortcuts && <KeyboardShortcutsButton onClick={onOpenShortcuts} />}
       <StartTourButton />
     </div>
