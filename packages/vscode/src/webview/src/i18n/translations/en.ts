@@ -437,6 +437,14 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   // Auto Layout (canvas toolbar)
   'autoLayout.tooltip': 'Auto layout (arrange all nodes)',
 
+  // Workflow problems panel (canvas toolbar + auto-open on validation failure)
+  'problemsPanel.tooltip': 'Check workflow problems',
+  'problemsPanel.title': 'Workflow problems',
+  'problemsPanel.noProblems': 'No problems found — this workflow passes validation',
+  'problemsPanel.close': 'Close problems panel',
+  'problemsPanel.workflowScope': 'workflow',
+  'problemsPanel.jumpTooltip': 'Jump to node',
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'Delete Node',
   'dialog.deleteNode.message': 'Are you sure you want to delete this node?',

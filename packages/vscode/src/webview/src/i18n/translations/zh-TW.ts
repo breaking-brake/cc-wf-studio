@@ -423,6 +423,14 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   // Auto Layout (canvas toolbar)
   'autoLayout.tooltip': '自動版面配置（排列所有節點）',
 
+  // Workflow problems panel (canvas toolbar + auto-open on validation failure)
+  'problemsPanel.tooltip': '檢查工作流程問題',
+  'problemsPanel.title': '工作流程問題',
+  'problemsPanel.noProblems': '未發現問題 — 此工作流程通過驗證',
+  'problemsPanel.close': '關閉問題面板',
+  'problemsPanel.workflowScope': '工作流程',
+  'problemsPanel.jumpTooltip': '跳轉到節點',
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '刪除節點',
   'dialog.deleteNode.message': '確定要刪除此節點嗎？',

@@ -73,6 +73,7 @@ import { SubAgentFlowNodeComponent } from './nodes/SubAgentFlowNode';
 import { SubAgentNodeComponent } from './nodes/SubAgentNode';
 import { SwitchNodeComponent } from './nodes/SwitchNode';
 import { StartMenu } from './StartMenu';
+import { WorkflowProblemsPanel } from './WorkflowProblemsPanel';
 
 /**
  * Node types registration (memoized outside component for performance)
@@ -524,6 +525,19 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     requestAnimationFrame(() => {
       reactFlowInstanceRef.current?.fitView({ padding: 0.2, duration: 300 });
     });
+  }, []);
+
+  // Workflow problems panel — opened here or automatically on a
+  // VALIDATION_ERROR from save/export (see App.handleError). Hidden while
+  // a sub-agent flow is being edited: the canvas then holds the sub-flow's
+  // nodes, which are not the workflow the validator would report on.
+  const isProblemsPanelOpen = useWorkflowStore((state) => state.isProblemsPanelOpen);
+  const activeSubAgentFlowId = useWorkflowStore((state) => state.activeSubAgentFlowId);
+  const openProblemsPanel = useCallback(() => {
+    useWorkflowStore.getState().openProblemsPanel();
+  }, []);
+  const closeProblemsPanel = useCallback(() => {
+    useWorkflowStore.getState().closeProblemsPanel();
   }, []);
 
   // Keyboard event handlers for modifier key and undo/redo
@@ -1021,6 +1035,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
               onToggleEdgeAnimation={() => setIsEdgeAnimationEnabled((prev) => !prev)}
               onOpenSearch={openSearch}
               onAutoLayout={autoLayoutCanvas}
+              onOpenProblems={activeSubAgentFlowId === null ? openProblemsPanel : undefined}
             />
           </Panel>
 
@@ -1031,6 +1046,13 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
                 focusNonce={searchFocusNonce}
                 onClose={() => setIsSearchOpen(false)}
               />
+            </Panel>
+          )}
+
+          {/* Workflow Problems Panel (all validation issues, click-to-jump) */}
+          {isProblemsPanelOpen && activeSubAgentFlowId === null && (
+            <Panel position="bottom-center">
+              <WorkflowProblemsPanel onClose={closeProblemsPanel} />
             </Panel>
           )}
 

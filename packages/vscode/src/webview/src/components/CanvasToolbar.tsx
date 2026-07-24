@@ -15,6 +15,7 @@ import { ScrollModeToggle } from './ScrollModeToggle';
 import { SearchNodesButton } from './SearchNodesButton';
 import { StartTourButton } from './StartTourButton';
 import { UndoRedoControls } from './UndoRedoControls';
+import { WorkflowProblemsButton } from './WorkflowProblemsButton';
 
 interface CanvasToolbarProps {
   isEdgeAnimationEnabled: boolean;
@@ -25,6 +26,9 @@ interface CanvasToolbarProps {
   /** Auto-arranges the whole canvas; omitted where auto layout is
    *  unavailable (e.g. the sub-agent flow dialog), which hides the button. */
   onAutoLayout?: () => void;
+  /** Opens the workflow problems panel; omitted where validation is
+   *  unavailable (e.g. the sub-agent flow dialog), which hides the button. */
+  onOpenProblems?: () => void;
 }
 
 export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
@@ -32,6 +36,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   onToggleEdgeAnimation,
   onOpenSearch,
   onAutoLayout,
+  onOpenProblems,
 }) => {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -43,6 +48,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
       <MinimapToggle />
       {onOpenSearch && <SearchNodesButton onClick={onOpenSearch} />}
       {onAutoLayout && <AutoLayoutButton onClick={onAutoLayout} />}
+      {onOpenProblems && <WorkflowProblemsButton onClick={onOpenProblems} />}
       <StartTourButton />
     </div>
   );

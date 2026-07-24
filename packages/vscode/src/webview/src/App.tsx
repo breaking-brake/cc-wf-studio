@@ -282,6 +282,11 @@ const App: React.FC = () => {
 
   const handleError = (errorData: ErrorPayload) => {
     setError(errorData);
+    // A validation failure has richer, clickable detail than the toast:
+    // open the problems panel so every issue is listed with jump-to-node.
+    if (errorData.code === 'VALIDATION_ERROR') {
+      useWorkflowStore.getState().openProblemsPanel();
+    }
   };
 
   const handleDismissError = () => {

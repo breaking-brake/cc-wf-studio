@@ -158,6 +158,10 @@ interface WorkflowStore {
   workflowName: string;
   workflowDescription: string;
   isPropertyOverlayOpen: boolean;
+  /** Workflow problems panel (all validation issues, click-to-jump).
+   *  Opened by the canvas toolbar button and automatically on a
+   *  VALIDATION_ERROR from save/export. Not tracked in undo history. */
+  isProblemsPanelOpen: boolean;
   minimapDisplayMode: 'hidden' | 'auto' | 'always';
   isMinimapShown: boolean;
   isDescriptionPanelVisible: boolean;
@@ -206,6 +210,8 @@ interface WorkflowStore {
   setWorkflowDescription: (description: string) => void;
   openPropertyOverlay: () => void;
   closePropertyOverlay: () => void;
+  openProblemsPanel: () => void;
+  closeProblemsPanel: () => void;
   setMinimapDisplayMode: (mode: 'hidden' | 'auto' | 'always') => void;
   setMinimapShown: (shown: boolean) => void;
   toggleDescriptionPanelVisibility: () => void;
@@ -506,6 +512,7 @@ export const useWorkflowStore = create<WorkflowStore>()(
       workflowName: 'my-workflow', // Default workflow name
       workflowDescription: '', // Default workflow description
       isPropertyOverlayOpen: true, // Property overlay is open by default
+      isProblemsPanelOpen: false,
       minimapDisplayMode: (() => {
         const saved = localStorage.getItem('cc-wf-studio.minimapDisplayMode');
         if (saved === 'hidden' || saved === 'auto' || saved === 'always') return saved;
@@ -634,6 +641,10 @@ export const useWorkflowStore = create<WorkflowStore>()(
       openPropertyOverlay: () => set({ isPropertyOverlayOpen: true }),
 
       closePropertyOverlay: () => set({ isPropertyOverlayOpen: false }),
+
+      openProblemsPanel: () => set({ isProblemsPanelOpen: true }),
+
+      closeProblemsPanel: () => set({ isProblemsPanelOpen: false }),
 
       setMinimapDisplayMode: (mode) => {
         localStorage.setItem('cc-wf-studio.minimapDisplayMode', mode);
