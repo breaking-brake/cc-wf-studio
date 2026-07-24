@@ -414,6 +414,9 @@ export interface WebviewTranslationKeys {
   'canvasSearch.next': string;
   'canvasSearch.close': string;
 
+  // Auto Layout (canvas toolbar)
+  'autoLayout.tooltip': string;
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': string;
   'dialog.deleteNode.message': string;

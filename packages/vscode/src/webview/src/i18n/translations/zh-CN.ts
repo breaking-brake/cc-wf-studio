@@ -418,6 +418,9 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'canvasSearch.next': '下一个匹配项',
   'canvasSearch.close': '关闭搜索',
 
+  // Auto Layout (canvas toolbar)
+  'autoLayout.tooltip': '自动布局（排列所有节点）',
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '删除节点',
   'dialog.deleteNode.message': '确定要删除此节点吗？',

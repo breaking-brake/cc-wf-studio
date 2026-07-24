@@ -517,6 +517,15 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     setSearchFocusNonce((nonce) => nonce + 1);
   }, []);
 
+  // Auto layout — tidy the whole canvas, then re-fit the view so the
+  // freshly arranged graph is fully visible
+  const autoLayoutCanvas = useCallback(() => {
+    useWorkflowStore.getState().autoLayout();
+    requestAnimationFrame(() => {
+      reactFlowInstanceRef.current?.fitView({ padding: 0.2, duration: 300 });
+    });
+  }, []);
+
   // Keyboard event handlers for modifier key and undo/redo
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -1011,6 +1020,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
               isEdgeAnimationEnabled={isEdgeAnimationEnabled}
               onToggleEdgeAnimation={() => setIsEdgeAnimationEnabled((prev) => !prev)}
               onOpenSearch={openSearch}
+              onAutoLayout={autoLayoutCanvas}
             />
           </Panel>
 

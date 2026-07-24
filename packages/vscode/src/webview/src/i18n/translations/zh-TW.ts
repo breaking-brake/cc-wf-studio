@@ -420,6 +420,9 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'canvasSearch.next': '下一個符合項目',
   'canvasSearch.close': '關閉搜尋',
 
+  // Auto Layout (canvas toolbar)
+  'autoLayout.tooltip': '自動版面配置（排列所有節點）',
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '刪除節點',
   'dialog.deleteNode.message': '確定要刪除此節點嗎？',

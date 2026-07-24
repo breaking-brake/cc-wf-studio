@@ -432,6 +432,9 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'canvasSearch.next': '次の一致',
   'canvasSearch.close': '検索を閉じる',
 
+  // Auto Layout (canvas toolbar)
+  'autoLayout.tooltip': '自動レイアウト（全ノードを整列）',
+
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': 'ノードを削除',
   'dialog.deleteNode.message': 'このノードを削除してもよろしいですか？',

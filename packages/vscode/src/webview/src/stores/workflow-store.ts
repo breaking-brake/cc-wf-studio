@@ -23,6 +23,7 @@ import type { Edge, Node, OnConnect, OnEdgesChange, OnNodesChange } from 'reactf
 import { addEdge, applyEdgeChanges, applyNodeChanges } from 'reactflow';
 import { temporal } from 'zundo';
 import { create } from 'zustand';
+import { absoluteNodePosition, computeAutoLayout, nodeBoxSize } from '../utils/auto-layout';
 
 // ============================================================================
 // Store State Interface
@@ -268,6 +269,10 @@ interface WorkflowStore {
    *  policy as alignSelection. No-op with fewer than three alignable nodes.
    *  Single undo entry. */
   distributeSelection: (nodeIds: string[], axis: DistributeAxis) => void;
+
+  /** Re-arrange the whole canvas into a tidy left-to-right layered layout
+   *  (groups laid out internally and resized to fit). One undo entry. */
+  autoLayout: () => void;
   clearLastAddedNodeId: () => void;
   /** Request the canvas to pan to a specific node (e.g. when jumping in from
    *  Overview mode). The canvas-side hook clears it after centring. */
@@ -320,26 +325,6 @@ function sortNodesParentFirst(nodes: Node[]): Node[] {
   const parents = nodes.filter((n) => parentIds.has(n.id));
   const others = nodes.filter((n) => !parentIds.has(n.id));
   return [...parents, ...others];
-}
-
-/** Absolute canvas position of a node (groups never nest — one parent hop). */
-function absoluteNodePosition(node: Node, allNodes: Node[]): { x: number; y: number } {
-  if (!node.parentId) return { x: node.position.x, y: node.position.y };
-  const parent = allNodes.find((n) => n.id === node.parentId);
-  return parent
-    ? { x: node.position.x + parent.position.x, y: node.position.y + parent.position.y }
-    : { x: node.position.x, y: node.position.y };
-}
-
-/** Rendered node size: explicit style size (groups) over React Flow's
- *  measured size, with fallbacks for nodes not yet measured. */
-function nodeBoxSize(node: Node): { width: number; height: number } {
-  const styleWidth = typeof node.style?.width === 'number' ? node.style.width : undefined;
-  const styleHeight = typeof node.style?.height === 'number' ? node.style.height : undefined;
-  return {
-    width: styleWidth ?? node.width ?? (node.type === 'group' ? 400 : 200),
-    height: styleHeight ?? node.height ?? (node.type === 'group' ? 300 : 80),
-  };
 }
 
 /**
@@ -1260,6 +1245,26 @@ export const useWorkflowStore = create<WorkflowStore>()(
                     : { x: node.position.x, y: node.position.y + delta },
                 }
               : node;
+          }),
+        });
+      },
+
+      autoLayout: () => {
+        const allNodes = get().nodes;
+        const result = computeAutoLayout(allNodes, get().edges);
+        if (!result) return;
+
+        // Single set() call → single undo/redo history entry
+        set({
+          nodes: allNodes.map((node) => {
+            const position = result.positions.get(node.id);
+            const size = node.type === 'group' ? result.groupSizes.get(node.id) : undefined;
+            if (!position && !size) return node;
+            return {
+              ...node,
+              ...(position ? { position } : {}),
+              ...(size ? { style: { ...node.style, ...size } } : {}),
+            };
           }),
         });
       },

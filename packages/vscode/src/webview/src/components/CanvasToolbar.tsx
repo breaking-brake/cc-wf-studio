@@ -6,6 +6,7 @@
  */
 
 import type React from 'react';
+import { AutoLayoutButton } from './AutoLayoutButton';
 import { EdgeAnimationToggle } from './EdgeAnimationToggle';
 import { HighlightToggle } from './HighlightToggle';
 import { InteractionModeToggle } from './InteractionModeToggle';
@@ -21,12 +22,16 @@ interface CanvasToolbarProps {
   /** Opens the node search panel; omitted where search is unavailable
    *  (e.g. the sub-agent flow dialog), which hides the button. */
   onOpenSearch?: () => void;
+  /** Auto-arranges the whole canvas; omitted where auto layout is
+   *  unavailable (e.g. the sub-agent flow dialog), which hides the button. */
+  onAutoLayout?: () => void;
 }
 
 export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   isEdgeAnimationEnabled,
   onToggleEdgeAnimation,
   onOpenSearch,
+  onAutoLayout,
 }) => {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -37,6 +42,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
       <HighlightToggle />
       <MinimapToggle />
       {onOpenSearch && <SearchNodesButton onClick={onOpenSearch} />}
+      {onAutoLayout && <AutoLayoutButton onClick={onAutoLayout} />}
       <StartTourButton />
     </div>
   );
