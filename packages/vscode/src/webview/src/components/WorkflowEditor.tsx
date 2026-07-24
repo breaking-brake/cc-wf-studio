@@ -20,6 +20,7 @@ import {
   GitBranch,
   GitBranchPlus,
   GitFork,
+  Group,
   MessageSquare,
   PanelLeftOpen,
   Scissors,
@@ -479,6 +480,12 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     if (selectedIds.length > 0) duplicateSelection(selectedIds);
   }, []);
 
+  const groupSelectionFromMenu = useCallback(() => {
+    const { nodes: currentNodes, groupSelection } = useWorkflowStore.getState();
+    const selectedIds = currentNodes.filter((n) => n.selected).map((n) => n.id);
+    if (selectedIds.length > 0) groupSelection(selectedIds);
+  }, []);
+
   const alignSelectionFromMenu = useCallback((mode: AlignMode) => {
     const { nodes: currentNodes, alignSelection } = useWorkflowStore.getState();
     const selectedIds = currentNodes.filter((n) => n.selected).map((n) => n.id);
@@ -857,6 +864,15 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
             duplicateSelection(selectedIds);
           }
         }
+        if (key === 'g' && !event.shiftKey && !event.altKey) {
+          const { nodes: currentNodes, groupSelection } = useWorkflowStore.getState();
+          const selectedIds = currentNodes.filter((n) => n.selected).map((n) => n.id);
+          if (selectedIds.length > 0) {
+            // Eligibility (≥2 groupable nodes) is re-checked by the store
+            event.preventDefault();
+            groupSelection(selectedIds);
+          }
+        }
       }
     };
 
@@ -1027,6 +1043,11 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     const alignableCount = nodes.filter(
       (n) => n.selected && !(n.parentId && selectedIds.has(n.parentId))
     ).length;
+    // Same eligibility as the store's groupSelection: groups never nest,
+    // ride-along children stay with their selected group
+    const groupableCount = nodes.filter(
+      (n) => n.selected && n.type !== 'group' && !(n.parentId && selectedIds.has(n.parentId))
+    ).length;
     return [
       {
         key: 'copy',
@@ -1052,6 +1073,14 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         shortcut: `${mod}D`,
         disabled: !hasCopyableSelection,
         onSelect: duplicateSelectionFromMenu,
+      },
+      {
+        key: 'groupSelection',
+        label: t('contextMenu.groupSelection'),
+        icon: <Group size={14} />,
+        shortcut: `${mod}G`,
+        disabled: groupableCount < 2,
+        onSelect: groupSelectionFromMenu,
       },
       ...(alignableCount >= 2
         ? ([
@@ -1139,6 +1168,7 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     copySelectionFromMenu,
     cutSelectionFromMenu,
     duplicateSelectionFromMenu,
+    groupSelectionFromMenu,
     alignSelectionFromMenu,
     distributeSelectionFromMenu,
     deleteSelectionFromMenu,

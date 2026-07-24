@@ -17,6 +17,41 @@ Entry format:
 
 ---
 
+## 2026-07-24 — "Group selection" canvas action (context menu + Ctrl/Cmd+G)
+- **User value**: a user can now select several nodes and wrap them in a
+  new, correctly-sized group in one step — right-click → "Group selection"
+  or Ctrl/Cmd+G — with a single undo entry, instead of creating a group
+  from the palette, resizing it by hand, and dragging each node in one at
+  a time (top carried proposal from the previous iteration).
+- **Issue/PR**: #951 / PR from `claude/sleepy-curie-sqw37t`
+- **Outcome**: done — new `groupSelection` store action frames the
+  selection's absolute-coordinate bounding box with auto-layout's
+  `GROUP_PADDING` (now exported; 56px top header room), creates the group
+  (`zIndex: -1001` per the established pattern, prepended so React Flow
+  sees the parent before its children) and reparents members with
+  group-relative positions in one `set()` → one undo entry; the new group
+  becomes the selection. Eligibility mirrors existing policies: group
+  nodes skipped (groups never nest), children whose group is also
+  selected ride along with it (alignSelection's rule), ≥2 members
+  required. Context-menu entry after Duplicate (lucide `Group` icon,
+  mod+G hint, disabled below 2 eligible), mod+G keyboard handler, new
+  cheat-sheet row, 2 new strings in all 5 locales. Serialization already
+  persists `parentId`/`style`, so no schema change. `pnpm build` +
+  `pnpm check` green. Issue #951 could not be locked (no `gh`, no MCP
+  lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - "Ungroup" counterpart (dissolve a selected group in place, children
+    keep absolute positions, no confirm dialog — delete already releases
+    children but also needs the confirm flow and drops the label).
+  - Mirror the shortcut cheat sheet in the README/docs (carried).
+  - Manual E2E queue (carried): Group selection (menu + mod+G, undo as
+    one step, grouping nodes already inside another group); Save as Image
+    from the VSCode extension host; Copy as Markdown; `render_workflow`
+    via MCP Inspector; problems badge; shortcut cheat sheet; problem-node
+    markers; problems panel click-to-jump; auto layout; node search
+    cycling; align/distribute + context menu + copy/cut/paste; localized
+    Claude API dialog in ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — "Save as Image (PNG)" canvas action
 - **User value**: a user can now export a clean PNG of the entire workflow
   graph — including parts scrolled out of view, at the theme's background,

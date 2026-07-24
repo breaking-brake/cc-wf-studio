@@ -23,7 +23,12 @@ import type { Connection, Edge, Node, OnConnect, OnEdgesChange, OnNodesChange } 
 import { addEdge, applyEdgeChanges, applyNodeChanges } from 'reactflow';
 import { temporal } from 'zundo';
 import { create } from 'zustand';
-import { absoluteNodePosition, computeAutoLayout, nodeBoxSize } from '../utils/auto-layout';
+import {
+  absoluteNodePosition,
+  computeAutoLayout,
+  GROUP_PADDING,
+  nodeBoxSize,
+} from '../utils/auto-layout';
 
 // ============================================================================
 // Store State Interface
@@ -279,6 +284,13 @@ interface WorkflowStore {
    *  policy as alignSelection. No-op with fewer than three alignable nodes.
    *  Single undo entry. */
   distributeSelection: (nodeIds: string[], axis: DistributeAxis) => void;
+  /** Wrap the selection in a new group node sized to fit (auto-layout's
+   *  GROUP_PADDING, extra top room for the header). Group nodes are skipped
+   *  (groups never nest) and children whose group is also selected ride
+   *  along with it instead of being pulled out; other members reparent with
+   *  group-relative positions. The new group becomes the selection. No-op
+   *  with fewer than two groupable nodes. Single undo entry. */
+  groupSelection: (nodeIds: string[]) => void;
 
   /** Re-arrange the whole canvas into a tidy left-to-right layered layout
    *  (groups laid out internally and resized to fit). One undo entry. */
@@ -1273,6 +1285,78 @@ export const useWorkflowStore = create<WorkflowStore>()(
                 }
               : node;
           }),
+        });
+      },
+
+      groupSelection: (nodeIds: string[]) => {
+        const allNodes = get().nodes;
+        const requested = new Set(nodeIds);
+        // Groups never nest, so selected group nodes are skipped; children
+        // whose group is also selected ride along with it (alignSelection's
+        // policy) instead of being pulled out of their group
+        const members = allNodes.filter(
+          (node) =>
+            requested.has(node.id) &&
+            node.type !== 'group' &&
+            !(node.parentId && requested.has(node.parentId))
+        );
+        if (members.length < 2) return;
+
+        // Frame the members' bounding box (absolute coordinates) with the
+        // same padding auto-layout gives group children
+        let minX = Number.POSITIVE_INFINITY;
+        let minY = Number.POSITIVE_INFINITY;
+        let maxX = Number.NEGATIVE_INFINITY;
+        let maxY = Number.NEGATIVE_INFINITY;
+        for (const node of members) {
+          const { x, y } = absoluteNodePosition(node, allNodes);
+          const { width, height } = nodeBoxSize(node);
+          if (x < minX) minX = x;
+          if (y < minY) minY = y;
+          if (x + width > maxX) maxX = x + width;
+          if (y + height > maxY) maxY = y + height;
+        }
+        const groupPosition = { x: minX - GROUP_PADDING.left, y: minY - GROUP_PADDING.top };
+        const groupId = `group-${Date.now()}`;
+        const groupNode: Node = {
+          id: groupId,
+          type: 'group',
+          position: groupPosition,
+          // Keep group below edge SVG layer so edges inside groups remain clickable (selected: -1001+1000=-1 < edge:0)
+          zIndex: -1001,
+          data: { label: 'Group' },
+          style: {
+            width: Math.ceil(maxX - minX + GROUP_PADDING.left + GROUP_PADDING.right),
+            height: Math.ceil(maxY - minY + GROUP_PADDING.top + GROUP_PADDING.bottom),
+          },
+          selected: true,
+        };
+
+        const memberIds = new Set(members.map((node) => node.id));
+        // The group is prepended so React Flow sees the parent before its
+        // children; members reparent with group-relative positions and the
+        // new group becomes the selection.
+        // Single set() call → single undo/redo history entry
+        set({
+          nodes: [
+            groupNode,
+            ...allNodes.map((node) => {
+              if (!memberIds.has(node.id)) {
+                return node.selected ? { ...node, selected: false } : node;
+              }
+              const absolute = absoluteNodePosition(node, allNodes);
+              return {
+                ...node,
+                parentId: groupId,
+                position: {
+                  x: absolute.x - groupPosition.x,
+                  y: absolute.y - groupPosition.y,
+                },
+                selected: false,
+              };
+            }),
+          ],
+          selectedNodeId: groupId,
         });
       },
 

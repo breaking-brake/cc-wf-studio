@@ -21,7 +21,7 @@ const RANK_SEPARATION = 96;
 
 /** Space kept between a group's border and its children. The top edge is
  *  larger to clear the group's header label. */
-const GROUP_PADDING = { top: 56, right: 28, bottom: 28, left: 28 };
+export const GROUP_PADDING = { top: 56, right: 28, bottom: 28, left: 28 };
 
 /** Matches the GroupNode NodeResizer minimums so an auto-sized group is
  *  never smaller than one a user could resize by hand. */

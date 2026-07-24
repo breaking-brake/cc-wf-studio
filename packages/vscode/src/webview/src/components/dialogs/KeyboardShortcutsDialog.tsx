@@ -77,6 +77,7 @@ export const KeyboardShortcutsDialog: React.FC<KeyboardShortcutsDialogProps> = (
         { label: t('shortcuts.cut'), combos: [[mod, 'X']] },
         { label: t('shortcuts.paste'), combos: [[mod, 'V']] },
         { label: t('shortcuts.duplicate'), combos: [[mod, 'D']] },
+        { label: t('shortcuts.group'), combos: [[mod, 'G']] },
         { label: t('shortcuts.delete'), combos: [['Delete'], ['Backspace']] },
       ],
     },
