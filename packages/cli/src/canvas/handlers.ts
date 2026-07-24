@@ -40,6 +40,13 @@ interface SaveSuccessPayload {
 interface SaveWorkflowPayload {
   workflow: Workflow;
 }
+interface ExportImagePayload {
+  fileName: string;
+  dataUrl: string;
+}
+interface ExportImageSuccessPayload {
+  filePath: string;
+}
 interface WorkflowListPayload {
   workflows: Array<{ id: string; name: string; description?: string; updatedAt: string }>;
 }
@@ -200,6 +207,54 @@ export function createCanvasHandlers(options: CanvasHandlersOptions): CanvasServ
               payload: {
                 code: 'SAVE_FAILED',
                 message: `Failed to write ${workflowAbsPath}: ${error instanceof Error ? error.message : String(error)}`,
+              },
+            });
+          }
+          return;
+        }
+
+        case 'EXPORT_IMAGE': {
+          // Persist a canvas capture (PNG data URL) next to the workflow
+          // file. There is no save dialog in a plain browser, so a
+          // non-clobbering numbered suffix protects existing files.
+          const image = (message.payload ?? {}) as Partial<ExportImagePayload>;
+          const base64 = (image.dataUrl ?? '').replace(/^data:image\/png;base64,/, '');
+          if (!base64) {
+            send({
+              type: 'ERROR',
+              requestId,
+              payload: {
+                code: 'INVALID_PAYLOAD',
+                message: 'EXPORT_IMAGE missing image data.',
+              },
+            });
+            return;
+          }
+          try {
+            const suggested = path
+              .basename(image.fileName || 'workflow.png', '.png')
+              .replace(/[\\/:*?"<>|]/g, '_');
+            const dir = path.dirname(workflowAbsPath);
+            let target = path.join(dir, `${suggested}.png`);
+            for (let n = 2; ; n++) {
+              try {
+                await fs.access(target);
+                target = path.join(dir, `${suggested}-${n}.png`);
+              } catch {
+                break;
+              }
+            }
+            await fs.writeFile(target, Buffer.from(base64, 'base64'));
+            console.log(`[ccwf canvas] Saved canvas image: ${target}`);
+            const payload: ExportImageSuccessPayload = { filePath: target };
+            send({ type: 'EXPORT_IMAGE_SUCCESS', requestId, payload });
+          } catch (error) {
+            send({
+              type: 'ERROR',
+              requestId,
+              payload: {
+                code: 'EXPORT_IMAGE_FAILED',
+                message: `Failed to save canvas image: ${error instanceof Error ? error.message : String(error)}`,
               },
             });
           }

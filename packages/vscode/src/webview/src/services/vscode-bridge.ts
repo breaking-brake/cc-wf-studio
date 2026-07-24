@@ -27,6 +27,7 @@ import type {
   ExportForGeminiCliSuccessPayload,
   ExportForRooCodePayload,
   ExportForRooCodeSuccessPayload,
+  ExportImagePayload,
   ExportWorkflowPayload,
   ExtensionMessage,
   GetChangelogResultPayload,
@@ -149,6 +150,55 @@ export function exportWorkflow(workflow: Workflow, overwriteExisting = false): P
       window.removeEventListener('message', handler);
       reject(new Error('Request timed out'));
     }, 10000);
+  });
+}
+
+/**
+ * Send a captured canvas image to the host to be written to disk.
+ *
+ * The VSCode host shows a save dialog (so the user can take their time —
+ * hence the long timeout); the `ccwf canvas` host saves next to the
+ * workflow file.
+ *
+ * @param fileName - Suggested file name (e.g. `<workflow-name>.png`)
+ * @param dataUrl - PNG data URL from the canvas capture
+ * @returns The saved file path, or null when the user cancelled the dialog
+ */
+export function exportCanvasImage(fileName: string, dataUrl: string): Promise<string | null> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${Date.now()}-${Math.random()}`;
+
+    const handler = (event: MessageEvent) => {
+      const message: ExtensionMessage = event.data;
+
+      if (message.requestId === requestId) {
+        window.removeEventListener('message', handler);
+        clearTimeout(timeoutId);
+
+        if (message.type === 'EXPORT_IMAGE_SUCCESS') {
+          resolve(message.payload?.filePath ?? null);
+        } else if (message.type === 'EXPORT_IMAGE_CANCELLED') {
+          resolve(null);
+        } else if (message.type === 'ERROR') {
+          reject(new Error(message.payload?.message || 'Failed to save canvas image'));
+        }
+      }
+    };
+
+    window.addEventListener('message', handler);
+
+    const payload: ExportImagePayload = { fileName, dataUrl };
+    vscode.postMessage({
+      type: 'EXPORT_IMAGE',
+      requestId,
+      payload,
+    });
+
+    // Generous timeout: the VSCode save dialog stays open until the user acts.
+    const timeoutId = setTimeout(() => {
+      window.removeEventListener('message', handler);
+      reject(new Error('Request timed out'));
+    }, 300000);
   });
 }
 
