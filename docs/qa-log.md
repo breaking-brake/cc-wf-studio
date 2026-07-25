@@ -17,6 +17,65 @@ Entry format:
 
 ---
 
+## 2026-07-25 — S3: the canvas serialization round-trip
+- **Protects**: if this breaks, the user opens a workflow in the canvas,
+  presses save, and the file comes back different from what they had — a
+  group's children detach and render outside it, a branch edge loses the
+  condition that routed it, or the slash-command `model` / `allowedTools`
+  they configured silently disappear from `workflow.json`.
+- **Issue/PR**: #1014 / PR from `claude/qa-canvas-serialization-round-trip`
+- **Outcome**: done — the **first tests in the webview package**, 41 passing
+  + 1 skipped in `src/services/workflow-service.test.ts`, plus a minimal
+  `vitest.config.ts` (node environment, `src/**/*.{test,spec}.ts`) so the
+  suite does not inherit the React plugin from `vite.config.ts`. Sections:
+  - **A. `deserializeWorkflow`** — parent-first ordering when the file
+    declares children before their group (the load-bearing case: AI-authored
+    files and `patch_workflow` output have no reason to declare a group
+    first); `parentId` / `style` present only when the source node has them;
+    `connections` → `edges` renames with `data` set to `{ condition }` only
+    when a condition exists; load-time id backfill for `askUserQuestion`
+    options and `branch`/`switch` branches, including the **identity** case
+    (unchanged data returns the same reference, which is what stops needless
+    re-renders); and the `ifElse` repair — 0 or 1 branch padded to two with
+    the English `True`/`False` fallbacks **and `outputPorts: 2`**, versus a
+    well-formed node returned untouched *without* `outputPorts`.
+  - **B. `serializeWorkflow`** — name falling back to the node id; `style`
+    narrowed to `width`/`height` with the key omitted entirely when neither
+    is set; edge handles defaulting to `output`/`input`; and the
+    `slashCommandOptions` block parameterised over all six options, so
+    dropping any single clause of `hasNonDefaultOptions` fails a named case.
+    Also `tour` only when non-empty, and the pass-through payloads.
+  - **C. Round-trip** — one fixture (group + two grouped children + an
+    `askUserQuestion` with labelled option edges + an `ifElse`) asserted as
+    **whole node and edge arrays**, so a dropped field fails rather than
+    slipping between field-by-field checks; plus a second round-trip.
+  - Verified the suite bites by hand-mutating five things and reverting each:
+    removing the parent-first sort, dropping the `allowedTools` clause from
+    `hasNonDefaultOptions`, setting `edge.data` unconditionally, copying
+    `node.style` wholesale instead of narrowing it, and dropping the
+    `outputPorts: 2` from the `ifElse` repair in core. Each made a named
+    assertion fail (2–4 tests each).
+- **Bugs filed**: #1015 — `deserializeWorkflow`'s sort comparator is correct
+  pairwise but is **not a transitive ordering**, so a nested group can be
+  emitted before the group that contains it (observed: parent at index 2,
+  nested child at index 0). Section D of the issue landed as `it.skip`
+  naming #1015. Reachable only from an AI-authored or hand-edited file — the
+  canvas never creates nested groups (`workflow-store.ts:591`) — hence
+  moderate, not high. The bug notes the second, independent implementation
+  of the same invariant (`sortNodesParentFirst`, `workflow-store.ts:189`)
+  for the same fix pass.
+- **Deliberately not filed as a bug**: `serializeWorkflow` mints a fresh
+  `id` and resets `createdAt` on every save (lines 87, 93–94). Per the
+  issue, this was judged rather than assumed: nothing in the product reads
+  either field back (`createdAt` is only ever written — `refinement-service`
+  preserves it defensively, no UI or exporter reads it), so it is dead
+  metadata, not a user-visible defect. The suite asserts the **observed**
+  behaviour and says so, rather than claiming preservation.
+- **Note for the next iteration**: `sortNodesParentFirst` and the rest of
+  `workflow-store.ts` remain uncovered — that is S6 and wants its own issue.
+  `validateWorkflow` in the same module stays out of scope as a
+  transcription of S1's ground.
+
 ## 2026-07-25 — S4: the `ccwf export` write contract
 - **Protects**: if this breaks, `ccwf export` (and `ccwf run`, which shares
   `runExport`) overwrites the user's hand-edited `.claude/agents/*.md` or
