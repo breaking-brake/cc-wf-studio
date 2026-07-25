@@ -18,6 +18,40 @@ Entry format:
 
 ---
 
+## 2026-07-25 — `ccwf run --launch` starts the agent with the skill invoked
+- **User value**: a user running `ccwf run <file> --launch` now lands in an
+  agent session that is already executing the workflow, instead of an empty
+  session plus a printed hint telling them to type the slash command
+  themselves — one command from workflow JSON to the workflow running.
+- **Issue/PR**: #984
+- **Outcome**: done — `AgentLauncher` (`packages/cli/src/utils/agent-launchers.ts`)
+  gained `invokeSkill` (per-agent skill phrase: `/name` for Claude Code and
+  Copilot, `$name` for Codex, bare `name` for Gemini) and `promptArgs`
+  (per-agent argv for an inline initial prompt), so `run.ts` spawns
+  `bin promptArgs(invokeSkill(slashName))` instead of `bin []`. The session
+  stays interactive (`stdio: 'inherit'`, exit-code propagation unchanged) and
+  no permission-bypass flags are passed — `ccwf tour` keeps its own argv map
+  precisely because it adds `--allow-all-tools` for its one-shot edit, and its
+  behaviour is unchanged (verified). The "Next: … run `/x`" hint now prints
+  only when no launch happens (plain `run`, unsupported agent, binary missing)
+  rather than alongside a launch that already typed it; the binary-missing
+  warning stopped hardcoding `/name` for every agent and uses the agent's own
+  phrase. Docs updated in `packages/cli/README.md` and the bundled
+  `ccwf-cli/SKILL.md`, which both still claimed launch was "claude-code only".
+  E2E against the built CLI with stub agent binaries: all four launchable
+  agents receive the right argv (`[/x]`, `[$x]`, `[-i /x]`, `[-i x]`), plain
+  `run` still prints the hint, unsupported agent (cursor) and missing binary
+  both warn + fall back to the hint with exit 0, and `ccwf tour` still passes
+  its 3-arg Copilot invocation.
+- **Next proposals**:
+  - `ccwf run --agent <bogus>` throws a raw commander stack trace instead of
+    the clean `error: …` line the other failure paths print
+    (`asSupportedAgent` in `packages/cli/src/commands/export.ts` throws a
+    plain `Error` that no handler in `run.ts`/`export.ts` catches).
+  - `ccwf run --launch` inherits the export's `--overwrite`/conflict
+    behaviour but gives no way to launch against files already exported
+    earlier (a `--launch`-only "skip export if unchanged" path).
+
 ## 2026-07-25 — `ccwf export` / `run` refuse to write an invalid workflow
 - **User value**: a user exporting or running a broken workflow no longer
   silently gets broken skill files — the same error list `ccwf validate`

@@ -152,11 +152,14 @@ ccwf run ./my-workflow.json                                    # same files as e
 ccwf run ./my-workflow.json --agent cursor                     # forwarded to export
 ```
 
-`ccwf run` is a thin wrapper over `ccwf export` (same flags: `--agent`, `--cwd`, `--overwrite`, `--no-validate` — including the schema check that refuses to write files for an invalid workflow). It adds an agent-specific "next step" line to stdout. With `--launch` (best-effort, claude-code only for now) it also walks `PATH` for the `claude` binary and spawns it in the output directory — when the binary is missing or a different agent is selected, the spawn is skipped and a warning is printed.
+`ccwf run` is a thin wrapper over `ccwf export` (same flags: `--agent`, `--cwd`, `--overwrite`, `--no-validate` — including the schema check that refuses to write files for an invalid workflow). It adds an agent-specific "next step" line to stdout.
+
+With `--launch` it goes one step further: it walks `PATH` for the agent's CLI binary and spawns it in the output directory **with the exported skill already invoked** — so the workflow starts running instead of leaving you at an empty session. Supported for `claude-code`, `codex`, `copilot` and `gemini` (the agents with a headless CLI); each gets the invocation it understands (`/name`, `$name`, or the bare skill name). The session stays interactive and the agent's normal permission prompts still apply. When the binary is missing or the selected agent has no CLI, the spawn is skipped and the "next step" hint is printed instead.
 
 ```sh
-ccwf run ./my-workflow.json --launch        # write + spawn claude
-ccwf run ./my-workflow.json --agent cursor  # write only (cursor launch not yet wired)
+ccwf run ./my-workflow.json --launch                # write + launch claude, skill already invoked
+ccwf run ./my-workflow.json --launch --agent codex  # same, in Codex CLI
+ccwf run ./my-workflow.json --agent cursor          # write only (cursor has no CLI to launch)
 ```
 
 ### `ccwf preview`
