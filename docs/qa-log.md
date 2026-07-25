@@ -17,6 +17,61 @@ Entry format:
 
 ---
 
+## 2026-07-25 — S2: the core generators (Mermaid, Markdown, agent skills)
+- **Protects**: if this breaks, every export surface — `ccwf render`, the MCP
+  `render_workflow` tool, the canvas "Copy as Markdown", and all six
+  non-Claude skill targets — silently emits a diagram or instruction document
+  that is wrong or unparseable, and the user only finds out wherever the agent
+  later runs.
+- **Issue/PR**: #995 / PR from `claude/qa-core-generators`
+- **Outcome**: done — three suites in `packages/core/src/services/`, plus
+  shared fixtures in `__fixtures__/workflows.ts`:
+  - `workflow-prompt-generator.test.ts` (items 1 + 2, the AI-facing half):
+    id sanitization against Mermaid reserved words and the end-to-end
+    invariant that node definitions and edges sanitize identically; label
+    escaping for every character that closes a shape; **node shapes asserted
+    against the vocabulary the execution instructions use** ("Rectangle nodes
+    (Sub-Agent: ...)", "Diamond nodes (AskUserQuestion:...)", …) — a contract
+    between two artifacts this module generates, so a shape change without a
+    prose change is caught; branch/option edge labelling including the
+    deliberately-unlabelled AI-suggestion and multi-select cases; group
+    subgraphs with no duplicate definitions; prompt-body verbatim
+    preservation; Codex shell-command quote escaping; group-table pipe
+    escaping; built-in `subagent_type` and CC-only model omission per
+    provider; determinism.
+  - `workflow-overview-formatter.test.ts` (item 2, the human-facing half):
+    topological order at a merge point, cycle tolerance (each node exactly
+    once), unreachable nodes still rendered, groups flattened, the
+    `## <sanitizedId>(<title>)` heading the scroll-sync keys off, 4-backtick
+    fencing so a prompt containing a code block survives, inline escaping, and
+    branch-ordered next-step links.
+  - `agent-skill-export.test.ts` (item 4): all six providers produce a
+    structurally sound SKILL.md from one generator; Cursor is the only
+    provider that mirrors Sub-Agent files; planned paths are relative,
+    forward-slashed and contain no `..`; and **both directions of agreement
+    with the README's "Supported Agents" table** — every provider is
+    documented, every SKILL.md lands under a documented directory, and every
+    documented directory actually receives a file.
+  - Verified the suites bite by hand-mutating six things: the sub-agent node
+    shape, the prompt label's `escapeLabel` call, Cursor's `agentsDir`, the
+    Codex `skillsDir` (README divergence), the overview's 4-backtick fence,
+    and the topological sort. Each made a named assertion fail. The
+    merge-point fixture was restrung after mutation 6 showed declaration
+    order satisfied it by accident.
+- **Bugs filed**: **#1009** — `generateAgentSkillContent` interpolates the
+  workflow description into the SKILL.md frontmatter unescaped, while
+  `generateSlashCommandFile` in the same package routes the identical value
+  through `escapeYamlString`. A description containing `:` (or a newline)
+  therefore produces invalid YAML for all six non-Claude targets and the skill
+  silently never loads. Test landed **skipped** naming the issue; the fix is
+  the feature loop's, since it touches `packages/core/src`.
+- **Residual scope on #995**: item 3 (Claude Code export artifacts checked
+  against `packages/vscode/specs/001-cc-wf-studio/spec.md`) is **not** in this
+  PR — the issue itself gates it on a human first updating that spec, which is
+  still stale (it lists sub-agent models as `sonnet`/`opus`/`haiku` while
+  `CC_ONLY_MODELS` now carries `haiku`/`fable`). Items 1, 2 and 4 all landed
+  here. #995 stays open for item 3.
+
 ## 2026-07-25 — S1: validator behavior and authoring-guide ↔ zod consistency
 - **Protects**: if this breaks, an AI agent follows
   `resources/workflow-schema.json`, authors a workflow the validator then
