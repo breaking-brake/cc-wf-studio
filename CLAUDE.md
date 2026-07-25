@@ -22,9 +22,10 @@ loop architecture and safety rails. Key points for agents:
   cleanup, docs-for-docs'-sake, no-user-effect refactors) is out of scope
   for agents. Maintenance is interrupt-only: red CI, security, human-reported
   bugs.
-- One skill drives it: `next-task` (one invention or interrupt-fix per
-  iteration). Idea queue = GitHub Issues labeled `idea`. Loop memory =
-  `docs/progress-log.md` (append-only).
+- Two skills drive it: `next-idea` (ideation — files locked `idea` issues,
+  never implements) and `next-task` (implementation — one queued idea or
+  interrupt-fix per iteration). Idea queue = GitHub Issues labeled `idea`.
+  Loop memory = `docs/progress-log.md` (append-only).
 - Two-stage branch flow: agent task PRs target the **`auto-dev`** integration
   branch and may auto-merge there on green CI. **`main` is human-only** —
   agents never open or merge PRs based on `main`; a human promotes

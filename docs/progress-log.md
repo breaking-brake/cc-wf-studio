@@ -1,9 +1,10 @@
 # Progress Log
 
 Append-only memory of the autonomous value-creation loop. The `next-task`
-skill appends one entry per iteration (newest first) and reads recent
-entries to avoid repeating finished or abandoned work. Humans may annotate
-entries but should not rewrite history.
+skill appends one entry per implementation iteration (newest first); both
+it and the `next-idea` skill read recent entries to avoid repeating
+finished or abandoned work. Humans may annotate entries but should not
+rewrite history.
 
 Entry format:
 
