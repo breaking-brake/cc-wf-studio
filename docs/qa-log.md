@@ -17,6 +17,56 @@ Entry format:
 
 ---
 
+## 2026-07-25 — S4: the `ccwf export` write contract
+- **Protects**: if this breaks, `ccwf export` (and `ccwf run`, which shares
+  `runExport`) overwrites the user's hand-edited `.claude/agents/*.md` or
+  `.claude/skills/<workflow>/SKILL.md` without asking — silently and
+  irreversibly, while still printing `✓ Wrote N file(s)`.
+- **Issue/PR**: #1008 / PR from `claude/qa-cli-export-write-contract`
+- **Outcome**: done — the **first tests in `packages/cli`** (its vitest config
+  existed but the suite was empty). Two suites, 21 tests:
+  - `src/commands/export.test.ts` (sections A–D). Every case asserts the
+    **complete set of files** found by walking a temp output root, not a series
+    of `exists` checks, so a stray write fails the test. Section A: the
+    claude-code plan materialised from an empty root, nested dirs created,
+    `writtenPaths` absolute under a *resolved* `rootDir`, and — parameterised
+    over all three markers (`commandFilePath`, `pluginName`, `builtInType`) —
+    **no agent file for a sub-agent the user already maintains**. Section B,
+    the load-bearing one: a pre-existing sentinel refuses with `process.exit(1)`
+    and leaves the sentinel byte-for-byte intact **and the non-conflicting
+    agent files uncreated**, because the sweep completes before the write loop
+    starts; `--overwrite` writes everything; and conflict detection keys off
+    `cwd`, not `process.cwd()`. Section C: plan selection (codex writes nothing
+    under `.claude/`, cursor mirrors sub-agents) and the Claude Code-only
+    warning in both directions. Section D: `asSupportedAgent` rejecting with
+    commander's `InvalidArgumentError` naming every agent, and `runExport`
+    propagating a `WorkflowLoadError` while **writing nothing**.
+  - `src/utils/load-workflow.test.ts` (section D, the exit-code half): missing
+    file and malformed JSON each become a `WorkflowLoadError` with
+    `exitCode === 2`, and a relative path in produces an **absolute** path in
+    the message — this module is the `<file>` error contract every subcommand
+    shares, so a regression here turns a typo into a raw stack trace.
+- **On stubbing `process.exit`**: mocked to *throw*, per the issue. A no-op
+  mock lets execution fall through into the write loop, so the conflict tests
+  would have asserted the opposite of what really happens; the assertion is on
+  the recorded call argument, not the thrown message.
+- **Verified the suites bite** by hand-mutating six things and restoring each:
+  the `!options.overwrite` conflict condition (1 test), the plan-selection
+  ternary (13), `resolvePlanned` regressed to a cwd-relative `path.resolve`
+  (1), the Claude Code-only warning (1), core's `commandFilePath` skip (1), and
+  `path.resolve` in `loadWorkflowFromFile` (1). Each made a named assertion
+  fail. The cwd-relative mutation was exercised only under the test that
+  `chdir`s into a temp dir, so no mutation run could write into the repo.
+- **Bugs filed**: none — the write path behaved as specified in every case.
+  The two product-behaviour oddities #1008 flagged (a JSON file that parses but
+  is not a workflow crashes with a `TypeError` stack trace; two sub-agent names
+  that normalise to the same file name silently collide) are **still not
+  filed** — the issue deliberately left them unasserted as feature-track
+  questions, and this loop files at most one issue per run.
+- **Residual scope on #1008**: none — all 14 named cases landed. The issue's
+  own out-of-scope list (multi-agent atomicity, dry-run/JSON output, the
+  `{meta, workflow}` wrapper, `--launch`) stays with `auto-dev`.
+
 ## 2026-07-25 — S5 (write half): the MCP write path and optimistic locking
 - **Protects**: if this breaks, an external AI agent's `apply_workflow` /
   `update_nodes` call silently overwrites or corrupts the user's
