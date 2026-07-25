@@ -17,6 +17,69 @@ Entry format:
 
 ---
 
+## 2026-07-25 — S6 (first slice): the MCP apply_workflow review gate
+- **Protects**: if this breaks, the user approves an AI's rewrite of their
+  canvas from a summary that does not match what is about to be written — a
+  removed node missing from the list, or "no changes" shown for an apply that
+  replaces three nodes. `computeWorkflowDiff` is the only thing that describes
+  an incoming `apply_workflow` before it lands.
+- **Issue/PR**: #1017 / PR from `claude/qa-workflow-diff-review-gate`
+- **Outcome**: done — 25 passing cases in
+  `packages/vscode/src/webview/src/utils/workflow-diff.test.ts`, covering the
+  issue's 16 named cases. No new config: the module's only imports are
+  `import type`, so it runs under the webview `vitest.config.ts` that landed
+  with #1014 with no alias resolution, no DOM, no React. Sections:
+  - **A. Node classification** — added / removed / modified asserted as the
+    **whole three lists**, so a node landing in two categories fails; an
+    unchanged node absent from all three; the `data.description || node.id`
+    name fallback asserted on **both** sides, because it is written twice
+    (`getNodeName` for canvas nodes, an inline expression for incoming ones)
+    and a refactor may update only one; and the deliberate asymmetry where a
+    typeless removed node reads `'unknown'` while a typeless added node passes
+    `undefined` straight through.
+  - **B. Connection counting** — matching sets count zero; a genuine add and a
+    genuine remove count once each; duplicate parallel wires collapse to one
+    key because both sides are `Set`s.
+  - **C. `isNewWorkflow`** — the flag that switches the dialog heading
+    (`DiffPreviewDialog.tsx:89`): true for an empty canvas and for the default
+    start + end, but **false once the user has wired start → end**, since any
+    edge at all disqualifies it.
+  - **D. `totalChanges` / `nameChange`** — parameterised one scenario per term
+    of the sum, so dropping any single term fails a case that names the missing
+    term; plus the all-categories sum, the no-op apply (`totalChanges === 0` is
+    what `DiffPreviewDialog.tsx:144` keys its "no changes" message off), and
+    `nameChange` null versus `{ from, to }`.
+  - Verified the suite bites by hand-mutating the four things the issue names
+    and reverting each: dropping the `nameChange` term from `totalChanges`
+    (2 named failures), inverting the `currentEdgeKeys.has` check (8),
+    removing the `|| 'unknown'` type fallback (1), and relaxing
+    `isNewWorkflow`'s `currentEdges.length === 0` clause (1).
+- **Bugs filed**: #1018 — the diff compares serialized form rather than
+  meaning, in two places, and both make the dialog **overstate** an incoming
+  apply. (a) The two edge-key builders disagree on the port default
+  (`sourceHandle ?? ''` vs `fromPort` verbatim, while `serializeWorkflow`
+  normalizes null to `'output'`/`'input'`), so one unchanged wire counts as
+  1 added + 1 removed. This is not just the null case: handle ids differ per
+  node component (`StartNode` emits `out`, `SubAgentNode` emits
+  `input`/`output`) while the authoring guide tells agents to write
+  `"fromPort": "output"`, so a `start → subAgent` wire — the most common in
+  the product — diffs as a change on every apply. (b) `modifiedNodes`
+  compares `JSON.stringify(data)`, so a different key order reads as modified,
+  and an `askUserQuestion` node reads as modified whenever an agent omits the
+  option ids that `ensureNodeDataItemIds` generates on load.
+- **Judgment — asserted as observed, not skipped**: four cases pin (a) and (b)
+  as the code behaves today and therefore pass. Skipping them would have left
+  the module's most-used path uncovered while the feature track decides;
+  instead the cases are named after the mismatch and #1018 asks whoever fixes
+  it to update them rather than work around them. Nothing here is a data
+  defect — the diff is a summary and the apply itself is unaffected — so the
+  cost is trust in the review gate, not a corrupted file.
+- **Residual scope on #1017**: none — all 16 cases landed. The store half of
+  S6 (undo/redo, `clearWorkflow`, unsaved-change detection) was sliced out of
+  #1017 on purpose and still wants its own issue: `workflow-store.ts` reads
+  `localStorage` at store-creation time (lines 342–359) and needs a stub this
+  module does not.
+
 ## 2026-07-25 — S3: the canvas serialization round-trip
 - **Protects**: if this breaks, the user opens a workflow in the canvas,
   presses save, and the file comes back different from what they had — a
