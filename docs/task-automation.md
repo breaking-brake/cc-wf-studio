@@ -14,7 +14,7 @@ file is the map.
 flowchart TD
     R1["Ideation routine<br>(hourly :30, Fable)"] -->|fires a fresh session| NI["next-idea skill:<br>invent 3–5, judge vs the value bar,<br>file + lock winners as issues (max 3)"]
     NI --> Q["Idea queue<br>(GitHub Issues, label idea)"]
-    R2["Implementation routine<br>(hourly :00, Opus)"] -->|fires a fresh session| NT["next-task skill"]
+    R2["Implementation routine<br>(hourly :01, Opus)"] -->|fires a fresh session| NT["next-task skill"]
     NT --> G{"Open PR on auto-dev<br>already exists?"}
     G -->|"yes — serialization guard"| S["Steward that PR:<br>merge if green / fix if red"]
     G -->|no| I{"Interrupt?<br>red CI / security / human bug"}
@@ -113,7 +113,8 @@ as privilege changes); closing or editing human-authored issues.
 
 - **Autonomous**: two Claude Code Remote routines fire fresh cloud sessions
   every hour — **ideation at :30 (Fable, `next-idea`)** and
-  **implementation at :00 (Opus, `next-task`)**. Pause/resume/retarget them
+  **implementation at :01 (Opus, `next-task`)** (the routine API rejects
+  minute 0, so :01 stands in for :00). Pause/resume/retarget them
   by asking Claude, or from the claude.ai Routines UI
   (https://claude.ai/code/routines).
 - **Manual**: `/next-idea` files ideas, `/next-task` runs one implementation
