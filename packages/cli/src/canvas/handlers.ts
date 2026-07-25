@@ -69,6 +69,16 @@ export interface CanvasHandlersOptions {
   allowMissing?: boolean;
 }
 
+export interface CanvasHandlers extends CanvasServerHandlers {
+  /**
+   * Re-read the workflow after a filesystem change event. Returns `null`
+   * when the change should NOT be pushed to the canvas: the event is an
+   * echo of the canvas's own save, the file is missing, or it does not
+   * parse (e.g. an external writer is mid-write — a later event retries).
+   */
+  loadExternalChange(): Promise<Workflow | null>;
+}
+
 /**
  * Minimal workflow for new-file mode — Start and End nodes only, matching
  * the webview's own `createEmptyWorkflow` starter shape.
@@ -134,7 +144,7 @@ function isCanvasUnsupported(type: string): boolean {
   return UNSUPPORTED_PREFIXES.some((prefix) => type.startsWith(prefix));
 }
 
-export function createCanvasHandlers(options: CanvasHandlersOptions): CanvasServerHandlers {
+export function createCanvasHandlers(options: CanvasHandlersOptions): CanvasHandlers {
   const workflowAbsPath = path.resolve(options.workflowPath);
   const workflowId = path.basename(workflowAbsPath, '.json');
   const workflowDisplayName = workflowId;
@@ -147,6 +157,13 @@ export function createCanvasHandlers(options: CanvasHandlersOptions): CanvasServ
   // Cached so browser reloads before the first save keep the same workflow
   // id instead of minting a fresh starter each time.
   let starterWorkflow: Workflow | undefined;
+
+  // Exact file contents the canvas is already showing — last load, last save,
+  // or last pushed external change. The file watcher fires for our own writes
+  // (and, on platforms that report null filenames, for sibling files like
+  // exported PNGs); comparing contents lets loadExternalChange drop those
+  // echoes instead of pushing a reload that wipes unsaved canvas edits.
+  let lastKnownContents: string | undefined;
 
   async function readWorkflowFromDisk() {
     let raw: string;
@@ -161,10 +178,36 @@ export function createCanvasHandlers(options: CanvasHandlersOptions): CanvasServ
     }
     const document = parseWorkflowDocument(raw, workflowAbsPath);
     wrapperMeta = document.wrapperMeta;
+    lastKnownContents = raw;
     return migrateWorkflow(document.workflow);
   }
 
   return {
+    async loadExternalChange() {
+      let raw: string;
+      try {
+        raw = await fs.readFile(workflowAbsPath, 'utf-8');
+      } catch {
+        // Deleted or transiently unreadable (atomic-rename window) — keep the
+        // canvas as-is; a follow-up event fires once the file is back.
+        return null;
+      }
+      if (raw === lastKnownContents) {
+        return null;
+      }
+      try {
+        const document = parseWorkflowDocument(raw, workflowAbsPath);
+        wrapperMeta = document.wrapperMeta;
+        lastKnownContents = raw;
+        return migrateWorkflow(document.workflow);
+      } catch (error) {
+        console.warn(
+          `[ccwf canvas] Ignoring file change (not a valid workflow yet): ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`
+        );
+        return null;
+      }
+    },
+
     async onMessage(raw, send) {
       const message = (raw ?? {}) as IncomingMessage;
       const type = typeof message.type === 'string' ? message.type : '';
@@ -256,6 +299,7 @@ export function createCanvasHandlers(options: CanvasHandlersOptions): CanvasServ
                 ? save.workflow
                 : { meta: wrapperMeta, workflow: save.workflow };
             const contents = `${JSON.stringify(document, null, 2)}\n`;
+            lastKnownContents = contents;
             await fs.writeFile(workflowAbsPath, contents, 'utf-8');
             const payload: SaveSuccessPayload = {
               filePath: workflowAbsPath,
