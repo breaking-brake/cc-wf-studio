@@ -17,6 +17,51 @@ Entry format:
 
 ---
 
+## 2026-07-25 — Malformed workflow JSON errors point at the offending line
+- **User value**: a user who feeds `ccwf` a malformed workflow JSON file now
+  sees the offending line with a caret pointing at the exact spot (plus
+  line/column), instead of a raw V8 message — which on Node 20 is just a
+  byte offset and even on Node 22 gives only `(line L column C)` with no
+  visible context (top carried proposal from the previous iteration,
+  premise re-verified: `parseWorkflowDocument` surfaced `error.message`
+  verbatim).
+- **Issue/PR**: #975
+- **Outcome**: done — `describeJsonParseError` in `load-workflow.ts`:
+  recovers the location from V8's message (`(line L column C)` on Node 22+;
+  on Node 20 re-derives line/column from `at position N` — derivation
+  verified to match V8's own line/col for the same input), strips the
+  position boilerplate down to a one-line reason, and renders a ±1-line
+  caret snippet; minified single-line files get a `…`-windowed 100-char
+  slice centered on the column so the caret stays visible; messages with no
+  recoverable position (tiny inputs, `Unexpected end of JSON input`) fall
+  through unchanged. Every subcommand benefits (`validate`, `render`,
+  `export`, `run`, `tour`, `preview`, `canvas` incl. its LOAD_FAILED
+  envelope) since all parse via `parseWorkflowDocument`. E2E on built CLI:
+  large/minified/tiny/truncated fixtures + valid-file control — caret exact,
+  windows correct, fallbacks intact, exit codes stable (2 / 1). `pnpm
+  build` + `pnpm check` green. Issue #975 could not be locked (no `gh`, no
+  MCP lock tool — known limitation, noted in the issue).
+- **Next proposals**:
+  - Security-interrupt check first next round: the push response reported
+    5 Dependabot alerts on the default branch (2 high) — assess whether any
+    is actionable (real, reachable dependency) before inventing.
+  - `ccwf canvas` doesn't watch the file: external edits (e.g. an AI agent
+    via `ccwf mcp --file`) go stale in the open canvas and a later save
+    clobbers them — `ccwf preview` already has the watcher pattern (carried).
+  - Mirror the shortcut cheat sheet in the README/docs (carried).
+  - Manual E2E queue (carried): drag-splice in the VSCode extension host
+    (highlight, drop, undo, wired-node guard, multi-select drag guard);
+    edge ⊕ insert (simple + dialog types, cancel paths, undo, ja locale
+    tooltip); edge-drop dialog create (all four dialogs, cancel path,
+    collapsed palette auto-expand, sub-agent-flow and Codex-beta gating);
+    palette filter; arrow-key nudge; Esc panel dismissal; F8 / Shift+F8
+    problem cycling; inline group rename; Ungroup; Group selection; Save as
+    Image from the VSCode extension host; Copy as Markdown; `render_workflow`
+    via MCP Inspector; problems badge; shortcut cheat sheet; problem-node
+    markers; problems panel click-to-jump; auto layout; node search cycling;
+    align/distribute + context menu + copy/cut/paste; localized Claude API
+    dialog in ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-24 — `ccwf canvas` can start a brand-new workflow file
 - **User value**: a user can now begin a workflow from the terminal with
   `ccwf canvas new.json` — the canvas opens with a Start→End starter (name
