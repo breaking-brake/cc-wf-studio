@@ -5,8 +5,9 @@
  * the user at Claude Code (or the chosen agent). In a later phase, `run` will
  * spawn `claude` itself and let the agent perform the skill export +
  * execution. The contract for `<file>` and the flags (`--agent`, `--cwd`,
- * `--overwrite`) is intentionally identical to `ccwf export` so the future
- * change is backward-compatible.
+ * `--overwrite`, `--no-validate`) is intentionally identical to `ccwf export`
+ * so the future change is backward-compatible — including the schema check
+ * that refuses to write files for an invalid workflow.
  */
 
 import { spawn } from 'node:child_process';
@@ -14,6 +15,7 @@ import { Command } from 'commander';
 import { LAUNCHABLE_AGENTS } from '../utils/agent-launchers.js';
 import { findBinaryInPath } from '../utils/find-binary.js';
 import { WorkflowLoadError } from '../utils/load-workflow.js';
+import { WorkflowInvalidError, reportWorkflowInvalid } from '../utils/validation-report.js';
 import {
   ExportConflictError,
   asSupportedAgent,
@@ -27,6 +29,8 @@ interface CommanderRunOptions {
   overwrite: boolean;
   cwd?: string;
   launch: boolean;
+  /** Commander sets this to `false` when `--no-validate` is passed. */
+  validate: boolean;
 }
 
 /**
@@ -80,6 +84,10 @@ export function registerRunCommand(program: Command): void {
       `After writing files, also spawn the agent CLI interactively (best-effort; supported for ${Object.keys(LAUNCHABLE_AGENTS).join(', ')}).`,
       false
     )
+    .option(
+      '--no-validate',
+      'Skip the schema check and run even if the workflow is invalid (escape hatch for forward-compatible files).'
+    )
     .action(async (file: string, options: CommanderRunOptions) => {
       try {
         const agent = asSupportedAgent(options.agent);
@@ -88,6 +96,7 @@ export function registerRunCommand(program: Command): void {
           agent,
           overwrite: options.overwrite,
           cwd: options.cwd,
+          validate: options.validate,
         });
 
         reportExportOutcome(result);
@@ -132,6 +141,9 @@ export function registerRunCommand(program: Command): void {
           });
         }
       } catch (error) {
+        if (error instanceof WorkflowInvalidError) {
+          reportWorkflowInvalid(error);
+        }
         if (error instanceof ExportConflictError) {
           reportExportConflict(error);
         }

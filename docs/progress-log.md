@@ -18,6 +18,49 @@ Entry format:
 
 ---
 
+## 2026-07-25 — `ccwf export` / `run` refuse to write an invalid workflow
+- **User value**: a user exporting or running a broken workflow no longer
+  silently gets broken skill files — the same error list `ccwf validate`
+  prints goes to stderr and **nothing is written** (exit 1), with
+  `--no-validate` as the deliberate escape hatch.
+- **Issue/PR**: #980
+- **Outcome**: done — premise re-verified and found **half-stale**: the
+  issue's second half (wire `collectIgnoredFieldWarnings` into export) had
+  already shipped meanwhile as `collectAgentCompatibilityWarnings`, so only
+  the validation gate remained and that is what this iteration built. New
+  `packages/cli/src/utils/validation-report.ts` owns the shared
+  `formatValidationError` (moved out of `validate.ts`, so validate/export/run
+  print byte-identical lines), a `WorkflowInvalidError`, `assertWorkflowValid`
+  and `reportWorkflowInvalid`. The gate sits right after the load in all
+  three export entry points (`runExport`, `previewExport`, `planForAgents`)
+  — i.e. before planning, before the conflict check, before any write — so
+  `--dry-run` and multi-agent runs behave identically. `--no-validate` added
+  to both `export` and `run` (commander's negated-boolean default stays
+  `true`); `--json` reports the failure as
+  `{ ok: false, file, agent | agents, valid: false, errors }`. Validation
+  now runs *before* compatibility warnings, matching `validate.ts`, whose
+  own comment already noted warnings are only meaningful for a schema-valid
+  workflow. Docs updated in `packages/cli/README.md` and the bundled
+  `ccwf-cli` SKILL.md. E2E against the built CLI, 12/12: baseline validate;
+  invalid export refused with 0 files written; `--no-validate` writes;
+  valid export unchanged; invalid `--dry-run`; invalid `--json` single and
+  multi agent; `run` refused and `run --no-validate`; `--agent all` invalid
+  (nothing written) and valid (10 files, 7 agents); `--dry-run --json`.
+  `pnpm build` + `pnpm check` green. No interrupts this round: `auto-dev` CI
+  green at `f4d4428` (CI + Security Scan), no `ci-failure`/`bug` issues.
+  Guard step also closed #977 (its PR #978 had merged after that session
+  ended). Issue #980 could not be locked (no `gh`, no MCP lock tool — known
+  limitation).
+- **Next proposals**:
+  - `ccwf canvas`'s save path writes without validating too — the canvas can
+    persist a workflow the CLI would now refuse to export; consider the same
+    gate (or a non-blocking problems push) there.
+  - The MCP `export_workflow` tool shares none of this gate; check whether it
+    should reuse `assertWorkflowValid` so agent-driven exports fail the same
+    way.
+  - Carried: canvas live-reload replaces unsaved in-canvas edits — a
+    keep/reload toast would need a small webview message.
+
 ## 2026-07-25 — `ccwf canvas` live-reloads on external file changes
 - **User value**: a user with an open canvas no longer gets a stale view —
   and no longer clobbers the file on their next save — when an external

@@ -21,8 +21,8 @@ pnpm add -D @cc-wf-studio/cli
 | `ccwf render <file>` | Print a Mermaid + execution-instructions Markdown bundle to stdout (or a file with `-o <path>`). `<file>` may be `-` to read the workflow JSON from stdin. `--agent <name>` phrases the execution instructions for that target agent and reports its target-compatibility warnings. |
 | `ccwf validate <paths...>` | Schema-check workflow JSON files — any mix of files and directories (searched recursively for `*.json`); `-` reads workflow JSON from stdin. Exit 0/1 (2 on unreadable files). `--json` for machine-readable output. `--agent <name>` (repeatable, or `all`) also preflights target compatibility; add `--strict` to turn those warnings into exit 1 for CI. |
 | `ccwf mcp --file <file>` | Run the cc-wf-studio stdio MCP server in-process against `<file>`. |
-| `ccwf export <file>` | Materialise the workflow as agent-skill files for one or more target agents (`--agent <name>`, repeatable, or `--agent all`; default `claude-code`). Multi-agent runs are atomic: any conflict aborts before anything is written. `--dry-run` previews the planned files without writing. `--json` for machine-readable output (works with `--dry-run` too). |
-| `ccwf run <file>` | `ccwf export` + a "next step" hint. `--launch` additionally spawns Claude Code when available. |
+| `ccwf export <file>` | Materialise the workflow as agent-skill files for one or more target agents (`--agent <name>`, repeatable, or `--agent all`; default `claude-code`). Invalid workflows are rejected before anything is written (`--no-validate` to override). Multi-agent runs are atomic: any conflict aborts before anything is written. `--dry-run` previews the planned files without writing. `--json` for machine-readable output (works with `--dry-run` too). |
+| `ccwf run <file>` | `ccwf export` + a "next step" hint (same schema check and `--no-validate` escape hatch). `--launch` additionally spawns Claude Code when available. |
 | `ccwf preview <file>` | Open a read-only viewer (Mermaid + per-node Markdown panes) in a local browser. Auto-reloads when the file changes. |
 | `ccwf canvas <file>` | (Experimental) Open the **full editable** cc-wf-studio canvas in a local browser. Saves write back to the same file. |
 | `ccwf samples list` / `ccwf samples copy <id>` | Discover the bundled example workflows and copy one locally to preview, export, or run. |
@@ -104,9 +104,12 @@ ccwf export ./my-workflow.json --overwrite                     # replace files w
 ccwf export ./my-workflow.json --dry-run                       # preview the plan, write nothing
 ccwf export ./my-workflow.json --json                          # machine-readable result on stdout
 ccwf export ./my-workflow.json --dry-run --json                # machine-readable plan preview
+ccwf export ./my-workflow.json --no-validate                   # export even if the schema check fails
 ```
 
 Re-running an export is idempotent: existing files whose content already matches are reported as up to date and skipped. Only files with *different* content are conflicts that require `--overwrite`.
+
+The workflow is schema-checked first: if it fails validation, the same error list `ccwf validate` prints goes to stderr, **nothing is written**, and the exit code is 1 — a broken workflow can no longer become broken skill files. `--no-validate` skips the check and exports anyway (escape hatch for forward-compatible files written by a newer version). The check runs on every path, including `--dry-run` and multi-agent runs; with `--json` the failure is reported as `{ "ok": false, "file", "agent" | "agents", "valid": false, "errors": [...] }`.
 
 `--agent` is repeatable (de-duped, first-mention order) and accepts `all` to expand to every supported target. With more than one agent the run is **atomic**: every agent's plan is checked against the disk first, and any conflict (without `--overwrite`) aborts the whole export before a single file is written (conflict lines are prefixed `[agent]`). Per-agent summaries are `[agent]`-prefixed, followed by a total line; target-compatibility warnings print as `warning: [agent] …`. With exactly one agent, all output is identical to earlier single-agent versions.
 
@@ -149,7 +152,7 @@ ccwf run ./my-workflow.json                                    # same files as e
 ccwf run ./my-workflow.json --agent cursor                     # forwarded to export
 ```
 
-`ccwf run` is a thin wrapper over `ccwf export` (same flags: `--agent`, `--cwd`, `--overwrite`). It adds an agent-specific "next step" line to stdout. With `--launch` (best-effort, claude-code only for now) it also walks `PATH` for the `claude` binary and spawns it in the output directory — when the binary is missing or a different agent is selected, the spawn is skipped and a warning is printed.
+`ccwf run` is a thin wrapper over `ccwf export` (same flags: `--agent`, `--cwd`, `--overwrite`, `--no-validate` — including the schema check that refuses to write files for an invalid workflow). It adds an agent-specific "next step" line to stdout. With `--launch` (best-effort, claude-code only for now) it also walks `PATH` for the `claude` binary and spawns it in the output directory — when the binary is missing or a different agent is selected, the spawn is skipped and a warning is printed.
 
 ```sh
 ccwf run ./my-workflow.json --launch        # write + spawn claude

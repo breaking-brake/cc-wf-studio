@@ -38,6 +38,7 @@ import {
   loadWorkflowFromFile,
   loadWorkflowFromStdin,
 } from '../utils/load-workflow.js';
+import { formatValidationError } from '../utils/validation-report.js';
 import {
   SUPPORTED_AGENTS,
   type SupportedAgent,
@@ -66,11 +67,6 @@ type FileReport =
       valid: false;
       loadError: string;
     };
-
-function formatError(err: ValidationError): string {
-  const fieldSuffix = err.field ? ` (field: ${err.field})` : '';
-  return `  - [${err.code}] ${err.message}${fieldSuffix}`;
-}
 
 const SKIPPED_DIR_NAMES = new Set(['node_modules']);
 
@@ -182,7 +178,7 @@ function printHumanReport(report: FileReport, agents: SupportedAgent[]): void {
   } else {
     process.stderr.write(`✗ ${report.file} has ${report.errors.length} error(s):\n`);
     for (const err of report.errors) {
-      process.stderr.write(`${formatError(err)}\n`);
+      process.stderr.write(`${formatValidationError(err)}\n`);
     }
   }
 }

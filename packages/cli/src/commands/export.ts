@@ -15,6 +15,10 @@
  * the run is atomic across agents (any conflict without `--overwrite`
  * aborts before anything is written), human lines are `[agent]`-prefixed,
  * and JSON payloads carry `resultsByAgent` instead of the single-agent keys.
+ *
+ * Every path schema-validates the workflow first and refuses to write a
+ * single file when it fails (`--no-validate` opts out), so a broken workflow
+ * can no longer materialise as broken skill files.
  */
 
 import * as fs from 'node:fs/promises';
@@ -31,6 +35,11 @@ import {
 } from '@cc-wf-studio/core';
 import { Command, InvalidArgumentError } from 'commander';
 import { WorkflowLoadError, loadWorkflowFromFile } from '../utils/load-workflow.js';
+import {
+  WorkflowInvalidError,
+  assertWorkflowValid,
+  reportWorkflowInvalid,
+} from '../utils/validation-report.js';
 
 const CLAUDE_CODE_AGENT = 'claude-code' as const;
 export const SUPPORTED_AGENTS = WORKFLOW_TARGET_AGENTS;
@@ -46,6 +55,8 @@ export interface ExportRunOptions {
   overwrite: boolean;
   /** Output root. Defaults to `process.cwd()`. */
   cwd?: string;
+  /** Schema-validate before planning/writing. Defaults to `true` (`--no-validate` clears it). */
+  validate?: boolean;
 }
 
 export interface ExportRunResult {
@@ -190,14 +201,21 @@ async function classifyPlan(
  * target-compatibility warnings as a real export, and classify the planned
  * files against the disk — but never write.
  *
- * Throws `WorkflowLoadError` for `<file>` issues, like `runExport`.
+ * Throws `WorkflowLoadError` for `<file>` issues and `WorkflowInvalidError`
+ * for schema failures, like `runExport`.
  */
 export async function previewExport(
   options: Omit<ExportRunOptions, 'overwrite'>,
   emitWarnings = true
 ): Promise<ExportPreviewResult> {
-  const { workflow } = await loadWorkflowFromFile(options.file);
+  const { workflow, absolutePath } = await loadWorkflowFromFile(options.file);
   const rootDir = path.resolve(options.cwd ?? process.cwd());
+
+  // Validate before anything else: compatibility warnings are only meaningful
+  // for a schema-valid workflow, and a dry run must predict the real run.
+  if (options.validate !== false) {
+    assertWorkflowValid(workflow, absolutePath);
+  }
 
   const warnings = collectAgentCompatibilityWarnings(workflow, options.agent);
   if (emitWarnings) {
@@ -251,17 +269,23 @@ function previewNote(status: PlannedFileStatus, overwrite: boolean): string {
 /**
  * Shared implementation invoked by both `ccwf export` and `ccwf run`.
  *
- * Throws `WorkflowLoadError` for `<file>` issues and `ExportConflictError`
- * on a write conflict (without `--overwrite`) — callers render those via
- * their usual error paths (`reportExportConflict` for the historical
- * stderr + exit 1 behaviour).
+ * Throws `WorkflowLoadError` for `<file>` issues, `WorkflowInvalidError` when
+ * the workflow fails schema validation (unless `validate: false`), and
+ * `ExportConflictError` on a write conflict (without `--overwrite`) —
+ * callers render those via their usual error paths (`reportExportConflict`
+ * for the historical stderr + exit 1 behaviour).
  */
 export async function runExport(
   options: ExportRunOptions,
   emitWarnings = true
 ): Promise<ExportRunResult> {
-  const { workflow } = await loadWorkflowFromFile(options.file);
+  const { workflow, absolutePath } = await loadWorkflowFromFile(options.file);
   const rootDir = path.resolve(options.cwd ?? process.cwd());
+
+  // Before planning, so an invalid workflow never reaches the filesystem.
+  if (options.validate !== false) {
+    assertWorkflowValid(workflow, absolutePath);
+  }
 
   const warnings = collectAgentCompatibilityWarnings(workflow, options.agent);
   if (emitWarnings) {
@@ -366,10 +390,14 @@ async function planForAgents(
   file: string,
   agents: SupportedAgent[],
   cwd: string | undefined,
-  emitWarnings: boolean
+  emitWarnings: boolean,
+  validate = true
 ): Promise<{ slashName: string; rootDir: string; bundles: AgentPlanBundle[] }> {
-  const { workflow } = await loadWorkflowFromFile(file);
+  const { workflow, absolutePath } = await loadWorkflowFromFile(file);
   const rootDir = path.resolve(cwd ?? process.cwd());
+  if (validate) {
+    assertWorkflowValid(workflow, absolutePath);
+  }
   const bundles: AgentPlanBundle[] = agents.map((agent) => ({
     agent,
     warnings: collectAgentCompatibilityWarnings(workflow, agent),
@@ -398,7 +426,13 @@ async function previewMultiExport(
   agents: SupportedAgent[],
   options: CommanderExportOptions
 ): Promise<void> {
-  const { rootDir, bundles } = await planForAgents(file, agents, options.cwd, !options.json);
+  const { rootDir, bundles } = await planForAgents(
+    file,
+    agents,
+    options.cwd,
+    !options.json,
+    options.validate
+  );
   const classified: { bundle: AgentPlanBundle; entries: ClassifiedPlanEntry[] }[] = [];
   for (const bundle of bundles) {
     classified.push({ bundle, entries: await classifyPlan(rootDir, bundle.plan) });
@@ -469,7 +503,8 @@ async function runMultiExport(
     file,
     agents,
     options.cwd,
-    !options.json
+    !options.json,
+    options.validate
   );
 
   // Same contract as the single-agent run: --overwrite skips classification
@@ -599,6 +634,8 @@ interface CommanderExportOptions {
   dryRun: boolean;
   json: boolean;
   cwd?: string;
+  /** Commander sets this to `false` when `--no-validate` is passed. */
+  validate: boolean;
 }
 
 function toRootRelative(rootDir: string, absPaths: string[]): string[] {
@@ -664,6 +701,10 @@ export function registerExportCommand(program: Command): void {
       '--cwd <dir>',
       'Output root. Defaults to process.cwd(). Useful for tests / scripted runs.'
     )
+    .option(
+      '--no-validate',
+      'Skip the schema check and export even if the workflow is invalid (escape hatch for forward-compatible files).'
+    )
     .action(async (file: string, options: CommanderExportOptions) => {
       const agents = options.agent ?? [CLAUDE_CODE_AGENT];
       const singleAgent = agents.length === 1 ? agents[0] : undefined;
@@ -685,6 +726,7 @@ export function registerExportCommand(program: Command): void {
               file,
               agent: singleAgent,
               cwd: options.cwd,
+              validate: options.validate,
             },
             !options.json
           );
@@ -702,6 +744,7 @@ export function registerExportCommand(program: Command): void {
             agent: singleAgent,
             overwrite: options.overwrite,
             cwd: options.cwd,
+            validate: options.validate,
           },
           !options.json
         );
@@ -721,6 +764,19 @@ export function registerExportCommand(program: Command): void {
 
         reportExportOutcome(result);
       } catch (error) {
+        if (error instanceof WorkflowInvalidError) {
+          if (options.json) {
+            printJson({
+              ok: false,
+              file: error.sourceLabel,
+              ...(singleAgent === undefined ? { agents } : { agent: singleAgent }),
+              valid: false,
+              errors: error.errors,
+            });
+            process.exit(1);
+          }
+          reportWorkflowInvalid(error);
+        }
         if (error instanceof ExportConflictError) {
           if (options.json) {
             printJson({
