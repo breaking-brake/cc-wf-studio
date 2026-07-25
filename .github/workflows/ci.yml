@@ -1,12 +1,10 @@
 name: CI
 
-# Runs the repo's required quality gates (pnpm check + pnpm build) on every PR
+# Runs the repo's required quality gates (build + check + test) on every PR
 # targeting main, auto-dev, or auto-qa, and on pushes to those branches. This
 # is the validation gate for both human-authored and agent-authored PRs — on
 # auto-dev and auto-qa it is the ONLY gate before an agent PR auto-merges, so
-# it must stay strict. The QA loop adds a `pnpm test` step here once the test
-# suite exists; until then this gate checks compilation only, which is exactly
-# the gap that loop is being built to close. See docs/task-automation.md.
+# it must stay strict. See docs/task-automation.md and docs/quality/.
 
 on:
   pull_request:
@@ -48,3 +46,12 @@ jobs:
 
       - name: Check (lint + type-check)
         run: pnpm check
+
+      - name: Test
+        run: pnpm test
+
+      # The MCP smoke test spawns the built `ccwf-mcp` bin and talks to it over
+      # stdio, so it needs the build above. It predates this workflow and was
+      # never wired in — it is the one behavioral check that already existed.
+      - name: MCP smoke test
+        run: pnpm --filter @cc-wf-studio/mcp run smoke

@@ -9,7 +9,7 @@
     "build": "tsc && vite build",
     "build:dev": "tsc && vite build --mode development --minify false",
     "preview": "vite preview",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest watch"
   },
   "dependencies": {
