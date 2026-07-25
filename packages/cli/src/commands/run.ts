@@ -1,10 +1,11 @@
 /**
  * `ccwf run <file>` — for now, a thin wrapper over `ccwf export`.
  *
- * Today this just calls `runExport` and appends a "next step" hint pointing
- * the user at Claude Code (or the chosen agent). In a later phase, `run` will
- * spawn `claude` itself and let the agent perform the skill export +
- * execution. The contract for `<file>` and the flags (`--agent`, `--cwd`,
+ * Today this calls `runExport` and then either prints a "next step" hint
+ * pointing the user at the chosen agent, or — with `--launch` — spawns that
+ * agent's CLI with the exported skill already invoked, so the workflow starts
+ * running from the same command. The contract for `<file>` and the flags
+ * (`--agent`, `--cwd`,
  * `--overwrite`, `--no-validate`) is intentionally identical to `ccwf export`
  * so the future change is backward-compatible — including the schema check
  * that refuses to write files for an invalid workflow.
@@ -81,7 +82,7 @@ export function registerRunCommand(program: Command): void {
     )
     .option(
       '--launch',
-      `After writing files, also spawn the agent CLI interactively (best-effort; supported for ${Object.keys(LAUNCHABLE_AGENTS).join(', ')}).`,
+      `After writing files, spawn the agent CLI with the exported skill already invoked (best-effort; supported for ${Object.keys(LAUNCHABLE_AGENTS).join(', ')}).`,
       false
     )
     .option(
@@ -101,45 +102,64 @@ export function registerRunCommand(program: Command): void {
 
         reportExportOutcome(result);
 
-        const hint = NEXT_STEP_HINTS[agent](result.slashName);
-        // Each hint ends in its own period; no trailing dot here.
-        process.stdout.write(`\nNext: in ${result.rootDir}, ${hint}\n`);
+        /**
+         * The "type this yourself" hint only makes sense when we are not
+         * about to type it for the user — so it is printed for a plain `run`
+         * and for every path where the launch is skipped.
+         */
+        const printNextStepHint = () => {
+          const hint = NEXT_STEP_HINTS[agent](result.slashName);
+          // Each hint ends in its own period; no trailing dot here.
+          process.stdout.write(`\nNext: in ${result.rootDir}, ${hint}\n`);
+        };
 
-        if (options.launch) {
-          const launcher = LAUNCHABLE_AGENTS[agent];
-          if (!launcher) {
-            process.stderr.write(
-              `warn: --launch is not supported for --agent ${agent} (no headless CLI). Skipping launch.\n`
-            );
-            return;
-          }
-          const bin = await findBinaryInPath(launcher.bin);
-          if (!bin) {
-            process.stderr.write(
-              `warn: --launch requested but \`${launcher.bin}\` was not found on PATH. Files were written; please launch ${launcher.label} manually and run /${result.slashName}.\n`
-            );
-            return;
-          }
-          process.stdout.write(`\nLaunching: ${bin} (cwd ${result.rootDir})\n`);
-          const child = spawn(bin, [], {
-            cwd: result.rootDir,
-            stdio: 'inherit',
-            shell: false,
-          });
-          await new Promise<void>((resolve) => {
-            child.on('exit', (code) => {
-              if (typeof code === 'number' && code !== 0) {
-                process.exitCode = code;
-              }
-              resolve();
-            });
-            child.on('error', (error) => {
-              process.stderr.write(`error: failed to launch ${launcher.bin}: ${error.message}\n`);
-              process.exitCode = 1;
-              resolve();
-            });
-          });
+        if (!options.launch) {
+          printNextStepHint();
+          return;
         }
+
+        const launcher = LAUNCHABLE_AGENTS[agent];
+        if (!launcher) {
+          process.stderr.write(
+            `warn: --launch is not supported for --agent ${agent} (no headless CLI). Skipping launch.\n`
+          );
+          printNextStepHint();
+          return;
+        }
+        const invocation = launcher.invokeSkill(result.slashName);
+        const bin = await findBinaryInPath(launcher.bin);
+        if (!bin) {
+          process.stderr.write(
+            `warn: --launch requested but \`${launcher.bin}\` was not found on PATH. Files were written; please launch ${launcher.label} manually and run \`${invocation}\`.\n`
+          );
+          printNextStepHint();
+          return;
+        }
+        // Hand the skill invocation to the agent as its opening prompt, so the
+        // workflow starts running instead of dropping the user at an empty
+        // session. The session stays interactive afterwards (stdio inherited,
+        // no permission-bypass flags).
+        process.stdout.write(
+          `\nLaunching: ${bin} (cwd ${result.rootDir}) — invoking \`${invocation}\`\n`
+        );
+        const child = spawn(bin, launcher.promptArgs(invocation), {
+          cwd: result.rootDir,
+          stdio: 'inherit',
+          shell: false,
+        });
+        await new Promise<void>((resolve) => {
+          child.on('exit', (code) => {
+            if (typeof code === 'number' && code !== 0) {
+              process.exitCode = code;
+            }
+            resolve();
+          });
+          child.on('error', (error) => {
+            process.stderr.write(`error: failed to launch ${launcher.bin}: ${error.message}\n`);
+            process.exitCode = 1;
+            resolve();
+          });
+        });
       } catch (error) {
         if (error instanceof WorkflowInvalidError) {
           reportWorkflowInvalid(error);

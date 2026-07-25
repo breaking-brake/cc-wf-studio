@@ -144,11 +144,12 @@ Use `export` (rather than `run`) when the user wants the *files only* — e.g. c
 
 ### `ccwf run <file> [--agent <name>] [--launch]`
 
-Same file output as `ccwf export` — including the schema check that refuses to write anything for an invalid workflow (`--no-validate` to override) — plus a "next step" hint on stdout. `--launch` additionally spawns the `claude` binary in the output directory (best-effort, claude-code agent only).
+Same file output as `ccwf export` — including the schema check that refuses to write anything for an invalid workflow (`--no-validate` to override) — plus a "next step" hint on stdout. `--launch` instead spawns the agent's CLI in the output directory **with the exported skill already invoked**, so the workflow starts running (best-effort; `claude-code`, `codex`, `copilot`, `gemini`). The session stays interactive and permission prompts still apply.
 
 ```bash
-ccwf run ./my-workflow.json --launch          # write + spawn claude
-ccwf run ./my-workflow.json --agent cursor    # write only (cursor launch not yet wired)
+ccwf run ./my-workflow.json --launch                # write + launch claude, skill already invoked
+ccwf run ./my-workflow.json --launch --agent codex  # same, in Codex CLI
+ccwf run ./my-workflow.json --agent cursor          # write only (cursor has no CLI to launch)
 ```
 
 Use `run`:
@@ -240,7 +241,7 @@ Use this as a lookup when the user describes intent in natural language. If the 
 
 - **`ccwf preview` URLs include a per-session UUID** so two concurrent preview sessions don't collide. The server itself only binds to the loopback interface (`127.0.0.1`) by default, so external machines can't reach it; the UUID is a path key, not a credential.
 - **Auto-shutdown**: `preview` and `canvas` shut themselves down 30 seconds after the last viewer tab closes. The countdown only starts once at least one viewer has connected, so a `preview` that nobody opens stays up. Use `--keep-alive` for multi-tab or LAN scenarios.
-- **`ccwf run --launch` requires `claude` on PATH**. If it's missing, the command warns and exits cleanly after writing the files — that's not an error condition.
+- **`ccwf run --launch` requires the agent's CLI on PATH** (`claude`, `codex`, `copilot`, `gemini`). If it's missing, the command warns, prints the "next step" hint, and exits cleanly after writing the files — that's not an error condition.
 - **`ccwf canvas` is experimental** and missing Slack / Claude API / MCP / external-IDE export. If the user needs any of those, fall back to the VSCode extension.
 - **Workflow file location**: when the user doesn't specify a path, look first under `.vscode/workflows/*.json` from the workspace root. If multiple workflows exist, list them and ask.
 - **Validation before execution**: if the workflow is hand-edited or AI-authored in the same session, run `ccwf validate` before `ccwf run` / `ccwf export` to catch shape errors early.
