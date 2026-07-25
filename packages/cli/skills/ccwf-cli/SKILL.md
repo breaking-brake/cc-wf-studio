@@ -115,7 +115,10 @@ ccwf export ./my-workflow.json --overwrite                     # replace files w
 ccwf export ./my-workflow.json --dry-run                       # preview the plan, write nothing
 ccwf export ./my-workflow.json --json                          # machine-readable result on stdout
 ccwf export ./my-workflow.json --dry-run --json                # machine-readable plan preview
+ccwf export ./my-workflow.json --no-validate                   # export even if the schema check fails
 ```
+
+The workflow is schema-checked before anything is planned or written: on failure the same error list `ccwf validate` prints goes to stderr, no file is written, and the exit code is 1 (`--json`: `{ ok: false, file, agent | agents, valid: false, errors }`). This runs on every path, `--dry-run` and multi-agent included. Pass `--no-validate` only when you deliberately want to export a file the current schema rejects — normally, fix the workflow instead.
 
 Re-running an export is idempotent: existing files whose content already matches are skipped as up to date; only files with different content require `--overwrite`.
 
@@ -141,7 +144,7 @@ Use `export` (rather than `run`) when the user wants the *files only* — e.g. c
 
 ### `ccwf run <file> [--agent <name>] [--launch]`
 
-Same file output as `ccwf export`, plus a "next step" hint on stdout. `--launch` additionally spawns the `claude` binary in the output directory (best-effort, claude-code agent only).
+Same file output as `ccwf export` — including the schema check that refuses to write anything for an invalid workflow (`--no-validate` to override) — plus a "next step" hint on stdout. `--launch` additionally spawns the `claude` binary in the output directory (best-effort, claude-code agent only).
 
 ```bash
 ccwf run ./my-workflow.json --launch          # write + spawn claude
