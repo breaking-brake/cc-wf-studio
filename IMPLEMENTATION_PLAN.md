@@ -33,8 +33,10 @@ is the test — users of the product, not maintainers of the repo.
   refactors with no user-observable effect, metrics nobody asked for
 - New features for the discontinued Chat-UI AI editing paths
   (RefinementChatPanel, AiGenerationDialog) — maintain-only per CLAUDE.md
-- Automated test-suite buildout (repo policy is manual E2E; change the
-  policy here first if that should ever change)
+- Automated test-suite buildout — **not this loop's job**, and no longer
+  forbidden repo-wide: it belongs to the quality-assurance loop (`next-qa`
+  skill, `auto-qa` branch, queue = Issues labeled `qa`). A feature PR is not
+  expected to ship tests; it must never delete or skip an existing one
 - Release/publish operations — human-only, always
 - Large architectural rewrites without a human-approved design issue
 
