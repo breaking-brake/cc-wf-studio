@@ -31,7 +31,7 @@
     "check": "tsc --noEmit",
     "lint": "echo 'cli: no lint config yet'",
     "format": "echo 'cli: no format config yet'",
-    "test": "echo 'cli: no tests yet'"
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@cc-wf-studio/core": "workspace:*",
@@ -45,6 +45,7 @@
     "@types/ws": "^8.5.13",
     "cc-wf-studio-webview": "workspace:*",
     "tsx": "^4.19.2",
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "vitest": "^4.1.2"
   }
 }
