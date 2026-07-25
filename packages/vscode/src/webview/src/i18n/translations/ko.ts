@@ -458,6 +458,7 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'shortcuts.section.editing': '편집',
   'shortcuts.section.canvas': '캔버스',
   'shortcuts.section.mouse': '마우스',
+  'shortcuts.save': '워크플로우 저장',
   'shortcuts.undo': '실행 취소',
   'shortcuts.redo': '다시 실행',
   'shortcuts.copy': '선택 항목 복사',

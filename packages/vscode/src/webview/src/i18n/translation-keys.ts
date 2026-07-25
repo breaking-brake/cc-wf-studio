@@ -441,6 +441,7 @@ export interface WebviewTranslationKeys {
   'shortcuts.section.editing': string;
   'shortcuts.section.canvas': string;
   'shortcuts.section.mouse': string;
+  'shortcuts.save': string;
   'shortcuts.undo': string;
   'shortcuts.redo': string;
   'shortcuts.copy': string;

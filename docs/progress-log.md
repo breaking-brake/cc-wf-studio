@@ -18,6 +18,46 @@ Entry format:
 
 ---
 
+## 2026-07-25 — Ctrl/Cmd+S saves, and the canvas warns before losing edits
+- **User value**: a user editing in `ccwf canvas` can now press Ctrl/Cmd+S to
+  save instead of getting the browser's "Save page…" dialog, and no longer
+  silently loses unsaved edits by closing the tab — the canvas warns first,
+  and the tab title carries the workflow name plus a `●` dirty marker so
+  several open canvases stay distinguishable.
+- **Issue/PR**: #988
+- **Outcome**: done — but the shape changed once the premise was tested.
+  `hasUnsavedChanges()` (workflow-store), which the issue assumed could drive
+  the guard, is **defeated by its own data source**: `App.tsx` re-serializes
+  the live canvas into `activeWorkflow` on every edit via
+  `updateActiveWorkflowMetadata`, so the canvas and its "saved" baseline never
+  diverge and the function returns `false` no matter how much has changed.
+  That also meant the pre-existing "loading a sample discards your changes"
+  confirm (App.tsx) had been silently inert. Replaced it with revision-based
+  tracking built on the fingerprint the canvas-revision counter already
+  maintains (`hasUnsavedCanvasChanges` / `markCanvasSaved` /
+  `subscribeToUnsavedChanges`), with the baseline re-captured on
+  load-from-disk and on successful save; the dead `hasUnsavedChanges` was
+  removed. Because it reuses the content fingerprint, undoing back to the
+  saved state reports clean again rather than staying dirty forever.
+  The shortcut lives in `Toolbar.tsx` so it goes through the same save path as
+  the button (name + schema validation, same error surface) and deliberately
+  still fires while a text field has focus — that is exactly when the browser
+  would otherwise hijack the key. Title uses the workflow name, not the file
+  name: the canvas boot payload (`INITIAL_STATE`) carries no file name, and
+  plumbing one would have meant changing the shared message contract.
+  Verified for real against `ccwf canvas` driven by headless Chromium: clean
+  on load, dirty after a node drag (marker + unload guard), clean again after
+  Ctrl+Z, Ctrl+S writes the file, clean again after save.
+- **Next proposals**:
+  - Plumb the opened file name through `INITIAL_STATE` so the canvas tab title
+    can show `foo.json` rather than the workflow name.
+  - Entering Sub-Agent flow editing swaps the canvas wholesale, so it reads as
+    dirty until the next save; a per-canvas baseline would fix that.
+  - The VSCode webview has no equivalent guard — closing the panel with
+    unsaved edits still discards them silently.
+
+---
+
 ## 2026-07-25 — `ccwf run --launch` starts the agent with the skill invoked
 - **User value**: a user running `ccwf run <file> --launch` now lands in an
   agent session that is already executing the workflow, instead of an empty

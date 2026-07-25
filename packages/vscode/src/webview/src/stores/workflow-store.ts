@@ -2397,71 +2397,52 @@ export function getCanvasRevision(): number {
   return _canvasRevision;
 }
 
-/**
- * Check if the current canvas has unsaved changes compared to activeWorkflow
- *
- * @returns true if there are unsaved changes
- */
-export function hasUnsavedChanges(): boolean {
-  const { nodes, edges, activeWorkflow, workflowName } = useWorkflowStore.getState();
+// ============================================================================
+// Unsaved-Changes Tracking
+// ============================================================================
+// The canvas is dirty when its content fingerprint (or the workflow name) has
+// drifted from the one captured at the last load-from-disk or save.
+//
+// This deliberately does NOT compare the canvas against `activeWorkflow`:
+// App.tsx re-serializes the live canvas into `activeWorkflow` on every edit
+// (updateActiveWorkflowMetadata), so the two never diverge and any such
+// comparison reports "clean" no matter how much has been edited.
+//
+// Reusing `_prevFingerprint` means undoing back to the saved state reports
+// clean again, rather than staying dirty forever.
 
-  // If no activeWorkflow, check if canvas is in default state (only Start + End nodes)
-  if (!activeWorkflow) {
-    // Check if we have more than the default Start and End nodes
-    if (nodes.length !== 2) return true;
+let _savedFingerprint = _prevFingerprint;
+let _savedName = _initialState.workflowName;
+let _isDirty = false;
+const _dirtyListeners = new Set<() => void>();
 
-    const hasStart = nodes.some((n) => n.type === 'start');
-    const hasEnd = nodes.some((n) => n.type === 'end');
-    if (!hasStart || !hasEnd) return true;
+function refreshDirtyState(workflowName: string): void {
+  const next = _prevFingerprint !== _savedFingerprint || workflowName !== _savedName;
+  if (next === _isDirty) return;
+  _isDirty = next;
+  for (const listener of _dirtyListeners) listener();
+}
 
-    // Check if there are any edges
-    if (edges.length > 0) return true;
+// Registered after the revision subscription above, so `_prevFingerprint` is
+// already up to date by the time this runs.
+useWorkflowStore.subscribe((state) => refreshDirtyState(state.workflowName));
 
-    // Check if workflow name is changed from default
-    if (workflowName !== 'my-workflow') return true;
+/** True when the canvas holds edits that have not been written to the file. */
+export function hasUnsavedCanvasChanges(): boolean {
+  return _isDirty;
+}
 
-    return false;
-  }
+/** Record the current canvas as the on-disk state — call after a load or save. */
+export function markCanvasSaved(): void {
+  _savedFingerprint = _prevFingerprint;
+  _savedName = useWorkflowStore.getState().workflowName;
+  refreshDirtyState(_savedName);
+}
 
-  // Compare node count
-  if (nodes.length !== activeWorkflow.nodes.length) return true;
-
-  // Compare edge count
-  if (edges.length !== activeWorkflow.connections.length) return true;
-
-  // Compare workflow name
-  if (workflowName !== activeWorkflow.name) return true;
-
-  // Compare node IDs and positions
-  for (const node of nodes) {
-    const savedNode = activeWorkflow.nodes.find((n) => n.id === node.id);
-    if (!savedNode) return true;
-
-    // Check position
-    if (savedNode.position.x !== node.position.x || savedNode.position.y !== node.position.y) {
-      return true;
-    }
-
-    // Check data (simple JSON comparison for non-function properties)
-    const currentData = JSON.stringify(node.data || {});
-    const savedData = JSON.stringify(savedNode.data || {});
-    if (currentData !== savedData) return true;
-  }
-
-  // Compare edge connections
-  for (const edge of edges) {
-    const savedEdge = activeWorkflow.connections.find((c) => c.id === edge.id);
-    if (!savedEdge) return true;
-
-    if (
-      savedEdge.from !== edge.source ||
-      savedEdge.to !== edge.target ||
-      savedEdge.fromPort !== (edge.sourceHandle || 'default') ||
-      savedEdge.toPort !== (edge.targetHandle || 'default')
-    ) {
-      return true;
-    }
-  }
-
-  return false;
+/** Subscribe to dirty-state flips (the `useSyncExternalStore` contract). */
+export function subscribeToUnsavedChanges(listener: () => void): () => void {
+  _dirtyListeners.add(listener);
+  return () => {
+    _dirtyListeners.delete(listener);
+  };
 }
