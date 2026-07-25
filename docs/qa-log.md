@@ -17,6 +17,83 @@ Entry format:
 
 ---
 
+## 2026-07-25 — S6 (third slice): undo/redo history in the canvas store
+- **Protects**: if this breaks, the user presses Ctrl+Z after an AI agent's
+  `apply_workflow` rewrote their canvas and their work does not come back —
+  undo is the canvas's only recovery path, and most edits carry no
+  confirmation. In the other direction, a regressed `clear()` makes Ctrl+Z on
+  a freshly opened workflow pull in the *previous* workflow's nodes, which the
+  next save then writes into the wrong file.
+- **Issue/PR**: #1022 / PR from `claude/qa-canvas-undo-redo-history`
+- **Outcome**: done — 18 passing cases in a new sibling suite,
+  `packages/vscode/src/webview/src/stores/workflow-store-history.test.ts`,
+  covering all 17 cases the issue names, driven through the store's public
+  actions and `useWorkflowStore.temporal.getState()`. A **sibling file** rather
+  than an addition to `workflow-store.test.ts` on purpose: vitest gives each
+  file its own module registry, so the module-global temporal stack here cannot
+  perturb that file's module-global revision counter. No new test
+  infrastructure — the `localStorage` setup file that landed with #1020 was
+  the only thing needed. Sections:
+  - **A. What is and is not an undoable step** — `addNode`, `onConnect`
+    (exactly one entry, though it rewrites every node with `selected: false`)
+    and `updateNodeData` each record one, and `undo()` restores the prior
+    value; selection and React Flow `dimensions` changes record **none** (the
+    load-bearing half — without both the `partialize` strip and the `equality`
+    dedupe, the user's real edit sits further from Ctrl+Z than it looks); and
+    `setCanvas` with identical content in fresh arrays records none, since
+    `equality` compares content, not array identity. Each "records nothing"
+    case first asserts the change actually landed, so the zero cannot pass
+    vacuously.
+  - **B. Redo** — `undo()` → `redo()` round-trips and drains `futureStates`;
+    a fresh edit after an `undo()` drops the redo stack, which is what disables
+    the button at `UndoRedoControls.tsx:24`.
+  - **C. The 50-entry cap** — 60 distinct changes leave `pastStates.length`
+    at 50, and 50 undos land on `v10`, not the `v0` the canvas started from.
+    Asserting the exact label is what distinguishes "the oldest were dropped"
+    from "the newest were".
+  - **D. History clearing** — all five `clear()` sites: `clearWorkflow`,
+    `addGeneratedWorkflow`, `setActiveWorkflow` by default,
+    `setActiveSubAgentFlowId` on entering sub-agent flow editing, and
+    `cancelSubAgentFlowEditing` with a snapshot — plus its early return, so a
+    stray Escape on the main canvas does not cost the undo stack. **And the
+    case the issue exists for**: `setActiveWorkflow(w, { clearHistory: false })`
+    preserves history, reproducing `App.tsx:317-321` verbatim
+    (`deserializeWorkflow` → `setCanvas` → `setWorkflowName` →
+    `setActiveWorkflow`) and asserting the pre-apply canvas comes back on a
+    single `undo()`. The count is pinned at exactly 1, so the user's work
+    cannot end up buried behind no-op entries from the pair writing the same
+    content twice.
+  - **E. The drag pause/resume contract** — reproduces
+    `WorkflowEditor.tsx:279-301`'s exact sequence (pause, four per-mouse-move
+    position writes, revert to pre-drag, resume, apply final) and asserts it
+    yields exactly one entry that undoes to the pre-drag position. The
+    component's single-entry-per-drag trick is a contract with zundo's
+    `pause`/`resume`, so a zundo upgrade could silently turn one drag into zero
+    entries or one per mouse-move and nothing else would notice.
+  - Verified the suite bites by hand-mutating and reverting five things — the
+    four the issue names plus one more: dropping `selected` from the
+    `partialize` strip (2 named failures), replacing `equality` with
+    `() => false` (4), making the `options?.clearHistory !== false` guard
+    unconditional (1), lowering `limit` to 20 (1), and neutering the `clear()`
+    in `clearWorkflow` and `cancelSubAgentFlowEditing` (2).
+- **Case 7 (`partialize`'d fields on restore), resolved as observed**: what
+  `undo()` hands back carries no `selected` / `width` / `height` key, since
+  `partialize` strips them before the entry is stored. Asserted as observed and
+  **not** filed as a bug: React Flow re-measures on the next render and
+  re-applies selection from its own state, so the missing keys are not known to
+  be user-visible. The case says so in place and tells whoever proves otherwise
+  to file a `bug` and update it rather than assert a different answer.
+- **Bugs filed**: none — every clear site, the `clearHistory` guard, the cap
+  and the dedupe behave as the code claims.
+- **Residual scope on #1022**: none — all 17 cases landed, which closes S6.
+  `updateWorkflow` (`workflow-store.ts:921`) remains deliberately uncovered per
+  the issue: its only callers are the frozen chat-UI refinement path.
+- **Noted, not acted on**: `tsc` in the webview build compiles this test file
+  (it surfaced an unused-import error before vitest ever ran). That is the same
+  packaging shape #1011 describes for `core`/`mcp`/`cli`; the webview is not
+  published, so it costs only build time. Left for #1011 rather than widened
+  here.
+
 ## 2026-07-25 — S6 (second slice): the canvas change-detection gate
 - **Protects**: if this breaks, an external AI agent's `apply_workflow`
   overwrites the edits a user made *after* the agent fetched the workflow and
