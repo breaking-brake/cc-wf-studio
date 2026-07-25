@@ -56,7 +56,7 @@ import {
 } from '../services/workflow-service';
 import { useCommentaryStore } from '../stores/commentary-store';
 import { useRefinementStore } from '../stores/refinement-store';
-import { useWorkflowStore } from '../stores/workflow-store';
+import { markCanvasSaved, useWorkflowStore } from '../stores/workflow-store';
 import { captureCanvasPng } from '../utils/canvas-image';
 import { EditableNameField } from './common/EditableNameField';
 import { ProcessingOverlay } from './common/ProcessingOverlay';
@@ -317,6 +317,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       // Save if validation passes
       await saveWorkflow(workflow);
+      markCanvasSaved();
       console.log('Workflow saved successfully:', workflowName);
     } catch (error) {
       // Translate error messages
@@ -338,6 +339,32 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       setIsSaving(false);
     }
   };
+
+  // Ctrl/Cmd+S saves, the way every other editor does. Registered here so the
+  // shortcut goes through the exact same path as the Save button — name
+  // validation, schema validation and the toolbar's error surface included.
+  // Unlike the canvas shortcuts in WorkflowEditor this deliberately still
+  // fires while a text field has focus: in the browser canvas the alternative
+  // is the browser hijacking the key with its "Save page…" dialog, which is
+  // never what the user meant.
+  const saveShortcutRef = useRef({ save: handleSave, isSaving });
+  useEffect(() => {
+    saveShortcutRef.current = { save: handleSave, isSaving };
+  });
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() !== 's') return;
+      if (!(event.metaKey || event.ctrlKey) || event.altKey || event.shiftKey) return;
+      event.preventDefault();
+      // A save is already in flight — the button is disabled in that state too.
+      if (saveShortcutRef.current.isSaving) return;
+      void saveShortcutRef.current.save();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Copy the current workflow as the same Markdown bundle `ccwf render`
   // (format md) prints: title + description + Mermaid diagram + execution
@@ -439,6 +466,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           });
           // Set as active workflow to preserve conversation history
           setActiveWorkflow(workflow);
+          // The canvas now mirrors the file on disk — this is the clean baseline
+          // the unsaved-changes guard measures later edits against.
+          markCanvasSaved();
         }
       } else if (message.type === 'FILE_PICKER_CANCELLED') {
         // User cancelled file picker - reset loading state

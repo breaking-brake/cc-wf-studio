@@ -459,6 +459,7 @@ export const jaWebviewTranslations: WebviewTranslationKeys = {
   'shortcuts.section.editing': '編集',
   'shortcuts.section.canvas': 'キャンバス',
   'shortcuts.section.mouse': 'マウス',
+  'shortcuts.save': 'ワークフローを保存',
   'shortcuts.undo': '元に戻す',
   'shortcuts.redo': 'やり直す',
   'shortcuts.copy': '選択範囲をコピー',

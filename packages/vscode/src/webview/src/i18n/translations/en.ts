@@ -461,6 +461,7 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
   'shortcuts.section.editing': 'Editing',
   'shortcuts.section.canvas': 'Canvas',
   'shortcuts.section.mouse': 'Mouse',
+  'shortcuts.save': 'Save workflow',
   'shortcuts.undo': 'Undo',
   'shortcuts.redo': 'Redo',
   'shortcuts.copy': 'Copy selection',

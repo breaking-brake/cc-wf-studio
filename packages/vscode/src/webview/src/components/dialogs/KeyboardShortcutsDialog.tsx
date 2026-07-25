@@ -65,6 +65,7 @@ export const KeyboardShortcutsDialog: React.FC<KeyboardShortcutsDialogProps> = (
     {
       title: t('shortcuts.section.editing'),
       rows: [
+        { label: t('shortcuts.save'), combos: [[mod, 'S']] },
         { label: t('shortcuts.undo'), combos: [[mod, 'Z']] },
         {
           label: t('shortcuts.redo'),

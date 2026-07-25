@@ -445,6 +445,7 @@ export const zhCNWebviewTranslations: WebviewTranslationKeys = {
   'shortcuts.section.editing': '编辑',
   'shortcuts.section.canvas': '画布',
   'shortcuts.section.mouse': '鼠标',
+  'shortcuts.save': '保存工作流',
   'shortcuts.undo': '撤销',
   'shortcuts.redo': '重做',
   'shortcuts.copy': '复制所选内容',

@@ -48,6 +48,7 @@ import { Tour } from './components/Tour';
 import { TourPanel } from './components/TourPanel';
 import { WorkflowEditor } from './components/WorkflowEditor';
 import { useCollapsiblePanel } from './hooks/useCollapsiblePanel';
+import { useUnsavedChangesGuard } from './hooks/useUnsavedChangesGuard';
 import { useIsCompactMode } from './hooks/useWindowWidth';
 import { useTranslation } from './i18n/i18n-context';
 import { vscode } from './main';
@@ -55,7 +56,11 @@ import { generateTour } from './services/vscode-bridge';
 import { deserializeWorkflow, serializeWorkflow } from './services/workflow-service';
 import { useCommentaryStore } from './stores/commentary-store';
 import { useRefinementStore } from './stores/refinement-store';
-import { getCanvasRevision, hasUnsavedChanges, useWorkflowStore } from './stores/workflow-store';
+import {
+  getCanvasRevision,
+  hasUnsavedCanvasChanges,
+  useWorkflowStore,
+} from './stores/workflow-store';
 import type { RefinementChatState } from './types/refinement-chat-state';
 import { computeWorkflowDiff, type WorkflowDiffSummary } from './utils/workflow-diff';
 
@@ -258,6 +263,10 @@ const App: React.FC = () => {
   } = useCollapsiblePanel();
   const isCompact = useIsCompactMode();
 
+  // Warn before a browser tab with unsaved canvas edits is closed, and keep the
+  // tab title in sync with the workflow name / dirty state.
+  useUnsavedChangesGuard();
+
   // Edge-drop create for dialog-based node types: the palette owns the
   // creation dialogs but unmounts while collapsed — expand it so it can
   // pick up the pending dialog request from the store.
@@ -317,7 +326,7 @@ const App: React.FC = () => {
   };
 
   const handleLoadSample = useCallback((sampleId: string) => {
-    if (hasUnsavedChanges()) {
+    if (hasUnsavedCanvasChanges()) {
       setPendingLoadSampleId(sampleId);
       setShowUnsavedConfirmForSample(true);
     } else {
