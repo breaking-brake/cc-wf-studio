@@ -166,6 +166,11 @@ flowchart TD
     BUG -.->|"picked up as an interrupt"| AD
 ```
 
+- **Steering**: [`docs/quality/`](./quality/) — a three-layer, top-down
+  definition of what assurance must protect (product value → features →
+  assurance), including the explicit list of what is deliberately **not**
+  protected and the S0–S7 test-suite design the `qa` queue is drawn from.
+  Human-edited; agents read it.
 - **Sibling, not nested**: `auto-qa` and `auto-dev` both branch from `main`
   and are promoted back to `main` by a human, independently. Neither merges
   into the other. This keeps each promotion review small — the failure mode

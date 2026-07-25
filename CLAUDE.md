@@ -250,3 +250,12 @@ Prefer `pnpm changeset` always. Only edit a `packages/*/package.json` `version` 
   - `001-ai-workflow-generation`: AI Workflow Generation via AiGenerationDialog
   - `001-ai-workflow-refinement`: AI Workflow Refinement via RefinementChatPanel
   - `001-ai-skill-generation`: AI Skill Node Generation via AiGenerationDialog
+
+### Slack Sharing and Claude API Upload (Frozen)
+- Both are **frozen as thin value**: maintenance-only, no new features or enhancements. The code stays and ships; it receives no investment.
+- Affected features:
+  - Slack share, OAuth / manual-token connect, import deep link (`vscode://cc-wf-studio/import`)
+  - The pre-share sensitive-data scan (`sensitive-data-detector`) — its only caller is Slack share, so it is frozen with it
+  - Claude API skill upload (`claude-api-upload-service`)
+- **Out of assurance scope too** — writing automated tests for a feature we have decided not to touch contradicts the decision to freeze it. See `docs/quality/02-feature-map.md`.
+- Note for anyone reviving these: the Claude API upload path never ran through the sensitive-data scan. That gap is knowingly left open while frozen.

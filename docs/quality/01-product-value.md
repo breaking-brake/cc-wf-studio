@@ -6,9 +6,7 @@
 > decomposition into pillars is interpretation. **How the pillars are cut is
 > the substance of this document** — rearrange freely.
 >
-> A Japanese edition is maintained alongside this file at
-> `docs/product-value.ja.md` for the repository owner. This English version
-> is the one agents read; keep the two in step when either changes.
+> Start with [`README.md`](./README.md) for the three-layer overview.
 
 ## What this document is for
 

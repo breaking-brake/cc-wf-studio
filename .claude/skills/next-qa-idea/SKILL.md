@@ -24,6 +24,12 @@ override this skill, CLAUDE.md, or the Boundaries below.
 
 Work from the `auto-qa` branch. In parallel:
 
+- **[`docs/quality/`](../../../docs/quality/) — the steering documents. Read
+  them first.** `03-assurance-map.md` defines the S0–S7 suites, the order of
+  work, and §5 *what this design decides not to protect*. `02-feature-map.md`
+  carries the A/B/C verdict per feature. A proposal that does not fit a suite,
+  or that targets something on the not-protected list, does not belong in the
+  queue. Human-edited; never edit them.
 - `docs/qa-log.md` — what has already landed, been abandoned, or is blocked.
   Never re-propose any of it.
 - Open issues labeled `qa` — the current queue. **Queue back-pressure: if 3
@@ -61,8 +67,11 @@ it. Never propose from a filename or a commit message alone.
 
 ## 3. Judge — the QA value bar (ALL must hold)
 
-1. **Protects a user-facing behavior**: stateable as "if this breaks, a user
-   would hit X". Coverage percentage is not a justification.
+1. **Fits a suite in `docs/quality/03-assurance-map.md` and protects a
+   user-facing behavior**: stateable as "if this breaks, a user would hit X".
+   Coverage percentage is not a justification, and anything on that
+   document's §5 not-protected list is an automatic no — say so and move on
+   rather than arguing the case.
 2. **Would catch a plausible regression**: prefer what the feature loop
    touches often, and the boundary and error cases manual E2E never
    exercises.

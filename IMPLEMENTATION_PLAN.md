@@ -33,6 +33,9 @@ is the test — users of the product, not maintainers of the repo.
   refactors with no user-observable effect, metrics nobody asked for
 - New features for the discontinued Chat-UI AI editing paths
   (RefinementChatPanel, AiGenerationDialog) — maintain-only per CLAUDE.md
+- New features for **Slack sharing** (share, OAuth/token management, import
+  deep link, the sensitive-data scan that only Slack share calls) or the
+  **Claude API skill upload** — both frozen as thin value; maintain-only
 - Automated test-suite buildout — **not this loop's job**, and no longer
   forbidden repo-wide: it belongs to the quality-assurance loop (`next-qa`
   skill, `auto-qa` branch, queue = Issues labeled `qa`). A feature PR is not
