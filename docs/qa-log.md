@@ -17,6 +17,92 @@ Entry format:
 
 ---
 
+## 2026-07-25 — S2 (fourth slice): the MCP tool node execution instructions
+- **Protects**: if this breaks, the user configures an MCP node in the canvas
+  and the exported skill / slash command / `ccwf render` output describes a
+  **different tool call than the one they configured** — the wrong server, a
+  dropped parameter, a lost constraint, or the wrong execution strategy
+  entirely (telling the agent to call a fixed tool when the user asked the AI
+  to pick one). Nothing on the user's machine reports it; the damage happens
+  wherever the agent later runs. `docs/quality/02-feature-map.md` rates the
+  MCP node **A** with exactly this failure.
+- **Issue/PR**: #1024 / PR from `claude/qa-mcp-execution-instructions`
+- **Outcome**: done — 31 passing cases and 2 deliberately skipped, appended as
+  a `describe` block to the existing
+  `packages/core/src/services/workflow-prompt-generator.test.ts` so the
+  `mcpNode` fixture and `makeWorkflow` helper are shared. All three formatters
+  are module-private, so every case drives them through the exported
+  `generateExecutionInstructions`; **no product source changed**. Sections:
+  - **A. Mode dispatch** — the load-bearing half, since picking the wrong
+    formatter changes the execution strategy the agent is told to use. All
+    three modes, plus both fallbacks (`mode` absent — the shape every
+    pre-mode workflow file on disk has — and an unrecognised string).
+    Each dispatch case matches the **whole heading line**: the manual heading
+    is a prefix of the AI Parameter Config heading, so a `toContain` on it
+    would pass on AI-mode output and the case would succeed for the wrong
+    reason.
+  - **B. Manual parameter config** — typed rendering of configured values, an
+    untyped value with no matching schema entry (a dropped parameter here is
+    the A-rated failure), `JSON.stringify` for object/array values rather
+    than `[object Object]`, both empty-section guards, required/optional
+    labels with the description fallback, the `MCP Tool` / empty-string
+    placeholders instead of printing `undefined`, and server + validation
+    status.
+  - **C. AI parameter config** — the metadata comment is extracted and
+    `JSON.parse`d rather than string-matched: it is a machine-readable
+    contract with the consuming agent and nothing in the repo parses it
+    today, so a malformed payload is otherwise invisible. Plus
+    `parameterSchema` mirroring in order, and **constraint rendering
+    parameterised over all six `validation` keys** — one case per key, so
+    dropping any single clause fails a case that names the missing
+    constraint.
+  - **D. AI tool selection** — metadata carries the server and intent and
+    **nothing else** (`toEqual`, not `toMatchObject`, so a leaked `toolName`
+    fails), the server id embedded verbatim in the execution sentence, and
+    the case that matters most: a `toolName`/`parameters` left over on the
+    node data from a previous manual configuration must **not** be emitted,
+    or the agent is told to call that specific tool in the mode that exists
+    to let it choose one.
+  - **E. Provider dependence** — `getAgentName` per provider including
+    `roo-code` → **Zoo Code** (the #801 rename is exactly the kind of thing
+    that regresses back), and the manual mode asserted provider-**independent**
+    by comparing two providers' output directly.
+  - **F.** Two nodes in different modes, each with its own subsection in
+    workflow node order under a single `## MCP Tool Nodes` heading.
+  - Verified the suite bites by hand-mutating and reverting the five things
+    the issue names — the `default:` arm of the mode switch (2 named
+    failures), the `paramSchema` type annotation (1), the
+    `Object.keys(parameterValues).length > 0` guard (1), the `maxLength`
+    constraint clause (1), and `getAgentName`'s `roo-code` arm (1). Each made
+    a **named** assertion fail.
+- **Bugs filed**: **#1025** and **#1026** — both found by this suite, both
+  verified in the code before filing:
+  - **#1025 — legacy `mode` values export as manual parameter config.**
+    `normalizeMcpNodeData` (`types/mcp-node.ts:261`) exists to migrate the v1
+    names, but its only two callers are `addGeneratedWorkflow` /
+    `updateWorkflow` in the webview store. Nothing in `deserializeWorkflow`,
+    `packages/cli` or `packages/mcp` calls it, so a file on disk carrying
+    `mode: 'fullNaturalLanguage'` misses all three `case` arms and is exported
+    as manual config — the wrong execution strategy, silently. Per the #1018
+    precedent this is **pinned as observed in a passing case named after the
+    issue**, not skipped; the case says to update it once the fix lands.
+  - **#1026 — user-typed text breaks the exported markup.** `JSON.stringify`
+    does not escape `>`, so a `-->` in the free-text description ends the
+    `MCP_NODE_METADATA` comment mid-JSON and the remainder leaks into the
+    document as visible text. Same root cause: the User Intent block opens
+    with three backticks, so a description containing its own fence closes it
+    early and the intended closing fence opens a new one that swallows
+    `**Execution Method**` — `workflow-overview-formatter` already uses four
+    backticks for exactly this reason. Both cases **land skipped**, asserting
+    the intended contract, so they un-skip unchanged once #1026 is fixed.
+- **Residual scope on #1024**: none — all 27 cases the issue names landed,
+  which completes the MCP slice of S2. #995's item 3 (Claude Code artifacts
+  vs `spec.md`) remains blocked on a human revising that spec, unchanged by
+  this PR. The `export-metadata.schema.json` contract the issue calls out as
+  a trap was deliberately **not** tested against: it is written to the v1
+  mode names, requires an `instructions` key the generator never emits, and
+  types `parameterSchema` as an object where the generator emits an array.
+
 ## 2026-07-25 — S6 (third slice): undo/redo history in the canvas store
 - **Protects**: if this breaks, the user presses Ctrl+Z after an AI agent's
   `apply_workflow` rewrote their canvas and their work does not come back —

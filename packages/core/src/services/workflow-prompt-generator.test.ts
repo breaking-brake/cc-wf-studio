@@ -585,3 +585,394 @@ describe('generateExecutionInstructions', () => {
     );
   });
 });
+
+// ---------------------------------------------------------------------------
+// MCP Tool Nodes section (issue #1024)
+// ---------------------------------------------------------------------------
+
+/**
+ * The `## MCP Tool Nodes` body — three modes, ~200 lines — was asserted only by
+ * its *absence* by the suite above. It is the highest-stakes section in the
+ * document: `docs/quality/02-feature-map.md` rates the MCP node **A** because a
+ * regression here means the exported skill / slash command describes a
+ * different tool call than the user configured — the wrong server, a dropped
+ * parameter, a lost constraint, or the wrong execution strategy entirely. The
+ * damage lands wherever the agent later runs, not on the user's machine.
+ *
+ * All three formatters are module-private, so every case drives them through
+ * the exported `generateExecutionInstructions`.
+ */
+describe('generateExecutionInstructions — MCP Tool Nodes', () => {
+  /** The section body, so a heading assertion cannot match elsewhere. */
+  function mcpSection(node: ReturnType<typeof mcpNode>, provider: ExportProvider = 'claude-code') {
+    const out = generateExecutionInstructions(makeWorkflow([node]), { provider });
+    const start = out.indexOf('## MCP Tool Nodes');
+    expect(start, 'the MCP section is missing entirely').toBeGreaterThan(-1);
+    return out.slice(start);
+  }
+
+  /** Pull the JSON out of the `MCP_NODE_METADATA` comment and parse it. */
+  function parseMetadata(section: string): Record<string, unknown> {
+    const match = section.match(/<!-- MCP_NODE_METADATA: (.*) -->/);
+    expect(match, 'no MCP_NODE_METADATA comment was emitted').not.toBeNull();
+    return JSON.parse((match as RegExpMatchArray)[1]) as Record<string, unknown>;
+  }
+
+  // -- A. Mode dispatch -----------------------------------------------------
+  //
+  // The load-bearing half: picking the wrong formatter changes the execution
+  // strategy the agent is told to use, which is the A-rated failure.
+  //
+  // Trap: the manual heading `#### mcp-1(get_forecast)` is a *prefix* of the
+  // AI Parameter Config heading, so `toContain` on the manual heading also
+  // passes on AI-mode output. Every dispatch case matches the whole line.
+  describe('mode dispatch', () => {
+    const MANUAL_HEADING = '#### mcp-1(get_forecast)\n';
+
+    it('routes manualParameterConfig to the manual formatter', () => {
+      const section = mcpSection(mcpNode('mcp-1', { mode: 'manualParameterConfig' }));
+      expect(section).toContain(MANUAL_HEADING);
+      expect(section).not.toContain('AI Parameter Config Mode');
+      expect(section).not.toContain('AI Tool Selection Mode');
+    });
+
+    it('routes aiParameterConfig to the AI parameter formatter', () => {
+      const section = mcpSection(mcpNode('mcp-1', { mode: 'aiParameterConfig' }));
+      expect(section).toContain('#### mcp-1(get_forecast) - AI Parameter Config Mode\n');
+    });
+
+    it('routes aiToolSelection to the AI tool-selection formatter', () => {
+      const section = mcpSection(mcpNode('mcp-1', { mode: 'aiToolSelection' }));
+      expect(section).toContain('#### mcp-1(MCP Auto-Selection) - AI Tool Selection Mode\n');
+    });
+
+    it('defaults to manual parameter config when mode is absent', () => {
+      // Every workflow file written before the mode field existed has this
+      // shape, so the `|| 'manualParameterConfig'` default is what keeps them
+      // exporting at all.
+      const section = mcpSection(mcpNode('mcp-1'));
+      expect(section).toContain(MANUAL_HEADING);
+      expect(section).not.toContain('AI Parameter Config Mode');
+      expect(section).not.toContain('AI Tool Selection Mode');
+    });
+
+    it('falls back to manual parameter config for an unrecognised mode', () => {
+      const section = mcpSection(mcpNode('mcp-1', { mode: 'somethingElse' as never }));
+      expect(section).toContain(MANUAL_HEADING);
+      expect(section).not.toContain('AI Parameter Config Mode');
+      expect(section).not.toContain('AI Tool Selection Mode');
+    });
+
+    it('falls back to manual parameter config for a legacy `mode` value — see #1025', () => {
+      // Pinned as the code behaves today, not as it should. `fullNaturalLanguage`
+      // is the v1 name for `aiToolSelection`, and `normalizeMcpNodeData`
+      // (types/mcp-node.ts:261) exists to migrate it — but its only callers are
+      // two webview-store methods, so a workflow loaded from disk arrives here
+      // un-normalised and is exported with the *wrong execution strategy*:
+      // "call this fixed tool" instead of "pick a tool at runtime".
+      //
+      // Filed as #1025. When that is fixed on auto-dev, this case must be
+      // updated to assert the AI Tool Selection heading.
+      const section = mcpSection(mcpNode('mcp-1', { mode: 'fullNaturalLanguage' as never }));
+      expect(section).toContain(MANUAL_HEADING);
+      expect(section).not.toContain('AI Tool Selection Mode');
+    });
+  });
+
+  // -- B. Manual parameter config mode --------------------------------------
+  describe('manual parameter config mode', () => {
+    it('renders every configured parameter with the type from its schema', () => {
+      const section = mcpSection(
+        mcpNode('mcp-1', {
+          parameters: [
+            { name: 'region', type: 'string', required: true },
+            { name: 'days', type: 'number', required: false },
+          ],
+          parameterValues: { region: 'us-east-1', days: 3 },
+        })
+      );
+      expect(section).toContain('- `region` (string): us-east-1');
+      expect(section).toContain('- `days` (number): 3');
+    });
+
+    it('renders a configured value with no matching schema entry, untyped', () => {
+      // A dropped parameter here is the exact A-rated failure: the tool is
+      // called without a value the user set.
+      const section = mcpSection(
+        mcpNode('mcp-1', {
+          parameters: [{ name: 'region', type: 'string', required: true }],
+          parameterValues: { region: 'us-east-1', undocumented: 'kept' },
+        })
+      );
+      expect(section).toContain('- `undocumented`: kept');
+    });
+
+    it('serializes object and array values as JSON rather than [object Object]', () => {
+      const section = mcpSection(
+        mcpNode('mcp-1', { parameterValues: { filter: { a: 1 }, tags: ['x', 'y'] } })
+      );
+      expect(section).toContain('- `filter`: {"a":1}');
+      expect(section).toContain('- `tags`: ["x","y"]');
+      expect(section).not.toContain('[object Object]');
+    });
+
+    it('omits Configured Parameters entirely when there are none', () => {
+      // An empty heading tells the agent a step exists with no content.
+      expect(mcpSection(mcpNode('mcp-1'))).not.toContain('**Configured Parameters**');
+      expect(mcpSection(mcpNode('mcp-1', { parameterValues: {} }))).not.toContain(
+        '**Configured Parameters**'
+      );
+    });
+
+    it('omits Available Parameters entirely when there are none', () => {
+      expect(mcpSection(mcpNode('mcp-1'))).not.toContain('**Available Parameters**');
+      expect(mcpSection(mcpNode('mcp-1', { parameters: [] }))).not.toContain(
+        '**Available Parameters**'
+      );
+    });
+
+    it('labels each available parameter required or optional, with a description fallback', () => {
+      const section = mcpSection(
+        mcpNode('mcp-1', {
+          parameters: [
+            { name: 'region', type: 'string', required: true, description: 'Region code' },
+            { name: 'days', type: 'number', required: false },
+          ],
+        })
+      );
+      expect(section).toContain('- `region` (string) (required): Region code');
+      expect(section).toContain('- `days` (number) (optional): No description available');
+    });
+
+    it('falls back to placeholders rather than printing undefined', () => {
+      const section = mcpSection(
+        mcpNode('mcp-1', { toolName: undefined, toolDescription: undefined })
+      );
+      expect(section).toContain('#### mcp-1(MCP Tool)\n');
+      expect(section).toContain('**Tool Name**: \n');
+      expect(section).toContain('**Description**: \n');
+      expect(section).not.toContain('undefined');
+    });
+
+    it('names the server and the validation status', () => {
+      // The server id is the only thing connecting the instruction to a
+      // concrete endpoint.
+      const section = mcpSection(mcpNode('mcp-1', { validationStatus: 'missing' }));
+      expect(section).toContain('**MCP Server**: weather');
+      expect(section).toContain('**Validation Status**: missing');
+    });
+  });
+
+  // -- C. AI parameter config mode ------------------------------------------
+  describe('AI parameter config mode', () => {
+    const aiNode = (extra: Parameters<typeof mcpNode>[1] = {}) =>
+      mcpNode('mcp-1', { mode: 'aiParameterConfig', ...extra });
+
+    it('emits a metadata payload that round-trips as JSON', () => {
+      // Nothing in this repository parses this comment, so a malformed payload
+      // is invisible here and only fails in the consuming agent.
+      const metadata = parseMetadata(
+        mcpSection(
+          aiNode({
+            aiParameterConfig: { description: 'the east region', timestamp: 't' },
+          })
+        )
+      );
+      expect(metadata).toMatchObject({
+        mode: 'aiParameterConfig',
+        serverId: 'weather',
+        toolName: 'get_forecast',
+        userIntent: 'the east region',
+      });
+      expect(metadata.parameterSchema).toEqual([]);
+    });
+
+    it('mirrors each parameter into parameterSchema, in order', () => {
+      const metadata = parseMetadata(
+        mcpSection(
+          aiNode({
+            parameters: [
+              {
+                name: 'region',
+                type: 'string',
+                required: true,
+                description: 'Region code',
+                validation: { minLength: 2 },
+              },
+              { name: 'days', type: 'number', required: false },
+            ],
+          })
+        )
+      );
+      expect(metadata.parameterSchema).toEqual([
+        {
+          name: 'region',
+          type: 'string',
+          required: true,
+          description: 'Region code',
+          validation: { minLength: 2 },
+        },
+        { name: 'days', type: 'number', required: false, description: '' },
+      ]);
+    });
+
+    it.skip('round-trips the metadata when the payload contains "-->" — blocked on #1026', () => {
+      // `JSON.stringify` does not escape `>`, and an HTML comment ends at the
+      // first `-->`. The description is free text the user types, so this is
+      // reachable: the comment closes mid-JSON and the remainder leaks into
+      // the document as visible text. Asserted to the intended contract so
+      // this un-skips unchanged once #1026 is fixed.
+      const metadata = parseMetadata(
+        mcpSection(aiNode({ aiParameterConfig: { description: 'use --> east', timestamp: 't' } }))
+      );
+      expect(metadata.userIntent).toBe('use --> east');
+    });
+
+    describe('constraint rendering', () => {
+      // One case per validation key, so dropping any single clause fails a
+      // case that names the missing constraint rather than a generic blob.
+      const cases: [string, Record<string, unknown>, string][] = [
+        ['minLength', { minLength: 2 }, 'minLength: 2'],
+        ['maxLength', { maxLength: 10 }, 'maxLength: 10'],
+        ['minimum', { minimum: 0 }, 'minimum: 0'],
+        ['maximum', { maximum: 99 }, 'maximum: 99'],
+        ['pattern', { pattern: '^[a-z]+$' }, 'pattern: ^[a-z]+$'],
+        ['enum', { enum: ['a', 'b'] }, 'enum: a, b'],
+      ];
+
+      for (const [key, validation, expected] of cases) {
+        it(`renders the ${key} constraint`, () => {
+          const section = mcpSection(
+            aiNode({
+              parameters: [{ name: 'region', type: 'string', required: true, validation }],
+            })
+          );
+          expect(section).toContain(`  - Constraints: ${expected}`);
+        });
+      }
+
+      it('omits the Constraints line when the parameter has no validation', () => {
+        const section = mcpSection(
+          aiNode({ parameters: [{ name: 'region', type: 'string', required: true }] })
+        );
+        expect(section).toContain('- `region` (string) (required):');
+        expect(section).not.toContain('Constraints:');
+      });
+    });
+
+    it('includes the User Intent block only when a description is set', () => {
+      const withIntent = mcpSection(
+        aiNode({ aiParameterConfig: { description: 'the east region', timestamp: 't' } })
+      );
+      expect(withIntent).toContain('**User Intent (Natural Language Parameter Description)**');
+      expect(withIntent).toContain('```\nthe east region\n```');
+
+      expect(mcpSection(aiNode())).not.toContain('**User Intent');
+    });
+
+    it.skip('keeps the User Intent fence intact around a fenced description — blocked on #1026', () => {
+      // The block opens with three backticks, so a description containing its
+      // own fence closes it early and the intended closing fence opens a new
+      // one that swallows **Execution Method**. `workflow-overview-formatter`
+      // uses four backticks for exactly this reason.
+      const description = 'like ```js\ncode\n```';
+      const section = mcpSection(aiNode({ aiParameterConfig: { description, timestamp: 't' } }));
+      const intent = section.slice(section.indexOf('**User Intent'));
+      expect(intent).toContain(`\`\`\`\`\n${description}\n\`\`\`\``);
+    });
+  });
+
+  // -- D. AI tool selection mode --------------------------------------------
+  describe('AI tool selection mode', () => {
+    const selectionNode = (extra: Parameters<typeof mcpNode>[1] = {}) =>
+      mcpNode('mcp-1', { mode: 'aiToolSelection', ...extra });
+
+    it('emits metadata carrying only the server and the intent', () => {
+      // This mode deliberately carries less: naming a tool would contradict
+      // the whole point of letting the agent choose one.
+      const metadata = parseMetadata(
+        mcpSection(
+          selectionNode({
+            aiToolSelectionConfig: { taskDescription: 'find the weather', timestamp: 't' },
+          })
+        )
+      );
+      expect(metadata).toEqual({
+        mode: 'aiToolSelection',
+        serverId: 'weather',
+        userIntent: 'find the weather',
+      });
+    });
+
+    it('embeds the server id in the execution method verbatim', () => {
+      // The agent has nothing else to connect to at runtime.
+      const section = mcpSection(selectionNode({ serverId: 'aws-knowledge-mcp' }));
+      expect(section).toContain('query the MCP server "aws-knowledge-mcp" at runtime');
+    });
+
+    it('includes the User Intent block only when a task description is set', () => {
+      const withIntent = mcpSection(
+        selectionNode({
+          aiToolSelectionConfig: { taskDescription: 'find the weather', timestamp: 't' },
+        })
+      );
+      expect(withIntent).toContain('**User Intent (Natural Language Task Description)**');
+      expect(withIntent).toContain('```\nfind the weather\n```');
+
+      expect(mcpSection(selectionNode())).not.toContain('**User Intent');
+    });
+
+    it('does not emit a tool name or parameters left over on the node data', () => {
+      // Switching a node to this mode preserves the old manual config on the
+      // data. Emitting it would tell the agent to call that specific tool.
+      const section = mcpSection(
+        selectionNode({
+          toolName: 'get_forecast',
+          parameters: [{ name: 'region', type: 'string', required: true }],
+          parameterValues: { region: 'us-east-1' },
+        })
+      );
+      expect(section).not.toContain('get_forecast');
+      expect(section).not.toContain('region');
+    });
+  });
+
+  // -- E. Provider dependence -----------------------------------------------
+  describe('provider dependence', () => {
+    it.each([
+      ['claude-code', 'Claude Code'],
+      ['codex', 'Codex CLI'],
+      // The Roo Code -> Zoo Code rename (#801) is exactly the kind of thing
+      // that regresses back on an unrelated edit.
+      ['roo-code', 'Zoo Code'],
+    ] as [ExportProvider, string][])('names %s as %s in the AI modes', (provider, agentName) => {
+      const aiParam = mcpSection(mcpNode('mcp-1', { mode: 'aiParameterConfig' }), provider);
+      expect(aiParam).toContain(`${agentName} should interpret the natural language description`);
+
+      const selection = mcpSection(mcpNode('mcp-1', { mode: 'aiToolSelection' }), provider);
+      expect(selection).toContain(`${agentName} should analyze the task description`);
+    });
+
+    it('keeps the manual mode closing sentence provider-independent', () => {
+      const node = mcpNode('mcp-1', { parameterValues: { region: 'us-east-1' } });
+      expect(mcpSection(node, 'claude-code')).toBe(mcpSection(node, 'roo-code'));
+    });
+  });
+
+  // -- F. Multiple nodes ----------------------------------------------------
+  it('gives each MCP node its own subsection, in workflow node order', () => {
+    const out = generateExecutionInstructions(
+      makeWorkflow([
+        mcpNode('mcp-1', { mode: 'aiToolSelection' }),
+        mcpNode('mcp-2', { mode: 'manualParameterConfig' }),
+      ]),
+      { provider: 'claude-code' }
+    );
+    expect(out.match(/## MCP Tool Nodes/g)).toHaveLength(1);
+
+    const first = out.indexOf('#### mcp-1(MCP Auto-Selection) - AI Tool Selection Mode');
+    const second = out.indexOf('#### mcp-2(get_forecast)\n');
+    expect(first).toBeGreaterThan(-1);
+    expect(second).toBeGreaterThan(first);
+  });
+});
