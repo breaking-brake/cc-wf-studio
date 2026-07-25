@@ -8,7 +8,7 @@
 
 ## What this document is for
 
-```
+```text
 [Layer 1] Product value   docs/quality/01-product-value.md
 [Layer 2] Features        docs/quality/02-feature-map.md   → A=31 / B=6 / C=23 / frozen=7
 [Layer 3] Assurance       ← this file

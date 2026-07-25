@@ -3,7 +3,7 @@
 A three-layer, top-down definition of what quality assurance must protect in
 cc-wf-studio, and what it deliberately must not.
 
-```
+```text
 [Layer 1] Product value   →  Why the product exists, what it promises
     ↓
 [Layer 2] Features        →  Which features deliver that value

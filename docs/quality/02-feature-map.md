@@ -10,7 +10,7 @@
 
 ## What this document is for
 
-```
+```text
 [Layer 1] Product value    docs/quality/01-product-value.md
     ↓
 [Layer 2] Features         ← this file
@@ -235,10 +235,22 @@ commentary — where **handing the content to an AI is the whole point**
 (pillar 4), and doing so is not a defect. The shape of what needs protecting
 is different, so stating it as a general rule in the ground would overreach.
 
-For the record, the Claude API upload never ran through the sensitive-data
-scan at all (the detector's only call site is `slack-share-workflow.ts:55`).
-Since it is being frozen too, that gap will not be closed: **adding a defense
-to a feature you are freezing is a poor investment.**
+**One open gap is worth stating plainly.** The Claude API upload never ran
+through the sensitive-data scan at all — the detector's only call site is
+`slack-share-workflow.ts:55` — so workflow content, including free-text
+prompt fields where users are known to paste credentials, goes to the
+Anthropic API unscanned.
+
+**Freezing does not close this.** Frozen means no investment; the code still
+ships and users can still invoke it, so the gap is live rather than deferred.
+It is lower severity than the Slack case (the destination is the user's own
+account, not a shared channel), but the secret still lands on an external
+service and persists.
+
+The resolution is a product decision rather than an assurance one, and it is
+recorded as accepted risk in CLAUDE.md. Note the asymmetry: **adding a scan
+means investing in a feature just declared thin value, whereas removing the
+entry point is the option consistent with the freeze.**
 
 ---
 

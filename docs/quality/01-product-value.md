@@ -13,7 +13,7 @@
 The top of a three-layer, top-down definition of what quality assurance must
 protect.
 
-```
+```text
 [Layer 1] Product value    ← this file. Why it exists, what it promises
     ↓
 [Layer 2] Features         which features deliver that value
@@ -126,8 +126,9 @@ won't open in the extension" damages trust directly.
 **The promise**: through the MCP server, an AI agent can read, write, and
 validate a workflow. "Add a branch here" works as a sentence.
 
-Tools provided: `get_workflow`, `apply_workflow`, `patch_workflow`,
-`validate_workflow`, `export_workflow`, `render_workflow`.
+Tools provided: `get_current_workflow`, `get_workflow_schema`,
+`apply_workflow`, `update_nodes`, `patch_workflow`, `validate_workflow`,
+`export_workflow`, `render_workflow`.
 
 **Why it is wanted**: the design itself becomes something the AI can help
 with, lowering the cost of both starting from nothing and improving what
