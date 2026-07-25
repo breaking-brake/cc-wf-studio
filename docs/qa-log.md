@@ -17,6 +17,71 @@ Entry format:
 
 ---
 
+## 2026-07-25 — S6 (second slice): the canvas change-detection gate
+- **Protects**: if this breaks, an external AI agent's `apply_workflow`
+  overwrites the edits a user made *after* the agent fetched the workflow and
+  nothing tells them — or, in the other direction, every apply carrying an
+  `expectedRevision` is rejected and MCP-driven editing silently stops working.
+- **Issue/PR**: #1020 / PR from `claude/qa-canvas-change-detection`
+- **Outcome**: done — 25 passing cases in
+  `packages/vscode/src/webview/src/stores/workflow-store.test.ts`, covering all
+  23 cases the issue names, driven entirely through the store's public actions:
+  - **A. The revision increments on content changes** — `addNode`,
+    `confirmDeleteNodes`, `onConnect`, `updateNodeData`, a `position` change,
+    and `setCanvas` with different content. `onConnect` gets its own case
+    because it also rewrites every node with `selected: false`, so the correct
+    answer is exactly 1, not 2.
+  - **B. The revision ignores noise** — the load-bearing half, since a false
+    increment kills every `apply_workflow` that carries an `expectedRevision`:
+    `select` changes, `setCanvas` with fresh array identities but identical
+    content (the fingerprint comparison, not the reference fast path, is what
+    has to hold), a **staged** delete before `confirmDeleteNodes`, and
+    unrelated store fields (`setWorkflowName`, `setSelectedNodeId`).
+  - **C / D. `hasUnsavedChanges`** — the pristine-canvas heuristic with no
+    `activeWorkflow` (boot state, extra node, edge present, renamed, two nodes
+    that are not start+end), and the field-by-field comparison against a loaded
+    workflow (node/edge count, name, an id the saved workflow lacks, a moved
+    node, edited data, a rewired edge).
+  - Verified the suite bites by hand-mutating and reverting the four things the
+    issue names: dropping the `selected`/`width`/`height` strip in
+    `contentFingerprint` (2 named failures), inverting the reference fast path
+    (6), removing the node-position clause of the `activeWorkflow` comparison
+    (1), and neutering the `nodes.length !== 2` pristine check (1).
+- **Test infrastructure** (both questions the issue flagged, answered):
+  - **`localStorage` stub** — needed, and it must be a `setupFiles` entry:
+    the store reads `localStorage` while `create()` runs, i.e. at import time,
+    so a per-test `vi.stubGlobal` is too late. Landed as
+    `src/test/setup-browser-globals.ts` (in-memory `Storage`, also stubs
+    `sessionStorage`), wired into the webview `vitest.config.ts` so every
+    future store suite inherits it.
+  - **`reactflow` under `environment: 'node'`** — works, no DOM needed. The
+    store imports `applyNodeChanges` / `applyEdgeChanges` / `addEdge` from the
+    `reactflow` barrel and they import cleanly, so **no `jsdom` devDependency
+    was added and the shared node environment was left alone**. `@shared` is
+    imported type-only and erases, so no alias config was needed either.
+  - Note for future suites: `pnpm build` must run before the webview tests on a
+    fresh checkout — they resolve `@cc-wf-studio/core` through its `dist`.
+- **Case 11 (`dimensions`), resolved empirically**: React Flow v11 writes only
+  `width` / `height` for that change type, both of which `contentFingerprint`
+  strips, so the delta is **+0** — no over-report and no bug. The case asserts
+  the node's key set alongside the delta, so if a future React Flow writes the
+  measurement to a field the fingerprint does not strip, the test fails and
+  says which field rather than passing for the wrong reason.
+- **Bugs filed**: none new. Case 23 (the port-default disagreement at
+  `workflow-store.ts:1503`) is asserted **as observed** and recorded as a third
+  instance of **#1018** rather than a new issue, per that issue's own guidance.
+  It is reachable: a workflow whose connection omits `fromPort` loads with
+  `sourceHandle: undefined`, which `hasUnsavedChanges` reads back as
+  `'default'` and compares against the saved `undefined` — so an
+  agent-authored workflow reports unsaved changes the moment it loads, and the
+  next sample-workflow load prompts the user to discard edits they never made.
+  Severity is a spurious dialog, not data loss. Commented on #1018.
+- **Residual scope on #1020**: none — sections A-D all landed. The undo/redo
+  half of S6 (`partialize` / `equality` / `limit: 50` and the history clears in
+  `clearWorkflow` / `setActiveWorkflow`) is explicitly out of scope in the
+  issue and still wants its own issue; the `localStorage` setup file landed
+  here unblocks it.
+
 ## 2026-07-25 — S6 (first slice): the MCP apply_workflow review gate
 - **Protects**: if this breaks, the user approves an AI's rewrite of their
   canvas from a summary that does not match what is about to be written — a
