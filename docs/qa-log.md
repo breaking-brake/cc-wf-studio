@@ -17,6 +17,65 @@ Entry format:
 
 ---
 
+## 2026-07-25 — S5 (write half): the MCP write path and optimistic locking
+- **Protects**: if this breaks, an external AI agent's `apply_workflow` /
+  `update_nodes` call silently overwrites or corrupts the user's
+  `workflow.json` — the only path in the product where an outside agent writes
+  to the user's file — and nothing tells them until they reopen the canvas and
+  find their edits gone.
+- **Issue/PR**: #1006 / PR from `claude/qa-mcp-write-path`
+- **Outcome**: done — two suites in `packages/mcp/src/`, plus shared fixtures
+  in `__fixtures__/workflows.ts` (26 tests):
+  - `file-adapter.test.ts` (section A): the four locking states — matching
+    revision writes and reports the *new* hash, stale revision refuses with
+    the *current* hash and **leaves the file byte-for-byte unchanged**, an
+    absent `expectedRevision` writes unconditionally (the lock is opt-in), and
+    a supplied revision against a missing file writes rather than conflicting
+    (the `currentRevision !== null &&` guard). Plus `getCurrentWorkflow` on a
+    missing file, the atomic write leaving no `.tmp` sibling, parent-directory
+    creation, and the revision being sha256 over the content **including the
+    trailing newline** — asserted against the newline-less hash explicitly,
+    since that is the variant a regression would produce.
+  - `tools.test.ts` (sections B + C): every case pairs the reply assertion with
+    a file-on-disk assertion, because the failure that hurts is a write that
+    happened when it should not have. `apply_workflow` — malformed JSON,
+    validation refusal (validation treated as a black box), the success shape
+    with `autoCreatedFiles` **absent** rather than empty, and the case worth
+    naming: **a stale revision surfaces as `success: false` but NOT as
+    `isError`**, because the handler wraps the adapter result in `ok()`, so a
+    caller keying off `isError` alone would read a refused write as a success.
+    `update_nodes` — batch atomicity (one unknown id in a batch writes
+    nothing, not even the valid half), shallow merge, explicit-null deletion,
+    the three type-change branches, and the destructive `parentId` pair:
+    explicit `null` un-groups, an absent key leaves the grouping alone.
+- **On the read→write race**: the first attempt at the revision-passthrough
+  case asserted nothing — a mutation dropping the `revision ?? current.revision`
+  fallback at `tools.ts:349` left the suite green, because with
+  `expectedRevision: undefined` the adapter writes unconditionally and still
+  reports success. The handler's read and write are back-to-back, so no test
+  driving it from outside can get between them. Fixed with a test-only
+  `RacingAdapter` that delegates to `FileWorkflowAdapter` and lands a
+  concurrent write inside `getCurrentWorkflow`; the mutation is now caught.
+  Recorded because the weak version looked correct and passed.
+- **Verified the suites bite** by hand-mutating eight things and restoring each:
+  the `currentRevision !== null` guard, the `'parentId' in update` guard, the
+  `missingIds` atomicity check, the type-change replace branch, the revision
+  fallback, the type-change-without-data refusal, the null-delete loop, and the
+  trailing newline in the hash. Each made a named assertion fail.
+- **Bugs filed**: none in `packages/*/src` — the write path behaved as
+  specified in every case. Filed **#1011** (`qa`, not `bug`): `pnpm build`
+  compiles test files and fixtures into `packages/core/dist`, which is in the
+  published `files` list, so 29 test artifacts importing `vitest` ship to npm.
+  Low severity (nothing reachable from the entry points imports them) but it is
+  a regression this loop introduced and it grows with each suite. Not fixed
+  here — the fix touches `packages/*/tsconfig.json`, build config the feature
+  loop also owns, and it is unrelated to #1006.
+- **Residual scope on #1006**: none — the issue is the write half of S5 and all
+  18 named cases landed. The read/discovery half (`list_available_agents`,
+  `get_workflow_schema`) is deferred by the issue itself: both reach outside a
+  temp dir (`os.homedir()`, `import.meta.resolve`) with no injection point, so
+  making them deterministic is a feature-track change, not a QA one.
+
 ## 2026-07-25 — S2: the core generators (Mermaid, Markdown, agent skills)
 - **Protects**: if this breaks, every export surface — `ccwf render`, the MCP
   `render_workflow` tool, the canvas "Copy as Markdown", and all six
