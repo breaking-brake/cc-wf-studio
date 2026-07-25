@@ -26,6 +26,7 @@ import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import { createCanvasHandlers } from '../canvas/handlers.js';
 import { startCanvasServer } from '../canvas/server.js';
+import { watchWorkflowFile } from '../preview/watcher.js';
 import { reachabilityNote } from '../utils/host-warning.js';
 import { WorkflowLoadError, loadWorkflowFromFile } from '../utils/load-workflow.js';
 import { formatServerStartError } from '../utils/server-start-error.js';
@@ -157,12 +158,31 @@ export function registerCanvasCommand(program: Command): void {
           bootstrapConfig: { locale: process.env.LANG?.split('.')[0] ?? 'en' },
         });
 
+        // Live-reload: when something else writes the workflow file (an AI
+        // agent via `ccwf mcp --file`, a text editor, git …), push the fresh
+        // workflow to every open canvas instead of letting it go stale and
+        // clobber the edit on the next save. Self-write echoes and mid-write
+        // parse failures are filtered inside loadExternalChange.
+        const watcher = watchWorkflowFile({
+          filePath: workflowAbsPath,
+          logLabel: '[ccwf canvas]',
+          onChange: () => {
+            void handlers.loadExternalChange().then((workflow) => {
+              if (workflow) {
+                server.broadcast({ type: 'LOAD_WORKFLOW', payload: { workflow } });
+                console.log('[ccwf canvas] Workflow file changed on disk — canvas reloaded.');
+              }
+            });
+          },
+        });
+
         const banner = [
           `ccwf canvas server listening at ${server.url}`,
           `  workflow: ${workflowAbsPath}${isNewFile ? ' (new file — created on first save)' : ''}`,
           `  bind:     ${server.host}:${server.port}`,
           '',
           'Save buttons in the canvas will write back to the workflow file.',
+          'External changes to the file reload the open canvas automatically.',
           reachabilityNote(server.host),
           'Press Ctrl+C to stop.',
         ].join('\n');
@@ -180,6 +200,7 @@ export function registerCanvasCommand(program: Command): void {
           if (shuttingDown) return;
           shuttingDown = true;
           process.stdout.write(`\nReceived ${signal}, shutting down ccwf canvas…\n`);
+          watcher.close();
           try {
             await server.close();
           } catch (error) {

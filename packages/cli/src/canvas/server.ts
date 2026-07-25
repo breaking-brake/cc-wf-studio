@@ -63,6 +63,8 @@ export interface CanvasServerHandle {
   sessionId: string;
   /** URL the user should open in their browser (`http://host:port/<sessionId>/`). */
   url: string;
+  /** Send a message to every connected WebSocket (e.g. a file-change reload). */
+  broadcast(payload: unknown): void;
   /** Shut down the HTTP server, close all open WebSockets, and resolve. */
   close(): Promise<void>;
 }
@@ -258,6 +260,14 @@ export async function startCanvasServer(
     port,
     sessionId,
     url: `http://${displayHost}:${port}/${sessionId}/`,
+    broadcast(payload) {
+      const data = JSON.stringify(payload);
+      for (const socket of openSockets) {
+        if (socket.readyState === socket.OPEN) {
+          socket.send(data);
+        }
+      }
+    },
     async close() {
       for (const socket of openSockets) {
         socket.close();

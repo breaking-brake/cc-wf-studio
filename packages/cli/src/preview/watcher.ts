@@ -19,6 +19,8 @@ export interface WorkflowWatcherOptions {
   debounceMs?: number;
   /** Invoked after each debounced change. */
   onChange(): void;
+  /** Prefix for warning logs. Defaults to `[ccwf preview]`. */
+  logLabel?: string;
 }
 
 export interface WorkflowWatcherHandle {
@@ -78,7 +80,7 @@ export function watchWorkflowFile(options: WorkflowWatcherOptions): WorkflowWatc
       // Watching is a best-effort optimisation; if the directory is gone, just
       // log and stop trying.
       console.warn(
-        `[ccwf preview] Failed to watch ${dir}: ${error instanceof Error ? error.message : String(error)}`
+        `${options.logLabel ?? '[ccwf preview]'} Failed to watch ${dir}: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   };

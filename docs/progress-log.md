@@ -17,6 +17,52 @@ Entry format:
 
 ---
 
+## 2026-07-25 — `ccwf canvas` live-reloads on external file changes
+- **User value**: a user with an open canvas no longer gets a stale view —
+  and no longer clobbers the file on their next save — when an external
+  process (an AI agent via `ccwf mcp --file`, a text editor, `git checkout`)
+  modifies the workflow JSON; the canvas reloads automatically (top carried
+  proposal, premise re-verified: `handlers.ts` read the file only at boot /
+  explicit load and `SAVE_WORKFLOW` wrote unconditionally).
+- **Issue/PR**: #977
+- **Outcome**: done — reused `preview/watcher.ts` (debounced `fs.watch`,
+  new optional `logLabel`); `startCanvasServer` handle gains `broadcast()`
+  over its open sockets; `createCanvasHandlers` gains `loadExternalChange()`
+  which drops echoes by comparing contents against the last load/save/push
+  (`lastKnownContents` — also guards platforms with null watch filenames,
+  where sibling writes like exported PNGs trigger events), skips mid-write
+  invalid JSON with a server-side warning (next event retries), and
+  refreshes `{meta, workflow}` wrapper meta so a later save keeps the new
+  meta; watcher armed in `commands/canvas.ts`, closed on shutdown, banner
+  mentions live-reload. Webview untouched — it already applies unsolicited
+  `LOAD_WORKFLOW` pushes. E2E via WS harness against the built CLI: 8/8
+  (boot, external edit push, no self-save echo, invalid-JSON ignored,
+  recovery push, wrapper-meta survival, new-file starter, external creation
+  of a new file). `pnpm build` + `pnpm check` green. Security check from
+  last round done first: the 2 high advisories (postcss, brace-expansion)
+  are dev-only build-chain deps (vite, @vscode/vsce) unreachable in shipped
+  artifacts; moderate @hono/node-server (via MCP SDK) is Windows
+  `serve-static`, unused by the stdio MCP server — no actionable interrupt.
+  Issue #977 could not be locked (no `gh`, no MCP lock tool — known
+  limitation, noted in the issue).
+- **Next proposals**:
+  - The reload replaces unsaved canvas edits when an external write lands;
+    consider a lightweight "file changed on disk" toast with keep/reload
+    choice instead of an unconditional swap (needs a small webview message).
+  - Mirror the shortcut cheat sheet in the README/docs (carried).
+  - Manual E2E queue (carried): drag-splice in the VSCode extension host
+    (highlight, drop, undo, wired-node guard, multi-select drag guard);
+    edge ⊕ insert (simple + dialog types, cancel paths, undo, ja locale
+    tooltip); edge-drop dialog create (all four dialogs, cancel path,
+    collapsed palette auto-expand, sub-agent-flow and Codex-beta gating);
+    palette filter; arrow-key nudge; Esc panel dismissal; F8 / Shift+F8
+    problem cycling; inline group rename; Ungroup; Group selection; Save as
+    Image from the VSCode extension host; Copy as Markdown; `render_workflow`
+    via MCP Inspector; problems badge; shortcut cheat sheet; problem-node
+    markers; problems panel click-to-jump; auto layout; node search cycling;
+    align/distribute + context menu + copy/cut/paste; localized Claude API
+    dialog in ja/ko/zh; `validate_workflow` via MCP Inspector.
+
 ## 2026-07-25 — Malformed workflow JSON errors point at the offending line
 - **User value**: a user who feeds `ccwf` a malformed workflow JSON file now
   sees the offending line with a caret pointing at the exact spot (plus
