@@ -149,7 +149,10 @@ behavioral regressions into red builds.
 flowchart TD
     M["main"] -->|branch| AD["auto-dev<br>(feature track)"]
     M -->|branch| AQ["auto-qa<br>(quality track)"]
-    RQ["QA routine (Opus)"] -->|fires a fresh session| NQ["next-qa skill"]
+    RQI["QA ideation routine<br>(hourly :46, Opus)"] -->|fires a fresh session| NQI["next-qa-idea skill:<br>find the highest-value untested<br>behavior, file + lock ONE qa issue"]
+    NQI --> QQU["QA queue<br>(GitHub Issues, label qa)"]
+    RQ["QA implementation routine<br>(hourly :16, Opus)"] -->|fires a fresh session| NQ["next-qa skill"]
+    QQU --> QQ
     NQ --> QG{"Open PR on auto-qa<br>already exists?"}
     QG -->|"yes — serialization guard"| QS["Steward that PR:<br>merge if green / fix if red"]
     QG -->|no| QQ{"qa queue<br>non-empty?"}
@@ -178,10 +181,15 @@ flowchart TD
   an interrupt and fixes them on `auto-dev`; a later QA iteration un-skips
   the test once the fix reaches `main`. A red test never merges, and a bug
   never gets quietly papered over.
-- **Queue**: GitHub Issues labeled `qa`. Unlike the feature track there is
-  no ideation half — the QA backlog is largely deterministic (test the pure
-  logic, cover the bugs that actually happened), so a human or a previous
-  iteration seeds it.
+- **Two halves, same as the feature track**: `next-qa-idea` files **one**
+  locked `qa` issue per run (none when 3+ are already open); `next-qa`
+  resolves one per run. One in, one out — the queue tracks implementation's
+  pace instead of outrunning it, so specs don't rot while the code moves.
+  Ideation looks for bugs with no regression test, recently merged code
+  with no coverage, and untested pure logic.
+- **Queue**: GitHub Issues labeled `qa`, locked at creation like `idea`
+  issues. A human can veto any test *before* it is written by closing its
+  issue.
 - **Scope**: `packages/core` (validators, generators, schema) and the pure
   transforms in `packages/cli` / `packages/mcp`. Webview React rendering and
   the VSCode host stay on manual E2E deliberately — automating them costs
@@ -189,5 +197,8 @@ flowchart TD
 - **The gate grows with the suite**: `ci.yml` runs on `auto-qa` from the
   start; the QA loop adds the `pnpm test` step to it as its first task, once
   there is a suite to run.
-- **Running it**: `/next-qa` in any Claude Code session, or the QA cloud
-  routine. **Promote**: `gh pr create --base main --head auto-qa`.
+- **Running it**: two Claude Code Remote routines fire every hour —
+  **ideation at :46** and **implementation at :16** (`next-qa-idea` /
+  `next-qa`, both Opus). Manually: `/next-qa-idea` files a task,
+  `/next-qa` builds one. **Promote**:
+  `gh pr create --base main --head auto-qa`.

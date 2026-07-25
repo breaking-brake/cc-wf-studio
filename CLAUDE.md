@@ -31,11 +31,12 @@ loop architecture and safety rails. Key points for agents:
   agents never open or merge PRs based on `main`; a human promotes
   `auto-dev` → `main` via a promotion PR. Release actions are always
   human-only.
-- A second, sibling track handles **quality assurance**: the `next-qa` skill
-  builds the automated test suite on the **`auto-qa`** branch (queue =
-  Issues labeled `qa`, memory = `docs/qa-log.md`). `auto-qa` branches from
-  `main` and is promoted back to `main` by a human, independently of
-  `auto-dev`. The two tracks never merge into each other and are kept to
+- A second, sibling track handles **quality assurance**, split the same way:
+  `next-qa-idea` (ideation — files one locked `qa` issue per run) and
+  `next-qa` (implementation — builds one per run) grow the automated test
+  suite on the **`auto-qa`** branch (queue = Issues labeled `qa`, memory =
+  `docs/qa-log.md`). `auto-qa` branches from `main` and is promoted back to
+  `main` by a human, independently of `auto-dev`. The two tracks never merge into each other and are kept to
   disjoint files: **the QA loop never edits `packages/*/src`** — when a test
   finds a product bug it files a `bug` issue for the feature loop and lands
   the test skipped.
