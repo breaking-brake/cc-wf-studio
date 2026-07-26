@@ -17,6 +17,76 @@ Entry format:
 
 ---
 
+## 2026-07-26 — S1: panel option sets vs. what the field's zod accepts
+- **Protects**: if this breaks, a property-panel dropdown offers a value the
+  node's own zod type rejects. The user picks it, `updateNodeData` stores it,
+  the file saves — and the workflow then fails validation for a value the
+  product itself offered: `validateNodeSchemaFields`
+  (`validate-workflow.ts:257`) runs `propertyField.zod.safeParse(value)` on
+  every field present on node data, so `ccwf validate` exits 1 and the MCP
+  `apply_workflow` write is refused, on a workflow the user never hand-edited.
+  The mirror-image break is quieter: a value zod accepts but the panel stops
+  offering becomes unreachable from the UI with nothing failing anywhere.
+- **Issue/PR**: #1046 / PR from `claude/qa-panel-options-consistency`
+- **Outcome**: done — one new suite,
+  `packages/core/src/schema/panel-options-consistency.test.ts` (43 cases).
+  Nothing in the repository read `meta.options` or `SUB_AGENT_COLORS` before
+  this; `authoring-guide-consistency.test.ts` checks the *authoring guide*
+  against zod and never looks at what the panel renders.
+  - **Premise re-verified on `auto-qa`.** Every value set the issue names
+    agrees today — the 8 `SUB_AGENT_COLORS` keys match both colour enums, and
+    all 12 select/radio option lists match their zod. **No divergence found,
+    so the suite lands fully green with nothing skipped and no `bug` issue
+    filed**, exactly as the issue predicted.
+  - **One correction to the issue's numbers**: it says "All 13 do today" of
+    the select/radio fields; the registry actually exposes **12** (plus 2
+    `control: 'color'` fields, which carry no `options` — the picker reads
+    `SUB_AGENT_COLORS` directly). The suite pins the 12 by id, so the count is
+    now asserted rather than counted by hand.
+  - **Covered**: section A, the load-bearing direction — parameterised over
+    the registry, every offered value must satisfy the field's own
+    `safeParse`, and every select/radio must have a non-empty `options`
+    (`SelectControl.tsx:21` falls back to `[]`, so a field that loses it
+    renders an empty dropdown with no error). Section B is the reverse
+    direction, enum value set equal to `options` as a set, with `codex.model`
+    allowlisted by name (`allowCustom: true` + a `z.string()` zod, so its
+    list is a suggestion, not the accepted set). Section C covers the colours
+    across all three representations, stated generically over the registry.
+  - **Enum introspection worked cleanly against the installed zod 4.4.3** —
+    `_zod.def.type === 'enum'` plus `.options`, unwrapping one `.optional()`
+    layer via `_zod.def.innerType` — so section B landed in full and the
+    issue's "assert only the importable-constant fields" fallback was not
+    needed.
+  - **Three cases the issue did not ask for**, each closing a way the suite
+    could pass vacuously: the registry still exposes the 12 known select/radio
+    ids and the 2 known colour ids (every other case is filtered on
+    `control`), and a canary asserting the enum value set can still be read
+    off all 11 enum-backed fields — if a zod bump moves `_zod.def`, that fails
+    by name instead of section B silently covering nothing. Also asserted the
+    `codex.model` exemption stays justified (still `allowCustom`, still
+    non-enum, still accepts an unlisted model), so the allowlist entry cannot
+    outlive its reason.
+  - **Verified the suite bites** by hand-mutating and reverting five things,
+    each producing *named* failures: a 9th key in `SUB_AGENT_COLORS` → both
+    colour fields; an extra `'ai-drafted'` in `codex.promptMode`'s options →
+    A2 plus B for that field; a 4th value in the `skill.scope` zod enum only →
+    B for that field; deleting `codex.reasoningEffort`'s `options` → A1 plus
+    B; and a simulated zod-internals rename → the canary, by name. The
+    working tree was confirmed clean of `packages/*/src` changes afterwards.
+- **Bugs filed**: none — every option set agrees with its zod on `auto-qa`
+  today. This is a drift guard, not a bug report.
+- **Note on PR #1049**: that PR (a **fork**, by another author) also targets
+  #1046. The loop may not merge, build or push to it, so it stays labelled
+  `needs-attention` for a human — who may now want to close it as superseded.
+  #1046 had been deferred by the two previous iterations for its sake; with
+  #995 blocked on a human spec revision it was the only buildable issue left,
+  and deferring a third time would have meant building nothing.
+- **Residual scope on #1046**: none of the issue's own cases are left out.
+  Its two explicitly out-of-scope items stay out: `DEFAULT_CONTROLS` coverage
+  (needs `packages/vscode`, since it imports the React controls) and "every
+  schema field is renderable" (needs an allowlist and a decision about which
+  dialogs own which data-only fields).
+
 ## 2026-07-26 — S1: getArrayBounds vs. what the array field's zod accepts
 - **Protects**: if this breaks, the property panel's array editor offers an Add
   or Remove button the node's own zod type forbids. The user clicks it,
