@@ -17,6 +17,80 @@ Entry format:
 
 ---
 
+## 2026-07-26 — S7: `extractVariables`, the `{{var}}` detector behind the Prompt node
+- **Protects**: if this breaks, the user writes `{{language}}` in a Prompt node
+  and the product stops telling them the variable is there — the canvas node's
+  variable chips and the property panel's "Detected variables" section go empty
+  or list the wrong names. Nothing fails: the export still succeeds, and the
+  exported document's **Available variables** block is generated from a
+  different source (`node.data.variables`), so the two silently disagree about
+  what the prompt actually uses. The user ships a workflow whose documented
+  variable list does not match its own prompt text, and it surfaces wherever
+  the agent later runs.
+- **Issue/PR**: #1066 / PR from `claude/qa-template-utils-variables`
+- **Outcome**: done — 18 cases in a new
+  `packages/vscode/src/webview/src/utils/template-utils.test.ts`. The module is
+  dependency-free, so it runs under the existing webview `vitest.config.ts`
+  with no new infrastructure. Every expected value was verified by **executing**
+  the function, not read off the regex.
+  - **A. Detection** (7 cases) — multiple variables, dedup, first-occurrence
+    order, adjacency, newlines, `\w` admitting `_x` / `a1` / `1a`, and the
+    empty results. Order is asserted with `toEqual` on the whole array rather
+    than `toContain`: the chips render in this order and `Set` dedup preserving
+    insertion order is the load-bearing detail, so a `toContain`-only case
+    would pass on a sort regression.
+  - **B. Silently undetected shapes** (6 cases + 1 pin) — hyphen, dot,
+    `{{ name }}` (surrounding whitespace, the most likely thing a real user
+    types), a non-ASCII name in a UI that ships five locales, single braces,
+    and an unclosed placeholder. Each returns `[]` with **no** feedback: the
+    panel section disappears rather than reporting that the placeholder was not
+    understood. Plus a `CURRENT BEHAVIOUR` pin that `{{{name}}}` **does** match
+    by backtracking one character — observed, not obviously desired, and
+    nothing else in the repo recorded it.
+  - **C. The cross-representation divergence** (1 case) — drives **both** sides
+    on one fixture so neither half can pass alone: `extractVariables` returns
+    `[]` for `{{my-var}}` while `generateExecutionInstructions` emits
+    ``- `{{my-var}}`: …`` under **Available variables:**, because the generator
+    (`workflow-prompt-generator.ts:939-945`) iterates `Object.entries` with no
+    pattern check and `promptPropertySchema.variables` is
+    `z.record(z.string(), z.string())`. Landed as a pin per the #1018 / #1031 /
+    #1047 / #1058 / #1061 / #1064 precedent — passing today, red the moment
+    either side is changed to agree with the other. **No bug filed, by the
+    issue's instruction**: which side is wrong (widen the pattern, or validate
+    the keys on entry) is a product decision, and the qa-log already records it
+    for the feature track.
+  - **D. Global-regex statefulness** (3 cases) — `VARIABLE_PATTERN` is a
+    module-level `const` with the `g` flag, shared by every caller, and both
+    consumers call it once per node per render. Covers: same input twice,
+    X→Y→X, and `lastIndex === 0` after a matching call.
+  - **Verified the suite bites** by hand-mutating `template-utils.ts` three
+    times, each reverted (`git diff` on `packages/*/src` is empty):
+    - dropping the `Set` dedup → **2 red**: *deduplicates a variable used more
+      than once*, *preserves first-occurrence order rather than sorting*.
+    - widening `\w` → `[\w-]` → **2 red**: *detects nothing for a hyphen in the
+      name*, and the whole of section C.
+    - the `lastIndex` leak → **10 red**, including all three of section D.
+- **Correction to the issue's "Done when" clause**: it asserts that replacing
+  `matchAll` with a `while ((m = re.exec(s)))` loop over the shared pattern
+  "must turn section D red". **It does not** — that mutation was applied and
+  the suite stayed fully green (18/18). A full drain loop is safe: `exec`
+  resets `lastIndex` to 0 when it finally returns `null`. The leak needs an
+  exit that does *not* drain, so the mutation was replaced with the shape that
+  actually occurs in practice — a plausible early-out guard
+  `if (!VARIABLE_PATTERN.test(promptText)) return [];` — which turned 10 cases
+  red including all of section D. Worth carrying forward: `.test()` and
+  partial/`break`-ing loops are the dangerous shapes here, a full `matchAll`
+  or drain loop is not.
+- **Bugs filed**: none — as the issue predicted, every case passes against the
+  current implementation and nothing is skipped.
+- **Residual scope on #1066**: none. `substituteVariables`,
+  `getUndefinedVariables` and `isFullyDefined` (`:69`, `:92`, `:118`) remain
+  deliberately untested — re-verified for this iteration that they still have
+  zero consumers repo-wide, so the substitution half of the feature is unwired
+  and testing it would be a transcription. Restated in the test file header so
+  a later iteration does not re-litigate it; whether to wire it up is a product
+  question for the feature track.
+
 ## 2026-07-26 — S2: user-text fences and the Prompt node variables block
 - **Protects**: if this breaks — and it is broken today — the exported
   instruction document **ends early**. A user prompt containing a ` ``` ` code
