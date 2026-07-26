@@ -17,6 +17,78 @@ Entry format:
 
 ---
 
+## 2026-07-26 — S6 (fifth slice): `setActiveWorkflow`, the canvas load conversion
+- **Protects**: if this breaks, **every** way a workflow reaches the canvas —
+  opening a `workflow.json`, an MCP `apply_workflow`, the Slack import, the
+  sample load — silently installs something different from the file, and the
+  next save writes that difference back. `setActiveWorkflow` is the **last
+  writer** of `nodes`/`edges` on all four paths, so whatever it drops is what
+  the user loses.
+- **Issue/PR**: #1038 / PR from `claude/qa-set-active-workflow-load`
+- **Outcome**: done — 13 passing cases in a new sibling suite,
+  `packages/vscode/src/webview/src/stores/workflow-store-load.test.ts`.
+  **No product source changed.** Notes:
+  - No new infrastructure: fourth store suite under the webview
+    `vitest.config.ts` that landed with #1014. `setActiveWorkflow`'s conversion
+    had **no coverage at all** before this — `workflow-store-history.test.ts:355-397`
+    drives the action but only to assert the `clearHistory` option, never the
+    nodes and edges it produces. That option is deliberately **not** re-tested
+    here; a second assertion on it would be negative value.
+  - **Section A** (8 cases) pins the conversion contract field by field, because
+    this is one of three near-identical `Workflow → canvas` converters
+    (`:871`, `:921`, `:964`) that have **already drifted** — `:882`/`:932` run
+    `normalizeMcpNodeData`, `:974` does not. `zIndex`, `parentId` and `style`
+    are asserted as **key absence** (`'zIndex' in node`), not as `undefined`:
+    a blanket spread would satisfy a presence-only check while burying ordinary
+    nodes under the edge SVG layer.
+  - A4 pins, **as observed**, that `sortNodesParentFirst` partitions on "is some
+    node's parent" and not "is a group" — a childless group is *not* hoisted.
+    One fixture asserts both halves (a group declared last is hoisted; a
+    childless group declared earlier stays put), so neither can pass alone.
+    #1033 pinned the same function through `onNodeDragStop`; this is a different
+    call site, so the ordering is asserted, not the function.
+  - **Section B** (4 cases) drives `deserializeWorkflow` → `setCanvas` →
+    `setActiveWorkflow` exactly as the five call sites do (`Toolbar.tsx:340-356`,
+    `App.tsx:451`/`:480`/`:616`/`:321`), asserting the state after **both** steps
+    in one test so the overwrite itself is the assertion.
+  - The load-order premise was **confirmed by running it**, not only by reading:
+    `setActiveWorkflow` re-converts from the raw `Workflow` and its conversion is
+    strictly weaker than `deserializeWorkflow`'s, so it destroys a connection's
+    `condition` (`serializeWorkflow` reads `edge.data?.condition`), the backfilled
+    `askUserQuestion` option ids, and an `ifElse`'s branch repair. Open a file
+    with conditional routes, press save with **no edit**, and the conditions are
+    gone from disk.
+  - Those three landed **passing against the current (wrong) behaviour** and
+    named `CURRENT BEHAVIOUR (bug #1039)` per the #1031 precedent, rather than
+    skipped — the suite stays green and goes red the moment the feature loop
+    fixes it, which is the intended signal.
+  - B4 pins the MCP-normalization drift by driving `addGeneratedWorkflow` and
+    `setActiveWorkflow` **on the same fixture in one test**, so the asymmetry is
+    the thing under test. No bug filed for it: it is the store-side half of
+    #1025's premise, per that issue.
+  - A8 pins, as observed and **not** as desired, that `selectedNodeId` is left
+    pointing at a node the new workflow does not contain. Not obviously wrong,
+    but nothing else recorded it.
+  - Verified the suite bites by hand-mutating and reverting all five things the
+    issue names — the `zIndex` spread (`:978`), the `sortNodesParentFirst` call
+    (`:966`), `subAgentFlows || []` (`:998`), the `isTourActive: false` reset
+    (`:1000`), and the edge literal (`:983-989`, mutated twice: port defaulting,
+    and adding the `data` key) — each producing **exactly one named** failure.
+    The last of those is the important one: it confirms B1 goes red when #1039
+    is fixed.
+  - One trap worth recording: `packages/*/src` written inside a `/** */` header
+    comment **closes the comment** at the `*/`, and tsc then reports a cascade of
+    parse errors ~20 lines later. Say "product source" in block comments.
+- **Bugs filed**: **#1039** — one issue for the B1–B3 family, since they share a
+  single root cause (`setActiveWorkflow` re-converting from the raw `Workflow`
+  instead of reusing `deserializeWorkflow`'s output). The fix touches
+  `packages/vscode/src/webview/src`, which this loop must not edit.
+- **Out of scope, per the issue**: `updateWorkflow` (`:921`, only reachable from
+  the **frozen** chat-UI refinement path); `addGeneratedWorkflow` (`:871`) beyond
+  the one B4 comparison (it has no live webview caller today); whether any of
+  this **renders** correctly (manual E2E, per §5); and the nested-group ordering
+  flaw already recorded in #1015.
+
 ## 2026-07-26 — S4 (second slice): the `ccwf validate` / `ccwf render` contract
 - **Protects**: if this breaks, a CI pipeline running `ccwf validate
   workflow.json` **goes green on a workflow that does not validate** — the
