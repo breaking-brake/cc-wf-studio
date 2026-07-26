@@ -17,6 +17,62 @@ Entry format:
 
 ---
 
+## 2026-07-26 — S1 (behavior half): the cross-field derive normalizers
+- **Protects**: if this breaks, the user edits one field of a branching node in
+  the property panel and a **different** field is silently rewritten — a Switch
+  node's default case stops sorting last, so the exported instructions tell the
+  agent to evaluate the fallback ahead of the specific conditions it was meant
+  to follow; or toggling AI suggestions off on an AskUserQuestion node wipes the
+  options the user typed. Nothing reports it: the panel shows the value that was
+  written, and the divergence surfaces wherever the agent later runs.
+- **Issue/PR**: #1028 / PR from `claude/qa-derive-normalizers`
+- **Outcome**: done — 24 passing cases in a new
+  `packages/core/src/schema/nodes/derive-updates.test.ts`, one `describe` per
+  function, all driven through the `@cc-wf-studio/core` schema entry point.
+  **No product source changed.** Notes on what the cases pin:
+  - These four functions are **not** a declarative schema, so covering them is
+    an inspection rather than a transcription: `.claude/rules/schema-driven-panels.md`
+    deliberately keeps cross-field effects out of `FieldMeta` ("No side-effect
+    meta") and puts them in hand-written pure functions co-located with the
+    schema. They implement rules stated nowhere else.
+  - Every patch is a **single key**, matching what the call site actually
+    produces (`SchemaPropertyPanel.tsx:74-76` builds `{ [fieldName]: value }`).
+  - Assertions are `toEqual` on the **whole** returned object, because the
+    failure mode is a dropped or extra key — a case checking one field in
+    isolation still passes once the function starts adding keys it shouldn't.
+    The pass-through cases additionally assert the *absence* of `outputPorts`.
+  - **`deriveSwitchUpdate`**: default-last ordering with the regular cases'
+    relative order preserved, two defaults keeping their own order, no-default
+    left untouched, the `outputPorts` sync, pass-through, the `Array.isArray`
+    guard (`switch-schema.ts:66` — without it `.filter` throws a TypeError
+    inside the panel's change handler), and **purity** (the caller's array must
+    not be sorted in place).
+  - **`deriveAskUserQuestionUpdate`**: enabling AI suggestions clears options;
+    **disabling preserves them** — the doc comment calls out that disabling does
+    not restore defaults, and a regression that clears here instead is the
+    silent-data-loss case this suite exists for. Plus both `multiSelect` arms,
+    the option count read **from `data`, not the patch**, the absent-`options`
+    paths, and arm **precedence** (`useAiSuggestions` wins over a same-patch
+    `options`) pinned as observed so reordering the arms fails by name.
+  - **`deriveBranchUpdate`** (legacy): the >2 → first-two trim pinned as
+    observed (it discards the user's 3rd+ branches; the doc comment states this
+    is deliberate), the exactly-two no-op, `switch` not trimming, the count
+    sync, and the absent-`data.branches` path.
+  - **`deriveIfElseUpdate`**: `outputPorts: 2` regardless of array length —
+    enforcing `.length(2)` is the zod schema's job, not this function's.
+  - Verified the suite bites by hand-mutating and reverting exactly the five
+    things the issue names: the `[...regular, ...defaults]` concatenation order
+    (2 named failures), the `Array.isArray` guard (1), the `enabled ? [] :
+    options` ternary (3), `data.options` → `patch.options` in the `multiSelect`
+    arm (1), and `branches.length > 2` (1). Each made a **named** assertion fail.
+- **Bugs filed**: none — all four functions behave as their doc comments state.
+- **Out of scope, per the issue**: `NODE_DERIVE_FNS`
+  (`node-schema-registry.ts:65`) has **no consumers** — the panels import each
+  derive function directly rather than looking it up. A "registry agrees with
+  the panel configs" test would either assert dead code or import the webview's
+  React panel modules. If that panel/registry drift is worth closing, it is a
+  feature-track question, not a test.
+
 ## 2026-07-25 — S2 (fourth slice): the MCP tool node execution instructions
 - **Protects**: if this breaks, the user configures an MCP node in the canvas
   and the exported skill / slash command / `ccwf render` output describes a
