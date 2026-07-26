@@ -26,7 +26,7 @@
   },
   "scripts": {
     "build": "tsc && chmod +x dist/mcp.js",
-    "check": "tsc --noEmit",
+    "check": "tsc --noEmit -p tsconfig.test.json",
     "lint": "echo 'mcp: no lint config yet'",
     "format": "echo 'mcp: no format config yet'",
     "test": "vitest run --passWithNoTests",
