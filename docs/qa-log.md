@@ -17,6 +17,56 @@ Entry format:
 
 ---
 
+## 2026-07-26 — S7: the agent `.md` frontmatter parser behind sub-agent import
+- **Protects**: if this breaks, the user picks an existing `.claude/agents/*.md`
+  from the Sub-Agent creation dialog and the node that lands on the canvas
+  carries the **wrong model, the wrong tools, and an `agentDefinition` that
+  still has the raw `---` block inside it** — so every artifact generated from
+  that workflow describes a different agent than the file they chose, and the
+  divergence surfaces wherever the agent is later run.
+- **Issue/PR**: #1030 / PR from `claude/qa-agent-frontmatter`
+- **Outcome**: done — 17 passing cases in a new
+  `packages/vscode/src/webview/src/utils/agent-frontmatter.test.ts`.
+  **No product source changed.** Notes on what the cases pin:
+  - No new infrastructure: the module has zero imports, so it runs under the
+    webview `vitest.config.ts` that landed with #1014, next to
+    `workflow-diff.test.ts`. Section F imports `@cc-wf-studio/core` through its
+    `dist`, so `pnpm build` must precede `pnpm test` on a fresh checkout
+    (already recorded under #1020).
+  - Both call sites (`SubAgentCreationDialog.tsx:125`, `NodePalette.tsx:207`)
+    parse the **same content independently** and both fall back on a falsy
+    value (`|| 'sonnet'`, `|| ''`), so a failed parse never fails loudly. That
+    is why the empty-value case pins `''` rather than `undefined`: today both
+    take the same branch, and a change there changes which one runs.
+  - Nested-structure cases assert with `toEqual` on the **whole** frontmatter
+    object, because an inner line of a `hooks:` block leaking to the top level
+    — a nested config silently becoming agent metadata — is the failure the
+    code comment's "skip complex nested structures" claim is about.
+  - Section F is a **contract between two independently maintained modules**:
+    `generateSubAgentFile` writes the file, `parseAgentFrontmatter` reads it
+    back. It is the only part of the suite that is not a check of the parser
+    against its own regex.
+  - Verified the suite bites by hand-mutating four things and reverting each:
+    the non-greedy `*?`, the `\n?` after the closing fence, the `[\w-]` in the
+    key pattern, and the `.trim()` on the body. Each made exactly one **named**
+    assertion fail.
+- **Bugs filed**: **#1031** — the fence pattern hardcodes `\n`, so a **CRLF**
+  agent file does not match at all: `model` falls back to `sonnet` whatever the
+  file said, `tools` and `memory` are dropped, and `agentDefinition` becomes the
+  whole file including the raw fences. Reachable on Windows, where the
+  extension ships. Per the issue, the case is landed **passing against the
+  current (wrong) behaviour** and named `CURRENT BEHAVIOUR (bug #1031)` rather
+  than skipped — so it goes red when the feature loop fixes it, which is the
+  intended signal to update it.
+- **Second finding, not filed separately**: `generateSubAgentFile` interpolates
+  `description: ${data.description || name}` with no `escapeYamlString`, unlike
+  the slash-command path in the same file. A description containing a newline
+  therefore **injects extra frontmatter lines** (`description: line one\nmodel:
+  haiku`) and does not survive the round trip — the parsed description is
+  `'line one'`. This is the same family as the already-filed **#1009**, so per
+  #1030's own instruction it is recorded here rather than filed a second time
+  in one run. Pinned as observed in section F.
+
 ## 2026-07-26 — S1 (behavior half): the cross-field derive normalizers
 - **Protects**: if this breaks, the user edits one field of a branching node in
   the property panel and a **different** field is silently rewritten — a Switch
