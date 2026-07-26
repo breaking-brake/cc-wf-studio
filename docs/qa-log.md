@@ -17,6 +17,78 @@ Entry format:
 
 ---
 
+## 2026-07-26 — S2: the Skill node's SKILL.md writer and reader
+- **Protects**: if this breaks, one of two things happens and **neither reports
+  anything on the user's machine**. On the write side, the user creates a Skill
+  from the Skill Browser, the extension reports success and writes
+  `.claude/skills/<name>/SKILL.md`, and Claude Code silently never loads it
+  because the frontmatter does not parse — the failure surfaces wherever the
+  agent later runs. On the read side, a skill the user already has on disk
+  disappears from the Skill Browser and can no longer be attached to a Skill
+  node, because a `null` from `parseSkillFrontmatter` makes the caller drop it
+  from the list (`skill-service.ts:69-71`, `:313-315`) with no error shown.
+  `docs/quality/02-feature-map.md:128` rates the feature **A** with exactly
+  these failure modes.
+- **Issue/PR**: #1060 / PR from `claude/qa-skill-file-generator`
+- **Outcome**: done — one new suite (22 cases),
+  `packages/vscode/src/extension/services/skill-file-generator.test.ts`,
+  covering `generateSkillFileContent` (`skill-file-generator.ts:50`) and
+  `parseSkillFrontmatter` (`yaml-parser.ts:43`). Both had **zero test
+  references anywhere in the repository** before this.
+  - **A. Write shape**: the exact three-line frontmatter + blank line +
+    instructions; `allowed-tools` emitted trimmed when present and asserted
+    absent for `undefined` / `''` / `'   '` (the `.trim().length > 0` guard at
+    `:58`); instructions preserved byte-for-byte.
+  - **B. Read**: all three fields with the `allowed-tools` → `allowedTools`
+    rename (the contract every caller depends on); values trimmed but a value
+    containing `: ` kept whole; **a CRLF file parses identically to LF** — the
+    deliberate contrast with bug #1031, where the sibling `parseAgentFrontmatter`
+    reads a CRLF file as nothing at all; `null` for no frontmatter / no closing
+    fence / a blank line before the opening fence; `null` when `description` is
+    missing but `{ name: '', … }` when `name` is missing; a later `---` in the
+    body does not extend the block.
+  - **C. Round trip**: the load-bearing section — what `parseSkillFrontmatter`
+    reads back equals the `CreateSkillPayload` that was written, payload object
+    on one side and parsed object on the other, plus one case asserting the
+    emitted block is accepted by **`yaml@2`** for an ordinary payload. Asserting
+    the generator's output line-by-line would have been a transcription and
+    would have passed on every defect in section D.
+  - **D. Four pinned cases** naming bug #1061, asserted with `yaml@2` and not
+    only with the in-house reader: a `: ` in the description and in
+    `allowedTools` each emit a block real YAML rejects; a newline in the
+    description injects an `allowed-tools` field the payload never declared; a
+    multi-line description loses every line after the first. **Pinned, not
+    skipped**, per the #1018 / #1031 / #1047 / #1058 precedent — the code does
+    today what each case says, and a skip would leave the most likely real
+    failure uncovered while the feature loop decides.
+  - Verified the suite bites by applying `escapeYamlString` to `description`
+    and `allowedTools` by hand: **all four section-D cases went red**, then
+    reverted. `git diff` on `packages/*/src` is empty.
+- **Test infrastructure landed in the same PR**: `packages/vscode` had no
+  vitest setup at all — its `test` script only delegated to the webview, and
+  the only config in the package was `src/webview/vitest.config.ts`. Added
+  `packages/vscode/vitest.config.ts` (`environment: 'node'`,
+  `include: ['src/extension/**/*.{test,spec}.ts']` — neither module imports
+  `vscode` or touches the DOM, so no mocks and no jsdom), the `vitest` and
+  `yaml` devDependencies, and changed the `test` script to run both. Checked
+  before landing: `.vscodeignore` excludes `**/*.test.ts` **and**
+  `src/extension/**/*.ts`, and `build:extension` is a `vite build` from the
+  entry point, so nothing new reaches the VSIX (cf. the #1011 packaging
+  regression).
+- **Bugs filed**: **#1061** — the generator interpolates every user-typed value
+  into the frontmatter raw, the fourth site of the #1009 / #1047 / #1058 family.
+  The issue carries one finding the section-D cases alone would not have
+  produced: the **round-trip** case shows that applying `escapeYamlString` is
+  not a sufficient fix on its own, because it quotes on `,`, so an ordinary
+  tool list `Read, Bash` is emitted as `"Read, Bash"` and `parseSkillFrontmatter`
+  (`yaml-parser.ts:60`) has no unquoting step and reads the quotes back as part
+  of the value. Whoever fixes #1061 must touch both directions.
+- **Residual scope on #1060**: none — every case the issue specified landed.
+  `skill-service.ts` itself stays out (it reaches the filesystem and VSCode
+  configuration; §5 of the assurance map leaves host dependencies on manual
+  E2E), as do `validateSkillName` / `validateCreateSkillPayload` in the webview
+  and whether the Skill Browser renders the list.
+
 ## 2026-07-26 — S2: the Sub-Agent Flow agent file written on every CC export
 - **Protects**: if this breaks, the user builds a Sub-Agent Flow, exports, and
   the `.claude/agents/{workflow}_{flow}.md` that lands on disk either describes
