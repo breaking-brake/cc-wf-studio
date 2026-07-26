@@ -53,7 +53,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.1.2
-        version: 4.1.6(@types/node@25.8.0)(@vitest/ui@4.1.6)(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0))
+        version: 4.1.6(@types/node@25.8.0)(@vitest/ui@4.1.6)(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0))
 
   packages/core:
     dependencies:
@@ -75,7 +75,10 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.1.2
-        version: 4.1.6(@types/node@25.8.0)(@vitest/ui@4.1.6)(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0))
+        version: 4.1.6(@types/node@25.8.0)(@vitest/ui@4.1.6)(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0))
+      yaml:
+        specifier: ^2.9.0
+        version: 2.9.0
 
   packages/mcp:
     dependencies:
@@ -100,7 +103,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.1.2
-        version: 4.1.6(@types/node@25.8.0)(@vitest/ui@4.1.6)(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0))
+        version: 4.1.6(@types/node@25.8.0)(@vitest/ui@4.1.6)(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0))
 
   packages/vscode:
     dependencies:
@@ -155,7 +158,7 @@ importers:
         version: 5.9.3
       vite:
         specifier: ^7.3.6
-        version: 7.3.6(@types/node@25.8.0)(tsx@4.22.0)
+        version: 7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0)
 
   packages/vscode/src/webview:
     dependencies:
@@ -225,7 +228,7 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-react':
         specifier: ^5.1.2
-        version: 5.2.0(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0))
+        version: 5.2.0(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0))
       '@vitest/ui':
         specifier: ^4.1.2
         version: 4.1.6(vitest@4.1.6)
@@ -234,10 +237,10 @@ importers:
         version: 5.9.3
       vite:
         specifier: ^7.3.6
-        version: 7.3.6(@types/node@25.8.0)(tsx@4.22.0)
+        version: 7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0)
       vitest:
         specifier: ^4.1.2
-        version: 4.1.6(@types/node@25.8.0)(@vitest/ui@4.1.6)(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0))
+        version: 4.1.6(@types/node@25.8.0)(@vitest/ui@4.1.6)(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0))
 
 packages:
 
@@ -3943,6 +3946,11 @@ packages:
   yallist@4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
 
+  yaml@2.9.0:
+    resolution: {integrity: sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
   yauzl@3.3.0:
     resolution: {integrity: sha512-PtGEvEP30p7sbIBJKUBjUnqgTVOyMURc4dLo9iNyAJnNIEz9pm88cCXF21w94Kg3k6RXkeZh5DHOGS0qEONvNQ==}
     engines: {node: '>=12'}
@@ -5513,7 +5521,7 @@ snapshots:
       d3-selection: 3.0.0
       d3-transition: 3.0.1(d3-selection@3.0.0)
 
-  '@vitejs/plugin-react@5.2.0(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0))':
+  '@vitejs/plugin-react@5.2.0(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0))':
     dependencies:
       '@babel/core': 7.29.7
       '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.29.7)
@@ -5521,7 +5529,7 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-rc.3
       '@types/babel__core': 7.20.5
       react-refresh: 0.18.0
-      vite: 7.3.6(@types/node@25.8.0)(tsx@4.22.0)
+      vite: 7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -5534,13 +5542,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.0
 
-  '@vitest/mocker@4.1.6(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0))':
+  '@vitest/mocker@4.1.6(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0))':
     dependencies:
       '@vitest/spy': 4.1.6
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.3.6(@types/node@25.8.0)(tsx@4.22.0)
+      vite: 7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0)
 
   '@vitest/pretty-format@4.1.6':
     dependencies:
@@ -5569,7 +5577,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.16
       tinyrainbow: 3.1.0
-      vitest: 4.1.6(@types/node@25.8.0)(@vitest/ui@4.1.6)(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0))
+      vitest: 4.1.6(@types/node@25.8.0)(@vitest/ui@4.1.6)(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0))
 
   '@vitest/utils@4.1.6':
     dependencies:
@@ -8095,7 +8103,7 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0):
+  vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0):
     dependencies:
       esbuild: 0.28.1
       fdir: 6.5.0(picomatch@4.0.4)
@@ -8107,11 +8115,12 @@ snapshots:
       '@types/node': 25.8.0
       fsevents: 2.3.3
       tsx: 4.22.0
+      yaml: 2.9.0
 
-  vitest@4.1.6(@types/node@25.8.0)(@vitest/ui@4.1.6)(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0)):
+  vitest@4.1.6(@types/node@25.8.0)(@vitest/ui@4.1.6)(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0)):
     dependencies:
       '@vitest/expect': 4.1.6
-      '@vitest/mocker': 4.1.6(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0))
+      '@vitest/mocker': 4.1.6(vite@7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0))
       '@vitest/pretty-format': 4.1.6
       '@vitest/runner': 4.1.6
       '@vitest/snapshot': 4.1.6
@@ -8128,7 +8137,7 @@ snapshots:
       tinyexec: 1.1.2
       tinyglobby: 0.2.16
       tinyrainbow: 3.1.0
-      vite: 7.3.6(@types/node@25.8.0)(tsx@4.22.0)
+      vite: 7.3.6(@types/node@25.8.0)(tsx@4.22.0)(yaml@2.9.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 25.8.0
@@ -8169,6 +8178,8 @@ snapshots:
   yallist@3.1.1: {}
 
   yallist@4.0.0: {}
+
+  yaml@2.9.0: {}
 
   yauzl@3.3.0:
     dependencies:

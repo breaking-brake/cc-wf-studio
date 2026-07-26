@@ -17,6 +17,79 @@ Entry format:
 
 ---
 
+## 2026-07-26 — S2: the slash-command frontmatter emitted by generateSlashCommandFile
+- **Protects**: if this breaks, the user sets a model, a tool allowlist, an
+  argument hint or a hook in the Slash Command Options dropdown, exports, and
+  the emitted `.claude/skills/{workflow}/SKILL.md` carries different values
+  than the canvas holds — or a frontmatter block Claude Code cannot parse at
+  all, in which case the whole skill silently never loads. Nothing on the
+  user's machine reports it; the divergence surfaces wherever the agent is
+  later run.
+- **Issue/PR**: #1044 / PR from `claude/qa-slash-command-frontmatter`
+- **Outcome**: done — one new suite,
+  `packages/core/src/services/slash-command-frontmatter.test.ts` (26 cases).
+  `generateSlashCommandFile` had **zero test references** in the repository
+  before this (`workflow-export.test.ts` covers only `nodeNameToFileName`),
+  despite hand-building six conditional option lines plus a four-level
+  hand-indented `hooks:` block.
+  - **Parser choice**: `yaml@2` added to `packages/core` devDependencies, per
+    the issue's instruction to pick one and record it. Chosen over `js-yaml`
+    because it is ESM-native and needs no separate `@types` package. This is a
+    `package.json` change only — no `packages/*/src` was touched.
+  - **The property asserted** is not "the generator emits these lines" — that
+    would be a transcription of the generator and would pass on every defect
+    below. It is: *the emitted frontmatter must parse as YAML, and parsing it
+    must yield back the `SlashCommandOptions` object the workflow declared.*
+    Input object on one side, parsed tree on the other.
+  - Sections: (A) conditional emission, each key asserted **absent** as well as
+    present — the `'default'` sentinels for `model`/`context`, the
+    truthiness-guarded `disable-model-invocation: false`, the
+    camelCase→kebab-case rename asserted key by key, and the
+    `description` → `workflow.name` fallback; (B) the hooks block round-tripped
+    by `toEqual` against the input object, both the matcher and matcher-less
+    branches, two hook types at once, and `once: false`; (C) escaping;
+    (D) agreement with `validateClaudeFileFormat`, which the extension runs on
+    every file before writing.
+  - **Verified the suite bites** by hand-mutating the generator six ways, each
+    producing a *named* failure: dropping the kebab-case rename, removing the
+    `'default'` sentinel guard, shifting the hooks `command:` indentation by
+    two spaces (5 failures), removing the matcher escaping (3), removing the
+    command escaping (1), and — the important one — **applying the #1047 fix,
+    which turns exactly the five `CURRENT BEHAVIOUR` cases red and nothing
+    else**. All mutations reverted; `git diff` on `workflow-export.ts` is empty.
+  - The first matcher fixture (`Bash("x")`) turned out **not** to hold the
+    escaping — it round-trips fine as a plain scalar — so three matchers that
+    are genuine YAML control constructs were added (`*`, `Bash: git commit`,
+    `[Edit]`), plus a command containing a colon-space. Those are what make
+    the `alwaysQuote` argument load-bearing in the suite.
+- **Bugs filed**: **#1047** — `argumentHint` (`workflow-export.ts:211`) and
+  `allowedTools` (`:195`) are interpolated **raw**, while `description` two
+  lines above goes through `escapeYamlString`. The **documented** hint format
+  (`workflow-definition.ts:69`: `"[arg1] [arg2] | [alt1] | [alt2]"`) opens an
+  unterminated YAML flow sequence, so a user following the doc comment exactly
+  produces a frontmatter that does not parse — taking the entire SKILL.md
+  down, not just the hint. `[message]` parses as a **list** instead of a
+  string; `allowedTools` containing `: ` throws the same way. Worse,
+  `validateClaudeFileFormat` returns ok for all of them, which is why it ships
+  silently (pinned as case D18). Landed as five **passing**
+  `CURRENT BEHAVIOUR (bug #1047)` cases per the #1018/#1031/#1039 precedent,
+  so the suite is green today and goes red when the feature loop fixes it.
+- **Not filed, pinned as observed**: `hooks: { PreToolUse: [] }` emits a bare
+  `hooks:` line (`hooks: null` once parsed) — the outer guard counts keys and
+  the inner counts entries, and nothing closes the gap. Confirmed
+  **unreachable from the canvas** per the issue (`removeHookEntry`,
+  `workflow-store.ts:556-563`, deletes the key with its last entry), so it
+  affects only hand-edited or AI-authored files. Also the newline-stripping in
+  `escapeYamlString` (`:54`), which joins `'Line one\nLine two'` into
+  `'Line oneLine two'` — the already-filed #1009 family, recorded rather than
+  filed a second time.
+- **Residual scope on #1044**: none — all 18 cases the issue names landed, plus
+  the four added during mutation testing. Items the issue put out of scope
+  (`generateSubAgentFile`, `generateSubAgentFlowAgentFile`,
+  `planWorkflowExportFiles`, the document body) stay out; #995's item 3
+  remains blocked on a human revising the stale `spec.md`, and this issue did
+  not depend on it.
+
 ## 2026-07-26 — Packaging: keep the test suite out of the published dist/
 - **Protects**: if this stays broken, every `@cc-wf-studio/{core,cli,mcp}`
   tarball ships this loop's test suite, so a consumer's deep import into any
