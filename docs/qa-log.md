@@ -17,6 +17,78 @@ Entry format:
 
 ---
 
+## 2026-07-26 — S2: the Sub-Agent Flow agent file written on every CC export
+- **Protects**: if this breaks, the user builds a Sub-Agent Flow, exports, and
+  the `.claude/agents/{workflow}_{flow}.md` that lands on disk either describes
+  a different agent than the canvas holds — wrong model, missing tools — or
+  carries a frontmatter block Claude Code cannot parse, in which case the
+  nested agent **silently never loads**. Nothing on the user's machine reports
+  it: the export succeeds, the file is written, and the failure surfaces
+  wherever the agent is later run. Both export surfaces are affected
+  (`cli/src/commands/export.ts:100`, `vscode/.../export-service.ts:36,59`),
+  because both go through `planWorkflowExportFiles:381`.
+- **Issue/PR**: #1057 / PR from `claude/qa-sub-agent-flow-agent-file`
+- **Outcome**: done — one new suite,
+  `packages/core/src/services/sub-agent-flow-agent-file.test.ts` (29 cases),
+  plus `makeSubAgentFlow` / `subAgentFlowNode` builders added to the shared
+  `__fixtures__/workflows.ts`. `generateSubAgentFlowAgentFile` had **zero test
+  references anywhere in the repo** before this; `#1044` had named and skipped
+  it once already.
+  The asserted property is the same one `#1044` used, not a transcription of
+  the generator: *the emitted frontmatter must parse as YAML, and parsing it
+  must yield back the values the `SubAgentFlow` and its referencing node
+  declared* — input objects on one side, parsed tree on the other.
+  - **A** — round-trip: `name` verbatim from the caller-sanitized argument,
+    `description` from the flow with the name as fallback, `tools`/`color`/
+    `memory` asserted **absent** as well as present, `model` always emitted
+    and defaulting to `sonnet`, all four CC models (incl. the `CC_ONLY_MODELS`
+    `haiku`/`fable`) passing through, and all four node-sourced keys composing
+    in one file.
+  - **B** — the four `CURRENT BEHAVIOUR (bug #1058)` pins, landed **passing**
+    per the #1018/#1031/#1039/#1042/#1047 precedent.
+  - **C** — composition: fence → Mermaid → instructions in order, the *flow's*
+    nodes rendered rather than the parent's, no `pseudoWorkflow` placeholder
+    (`1.0.0`, epoch) leaking, and byte-identical output across calls with no
+    clock stubbing.
+  - **D** — planner level: the `<parent>_<flow>` path convention, the
+    referencing-node lookup being by `subAgentFlowId` rather than position,
+    and two pins-as-observed (orphan definition still gets a sonnet file;
+    two flow names that sanitize alike plan the **same** `relativePath` twice
+    and the second write wins on disk — the collision the #1008 iteration
+    flagged for sub-agent names and left unfiled).
+  - Verified the suite bites by hand-mutating and reverting four things: the
+    `|| 'sonnet'` default (`:129`), the `tools.length > 0` guard (`:140`), the
+    `subAgentFlow.description ||` fallback (`:137`), and the `referencingNode`
+    lookup (`:376`). Each produced a **named** failure (3/3/3/1 cases). The
+    candidate #1058 fix was also applied experimentally: it turns exactly the
+    four `CURRENT BEHAVIOUR` cases red and nothing else. All reverted —
+    `git diff` on `packages/*/src` is empty.
+- **Bugs filed**: **#1058** — `description` (`workflow-export.ts:137`) and
+  `tools` (`:141`) are interpolated raw while `generateSlashCommandFile` 50
+  lines below escapes its own `description` (`:191`). A colon-space or a
+  newline in either takes the whole agent file down, and
+  `validateClaudeFileFormat` passes it because it never parses the block. Third
+  site in the #1009 / #1047 family.
+- **#1057 section E resolved — no defect.** The issue asked whether a
+  `description` typed in the Sub-Agent Flow property panel is dropped, since
+  the generator reads `subAgentFlow.description` rather than the node's. It is
+  not: `description` in `subAgentFlowPropertySchema`
+  (`sub-agent-flow-schema.ts:24`) declares **no `control`**, and
+  `SchemaPropertyPanel.tsx:85` skips control-less fields, so it is data-only
+  and never editable. The panel shows the *flow's* description read-only in its
+  Header slot, and `workflow-store.ts:1249,1274` copies the flow's value into
+  the node on save. The node field is a mirror; the flow is the source of
+  truth, and the generator reads the right one. Pinned as a precedence
+  assertion rather than left as a comment. **No follow-up needed** — the next
+  iteration should not re-investigate this.
+- **Residual scope on #1057**: none — sections A–D all landed, and E is closed
+  above. Out-of-scope items the issue named (`generateSubAgentFile`, the
+  `generateMermaidFlowchart` / `generateExecutionInstructions` internals under
+  #995) were not touched.
+- **Housekeeping note for a human**: #1057 could not be locked by the session
+  that filed it, so unlike the other `auto-generated` `qa` issues it still
+  accepts non-collaborator comments. `gh issue lock 1057`.
+
 ## 2026-07-26 — S1: panel option sets vs. what the field's zod accepts
 - **Protects**: if this breaks, a property-panel dropdown offers a value the
   node's own zod type rejects. The user picks it, `updateNodeData` stores it,

@@ -21,6 +21,8 @@ import {
   NodeType,
   type PromptNode,
   type SkillNode,
+  type SubAgentFlow,
+  type SubAgentFlowNode,
   type SubAgentNode,
   type SwitchNode,
   type Workflow,
@@ -212,6 +214,41 @@ export function branchSessionNode(
       outputPorts: 1,
       ...extra,
     },
+  };
+}
+
+/**
+ * A `SubAgentFlow` definition with a runnable three-node body.
+ *
+ * The body is deliberately distinguishable from anything `makeWorkflow`
+ * produces, so a test can tell whose nodes reached the generator.
+ */
+export function makeSubAgentFlow(overrides: Partial<SubAgentFlow> = {}): SubAgentFlow {
+  return {
+    id: 'flow-1',
+    name: 'Input Validation',
+    nodes: [
+      startNode('flow-start'),
+      promptNode('flow-step', 'Validate the input', {}, 'Validate'),
+      endNode('flow-end'),
+    ],
+    connections: [connect('flow-start', 'flow-step'), connect('flow-step', 'flow-end')],
+    ...overrides,
+  };
+}
+
+/** The main-workflow node that references a {@link makeSubAgentFlow} definition. */
+export function subAgentFlowNode(
+  id: string,
+  extra: Partial<SubAgentFlowNode['data']> = {},
+  name = 'Run Validation'
+): SubAgentFlowNode {
+  return {
+    id,
+    type: NodeType.SubAgentFlow,
+    name,
+    position,
+    data: { subAgentFlowId: 'flow-1', label: name, outputPorts: 1, ...extra },
   };
 }
 
