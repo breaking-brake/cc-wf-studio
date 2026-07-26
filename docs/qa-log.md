@@ -17,6 +17,62 @@ Entry format:
 
 ---
 
+## 2026-07-26 — S1: the Sub-Agent Flow validation family in validateAIGeneratedWorkflow
+- **Protects**: if this breaks, an external agent's `apply_workflow` lands a
+  workflow whose `subAgentFlow` node points at a `subAgentFlowId` that has no
+  definition in `subAgentFlows`, and validation passes. The user opens the
+  canvas, the nested-flow node is there, double-clicking it opens nothing, and
+  every generated artifact — the Mermaid subgraph, the execution instructions,
+  the exported `SKILL.md` — describes a flow that does not exist. Nothing on
+  the user's machine reports it; the divergence surfaces wherever the agent is
+  later run.
+- **Issue/PR**: #1050 / PR from `claude/qa-sub-agent-flow-validation`
+- **Outcome**: done — 24 cases appended to
+  `packages/core/src/utils/validate-workflow.test.ts`. All three
+  sub-agent-flow functions ran **zero times** under the suite before this:
+  `validateSubAgentFlowReferences` (`:191`), `validateSubAgentFlowNode`
+  (`:492`) and the exported `validateSubAgentFlow` (`:540`). They are not a
+  zod transcription — they enforce cross-node invariants a schema cannot
+  express (does the referenced flow exist, does the nested flow have exactly
+  one Start), which `docs/quality/03-assurance-map.md` §6 names as the class
+  that does need tests.
+  - **Covered**: the reference contract (a dangling `subAgentFlowId` names the
+    offending node in `field`, one error per node, a missing `subAgentFlows`
+    array does not throw); the reference node's own fields
+    (`SUBAGENTFLOW_MISSING_REF_ID` / `_MISSING_LABEL` / `_INVALID_PORTS`,
+    including that an **omitted** `outputPorts` fails the strict `!==`); the
+    definition (`_MISSING_ID` / `_MISSING_NAME`, the early return on a
+    non-array `nodes`, the Start/End counts carrying the flow **name** since
+    those three errors have no `field`, the two MVP node prohibitions, all
+    broken rules reported rather than the first, and one case driving the
+    public entry point so the `:215-218` wiring is covered too).
+  - **Verified the suite bites** by hand-mutating and reverting four things:
+    the early return at `:196`, the `!subAgentFlowIds.has(...)` condition at
+    `:204`, the `!==` at `:515`, and the `subAgentNodes.length > 0` guard at
+    `:597`. Each produced a named failure (1, 3, 1 and 2 cases respectively).
+  - **Deliberate non-assertions**, recorded in the file header:
+    `SUB_AGENT_FLOW.NAME_PATTERN` (`/^[a-z0-9_-]+$/`), `NAME_MAX_LENGTH` and
+    `DESCRIPTION_MAX_LENGTH` are declared and never read, and the authoring
+    guide's own worked example (`"name": "Input Validation"`) violates the
+    pattern. The two representations contradict each other, so asserting
+    either would pin an arbitrary answer.
+- **Bugs filed**: **#1051** — the authoring guide states six sub-agent-flow
+  MUST-rules and the validator enforces three. `askUserQuestion`,
+  `branchSession` and the 100-node cap go unenforced (`MAX_NODES` at
+  `workflow-definition.ts:737` is declared and read by nothing), while the
+  **frozen** chat-UI path does check `askUserQuestion`
+  (`refinement-service.ts:977`) — so the live MCP path is the looser of the
+  two. Filed with three further holes in the same family: a definition is
+  never inspected while nothing references it, two definitions may share an
+  `id`, and an orphan definition is never reported. Seven cases land as
+  **passing** `CURRENT BEHAVIOUR (bug #1051)` pins rather than skipped, per
+  the #1031 / #1042 / #1047 precedent — a skipped test says nothing when the
+  behaviour changes, whereas a pin goes red the moment the feature loop closes
+  a gap.
+- **Note on #1046**: not picked this round. PR #1049 (a **fork**, by another
+  author) targets it; the loop may not merge, build or push to that PR, so it
+  was labelled `needs-attention` for a human and left alone.
+
 ## 2026-07-26 — S2: the slash-command frontmatter emitted by generateSlashCommandFile
 - **Protects**: if this breaks, the user sets a model, a tool allowlist, an
   argument hint or a hook in the Slash Command Options dropdown, exports, and
