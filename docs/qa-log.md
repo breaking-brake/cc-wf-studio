@@ -17,6 +17,82 @@ Entry format:
 
 ---
 
+## 2026-07-26 — S2: user-text fences and the Prompt node variables block
+- **Protects**: if this breaks — and it is broken today — the exported
+  instruction document **ends early**. A user prompt containing a ` ``` ` code
+  block closes the enclosing 3-backtick fence, so the rest of the prompt is read
+  by the consuming agent as document prose; a prompt whose last line is a bare
+  fence goes further and swallows the *whole* of the next node's subsection, so
+  a node the user drew on the canvas is never executed at all. Every export
+  surface is affected (`ccwf render`, the MCP `render_workflow` tool, "Copy as
+  Markdown", all seven targets), prompts that ask an agent to write code
+  routinely contain a fence, and nothing on the user's machine reports it: the
+  export succeeds and the damage surfaces wherever the agent later runs.
+- **Issue/PR**: #1063 / PR from `claude/qa-execution-instruction-fences`
+- **Outcome**: done — 21 cases appended to
+  `packages/core/src/services/workflow-prompt-generator.test.ts`.
+  - **A. Fence containment** (12 cases, `describe.each` over the three
+    embedding sites — Prompt node body `:934-936`, Sub-Agent `**Prompt**`
+    `:776-778`, Codex `**Prompt**` `:886-888`). The asserted property is
+    *"which lines of the document sit outside every fence?"*, computed by a
+    small CommonMark-faithful `topLevelLines` scanner, **not** a transcription
+    of the `sections.push` sequence. That distinction is the whole point: the
+    pre-existing `:390` case spells out `` ```\n${prompt}\n``` `` and passes on
+    the defect, because its fixture prompt only contains *single* backticks.
+    Per site: a positive control (ordinary prompt stays contained, next node
+    stays visible — must hold before *and* after the fix), plus three
+    `CURRENT BEHAVIOUR (bug #1064)` pins — a ` ```bash ` block escapes, a
+    trailing fence swallows the next node, and **four** backticks defeat a
+    four-backtick fence too.
+  - **Fourth exposure found while building**: the Codex `**Execution Command**`
+    block (`:868-872`) interpolates the same prompt into the
+    `codex exec … '<prompt>'` argument inside a ` ```bash ` block.
+    `escapedPrompt` (`:862`) escapes `'` for the shell and nothing else, so a
+    fenced prompt breaks that block too — and the command the user is told to
+    run is wrong as well as unfenced. Pinned in its own case.
+  - **B. The variables block** (`:939-945`, 8 cases). `grep -n variables` over
+    the suite returned **nothing** before this, yet the field is live and
+    AI-authorable (zod `prompt-schema.ts:29`, in the authoring guide,
+    `NodePalette.tsx:264` seeds `variables: {}` on every new Prompt node) and
+    `docs/quality/02-feature-map.md:123` rates it **A**. Covers: heading absent
+    for `undefined` and for `{}` (the common shape, via the
+    `Object.keys(...).length > 0` guard), the exact emitted line, insertion
+    order preserved, the `(not set)` fallback for an empty value, and three
+    pins — a newline in a value splits the Markdown list item so the remainder
+    becomes prose (`CURRENT BEHAVIOUR (bug #1064)`), a backtick/pipe is emitted
+    raw (observed, harmless today), and a non-`\w` key like `my-var` is
+    advertised as available even though the webview's placeholder detector
+    (`template-utils.ts:14`, `/\{\{(\w+)\}\}/g`) can never match it.
+  - Landed **passing and named**, per the #1018 / #1031 / #1047 / #1058 / #1061
+    precedent, rather than skipped — a skip would leave the most likely real
+    failure uncovered while the feature loop decides.
+  - **Verified the suite bites**: applied the sibling `fence()`
+    (`workflow-overview-formatter.ts:576`) by hand to all four sites. Exactly
+    the 10 fence pins went red and nothing else — the positive controls, the
+    variables cases, and the 94 pre-existing cases stayed green. Reverted;
+    `git diff` on `packages/*/src` is empty.
+  - **Finding worth carrying to #1064**: patching only the three `**Prompt**`
+    sites left the Codex site's pins *green*, because the unfixed
+    `**Execution Command**` block breaks the document first and masks them. A
+    partial fix of #1064 is therefore invisible at the Codex site — it must
+    cover the exec block too.
+- **Bugs filed**: **#1064** — the 3-vs-4 backtick divergence. Sibling of #1026
+  (same root cause, different sites: #1026 is the MCP User Intent fence and the
+  metadata comment, this is the three user-prompt sites plus the Codex exec
+  block). The fix is already written and tested in the same directory —
+  `workflow-overview-formatter.ts:576`'s `fence()`, whose own comment names
+  exactly this case — so the fix is to reuse it, and one shared helper closes
+  #1026 as well. Noted in the issue that four backticks are still not a
+  complete answer (case 3 defeats them); the robust form measures the longest
+  backtick run and opens with one more.
+- **Residual scope on #1063**: none — sections A and B both landed, and the
+  issue's section C exclusions were respected. Flagged there and repeated here
+  for the **feature track**: `substituteVariables` / `getUndefinedVariables` /
+  `isFullyDefined` (`template-utils.ts:69, :92, :118`) have zero consumers
+  repo-wide, so the substitution half of the Prompt-variables feature is
+  unwired while the feature map rates it **A**. That is a product question, not
+  an assurance one — testing dead code would be a transcription.
+
 ## 2026-07-26 — S2: the Skill node's SKILL.md writer and reader
 - **Protects**: if this breaks, one of two things happens and **neither reports
   anything on the user's machine**. On the write side, the user creates a Skill
