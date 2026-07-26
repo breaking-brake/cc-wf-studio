@@ -39,10 +39,37 @@ class MemoryStorage implements Storage {
   }
 }
 
-if (typeof globalThis.localStorage === 'undefined') {
-  globalThis.localStorage = new MemoryStorage();
+/**
+ * Presence alone is not enough to trust. Node 22 has no `localStorage`, but
+ * Node 25 exposes one that is only usable when the runtime was started with
+ * `--localstorage-file` — without it the object exists while `getItem` is
+ * `undefined`. A `typeof … === 'undefined'` guard therefore skips the stub on
+ * Node 25 and the suites die with "getItem is not a function", passing in CI
+ * (Node 22) and failing on a newer local runtime.
+ *
+ * So probe for the methods actually used rather than for the object.
+ */
+function isUsableStorage(value: unknown): value is Storage {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as Storage).getItem === 'function' &&
+    typeof (value as Storage).setItem === 'function'
+  );
 }
 
-if (typeof globalThis.sessionStorage === 'undefined') {
-  globalThis.sessionStorage = new MemoryStorage();
+if (!isUsableStorage(globalThis.localStorage)) {
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: new MemoryStorage(),
+    configurable: true,
+    writable: true,
+  });
+}
+
+if (!isUsableStorage(globalThis.sessionStorage)) {
+  Object.defineProperty(globalThis, 'sessionStorage', {
+    value: new MemoryStorage(),
+    configurable: true,
+    writable: true,
+  });
 }
