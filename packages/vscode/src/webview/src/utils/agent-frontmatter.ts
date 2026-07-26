@@ -6,7 +6,8 @@ export function parseAgentFrontmatter(content: string): {
   frontmatter: Record<string, string | undefined>;
   body: string;
 } {
-  const match = content.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  const normalizedContent = content.replace(/\r\n?/g, '\n');
+  const match = normalizedContent.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
   if (!match) {
     return { frontmatter: {}, body: content };
   }
