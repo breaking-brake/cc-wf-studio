@@ -976,3 +976,238 @@ describe('generateExecutionInstructions — MCP Tool Nodes', () => {
     expect(second).toBeGreaterThan(first);
   });
 });
+
+// ---------------------------------------------------------------------------
+// User-text fences and the Prompt node variables block (issue #1063)
+// ---------------------------------------------------------------------------
+
+/**
+ * The prompt body is the payload of the whole export: it is the text the
+ * consuming agent actually executes. `generateExecutionInstructions` embeds it
+ * inside a Markdown fence at three sites — the Sub-Agent `**Prompt**`, the
+ * Codex `**Prompt**`, and the Prompt node body — and the containment of that
+ * fence is what keeps the rest of the instruction document intact.
+ *
+ * The property asserted below is deliberately *not* a transcription of the
+ * `sections.push` sequence: a test that spells out `` ```\n${prompt}\n``` ``
+ * passes on the very defect this section exists to catch (see the existing
+ * "reproduces the user prompt verbatim" case, which uses single backticks).
+ * Instead each case asks the question a reader of the document would:
+ * **which lines are outside every fence?** A prompt line that surfaces there
+ * is prose the agent will act on; a heading that stops surfacing there is a
+ * node the agent will never see.
+ */
+
+/**
+ * The lines of `doc` that sit outside every fenced code block.
+ *
+ * A small CommonMark-faithful scanner: a fence opens on a line whose first
+ * non-space run is three or more backticks, and closes on the first later line
+ * whose backtick run is at least as long as the opener's and which carries no
+ * info string. That closing rule is the whole reason a nested ` ```bash ` does
+ * not close its parent while a bare ` ``` ` does.
+ */
+function topLevelLines(doc: string): string[] {
+  const outside: string[] = [];
+  let openFenceLength = 0;
+  for (const line of doc.split('\n')) {
+    const fence = /^ {0,3}(`{3,})(.*)$/.exec(line);
+    if (openFenceLength === 0) {
+      if (fence) {
+        openFenceLength = fence[1].length;
+        continue;
+      }
+      outside.push(line);
+    } else if (fence && fence[1].length >= openFenceLength && fence[2].trim() === '') {
+      openFenceLength = 0;
+    }
+  }
+  return outside;
+}
+
+/**
+ * One embedding site: a document carrying the prompt under test on its first
+ * node, plus a second node of the same type whose heading is the canary for
+ * "the rest of the document survived".
+ */
+interface FenceSite {
+  site: string;
+  render: (prompt: string) => string;
+  /** Heading of the second node's subsection. */
+  nextHeading: string;
+}
+
+const FENCE_SITES: FenceSite[] = [
+  {
+    site: 'Prompt node body',
+    render: (prompt) =>
+      generateExecutionInstructions(
+        makeWorkflow([promptNode('p1', prompt), promptNode('p2', 'second body')]),
+        { provider: 'claude-code' }
+      ),
+    nextHeading: '#### p2(second body)',
+  },
+  {
+    site: 'Sub-Agent **Prompt**',
+    render: (prompt) =>
+      generateExecutionInstructions(
+        makeWorkflow([
+          subAgentNode('a1', 'One', { prompt }),
+          subAgentNode('a2', 'Two', { prompt: 'second body' }),
+        ]),
+        { provider: 'claude-code' }
+      ),
+    nextHeading: '#### a2(Sub-Agent: Two)',
+  },
+  {
+    site: 'Codex **Prompt**',
+    render: (prompt) =>
+      generateExecutionInstructions(
+        makeWorkflow([
+          codexNode('c1', { prompt }),
+          codexNode('c2', { prompt: 'second body', label: 'Second' }),
+        ]),
+        { provider: 'claude-code' }
+      ),
+    nextHeading: '#### c2(Second)',
+  },
+];
+
+describe.each(FENCE_SITES)('generateExecutionInstructions — fence containment: $site', (site) => {
+  it('keeps an ordinary prompt inside the fence and the next node visible', () => {
+    // The positive control. It must hold both today and after bug #1064 is
+    // fixed, so a fix that widens every fence cannot quietly change the shape
+    // of ordinary output.
+    const top = topLevelLines(site.render('Analyse the module\nand report back'));
+    expect(top).not.toContain('Analyse the module');
+    expect(top).not.toContain('and report back');
+    expect(top).toContain(site.nextHeading);
+  });
+
+  it('CURRENT BEHAVIOUR (bug #1064): a code block in the prompt escapes the fence', () => {
+    // A prompt that contains its own ``` block closes the enclosing 3-backtick
+    // fence early, so the tail of the prompt lands at document top level and
+    // the agent reads it as instructions to the *document*, not as prompt text.
+    // This case is expected to go red when #1064 is fixed — that is its job.
+    const top = topLevelLines(site.render('before\n```bash\nls -la\n```\nafter'));
+    expect(top, 'the tail of the prompt has escaped the fence').toContain('after');
+  });
+
+  it('CURRENT BEHAVIOUR (bug #1064): a prompt ending in a fence swallows the next node', () => {
+    // No code block needed — a trailing ``` alone is enough. The generator's
+    // own closing fence then *opens* a block that runs to the end of the
+    // document, so the following node's entire subsection disappears from the
+    // agent's view while the export still reports success.
+    const top = topLevelLines(site.render('text\n```'));
+    expect(top, 'the next node was swallowed by an unclosed fence').not.toContain(
+      site.nextHeading
+    );
+  });
+
+  it('CURRENT BEHAVIOUR (bug #1064, boundary): four backticks defeat a four-backtick fence too', () => {
+    // Recorded rather than demanded: the sibling `workflow-overview-formatter`
+    // fixes the common case by opening with four backticks, and this input
+    // defeats that fix exactly the way three backticks defeat the current
+    // code. Whoever closes #1064 should know the robust form measures the
+    // longest backtick run in the text and opens with one more.
+    const top = topLevelLines(site.render('a\n````\nb\n````\nc'));
+    expect(top).toContain('b');
+    expect(top).not.toContain(site.nextHeading);
+  });
+});
+
+describe('generateExecutionInstructions — Codex execution command', () => {
+  it('CURRENT BEHAVIOUR (bug #1064): a fenced prompt also breaks the ```bash command block', () => {
+    // The fourth exposure of the same input: the prompt is interpolated into
+    // the `codex exec … '<prompt>'` argument inside a ```bash block. The shell
+    // escaping at workflow-prompt-generator.ts:866 handles `'` and nothing
+    // else, so the command the user is told to run is unfenced *and* wrong.
+    const out = generateExecutionInstructions(
+      makeWorkflow([codexNode('c1', { prompt: 'before\n```bash\nls -la\n```\nafter' })]),
+      { provider: 'claude-code' }
+    );
+    expect(topLevelLines(out), 'the codex exec command line has escaped its block').toContain(
+      "after'"
+    );
+  });
+});
+
+/**
+ * `PromptNode.data.variables` is live and AI-authorable — a zod field, part of
+ * the AI authoring guide, and seeded as `{}` on every Prompt node the palette
+ * creates — but had no test reference anywhere in the repository.
+ * `docs/quality/02-feature-map.md:123` rates the feature **A** with the failure
+ * mode "substitutes wrongly, so a different value arrives at run time".
+ */
+describe('generateExecutionInstructions — Prompt node variables block', () => {
+  function promptSection(variables?: Record<string, string>) {
+    const out = generateExecutionInstructions(
+      makeWorkflow([promptNode('p1', 'body', variables ? { variables } : {})]),
+      { provider: 'claude-code' }
+    );
+    const start = out.indexOf('### Prompt Node Details');
+    expect(start, 'the Prompt Node Details section is missing entirely').toBeGreaterThan(-1);
+    return out.slice(start);
+  }
+
+  it('omits the block entirely when no variables are declared', () => {
+    expect(promptSection()).not.toContain('**Available variables:**');
+  });
+
+  it('omits the block for an empty variables map', () => {
+    // The common shape: NodePalette seeds `variables: {}` on every new Prompt
+    // node, so without the length guard every exported document would carry an
+    // empty heading.
+    expect(promptSection({})).not.toContain('**Available variables:**');
+  });
+
+  it('lists a declared variable with its mustache placeholder and value', () => {
+    const section = promptSection({ lang: 'TypeScript' });
+    expect(section).toContain('**Available variables:**');
+    expect(section).toContain('- `{{lang}}`: TypeScript');
+  });
+
+  it('preserves declaration order across several variables', () => {
+    // Insertion order is what the user sees in the property panel; a reordering
+    // makes two exports of the same workflow differ for no reason.
+    const section = promptSection({ lang: 'TypeScript', target: 'node', style: 'concise' });
+    const order = ['lang', 'target', 'style'].map((k) => section.indexOf(`- \`{{${k}}}\`:`));
+    expect(order.every((i) => i > -1)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+
+  it('renders an unset value as (not set) rather than as an empty line', () => {
+    // A declared-but-empty variable is the state a user leaves the panel in
+    // most often; silently emitting a blank tells the agent nothing.
+    expect(promptSection({ region: '' })).toContain('- `{{region}}`: (not set)');
+  });
+
+  it('CURRENT BEHAVIOUR (bug #1064): a newline in a value breaks the list item apart', () => {
+    // The value is interpolated raw into a Markdown list item, so its second
+    // line stops being part of the item and becomes document prose. Same root
+    // cause as the fences above; recorded here so a fix to #1064 that only
+    // widens fences is visibly incomplete.
+    const section = promptSection({ note: 'first\nsecond' });
+    expect(section).toContain('- `{{note}}`: first');
+    expect(topLevelLines(section)).toContain('second');
+  });
+
+  it('CURRENT BEHAVIOUR: a backtick or a pipe in a value is emitted raw', () => {
+    // Observed, not demanded. A backtick unbalances the inline code span that
+    // renders the placeholder, and a pipe would split the row if this block
+    // ever became a table. Neither corrupts the document today.
+    const section = promptSection({ tick: 'x`y', pipe: 'a|b' });
+    expect(section).toContain('- `{{tick}}`: x`y');
+    expect(section).toContain('- `{{pipe}}`: a|b');
+  });
+
+  it('CURRENT BEHAVIOUR: advertises a key the placeholder syntax cannot match', () => {
+    // The zod field is `z.record(z.string(), z.string())`, so any key is
+    // accepted, but the webview's placeholder detector
+    // (packages/vscode/src/webview/src/utils/template-utils.ts:14,
+    // `/\{\{(\w+)\}\}/g`) only ever matches `\w`-only names. So the exported
+    // document can advertise `{{my-var}}` as available while nothing in the
+    // product can ever bind it. A consistency gap, pinned rather than judged.
+    expect(promptSection({ 'my-var': 'value' })).toContain('- `{{my-var}}`: value');
+  });
+});
