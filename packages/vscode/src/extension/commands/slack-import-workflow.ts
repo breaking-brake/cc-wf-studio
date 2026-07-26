@@ -3,8 +3,6 @@
  *
  * Handles IMPORT_WORKFLOW_FROM_SLACK messages from Webview.
  * Downloads workflow file from Slack, validates, and saves to local filesystem.
- *
- * Based on specs/001-slack-workflow-sharing/contracts/extension-host-api-contracts.md
  */
 
 import * as path from 'node:path';

@@ -2,7 +2,6 @@
  * Processing Overlay Component
  *
  * Displays a semi-transparent overlay to block user interactions during AI processing.
- * Based on: /specs/001-ai-workflow-refinement/tasks.md Phase 3.10
  */
 
 interface ProcessingOverlayProps {

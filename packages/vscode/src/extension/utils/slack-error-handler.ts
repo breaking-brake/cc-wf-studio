@@ -3,8 +3,6 @@
  *
  * Provides unified error handling for Slack API operations.
  * Maps Slack API errors to i18n translation keys.
- *
- * Based on specs/001-slack-workflow-sharing/contracts/slack-api-contracts.md
  */
 
 /**

@@ -2,7 +2,6 @@
  * Message Input Component
  *
  * Text input area with send button and character counter for refinement requests.
- * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.2
  * Updated: Phase 3.2 - Added progress bar during processing
  * Updated: Phase 3.7 - Removed progress bar (moved to message bubble)
  * Updated: Controlled Component - Accept input state from props

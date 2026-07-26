@@ -3,8 +3,6 @@
  *
  * Detects and masks sensitive information (API keys, tokens, passwords, etc.)
  * in workflow JSON files before sharing to Slack.
- *
- * Based on specs/001-slack-workflow-sharing/data-model.md
  */
 
 import { type SensitiveDataFinding, SensitiveDataType } from '../types/slack-integration-types';

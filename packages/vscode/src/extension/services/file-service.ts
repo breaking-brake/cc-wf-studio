@@ -2,7 +2,6 @@
  * Claude Code Workflow Studio - File Service
  *
  * Handles file system operations using VSCode workspace.fs API
- * Based on: /specs/001-cc-wf-studio/contracts/vscode-extension-api.md section 2
  */
 
 import * as path from 'node:path';

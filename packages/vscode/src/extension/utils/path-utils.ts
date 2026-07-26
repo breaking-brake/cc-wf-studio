@@ -3,8 +3,6 @@
  *
  * Feature: 001-skill-node
  * Purpose: Handle Windows/Unix path differences for Skill directories
- *
- * Based on: specs/001-skill-node/research.md Section 3
  */
 
 import os from 'node:os';

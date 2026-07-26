@@ -4,7 +4,6 @@
  * Feature: 001-mcp-node
  * Purpose: Validate MCP tool parameter values against schema constraints
  *
- * Based on: specs/001-mcp-node/plan.md Section 6.3
  * Task: T037
  *
  * Note: This is a client-side validator for immediate UI feedback.

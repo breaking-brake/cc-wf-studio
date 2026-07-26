@@ -7,8 +7,6 @@
  * - 出力接続のみ持つ（入力接続は持たない）
  * - ワークフローの開始点を視覚的に明示
  * - カスタムラベルをサポート
- *
- * Based on: /specs/001-node-types-extension/quickstart.md
  */
 
 import { Play } from 'lucide-react';

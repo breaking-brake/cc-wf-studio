@@ -2,7 +2,6 @@
  * Slack Integration Data Models
  *
  * This file defines TypeScript types for Slack integration feature.
- * Based on specs/001-slack-workflow-sharing/data-model.md
  */
 
 // ============================================================================

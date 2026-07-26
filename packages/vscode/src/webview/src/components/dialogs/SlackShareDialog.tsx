@@ -4,8 +4,6 @@
  * Dialog for sharing workflow to Slack channels.
  * Includes channel selection and sensitive data warning handling.
  * Description is taken from the DescriptionPanel (workflowDescription in store).
- *
- * Based on specs/001-slack-workflow-sharing/plan.md
  */
 
 import * as Dialog from '@radix-ui/react-dialog';

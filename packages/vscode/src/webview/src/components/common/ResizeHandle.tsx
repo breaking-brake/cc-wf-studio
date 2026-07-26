@@ -2,7 +2,6 @@
  * Resize Handle Component
  *
  * Draggable vertical line for resizing sidebar panels.
- * Based on: /specs/001-ai-workflow-refinement/tasks.md Phase 3.3
  */
 
 import type React from 'react';

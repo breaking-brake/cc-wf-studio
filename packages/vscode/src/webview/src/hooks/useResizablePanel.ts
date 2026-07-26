@@ -2,7 +2,6 @@
  * Resizable Panel Custom Hook
  *
  * Provides drag-to-resize functionality for sidebar panels.
- * Based on: /specs/001-ai-workflow-refinement/tasks.md Phase 3.3
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';

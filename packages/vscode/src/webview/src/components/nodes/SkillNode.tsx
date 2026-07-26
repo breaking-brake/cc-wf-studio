@@ -3,8 +3,6 @@
  *
  * Feature: 001-skill-node
  * Purpose: Display and edit Skill nodes on the React Flow canvas
- *
- * Based on: specs/001-skill-node/design.md Section 6.1
  */
 
 import type { SkillNodeData } from '@cc-wf-studio/core';

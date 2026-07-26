@@ -2,7 +2,6 @@
  * Workflow Refinement Service
  *
  * Handles AI-assisted workflow refinement requests to the Extension Host.
- * Based on: /specs/001-ai-workflow-refinement/tasks.md T009
  */
 
 import type { ConversationHistory, Workflow } from '@cc-wf-studio/core';

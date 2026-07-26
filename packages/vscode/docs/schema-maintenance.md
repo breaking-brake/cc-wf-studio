@@ -210,6 +210,5 @@ When making schema changes, verify:
 ## Questions?
 
 For questions or issues with schema maintenance, refer to:
-- Design doc: `/specs/001-ai-workflow-generation/plan.md`
 - Type definitions: `src/shared/types/workflow-definition.ts`
 - Validation logic: `src/extension/utils/validate-workflow.ts`

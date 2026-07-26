@@ -3,8 +3,6 @@
  *
  * Handles SHARE_WORKFLOW_TO_SLACK messages from Webview.
  * Implements workflow sharing with sensitive data detection and warning flow.
- *
- * Based on specs/001-slack-workflow-sharing/contracts/extension-host-api-contracts.md
  */
 
 import * as vscode from 'vscode';

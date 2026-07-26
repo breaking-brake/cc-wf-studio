@@ -3,8 +3,6 @@
  *
  * Feature: 001-ai-skill-generation
  * Purpose: Calculate relevance scores between user descriptions and Skills using keyword matching
- *
- * Based on: specs/001-ai-skill-generation/data-model.md (Keyword Matching Algorithm)
  */
 
 import type { SkillReference } from '../../shared/types/messages';

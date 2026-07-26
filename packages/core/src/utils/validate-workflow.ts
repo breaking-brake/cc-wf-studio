@@ -2,7 +2,6 @@
  * Workflow Validation Utility
  *
  * Validates AI-generated workflows against schema rules.
- * Based on: /specs/001-ai-workflow-generation/research.md Q3
  */
 
 import { NODE_PROPERTY_SCHEMAS } from '../schema/node-schema-registry.js';
@@ -614,8 +613,6 @@ export function validateSubAgentFlow(subAgentFlow: SubAgentFlow): ValidationErro
 
 /**
  * Validate Skill node structure and fields
- *
- * Based on: /specs/001-ai-skill-generation/contracts/skill-scanning-api.md Section 5.1
  *
  * @param node - Skill node to validate
  * @returns Array of validation errors (T024-T025)

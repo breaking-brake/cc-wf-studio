@@ -3,8 +3,6 @@
  *
  * Validates workflow JSON files downloaded from Slack.
  * Ensures required fields exist and structure is valid before import.
- *
- * Based on specs/001-slack-workflow-sharing/contracts/extension-host-api-contracts.md
  */
 
 import type { Workflow } from '../types/workflow-definition.js';

@@ -2,7 +2,6 @@
  * Message Bubble Component
  *
  * Displays a single message in the refinement chat.
- * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.2
  * Updated: Phase 3.7 - Added loading state for AI messages
  * Updated: Phase 3.8 - Added error state display
  */

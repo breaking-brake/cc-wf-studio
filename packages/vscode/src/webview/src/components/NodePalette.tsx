@@ -2,7 +2,6 @@
  * Claude Code Workflow Studio - Node Palette Component
  *
  * Draggable node templates for Sub-Agent and AskUserQuestion nodes
- * Based on: /specs/001-cc-wf-studio/plan.md
  */
 
 import type { BuiltInSubAgentType, SubAgentFlow, SubAgentModel } from '@cc-wf-studio/core';

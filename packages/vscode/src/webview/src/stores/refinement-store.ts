@@ -2,7 +2,6 @@
  * Claude Code Workflow Studio - Refinement State Store
  *
  * Zustand store for managing AI-assisted workflow refinement chat state
- * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.1
  */
 
 import type { ConversationHistory, ConversationMessage } from '@cc-wf-studio/core';

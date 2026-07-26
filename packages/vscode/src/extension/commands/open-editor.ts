@@ -2,7 +2,6 @@
  * CC Workflow Studio - Open Editor Command
  *
  * Creates and manages the Webview panel for the workflow editor
- * Based on: /specs/001-cc-wf-studio/contracts/vscode-extension-api.md section 1.1
  */
 
 import * as crypto from 'node:crypto';

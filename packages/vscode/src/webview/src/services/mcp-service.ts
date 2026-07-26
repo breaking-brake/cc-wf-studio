@@ -3,8 +3,6 @@
  *
  * Feature: 001-mcp-node
  * Purpose: Request MCP operations from Extension Host
- *
- * Based on: specs/001-mcp-node/contracts/extension-webview-messages.schema.json
  */
 
 import type {

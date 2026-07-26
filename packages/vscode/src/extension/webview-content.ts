@@ -2,7 +2,6 @@
  * CC Workflow Studio - Webview HTML Generator
  *
  * Generates the HTML content for the Webview panel
- * Based on: /specs/001-cc-wf-studio/contracts/vscode-extension-api.md section 4.2
  */
 
 import * as fs from 'node:fs';

@@ -3,7 +3,6 @@
  *
  * Displays a semi-transparent overlay without any message.
  * Used for blocking interactions in areas like Node Palette during AI processing.
- * Based on: /specs/001-ai-workflow-refinement/tasks.md Phase 3.10
  */
 
 interface SimpleOverlayProps {

@@ -3,8 +3,6 @@
  *
  * Feature: 001-skill-node
  * Purpose: Validate CreateSkillPayload before submission
- *
- * Based on: specs/001-skill-node/data-model.md Section "CreateSkillPayload Validation"
  */
 
 export interface SkillValidationErrors {

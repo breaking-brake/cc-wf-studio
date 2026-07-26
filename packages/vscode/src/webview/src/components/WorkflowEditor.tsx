@@ -2,7 +2,6 @@
  * Claude Code Workflow Studio - Workflow Editor Component
  *
  * Main React Flow canvas for visual workflow editing
- * Based on: /specs/001-cc-wf-studio/research.md section 3.4
  */
 
 import { PanelLeftOpen } from 'lucide-react';
@@ -51,7 +50,6 @@ import { StartMenu } from './StartMenu';
 
 /**
  * Node types registration (memoized outside component for performance)
- * Based on: /specs/001-cc-wf-studio/research.md section 3.1
  *
  * 新規ノードタイプ (Start, End, Prompt, Branch) は実装後にコメント解除
  */
@@ -204,8 +202,6 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
   /**
    * 接続制約の検証
-   *
-   * Based on: /specs/001-node-types-extension/research.md section 3
    *
    * @param connection - 検証対象の接続
    * @returns 接続が有効な場合true

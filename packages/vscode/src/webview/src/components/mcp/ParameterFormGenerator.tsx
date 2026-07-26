@@ -4,7 +4,6 @@
  * Feature: 001-mcp-node
  * Purpose: Dynamically generate parameter input forms based on tool schema
  *
- * Based on: specs/001-mcp-node/plan.md Section 6.3
  * Task: T031
  */
 

@@ -2,7 +2,6 @@
  * Claude Code Workflow Studio - Vite Configuration
  *
  * Vite build configuration for the Webview UI
- * Based on: /specs/001-cc-wf-studio/plan.md
  */
 
 import { resolve } from 'node:path';

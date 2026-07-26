@@ -2,7 +2,6 @@
  * Error message mapping utilities
  *
  * Maps error codes to user-friendly error messages and retry eligibility.
- * Based on: /specs/001-ai-workflow-refinement/tasks.md Phase 3.8
  */
 
 import type { WebviewTranslationKeys } from '../i18n/translation-keys';

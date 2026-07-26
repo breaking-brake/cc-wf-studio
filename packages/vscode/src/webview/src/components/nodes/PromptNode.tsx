@@ -7,8 +7,6 @@
  * - 入力・出力の両方の接続を持つ
  * - Mustacheスタイルの変数置換をサポート（{{variableName}}）
  * - プロンプトテンプレートのプレビュー表示
- *
- * Based on: /specs/001-node-types-extension/quickstart.md
  */
 
 import { MessageSquare } from 'lucide-react';

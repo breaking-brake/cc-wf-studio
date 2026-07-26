@@ -25,10 +25,8 @@ src/webview/index.html
 # Keep only webview/dist for runtime
 !src/webview/dist/**
 
-# Development and spec files
-.specify/**
+# Development files
 .claude/**
-specs/**
 poc/**
 
 # Test files

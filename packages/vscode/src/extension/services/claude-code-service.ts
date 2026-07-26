@@ -2,7 +2,6 @@
  * Claude Code CLI Service
  *
  * Executes Claude Code CLI commands for AI-assisted workflow generation.
- * Based on: /specs/001-ai-workflow-generation/research.md Q1
  *
  * Updated to use nano-spawn for cross-platform compatibility (Windows/Unix)
  * See: Issue #79 - Windows environment compatibility

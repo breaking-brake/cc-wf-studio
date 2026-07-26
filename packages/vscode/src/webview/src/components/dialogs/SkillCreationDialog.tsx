@@ -3,8 +3,6 @@
  *
  * Feature: 001-skill-node
  * Purpose: Create new Claude Code Skills from the visual editor
- *
- * Based on: specs/001-skill-node/tasks.md T022
  */
 
 import * as Dialog from '@radix-ui/react-dialog';

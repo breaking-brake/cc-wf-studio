@@ -3,8 +3,6 @@
  *
  * Feature: 001-skill-node
  * Purpose: Scan, validate, and create SKILL.md files
- *
- * Based on: specs/001-skill-node/research.md Section 2
  */
 
 import fs from 'node:fs/promises';

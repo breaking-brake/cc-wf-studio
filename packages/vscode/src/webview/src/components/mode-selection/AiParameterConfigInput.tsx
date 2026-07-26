@@ -3,8 +3,6 @@
  *
  * Feature: 001-mcp-natural-language-mode
  * Purpose: Text area for entering parameter description in AI Parameter Config Mode
- *
- * Based on: specs/001-mcp-natural-language-mode/tasks.md T015, T035
  */
 
 import { useState } from 'react';

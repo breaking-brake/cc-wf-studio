@@ -4,7 +4,6 @@
  * Feature: 001-mcp-node
  * Purpose: Display list of available MCP servers with selection capability
  *
- * Based on: specs/001-mcp-node/plan.md Section 6.2
  * Task: T022
  */
 

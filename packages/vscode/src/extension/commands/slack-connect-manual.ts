@@ -5,8 +5,6 @@
  * Users manually create Slack App and provide User Token only.
  * Workspace ID and Workspace Name are automatically retrieved via auth.test API.
  * Author name comes from git config (not Slack user).
- *
- * Based on specs/001-slack-workflow-sharing/tasks.md Phase 8
  */
 
 import { WebClient } from '@slack/web-api';

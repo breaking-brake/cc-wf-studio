@@ -1,7 +1,5 @@
 /**
  * Claude Code Workflow Studio - Extension ↔ Webview Message Types
- *
- * Based on: /specs/001-cc-wf-studio/contracts/extension-webview-api.md
  */
 
 import type {

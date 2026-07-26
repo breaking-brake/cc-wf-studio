@@ -2,7 +2,6 @@
  * Warning Banner Component
  *
  * Displays a warning message when iteration count reaches 20 or more.
- * Based on: /specs/001-ai-workflow-refinement/spec.md FR-011
  */
 
 import { useResponsiveFonts } from '../../contexts/ResponsiveFontContext';

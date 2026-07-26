@@ -7,8 +7,6 @@
  * - 入力接続のみ持つ（出力接続は持たない）
  * - ワークフローの終了点を視覚的に明示
  * - カスタムラベルをサポート
- *
- * Based on: /specs/001-node-types-extension/quickstart.md
  */
 
 import { Square } from 'lucide-react';

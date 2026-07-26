@@ -4,7 +4,6 @@
  * Feature: 001-mcp-node
  * Purpose: Display and edit MCP nodes on the React Flow canvas
  *
- * Based on: specs/001-mcp-node/plan.md Section 6.3
  * Task: T027
  */
 

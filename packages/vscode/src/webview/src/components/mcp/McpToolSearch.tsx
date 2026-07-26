@@ -4,7 +4,6 @@
  * Feature: 001-mcp-node
  * Purpose: Search input for filtering MCP tools
  *
- * Based on: specs/001-mcp-node/plan.md Section 6.2
  * Task: T024
  */
 

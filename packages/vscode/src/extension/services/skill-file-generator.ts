@@ -3,8 +3,6 @@
  *
  * Feature: 001-skill-node
  * Purpose: Generate SKILL.md file content from CreateSkillPayload
- *
- * Based on: specs/001-skill-node/tasks.md T025
  */
 
 import type { CreateSkillPayload } from '../../shared/types/messages';

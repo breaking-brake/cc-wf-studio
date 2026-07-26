@@ -2,7 +2,6 @@
  * Workflow Refinement Command Handler
  *
  * Handles REFINE_WORKFLOW and CLEAR_CONVERSATION messages from Webview.
- * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 2.2
  */
 
 import type { ConversationMessage } from '@cc-wf-studio/core';

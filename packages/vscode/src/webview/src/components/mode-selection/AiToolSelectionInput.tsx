@@ -3,8 +3,6 @@
  *
  * Feature: 001-mcp-natural-language-mode
  * Purpose: Text area for entering task description in AI Tool Selection Mode
- *
- * Based on: specs/001-mcp-natural-language-mode/tasks.md T014, T047
  */
 
 import { useState } from 'react';

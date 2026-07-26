@@ -2,7 +2,6 @@
  * Claude Code Workflow Studio - Error Notification Component
  *
  * Displays error messages from Extension
- * Based on: /specs/001-cc-wf-studio/contracts/extension-webview-api.md section 1.4
  */
 
 import type { ErrorPayload } from '@shared/types/messages';

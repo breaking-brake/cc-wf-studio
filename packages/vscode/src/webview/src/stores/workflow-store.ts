@@ -2,7 +2,6 @@
  * Claude Code Workflow Studio - Workflow State Store
  *
  * Zustand store for managing workflow state (nodes and edges)
- * Based on: /specs/001-cc-wf-studio/research.md section 3.4
  */
 
 import type {

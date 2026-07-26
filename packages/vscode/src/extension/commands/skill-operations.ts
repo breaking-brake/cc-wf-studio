@@ -3,8 +3,6 @@
  *
  * Feature: 001-skill-node
  * Purpose: Handle Webview requests for Skill browsing, creation, and validation
- *
- * Based on: specs/001-skill-node/contracts/skill-messages.ts
  */
 
 import * as vscode from 'vscode';

@@ -2,7 +2,6 @@
  * Message List Component
  *
  * Displays the conversation history with auto-scroll to bottom.
- * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.2
  * Updated: Phase 3.8 - Added retry handler support
  * Updated: Phase 3.12 - Added initial instructional message
  * Updated: Controlled Component - Accept conversationHistory from props

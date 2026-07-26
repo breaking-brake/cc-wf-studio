@@ -3,7 +3,6 @@
  *
  * Reusable progress bar for AI processing indication.
  * Used in message bubbles during AI refinement.
- * Based on: /specs/001-ai-workflow-refinement/tasks.md Phase 3.7 (T074)
  */
 
 import { useEffect, useState } from 'react';

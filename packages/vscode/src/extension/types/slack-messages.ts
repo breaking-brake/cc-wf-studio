@@ -2,7 +2,6 @@
  * Slack Integration Message Passing Types
  *
  * Defines message contracts between Webview UI and Extension Host.
- * Based on specs/001-slack-workflow-sharing/contracts/extension-host-api-contracts.md
  */
 
 import type {

@@ -2,7 +2,6 @@
  * Claude Code Workflow Studio - Main App Component
  *
  * Root component for the Webview UI with 3-column layout
- * Based on: /specs/001-cc-wf-studio/plan.md
  */
 
 import * as Collapsible from '@radix-ui/react-collapsible';

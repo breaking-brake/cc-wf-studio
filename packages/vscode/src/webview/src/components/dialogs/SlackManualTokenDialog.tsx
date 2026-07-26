@@ -4,8 +4,6 @@
  * Dialog for connecting to Slack workspace with two options:
  * - OAuth: One-click authentication via browser
  * - Manual Token: Enter User Token manually
- *
- * Based on specs/001-slack-workflow-sharing OAuth implementation plan
  */
 
 import * as Dialog from '@radix-ui/react-dialog';

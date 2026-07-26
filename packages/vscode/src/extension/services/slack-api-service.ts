@@ -3,8 +3,6 @@
  *
  * Provides high-level interface to Slack Web API.
  * Handles authentication, error handling, and response parsing.
- *
- * Based on specs/001-slack-workflow-sharing/contracts/slack-api-contracts.md
  */
 
 import { WebClient } from '@slack/web-api';

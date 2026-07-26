@@ -3,8 +3,6 @@
  *
  * Builds rich message blocks for Slack using Block Kit format.
  * Used for displaying workflow metadata in Slack channels.
- *
- * Based on specs/001-slack-workflow-sharing/contracts/slack-api-contracts.md
  */
 
 /**

@@ -4,8 +4,6 @@
  * Feature: 001-mcp-node
  * Purpose: Handle Webview requests for MCP server and tool operations
  *
- * Based on: specs/001-mcp-node/contracts/extension-webview-messages.schema.json
- *
  * Feature: 001-mcp-natural-language-mode
  * Enhancement: T046 - Updated handleGetMcpTools to use getTools() with built-in caching
  */

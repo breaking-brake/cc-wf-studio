@@ -3,8 +3,6 @@
  *
  * Handles communication with Extension Host for Slack-related operations.
  * Provides high-level APIs for workflow sharing, importing, and searching.
- *
- * Based on: specs/001-slack-workflow-sharing/contracts/extension-host-api-contracts.md
  */
 
 import type { ExtensionMessage, Workflow } from '@shared/types/messages';

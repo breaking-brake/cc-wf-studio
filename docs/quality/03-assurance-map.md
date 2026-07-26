@@ -74,34 +74,39 @@ which should be verifiable as plain functions without rendering React
 
 ### The limit of S2 — "specification" means different things per target
 
-**The 8 targets are not symmetric.** The survey found this asymmetry:
+**No target has an independent specification in this repository.**
 
 | Target | Independent spec? | Reality |
 |---|---|---|
-| Claude Code | **Yes** | `packages/vscode/specs/001-cc-wf-studio/spec.md` — a pre-implementation spec-kit document specifying each frontmatter field and the naming rules in detail |
+| Claude Code | **No** | The generators in `core/services/workflow-export.ts` are the only statement of the sub-agent and slash-command file formats |
 | The other 7 (Copilot / Codex / Cursor / Gemini / Antigravity / Zoo Code / Copilot CLI) | **No** | `core/services/agent-skill-export.ts`'s `generateAgentSkillContent` is a single generator applying one identical format (Mermaid + instructions + YAML frontmatter `SKILL.md`) to all of them |
 
-**Even on the Claude Code side, taking the spec as ground truth is unsafe.**
-Comparing `spec.md` against the current schema turned up a mismatch in the
-allowed values of the `model` field (the spec lists only
-`sonnet`/`opus`/`haiku`, while the schema now carries `CC_ONLY_MODELS` —
-`haiku`, `fable`). **The spec has not kept up with the implementation.** Using
-it as the expected answer would reproduce the same problem as S1: pinning
-something wrong in place, wrongly.
+**An earlier revision of this document rated Claude Code "Yes"**, pointing at
+`packages/vscode/specs/001-cc-wf-studio/spec.md` — a spec-kit document from
+the pre-implementation phase. That rating was wrong, and acting on it would
+have been actively harmful: the document was a `Status: Draft` MVP plan from
+2025-11-01 that the implementation has long since overtaken. It states, for
+example, that cycle detection is deliberately *not* implemented, while
+`validate-workflow.ts` detects cycles today and
+`workflow-overview-formatter.ts` is tested for cycle tolerance. Writing tests
+against it would have pinned the opposite of the current behavior as the
+expected answer.
 
-S2 therefore splits in two.
+The whole `packages/vscode/specs/` tree (and the orphaned `.specify/`
+tooling beside it) has therefore been **deleted**, along with the 89
+`Based on: /specs/…` comments in `packages/*/src` that pointed into it. The
+history is in git if a decision record is ever needed. The reasoning is the
+asymmetry in how the two options fail: a **missing** reference fails loudly,
+and the reader falls back to the code; a **stale** reference fails silently,
+and the reader believes it. Marking the tree "non-normative" in a README
+would only have worked on readers who happened to open the README — not on
+anyone who followed a `Based on:` comment straight into a spec file.
 
-**Claude Code artifacts (checked against `spec.md`)**: on the assumption the
-spec may be behind, **a human must bring `spec.md` up to date before the
-tests are written.** Against a revised spec, checking the generator is
-meaningful.
-
-**The other 7 targets (internal consistency of the shared generator)**: with
-no independent spec, whether the format matches what each tool actually
-expects **cannot be verified from inside this repository** (doing so would
-need integration tests that run each tool, or transcribing each vendor's
-official documentation into a spec — both separate projects). Only two things
-are testable here:
+**So S2 treats all 8 targets identically.** Whether the emitted format
+matches what each tool actually expects **cannot be verified from inside this
+repository** (doing so would need integration tests that run each tool, or
+transcribing each vendor's official documentation into a spec — both separate
+projects). Only two things are testable here:
 
 1. **Internal consistency of the shared generator** — that every target
    produces a structurally sound `SKILL.md` from the same input (valid YAML
@@ -227,7 +232,7 @@ The five issues filed earlier, judged against this design:
 |---|---|---|
 | #993 | vitest foundation + CI gate | **Matches S0.** Add connecting the MCP smoke test to CI |
 | #994 | core workflow validation | **Corresponds to S1 but needed rewriting.** The original text ("each node type accepts its valid shape and rejects the wrong one") was a transcription of the schema. Replaced with S1's four points |
-| #995 | core Mermaid / Markdown generation | **Part of S2 but needed rewriting.** Generation stays in scope, but the claim to assure "the 8 target formats" was wrong (no means of verification). Split into the Claude Code path (gated on revising `spec.md`) and the other 7 (internal consistency + README path agreement) |
+| #995 | core Mermaid / Markdown generation | **Part of S2 but needed rewriting.** Generation stays in scope, but the claim to assure "the 8 target formats" was wrong (no means of verification). Rescoped to internal consistency + README path agreement, applied uniformly to all 8 targets |
 | #999 | `ccwf validate` discovery and exit codes | **Out of scope.** Its subject (multi-file discovery, `--strict`) is an `auto-dev` feature. Only the exit-code contract moves to S4 |
 | #1000 | `patch_workflow` structural edits | **Out of scope.** `patch_workflow` itself is an `auto-dev` feature. Revive on promotion |
 
@@ -236,11 +241,12 @@ when `auto-dev` is promoted (leaving them open makes every implementation
 iteration pick them up and reject them at premise verification, burning a run
 each time). #994 and #995 were rewritten to the scopes above.
 
-**Prerequisite**: before starting the Claude Code half of #995, a human must
-revise the Export Format Details section of
-`packages/vscode/specs/001-cc-wf-studio/spec.md` (the allowed `model` values,
-among others) to match the current schema. Writing tests against a stale spec
-pins the stale spec as the answer.
+**#995 is no longer blocked.** It previously carried a prerequisite — that a
+human revise `packages/vscode/specs/001-cc-wf-studio/spec.md` before the
+Claude Code half could be written. That spec has been deleted (see "The limit
+of S2"), so the prerequisite is void and the issue's remaining item reduces to
+the same scope as the other targets: internal consistency of the generator
+plus agreement with the paths the README claims.
 
 New issues are needed for S3, S4, S5, S6 and S7 — five in all. But the `qa`
 queue's back-pressure limit is three, so they don't all get filed at once.
@@ -259,10 +265,11 @@ following.**
   tests would only transcribe it. What is verifiable is the **consistency**
   between the two schema representations; the merits of the content are for
   usage and human review to judge (see "The limit of S1" in section 2)
-- **Whether the 7 non-Claude target formats match what each tool expects** —
-  no independent specification exists anywhere in the repository. What can be
-  protected ends at the shared generator's internal consistency; conformance
-  with the external tool cannot be guaranteed (see "The limit of S2")
+- **Whether any of the 8 target formats match what each tool expects** —
+  no independent specification exists anywhere in the repository, Claude Code
+  included. What can be protected ends at the generator's internal
+  consistency; conformance with the external tool cannot be guaranteed (see
+  "The limit of S2")
 - **Rendering and interaction** (canvas appearance, dragging, panel
   open/close, minimap, search UI, onboarding, i18n strings) — noticed at once
   and recoverable

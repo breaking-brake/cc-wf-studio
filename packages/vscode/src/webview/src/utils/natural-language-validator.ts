@@ -3,8 +3,6 @@
  *
  * Feature: 001-mcp-natural-language-mode
  * Purpose: Validate natural language input for AI Parameter Config and AI Tool Selection modes
- *
- * Based on: specs/001-mcp-natural-language-mode/tasks.md T034
  */
 
 import { useEffect, useState } from 'react';

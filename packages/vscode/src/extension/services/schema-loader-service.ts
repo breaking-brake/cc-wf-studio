@@ -3,7 +3,6 @@
  *
  * Loads and caches the workflow schema documentation for AI context.
  * Supports both JSON and TOON formats for A/B testing.
- * Based on: /specs/001-ai-workflow-generation/research.md Q2
  */
 
 import * as fs from 'node:fs/promises';

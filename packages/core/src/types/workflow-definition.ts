@@ -1,7 +1,5 @@
 /**
  * Claude Code Workflow Studio - Workflow Definition Types
- *
- * Based on: /specs/001-cc-wf-studio/data-model.md
  */
 
 import type { SubAgentModel } from '../schema/nodes/sub-agent-schema.js';
@@ -539,7 +537,6 @@ export interface Connection {
  * Individual conversation message
  *
  * Represents a single message in the conversation history.
- * Based on: /specs/001-ai-workflow-refinement/data-model.md
  */
 export interface ConversationMessage {
   /** Message ID (UUID v4) */
@@ -574,7 +571,6 @@ export interface ConversationMessage {
  * Conversation history for workflow refinement
  *
  * Stores the entire conversation history associated with a workflow.
- * Based on: /specs/001-ai-workflow-refinement/data-model.md
  */
 export interface ConversationHistory {
   /** Schema version (for future migrations) */

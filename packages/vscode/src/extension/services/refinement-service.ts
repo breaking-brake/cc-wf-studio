@@ -2,7 +2,6 @@
  * Workflow Refinement Service
  *
  * Executes AI-assisted workflow refinement based on user feedback and conversation history.
- * Based on: /specs/001-ai-workflow-refinement/quickstart.md
  */
 
 import {

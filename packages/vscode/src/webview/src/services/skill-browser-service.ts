@@ -3,8 +3,6 @@
  *
  * Feature: 001-skill-node
  * Purpose: Request Skill operations from Extension Host
- *
- * Based on: specs/001-skill-node/contracts/skill-messages.ts
  */
 
 import type {

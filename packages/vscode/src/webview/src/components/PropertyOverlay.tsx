@@ -2,7 +2,6 @@
  * Claude Code Workflow Studio - Property Overlay Component
  *
  * Property editor for selected nodes (displayed as overlay on canvas)
- * Based on: /specs/001-cc-wf-studio/plan.md
  * Updated: Phase 3.3 - Added resizable width functionality
  * Updated: Added "Edit in Editor" button for textarea fields
  */

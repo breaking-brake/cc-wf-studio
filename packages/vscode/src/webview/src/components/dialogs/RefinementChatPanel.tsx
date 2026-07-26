@@ -4,7 +4,6 @@
  * Sidebar panel for AI-assisted workflow refinement chat interface.
  * Supports both main workflow and SubAgentFlow editing modes.
  *
- * Based on: /specs/001-ai-workflow-refinement/quickstart.md Section 3.2
  * Updated: Phase 3.1 - Changed from modal dialog to sidebar format
  * Updated: Phase 3.3 - Added resizable width functionality
  * Updated: Phase 3.7 - Added immediate loading message display

@@ -3,8 +3,6 @@
  *
  * Feature: 001-mcp-natural-language-mode
  * Purpose: Step-by-step wizard for creating MCP nodes with mode selection
- *
- * Based on: specs/001-mcp-natural-language-mode/tasks.md T017, T048
  */
 
 import { NodeType } from '@cc-wf-studio/core';

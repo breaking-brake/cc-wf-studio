@@ -2,7 +2,6 @@
  * Claude Code Workflow Studio - VSCode Bridge Service
  *
  * Handles communication between Webview and Extension Host
- * Based on: /specs/001-cc-wf-studio/contracts/extension-webview-api.md section 3
  */
 
 import type {

@@ -4,7 +4,6 @@
  * Feature: 001-mcp-node
  * Purpose: Input component for array-type MCP tool parameters
  *
- * Based on: specs/001-mcp-node/plan.md Section 6.3
  * Task: T035
  */
 

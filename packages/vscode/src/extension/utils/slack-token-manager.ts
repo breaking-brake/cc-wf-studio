@@ -3,8 +3,6 @@
  *
  * Manages Slack OAuth tokens using VSCode Secret Storage.
  * Provides encrypted storage for access tokens and workspace information.
- *
- * Based on specs/001-slack-workflow-sharing/data-model.md
  */
 
 import type { ExtensionContext } from 'vscode';

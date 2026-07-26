@@ -3,8 +3,6 @@
  *
  * Feature: 001-mcp-natural-language-mode
  * Purpose: Display current MCP node mode as a read-only badge
- *
- * Based on: specs/001-mcp-natural-language-mode/tasks.md T016
  */
 
 import type { McpNodeMode } from '@cc-wf-studio/core/mcp';

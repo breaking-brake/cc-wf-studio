@@ -7,8 +7,6 @@
  * `escapeYamlString`, …) live in `@cc-wf-studio/core/services/workflow-export`
  * and are imported here so other VSCode commands keep working off the same
  * public surface.
- *
- * Based on: /specs/001-cc-wf-studio/spec.md Export Format Details
  */
 
 import * as path from 'node:path';

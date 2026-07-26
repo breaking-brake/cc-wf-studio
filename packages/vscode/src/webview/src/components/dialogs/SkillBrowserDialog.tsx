@@ -3,8 +3,6 @@
  *
  * Feature: 001-skill-node
  * Purpose: Browse and select Claude Code Skills to add to workflow
- *
- * Based on: specs/001-skill-node/design.md Section 6.2
  */
 
 import { NodeType, VALIDATION_RULES } from '@cc-wf-studio/core';

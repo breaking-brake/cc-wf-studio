@@ -3,8 +3,6 @@
  *
  * Feature: 001-skill-node
  * Purpose: Parse YAML frontmatter from SKILL.md files without adding new dependencies
- *
- * Based on: specs/001-skill-node/research.md Section 1
  */
 
 /**

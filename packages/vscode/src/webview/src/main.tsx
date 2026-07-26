@@ -4,8 +4,6 @@
  * React 18 root initialization. The `vscode` accessor lives in
  * `./services/vscode-api` so the lightweight `overview.html` entry can reuse it
  * without dragging this canvas bootstrap into its bundle.
- *
- * Based on: /specs/001-cc-wf-studio/plan.md
  */
 
 import React from 'react';
