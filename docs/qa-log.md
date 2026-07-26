@@ -17,6 +17,55 @@ Entry format:
 
 ---
 
+## 2026-07-26 — S6 (sixth slice): entering, leaving and cancelling a Sub-Agent Flow
+- **Protects**: if this breaks, the user opens a Sub-Agent Flow, edits the
+  nested canvas, closes it — and what lands back in the parent workflow is not
+  what they drew. `setActiveSubAgentFlowId` is the **only** writer of nested
+  flow contents into `subAgentFlows`, which is written straight to disk
+  (`workflow-service.ts:98`) and read by every exporter, so a lossy round trip
+  corrupts the saved file *and* every generated artifact — and the canvas shown
+  after closing the dialog is the corrupted version, so nothing surfaces it.
+- **Issue/PR**: #1041 / PR from `claude/qa-sub-agent-flow-enter-exit`
+- **Outcome**: done — 19 passing cases in a new sibling suite,
+  `packages/vscode/src/webview/src/stores/workflow-store-sub-agent-flow.test.ts`.
+  **No product source changed.** Notes:
+  - No new infrastructure: fifth store suite under the webview
+    `vitest.config.ts` that landed with #1014. The action's *conversions* had
+    **no coverage at all** before this — the two existing references
+    (`workflow-store-history.test.ts:398,418`) drive it only to assert the
+    undo/redo stacks. Those are deliberately **not** re-asserted here.
+  - Sections follow the three transitions plus the two related actions:
+    **A** enter (canvas conversion, snapshot by content, both halves of
+    `isNewSubAgentFlow`, and the not-found early return asserted by identity),
+    **B** exit (write-back into the matching entry *only*, `name` falling back
+    to the node id, the `'default'` port fallback, both branches of `hasRef`
+    with the count asserted each way), **C** switch (save-then-load, and the
+    snapshot surviving so the later exit still restores the parent),
+    **D** cancel, **E** `removeSubAgentFlow` while the flow is open.
+  - One asymmetry pinned that the history suite does not reach: the not-found
+    early return at `:1136` is the single path that skips the
+    `temporal.clear()` at `:1351`, so a failed open leaves undo intact.
+  - Two divergences pinned as observed rather than judged: the exit conversion
+    defaults ports to `'default'` where `serializeWorkflow` uses
+    `'output'`/`'input'`, and an unknown *switch* target commits the save-back
+    before bailing out (unlike the atomic no-op on enter).
+  - Verified the suite bites by hand-mutating five things and reverting each:
+    the `isNewSubAgentFlow` predicate (3 named failures), the `hasRef` check
+    (2), the `|| 'default'` port fallback (1), the `snapshot.isNewSubAgentFlow`
+    guard (1), and the `mainWorkflowSnapshot: null` reset (4).
+- **Bugs filed**: **#1042** — both conversion directions are hand-written field
+  lists instead of reuses of `deserializeWorkflow`/`serializeWorkflow`, so
+  `parentId`, `style` and `Connection.condition` fall out. A group created
+  inside a nested flow, its children's membership, and a branch condition are
+  therefore destroyed by merely opening and closing the editor — the same class
+  of defect as #1039, in a different function. Landed as three **passing**
+  `CURRENT BEHAVIOUR (bug #1042)` cases per the #1031/#1039 precedent, so the
+  suite is green today and goes red when the feature loop fixes it; those
+  assertions must be **inverted**, not un-skipped.
+- **Residual scope on #1041**: none — every case A1–F was implemented. Items the
+  issue placed out of scope (dialog rendering, the overlap-avoidance geometry
+  beyond one placement assertion) stay on manual E2E.
+
 ## 2026-07-26 — S6 (fifth slice): `setActiveWorkflow`, the canvas load conversion
 - **Protects**: if this breaks, **every** way a workflow reaches the canvas —
   opening a `workflow.json`, an MCP `apply_workflow`, the Slack import, the
