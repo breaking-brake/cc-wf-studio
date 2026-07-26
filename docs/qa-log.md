@@ -17,6 +17,66 @@ Entry format:
 
 ---
 
+## 2026-07-26 — S4 (second slice): the `ccwf validate` / `ccwf render` contract
+- **Protects**: if this breaks, a CI pipeline running `ccwf validate
+  workflow.json` **goes green on a workflow that does not validate** — the
+  build reports success, the broken workflow ships, and the failure surfaces
+  wherever the agent is later run. The exit code is the entire machine-readable
+  surface of that command; nothing else about the run is inspectable.
+- **Issue/PR**: #1036 / PR from `claude/qa-cli-validate-render-contract`
+- **Outcome**: done — 22 passing cases (the issue's 14, with the `md`-bundle
+  equivalence and the two name-fallback shapes split out) across two new
+  suites, `packages/cli/src/commands/validate.test.ts` (13) and
+  `render.test.ts` (9). **No product source changed.** Notes:
+  - No new infrastructure: third and fourth suites under the `packages/cli`
+    `vitest.config.ts` that landed with #1008. Both commands were entirely
+    untested before this — `load-workflow.test.ts` asserts that
+    `WorkflowLoadError` is *constructed* with `exitCode === 2`, which is a
+    different function from the two `catch` blocks that must **map it** to
+    `process.exit(2)` rather than let it escape to `cli.ts:53`'s generic
+    handler (which exits **1**, making a broken file indistinguishable from a
+    failed validation). Those blocks are what section D/E pin.
+  - Neither action closure is exported, so every case drives the command
+    through a fresh `new Command()` with `parseAsync(..., { from: 'user' })`.
+    `process.exit` is stubbed to **throw**, not no-op — the trap recorded for
+    #1006/#1008 — and the helper reports the recorded code, so `render`'s
+    success paths (which never exit) are distinguishable as `undefined`.
+  - **stdout and stderr are captured separately**, because which stream a line
+    lands on is half the contract: `ccwf validate x.json > out.txt` in CI
+    captures the success line but not the error list, so a regression moving
+    the `✗` block to stdout is user-visible and would pass a combined-output
+    assertion. Every case asserts the *other* stream is empty.
+  - The load-bearing case is C4: `--json` on an invalid workflow still exits 1,
+    with the parsed payload and the exit code asserted **in one case** so
+    neither half can pass alone. C5 pins that the `if / else if / else` chain
+    keeps the JSON and human-readable reports mutually exclusive.
+  - A2 asserts the header's `N` equals the number of `  - [` lines actually
+    printed — the count comes from `result.errors.length` and the lines from a
+    separate loop, so "says 3, prints 2" is exactly the silent case.
+  - Render's two formats **share a prefix**, so `--format mermaid` is asserted
+    by **equality** against the generator's block plus one newline, *and* by
+    the explicit absence of `## Workflow Execution Guide`. A bare
+    `toContain('```mermaid')` passes on the `md` bundle too and would have
+    succeeded for the wrong reason (the trap recorded for #1024). Section order
+    is asserted by `indexOf` comparison, not presence, so a reordering
+    regression fails.
+  - **F** pins, as **observed and explicitly not desired**, that a JSON file
+    which parses but is not a workflow kills `render` with a raw `TypeError`
+    from `nodes.filter` — while `validate` handles the identical input
+    gracefully. Per the issue, **no bug filed**: #1008 already flagged the same
+    shape on the `export` path and left it as a feature-track question.
+  - Verified the suites bite by hand-mutating and reverting exactly the five
+    things the issue names: the `result.valid ? 0 : 1` ternary (4 named
+    failures), the `else if (result.valid)` arm (4), the `error.exitCode` in
+    the `catch` (2), the early `return` in the mermaid branch (2), and the
+    `workflow.name || 'Workflow'` fallback (2). Each made a **named**
+    assertion fail.
+- **Bugs filed**: none — all 14 cases landed passing, as the issue predicted.
+- **Out of scope, per the issue**: what `render` *prints* (the generators are
+  #995 / #1024's subject); `ccwf run`'s `NEXT_STEP_HINTS` and `--launch`
+  spawn; and `validate`'s multi-file discovery and `--strict`, which are
+  `auto-dev` features not yet on `main`.
+
 ## 2026-07-26 — S6 (fourth slice): group membership on node drag-stop
 - **Protects**: if this breaks, the user drags a node into a group and the
   canvas draws it inside, but `parentId` is never set — or is set to the wrong
