@@ -40,7 +40,7 @@
   },
   "scripts": {
     "build": "pnpm run generate:toon && tsc",
-    "check": "tsc --noEmit",
+    "check": "tsc --noEmit -p tsconfig.test.json",
     "generate:toon": "tsx scripts/generate-toon-schema.ts",
     "lint": "echo 'core: no lint config yet'",
     "format": "echo 'core: no format config yet'",

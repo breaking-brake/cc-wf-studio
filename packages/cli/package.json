@@ -28,7 +28,7 @@
     "build": "pnpm run sync:webview && pnpm run sync:skills && tsc && chmod +x dist/cli.js",
     "sync:webview": "rm -rf dist/webview && mkdir -p dist/webview && cp -R ../vscode/src/webview/dist/. dist/webview/",
     "sync:skills": "rm -rf dist/skills && mkdir -p dist/skills && cp -R skills/. dist/skills/",
-    "check": "tsc --noEmit",
+    "check": "tsc --noEmit -p tsconfig.test.json",
     "lint": "echo 'cli: no lint config yet'",
     "format": "echo 'cli: no format config yet'",
     "test": "vitest run --passWithNoTests"

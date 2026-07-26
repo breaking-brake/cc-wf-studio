@@ -1,0 +1,15 @@
+// Type-checks the whole package INCLUDING the test files and fixtures that
+// tsconfig.json excludes from the emitting build (so they stay out of the
+// published dist/). Never emits — `pnpm check` runs this, `pnpm build` runs
+// tsconfig.json.
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

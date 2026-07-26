@@ -17,6 +17,48 @@ Entry format:
 
 ---
 
+## 2026-07-26 — Packaging: keep the test suite out of the published dist/
+- **Protects**: if this stays broken, every `@cc-wf-studio/{core,cli,mcp}`
+  tarball ships this loop's test suite, so a consumer's deep import into any
+  of those paths resolves a module that `import`s `vitest` — a devDependency
+  absent from their install — and the `.d.ts` surface carries test modules.
+  Not breakage (nothing reachable from an entry point imports a test), but a
+  sharp edge that grows with every suite the QA loop lands.
+- **Issue/PR**: #1011 / PR from `claude/qa-exclude-tests-from-dist`
+- **Outcome**: done — **no product source changed**; the diff is three
+  `tsconfig.json` files, three new `tsconfig.test.json` files, and the three
+  `check` scripts.
+  - **Premise re-verified and larger than filed.** #1011 measured 29 stray
+    artifacts in `packages/core/dist` alone. A clean `pnpm build` on `auto-qa`
+    HEAD (087445c) emitted **62**, across all three published packages —
+    `core` (22), `cli` (16), `mcp` (12), plus both `__fixtures__` directories.
+    `cli` and `mcp` had acquired the defect exactly as the issue predicted.
+  - **Fix**: `src/**/*.test.ts`, `src/**/*.spec.ts` and `src/**/__fixtures__/**`
+    added to `exclude` in each package's `tsconfig.json` (core's pre-existing
+    `scripts` entry kept). vitest reads `vitest.config.ts`, not `tsconfig.json`,
+    so its `include: ['src/**/*.{test,spec}.ts']` is untouched.
+  - **The trade-off #1011 flagged was taken deliberately as option (b).**
+    Excluding tests from `tsconfig.json` would have stopped `tsc --noEmit`
+    from type-checking them, silently dropping the only static check the test
+    files get. Each package now carries a `tsconfig.test.json` that extends
+    the build config, re-includes everything, and never emits; `check` is
+    `tsc --noEmit -p tsconfig.test.json`. Build and check now read different
+    configs on purpose — that is the whole mechanism, and the comment at the
+    top of each `tsconfig.test.json` says so.
+  - **All three of the issue's "Done when" clauses verified by hand**:
+    a clean `pnpm build` leaves `find packages/*/dist \( -name "*.test.*" -o
+    -path "*__fixtures__*" \)` **empty**; `pnpm test` is green from the root
+    (437 passed, 4 skipped, 21 files); and a deliberate `const x: number =
+    "not a number"` appended to a test file in **each** of the three packages
+    still fails `check` with `TS2322` (verified per-package, since the
+    repo-wide run short-circuits at `core`). `pnpm --filter @cc-wf-studio/mcp
+    run smoke` also still passes, and the three `dist` entry points are intact.
+  - **Not touched**: `packages/vscode`. Its webview tests are bundled by vite
+    from entry points and never reach the VSIX, and it publishes no npm
+    tarball — outside #1011's subject, so left alone rather than swept in.
+- **Bugs filed**: none — this is packaging hygiene in build config, not a
+  product defect, and the QA loop is the track that introduced it.
+
 ## 2026-07-26 — S6 (sixth slice): entering, leaving and cancelling a Sub-Agent Flow
 - **Protects**: if this breaks, the user opens a Sub-Agent Flow, edits the
   nested canvas, closes it — and what lands back in the parent workflow is not
