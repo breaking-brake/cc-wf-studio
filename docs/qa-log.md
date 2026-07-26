@@ -17,6 +17,71 @@ Entry format:
 
 ---
 
+## 2026-07-26 — S1: getArrayBounds vs. what the array field's zod accepts
+- **Protects**: if this breaks, the property panel's array editor offers an Add
+  or Remove button the node's own zod type forbids. The user clicks it,
+  `updateNodeData` stores the array, the file saves — and the workflow then
+  fails validation for an edit the product itself offered:
+  `validateNodeSchemaFields` (`validate-workflow.ts:257`) runs
+  `propertyField.zod.safeParse(value)` on every field present on node data, so
+  a 3-branch IfElse makes `ccwf validate` exit 1 and the MCP `apply_workflow`
+  write refused, on a workflow built entirely through the canvas UI. The
+  mirror-image break is quieter: bounds reported where none exist, so the Add
+  button never appears and a legitimate 3rd Switch case becomes unreachable
+  from the UI with nothing failing anywhere.
+- **Issue/PR**: #1054 / PR from `claude/qa-array-bounds-consistency`
+- **Outcome**: done — one new suite,
+  `packages/core/src/schema/array-bounds-consistency.test.ts` (16 cases).
+  `getArrayBounds` had **zero test references** in the repository before this,
+  and no test asserted any array bound.
+  - **Premise re-verified on `auto-qa`.** All four `objectArray` fields carry
+    the bounds the issue names (`askUserQuestion.options` `.min(2).max(4)`,
+    `branch.branches` `.min(2)`, `ifElse.branches` `.length(2)`,
+    `switch.branches` `.min(2).max(10)`), and every measurement in the issue
+    reproduced exactly against the installed zod **4.4.3**, including the two
+    section-D observations. **No divergence found — the suite lands fully
+    green with nothing skipped**, so no `bug` issue was filed.
+  - **Covered**: section A, the load-bearing part — parameterised over the
+    registry, it relates what `getArrayBounds` introspects to what the same
+    zod type actually accepts (minimum length passes, one fewer fails, empty
+    passes when no minimum is claimed, maximum passes and one more fails, 25
+    pass when no maximum is claimed, item columns present). Section B pins the
+    four production shapes individually with `toEqual` on the whole returned
+    object, since A names a field but not the shape that broke. Section C is
+    the zod-internals canary. Section D pins the two observed limits (no
+    `ZodOptional` unwrap; string length checks report as bounds).
+  - **Why C is a transcription on purpose**: it restates the implementation's
+    dependency contract on zod's private `_zod.def.checks`, so a zod bump fails
+    with "zod renamed the check" rather than only "the branch panel disagrees
+    with its validator". Said so in the file header so nobody deletes it as a
+    transcription by mistake. The fragility is real: all three packages declare
+    `"zod": "^4.4.3"` — a **caret** range — and if the internals move the
+    function returns `{}` for every field with no type error, because every
+    access is already `unknown` and optional-chained.
+  - **Added one case the issue did not ask for**: an assertion that the
+    registry still exposes exactly the four known `objectArray` field ids.
+    Every other case in A is parameterised over that filter, so without it a
+    renamed control kind would make the whole section pass vacuously.
+  - **Verified the suite bites** by hand-mutating and reverting each of the
+    five changes the issue names. Each produced *named* failures, matching the
+    issue's predictions: deleting the `min_length` arm → 10 failures (A1/A3 for
+    three fields, B7/B8/B10, D14); deleting `length_equals` → 4 (B9 plus
+    `ifElse`'s A1/A3/A5); `checkDef.minimum` → `checkDef.min`, the shape a real
+    zod rename would take → the same 10 via an `undefined` bound rather than a
+    missing one; `return {}` unconditionally → 16; adding `.max(6)` to
+    `askUserQuestion.options` → B7 only, with A4/A5 still passing because they
+    follow the schema.
+- **Bugs filed**: none — every bound agrees with its zod on `auto-qa` today.
+- **Residual scope on #1054**: none — all 14 cases the issue names landed, plus
+  the vacuity guard above. `ObjectArrayControl`'s derived predicates
+  (`fixedLength`, `showAdd`, `canRemove`) stay out per the issue: asserting
+  them for real needs React rendering, which
+  `docs/quality/03-assurance-map.md` §5 leaves on manual E2E.
+- **Note on #1046**: still not picked. PR #1049 (a **fork**, by another author)
+  targets it; the loop may not merge, build or push to that PR, so it remains
+  labelled `needs-attention` for a human. #1054 was chosen partly because the
+  issue states it shares no file, field or assertion with #1046.
+
 ## 2026-07-26 — S1: the Sub-Agent Flow validation family in validateAIGeneratedWorkflow
 - **Protects**: if this breaks, an external agent's `apply_workflow` lands a
   workflow whose `subAgentFlow` node points at a `subAgentFlowId` that has no
