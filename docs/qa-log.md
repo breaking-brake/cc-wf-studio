@@ -17,6 +17,73 @@ Entry format:
 
 ---
 
+## 2026-07-26 — S6 (fourth slice): group membership on node drag-stop
+- **Protects**: if this breaks, the user drags a node into a group and the
+  canvas draws it inside, but `parentId` is never set — or is set to the wrong
+  group — so the saved `workflow.json`, the Mermaid `subgraph` blocks, and the
+  Group Node Execution Tracking table all describe **a different structure than
+  the canvas shows**. Nothing on the user's machine reports it; the divergence
+  surfaces wherever the agent is later run.
+- **Issue/PR**: #1033 / PR from `claude/qa-drag-group-membership`
+- **Outcome**: done — 26 passing cases (the issue's 14, expanded by `it.each`
+  over the hit-test edges and the three size-source shapes) in a new
+  `packages/vscode/src/webview/src/stores/workflow-store-groups.test.ts`.
+  **No product source changed.** Notes on what the cases pin:
+  - No new infrastructure: third store suite under the webview
+    `vitest.config.ts` that landed with #1014. `workflow-store.ts` imports
+    `@cc-wf-studio/core` through its `dist`, so `pnpm build` must precede
+    `pnpm test` on a fresh checkout (already recorded under #1020).
+  - `onNodeDragStop` is the **only** writer of `parentId` from canvas
+    interaction and had **no** test before this. `workflow-store-history.test.ts`
+    section E reproduces the pause/resume half of the drag contract by writing
+    positions with `setState` and never invokes the action, so the group logic
+    was entirely untouched.
+  - Fixtures are installed with `setState`, not `setCanvas` — the one departure
+    from the sibling suites' "drive everything through public actions" rule,
+    and documented in the file header. `setCanvas` applies
+    `sortNodesParentFirst` itself (`workflow-store.ts:966`), and array order is
+    under test in sections A3/D12/E, so letting a second call site rewrite the
+    fixture would have tested the wrong function.
+  - **Section A** asserts the four early returns by **array identity**
+    (`toBe`), not value equality: every `set()` this action skips is also an
+    undo entry `handleNodeDragStop` (`WorkflowEditor.tsx:284`) would otherwise
+    record, so "wrote nothing" is the actual contract.
+  - **B/C** assert `parentId` **and** `position` together — a case checking
+    only `parentId` still passes while the node renders 100px off its drop
+    point. B6 covers group→group, where the conversion runs twice and a sign
+    error hides. C9 pins that `parentId` is written as `undefined` rather than
+    the key being deleted; the two are indistinguishable today because
+    `serializeWorkflow` spreads `...(node.parentId && { parentId })`, but
+    pinning what is written keeps the two modules in step.
+  - **D** gives each of the four inclusive edges, both corners and all four
+    one-pixel misses its own named case, since `>=` vs `>` is a one-character
+    regression. D12 pins the overlapping-group winner as **observed**: the loop
+    `break`s on the first match in **array order, not z-index** — not what a
+    user would predict, and a refactor dropping the `break` changes it
+    silently.
+  - **E14** pins the other observed-not-designed behaviour:
+    `sortNodesParentFirst` partitions on "is some node's parent", not "is a
+    group" (`:190`), so a group that loses its last child leaves the `parents`
+    partition and is reordered behind a still-parent group — an **untouched**
+    node moving, which is exactly what a rewrite would change without noticing.
+    It takes two groups to observe; with one, the partition change is invisible
+    in the output order.
+  - Verified the suite bites by hand-mutating and reverting exactly the five
+    things the issue names: the `targetGroup.id !== currentParentId` guard (1
+    named failure), the `>=` on the hit test's left edge (2), the `?? 400`
+    width fallback (1 — correctly only the no-size-at-all case, since the
+    React-Flow-`width` shape never reaches the fallback), the subtraction in
+    the move-in conversion (2), and the `[...parents, ...others]` order (2).
+    Each made a **named** assertion fail.
+- **Bugs filed**: none — all 14 cases landed passing, as the issue predicted.
+- **Out of scope, per the issue**: the nested-ordering flaw in
+  `sortNodesParentFirst` is already recorded in **#1015** and is unreachable
+  through this action anyway (line 590 returns before a group can nest). The
+  other three `sortNodesParentFirst` call sites (`:873`, `:923`, `:966` —
+  `addGeneratedWorkflow` / `updateWorkflow` / `setCanvas`) are a separate slice
+  and #1033 stays closed on this one; whether the drag *renders* correctly
+  stays on manual E2E per `docs/quality/03-assurance-map.md` §5.
+
 ## 2026-07-26 — S7: the agent `.md` frontmatter parser behind sub-agent import
 - **Protects**: if this breaks, the user picks an existing `.claude/agents/*.md`
   from the Sub-Agent creation dialog and the node that lands on the canvas
