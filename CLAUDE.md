@@ -165,6 +165,13 @@ primary check for feature work.
   schema) and the pure transforms in `packages/cli` / `packages/mcp` are the
   suite's target. Webview React rendering and the VSCode host stay on manual
   E2E — the cost/benefit there does not justify automation.
+- **Test file placement**: tests go under the package's `src/__tests__/`
+  directory, mirroring the source tree — the test for
+  `src/utils/validate-workflow.ts` is
+  `src/__tests__/utils/validate-workflow.test.ts`. Fixtures keep their
+  relative spot (`src/__tests__/**/__fixtures__/`); the webview's global
+  setup is `src/__tests__/setup-browser-globals.ts`. Do not co-locate tests
+  next to source files.
 
 ## Version Update & Release Procedure
 

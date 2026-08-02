@@ -34,7 +34,12 @@ promoted to `main` independently, so every file both loops touch is a future
 merge conflict. Keeping them disjoint is what makes independent promotion
 work. This loop may create or edit:
 
-- test files (`*.test.ts`, `*.spec.ts`) and test fixtures
+- test files (`*.test.ts`, `*.spec.ts`) and test fixtures — placed under the
+  package's `src/__tests__/` directory, mirroring the source tree (e.g. the
+  test for `src/utils/validate-workflow.ts` is
+  `src/__tests__/utils/validate-workflow.test.ts`; fixtures keep their
+  relative spot, e.g. `src/__tests__/services/__fixtures__/`). Never
+  co-locate a test next to its source file.
 - test configuration (`vitest.config.*`, test-only `package.json` scripts
   and devDependencies)
 - `.github/workflows/ci.yml` — only to run and gate on the test suite

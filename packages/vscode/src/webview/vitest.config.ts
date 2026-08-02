@@ -10,6 +10,6 @@ export default defineConfig({
     // `workflow-store.ts` reads `localStorage` at import time (zustand's
     // `create()` runs then), so the stub must be installed before the module
     // graph loads — a per-test `vi.stubGlobal` would be too late.
-    setupFiles: ['./src/test/setup-browser-globals.ts'],
+    setupFiles: ['./src/__tests__/setup-browser-globals.ts'],
   },
 });

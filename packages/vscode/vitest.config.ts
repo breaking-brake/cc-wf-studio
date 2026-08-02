@@ -1,8 +1,9 @@
 import { defineConfig } from 'vitest/config';
 
-// Extension-host suites only. `src/webview` is its own workspace package with
-// its own vitest config (and its own browser-global setup), so it is excluded
-// here by the narrow `include` rather than by an ignore rule.
+// Extension-host suites only, under `src/__tests__/` (mirroring the source
+// tree). `src/webview` is its own workspace package with its own vitest config
+// (and its own browser-global setup), so it is excluded here by the narrow
+// `include` rather than by an ignore rule.
 //
 // `environment: 'node'` is deliberate: the modules covered here are pure —
 // they neither import `vscode` nor touch the DOM — so no mocks and no jsdom.
@@ -11,6 +12,6 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'node',
-    include: ['src/extension/**/*.{test,spec}.ts'],
+    include: ['src/__tests__/**/*.{test,spec}.ts'],
   },
 });
