@@ -159,7 +159,7 @@ Copyright (c) 2025 breaking-brake
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=breaking-brake/cc-wf-studio&type=Date)](https://star-history.com/#breaking-brake/cc-wf-studio&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=breaking-brake/cc-wf-studio&type=Date)](https://star-history.dera.page/#breaking-brake/cc-wf-studio&Date)
 
 ## Acknowledgments
 
