@@ -24,6 +24,6 @@
   "devDependencies": {
     "@cc-wf-studio/cli": "workspace:*",
     "@changesets/cli": "^2.31.0",
-    "tsx": "^4.19.2"
+    "tsx": "^4.23.13"
   }
 }
